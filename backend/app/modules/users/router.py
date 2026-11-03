@@ -53,11 +53,13 @@ from app.dependencies import (
     SessionDep,
     SettingsDep,
 )
+from app.modules.users import validators as key_rules
 from app.modules.users.schemas import (
     AdminUserCreate,
     APIKeyCreate,
     APIKeyCreatedResponse,
     APIKeyResponse,
+    APIScope,
     ChangePasswordRequest,
     DeleteAccountRequest,
     DeleteAccountResponse,
@@ -940,7 +942,22 @@ async def update_my_preferences(
 # ── API Keys ───────────────────────────────────────────────────────────────
 
 
-@router.get("/me/api-keys/", response_model=list[APIKeyResponse])
+@router.get(
+    "/me/api-keys/scopes/",
+    response_model=list[APIScope],
+    tags=["Partner API"],
+    summary="List the scopes an API key can carry",
+)
+async def list_api_key_scopes(user_id: CurrentUserId) -> list[APIScope]:
+    """Scope catalogue generated from the permission registry.
+
+    Each scope is a permission name. A key's scopes only narrow what its
+    owner's role already allows; an empty list keeps the owner's full authority.
+    """
+    return [APIScope(**row) for row in key_rules.scope_catalogue()]
+
+
+@router.get("/me/api-keys/", response_model=list[APIKeyResponse], tags=["Partner API"])
 async def list_my_api_keys(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -950,7 +967,7 @@ async def list_my_api_keys(
     return [APIKeyResponse.model_validate(k) for k in keys]
 
 
-@router.post("/me/api-keys/", response_model=APIKeyCreatedResponse, status_code=201)
+@router.post("/me/api-keys/", response_model=APIKeyCreatedResponse, status_code=201, tags=["Partner API"])
 async def create_api_key(
     data: APIKeyCreate,
     user_id: CurrentUserId,
@@ -960,7 +977,28 @@ async def create_api_key(
     return await service.create_api_key(uuid.UUID(user_id), data)
 
 
-@router.delete("/me/api-keys/{key_id}", status_code=204)
+@router.post(
+    "/me/api-keys/{key_id}/rotate/",
+    response_model=APIKeyCreatedResponse,
+    status_code=201,
+    tags=["Partner API"],
+    summary="Rotate an API key",
+)
+async def rotate_api_key(
+    key_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> APIKeyCreatedResponse:
+    """Issue a replacement key with the same name, scopes and limits.
+
+    The old key keeps working for 24 hours (or until its own earlier expiry)
+    so clients can switch over. The new key is returned once, in this response.
+    404 if the key is not yours, 409 if it is revoked, expired or already rotated.
+    """
+    return await service.rotate_api_key(uuid.UUID(user_id), key_id)
+
+
+@router.delete("/me/api-keys/{key_id}", status_code=204, tags=["Partner API"])
 async def revoke_api_key(
     key_id: uuid.UUID,
     user_id: CurrentUserId,

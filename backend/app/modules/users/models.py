@@ -11,7 +11,7 @@ Tables:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -155,6 +155,19 @@ class APIKey(Base):
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     permissions: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
+    )
+    # NULL means the global API_RATE_LIMIT applies.
+    rate_limit_per_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Empty list means any client address may use the key.
+    allowed_cidrs: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    request_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # The key this one replaced; the old key keeps working until its expires_at (24 h overlap).
+    rotated_from_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_api_key.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     # Relationships

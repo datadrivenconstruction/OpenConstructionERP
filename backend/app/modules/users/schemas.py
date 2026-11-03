@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠User Pydantic schemas for request/response validation."""
 
+import ipaddress
 import re
 from datetime import datetime
 from typing import Any, Literal
@@ -486,13 +487,50 @@ class ResetPasswordResponse(BaseModel):
 # ── API Keys ───────────────────────────────────────────────────────────────
 
 
+MAX_API_KEY_CIDRS = 20
+
+
 class APIKeyCreate(BaseModel):
     """Create a new API key."""
 
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
-    expires_in_days: int | None = Field(default=None, ge=1, le=365)
-    permissions: list[str] = Field(default_factory=list)
+    expires_in_days: int | None = Field(default=None, ge=1, le=730)
+    expires_at: datetime | None = Field(
+        default=None, description="Absolute expiry, in the future and at most two years out."
+    )
+    permissions: list[str] = Field(
+        default_factory=list,
+        description="Scopes that narrow the owner's authority. Empty keeps the owner's full authority.",
+    )
+    rate_limit_per_min: int | None = Field(
+        default=None, ge=1, le=6000, description="Requests per minute for this key; omit for the server default."
+    )
+    allowed_cidrs: list[str] = Field(
+        default_factory=list,
+        description="Client networks allowed to use the key (IPv4 or IPv6 CIDR). Empty allows any address.",
+    )
+
+    @field_validator("allowed_cidrs")
+    @classmethod
+    def _check_cidrs(cls, value: list[str]) -> list[str]:
+        if len(value) > MAX_API_KEY_CIDRS:
+            raise ValueError(f"at most {MAX_API_KEY_CIDRS} networks")
+        out: list[str] = []
+        for raw in value:
+            try:
+                net = str(ipaddress.ip_network(raw.strip(), strict=False))
+            except ValueError as exc:
+                raise ValueError(f"not a valid network: {raw!r}") from exc
+            if net not in out:
+                out.append(net)
+        return out
+
+    @model_validator(mode="after")
+    def _one_expiry(self) -> "APIKeyCreate":
+        if self.expires_in_days is not None and self.expires_at is not None:
+            raise ValueError("give expires_in_days or expires_at, not both")
+        return self
 
 
 class APIKeyResponse(BaseModel):
@@ -506,6 +544,10 @@ class APIKeyResponse(BaseModel):
     description: str
     is_active: bool
     permissions: list[str]
+    rate_limit_per_min: int | None = None
+    allowed_cidrs: list[str] = Field(default_factory=list)
+    request_count: int = 0
+    rotated_from_id: UUID | None = None
     expires_at: datetime | None
     last_used_at: datetime | None
     created_at: datetime
@@ -515,6 +557,16 @@ class APIKeyCreatedResponse(APIKeyResponse):
     """Response when creating an API key - includes the full key (shown only once)."""
 
     key: str  # Full API key - shown only at creation time
+
+
+class APIScope(BaseModel):
+    """One scope a key may carry, generated from the permission registry."""
+
+    name: str
+    module: str
+    action: str
+    min_role: str
+    i18n_key: str
 
 
 # ── Onboarding ────────────────────────────────────────────────────────────────

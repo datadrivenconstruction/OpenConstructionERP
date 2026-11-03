@@ -202,13 +202,41 @@ class TestConnectionRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+MIN_SECRET_LENGTH = 24
+
+
 def _validate_webhook_url(value: str) -> str:
-    """Shared webhook-URL validator. Rejects non-http(s) schemes, literal
-    private IPs and cloud-metadata hosts before the row ever hits the DB."""
+    """Shared webhook-URL validator. Rejects non-https URLs (http only in debug),
+    literal private IPs and cloud-metadata hosts before the row ever hits the DB."""
     try:
-        return validate_external_url(value)
+        checked = validate_external_url(value)
     except UnsafeUrlError as exc:
         raise ValueError(str(exc)) from exc
+    if checked.lower().startswith("http://"):
+        from app.config import get_settings
+
+        if not get_settings().app_debug:
+            raise ValueError("webhook.https_required")
+    return checked
+
+
+def _validate_secret(value: str | None) -> str | None:
+    if value is None or value == "":
+        return None
+    if len(value) < MIN_SECRET_LENGTH:
+        raise ValueError(f"webhook.secret_too_short: at least {MIN_SECRET_LENGTH} characters")
+    return value
+
+
+def _validate_events(value: list[str] | None) -> list[str] | None:
+    if value is None:
+        return None
+    from app.modules.integrations.event_catalogue import unknown_events
+
+    unknown = unknown_events(value)
+    if unknown:
+        raise ValueError(f"webhook.unknown_event: {', '.join(unknown)}")
+    return value
 
 
 class WebhookCreate(BaseModel):
@@ -219,11 +247,16 @@ class WebhookCreate(BaseModel):
     project_id: UUID | None = None
     name: str = Field(..., min_length=1, max_length=255)
     url: str = Field(..., min_length=1, max_length=1000)
-    secret: str | None = Field(default=None, max_length=255)
+    secret: str | None = Field(
+        default=None,
+        max_length=255,
+        description="Signing secret, at least 24 characters. Omit to have the server generate one (shown once).",
+    )
     events: list[str] = Field(
         ...,
         min_length=1,
-        description="Event types to subscribe, e.g. ['rfi.created', 'task.assigned']",
+        description="Event names from GET /integrations/webhooks/events/, or '*' for all.",
+        examples=[["rfi.created", "task.assigned"]],
     )
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -232,6 +265,16 @@ class WebhookCreate(BaseModel):
     @classmethod
     def _check_url(cls, v: str) -> str:
         return _validate_webhook_url(v)
+
+    @field_validator("secret")
+    @classmethod
+    def _check_secret(cls, v: str | None) -> str | None:
+        return _validate_secret(v)
+
+    @field_validator("events")
+    @classmethod
+    def _check_events(cls, v: list[str]) -> list[str]:
+        return _validate_events(v) or v
 
 
 class WebhookUpdate(BaseModel):
@@ -250,6 +293,16 @@ class WebhookUpdate(BaseModel):
     @classmethod
     def _check_url(cls, v: str | None) -> str | None:
         return _validate_webhook_url(v) if v is not None else v
+
+    @field_validator("secret")
+    @classmethod
+    def _check_secret(cls, v: str | None) -> str | None:
+        return _validate_secret(v)
+
+    @field_validator("events")
+    @classmethod
+    def _check_events(cls, v: list[str] | None) -> list[str] | None:
+        return _validate_events(v)
 
 
 class WebhookResponse(BaseModel):
@@ -287,6 +340,20 @@ class WebhookResponse(BaseModel):
         return _REDACTED_MARKER if v else None
 
 
+class WebhookCreatedResponse(WebhookResponse):
+    """Response to creating an endpoint: carries the signing secret, shown only here."""
+
+    signing_secret: str = Field(description="HMAC key for X-OE-Signature. Store it now; it is not shown again.")
+
+
+class WebhookEventInfo(BaseModel):
+    """One subscribable event."""
+
+    name: str
+    module: str
+    i18n_key: str
+
+
 class DeliveryResponse(BaseModel):
     """Webhook delivery log entry returned from the API."""
 
@@ -299,4 +366,8 @@ class DeliveryResponse(BaseModel):
     status_code: int | None = None
     response_body: str | None = None
     duration_ms: int | None = None
+    attempt: int = 0
+    next_retry_at: datetime | None = None
+    status: Literal["pending", "delivered", "retrying", "dead"] = "pending"
+    last_error: str = ""
     created_at: datetime
