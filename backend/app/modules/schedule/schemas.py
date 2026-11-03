@@ -9,9 +9,9 @@ labour-by-phase ``labor_cost`` / ``total_cost``) are emitted as
 Decimal-as-string in JSON.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
-from typing import Any, Literal
+from typing import Any, Literal, Self
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
@@ -1069,45 +1069,93 @@ class BaselineResponse(BaseModel):
 # ── Progress Update schemas ────────────────────────────────────────────────
 
 
-class ProgressUpdateCreate(BaseModel):
-    """Create a progress update record."""
+def _iso_day(value: str | None, *, field: str) -> str | None:
+    """Return ``value`` as ``YYYY-MM-DD`` or raise; accepts a date or a full ISO timestamp."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    try:
+        if len(text) > 10:
+            return datetime.fromisoformat(text.replace("Z", "+00:00")).date().isoformat()
+        return date.fromisoformat(text).isoformat()
+    except ValueError as exc:
+        raise ValueError(f"{field} must be an ISO date (YYYY-MM-DD)") from exc
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+
+def progress_pct_text(value: Decimal | None) -> str | None:
+    """Progress as the compact text the column stores: ``50``, ``12.5``."""
+    if value is None:
+        return None
+    return format(value.quantize(Decimal("0.01")).normalize(), "f")
+
+
+class _ProgressInput(BaseModel):
+    """Shared field rules of the progress-update writers.
+
+    Caller identity is never read from the body: ``submitted_by`` and
+    ``approved_by`` are set by the server, so those keys are ignored.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
+
+    progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    actual_start: str | None = Field(default=None, max_length=20)
+    actual_finish: str | None = Field(default=None, max_length=20)
+    remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
+
+    @field_validator("actual_start", "actual_finish", mode="after")
+    @classmethod
+    def _dates_are_iso(cls, value: str | None, info: Any) -> str | None:
+        return _iso_day(value, field=info.field_name)
+
+    @model_validator(mode="after")
+    def _finish_not_before_start(self) -> Self:
+        if self.actual_start and self.actual_finish and self.actual_finish < self.actual_start:
+            raise ValueError("actual_finish must not be before actual_start")
+        return self
+
+
+class ProgressUpdateCreate(_ProgressInput):
+    """Create a progress update record."""
 
     project_id: UUID
     activity_id: UUID | None = None
-    update_date: str = Field(..., max_length=20)
-    progress_pct: str | None = Field(default=None, max_length=10)
-    actual_start: str | None = Field(default=None, max_length=20)
-    actual_finish: str | None = Field(default=None, max_length=20)
-    remaining_duration: str | None = Field(default=None, max_length=10)
+    update_date: str = Field(..., max_length=40)
     notes: str | None = Field(default=None, max_length=5000)
     status: str = Field(
         default="draft",
         pattern=r"^(draft|submitted|approved)$",
     )
-    submitted_by: UUID | None = None
-    approved_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("update_date", mode="after")
+    @classmethod
+    def _update_date_is_iso_and_not_future(cls, value: str) -> str:
+        day = _iso_day(value, field="update_date")
+        if day is not None and date.fromisoformat(day) > date.today() + timedelta(days=1):
+            raise ValueError("update_date must not be in the future")
+        return day or value
 
-class ProgressUpdateEdit(BaseModel):
-    """Partial update for a progress update record."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+class ProgressUpdateEdit(_ProgressInput):
+    """Partial update for a progress update record.
 
-    progress_pct: str | None = Field(default=None, max_length=10)
-    actual_start: str | None = Field(default=None, max_length=20)
-    actual_finish: str | None = Field(default=None, max_length=20)
-    remaining_duration: str | None = Field(default=None, max_length=10)
+    The activity and project of a record never change, so naming either is an error.
+    """
+
     notes: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|submitted|approved)$",
     )
-    submitted_by: UUID | None = None
-    approved_by: UUID | None = None
     metadata: dict[str, Any] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _reject_reassignment(cls, data: Any) -> Any:
+        if isinstance(data, dict) and ("activity_id" in data or "project_id" in data):
+            raise ValueError("activity_id and project_id cannot be changed on a progress update")
+        return data
 
 
 class ProgressUpdateResponse(BaseModel):
