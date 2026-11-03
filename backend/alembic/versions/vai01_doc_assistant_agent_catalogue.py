@@ -8,7 +8,7 @@ configured per project), ``oe_ai_agents_project_guard`` (per-project kill
 switch) and ``oe_ai_agents_draft`` (drafts produced by catalogue agents).
 
 Revision ID: vai01_doc_assistant_agent_catalogue
-Revises: v3354_owner_schedule
+Revises: vcc01_change_chain_award
 Create Date: 2026-11-03
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vai01_doc_assistant_agent_catalogue"
-down_revision: str | Sequence[str] | None = "v3354_owner_schedule"
+down_revision: str | Sequence[str] | None = "vcc01_change_chain_award"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

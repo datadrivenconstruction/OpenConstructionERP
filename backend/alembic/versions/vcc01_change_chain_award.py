@@ -22,7 +22,7 @@ Every other package stays ``subcontract``. The backfill runs only when the
 column is added, so a re-run never overrides a choice made since.
 
 Revision ID: vcc01_change_chain_award
-Revises: v3354_owner_schedule
+Revises: vph01_photos
 Create Date: 2026-11-02
 """
 
@@ -35,7 +35,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vcc01_change_chain_award"
-down_revision: str | Sequence[str] | None = "v3354_owner_schedule"
+down_revision: str | Sequence[str] | None = "vph01_photos"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
