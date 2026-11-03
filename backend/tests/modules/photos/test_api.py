@@ -411,3 +411,21 @@ async def test_export_zip_handler_writes_a_downloadable_archive(client: AsyncCli
         assert record["caption"] == "Export me"
         assert Path(record["file"]).parent.as_posix() == "photos"
         assert json.loads(zf.read("manifest.json"))["photo_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_category_filter_and_suggestion_reach_the_archive(client: AsyncClient, admin_auth, project_id):
+    from app.database import async_session_factory
+    from app.modules.documents.models import ProjectPhoto
+
+    _, header = admin_auth
+    photo = (await _upload(client, header, project_id, category="defect")).json()["items"][0]
+    async with async_session_factory() as session:
+        row = await session.get(ProjectPhoto, uuid.UUID(photo["id"]))
+        row.metadata_ = {**(row.metadata_ or {}), "category_suggestion": {"suggested_category": "safety"}}
+        await session.commit()
+    page = (await client.get(f"{BASE}/?project_id={project_id}&category=defect", headers=header)).json()
+    assert photo["id"] in [p["id"] for p in page["items"]]
+    assert all(p["category"] == "defect" for p in page["items"])
+    got = (await client.get(f"{BASE}/{photo['id']}/", headers=header)).json()
+    assert got["category_suggestion"]["suggested_category"] == "safety"

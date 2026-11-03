@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { Fragment, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
@@ -1582,6 +1583,7 @@ function IncidentsTab({
 
 function ObservationsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const [photosFor, setPhotosFor] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -1783,12 +1785,20 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 </td>
               </tr>
             ) : filtered.map((obs) => (
+              <Fragment key={obs.id}>
               <tr
-                key={obs.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
               >
                 <td className="px-4 py-3 font-mono text-xs text-content-primary">
                   {obs.observation_number}
+                  <button
+                    type="button"
+                    onClick={() => setPhotosFor(photosFor === obs.id ? null : obs.id)}
+                    aria-expanded={photosFor === obs.id}
+                    className="ml-2 font-sans text-2xs text-oe-blue hover:underline"
+                  >
+                    {t('photoArchive.strip.title')}
+                  </button>
                 </td>
                 <td className="px-4 py-3 text-content-secondary">
                   <DateDisplay value={obs.date} />
@@ -1837,6 +1847,14 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                   )}
                 </td>
               </tr>
+              {photosFor === obs.id && (
+                <tr className="border-b border-border-light">
+                  <td colSpan={6} className="px-4 py-3">
+                    <PhotoStrip projectId={projectId} kind="safety_obs" targetId={obs.id} />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
         </table>
@@ -1876,6 +1894,17 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                   {t('safety.create_inspection_link', { defaultValue: 'Create Inspection \u2192' })}
                 </Button>
               </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setPhotosFor(photosFor === obs.id ? null : obs.id)}
+              aria-expanded={photosFor === obs.id}
+              className="mt-2 text-xs text-oe-blue hover:underline"
+            >
+              {t('photoArchive.strip.title')}
+            </button>
+            {photosFor === obs.id && (
+              <PhotoStrip projectId={projectId} kind="safety_obs" targetId={obs.id} className="mt-2" />
             )}
           </Card>
         ))}

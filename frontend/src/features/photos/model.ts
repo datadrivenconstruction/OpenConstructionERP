@@ -6,8 +6,12 @@ export type PhotoView = (typeof PHOTO_VIEWS)[number];
 
 export const SOURCE_MODULES = ['documents', 'daily_diary', 'punchlist', 'fieldreports', 'progress'] as const;
 
+export const PHOTO_CATEGORIES = ['site', 'progress', 'defect', 'delivery', 'safety', 'aerial', 'other'] as const;
+export type PhotoCategory = (typeof PHOTO_CATEGORIES)[number];
+
 export interface PhotoFilters {
   q?: string;
+  category?: string;
   tag?: string;
   album?: string;
   from?: string; // yyyy-mm-dd
@@ -37,6 +41,8 @@ export function filtersFromParams(params: URLSearchParams): PhotoFilters {
   if (from && DAY.test(from)) out.from = from;
   const to = params.get('to');
   if (to && DAY.test(to)) out.to = to;
+  const category = params.get('category');
+  if (category && (PHOTO_CATEGORIES as readonly string[]).includes(category)) out.category = category;
   const source = params.get('source');
   if (source && (SOURCE_MODULES as readonly string[]).includes(source)) out.source = source;
   if (params.get('gps') === '1') out.hasGps = true;
@@ -52,8 +58,9 @@ export function filtersFromParams(params: URLSearchParams): PhotoFilters {
 /** Write the filter state back into URL params, keeping unrelated params such as `view`. */
 export function filtersToParams(filters: PhotoFilters, base: URLSearchParams): URLSearchParams {
   const next = new URLSearchParams(base);
-  for (const k of ['q', 'tag', 'album', 'from', 'to', 'source', 'gps', 'target_kind', 'target_id']) next.delete(k);
+  for (const k of ['q', 'category', 'tag', 'album', 'from', 'to', 'source', 'gps', 'target_kind', 'target_id']) next.delete(k);
   if (filters.q) next.set('q', filters.q);
+  if (filters.category) next.set('category', filters.category);
   if (filters.tag) next.set('tag', filters.tag);
   if (filters.album) next.set('album', filters.album);
   if (filters.from) next.set('from', filters.from);
@@ -74,6 +81,7 @@ export function filtersToParams(filters: PhotoFilters, base: URLSearchParams): U
 export function filtersToQuery(filters: PhotoFilters): string {
   const params = new URLSearchParams();
   if (filters.q) params.set('q', filters.q);
+  if (filters.category) params.set('category', filters.category);
   if (filters.tag) params.set('tag', filters.tag);
   if (filters.album) params.set('album', filters.album);
   if (filters.from) params.set('from', `${filters.from}T00:00:00Z`);
@@ -88,7 +96,7 @@ export function filtersToQuery(filters: PhotoFilters): string {
 }
 
 export function activeFilterCount(filters: PhotoFilters): number {
-  return ['q', 'tag', 'album', 'from', 'to', 'source', 'hasGps'].filter((k) => Boolean(filters[k as keyof PhotoFilters]))
+  return ['q', 'category', 'tag', 'album', 'from', 'to', 'source', 'hasGps'].filter((k) => Boolean(filters[k as keyof PhotoFilters]))
     .length;
 }
 
@@ -159,4 +167,47 @@ export function sourceRoute(source: string): string | null {
     progress: '/progress',
   };
   return routes[source] ?? null;
+}
+
+export type BulkAction =
+  | { kind: 'category'; category: string }
+  | { kind: 'addTags'; tags: string[] }
+  | { kind: 'field'; on: boolean };
+
+/** Split a typed tag list the way the old gallery did: comma separated, trimmed, no duplicates. */
+export function parseTags(text: string): string[] {
+  return [...new Set(text.split(',').map((t) => t.trim()).filter(Boolean))];
+}
+
+/**
+ * The PATCH body one bulk action means for one photo, or null when the photo
+ * already matches and no request is needed.
+ */
+export function bulkPatch(
+  photo: { category: string; tags: string[] },
+  action: BulkAction,
+): { category?: string; tags?: string[] } | null {
+  if (action.kind === 'category') return photo.category === action.category ? null : { category: action.category };
+  const current = photo.tags ?? [];
+  const lower = new Set(current.map((t) => t.toLowerCase()));
+  if (action.kind === 'addTags') {
+    const extra = action.tags.filter((t) => !lower.has(t.toLowerCase()));
+    return extra.length ? { tags: [...current, ...extra] } : null;
+  }
+  const hasField = lower.has('field');
+  if (action.on === hasField) return null;
+  return { tags: action.on ? [...current, 'field'] : current.filter((t) => t.toLowerCase() !== 'field') };
+}
+
+/** A category suggestion the reviewer can apply, read from the photo record. */
+export function categorySuggestion(
+  photo: { category: string; category_suggestion?: Record<string, unknown> | null },
+): { category: string; confidence: number | null; tags: string[] } | null {
+  const raw = photo.category_suggestion;
+  if (!raw) return null;
+  const cat = raw.suggested_category;
+  if (typeof cat !== 'string' || !(PHOTO_CATEGORIES as readonly string[]).includes(cat) || cat === photo.category) return null;
+  const conf = typeof raw.confidence === 'number' && Number.isFinite(raw.confidence) ? raw.confidence : null;
+  const tags = Array.isArray(raw.suggested_tags) ? raw.suggested_tags.filter((t): t is string => typeof t === 'string') : [];
+  return { category: cat, confidence: conf, tags };
 }

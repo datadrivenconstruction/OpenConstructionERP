@@ -102,6 +102,7 @@ def _filters(
     target_id: str | None,
     has_gps: bool | None,
     include_archived: bool = False,
+    category: str | None = None,
 ) -> PhotoFilters:
     if source is not None and source not in SOURCE_MODULES:
         raise _fail(status.HTTP_422_UNPROCESSABLE_CONTENT, "photos.errors.bad_source")
@@ -112,6 +113,7 @@ def _filters(
         date_from=date_from,
         date_to=date_to,
         source=source,
+        category=category or None,
         target_kind=target_kind or None,
         target_id=target_id or None,
         has_gps=has_gps,
@@ -193,6 +195,7 @@ async def list_photos(
     date_from: datetime | None = Query(None, alias="from"),
     date_to: datetime | None = Query(None, alias="to"),
     source: str | None = Query(None),
+    category: str | None = Query(None, max_length=100),
     target_kind: str | None = Query(None),
     target_id: str | None = Query(None),
     has_gps: bool | None = Query(None),
@@ -202,7 +205,7 @@ async def list_photos(
     _: None = Depends(RequirePermission("photos.read")),
 ) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
-    f = _filters(q, tag, album, date_from, date_to, source, target_kind, target_id, has_gps, include_archived)
+    f = _filters(q, tag, album, date_from, date_to, source, target_kind, target_id, has_gps, include_archived, category)
     return await PhotosService(session).search(project_id, f, cursor=cursor, limit=limit)
 
 
@@ -217,11 +220,12 @@ async def photo_timeline(
     date_from: datetime | None = Query(None, alias="from"),
     date_to: datetime | None = Query(None, alias="to"),
     source: str | None = Query(None),
+    category: str | None = Query(None, max_length=100),
     has_gps: bool | None = Query(None),
     _: None = Depends(RequirePermission("photos.read")),
 ) -> list[dict[str, Any]]:
     await verify_project_access(project_id, user_id, session)
-    f = _filters(q, tag, album, date_from, date_to, source, None, None, has_gps)
+    f = _filters(q, tag, album, date_from, date_to, source, None, None, has_gps, category=category)
     return await PhotosService(session).timeline(project_id, f)
 
 
@@ -236,11 +240,12 @@ async def photo_map(
     date_from: datetime | None = Query(None, alias="from"),
     date_to: datetime | None = Query(None, alias="to"),
     source: str | None = Query(None),
+    category: str | None = Query(None, max_length=100),
     _: None = Depends(RequirePermission("photos.read")),
 ) -> dict[str, Any]:
     """GeoJSON FeatureCollection; ``anchor`` carries the site anchor when the project has one."""
     await verify_project_access(project_id, user_id, session)
-    f = _filters(q, tag, album, date_from, date_to, source, None, None, True)
+    f = _filters(q, tag, album, date_from, date_to, source, None, None, True, category=category)
     return await PhotosService(session).geojson(project_id, f)
 
 

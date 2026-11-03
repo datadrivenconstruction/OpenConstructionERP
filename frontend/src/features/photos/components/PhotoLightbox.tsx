@@ -22,6 +22,7 @@ import {
 import { bboxStyle, sourceRoute } from '../model';
 import { AISuggestionList } from './AISuggestionList';
 import { LinkPicker } from './LinkPicker';
+import { PhotoMetaEditor } from './PhotoMetaEditor';
 
 interface PhotoLightboxProps {
   photo: ArchivePhoto;
@@ -165,6 +166,8 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
             </button>
           </div>
         </div>
+
+        <PhotoMetaEditor photo={photo} />
 
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
           <dt className="text-content-tertiary">{t('photoArchive.meta.taken')}</dt>
