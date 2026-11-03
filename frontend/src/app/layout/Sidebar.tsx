@@ -305,6 +305,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/schedule': 'oe_schedule',
   '/schedule-advanced': 'oe_schedule_advanced',
   '/portfolio': 'oe_portfolio',
+  '/capital-plan': 'oe_capital_plan',
   '/takt': 'oe_schedule_advanced',
   '/tasks': 'oe_tasks',
   '/5d': 'oe_costmodel',

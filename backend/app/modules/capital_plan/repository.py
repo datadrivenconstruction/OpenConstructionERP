@@ -1,0 +1,84 @@
+# DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Data access for the capital plan module. Writes flush only; the request middleware commits."""
+
+from __future__ import annotations
+
+import uuid
+from collections.abc import Sequence
+
+from sqlalchemy import delete, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.capital_plan.models import (
+    CapitalPlan,
+    CapitalPlanEnvelope,
+    CapitalPlanItem,
+    CapitalPlanScenario,
+)
+
+
+class CapitalPlanRepository:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    # Plans
+    async def get_plan(self, plan_id: uuid.UUID) -> CapitalPlan | None:
+        return await self.session.get(CapitalPlan, plan_id)
+
+    async def list_plans(self, node_ids: Sequence[uuid.UUID] | None = None) -> list[CapitalPlan]:
+        stmt = select(CapitalPlan).order_by(CapitalPlan.start_year.desc(), CapitalPlan.name)
+        if node_ids is not None:
+            stmt = stmt.where(CapitalPlan.node_id.in_(list(node_ids)))
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def add(self, row: object) -> None:
+        self.session.add(row)
+        await self.session.flush()
+
+    async def delete_row(self, row: object) -> None:
+        await self.session.delete(row)
+        await self.session.flush()
+
+    # Envelopes
+    async def list_envelopes(self, plan_id: uuid.UUID) -> list[CapitalPlanEnvelope]:
+        stmt = (
+            select(CapitalPlanEnvelope)
+            .where(CapitalPlanEnvelope.plan_id == plan_id)
+            .order_by(CapitalPlanEnvelope.year, CapitalPlanEnvelope.label)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def clear_envelopes(self, plan_id: uuid.UUID) -> None:
+        await self.session.execute(delete(CapitalPlanEnvelope).where(CapitalPlanEnvelope.plan_id == plan_id))
+        await self.session.flush()
+
+    # Scenarios
+    async def get_scenario(self, scenario_id: uuid.UUID) -> CapitalPlanScenario | None:
+        return await self.session.get(CapitalPlanScenario, scenario_id)
+
+    async def list_scenarios(self, plan_id: uuid.UUID) -> list[CapitalPlanScenario]:
+        stmt = (
+            select(CapitalPlanScenario)
+            .where(CapitalPlanScenario.plan_id == plan_id)
+            .order_by(CapitalPlanScenario.is_baseline.desc(), CapitalPlanScenario.created_at)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_baselines(self, plan_id: uuid.UUID) -> int:
+        stmt = select(func.count()).where(
+            CapitalPlanScenario.plan_id == plan_id, CapitalPlanScenario.is_baseline.is_(True)
+        )
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    # Items
+    async def get_item(self, item_id: uuid.UUID) -> CapitalPlanItem | None:
+        return await self.session.get(CapitalPlanItem, item_id)
+
+    async def list_items(self, scenario_id: uuid.UUID) -> list[CapitalPlanItem]:
+        stmt = (
+            select(CapitalPlanItem)
+            .where(CapitalPlanItem.scenario_id == scenario_id)
+            .order_by(CapitalPlanItem.priority, CapitalPlanItem.start_year, CapitalPlanItem.title)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
