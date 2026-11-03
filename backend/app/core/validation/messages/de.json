@@ -949,6 +949,10 @@
     "change_time_within_owner": {
       "fail": "Die Fristverlängerungen der Nachunternehmer zu {code} betragen {sub_days} Tage, mehr als die vom Auftraggeber gewährten {owner_days} Tage",
       "suggestion": "Die Fristansprüche der Nachunternehmer prüfen oder beim Auftraggeber eine entsprechende Verlängerung beantragen"
+    },
+    "notice_window": {
+      "fail": "Nachtrag {code} des Nachunternehmers wurde {late} Tage nach Ablauf der im Vertrag vereinbarten Frist von {days} Tagen angezeigt",
+      "suggestion": "Anzeigefristen im Vertrag prüfen, bevor die Kosten anerkannt werden; eine verspätete Anzeige kann den Anspruch ausschließen"
     }
   },
   "submittal": {
@@ -979,6 +983,18 @@
     "linked_scope_present": {
       "fail": "Diese Vorlage ist mit keiner Leistungsposition verknüpft und läuft daher in keinem Paket auf",
       "suggestion": "Verknüpfen Sie die LV-Positionen, die diese Vorlage betrifft"
+    },
+    "spec_section_format": {
+      "fail": "Leistungsbereich {section} ist keine gültige Gliederungsnummer",
+      "suggestion": "Eine MasterFormat-Nummer wie 03 30 00 oder einen LB- oder NBS-Code verwenden"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} für Abschnitt {section} ist bereits im Register vorhanden",
+      "suggestion": "Vorschlag überspringen oder so anpassen, dass es eine andere Freigabeunterlage ist"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Für Abschnitt {section} ist üblicherweise eine Freigabeunterlage der Art {kind} nötig, die in der Leistungsbeschreibung nicht aufgeführt ist",
+      "suggestion": "Leistungsbeschreibung prüfen oder die Freigabeunterlage von Hand ergänzen"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "Eine Mannschaft von {headcount} war auf der Baustelle, aber weder Arbeit, Prüfung noch Behinderung ist erfasst.",
       "suggestion": "Ergänzen, was die Mannschaft getan hat, oder die Behinderung erfassen, die die Arbeit stoppte."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Seite {page} hat keine lesbare Plannummer",
+      "suggestion": "Plannummer aus dem Schriftfeld eintragen"
+    },
+    "number_unique_in_set": {
+      "fail": "Plannummer {sheet} kommt auf {count} Seiten dieses Uploads vor",
+      "suggestion": "Plansatz auf doppelte oder falsch nummerierte Seiten prüfen"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Planindex {revision} von Plan {sheet} ist niedriger als der aktuelle Index {current}",
+      "suggestion": "Bestätigen, dass es ein älterer Stand ist, bevor er in die Historie aufgenommen wird"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Plan {sheet} wurde per Texterkennung mit {confidence} gelesen und ist nicht bestätigt",
+      "suggestion": "Felder des Schriftfelds prüfen und das Ergebnis bestätigen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Aus {pages} Seiten konnte kein Abschnitt der Spezifikation gelesen werden",
+      "suggestion": "Bei einem Scan den Import mit eingeschalteter Texterkennung wiederholen; sonst prüfen, ob die Abschnittsköpfe wie SECTION 03 30 00 - Title lauten"
     }
   }
 }

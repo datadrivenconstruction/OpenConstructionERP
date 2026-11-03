@@ -931,6 +931,10 @@
     "change_time_within_owner": {
       "fail": "Ang kabuuang epekto sa oras ng mga subcontract para sa {code} ay {sub_days} araw, mas marami kaysa sa {owner_days} araw na ibinigay ng may-ari",
       "suggestion": "Suriin ang mga claim sa oras ng mga subcontractor o humiling sa may-ari ng katumbas na extension"
+    },
+    "notice_window": {
+      "fail": "Ang pagbabago sa subcontract na {code} ay naipaalam {late} araw pagkatapos ng {days}-araw na palugit sa kasunduan",
+      "suggestion": "Suriin ang mga tuntunin ng abiso bago tanggapin ang gastos: ang huling abiso ay maaaring magpawalang-bisa sa claim"
     }
   },
   "submittal": {
@@ -961,6 +965,18 @@
     "linked_scope_present": {
       "fail": "Walang naka-link na scope item ang submittal na ito, kaya hindi ito maisasama sa anumang package",
       "suggestion": "I-link ang mga BOQ item na sakop ng submittal na ito"
+    },
+    "spec_section_format": {
+      "fail": "Ang seksyon {section} ay hindi kilalang numero ng seksyon",
+      "suggestion": "Gumamit ng MasterFormat na numero tulad ng 03 30 00, o LB o NBS na code"
+    },
+    "duplicate_in_register": {
+      "fail": "Nasa rehistro na ang {title} para sa seksyon {section}",
+      "suggestion": "Laktawan ang mungkahing ito o baguhin ito para maging ibang dokumentong isusumite para sa pag-apruba"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Karaniwang kailangan ng seksyon {section} ng dokumentong isusumite para sa pag-apruba na uri {kind}, na wala sa specification",
+      "suggestion": "Suriin ang specification, o idagdag nang mano-mano ang dokumento"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Walang mabasang numero ng sheet ang pahina {page}",
+      "suggestion": "Ilagay ang numero ng sheet mula sa title block"
+    },
+    "number_unique_in_set": {
+      "fail": "Ang numero ng sheet na {sheet} ay lumalabas sa {count} pahina ng upload na ito",
+      "suggestion": "Suriin ang set ng mga drawing kung may doble o maling numero na pahina"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Mas mababa ang revision {revision} ng sheet {sheet} kaysa sa kasalukuyang revision {current}",
+      "suggestion": "Tiyaking mas lumang isyu ito bago idagdag sa kasaysayan"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Nabasa ang sheet {sheet} sa pamamagitan ng text recognition na may {confidence} at hindi pa kumpirmado",
+      "suggestion": "Suriin ang mga field ng title block at kumpirmahin ang pagkakabasa"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Walang seksyon ng specification na nabasa mula sa {pages} pahina",
+      "suggestion": "Kung scan ang aklat, patakbuhing muli ang import nang naka-on ang text recognition; kung hindi, tingnan kung ganito ang hitsura ng mga header ng seksyon: SECTION 03 30 00 - Title"
     }
   }
 }

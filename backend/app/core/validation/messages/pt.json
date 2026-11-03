@@ -931,6 +931,10 @@
     "change_time_within_owner": {
       "fail": "Os impactos de prazo das subempreitadas de {code} somam {sub_days} dias, mais do que os {owner_days} dias concedidos pelo dono da obra",
       "suggestion": "Verifique os pedidos de prazo dos subempreiteiros ou solicite ao dono da obra uma prorrogação equivalente"
+    },
+    "notice_window": {
+      "fail": "A alteração de subempreitada {code} foi notificada {late} dias após o prazo de {days} dias previsto no contrato",
+      "suggestion": "Confira as condições de notificação antes de aceitar o custo: notificação fora do prazo pode impedir o pleito"
     }
   },
   "submittal": {
@@ -961,6 +965,18 @@
     "linked_scope_present": {
       "fail": "Esta submissão técnica não está vinculada a nenhum item de escopo; por isso, não é consolidada em nenhum pacote",
       "suggestion": "Vincule os itens da planilha orçamentária abrangidos por esta submissão"
+    },
+    "spec_section_format": {
+      "fail": "A seção {section} não é um número de seção reconhecido",
+      "suggestion": "Use um número MasterFormat como 03 30 00, ou um código LB ou NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} da seção {section} já está no registro",
+      "suggestion": "Ignore esta proposta ou edite-a para que seja outro documento para aprovação"
+    },
+    "required_type_missing_for_section": {
+      "fail": "A seção {section} normalmente exige um documento para aprovação do tipo {kind}, que a especificação não listou",
+      "suggestion": "Confira a especificação ou inclua o documento manualmente"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "A página {page} não tem número de prancha legível",
+      "suggestion": "Digite o número da prancha conforme o carimbo"
+    },
+    "number_unique_in_set": {
+      "fail": "O número de prancha {sheet} aparece em {count} páginas deste envio",
+      "suggestion": "Confira o conjunto de desenhos: página duplicada ou numerada errada"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "A revisão {revision} da prancha {sheet} é inferior à revisão atual {current}",
+      "suggestion": "Confirme que é uma emissão anterior antes de incluí-la no histórico"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "A prancha {sheet} foi lida por reconhecimento de texto com {confidence} e não está confirmada",
+      "suggestion": "Confira os campos do carimbo e confirme a leitura"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Não foi possível ler nenhuma seção de especificação em {pages} páginas",
+      "suggestion": "Se o caderno for escaneado, repita a importação com o reconhecimento de texto ativado; caso contrário, confira se os títulos de seção têm a forma SECTION 03 30 00 - Title"
     }
   }
 }
