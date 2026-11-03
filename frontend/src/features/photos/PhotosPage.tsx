@@ -34,6 +34,8 @@ import {
 } from './api';
 import {
   activeFilterCount,
+  categorySuggestion,
+  PHOTO_CATEGORIES,
   filtersFromParams,
   filtersToParams,
   parseView,
@@ -42,6 +44,8 @@ import {
   type PhotoView,
 } from './model';
 import { AlbumManager } from './components/AlbumManager';
+import { BulkBar } from './components/BulkBar';
+import { updatePhoto, type PhotoCategory as DocPhotoCategory } from '@/features/documents/api';
 import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { PhotoLightbox } from './components/PhotoLightbox';
 import { PhotoUploadDropzone } from './components/PhotoUploadDropzone';
@@ -117,6 +121,19 @@ function FilterBar({
         ))}
       </select>
       <select
+        value={filters.category ?? ''}
+        onChange={(e) => onChange({ ...filters, category: e.target.value || undefined })}
+        aria-label={t('photoArchive.filters.category')}
+        className={input}
+      >
+        <option value="">{t('photos.all_categories')}</option>
+        {PHOTO_CATEGORIES.map((c) => (
+          <option key={c} value={c}>
+            {t(`photos.cat_${c}`)}
+          </option>
+        ))}
+      </select>
+      <select
         value={filters.album ?? ''}
         onChange={(e) => onChange({ ...filters, album: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.album')}
@@ -169,18 +186,36 @@ function FilterBar({
 function Thumb({
   photo,
   selected,
+  selectMode,
   onOpen,
   onToggle,
+  onApplySuggestion,
 }: {
   photo: ArchivePhoto;
   selected: boolean;
+  selectMode: boolean;
   onOpen: () => void;
   onToggle: () => void;
+  onApplySuggestion: (photo: ArchivePhoto) => void;
 }) {
   const { t } = useTranslation();
+  const suggestion = selectMode ? null : categorySuggestion(photo);
+  const field = photo.tags.some((tag) => tag.toLowerCase() === 'field');
   return (
     <li className={`group relative overflow-hidden rounded-lg border ${selected ? 'border-oe-blue ring-2 ring-oe-blue' : 'border-border-light'}`}>
-      <button type="button" onClick={onOpen} className="block aspect-square w-full bg-surface-secondary">
+      <button
+        type="button"
+        onClick={selectMode ? onToggle : onOpen}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (selectMode) onToggle();
+            else onOpen();
+          }
+        }}
+        aria-pressed={selectMode ? selected : undefined}
+        className="block aspect-square w-full bg-surface-secondary"
+      >
         {photo.thumb_status === 'failed' ? (
           <span className="flex h-full items-center justify-center p-2 text-center text-xs text-content-tertiary">
             {t('photoArchive.thumb_failed')}
@@ -197,9 +232,32 @@ function Thumb({
           {t(`photoArchive.source.${photo.source_module}`)}
         </span>
       )}
-      <div className="truncate px-2 py-1 text-xs">
-        {photo.caption || (photo.taken_at ? <DateDisplay value={photo.taken_at} /> : photo.filename)}
+      <div className="flex items-center gap-1 px-2 py-1 text-xs">
+        <span className="min-w-0 flex-1 truncate">
+          {photo.caption || (photo.taken_at ? <DateDisplay value={photo.taken_at} /> : photo.filename)}
+        </span>
+        <span className="shrink-0 text-2xs text-content-tertiary">
+          {t(`photos.cat_${photo.category}`, { defaultValue: photo.category })}
+        </span>
+        {field && (
+          <span className="shrink-0 rounded bg-emerald-100 px-1 text-2xs text-emerald-800">{t('photoArchive.field_badge')}</span>
+        )}
       </div>
+      {suggestion && (
+        <button
+          type="button"
+          onClick={() => onApplySuggestion(photo)}
+          title={t('photoArchive.suggestion.apply_hint')}
+          className="mx-2 mb-1.5 rounded bg-purple-50 px-1.5 py-0.5 text-left text-2xs text-purple-800 hover:bg-purple-100"
+        >
+          {suggestion.confidence !== null
+            ? t('photoArchive.suggestion.with_conf', {
+                cat: t(`photos.cat_${suggestion.category}`),
+                pct: Math.round(suggestion.confidence * 100),
+              })
+            : t('photoArchive.suggestion.plain', { cat: t(`photos.cat_${suggestion.category}`) })}
+        </button>
+      )}
     </li>
   );
 }
@@ -246,6 +304,46 @@ function PhotosArchive({ projectId }: { projectId: string }) {
   const filters = useMemo(() => filtersFromParams(params), [params]);
   const [open, setOpen] = useState<ArchivePhoto | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [selectModeOn, setSelectMode] = useState(false);
+  // Ticking a checkbox outside select mode enters it, as the old gallery did.
+  const selectMode = selectModeOn || selected.length > 0;
+  const exitSelect = () => {
+    setSelectMode(false);
+    setSelected([]);
+  };
+  useEffect(() => {
+    if (!selectMode) return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !open) exitSelect();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+  const deepLinkPhoto = params.get('photo');
+  useEffect(() => {
+    if (!deepLinkPhoto) return;
+    fetchPhoto(deepLinkPhoto)
+      .then(setOpen)
+      .catch(() => addToast({ type: 'error', title: t('photoArchive.load_failed') }));
+    const next = new URLSearchParams(params);
+    next.delete('photo');
+    setParams(next, { replace: true });
+    // Runs once per deep link; params change on every filter edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkPhoto]);
+  const applySuggestion = useMutation({
+    mutationFn: (photo: ArchivePhoto) => {
+      const sug = categorySuggestion(photo)!;
+      const lower = new Set(photo.tags.map((x) => x.toLowerCase()));
+      const tags = [...photo.tags, ...sug.tags.filter((x) => !lower.has(x.toLowerCase()))];
+      return updatePhoto(photo.id, { category: sug.category as DocPhotoCategory, tags });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: photosKeys.all });
+      addToast({ type: 'success', title: t('photoArchive.suggestion.applied') });
+    },
+    onError: (err) => addToast({ type: 'error', title: t('photoArchive.save_failed'), message: getErrorMessage(err) }),
+  });
   const exporter = useExport(projectId);
 
   const setFilters = (next: PhotoFilters) => setParams(filtersToParams(next, params), { replace: true });
@@ -346,6 +444,16 @@ function PhotosArchive({ projectId }: { projectId: string }) {
               {exporter.busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
               {exporter.busy ? t('photoArchive.export.progress', { value: exporter.progress }) : t('photoArchive.export.all')}
             </button>
+            {view === 'grid' && (
+              <button
+                type="button"
+                onClick={() => (selectMode ? exitSelect() : setSelectMode(true))}
+                aria-pressed={selectMode}
+                className="rounded-md border border-border-light px-3 py-1.5 text-sm"
+              >
+                {selectMode ? t('photoArchive.bulk.done') : t('photoArchive.bulk.select')}
+              </button>
+            )}
             <ModuleGuideButton content={photosGuide} />
           </div>
         }
@@ -378,9 +486,8 @@ function PhotosArchive({ projectId }: { projectId: string }) {
         <FilterBar filters={filters} albums={albums.data ?? []} onChange={setFilters} />
       )}
 
-      {selected.length > 0 && view === 'grid' && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-sm">
-          <span>{t('photoArchive.selected', { count: selected.length })}</span>
+      {selectMode && view === 'grid' && (
+        <BulkBar photos={gridPhotos} selected={selected} allIds={gridPhotos.map((p) => p.id)} onSelect={setSelected}>
           {(albums.data ?? []).length > 0 && (
             <select
               defaultValue=""
@@ -415,10 +522,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
             <Download className="h-3 w-3" aria-hidden />
             {t('photoArchive.export.selected')}
           </button>
-          <button type="button" onClick={() => setSelected([])} className="text-xs text-oe-blue hover:underline">
-            {t('photoArchive.clear_selection')}
-          </button>
-        </div>
+        </BulkBar>
       )}
 
       {view === 'grid' &&
@@ -437,7 +541,15 @@ function PhotosArchive({ projectId }: { projectId: string }) {
             <p className="text-xs text-content-tertiary">{t('photoArchive.count', { count: total })}</p>
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" data-testid="photo-grid">
               {gridPhotos.map((p) => (
-                <Thumb key={p.id} photo={p} selected={selected.includes(p.id)} onOpen={() => setOpen(p)} onToggle={() => toggle(p.id)} />
+                <Thumb
+                  key={p.id}
+                  photo={p}
+                  selected={selected.includes(p.id)}
+                  selectMode={selectMode}
+                  onOpen={() => setOpen(p)}
+                  onToggle={() => toggle(p.id)}
+                  onApplySuggestion={(photo) => applySuggestion.mutate(photo)}
+                />
               ))}
             </ul>
             {grid.hasNextPage && (

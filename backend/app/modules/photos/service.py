@@ -198,6 +198,9 @@ def photo_out(photo: ProjectPhoto, links: list[PhotoLink] | None = None) -> dict
         "sha256": photo.sha256,
         "source_module": photo.source_module or "documents",
         "source_id": photo.source_id,
+        "category_suggestion": meta["category_suggestion"]
+        if isinstance(meta.get("category_suggestion"), dict)
+        else None,
         "thumb_status": photo.thumb_status or "pending",
         "location_id": photo.location_id,
         "zone": photo.zone,

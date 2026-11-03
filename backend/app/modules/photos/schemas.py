@@ -54,6 +54,7 @@ class PhotoOut(BaseModel):
     sha256: str | None = None
     source_module: str = "documents"
     source_id: str | None = None
+    category_suggestion: dict[str, Any] | None = None
     thumb_status: str = "pending"
     location_id: uuid.UUID | None = None
     zone: str | None = None

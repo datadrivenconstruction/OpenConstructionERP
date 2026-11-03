@@ -8,6 +8,7 @@ import { Camera, Loader2, Upload } from 'lucide-react';
 import { captureDeviceEvidence } from '@/shared/lib/photoEvidence';
 import { useToastStore } from '@/stores/useToastStore';
 import { photosKeys, uploadPhotos, type TargetKind, type UploadResult } from '../api';
+import { parseTags, PHOTO_CATEGORIES } from '../model';
 
 interface PhotoUploadDropzoneProps {
   projectId: string;
@@ -24,12 +25,15 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
   const addToast = useToastStore((s) => s.addToast);
   const input = useRef<HTMLInputElement | null>(null);
   const [over, setOver] = useState(false);
+  const [category, setCategory] = useState<string>('site');
+  const [tagText, setTagText] = useState('');
 
   const upload = useMutation({
     mutationFn: async (files: File[]) => {
       // A fix taken now describes where the person stands; it is only a hint for files shot elsewhere.
       const device = await captureDeviceEvidence();
-      return uploadPhotos(projectId, files, { device, target });
+      // Category and tags apply to the whole batch, as in the old gallery.
+      return uploadPhotos(projectId, files, { device, target, category, tags: parseTags(tagText) });
     },
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: photosKeys.all });
@@ -94,6 +98,30 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
       <div className={compact ? 'text-xs text-content-secondary' : 'text-sm text-content-secondary'}>
         {upload.isPending ? t('photoArchive.upload.sending') : t('photoArchive.upload.hint')}
       </div>
+      {!compact && (
+        <div className="flex flex-wrap items-center justify-center gap-2" data-testid="upload-batch-meta">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            aria-label={t('photos.category')}
+            className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          >
+            {PHOTO_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {t(`photos.cat_${c}`)}
+              </option>
+            ))}
+          </select>
+          <input
+            value={tagText}
+            onChange={(e) => setTagText(e.target.value)}
+            placeholder={t('photoArchive.bulk.tags_placeholder')}
+            aria-label={t('photos.upload_type_tags')}
+            className="w-44 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          />
+          <span className="w-full text-2xs text-content-tertiary">{t('photos.batch_meta_hint')}</span>
+        </div>
+      )}
       <button
         type="button"
         disabled={upload.isPending}
