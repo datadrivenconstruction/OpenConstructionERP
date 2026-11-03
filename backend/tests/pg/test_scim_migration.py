@@ -53,7 +53,7 @@ def _state(sync_conn) -> dict:
 
 async def test_revision_chains_onto_the_assistant_revision() -> None:
     assert _rev.revision == "vsci01_scim_provisioning"
-    assert _rev.down_revision == "vai01_doc_assistant_agent_catalogue"
+    assert _rev.down_revision == "vpar01_partner_api_keys_webhooks"
 
 
 async def test_upgrade_downgrade_upgrade_on_postgres() -> None:

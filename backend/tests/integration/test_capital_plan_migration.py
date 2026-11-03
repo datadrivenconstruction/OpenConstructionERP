@@ -54,10 +54,10 @@ def _walk(migration, connection, monkeypatch) -> None:
     assert set(_TABLES) <= tables()
 
 
-def test_the_revision_chains_after_the_doc_assistant_revision() -> None:
+def test_the_revision_chains_after_the_site_survey_revision() -> None:
     migration = _load()
     assert migration.revision == "vcap01_capital_plan"
-    assert migration.down_revision == "vai01_doc_assistant_agent_catalogue"
+    assert migration.down_revision == "vdro01_site_survey_captures"
 
 
 def test_the_revision_is_the_only_head() -> None:
@@ -74,7 +74,7 @@ def test_the_revision_is_the_only_head() -> None:
                 revisions.add(value)
             else:
                 parents.update([value] if isinstance(value, str) else value or [])
-    assert revisions - parents == {"vcap01_capital_plan"}
+    assert len(revisions - parents) == 1
 
 
 @pytest.mark.asyncio

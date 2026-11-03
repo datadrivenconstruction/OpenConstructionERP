@@ -89,7 +89,7 @@ def _count(conn, sql):
 
 def test_revision_follows_the_previous_head():
     rev = _revision()
-    assert rev.down_revision == "vai01_doc_assistant_agent_catalogue"
+    assert rev.down_revision == "vcap01_capital_plan"
     assert rev.revision == "vpar01_partner_api_keys_webhooks"
 
 
