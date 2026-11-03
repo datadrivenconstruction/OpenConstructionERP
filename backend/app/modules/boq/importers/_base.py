@@ -95,6 +95,8 @@ class ImportedPosition:
     # the target BOQ -> update in place. Every other importer leaves it
     # ``None`` (all-create, unchanged behaviour).
     position_id: str | None = None
+    # ``Position.version`` stamped by the export ("Row Version" column), or ``None``.
+    row_version: int | None = None
 
 
 @dataclass(slots=True)

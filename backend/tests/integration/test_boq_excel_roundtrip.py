@@ -463,3 +463,280 @@ async def test_foreign_boq_id_cannot_update_across_boundary(
     a_positions = {p["id"]: p for p in await _positions(shared_client, shared_auth, boq_a)}
     assert a_positions[pa]["description"] == "A original"
     assert float(a_positions[pa]["quantity"]) == 7.0
+
+
+# ── Review step: dry-run diff and stale-row conflicts ────────────────────────
+
+
+async def _export_workbook(client: AsyncClient, auth: dict[str, str], boq_id: str):
+    """The exported workbook, its header row number and the header labels."""
+    from openpyxl import load_workbook
+
+    resp = await client.get(f"/api/v1/boq/boqs/{boq_id}/export/excel", headers=auth, follow_redirects=True)
+    assert resp.status_code == 200, resp.text
+    wb = load_workbook(io.BytesIO(resp.content))
+    ws = wb.worksheets[0]
+    rows = list(ws.iter_rows(values_only=True))
+    header_at = _header_row_number(rows)
+    header = [str(c) if c is not None else "" for c in rows[header_at - 1]]
+    return wb, header_at, header
+
+
+def _edit_cell(wb, header_at: int, header: list[str], position_id: str, column: str, value) -> None:
+    ws = wb.worksheets[0]
+    id_col = header.index("Position ID") + 1
+    target = header.index(column) + 1
+    for row in range(header_at + 1, ws.max_row + 1):
+        if str(ws.cell(row=row, column=id_col).value) == position_id:
+            ws.cell(row=row, column=target).value = value
+            return
+    raise AssertionError(f"position {position_id} not in the sheet")
+
+
+def _xlsx_bytes(wb) -> bytes:
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+async def _post_sheet(client: AsyncClient, auth: dict[str, str], url: str, content: bytes, data=None):
+    return await client.post(url, files={"file": ("edited.xlsx", content, _XLSX)}, data=data or {}, headers=auth)
+
+
+async def _by_id(client: AsyncClient, auth: dict[str, str], boq_id: str) -> dict[str, dict]:
+    return {p["id"]: p for p in await _positions(client, auth, boq_id)}
+
+
+@pytest.mark.asyncio
+async def test_export_stamps_row_version_and_meta_sheet(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    pid = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab")
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    assert "Row Version" in header
+    ws = wb.worksheets[0]
+    id_col = header.index("Position ID") + 1
+    ver_col = header.index("Row Version") + 1
+    stamped = {
+        str(ws.cell(row=r, column=id_col).value): ws.cell(row=r, column=ver_col).value
+        for r in range(header_at + 1, ws.max_row + 1)
+        if ws.cell(row=r, column=id_col).value
+    }
+    assert stamped[pid] == (await _by_id(shared_client, shared_auth, boq_id))[pid]["version"]
+    meta = wb["_oe_meta"]
+    assert meta.sheet_state == "hidden"
+    cells = {meta.cell(row=r, column=1).value: meta.cell(row=r, column=2).value for r in range(1, 4)}
+    assert cells["boq_id"] == boq_id
+    assert cells["schema"] == 1
+    assert cells["exported_at"]
+
+
+@pytest.mark.asyncio
+async def test_preview_lists_exactly_the_edits_and_writes_nothing_then_apply_updates(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab", quantity=10)
+    b = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.002", description="Wall", quantity=5)
+    await _add_position(shared_client, shared_auth, boq_id, ordinal="01.003", description="Beam", quantity=2)
+    before = await _by_id(shared_client, shared_auth, boq_id)
+
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    _edit_cell(wb, header_at, header, a, "Quantity", 12.5)
+    _edit_cell(wb, header_at, header, b, "Description", "Wall, reinforced")
+    content = _xlsx_bytes(wb)
+
+    prev = await _post_sheet(shared_client, shared_auth, f"/api/v1/boq/boqs/{boq_id}/import/excel/preview/", content)
+    assert prev.status_code == 200, prev.text
+    body = prev.json()
+    assert body["round_trip"] is True
+    assert body["counts"]["updated"] == 2
+    assert body["unchanged"] == 1
+    assert body["conflicts"] == [] and body["created"] == [] and body["would_delete"] == []
+    fields = {(u["position_id"], c["field"]) for u in body["updated"] for c in u["changes"]}
+    assert fields == {(a, "quantity"), (b, "description")}
+    assert body["boq_version_token"]
+
+    # Dry run: nothing was written.
+    assert await _by_id(shared_client, shared_auth, boq_id) == before
+
+    applied = await _post_sheet(shared_client, shared_auth, f"/api/v1/boq/boqs/{boq_id}/import/excel/", content)
+    assert applied.status_code == 200, applied.text
+    assert applied.json()["updated"] == 2
+    after = await _by_id(shared_client, shared_auth, boq_id)
+    assert float(after[a]["quantity"]) == 12.5
+    assert after[b]["description"] == "Wall, reinforced"
+    assert after[a]["version"] > before[a]["version"]
+    assert after[b]["version"] > before[b]["version"]
+
+
+@pytest.mark.asyncio
+async def test_stale_row_is_a_conflict_and_apply_keeps_the_app_value_unless_overwritten(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab", quantity=10)
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    _edit_cell(wb, header_at, header, a, "Quantity", 50)
+    content = _xlsx_bytes(wb)
+
+    # Somebody edits the same position in the app after the export.
+    patched = await shared_client.patch(f"/api/v1/boq/positions/{a}", json={"quantity": 11}, headers=shared_auth)
+    assert patched.status_code == 200, patched.text
+
+    prev = await _post_sheet(shared_client, shared_auth, f"/api/v1/boq/boqs/{boq_id}/import/excel/preview/", content)
+    assert prev.status_code == 200, prev.text
+    body = prev.json()
+    assert [c["position_id"] for c in body["conflicts"]] == [a]
+    assert body["conflicts"][0]["stored_version"] > body["conflicts"][0]["file_version"]
+    assert body["updated"] == []
+    assert any(v["rule_id"] == "boq.roundtrip.stale_row" for v in body["validation"])
+
+    url = f"/api/v1/boq/boqs/{boq_id}/import/excel/"
+    kept = await _post_sheet(shared_client, shared_auth, url, content)
+    assert kept.status_code == 200, kept.text
+    out = kept.json()
+    assert out["updated"] == 0 and out["stale"] == 1
+    assert any(e.get("error") == "stale_row" and e.get("position_id") == a for e in out["errors"])
+    assert float((await _by_id(shared_client, shared_auth, boq_id))[a]["quantity"]) == 11
+
+    # Keeping the app value explicitly writes nothing either.
+    skipped = await _post_sheet(shared_client, shared_auth, url, content, {"skip_position_ids": f'["{a}"]'})
+    assert skipped.status_code == 200, skipped.text
+    assert skipped.json()["kept"] == 1
+    assert float((await _by_id(shared_client, shared_auth, boq_id))[a]["quantity"]) == 11
+
+    # Choosing the Excel value for that row applies it.
+    accepted = await _post_sheet(shared_client, shared_auth, url, content, {"accept_position_ids": f'["{a}"]'})
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["updated"] == 1
+    assert float((await _by_id(shared_client, shared_auth, boq_id))[a]["quantity"]) == 50
+
+
+@pytest.mark.asyncio
+async def test_overwrite_conflicts_applies_every_stale_row(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab", quantity=10)
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    _edit_cell(wb, header_at, header, a, "Quantity", 50)
+    content = _xlsx_bytes(wb)
+    await shared_client.patch(f"/api/v1/boq/positions/{a}", json={"quantity": 11}, headers=shared_auth)
+
+    resp = await _post_sheet(
+        shared_client,
+        shared_auth,
+        f"/api/v1/boq/boqs/{boq_id}/import/excel/",
+        content,
+        {"overwrite_conflicts": "true"},
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["updated"] == 1
+    assert float((await _by_id(shared_client, shared_auth, boq_id))[a]["quantity"]) == 50
+
+
+@pytest.mark.asyncio
+async def test_only_confirmed_ids_are_deleted(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab")
+    b = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.002", description="Wall")
+    c = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.003", description="Beam")
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    ws = wb.worksheets[0]
+    id_col = header.index("Position ID") + 1
+    for row in range(ws.max_row, header_at, -1):
+        if str(ws.cell(row=row, column=id_col).value) in {b, c}:
+            ws.delete_rows(row)
+    content = _xlsx_bytes(wb)
+    url = f"/api/v1/boq/boqs/{boq_id}/import/excel/"
+
+    prev = await _post_sheet(shared_client, shared_auth, url + "preview/", content)
+    assert {w["position_id"] for w in prev.json()["would_delete"]} == {b, c}
+
+    nothing = await _post_sheet(shared_client, shared_auth, url, content)
+    assert nothing.json()["deleted"] == 0
+    assert set(await _by_id(shared_client, shared_auth, boq_id)) == {a, b, c}
+
+    one = await _post_sheet(shared_client, shared_auth, url, content, {"delete_position_ids": f'["{b}"]'})
+    assert one.status_code == 200, one.text
+    assert one.json()["deleted"] == 1
+    assert set(await _by_id(shared_client, shared_auth, boq_id)) == {a, c}
+
+
+@pytest.mark.asyncio
+async def test_preview_of_a_sheet_without_ids_is_not_a_round_trip(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab")
+    csv_body = "Pos.;Description;Unit;Quantity;Unit Rate\n02.001;Brand new;m2;1.234,50;85,25\n"
+    resp = await shared_client.post(
+        f"/api/v1/boq/boqs/{boq_id}/import/excel/preview/",
+        files={"file": ("plain.csv", csv_body.encode("utf-8"), "text/csv")},
+        headers=shared_auth,
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["round_trip"] is False
+    assert len(body["created"]) == 1
+    assert body["would_delete"] == []
+    assert len(await _positions(shared_client, shared_auth, boq_id)) == 1
+
+
+@pytest.mark.asyncio
+async def test_locked_bill_refuses_preview_and_apply_with_409(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab")
+    wb, header_at, header = await _export_workbook(shared_client, shared_auth, boq_id)
+    _edit_cell(wb, header_at, header, a, "Quantity", 3)
+    content = _xlsx_bytes(wb)
+    lock = await shared_client.post(f"/api/v1/boq/boqs/{boq_id}/lock/", headers=shared_auth)
+    assert lock.status_code == 200, lock.text
+    for suffix in ("import/excel/preview/", "import/excel/"):
+        resp = await _post_sheet(shared_client, shared_auth, f"/api/v1/boq/boqs/{boq_id}/{suffix}", content)
+        assert resp.status_code == 409, (suffix, resp.text)
+
+
+@pytest.mark.asyncio
+async def test_another_users_bill_cannot_be_previewed(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+) -> None:
+    boq_id = await _create_boq(shared_client, shared_auth)
+    await _add_position(shared_client, shared_auth, boq_id, ordinal="01.001", description="Slab")
+    wb, _h, _hd = await _export_workbook(shared_client, shared_auth, boq_id)
+    content = _xlsx_bytes(wb)
+
+    unique = uuid.uuid4().hex[:8]
+    email, password = f"outsider-{unique}@test.io", f"Outsider{unique}9"
+    reg = await shared_client.post(
+        "/api/v1/users/auth/register",
+        json={"email": email, "password": password, "full_name": "Outsider"},
+    )
+    assert reg.status_code in (200, 201), reg.text
+    login = await shared_client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
+    token = login.json().get("access_token", "")
+    assert token, login.text
+    resp = await _post_sheet(
+        shared_client,
+        {"Authorization": f"Bearer {token}"},
+        f"/api/v1/boq/boqs/{boq_id}/import/excel/preview/",
+        content,
+    )
+    assert resp.status_code in (403, 404), resp.text

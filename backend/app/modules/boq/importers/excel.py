@@ -50,7 +50,14 @@ from app.modules.boq.importers._encoding import (
 )
 from app.modules.boq.importers._workbook import open_workbook
 from app.modules.boq.importers.hungary_workbook import parse_hungarian_workbook
-from app.modules.boq.roundtrip import ID_COLUMN_ALIASES, normalise_id
+from app.modules.boq.roundtrip import (
+    EXPORT_META_SHEET,
+    ID_COLUMN_ALIASES,
+    ROW_VERSION_COLUMN_ALIASES,
+    is_formula_id,
+    normalise_id,
+    parse_row_version,
+)
 from app.modules.boq.units import is_lump_sum_unit
 
 logger = logging.getLogger(__name__)
@@ -712,7 +719,10 @@ def _build_column_aliases(
     for headers in table.values():
         for canonical, words in headers.items():
             merged.setdefault(canonical, set()).update(words)
-    aliases: dict[str, frozenset[str]] = {"position_id": ID_COLUMN_ALIASES}
+    aliases: dict[str, frozenset[str]] = {
+        "position_id": ID_COLUMN_ALIASES,
+        "row_version": ROW_VERSION_COLUMN_ALIASES,
+    }
     for canonical in _CANONICAL_COLUMNS:
         aliases[canonical] = frozenset(merged.pop(canonical, set()))
     for canonical in sorted(merged):
@@ -1601,6 +1611,8 @@ def _pick_item_sheets(workbook: Any) -> tuple[list[Any], list[dict[str, Any]]]:
     sheets: list[Any] = []
     notes: list[dict[str, Any]] = []
     for name in workbook.sheetnames:
+        if name == EXPORT_META_SHEET:
+            continue
         worksheet = workbook[name]
         if _sheet_is_hidden(worksheet):
             if _sheet_has_content(worksheet):
@@ -2541,7 +2553,10 @@ def _rows_to_positions(
             # column an export stamped. Blank -> new row; a value belonging to
             # the target BOQ -> update in place (resolved downstream by the
             # diff against the BOQ's current ids).
+            if is_formula_id(row.get("position_id")):
+                raise ValueError("Position ID cell starts with a formula character (boq.roundtrip.formula_in_id)")
             position_id = normalise_id(row.get("position_id"))
+            row_version = parse_row_version(row.get("row_version"))
 
             unit_raw = fold_width(str(row.get("unit", ""))).strip()
             quantity_raw = row.get("quantity")
@@ -2604,6 +2619,7 @@ def _rows_to_positions(
                         },
                         is_section=True,
                         position_id=position_id,
+                        row_version=row_version,
                     )
                 )
                 continue
@@ -2696,6 +2712,7 @@ def _rows_to_positions(
                     source=source,
                     metadata=metadata,
                     position_id=position_id,
+                    row_version=row_version,
                 )
             )
 

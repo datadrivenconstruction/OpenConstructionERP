@@ -22,6 +22,7 @@ async def on_startup() -> None:
         register_boq_branch_rules,
         register_boq_markup_rules,
         register_boq_resource_rules,
+        register_boq_roundtrip_rules,
     )
 
     register_boq_permissions()
@@ -34,3 +35,4 @@ async def on_startup() -> None:
     register_boq_markup_rules()
     register_boq_resource_rules()
     register_boq_branch_rules()
+    register_boq_roundtrip_rules()

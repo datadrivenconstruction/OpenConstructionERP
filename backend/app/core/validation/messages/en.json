@@ -1454,6 +1454,28 @@
       "suggestion": "Check the row with the site before applying it."
     }
   },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Row {row}: the Position ID cell starts with a formula character and was not imported",
+      "suggestion": "Leave the Position ID column as exported, or clear the cell to add a new position"
+    },
+    "unknown_id": {
+      "fail": "Row {row}: the Position ID does not belong to this bill, so the row was treated as a new position",
+      "suggestion": "Export the bill again before editing, or clear the Position ID cell if the row is meant to be new"
+    },
+    "duplicate_id": {
+      "fail": "Row {row}: the Position ID is used by an earlier row, so this row was treated as a new position",
+      "suggestion": "Clear the Position ID of copied rows, or delete the copies"
+    },
+    "stale_row": {
+      "fail": "Row {row}: position {ordinal} was changed in the app after this sheet was exported",
+      "suggestion": "Keep the app value, or choose the Excel value for this row to overwrite it"
+    },
+    "locked_boq": {
+      "fail": "This bill is locked, so changes from Excel cannot be applied",
+      "suggestion": "Unlock the bill first, or save the sheet for later"
+    }
+  },
   "boq_branch": {
     "diverged_from_main": {
       "fail": "This branch has been open for {days} days and the main estimate has changed in {changes} positions since it was created",

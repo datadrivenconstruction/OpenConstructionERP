@@ -40,6 +40,7 @@ from app.core.i18n import get_locale, set_locale
 from app.core.job_run import JobRun
 from app.core.job_runner import register_handler, submit_job, update_progress
 from app.core.storage import module_uploads_dir
+from app.modules.boq.roundtrip import ApplyChoices
 
 logger = logging.getLogger(__name__)
 
@@ -117,11 +118,21 @@ def sweep_stale_uploads(*, older_than: timedelta = _STALE_AFTER) -> int:
     return removed
 
 
-def _idempotency_base(boq_id: uuid.UUID, content: bytes, *, delete_missing: bool, column_mapping: str | None) -> str:
+def _idempotency_base(
+    boq_id: uuid.UUID,
+    content: bytes,
+    *,
+    delete_missing: bool,
+    column_mapping: str | None,
+    choices: dict[str, Any] | None = None,
+) -> str:
     """The key of an import's first attempt: the bill, the file, and every option that changes the outcome."""
     digest = hashlib.sha256(content).hexdigest()
     mapping = hashlib.sha256((column_mapping or "").encode("utf-8")).hexdigest()[:16]
-    return f"boq_import:{boq_id}:{digest}:{int(delete_missing)}:{mapping}"
+    base = f"boq_import:{boq_id}:{digest}:{int(delete_missing)}:{mapping}"
+    if choices:
+        base += ":" + hashlib.sha256(json.dumps(choices, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+    return base
 
 
 async def _still_there(session: AsyncSession, row: JobRun) -> bool:
@@ -233,6 +244,7 @@ async def enqueue_boq_import(
     delete_missing: bool,
     column_mapping: str | None,
     force: bool = False,
+    choices: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Start the import of ``content`` into the bill, or hand back the job already importing it.
 
@@ -243,7 +255,9 @@ async def enqueue_boq_import(
             this bill before and what it imported is still there; ``force``
             imports it again.
     """
-    base_key = _idempotency_base(boq_id, content, delete_missing=delete_missing, column_mapping=column_mapping)
+    base_key = _idempotency_base(
+        boq_id, content, delete_missing=delete_missing, column_mapping=column_mapping, choices=choices
+    )
     key, holder, imported = await _attempt(session, base_key)
     if holder is not None:
         return _job_view(holder, reused=True)
@@ -261,6 +275,7 @@ async def enqueue_boq_import(
         "delete_missing": delete_missing,
         "column_mapping": column_mapping,
         "force": force,
+        "rt_choices": choices,
     }
     try:
         row = await submit_job(JOB_KIND, payload, idempotency_key=key)
@@ -337,6 +352,7 @@ async def run_boq_import_job(job_run: JobRun, payload: dict[str, Any]) -> dict[s
                     service=service,
                     on_phase=lambda phase: _report_phase(job_run.id, phase),
                     append_on_collision=bool(payload.get("force")),
+                    choices=ApplyChoices.from_json(payload.get("rt_choices")),
                 )
             except HTTPException as exc:
                 await session.rollback()
