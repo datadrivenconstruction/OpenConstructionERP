@@ -97,6 +97,7 @@ import {
 import { SubmittalRegisterDetail } from './SubmittalRegisterDetail';
 import { SubmittalAttachments } from './SubmittalAttachments';
 import { SubmittalRegisterExport } from './SubmittalRegisterExport';
+import { SpecImportDialog } from './SpecImportDialog';
 import { SubmittalRegisterFilters, SubmittalTypeTabs } from './SubmittalRegisterFilters';
 import { SubmittalRegisterSummary } from './SubmittalRegisterSummary';
 import {
@@ -1082,6 +1083,7 @@ export function SubmittalsPage() {
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(autoCreate);
+  const [showSpecImport, setShowSpecImport] = useState(false);
   const [reviewingSubmittal, setReviewingSubmittal] = useState<Submittal | null>(null);
   const [editingSubmittal, setEditingSubmittal] = useState<Submittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1422,6 +1424,15 @@ export function SubmittalsPage() {
             <ModuleGuideButton content={submittalsGuide} />
             <SubmittalRegisterExport projectId={projectId} filters={filters} empty={registerEmpty} />
             <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowSpecImport(true)}
+              disabled={!projectId}
+              className="shrink-0 whitespace-nowrap"
+            >
+              {t('submittals.spec_title', { defaultValue: 'Build register from spec' })}
+            </Button>
+            <Button
               variant="primary"
               size="sm"
               onClick={() => setShowCreateModal(true)}
@@ -1741,6 +1752,8 @@ export function SubmittalsPage() {
           </>
         )}
       </div>
+
+      {showSpecImport && <SpecImportDialog projectId={projectId} onClose={() => setShowSpecImport(false)} />}
 
       {/* Create Modal */}
       {showCreateModal && (

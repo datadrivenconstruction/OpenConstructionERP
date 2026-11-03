@@ -11310,6 +11310,90 @@ def _reconcile_from_context(context: ValidationContext) -> Any:
     return result
 
 
+class _SpecCheckRule(ValidationRule):
+    """One pure check from a module checks file over a payload."""
+
+    standard = "sheet"
+    check_name: str = ""
+    check_module: str = "app.modules.documents.sheet_checks"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        payload = context.data if isinstance(context.data, dict) else {}
+        if not payload:
+            return []
+        import importlib  # noqa: PLC0415
+
+        findings = getattr(importlib.import_module(self.check_module), self.check_name)(payload)
+        if not findings:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(f"{self.rule_id}.fail", locale=locale, **f.params),
+                element_ref=f.element_ref,
+                suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+            )
+            for f in findings
+        ]
+
+
+class _SpecRule(_SpecCheckRule):
+    """One pure check from ``submittals.spec_checks`` (spec book to register)."""
+
+    standard = "submittal"
+    check_module = "app.modules.submittals.spec_checks"
+
+
+class SubmittalSpecSectionFormat(_SpecRule):
+    rule_id = "submittal.spec_section_format"
+    name = "Spec Section Format"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags a spec section number the register cannot sort or group on."
+    check_name = "check_spec_section_format"
+
+
+class SubmittalDuplicateInRegister(_SpecRule):
+    rule_id = "submittal.duplicate_in_register"
+    name = "Duplicate In Register"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a proposed submittal already in the register for the same section, type and title."
+    check_name = "check_duplicate_in_register"
+
+
+class SpecImportNoSectionsFound(_SpecRule):
+    rule_id = "spec_import.no_sections_found"
+    name = "Spec Import Found No Sections"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a specification book from which no section could be read."
+    check_name = "check_no_sections_found"
+
+
+class SubmittalRequiredTypeMissing(_SpecRule):
+    rule_id = "submittal.required_type_missing_for_section"
+    name = "Required Submittal Type Missing For Section"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a spec section that normally needs a submittal type the book did not ask for."
+    check_name = "check_required_type_missing"
+
+
 class SheetCompletenessMissing(ValidationRule):
     rule_id = "sheet_completeness.missing"
     name = "Sheet in index is missing from the set"
@@ -13140,6 +13224,10 @@ def register_builtin_rules() -> None:
         (RFQBidsStillValid(), ["rfq_award"]),
         (RFQAwardHasCompetition(), ["rfq_award"]),
         # Sheet completeness (drawing index / issue register reconciliation)
+        (SubmittalSpecSectionFormat(), ["spec_submittal_item"]),
+        (SubmittalDuplicateInRegister(), ["spec_submittal_item"]),
+        (SpecImportNoSectionsFound(), ["spec_import"]),
+        (SubmittalRequiredTypeMissing(), ["spec_section"]),
         (SheetCompletenessMissing(), ["sheet_completeness"]),
         (SheetCompletenessExtra(), ["sheet_completeness"]),
         (SheetRevisionMismatch(), ["sheet_completeness"]),
