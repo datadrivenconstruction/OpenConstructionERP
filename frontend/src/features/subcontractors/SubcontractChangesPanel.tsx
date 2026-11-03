@@ -105,7 +105,13 @@ export function SubcontractChangesPanel({
   const [rows, setRows] = useState<Row[]>([emptyRow()]);
   const patchRow = (i: number, p: Partial<Row>) =>
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...p } : r)));
-  const canSplit = rows.every((r) => r.agreementId && Number(r.amount) > 0 && r.title.trim());
+  // A lone back-to-back line may leave the amount empty: the server passes the owner value down less the markup.
+  const canSplit = rows.every(
+    (r) =>
+      r.agreementId &&
+      r.title.trim() &&
+      (Number(r.amount) > 0 || (rows.length === 1 && r.backToBack && !r.amount.trim())),
+  );
 
   const submitSplit = () => {
     split.mutate(
@@ -114,7 +120,7 @@ export function SubcontractChangesPanel({
         id: ownerId,
         lines: rows.map((r) => ({
           agreement_id: r.agreementId,
-          amount: r.amount,
+          amount: r.amount.trim() || undefined,
           title: r.title.trim(),
           back_to_back: r.backToBack,
           markup_pct: Number(r.markup) || 0,
