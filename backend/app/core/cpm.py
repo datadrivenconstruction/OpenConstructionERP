@@ -28,6 +28,15 @@ logger = logging.getLogger(__name__)
 MIN_WEEKDAY = 0
 MAX_WEEKDAY = 6
 
+# Activity constraints the passes understand (neutral names, see
+# app.modules.schedule.constraints). A constraint needs ``constraint_offset``: a
+# calendar-day offset from the project origin. Activities without one, or with
+# an unlisted type, are scheduled by the network alone.
+_START_FLOOR = frozenset({"start_no_earlier", "must_start_on"})
+_FINISH_FLOOR = frozenset({"finish_no_earlier", "must_finish_on"})
+_START_CAP = frozenset({"start_no_later", "must_start_on"})
+_FINISH_CAP = frozenset({"finish_no_later", "must_finish_on"})
+
 # Default work calendar: Mon-Fri, no holidays
 _DEFAULT_CALENDAR: dict = {
     "work_days": {0, 1, 2, 3, 4},
@@ -545,6 +554,14 @@ async def calculate_cpm(
           earlier than" floor and defaults to 0. A root (no predecessor) passes
           its own manual start here so its successors are scheduled after it,
           not at the project origin.
+        - constraint_type / constraint_offset: (optional) a scheduling
+          constraint and its date as a calendar-day offset from the project
+          origin. ``start_no_earlier`` and ``must_start_on`` raise the early
+          start, ``finish_no_earlier`` and ``must_finish_on`` the early finish;
+          ``start_no_later``, ``finish_no_later`` and the ``must_*`` types cap
+          the late dates, so float goes negative when the network cannot meet
+          them. ``as_late_as_possible`` moves the early dates to the late ones
+          once float is known. Without constraints the pass is unchanged.
         - calendar: dict (optional) - a per-activity work calendar
           ({"work_days": [...], "exceptions": [...]}) so this activity's
           duration is measured on its own work week (e.g. a six-day trade).
@@ -615,6 +632,14 @@ async def calculate_cpm(
             "is_critical": False,
         }
 
+    # Constraints live beside act_map so unconstrained results stay as they were.
+    constraints: dict[str, tuple[str, int | None]] = {}
+    for act in activities:
+        c_type = act.get("constraint_type")
+        if c_type:
+            c_off = act.get("constraint_offset")
+            constraints[str(act["id"])] = (str(c_type), None if c_off is None else int(c_off))
+
     # Build adjacency: successors of each activity, and predecessors of each activity
     successors: dict[str, list[dict]] = defaultdict(list)
     predecessors: dict[str, list[dict]] = defaultdict(list)
@@ -682,6 +707,13 @@ async def calculate_cpm(
 
             es = max(es, candidate)
 
+        c_type, c_off = constraints.get(aid, (None, None))
+        if c_off is not None:
+            if c_type in _START_FLOOR:
+                es = max(es, c_off)
+            elif c_type in _FINISH_FLOOR:
+                es = max(es, _sub_working_days(c_off, act["duration"], act["work_days"], act["exceptions"], p_start))
+
         # Snap the resolved early_start onto THIS activity's own working calendar.
         # An early_start on a day the activity does not work is asymmetric with
         # the working-day backward pass and yields a spurious negative float and
@@ -726,6 +758,13 @@ async def calculate_cpm(
 
             lf = min(lf, candidate)
 
+        c_type, c_off = constraints.get(aid, (None, None))
+        if c_off is not None:
+            if c_type in _START_CAP:
+                lf = min(lf, _add_working_days(c_off, act["duration"], act["work_days"], act["exceptions"], p_start))
+            if c_type in _FINISH_CAP:
+                lf = min(lf, c_off)
+
         act["late_finish"] = lf
         act["late_start"] = _sub_working_days(
             act["late_finish"], act["duration"], act["work_days"], act["exceptions"], p_start
@@ -761,6 +800,13 @@ async def calculate_cpm(
 
         # Mark critical: total float == 0 (or very close to zero)
         act["is_critical"] = act["total_float"] <= 0
+
+    # As late as possible: sit on the late dates. Done after float so the float
+    # figures describe the early schedule; critical activities have none to use.
+    for aid, act in act_map.items():
+        if constraints.get(aid, ("", None))[0] == "as_late_as_possible" and act["total_float"] > 0:
+            act["early_start"] = act["late_start"]
+            act["early_finish"] = act["late_finish"]
 
     # Return results as list
     return list(act_map.values())

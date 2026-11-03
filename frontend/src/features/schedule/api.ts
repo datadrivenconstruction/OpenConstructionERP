@@ -262,6 +262,9 @@ export interface Activity {
   assignee_name?: string | null;
   /** A milestone the client sees in the portal's upcoming milestones. */
   client_visible?: boolean;
+  /** Scheduling constraint (neutral name) and its ISO date; null = none. */
+  constraint_type?: string | null;
+  constraint_date?: string | null;
   color: string;
   sort_order: number;
   /** Activity metadata passthrough. BOQ-generated activities carry
@@ -315,6 +318,8 @@ export interface CriticalPathResponse {
   project_duration_days: number;
   critical_path: CPMActivityResult[];
   all_activities: CPMActivityResult[];
+  /** Stored constraints the run ignored (missing or unreadable date). */
+  constraint_warnings?: string[];
 }
 
 /* ── Dependency relationships (#348) ────────────────────────────────────────

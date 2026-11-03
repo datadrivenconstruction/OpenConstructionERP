@@ -17,6 +17,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.core.cpm import canonical_exception_dates, check_work_days_in_range
+from app.modules.schedule.constraints import normalize_constraint
 
 
 def _check_calendar_metadata(metadata: Any) -> None:
@@ -280,6 +281,19 @@ class ActivityCreate(BaseModel):
     sort_order: int = Field(default=0, ge=0, le=_INT32_MAX)
     constraint_type: str | None = Field(default=None, max_length=50)
     constraint_date: str | None = Field(default=None, max_length=20)
+
+    @field_validator("constraint_type", mode="before")
+    @classmethod
+    def _known_constraint(cls, value: Any) -> str | None:
+        return normalize_constraint(value, strict=True)
+
+    @field_validator("constraint_date", mode="after")
+    @classmethod
+    def _constraint_date_is_iso(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        return _iso_day(value, field="constraint_date")
+
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
     # ── Cost-loaded / progress-rigor columns ──────────────────────────────
@@ -351,6 +365,19 @@ class ActivityUpdate(BaseModel):
     sort_order: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     constraint_type: str | None = Field(default=None, max_length=50)
     constraint_date: str | None = Field(default=None, max_length=20)
+
+    @field_validator("constraint_type", mode="before")
+    @classmethod
+    def _known_constraint(cls, value: Any) -> str | None:
+        return normalize_constraint(value, strict=True)
+
+    @field_validator("constraint_date", mode="after")
+    @classmethod
+    def _constraint_date_is_iso(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        return _iso_day(value, field="constraint_date")
+
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
     # ── Cost-loaded / progress-rigor columns ──────────────────────────────
@@ -901,6 +928,10 @@ class CriticalPathResponse(BaseModel):
     project_duration_days: int = Field(description="Total project duration from CPM")
     critical_path: list[CPMActivityResult] = Field(description="Activities on the critical path (float = 0)")
     all_activities: list[CPMActivityResult] = Field(description="All activities with CPM data")
+    constraint_warnings: list[str] = Field(
+        default_factory=list,
+        description="Stored constraints the run ignored because their date is missing or unreadable",
+    )
 
 
 class RiskAnalysisResponse(BaseModel):

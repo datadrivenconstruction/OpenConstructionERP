@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} endet {days} Tage vom Ende in der importierten Datei ({source}) entfernt.",
       "suggestion": "Neu berechnete Termine mit der Quelldatei vergleichen, dann übernehmen oder die Quelltermine wiederherstellen."
+    },
+    "constraint_date_missing": {
+      "fail": "Vorgang '{activity}' hat die Einschränkung {constraint}, aber kein Einschränkungsdatum; die Einschränkung wird ignoriert.",
+      "suggestion": "Das Einschränkungsdatum eintragen oder die Einschränkung entfernen."
+    },
+    "constraint_conflict": {
+      "fail": "Vorgang '{activity}' ist durch {constraint} auf den {date} festgelegt, die Vorgänger erlauben ihn aber erst {days} Tage später.",
+      "suggestion": "Das Einschränkungsdatum verschieben, die Vorgängerkette verkürzen oder die negative Pufferzeit akzeptieren."
     }
   },
   "sheet_completeness": {

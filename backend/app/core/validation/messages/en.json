@@ -703,6 +703,14 @@
     "dates_match_source": {
       "fail": "{activity} finishes {days} days away from the finish in the imported file ({source}).",
       "suggestion": "Compare the recalculated dates with the source file, then accept them or restore the source dates."
+    },
+    "constraint_date_missing": {
+      "fail": "Activity '{activity}' has the constraint {constraint} but no constraint date, so the constraint is ignored.",
+      "suggestion": "Enter the constraint date, or clear the constraint."
+    },
+    "constraint_conflict": {
+      "fail": "Activity '{activity}' is constrained by {constraint} to {date}, but its predecessors allow it only {days} days later.",
+      "suggestion": "Move the constraint date, shorten the predecessor chain, or accept the negative float."
     }
   },
   "sheet_completeness": {
