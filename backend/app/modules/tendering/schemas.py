@@ -287,6 +287,9 @@ class BidComparisonRow(BaseModel):
     # line, so a reader can tell a missing price from one quoted at zero (an
     # unpriced entry carries ``unit_rate`` and ``total`` null, not 0).
     bids: list[dict[str, Any]] = Field(default_factory=list)
+    # GAEB ``Provis`` flag of the bill line (``WithoutTotal`` / ``WithTotal``),
+    # empty for a normal item. A ``WithoutTotal`` line is not in any total.
+    provis: str = ""
 
     @field_serializer("budget_rate", "budget_total", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
@@ -304,6 +307,9 @@ class BidComparisonResponse(BaseModel):
     bid_count: int = 0
     bid_companies: list[str] = Field(default_factory=list)
     budget_total: Decimal = Decimal("0")
+    # Budget of the Bedarfspositionen ohne Gesamtbetrag, shown apart from
+    # ``budget_total`` which never includes them.
+    budget_provis_total: Decimal = Decimal("0")
     rows: list[BidComparisonRow] = Field(default_factory=list)
     bid_totals: list[dict[str, Any]] = Field(default_factory=list)
     # Tender BOQ revision bidders must price and the number of published addenda;
@@ -311,7 +317,7 @@ class BidComparisonResponse(BaseModel):
     current_boq_revision: int = 0
     published_addenda: int = 0
 
-    @field_serializer("budget_total", when_used="json")
+    @field_serializer("budget_total", "budget_provis_total", when_used="json")
     def _ser_budget_total(self, v: Decimal) -> str | None:
         return _serialise_money(v)
 

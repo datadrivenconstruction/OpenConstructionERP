@@ -50155,6 +50155,9 @@ const resource = {
     "boq.recurring_apply": "Aplicar a todas",
     "boq.recurring_applied": "Precio aplicado: {{updated}}. Sin cambios: {{unchanged}}",
     "boq.recurring_bad_rate": "Introduzca un precio unitario de 0 o más.",
+    "boq.provis_badge": "Eventual",
+    "boq.provis_without_total_tip": "Partida eventual sin total: valorada, pero no se suma a ningún total.",
+    "boq.provis_with_total_tip": "Partida eventual con total: se suma a los totales.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

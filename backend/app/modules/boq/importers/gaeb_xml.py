@@ -83,7 +83,7 @@ _MAX_LONG_TEXT_CHARS = 20000
 # Item carries is reported on the exchange fidelity report, never dropped
 # silently. Price components are reported as a dropped attribute because they
 # hold the line's cost build-up; everything else as an unread element.
-_READ_ITEM_TAGS: frozenset[str] = frozenset({"Qty", "QU", "UP", "IT", "Description", "Provis"})
+_READ_ITEM_TAGS: frozenset[str] = frozenset({"Qty", "QU", "UP", "IT", "Description", "Provis", "CtlgAssign"})
 _PRICE_COMPONENT_TAGS: frozenset[str] = frozenset({"UPComps", "UPBkdn"})
 _ATTACHMENT_TAGS: frozenset[str] = frozenset({"Attachment", "Image", "Picture"})
 
@@ -222,48 +222,130 @@ def _extract_descr_txc(item: ET.Element) -> dict[str, Any] | None:
     return None
 
 
-def _extract_long_text(item: ET.Element) -> str:
-    """Pull the human-readable long text (Langtext) from an item.
+def _paragraph_lines(node: ET.Element) -> list[str]:
+    """Render one ``<p>`` to its lines: ``<br/>`` breaks, spans are joined."""
+    lines: list[list[str]] = [[]]
 
-    Reads the FIRST ``Description / CompleteText / DetailTxt / Text`` block
-    and joins its paragraphs cleanly, dropping annotation markers. This
-    replaces the old ``itertext()`` concatenation that fused quantity, unit,
-    UP, IT, Provis flags and Remark text into one polluted string
-    (FA-STD-033). Returns ``""`` when the item carries no Text block (an
-    X84 priced line legitimately omits the description).
-    """
+    def _walk(el: ET.Element) -> None:
+        # Only paragraph and span text is prose; an inline image carries its
+        # base64 payload as element text and must never reach the description.
+        if el.text and el.text.strip() and (el is node or _local(el.tag) == "span"):
+            lines[-1].append(el.text.strip())
+        for child in el:
+            if _local(child.tag) == "br":
+                lines.append([])
+            else:
+                _walk(child)
+            if child.tail and child.tail.strip():
+                lines[-1].append(child.tail.strip())
+
+    _walk(node)
+    return [" ".join(" ".join(parts).split()) for parts in lines]
+
+
+def _complement_text(node: ET.Element | None) -> str:
+    """Plain text of a ``ComplCaption`` / ``ComplBody`` / ``ComplTail``."""
+    if node is None:
+        return ""
+    return " ".join(" ".join(line for line in _paragraph_lines(node) if line).split())
+
+
+def _detail_container(item: ET.Element) -> ET.Element | None:
+    """The ``DetailTxt`` (or bare ``Text`` holder) carrying the Langtext."""
     desc = _find_child(item, "Description")
-    text_node: ET.Element | None = None
     if desc is not None:
         complete = _find_child(desc, "CompleteText")
         container = complete if complete is not None else desc
         detail = _find_child(container, "DetailTxt")
-        text_node = _find_child(detail, "Text") if detail is not None else None
-        if text_node is None:
-            text_node = _find_child(container, "Text")
-    if text_node is None:
-        # Some toolchains place <Text> directly under the item.
-        text_node = _find_child(item, "Text")
+        if detail is not None:
+            return detail
+        if _find_child(container, "Text") is not None:
+            return container
+    if _find_child(item, "Text") is not None:
+        return item
+    return None
 
-    if text_node is not None:
-        paragraphs: list[str] = []
-        # The text node may itself hold <p> children, or be a flat <span>
-        # run / bare string.
-        p_nodes = [c for c in text_node if _local(c.tag) == "p"]
-        sources = p_nodes if p_nodes else [text_node]
-        for p in sources:
-            line = _paragraph_text(p)
-            if not line:
-                continue
-            if line.strip().lower() in _TEXT_NOISE_MARKERS:
-                continue
-            # Our own AI-origin marker line is provenance, not Langtext.
-            if line.strip().startswith(AI_MARK_TEXT_PREFIX):
-                continue
-            paragraphs.append(line)
-        if paragraphs:
-            return "\n".join(paragraphs)
-    return ""
+
+def _extract_text_complements(item: ET.Element) -> list[dict[str, str]]:
+    """The ``TextComplement`` placeholders of a Langtext, in document order.
+
+    ``Kind`` is ``Owner`` (filled by the issuer) or ``Bidder`` (a blank the
+    bidder fills in); the body is the filled value either way.
+    """
+    detail = _detail_container(item)
+    if detail is None:
+        return []
+    out: list[dict[str, str]] = []
+    for child in detail:
+        if _local(child.tag) != "TextComplement":
+            continue
+        out.append(
+            {
+                "mark": (child.get("MarkLbl") or "").strip(),
+                "kind": (child.get("Kind") or "").strip(),
+                "caption": _complement_text(_find_child(child, "ComplCaption")),
+                "body": _complement_text(_find_child(child, "ComplBody")),
+                "tail": _complement_text(_find_child(child, "ComplTail")),
+            }
+        )
+    return out
+
+
+def _extract_long_text(item: ET.Element) -> str:
+    """Pull the full Langtext of an item as plain text with line breaks.
+
+    Walks every ``Text`` and ``TextComplement`` child of ``DetailTxt`` in
+    document order. A complement continues the current line (caption, body,
+    tail), each ``<p>`` ends its line unless a complement follows directly,
+    and ``<br/>`` breaks a line. Position-type marker paragraphs are dropped.
+    Returns ``""`` when the item carries no text (an X84 priced line may
+    legitimately omit it).
+    """
+    detail = _detail_container(item)
+    if detail is None:
+        return ""
+    lines: list[str] = []
+    current: list[str] = []
+
+    def _close() -> None:
+        line = " ".join(" ".join(current).split())
+        current.clear()
+        # Our own AI-origin marker line is provenance, not Langtext.
+        if line and line.lower() not in _TEXT_NOISE_MARKERS and not line.startswith(AI_MARK_TEXT_PREFIX):
+            lines.append(line)
+
+    children = list(detail)
+    for idx, child in enumerate(children):
+        tag = _local(child.tag)
+        if tag == "TextComplement":
+            for part in ("ComplCaption", "ComplBody", "ComplTail"):
+                text = _complement_text(_find_child(child, part))
+                if text:
+                    current.append(text)
+            continue
+        if tag != "Text":
+            continue
+        next_is_complement = idx + 1 < len(children) and _local(children[idx + 1].tag) == "TextComplement"
+        paragraphs = [c for c in child if _local(c.tag) == "p"]
+        if not paragraphs:
+            sub = _paragraph_lines(child)
+            for line_idx, line in enumerate(sub):
+                if line:
+                    current.append(line)
+                if line_idx < len(sub) - 1 or not next_is_complement or not line:
+                    _close()
+            continue
+        for p_idx, p in enumerate(paragraphs):
+            sub = _paragraph_lines(p)
+            last_p = p_idx == len(paragraphs) - 1
+            for line_idx, line in enumerate(sub):
+                if line:
+                    current.append(line)
+                # An empty paragraph is a line break even before a complement.
+                if not (last_p and line_idx == len(sub) - 1 and next_is_complement and line):
+                    _close()
+    _close()
+    return "\n".join(lines)
 
 
 def _label_text(node: ET.Element | None) -> str:
@@ -281,16 +363,22 @@ def _label_text(node: ET.Element | None) -> str:
 
 def _extract_short_text(item: ET.Element) -> str:
     """Pull the Kurztext (short label) from ``OutlineText / OutlTxt`` or
-    a category's ``LblTx``. Handles bare-text and nested ``<p><span>``."""
+    a category's ``LblTx``. ``OutlineText`` may sit under ``Description``,
+    under ``Description / CompleteText`` (the usual 3.x place) or on the item.
+    Handles bare-text and nested ``<p><span>``."""
     desc = _find_child(item, "Description")
-    for container in (desc, item):
+    complete = _find_child(desc, "CompleteText") if desc is not None else None
+    for container in (complete, desc, item):
         if container is None:
             continue
         outline = _find_child(container, "OutlineText")
         if outline is not None:
             txt = _find_child(outline, "OutlTxt")
             target = txt if txt is not None else outline
-            line = _label_text(_find_child(target, "Text") or target)
+            inner = _find_child(target, "TextOutlTxt")
+            if inner is None:
+                inner = _find_child(target, "Text")
+            line = _label_text(inner if inner is not None else target)
             if line:
                 return line
         for name in ("OutlTxt", "LblTx"):
@@ -397,22 +485,117 @@ def _build_oz(rno_parts: list[str], rno_index: str, lengths: list[str]) -> str:
     """Compose the full OZ from the RNoPart chain plus optional RNoIndex.
 
     ``rno_parts`` is the ordered list of ``RNoPart`` values from the
-    enclosing BoQCtgy chain down to the item. They are joined with ``.`` and
-    the index (if any) is appended as ``.<index>`` (Fachdok 3.x OZ display).
-    Already-padded parts pass through unchanged; un-padded parts are padded
-    to the matching mask width when available.
+    enclosing BoQCtgy chain down to the item, joined with ``.``; the index
+    (if any) is appended as ``.<index>``. Parts are kept exactly as written:
+    the OZ-Maske widths are display hints, and the issuer's own references
+    (texts, PDFs, the returned bid) use the OZ as it stands in the file.
+    ``lengths`` is accepted for signature stability and not used to pad.
     """
-    padded: list[str] = []
-    for depth, part in enumerate(rno_parts):
-        width_str = lengths[depth] if depth < len(lengths) else ""
-        if part.isdigit() and width_str.isdigit():
-            padded.append(part.zfill(int(width_str)))
-        else:
-            padded.append(part)
-    oz = ".".join(p for p in padded if p)
+    del lengths
+    oz = ".".join(p for p in rno_parts if p)
     if rno_index:
         oz = f"{oz}.{rno_index}" if oz else rno_index
     return oz
+
+
+def _catalogue_table(root: ET.Element) -> dict[str, dict[str, str]]:
+    """``CtlgID`` -> ``{name, type}`` from every ``Ctlg`` the file declares."""
+    table: dict[str, dict[str, str]] = {}
+    for ctlg in _find_all_descendants(root, "Ctlg"):
+        ctlg_id = _text_of(ctlg, "CtlgID")
+        if ctlg_id:
+            table[ctlg_id] = {"name": _text_of(ctlg, "CtlgName"), "type": _text_of(ctlg, "CtlgType")}
+    return table
+
+
+def _is_din276_catalogue(name: str) -> bool:
+    """Whether a catalogue name designates the DIN 276 cost groups."""
+    compact = re.sub(r"[\s_-]", "", name or "").lower()
+    return compact.startswith("din276")
+
+
+def _catalogue_assignments(node: ET.Element, table: dict[str, dict[str, str]]) -> list[dict[str, str]]:
+    """The ``CtlgAssign`` children of an item or category, resolved by name."""
+    out: list[dict[str, str]] = []
+    for child in node:
+        if _local(child.tag) != "CtlgAssign":
+            continue
+        ctlg_id = _text_of(child, "CtlgID")
+        code = _text_of(child, "CtlgCode")
+        if not code:
+            continue
+        info = table.get(ctlg_id, {})
+        out.append({"ctlg_id": ctlg_id, "name": info.get("name", ""), "type": info.get("type", ""), "code": code})
+    return out
+
+
+def _rich_text(node: ET.Element | None) -> str:
+    """Plain text of a rich-text block (``p`` paragraphs), one line per paragraph."""
+    if node is None:
+        return ""
+    paragraphs = [c for c in node if _local(c.tag) == "p"]
+    lines: list[str] = []
+    for p in paragraphs or [node]:
+        lines.extend(_paragraph_lines(p))
+    return "\n".join(line for line in lines if line)
+
+
+def _extract_header(root: ET.Element, award: ET.Element | None) -> dict[str, Any]:
+    """Project and award header of the file: what a tender is about and when.
+
+    Keys are only present when the file states them.
+    """
+    header: dict[str, Any] = {}
+    prj = _find_child(root, "PrjInfo")
+    if prj is not None:
+        for key, tag in (("project_number", "NamePrj"), ("project_label", "LblPrj")):
+            val = _text_of(prj, tag)
+            if val:
+                header[key] = val
+    if award is not None:
+        info = _find_child(award, "AwardInfo")
+        if info is not None:
+            for key, tag in (
+                ("award_category", "Cat"),
+                ("submission_date", "OpenDate"),
+                ("submission_time", "OpenTime"),
+                ("submission_place", "SubmLoc"),
+                ("construction_start", "CnstStart"),
+                ("construction_end", "CnstEnd"),
+            ):
+                val = _text_of(info, tag)
+                if val:
+                    header[key] = val
+        own = _find_child(award, "OWN")
+        address = _find_child(own, "Address") if own is not None else None
+        if address is not None:
+            owner = {
+                tag: _text_of(address, tag)
+                for tag in ("Name1", "Name2", "Street", "PCode", "City", "Country")
+                if _text_of(address, tag)
+            }
+            if owner:
+                header["owner"] = owner
+        add_texts: list[dict[str, str]] = []
+        for add in award:
+            if _local(add.tag) != "AddText":
+                continue
+            entry = {
+                "outline": _rich_text(_find_child(add, "OutlineAddText")),
+                "detail": _rich_text(_find_child(add, "DetailAddText")),
+            }
+            if entry["outline"] or entry["detail"]:
+                add_texts.append(entry)
+        if add_texts:
+            header["add_texts"] = add_texts
+    for el in root.iter():
+        if _local(el.tag) == "BoQInfo":
+            for key, tag in (("boq_name", "Name"), ("boq_label", "LblBoQ")):
+                val = _text_of(el, tag)
+                if val:
+                    header[key] = val
+            break
+    return header
 
 
 class GAEBXMLImporter:
@@ -526,6 +709,10 @@ class GAEBXMLImporter:
                     award_meta[field_name] = val
 
         result = ImportedBOQ(source_format="gaeb", currency=currency)
+        catalogues = _catalogue_table(root)
+        header = _extract_header(root, award)
+        remark_count = sum(1 for el in root.iter() if _local(el.tag) == "Remark")
+        remarks: list[dict[str, str]] = []
 
         # Walk the BoQCtgy tree, emitting section header rows that mirror the
         # LV hierarchy and item rows underneath. ``rno_chain`` accumulates the
@@ -666,6 +853,20 @@ class GAEBXMLImporter:
             provis = _text_of(item, "Provis").strip()
             if provis:
                 metadata["gaeb_provis"] = provis
+            source_id = (item.get("ID") or "").strip()
+            if source_id:
+                metadata["gaeb_id"] = source_id
+            if rno_part:
+                metadata["gaeb_rno_parts"] = [*rno_chain, rno_part]
+            assignments = _catalogue_assignments(item, catalogues)
+            if assignments:
+                metadata["gaeb_ctlg_assign"] = assignments
+                for entry in assignments:
+                    if _is_din276_catalogue(entry["name"]) and "din276" not in classification:
+                        classification["din276"] = entry["code"]
+            complements = _extract_text_complements(item)
+            if complements:
+                metadata["gaeb_text_complements"] = complements
             if up_dec is not None:
                 metadata["gaeb_up"] = str(up_dec)
             if it_dec is not None:
@@ -759,6 +960,13 @@ class GAEBXMLImporter:
                                 "gaeb_ordinal": child_oz,
                                 "gaeb_da_kind": da_kind,
                                 "gaeb_is_section": True,
+                                **({"gaeb_id": child.get("ID").strip()} if (child.get("ID") or "").strip() else {}),
+                                **({"gaeb_rno_parts": child_chain} if child.get("RNoPart") else {}),
+                                **(
+                                    {"gaeb_ctlg_assign": ctgy_assign}
+                                    if (ctgy_assign := _catalogue_assignments(child, catalogues))
+                                    else {}
+                                ),
                             },
                         )
                     )
@@ -780,8 +988,15 @@ class GAEBXMLImporter:
                     _emit_markup(child, rno_chain)
                 elif tag == "BoQBody":
                     _walk(child, rno_chain, section_oz)
+                elif tag == "Remark":
+                    # Vorbemerkung: kept with the section it opens.
+                    text = _extract_long_text(child)
+                    if text:
+                        remarks.append({"section": section_oz, "id": (child.get("ID") or "").strip(), "text": text})
 
         _walk(top_body, [], "")
+        if remarks:
+            header["remarks"] = remarks
 
         attachments = sum(1 for el in root.iter() if _local(el.tag) in _ATTACHMENT_TAGS)
         if attachments:
@@ -821,5 +1036,8 @@ class GAEBXMLImporter:
             # OZ-Maske level widths so downstream validation checks the OZ
             # against the file's real mask instead of a single hardcoded shape.
             "gaeb_oz_mask": oz_mask_widths,
+            "gaeb_header": header,
+            "gaeb_catalogues": catalogues,
+            "remark_count": remark_count,
         }
         return result

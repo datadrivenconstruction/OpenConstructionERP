@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Position {ordinal}: Menge {quantity} hat {decimals} Nachkommastellen - GAEB X83 erlaubt maximal 3",
       "suggestion": "Menge auf maximal 3 Nachkommastellen runden gemäß GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Position {ordinal} ist eine Bedarfsposition ohne Gesamtbetrag: der Betrag {total} wird angezeigt, aber in keine Summe eingerechnet",
+      "suggestion": "Bei Abruf gesondert beauftragen; nach GAEB bleibt sie außerhalb der Angebotssumme"
+    },
+    "ordinal_changed": {
+      "fail": "Position {ordinal}: OZ gegenüber der Quelldatei geändert ({source}) - der Auftraggeber ordnet das Angebot über die OZ zu",
+      "suggestion": "Ursprüngliche OZ wiederherstellen, damit Angebot und Textverweise des Auftraggebers zusammenpassen"
+    },
+    "unit_exportable": {
+      "fail": "Position {ordinal}: Einheit '{unit}' passt nicht in das 4-stellige GAEB-Feld QU und würde beim Export gekürzt",
+      "suggestion": "GAEB-Einheit mit höchstens 4 Zeichen verwenden (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

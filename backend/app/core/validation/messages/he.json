@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "סעיף {ordinal}: בכמות {quantity} יש {decimals} ספרות אחרי הנקודה; מוסכמת GAEB X83 מגבילה ל-3",
       "suggestion": "יש לעגל את הכמות ל-3 ספרות אחרי הנקודה לכל היותר לפי GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "סעיף {ordinal} הוא סעיף אופציונלי ללא סכום: הסכום {total} מוצג אך אינו נכלל באף סיכום",
+      "suggestion": "יש להזמין אותו בנפרד אם המזמין מפעיל אותו; לפי GAEB הוא נשאר מחוץ לסכום ההצעה"
+    },
+    "ordinal_changed": {
+      "fail": "סעיף {ordinal}: מספר OZ שונה מקובץ המקור ({source}); המזמין מתאים את ההצעה לפי OZ",
+      "suggestion": "החזירו את מספר OZ המקורי כדי שההצעה והפניות המזמין יתאימו"
+    },
+    "unit_exportable": {
+      "fail": "סעיף {ordinal}: היחידה '{unit}' אינה נכנסת לשדה GAEB QU בן 4 התווים ותיחתך בייצוא",
+      "suggestion": "השתמשו בקוד יחידה GAEB של עד 4 תווים (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

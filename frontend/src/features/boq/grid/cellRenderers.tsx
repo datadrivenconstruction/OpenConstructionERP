@@ -1317,8 +1317,30 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     </span>
   ) : null;
 
+  // GAEB Bedarfsposition: labelled so nobody reads its amount as part of the total.
+  const provis = typeof meta.gaeb_provis === 'string' ? meta.gaeb_provis.trim().toLowerCase() : '';
+  const provisChip =
+    provis === 'withouttotal' || provis === 'withtotal' ? (
+      <span
+        className="shrink-0 inline-flex items-center rounded text-[10px] font-medium px-1 py-0.5
+                   bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 cursor-help"
+        title={
+          provis === 'withouttotal'
+            ? t('boq.provis_without_total_tip', {
+                defaultValue: 'Bedarfsposition without total: priced, but not counted in any total.',
+              })
+            : t('boq.provis_with_total_tip', {
+                defaultValue: 'Bedarfsposition with total: counted in the totals.',
+              })
+        }
+        data-testid="boq-provis-chip"
+      >
+        {t('boq.provis_badge', { defaultValue: 'Optional' })}
+      </span>
+    ) : null;
+
   if (!hasVariant && !hasDefault) {
-    if (!variantIconButton && !scopeHint && !breakdownPill && !provenanceChip) {
+    if (!variantIconButton && !scopeHint && !breakdownPill && !provenanceChip && !provisChip) {
       return descMultiline ? (
         <span className="block w-full whitespace-pre-wrap break-words leading-snug overflow-y-auto max-h-full">
           {displayValue}
@@ -1333,7 +1355,9 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         <span className={descTextCls}>{displayValue}</span>
         {scopeHint}
         {breakdownPill}
-        {provenanceChip}
+        {provisChip}
+        {provisChip}
+      {provenanceChip}
       </span>
     );
   }
@@ -1360,7 +1384,9 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         <span className={descTextCls}>{displayValue}</span>
         {scopeHint}
         {breakdownPill}
-        {provenanceChip}
+        {provisChip}
+        {provisChip}
+      {provenanceChip}
       </span>
     );
   }
@@ -1390,6 +1416,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
       <span className="truncate min-w-0">{displayValue}</span>
       {scopeHint}
       {breakdownPill}
+      {provisChip}
       {provenanceChip}
       <span
         className="shrink-0 inline-flex items-center gap-1 rounded

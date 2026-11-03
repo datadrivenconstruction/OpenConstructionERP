@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Item {ordinal}: kuantitas {quantity} memiliki {decimals} angka desimal; konvensi GAEB X83 membatasi hingga 3",
       "suggestion": "Bulatkan kuantitas hingga paling banyak 3 angka desimal sesuai GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Item {ordinal} adalah item cadangan tanpa total: jumlah {total} ditampilkan tetapi tidak dihitung dalam total mana pun",
+      "suggestion": "Berikan terpisah jika pemberi kerja memanggilnya; menurut GAEB item ini di luar nilai penawaran"
+    },
+    "ordinal_changed": {
+      "fail": "Item {ordinal}: OZ berubah dari file sumber ({source}); pemberi kerja mencocokkan penawaran berdasarkan OZ",
+      "suggestion": "Pulihkan OZ asli agar penawaran dan rujukan pemberi kerja cocok"
+    },
+    "unit_exportable": {
+      "fail": "Item {ordinal}: satuan '{unit}' tidak muat di kolom GAEB QU 4 karakter dan akan terpotong saat ekspor",
+      "suggestion": "Gunakan kode satuan GAEB maksimal 4 karakter (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

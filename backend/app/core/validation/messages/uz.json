@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "{ordinal} pozitsiyasi: {quantity} miqdorida {decimals} kasr xonasi bor; GAEB X83 qoidasi 3 tagacha ruxsat beradi",
       "suggestion": "GAEB X83 boʻyicha miqdorni koʻpi bilan 3 kasr xonasigacha yaxlitlang"
+    },
+    "provis_without_total": {
+      "fail": "{ordinal} pozitsiyasi umumiy summasiz ehtiyoj pozitsiyasi: {total} summasi ko'rsatiladi, lekin hech bir jamiga qo'shilmaydi",
+      "suggestion": "Buyurtmachi chaqirsa, alohida topshiring; GAEB bo'yicha u taklif summasidan tashqarida qoladi"
+    },
+    "ordinal_changed": {
+      "fail": "{ordinal} pozitsiyasi: OZ manba fayliga nisbatan o'zgargan ({source}); buyurtmachi taklifni OZ bo'yicha moslaydi",
+      "suggestion": "Taklif va buyurtmachi havolalari mos kelishi uchun asl OZ ni tiklang"
+    },
+    "unit_exportable": {
+      "fail": "{ordinal} pozitsiyasi: '{unit}' birligi 4 belgili GAEB QU maydoniga sig'maydi va eksportda qisqartiriladi",
+      "suggestion": "Ko'pi bilan 4 belgili GAEB birlik kodidan foydalaning (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

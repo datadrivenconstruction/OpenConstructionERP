@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Poste {ordinal} : la quantité {quantity} comporte {decimals} décimales ; la convention GAEB X83 en autorise au maximum 3",
       "suggestion": "Arrondissez la quantité à 3 décimales au maximum conformément à GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "La position {ordinal} est une position éventuelle sans total : son montant {total} est affiché mais n'entre dans aucun total",
+      "suggestion": "Commandez-la séparément si le client la déclenche ; selon GAEB elle reste hors du montant de l'offre"
+    },
+    "ordinal_changed": {
+      "fail": "Position {ordinal} : OZ modifié par rapport au fichier source ({source}) - le client rapproche l'offre par OZ",
+      "suggestion": "Rétablissez l'OZ d'origine pour que l'offre et les renvois du client correspondent"
+    },
+    "unit_exportable": {
+      "fail": "Position {ordinal} : l'unité '{unit}' dépasse les 4 caractères du champ GAEB QU et serait tronquée à l'export",
+      "suggestion": "Utilisez un code d'unité GAEB de 4 caractères au plus (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

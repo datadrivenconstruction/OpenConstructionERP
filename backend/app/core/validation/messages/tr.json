@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "{ordinal} pozu: {quantity} miktarında {decimals} ondalık basamak var; GAEB X83 kuralı 3 ile sınırlar",
       "suggestion": "GAEB X83'e göre miktarı en fazla 3 ondalık basamağa yuvarlayın"
+    },
+    "provis_without_total": {
+      "fail": "{ordinal} kalemi toplamsız bir ihtiyaç kalemidir: {total} tutarı gösterilir ancak hiçbir toplama dahil edilmez",
+      "suggestion": "İşveren çağırırsa ayrıca ihale edin; GAEB'e göre teklif toplamının dışında kalır"
+    },
+    "ordinal_changed": {
+      "fail": "{ordinal} kalemi: OZ kaynak dosyaya göre değişti ({source}); işveren teklifi OZ ile eşleştirir",
+      "suggestion": "Teklif ve işverenin atıfları uyuşsun diye özgün OZ'yi geri yükleyin"
+    },
+    "unit_exportable": {
+      "fail": "{ordinal} kalemi: '{unit}' birimi 4 karakterlik GAEB QU alanına sığmaz ve dışa aktarımda kesilir",
+      "suggestion": "En fazla 4 karakterlik bir GAEB birim kodu kullanın (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

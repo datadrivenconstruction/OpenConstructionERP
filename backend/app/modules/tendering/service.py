@@ -811,8 +811,11 @@ class TenderingService:
             budget_positions = []
 
         # Build position map from BOQ (exact Decimal arithmetic).
+        from app.modules.boq.gaeb_common import is_excluded_from_total, provis_kind
+
         position_map: dict[str, dict] = {}
         budget_total = Decimal("0")
+        budget_provis_total = Decimal("0")
         for pos in budget_positions:
             pid = str(pos.id)
             qty = _to_decimal(pos.quantity)
@@ -827,8 +830,12 @@ class TenderingService:
                 "total": total,
                 "ordinal": pos.ordinal or "",
                 "is_line": _is_bill_line(pos),
+                "provis": provis_kind(pos),
             }
-            budget_total += total
+            if is_excluded_from_total(pos):
+                budget_provis_total += total
+            else:
+                budget_total += total
 
         # Index each bid's line items by position_id once → comparison is
         # O(positions·bids + bids·line_items) instead of the previous
@@ -875,6 +882,7 @@ class TenderingService:
         # of ``total_lines``) over the lines the bidders were sent.
         line_count = 0
         priced_lines: dict[str, int] = {str(b.id): 0 for b in bids}
+        provis_by_bid: dict[str, Decimal] = {str(b.id): Decimal("0") for b in bids}
         for pid, pdata in position_map.items():
             bid_entries = []
             budget_rate: Decimal = pdata["unit_rate"]
@@ -892,6 +900,8 @@ class TenderingService:
                         priced_lines[str(bid.id)] += 1
                     bid_rate = _to_decimal(matching.get("unit_rate", 0))
                     bid_total = _to_decimal(matching.get("total", 0))
+                    if pdata["provis"].lower() == "withouttotal":
+                        provis_by_bid[str(bid.id)] += bid_total
                     if budget_rate > 0 and _same_currency(bid):
                         deviation = (bid_rate - budget_rate) / budget_rate * Decimal("100")
                         dev_val = round(float(deviation), 1)
@@ -929,6 +939,7 @@ class TenderingService:
                     budget_rate=_round2(budget_rate),
                     budget_total=_round2(pdata["total"]),
                     bids=bid_entries,
+                    provis=pdata["provis"],
                 )
             )
 
@@ -958,6 +969,8 @@ class TenderingService:
                     "status": bid.status,
                     "matched_lines": priced_lines[str(bid.id)],
                     "total_lines": line_count,
+                    # Priced Bedarfspositionen ohne Gesamtbetrag, shown apart.
+                    "provis_total": _round2(provis_by_bid[str(bid.id)]),
                     **compliance.get(str(bid.id), {}),
                 }
             )
@@ -968,6 +981,7 @@ class TenderingService:
             bid_count=len(bids),
             bid_companies=[b.company_name for b in bids],
             budget_total=_round2(budget_total),
+            budget_provis_total=_round2(budget_provis_total),
             rows=rows,
             bid_totals=bid_totals,
             current_boq_revision=addenda_logic.current_boq_revision(package.metadata_),

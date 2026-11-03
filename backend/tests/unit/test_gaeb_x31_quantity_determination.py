@@ -94,22 +94,22 @@ def test_export_then_import_preserves_every_quantity_per_oz() -> None:
     assert all(row["matched_via"] == "ordinal" for row in matched.values())
 
 
-def test_round_trip_survives_the_importers_zero_padding() -> None:
-    """``1.10`` is written under a mask; the reader pads it; the matcher still finds it."""
+def test_round_trip_keeps_the_oz_as_written() -> None:
+    """``1.10`` is written under a mask and read back exactly; the matcher finds it by ordinal."""
     exported = build_x31_xml(
         [("1.10", Decimal("5")), ("1.200", Decimal("6")), ("12.3", Decimal("7"))],
         boq_name="LV",
         project_name="P",
     )
     parsed = parse_x31(exported.xml.encode("utf-8"))
-    # The reader pads numeric parts to the mask widths (2 and 3).
-    assert sorted(i.oz for i in parsed.items) == ["01.010", "01.200", "12.003"]
+    # The mask widths are display hints; the reader never pads the OZ.
+    assert sorted(i.oz for i in parsed.items) == ["1.10", "1.200", "12.3"]
     positions = [_pos("1.10"), _pos("1.200"), _pos("12.3")]
     proposal = propose_x31(parsed, positions, is_section=_is_section)
     assert proposal["unmatched"] == []
     by_ordinal = {row["ordinal"]: Decimal(row["proposed_quantity"]) for row in proposal["matched"]}
     assert by_ordinal == {"1.10": Decimal("5"), "1.200": Decimal("6"), "12.3": Decimal("7")}
-    assert {row["matched_via"] for row in proposal["matched"]} == {"normalized"}
+    assert {row["matched_via"] for row in proposal["matched"]} == {"ordinal"}
 
 
 def test_quantity_is_written_with_three_decimals() -> None:

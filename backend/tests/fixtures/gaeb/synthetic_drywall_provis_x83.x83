@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
+ <GAEBInfo>
+  <Version>3.1</Version>
+  <VersDate>2009-12</VersDate>
+  <Date>2026-10-01</Date>
+  <ProgSystem>Synthetic</ProgSystem>
+  <ProgName>Synthetic</ProgName>
+ </GAEBInfo>
+ <PrjInfo>
+  <NamePrj>4711</NamePrj>
+  <LblPrj>Musterstadt, Neubau Lagerhalle</LblPrj>
+  <Cur>EUR</Cur>
+ </PrjInfo>
+ <Award>
+  <DP>83</DP>
+  <AwardInfo>
+   <Cat>SelectCall</Cat>
+   <Cur>EUR</Cur>
+   <OpenDate>2026-12-01</OpenDate>
+   <OpenTime>10:00:00</OpenTime>
+   <SubmLoc>Musterbau GmbH, Hauptstrasse 1, 12345 Musterstadt</SubmLoc>
+   <CnstStart>2027-03-01</CnstStart>
+   <CnstEnd>2027-08-31</CnstEnd>
+  </AwardInfo>
+  <OWN>
+   <Address>
+    <Name1>Muster Immobilien GmbH</Name1>
+    <City>Musterstadt</City>
+   </Address>
+  </OWN>
+  <AddText>
+   <OutlineAddText><p><span>Besondere Vertragsbedingungen</span></p></OutlineAddText>
+   <DetailAddText>
+    <p><span>Die Bindefrist betraegt 30 Kalendertage.</span></p>
+    <p><span>Zahlung nach VOB/B.</span></p>
+   </DetailAddText>
+  </AddText>
+  <BoQ ID="B1">
+   <BoQInfo>
+    <Name>4711-39</Name>
+    <LblBoQ>Trockenbauarbeiten</LblBoQ>
+    <BoQBkdn><Type>BoQLevel</Type><Length>2</Length><Num>Yes</Num></BoQBkdn>
+    <BoQBkdn><Type>BoQLevel</Type><Length>2</Length><Num>Yes</Num></BoQBkdn>
+    <BoQBkdn><Type>BoQLevel</Type><Length>2</Length><Num>Yes</Num></BoQBkdn>
+    <BoQBkdn><Type>Item</Type><Length>2</Length><Num>Yes</Num></BoQBkdn>
+    <BoQBkdn><Type>Index</Type><Length>1</Length><Num>No</Num></BoQBkdn>
+    <Ctlg><CtlgID>C_KOA</CtlgID><CtlgType>miscellaneous</CtlgType><CtlgName>KOA Muster</CtlgName></Ctlg>
+    <Ctlg><CtlgID>C_DIN</CtlgID><CtlgType>miscellaneous</CtlgType><CtlgName>DIN276-1_08</CtlgName></Ctlg>
+    <Ctlg><CtlgID>C_LB</CtlgID><CtlgType>work category</CtlgType><CtlgName>Leistungsbereichkatalog</CtlgName></Ctlg>
+   </BoQInfo>
+   <BoQBody>
+    <BoQCtgy ID="CT39" RNoPart="39">
+     <LblTx><p><span>Trockenbau</span></p></LblTx>
+     <BoQBody>
+      <Remark ID="RM391">
+       <Description><CompleteText><DetailTxt><Text>
+        <p><span>1. Allgemeines</span><br/><span>Alle Waende bis Rohdecke.</span></p>
+       </Text></DetailTxt></CompleteText></Description>
+      </Remark>
+      <BoQCtgy ID="CT391" RNoPart="1">
+       <LblTx><p><span>Waende</span></p></LblTx>
+       <BoQBody>
+        <BoQCtgy ID="CT3911" RNoPart="1">
+         <LblTx><p><span>Trennwaende</span></p></LblTx>
+         <BoQBody>
+          <Itemlist>
+           <Item ID="IT0001" RNoPart="1">
+            <Qty>120.000</Qty>
+            <QU>m2</QU>
+            <CtlgAssign><CtlgID>C_LB</CtlgID><CtlgCode>039</CtlgCode></CtlgAssign>
+            <CtlgAssign><CtlgID>C_DIN</CtlgID><CtlgCode>342</CtlgCode></CtlgAssign>
+            <CtlgAssign><CtlgID>C_KOA</CtlgID><CtlgCode>900100</CtlgCode></CtlgAssign>
+            <Description>
+             <CompleteText>
+              <DetailTxt>
+               <Text><p><span>Leichte Trennwand </span></p></Text>
+               <TextComplement MarkLbl="1" Kind="Owner">
+                <ComplCaption><span>Bereich </span></ComplCaption>
+                <ComplBody><span>'A'</span></ComplBody>
+                <ComplTail/>
+               </TextComplement>
+               <Text><p/></Text>
+               <TextComplement MarkLbl="2" Kind="Owner">
+                <ComplCaption><span>Dicke </span></ComplCaption>
+                <ComplBody><span>'125'</span></ComplBody>
+                <ComplTail><span> mm</span></ComplTail>
+               </TextComplement>
+               <Text><p/></Text>
+               <TextComplement MarkLbl="3" Kind="Bidder">
+                <ComplCaption><span>Fabrikat </span></ComplCaption>
+                <ComplBody><span>'.....'</span></ComplBody>
+                <ComplTail/>
+               </TextComplement>
+               <Text>
+                <p><span>Zeile eins</span><br/><span>Zeile zwei</span></p>
+               </Text>
+              </DetailTxt>
+              <OutlineText>
+               <OutlTxt><TextOutlTxt><p><span>Staenderwand 125 mm</span></p></TextOutlTxt></OutlTxt>
+              </OutlineText>
+             </CompleteText>
+            </Description>
+           </Item>
+           <Item ID="IT0002" RNoPart="2">
+            <Provis>WithoutTotal</Provis>
+            <Qty>10.000</Qty>
+            <QU>St</QU>
+            <Description>
+             <CompleteText>
+              <DetailTxt><Text><p><span>Zulage Pos. 39.1.1.1 fuer Tueroeffnung</span></p></Text></DetailTxt>
+              <OutlineText><OutlTxt><TextOutlTxt><p><span>Zulage Tueroeffnung</span></p></TextOutlTxt></OutlTxt></OutlineText>
+             </CompleteText>
+            </Description>
+           </Item>
+           <Item ID="IT0003" RNoPart="3">
+            <Provis>WithTotal</Provis>
+            <Qty>8.000</Qty>
+            <QU>h</QU>
+            <Description>
+             <CompleteText>
+              <DetailTxt><Text><p><span>Stundenlohnarbeiten Facharbeiter</span></p></Text></DetailTxt>
+              <OutlineText><OutlTxt><TextOutlTxt><p><span>Stundenlohn Facharbeiter</span></p></TextOutlTxt></OutlTxt></OutlineText>
+             </CompleteText>
+            </Description>
+           </Item>
+          </Itemlist>
+         </BoQBody>
+        </BoQCtgy>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="CT392" RNoPart="2">
+       <LblTx><p><span>Decken</span></p></LblTx>
+       <BoQBody>
+        <BoQCtgy ID="CT3921" RNoPart="1">
+         <LblTx><p><span>Unterdecken</span></p></LblTx>
+         <BoQBody>
+          <Itemlist>
+           <Item ID="IT0004" RNoPart="1">
+            <Qty>45.500</Qty>
+            <QU>m2</QU>
+            <Description>
+             <CompleteText>
+              <DetailTxt><Text><p><span>Abgehaengte Decke aus Mineralfaserplatten</span></p></Text></DetailTxt>
+              <OutlineText><OutlTxt><TextOutlTxt><p><span>Mineralfaserdecke</span></p></TextOutlTxt></OutlTxt></OutlineText>
+             </CompleteText>
+            </Description>
+           </Item>
+          </Itemlist>
+         </BoQBody>
+        </BoQCtgy>
+       </BoQBody>
+      </BoQCtgy>
+     </BoQBody>
+    </BoQCtgy>
+   </BoQBody>
+  </BoQ>
+ </Award>
+</GAEB>

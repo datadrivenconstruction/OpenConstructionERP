@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "清单项 {ordinal}：工程量 {quantity} 有 {decimals} 位小数，GAEB X83 约定最多保留 3 位。",
       "suggestion": "请按 GAEB X83 将工程量四舍五入至最多 3 位小数。"
+    },
+    "provis_without_total": {
+      "fail": "条目 {ordinal} 是不计总额的备选条目：金额 {total} 会显示，但不计入任何合计",
+      "suggestion": "如业主调用请单独委托；按 GAEB 规定它不计入投标总价"
+    },
+    "ordinal_changed": {
+      "fail": "条目 {ordinal}：OZ 与源文件不一致（{source}）；业主按 OZ 匹配投标",
+      "suggestion": "恢复原始 OZ，使投标与业主的文字引用保持一致"
+    },
+    "unit_exportable": {
+      "fail": "条目 {ordinal}：单位“{unit}”超出 GAEB QU 字段的 4 个字符，导出时会被截断",
+      "suggestion": "请使用不超过 4 个字符的 GAEB 单位代码（m、m2、m3、St、h、psch、kg、t）"
     }
   },
   "nrm": {

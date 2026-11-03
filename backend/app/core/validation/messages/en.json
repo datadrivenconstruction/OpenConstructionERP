@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Position {ordinal}: quantity {quantity} has {decimals} decimal places - GAEB X83 convention limits to 3",
       "suggestion": "Round the quantity to at most 3 decimal places per GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Position {ordinal} is a Bedarfsposition without total: its amount {total} is shown but not counted in any total",
+      "suggestion": "Award it separately if the client calls it off; it is kept out of the bid total by GAEB rules"
+    },
+    "ordinal_changed": {
+      "fail": "Position {ordinal}: OZ changed from the source file ({source}) - the client matches the returned bid by OZ",
+      "suggestion": "Restore the original OZ so the returned bid and the client's text references still match"
+    },
+    "unit_exportable": {
+      "fail": "Position {ordinal}: unit '{unit}' does not fit the 4-character GAEB QU field and would be cut on export",
+      "suggestion": "Use a GAEB unit code of at most 4 characters (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Công tác {ordinal}: khối lượng {quantity} có {decimals} chữ số thập phân; quy ước GAEB X83 giới hạn ở 3",
       "suggestion": "Làm tròn khối lượng đến tối đa 3 chữ số thập phân theo GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Hạng mục {ordinal} là hạng mục dự phòng không tính tổng: số tiền {total} được hiển thị nhưng không cộng vào tổng nào",
+      "suggestion": "Giao riêng nếu chủ đầu tư gọi đến; theo GAEB nó nằm ngoài giá dự thầu"
+    },
+    "ordinal_changed": {
+      "fail": "Hạng mục {ordinal}: OZ đã thay đổi so với tệp gốc ({source}); chủ đầu tư đối chiếu hồ sơ dự thầu theo OZ",
+      "suggestion": "Khôi phục OZ gốc để hồ sơ dự thầu và tham chiếu của chủ đầu tư khớp nhau"
+    },
+    "unit_exportable": {
+      "fail": "Hạng mục {ordinal}: đơn vị '{unit}' không vừa trường GAEB QU 4 ký tự và sẽ bị cắt khi xuất",
+      "suggestion": "Dùng mã đơn vị GAEB tối đa 4 ký tự (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Pozycja {ordinal}: ilość {quantity} ma {decimals} miejsc po przecinku — konwencja GAEB X83 dopuszcza najwyżej 3",
       "suggestion": "Zaokrąglij ilość do najwyżej 3 miejsc po przecinku zgodnie z GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Pozycja {ordinal} to pozycja warunkowa bez sumy: kwota {total} jest pokazana, ale nie wchodzi do żadnej sumy",
+      "suggestion": "Zlecaj ją osobno po wywołaniu; według GAEB pozostaje poza sumą oferty"
+    },
+    "ordinal_changed": {
+      "fail": "Pozycja {ordinal}: OZ zmieniony względem pliku źródłowego ({source}); zamawiający dopasowuje ofertę po OZ",
+      "suggestion": "Przywróć pierwotny OZ, aby oferta i odwołania zamawiającego się zgadzały"
+    },
+    "unit_exportable": {
+      "fail": "Pozycja {ordinal}: jednostka '{unit}' nie mieści się w 4-znakowym polu GAEB QU i zostanie obcięta przy eksporcie",
+      "suggestion": "Użyj kodu jednostki GAEB o długości najwyżej 4 znaków (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

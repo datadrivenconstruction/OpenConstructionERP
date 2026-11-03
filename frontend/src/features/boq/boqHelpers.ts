@@ -559,6 +559,26 @@ export function fmtCompact(n: number, fmt: Intl.NumberFormat): string {
   return fmt.format(n);
 }
 
+/** GAEB ``Provis`` flag of a position: ``WithoutTotal``, ``WithTotal`` or ''. */
+export function provisKind(
+  position: { metadata?: Record<string, unknown> | null; metadata_?: Record<string, unknown> | null },
+): string {
+  const meta = position.metadata ?? position.metadata_ ?? {};
+  const raw = (meta as Record<string, unknown>).gaeb_provis;
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+/**
+ * A Bedarfsposition ohne Gesamtbetrag (GAEB ``Provis=WithoutTotal``) is priced
+ * but never counted in a section total or the bill total. Mirrors the server's
+ * ``is_excluded_from_total``.
+ */
+export function isExcludedFromTotal(
+  position: { metadata?: Record<string, unknown> | null; metadata_?: Record<string, unknown> | null },
+): boolean {
+  return provisKind(position).toLowerCase() === 'withouttotal';
+}
+
 /**
  * Format a number with locale-aware currency symbol placement.
  *

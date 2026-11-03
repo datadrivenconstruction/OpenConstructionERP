@@ -1090,7 +1090,11 @@ class GAEBOrdinalFormat(ValidationRule):
             return False
         level_count = min(len(parts), len(mask))
         for part, width in zip(parts[:level_count], mask[:level_count], strict=True):
-            if not part.isdigit() or len(part) != width:
+            # GAEB pads for display only: an unpadded part ("1" under width 2)
+            # is the issuer's own OZ; a padded part of the wrong width is not.
+            if not part.isdigit() or len(part) > width:
+                return False
+            if len(part) < width and part != str(int(part)):
                 return False
         if len(parts) == len(mask) + 1:
             index = parts[-1]
@@ -1468,6 +1472,148 @@ class GAEBQuantityDecimals(ValidationRule):
                     element_ref=pos.get("id"),
                     details={"quantity": str(qty), "decimals": decimals},
                     suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class GAEBProvisWithoutTotal(ValidationRule):
+    """Reports Bedarfspositionen ohne Gesamtbetrag that carry an amount.
+
+    GAEB ``Provis=WithoutTotal`` items are priced but never enter a category
+    total or the Angebotssumme. The bill rollups leave them out; this rule
+    lists each priced one so the estimator sees what sits outside the total.
+    """
+
+    rule_id = "gaeb.provis_without_total"
+    name = "GAEB Bedarfsposition outside the total"
+    standard = "gaeb"
+    severity = Severity.INFO
+    category = RuleCategory.CONSISTENCY
+    description = "Bedarfspositionen without total are priced but kept out of every total."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            meta = _position_metadata(pos)
+            if str(meta.get("gaeb_provis") or "").strip().lower() != "withouttotal":
+                continue
+            try:
+                total = Decimal(str(pos.get("total") or "0"))
+            except (InvalidOperation, ValueError):
+                total = Decimal("0")
+            if total == 0:
+                continue
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "gaeb.provis_without_total.fail",
+                        locale=locale,
+                        ordinal=pos.get("ordinal", "?"),
+                        total=str(total),
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"provis": meta.get("gaeb_provis"), "total": str(total)},
+                    suggestion=translate("gaeb.provis_without_total.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+class GAEBOrdinalChanged(ValidationRule):
+    """Flags a GAEB-imported position whose OZ no longer matches the file.
+
+    The issuer matches a returned bid by OZ and refers to positions by OZ in
+    its own texts. An OZ edited after import breaks both.
+    """
+
+    rule_id = "gaeb.ordinal_changed"
+    name = "GAEB OZ changed against the source file"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "The OZ of an imported GAEB position should stay as the issuer wrote it."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            meta = _position_metadata(pos)
+            source = str(meta.get("gaeb_ordinal") or "").strip()
+            if not source or meta.get("gaeb_is_section"):
+                continue
+            ordinal = str(pos.get("ordinal") or "").strip()
+            passed = ordinal == source
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=_ok(locale)
+                    if passed
+                    else translate("gaeb.ordinal_changed.fail", locale=locale, ordinal=ordinal or "?", source=source),
+                    element_ref=pos.get("id"),
+                    details={"ordinal": ordinal, "source": source},
+                    suggestion=None if passed else translate("gaeb.ordinal_changed.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+class GAEBUnitExportable(ValidationRule):
+    """Flags a unit that cannot be written to a GAEB ``QU`` unchanged.
+
+    ``QU`` holds at most four characters. A unit whose GAEB form is longer is
+    cut on export and comes back as a different unit at the issuer.
+    """
+
+    rule_id = "gaeb.unit_exportable"
+    name = "GAEB unit exportable"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Units should fit the four-character GAEB QU field."
+
+    MAX_QU_CHARS = 4
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.boq.units import to_gaeb_unit_code
+
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            if str(pos.get("type") or "").lower() == "section":
+                continue
+            unit = str(pos.get("unit") or "").strip()
+            if not unit or unit.lower() == "section":
+                continue
+            meta = _position_metadata(pos)
+            original = str(meta.get("gaeb_unit_original") or "").strip()
+            code = original or to_gaeb_unit_code(unit)
+            passed = len(code) <= self.MAX_QU_CHARS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=_ok(locale)
+                    if passed
+                    else translate(
+                        "gaeb.unit_exportable.fail", locale=locale, ordinal=pos.get("ordinal", "?"), unit=unit
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"unit": unit, "qu": code},
+                    suggestion=None if passed else translate("gaeb.unit_exportable.suggestion", locale=locale),
                 )
             )
         return results
@@ -12221,6 +12367,9 @@ def register_builtin_rules() -> None:
         (GAEBEinheitspreisSanity(), None),
         (GAEBTradeSectionCode(), None),
         (GAEBQuantityDecimals(), None),
+        (GAEBProvisWithoutTotal(), None),
+        (GAEBOrdinalChanged(), None),
+        (GAEBUnitExportable(), None),
         # NRM (UK)
         (NRMClassificationRequired(), None),
         (NRMValidElement(), None),

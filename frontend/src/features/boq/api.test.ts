@@ -334,3 +334,24 @@ describe('billDirectCost', () => {
     expect(billDirectCost(positions, 'EUR', [])).toBe(shown);
   });
 });
+
+describe('GAEB Bedarfsposition ohne Gesamtbetrag', () => {
+  const sec = makePosition({ id: 'sec', unit: '', quantity: 0, unit_rate: 0, total: 0, ordinal: '39.1.1' });
+  const normal = makePosition({ id: 'a', parent_id: 'sec', ordinal: '39.1.1.1', total: 6000 });
+  const without = makePosition({
+    id: 'b', parent_id: 'sec', ordinal: '39.1.1.2', total: 200, metadata: { gaeb_provis: 'WithoutTotal' },
+  });
+  const withTotal = makePosition({
+    id: 'c', parent_id: 'sec', ordinal: '39.1.1.3', total: 480, metadata: { gaeb_provis: 'WithTotal' },
+  });
+
+  it('is left out of the bill direct cost', () => {
+    expect(billDirectCost([sec, normal, without, withTotal], 'EUR', [])).toBe(6480);
+  });
+
+  it('is left out of the section subtotal but stays listed', () => {
+    const { sections } = groupPositionsIntoSections([sec, normal, without, withTotal]);
+    expect(sections[0].subtotal).toBe(6480);
+    expect(sections[0].children.map((p) => p.id)).toEqual(['a', 'b', 'c']);
+  });
+});

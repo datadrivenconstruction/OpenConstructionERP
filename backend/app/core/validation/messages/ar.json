@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "البند {ordinal}: الكمية {quantity} تحتوي على {decimals} منازل عشرية؛ تحدد أعراف GAEB X83 الحد الأقصى بـ 3",
       "suggestion": "قرّب الكمية إلى 3 منازل عشرية كحد أقصى وفق GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "البند {ordinal} بند احتياطي بلا مجموع: يُعرض مبلغه {total} لكنه لا يُحتسب في أي مجموع",
+      "suggestion": "أسنده منفصلًا إذا طلبه العميل؛ وفق GAEB يبقى خارج قيمة العرض"
+    },
+    "ordinal_changed": {
+      "fail": "البند {ordinal}: تغيّر رقم OZ عن الملف المصدر ({source})؛ يطابق العميل العرض حسب OZ",
+      "suggestion": "أعد رقم OZ الأصلي ليتطابق العرض مع إحالات العميل"
+    },
+    "unit_exportable": {
+      "fail": "البند {ordinal}: الوحدة '{unit}' لا تتسع لحقل GAEB QU ذي الأحرف الأربعة وستُقتطع عند التصدير",
+      "suggestion": "استخدم رمز وحدة GAEB لا يزيد على 4 أحرف (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

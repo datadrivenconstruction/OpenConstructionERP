@@ -106,7 +106,7 @@ import {
   fmtWithCurrency,
   getUnitsForLocale,
   isResourceDrivenRate,
-  resourceAwareTotalInBase,
+  resourceAwareTotalInBase, isExcludedFromTotal,
   saveCustomUnit,
 } from './boqHelpers';
 import { RESOURCE_TYPES, getResourceTypeLabel } from './boqResourceTypes';
@@ -1921,6 +1921,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // ``metadata.currency`` but USD-priced ``metadata.resources`` (its
     // stored total was built from Σ(r.qty×r.rate) with no FX applied).
     const rebase = (pos: Position): number => {
+      // A Bedarfsposition ohne Gesamtbetrag never enters a section subtotal.
+      if (isExcludedFromTotal(pos)) return 0;
       if (!currencyCode) return num(pos.total);
       return resourceAwareTotalInBase(
         pos as unknown as {
