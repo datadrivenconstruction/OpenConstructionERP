@@ -2988,7 +2988,11 @@ class AppliedRiskContingency(BaseModel):
     markup_id: UUID
     name: str
     is_active: bool
-    line_amount: str
+    line_amount: str | None = None
+    #: ``fixed`` money as typed, or ``percentage`` of the direct cost (follows quantity edits).
+    mode: str = "fixed"
+    percentage: float | None = None
+    scope_position_id: UUID | None = None
     percentile: int
     amount: str
     pct_of_base: float | None = None
@@ -3017,6 +3021,8 @@ class RiskContingencyStatus(BaseModel):
     drift_amount: str | None = None
     drift_pct: float | None = None
     current_fingerprint: str | None = None
+    #: Other active contingency lines: applying a risk contingency on top may count the risk twice.
+    other_contingency: list[str] = Field(default_factory=list)
 
 
 class ApplyRiskContingencyRequest(BaseModel):
@@ -3036,3 +3042,6 @@ class ApplyRiskContingencyRequest(BaseModel):
     correlation: float = Field(default=0.2, ge=0.0, le=0.95)
     expected_amount: Decimal | None = Field(default=None, ge=0)
     name: str | None = Field(default=None, max_length=255)
+    mode: Literal["fixed", "percentage"] = "fixed"
+    #: Run and apply for this section only; a bill-wide risk line is overridden inside it.
+    scope_position_id: UUID | None = None

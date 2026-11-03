@@ -147,3 +147,28 @@ async def test_apply_stale_and_undo_round_trip(client: AsyncClient):
     assert undo.status_code == 200, undo.text
     assert undo.json()["applied"] is None
     assert (await client.delete(url, headers=auth)).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_percentage_mode_is_stored_as_a_share_of_the_direct_cost(client: AsyncClient):
+    auth = await _auth(client)
+    boq_id, ids = await _bill(client, auth)
+    url = f"/api/v1/boq/boqs/{boq_id}/cost-risk/contingency/"
+
+    applied = await client.post(url, json={"percentile": 80, "iterations": 1000, "mode": "percentage"}, headers=auth)
+    assert applied.status_code == 200, applied.text
+    assert applied.json()["applied"]["mode"] == "percentage"
+    markups = (await client.get(f"/api/v1/boq/boqs/{boq_id}/markups/", headers=auth)).json()["markups"]
+    line = next(m for m in markups if m["category"] == "contingency")
+    assert line["markup_type"] == "percentage" and float(line["percentage"]) > 0
+    assert float(line["fixed_amount"]) == 0.0
+
+    # A manual contingency alongside is reported, not blocked.
+    manual = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/markups/",
+        json={"name": "Manual contingency", "category": "contingency", "percentage": 3.0},
+        headers=auth,
+    )
+    assert manual.status_code == 201, manual.text
+    status_now = (await client.get(url, headers=auth)).json()
+    assert status_now["other_contingency"] == ["Manual contingency"]

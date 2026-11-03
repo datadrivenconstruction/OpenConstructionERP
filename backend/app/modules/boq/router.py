@@ -10788,6 +10788,7 @@ async def get_risk_contingency(
     optimistic_pct: float = Query(default=15.0, ge=0.0, le=50.0),
     pessimistic_pct: float = Query(default=25.0, ge=0.0, le=100.0),
     correlation: float = Query(default=cre.DEFAULT_CORRELATION, ge=0.0, le=0.95),
+    scope_position_id: uuid.UUID | None = Query(default=None, description="Section to simulate and read"),
     service: BOQService = Depends(_get_service),
 ) -> RiskContingencyStatus:
     """Suggested contingency at ``percentile`` (when given) plus the applied line.
@@ -10804,7 +10805,7 @@ async def get_risk_contingency(
         if percentile is not None
         else None
     )
-    return RiskContingencyStatus(**await RiskContingencyService(service).status(boq_id, params))
+    return RiskContingencyStatus(**await RiskContingencyService(service).status(boq_id, params, scope_position_id))
 
 
 @router.post(
@@ -10839,6 +10840,8 @@ async def apply_risk_contingency(
         user_email=(payload or {}).get("email") if isinstance(payload, dict) else None,
         expected_amount=data.expected_amount,
         name=data.name,
+        mode=data.mode,
+        scope_position_id=data.scope_position_id,
     )
     return RiskContingencyStatus(**result)
 
@@ -10854,13 +10857,14 @@ async def undo_risk_contingency(
     user_id: CurrentUserId,
     payload: CurrentUserPayload,
     session: SessionDep,
+    scope_position_id: uuid.UUID | None = Query(default=None, description="Section whose line to undo"),
     service: BOQService = Depends(_get_service),
 ) -> RiskContingencyStatus:
     """Restore the previous risk contingency, or remove the line when it was the first."""
     from app.modules.boq.risk_contingency import RiskContingencyService
 
     await _verify_boq_owner(session, boq_id, user_id, payload)
-    return RiskContingencyStatus(**await RiskContingencyService(service).undo(boq_id))
+    return RiskContingencyStatus(**await RiskContingencyService(service).undo(boq_id, scope_position_id))
 
 
 # ── Custom Column Definitions ────────────────────────────────────────────────

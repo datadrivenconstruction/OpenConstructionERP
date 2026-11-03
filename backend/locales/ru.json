@@ -1369,6 +1369,7 @@
     },
     "boq_pdf": {
       "strings": {
+        "risk_allowance": "Резерв на риски P{percentile} (прогон {run})",
         "ai_generated": "Создано ИИ",
         "drawing": "Чертёж",
         "cost_estimate": "СМЕТНЫЙ РАСЧЁТ",

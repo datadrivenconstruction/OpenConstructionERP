@@ -37,6 +37,12 @@ RUN_KEY = "risk_run"
 PREVIOUS_KEY = "risk_run_previous"
 MAX_PREVIOUS = 5
 
+#: ``mode`` of the written line. ``fixed`` holds the money as typed; ``percentage`` stores
+#: contingency / direct cost so the amount follows later quantity edits.
+MODE_FIXED = "fixed"
+MODE_PERCENTAGE = "percentage"
+MODES = (MODE_FIXED, MODE_PERCENTAGE)
+
 MIN_PERCENTILE = 50
 MAX_PERCENTILE = 99
 
@@ -119,6 +125,8 @@ class Suggestion:
     prob_within_base: float
     confidence: float
     fingerprint: str
+    #: Contingency that reaches only the median (P50 - base, never negative).
+    p50_amount: Decimal = Decimal("0.00")
 
     def as_dict(self) -> dict[str, Any]:
         """JSON shape of the API."""
@@ -139,6 +147,7 @@ class Suggestion:
             "prob_within_base": self.prob_within_base,
             "confidence": self.confidence,
             "fingerprint": self.fingerprint,
+            "p50_amount": self.p50_amount,
         }
 
 
@@ -158,6 +167,8 @@ def suggest(inputs: list[cre.PositionInput], params: RunParams, seed: int) -> Su
     budget = money(result.recommended_budget)
     raw = budget - base
     amount = raw if raw > 0 else Decimal("0.00")
+    p50_raw = money(result.percentiles.get("p50", result.base_total)) - base
+    p50_amount = p50_raw if p50_raw > 0 else Decimal("0.00")
     return Suggestion(
         percentile=int(params.percentile),
         amount=amount,
@@ -175,12 +186,26 @@ def suggest(inputs: list[cre.PositionInput], params: RunParams, seed: int) -> Su
         prob_within_base=round(result.prob_within_base, 1),
         confidence=_CONFIDENCE.get(result.convergence_status, 0.4),
         fingerprint=risk_fingerprint(inputs),
+        p50_amount=p50_amount,
     )
 
 
-def run_record(s: Suggestion, *, user_id: str, user_email: str | None, now: datetime | None = None) -> dict[str, Any]:
+def run_record(
+    s: Suggestion,
+    *,
+    user_id: str,
+    user_email: str | None,
+    now: datetime | None = None,
+    mode: str = MODE_FIXED,
+    percentage: float | None = None,
+    scope_position_id: str | None = None,
+) -> dict[str, Any]:
     """The provenance stored on the markup line for one application."""
     return {
+        "mode": mode,
+        "percentage": percentage,
+        "scope_position_id": scope_position_id,
+        "p50_amount": str(s.p50_amount),
         "percentile": s.percentile,
         "amount": str(s.amount),
         "pct_of_base": s.pct_of_base,
@@ -211,6 +236,21 @@ def params_of(record: dict[str, Any]) -> RunParams:
     )
 
 
+def section_positions(positions: list[Any], section_id: uuid.UUID) -> list[Any]:
+    """The positions under one section (itself included), by the parent chain."""
+    ids = {str(section_id)}
+    if not any(str(p.id) in ids for p in positions):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found in this bill")
+    grew = True
+    while grew:
+        grew = False
+        for p in positions:
+            if p.parent_id is not None and str(p.parent_id) in ids and str(p.id) not in ids:
+                ids.add(str(p.id))
+                grew = True
+    return [p for p in positions if str(p.id) in ids]
+
+
 def is_risk_line(markup: Any) -> bool:
     """True for the markup line this module wrote."""
     meta = getattr(markup, "metadata_", None)
@@ -219,12 +259,58 @@ def is_risk_line(markup: Any) -> bool:
     return isinstance(meta, dict) and meta.get("source") == RISK_CONTINGENCY_SOURCE
 
 
-def find_risk_line(markups: list[Any]) -> Any | None:
-    """The bill-wide risk contingency line, if one was applied."""
+def risk_label_parts(markup: Any) -> tuple[int, str] | None:
+    """``(percentile, run id)`` for the exports' "P80 risk allowance" label, ``None`` for any other line."""
+    if not is_risk_line(markup):
+        return None
+    meta = getattr(markup, "metadata_", None)
+    record = meta.get(RUN_KEY) if isinstance(meta, dict) else None
+    if not isinstance(record, dict) or not record.get("percentile"):
+        return None
+    run = str(record.get("fingerprint") or "")[:8] or str(record.get("seed") or "?")
+    return int(record["percentile"]), run
+
+
+def find_risk_line(markups: list[Any], scope_position_id: Any = None) -> Any | None:
+    """The risk contingency line of one scope: the bill (default) or a section."""
+    want = str(scope_position_id) if scope_position_id else None
     for m in markups:
-        if is_risk_line(m) and not getattr(m, "scope_position_id", None):
+        have = getattr(m, "scope_position_id", None)
+        if is_risk_line(m) and (str(have) if have else None) == want:
             return m
     return None
+
+
+def other_contingency(markups: list[Any]) -> list[str]:
+    """Names of active contingency lines this module did not write: a possible double count."""
+    return [
+        str(m.name)
+        for m in markups
+        if getattr(m, "is_active", True) and getattr(m, "category", "") == "contingency" and not is_risk_line(m)
+    ]
+
+
+def line_amount(line: Any, base_total: Decimal) -> Decimal:
+    """Money the line adds today: its fixed amount, or its percentage of the direct cost."""
+    if getattr(line, "markup_type", MODE_FIXED) == MODE_PERCENTAGE:
+        return money(base_total * Decimal(str(line.percentage or 0)) / Decimal("100"))
+    return money(line.fixed_amount or 0)
+
+
+def percentage_of(amount: Decimal, base_total: Decimal) -> float:
+    """Contingency as a percent of the direct cost, for the percentage mode."""
+    if base_total <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The bill has no direct cost to take a percentage of",
+        )
+    pct = round(float(amount / base_total * 100), 4)
+    if pct > 100.0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The contingency exceeds 100% of the direct cost; keep it as a fixed amount",
+        )
+    return pct
 
 
 def drift(applied: dict[str, Any], current_amount: Decimal) -> tuple[Decimal, float | None]:
@@ -249,7 +335,17 @@ def stale_block(markups: list[Any], inputs: list[cre.PositionInput]) -> dict[str
     meta = line.metadata_ if isinstance(line.metadata_, dict) else {}
     record = meta.get(RUN_KEY) if isinstance(meta.get(RUN_KEY), dict) else {}
     current = risk_fingerprint(inputs)
+    base_total = money(sum(p.base for p in inputs))
+    try:
+        p50_amount = Decimal(str(record.get("p50_amount"))) if record.get("p50_amount") is not None else None
+    except ArithmeticError:
+        p50_amount = None
+    today = line_amount(line, base_total)
     return {
+        "line_amount": str(today),
+        "p50_amount": str(p50_amount) if p50_amount is not None else None,
+        "below_p50": p50_amount is not None and today < p50_amount,
+        "other_contingency": other_contingency(markups),
         "markup_id": str(line.id),
         "name": line.name,
         "percentile": record.get("percentile"),
@@ -261,7 +357,13 @@ def stale_block(markups: list[Any], inputs: list[cre.PositionInput]) -> dict[str
     }
 
 
-def next_metadata(existing: dict[str, Any] | None, record: dict[str, Any], line_fixed_amount: str | None) -> dict:
+def next_metadata(
+    existing: dict[str, Any] | None,
+    record: dict[str, Any],
+    line_fixed_amount: str | None,
+    line_mode: str | None = None,
+    line_percentage: float | None = None,
+) -> dict:
     """Metadata of the line after a new application, keeping the previous one for undo."""
     meta = dict(existing or {})
     previous = list(meta.get(PREVIOUS_KEY) or [])
@@ -269,6 +371,9 @@ def next_metadata(existing: dict[str, Any] | None, record: dict[str, Any], line_
         prev = dict(meta[RUN_KEY])
         if line_fixed_amount is not None:
             prev["line_amount"] = line_fixed_amount
+        if line_mode is not None:
+            prev["line_mode"] = line_mode
+            prev["line_percentage"] = line_percentage
         previous.append(prev)
     meta["source"] = RISK_CONTINGENCY_SOURCE
     meta[RUN_KEY] = record
@@ -314,7 +419,10 @@ def _applied_view(line: Any) -> dict[str, Any]:
         "markup_id": line.id,
         "name": line.name,
         "is_active": bool(line.is_active),
-        "line_amount": str(line.fixed_amount or "0"),
+        "line_amount": str(line.fixed_amount or "0") if line.markup_type != MODE_PERCENTAGE else record.get("amount"),
+        "mode": MODE_PERCENTAGE if line.markup_type == MODE_PERCENTAGE else MODE_FIXED,
+        "percentage": float(line.percentage) if line.markup_type == MODE_PERCENTAGE else None,
+        "scope_position_id": line.scope_position_id,
         "percentile": int(record.get("percentile") or 0),
         **{k: record.get(k) for k in keep},
         "can_undo_to_previous": bool(meta.get(PREVIOUS_KEY)),
@@ -331,18 +439,28 @@ class RiskContingencyService:
     def __init__(self, boq_service: Any) -> None:
         self.boq = boq_service
 
-    async def _inputs(self, boq_id: uuid.UUID) -> list[cre.PositionInput]:
+    async def _inputs(self, boq_id: uuid.UUID, scope_position_id: uuid.UUID | None = None) -> list[cre.PositionInput]:
         data = await self.boq.get_boq_with_positions(boq_id)
-        return risk_inputs(list(data.positions))
+        positions = list(data.positions)
+        if scope_position_id is not None:
+            positions = section_positions(positions, scope_position_id)
+        return risk_inputs(positions)
 
-    async def status(self, boq_id: uuid.UUID, params: RunParams | None) -> dict[str, Any]:
+    async def status(
+        self,
+        boq_id: uuid.UUID,
+        params: RunParams | None,
+        scope_position_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
         """Suggestion for ``params`` (if given), the applied line and its drift."""
-        inputs = await self._inputs(boq_id)
+        inputs = await self._inputs(boq_id, scope_position_id)
         seed = risk_seed(boq_id)
         out: dict[str, Any] = {"current_fingerprint": risk_fingerprint(inputs)}
         if params is not None:
             out["suggestion"] = suggest(inputs, params, seed).as_dict()
-        line = find_risk_line(await self.boq.list_markups(boq_id))
+        markups = await self.boq.list_markups(boq_id)
+        out["other_contingency"] = other_contingency(markups)
+        line = find_risk_line(markups, scope_position_id)
         if line is not None:
             view = _applied_view(line)
             out["applied"] = view
@@ -365,11 +483,20 @@ class RiskContingencyService:
         user_email: str | None,
         expected_amount: Decimal | None,
         name: str | None,
+        mode: str = MODE_FIXED,
+        scope_position_id: uuid.UUID | None = None,
     ) -> dict[str, Any]:
-        """Write the contingency line from a fresh, server-side run."""
+        """Write the contingency line from a fresh, server-side run.
+
+        ``mode="percentage"`` stores the contingency as a share of the direct cost, so the
+        money follows later quantity edits. ``scope_position_id`` confines the run and the
+        line to one section; a bill-wide risk line, if present, is overridden inside it.
+        """
         from app.modules.boq.schemas import MarkupCreate, MarkupUpdate  # noqa: PLC0415 - avoid import cycle
 
-        inputs = await self._inputs(boq_id)
+        if mode not in MODES:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Unknown contingency mode")
+        inputs = await self._inputs(boq_id, scope_position_id)
         if not inputs or sum(p.base for p in inputs) <= 0:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -381,12 +508,26 @@ class RiskContingencyService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"The bill changed since the preview: the contingency is now {s.amount}. Review and confirm again.",
             )
-        record = run_record(s, user_id=user_id, user_email=user_email)
+        pct = percentage_of(s.amount, s.base_total) if mode == MODE_PERCENTAGE else None
+        record = run_record(
+            s,
+            user_id=user_id,
+            user_email=user_email,
+            mode=mode,
+            percentage=pct,
+            scope_position_id=str(scope_position_id) if scope_position_id else None,
+        )
         label = (name or "").strip() or f"Risk contingency P{s.percentile}"
         record["name"] = label
+        fields = {
+            "markup_type": mode,
+            "fixed_amount": s.amount if mode == MODE_FIXED else Decimal("0"),
+            "percentage": pct if pct is not None else 0.0,
+        }
         markups = await self.boq.list_markups(boq_id)
-        line = find_risk_line(markups)
+        line = find_risk_line(markups, scope_position_id)
         if line is None:
+            wide = find_risk_line(markups) if scope_position_id else None
             orders = [int(m.sort_order or 0) for m in markups if not m.scope_position_id]
             # First in the stack so cumulative lines (tax) compound on it; 0 would mean "append".
             first = min(orders) - 1 if orders and min(orders) > 1 else 0
@@ -394,12 +535,13 @@ class RiskContingencyService:
                 boq_id,
                 MarkupCreate(
                     name=label,
-                    markup_type="fixed",
                     category="contingency",
-                    fixed_amount=s.amount,
                     apply_to="direct_cost",
-                    sort_order=first,
+                    sort_order=int(wide.sort_order or 0) if wide is not None else first,
+                    scope_position_id=scope_position_id,
+                    overrides_id=wide.id if wide is not None else None,
                     metadata=next_metadata(None, record, None),
+                    **fields,
                 ),
             )
         else:
@@ -408,18 +550,24 @@ class RiskContingencyService:
                 line.id,
                 MarkupUpdate(
                     name=label,
-                    fixed_amount=s.amount,
                     is_active=True,
-                    metadata=next_metadata(meta, record, str(line.fixed_amount or "0")),
+                    metadata=next_metadata(
+                        meta,
+                        record,
+                        str(line.fixed_amount or "0"),
+                        line.markup_type,
+                        float(line.percentage or 0.0),
+                    ),
+                    **fields,
                 ),
             )
-        return await self.status(boq_id, params)
+        return await self.status(boq_id, params, scope_position_id)
 
-    async def undo(self, boq_id: uuid.UUID) -> dict[str, Any]:
+    async def undo(self, boq_id: uuid.UUID, scope_position_id: uuid.UUID | None = None) -> dict[str, Any]:
         """Restore the previous application, or remove the line when there was none."""
         from app.modules.boq.schemas import MarkupUpdate  # noqa: PLC0415 - avoid import cycle
 
-        line = find_risk_line(await self.boq.list_markups(boq_id))
+        line = find_risk_line(await self.boq.list_markups(boq_id), scope_position_id)
         if line is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No risk contingency applied")
         meta = line.metadata_ if isinstance(line.metadata_, dict) else {}
@@ -427,12 +575,16 @@ class RiskContingencyService:
         if restored is None:
             await self.boq.delete_markup(line.id)
         else:
+            run = restored.get(RUN_KEY, {})
+            mode = run.get("line_mode") or MODE_FIXED
             await self.boq.update_markup(
                 line.id,
                 MarkupUpdate(
-                    name=str(restored.get(RUN_KEY, {}).get("name") or line.name),
-                    fixed_amount=Decimal(amount or "0"),
+                    name=str(run.get("name") or line.name),
+                    markup_type=mode,
+                    fixed_amount=Decimal(amount or "0") if mode == MODE_FIXED else Decimal("0"),
+                    percentage=float(run.get("line_percentage") or 0.0) if mode == MODE_PERCENTAGE else 0.0,
                     metadata=restored,
                 ),
             )
-        return await self.status(boq_id, None)
+        return await self.status(boq_id, None, scope_position_id)

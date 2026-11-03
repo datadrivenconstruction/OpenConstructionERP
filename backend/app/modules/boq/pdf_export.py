@@ -270,6 +270,17 @@ def _fmt_currency(value: float, currency: str, decimals: int = 2, country: str =
     return f"{formatted} {currency}"
 
 
+def _markup_label(markup: Any, lb: dict[str, str]) -> str:
+    """A markup line's printed name; a line written from a Monte Carlo run reads as a risk allowance with its run id."""
+    from app.modules.boq.risk_contingency import risk_label_parts  # noqa: PLC0415 - avoid import cycle
+
+    parts = risk_label_parts(markup)
+    if parts is None:
+        return str(markup.name)
+    template = lb.get("risk_allowance") or "P{percentile} risk allowance (run {run})"
+    return template.format(percentile=parts[0], run=parts[1])
+
+
 def _tax_label(markup: Any, currency: str, country: str = "") -> str:
     """A tax line's own name and rate, so a stack of several stays readable.
 
@@ -1236,9 +1247,9 @@ def _build_boq_table(
     for markup in boq_data.markups:
         if not markup.is_active or markup.category == "tax":
             continue
-        label = markup.name
+        label = _markup_label(markup, lb)
         if markup.markup_type == "percentage":
-            label = f"{markup.name} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
+            label = f"{label} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
         table_data.append(
             [
                 "",
@@ -1556,9 +1567,9 @@ def _cost_totals_table(
     for markup in boq_data.markups:
         if not markup.is_active or markup.category == "tax":
             continue
-        label = markup.name
+        label = _markup_label(markup, lb)
         if markup.markup_type == "percentage":
-            label = f"{markup.name} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
+            label = f"{label} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
         cost_rows.append(
             [
                 _safe_para(label, styles["cell_right"]),

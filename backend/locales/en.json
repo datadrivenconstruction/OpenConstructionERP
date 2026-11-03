@@ -1393,6 +1393,7 @@
     },
     "boq_pdf": {
       "strings": {
+        "risk_allowance": "P{percentile} risk allowance (run {run})",
         "ai_generated": "AI-generated",
         "drawing": "Drawing",
         "cost_estimate": "COST ESTIMATE",

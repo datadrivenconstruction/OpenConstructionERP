@@ -686,6 +686,86 @@ class RiskContingencyFromStaleRun(ValidationRule):
         ]
 
 
+class RiskContingencyBelowP50(ValidationRule):
+    """The risk contingency in the estimate is smaller than what the median of its own run asks for."""
+
+    rule_id = "boq.risk.contingency_below_p50"
+    name = "Risk contingency reaches at least the median"
+    standard = "universal"
+    severity = Severity.INFO
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A contingency taken from a Monte Carlo run that sits below the run's own P50 "
+        "contingency covers the risk less often than not."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding when the line's money today is below the P50 contingency recorded with the run."""
+        data = context.data
+        block = data.get("risk_contingency") if isinstance(data, dict) else None
+        if not isinstance(block, dict) or not block.get("below_p50"):
+            return []
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_risk.contingency_below_p50.fail",
+                    _locale(context),
+                    markup=str(block.get("name") or ""),
+                    amount=str(block.get("line_amount") or "?"),
+                    p50=str(block.get("p50_amount") or "?"),
+                ),
+                element_ref=str(block.get("markup_id") or "") or None,
+                suggestion=translate("boq_risk.contingency_below_p50.suggestion", _locale(context)),
+                details={"line_amount": block.get("line_amount"), "p50_amount": block.get("p50_amount")},
+            )
+        ]
+
+
+class RiskContingencyDoubleCount(ValidationRule):
+    """A risk contingency and a manual contingency line are both active."""
+
+    rule_id = "boq.risk.contingency_double_count"
+    name = "Risk contingency does not stack on a manual contingency"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A contingency from a Monte Carlo run already prices the uncertainty of the lines. "
+        "A manual contingency line on top counts the same risk twice."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding when the applied risk line coexists with another active contingency line."""
+        data = context.data
+        block = data.get("risk_contingency") if isinstance(data, dict) else None
+        others = block.get("other_contingency") if isinstance(block, dict) else None
+        if not others:
+            return []
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_risk.contingency_double_count.fail",
+                    _locale(context),
+                    markup=str(block.get("name") or ""),
+                    other=", ".join(str(n) for n in others),
+                ),
+                element_ref=str(block.get("markup_id") or "") or None,
+                suggestion=translate("boq_risk.contingency_double_count.suggestion", _locale(context)),
+                details={"other_contingency": list(others)},
+            )
+        ]
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 
@@ -778,6 +858,8 @@ _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     CarriedMeasurementUnconfirmed(),
     CarriedLowConfidencePending(),
     RiskContingencyFromStaleRun(),
+    RiskContingencyBelowP50(),
+    RiskContingencyDoubleCount(),
 )
 
 

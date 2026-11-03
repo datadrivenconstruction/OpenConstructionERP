@@ -1486,6 +1486,14 @@
     "contingency_stale": {
       "fail": "Die Risikozeile „{markup}“ wurde am {applied_at} mit P{percentile} angesetzt, seither haben sich die Positionssummen der Risikoanalyse geändert",
       "suggestion": "Risikoanalyse neu rechnen und den Risikozuschlag erneut übernehmen, oder die Zeile behalten und den Grund vermerken"
+    },
+    "contingency_below_p50": {
+      "fail": "Die Wagnisposition \"{markup}\" beträgt {amount} und liegt unter den {p50}, die der Median (P50) ihres eigenen Risikolaufs verlangt",
+      "suggestion": "Das Wagnis auf ein höheres Perzentil anheben oder den Lauf erneut anwenden"
+    },
+    "contingency_double_count": {
+      "fail": "Das Wagnis \"{markup}\" ist zusammen mit einer weiteren Wagnisposition aktiv ({other}); dasselbe Risiko kann doppelt gezählt sein",
+      "suggestion": "Nur eine der beiden behalten oder die manuelle Position auf das beschränken, was der Risikolauf nicht abdeckt"
     }
   },
   "field_productivity": {

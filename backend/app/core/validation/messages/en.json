@@ -1486,6 +1486,14 @@
     "contingency_stale": {
       "fail": "Contingency line \"{markup}\" was applied at P{percentile} on {applied_at}, but the line totals the risk run sampled have changed since",
       "suggestion": "Re-run the cost risk analysis and apply the contingency again, or keep the line and note why"
+    },
+    "contingency_below_p50": {
+      "fail": "Contingency line \"{markup}\" adds {amount}, less than the {p50} that the median (P50) of its own risk run asks for",
+      "suggestion": "Raise the contingency to a higher percentile, or re-apply the run"
+    },
+    "contingency_double_count": {
+      "fail": "Risk contingency \"{markup}\" is active together with another contingency line ({other}); the same risk may be counted twice",
+      "suggestion": "Keep one of them, or lower the manual contingency to what the risk run does not cover"
     }
   },
   "field_productivity": {
