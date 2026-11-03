@@ -294,7 +294,7 @@ _GAEB_83 = """<?xml version="1.0" encoding="UTF-8"?>
   <Award><DP>83</DP><Cur>EUR</Cur>
     <BoQ><BoQBody><BoQCtgy RNoPart="01"><LblTx><p><span>Rohbau</span></p></LblTx>
       <BoQBody><Itemlist>
-        <Item RNoPart="0010"><Qty>10.000</Qty><QU>m3</QU><CtlgAssign/><Description><CompleteText><DetailTxt><Text><p><span>{text}</span></p></Text></DetailTxt></CompleteText></Description></Item>
+        <Item RNoPart="0010"><Qty>10.000</Qty><QU>m3</QU><SubDescr/><Description><CompleteText><DetailTxt><Text><p><span>{text}</span></p></Text></DetailTxt></CompleteText></Description></Item>
         <Remark/>
       </Itemlist></BoQBody></BoQCtgy></BoQBody></BoQ>
   </Award>
@@ -309,7 +309,7 @@ def test_gaeb_import_reports_unread_elements_attachments_and_cut_text() -> None:
     imported = asyncio.run(GAEBXMLImporter.parse(content))
     report = analyze_import("gaeb_xml", imported, content)
     tags = {(i.kind, i.field) for i in report.items}
-    assert ("unsupported_element", "CtlgAssign") in tags
+    assert ("unsupported_element", "SubDescr") in tags
     assert ("unsupported_element", "Remark") in tags
     assert ("attachment_skipped", "Attachment") in tags
     assert ("truncated_text", "description") in tags

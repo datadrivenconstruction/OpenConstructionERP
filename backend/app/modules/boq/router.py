@@ -6461,6 +6461,7 @@ def build_gaeb_xml(
         ctgy_part: str = "",
         *,
         leaf_override: str | None = None,
+        oz_override: str | None = None,
     ) -> None:
         """Write one schema-valid ``Item`` into an ``Itemlist``.
 
@@ -6506,7 +6507,9 @@ def build_gaeb_xml(
                 {
                     "type": "item",
                     "id": str(getattr(pos, "id", "") or ""),
-                    "oz": ".".join(p for p in (ctgy_part, item.get("RNoPart") or "") if p),
+                    "oz": oz_override
+                    if oz_override is not None
+                    else ".".join(p for p in (ctgy_part, item.get("RNoPart") or "") if p),
                     "qty": qty_s,
                     "up": up_s if is_priced else None,
                     "it": it_s if is_priced else None,
@@ -6661,8 +6664,8 @@ def build_gaeb_xml(
                 )
                 _emit_category_totals(ctgy, subtotal)
 
-        def _tree_item(itemlist: ET.Element, leaf: str, _ordinal: str, pos: Any) -> None:
-            _emit_item(itemlist, pos, "", leaf_override=leaf)
+        def _tree_item(itemlist: ET.Element, leaf: str, ordinal: str, pos: Any) -> None:
+            _emit_item(itemlist, pos, "", leaf_override=leaf, oz_override=ordinal)
 
         write_oz_body(
             boq_body,
