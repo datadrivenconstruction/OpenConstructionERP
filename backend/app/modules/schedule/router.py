@@ -702,8 +702,8 @@ async def get_risk_analysis(
 
     Computes optimistic/pessimistic durations for each activity and derives
     project-level probability estimates for schedule completion. Verifies the
-    caller owns the parent project (admins bypass) - risk analysis re-runs
-    CPM, which mutates activity fields.
+    caller owns the parent project (admins bypass). Read-only: the CPM pass
+    behind it does not persist.
     """
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     return await service.get_risk_analysis(schedule_id)
@@ -1441,153 +1441,8 @@ async def calculate_cpm_full(
     each activity, and returns the full analysis. Verifies the caller owns
     the parent project (admins bypass) before mutating activity CPM fields.
     """
-    from sqlalchemy import select
-
-    from app.core.cpm import calculate_cpm
-    from app.modules.schedule.models import ScheduleRelationship
-    from app.modules.schedule.schemas import CPMActivityResult
-
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
-    schedule = await service.get_schedule(schedule_id)
-    activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
-
-    if not activities:
-        raise HTTPException(status_code=404, detail="Schedule has no activities")
-
-    # Build activity dicts for CPM engine
-    act_dicts = []
-    for act in activities:
-        act_dicts.append(
-            {
-                "id": str(act.id),
-                "duration": act.duration_days or 0,
-                "name": act.name,
-            }
-        )
-
-    # Build the edge set from the canonical ScheduleRelationship store ONLY.
-    # The table is the single source of truth; Activity.dependencies JSON is a
-    # derived mirror. Reading the table alone means a relationship the user
-    # deleted truly disappears from CPM instead of being re-introduced by a
-    # lingering JSON copy.
-    rel_dicts: list[dict] = []
-
-    rel_stmt = select(ScheduleRelationship).where(ScheduleRelationship.schedule_id == schedule_id)
-    rel_result = await session.execute(rel_stmt)
-    canonical_rows = list(rel_result.scalars().all())
-    for r in canonical_rows:
-        rel_dicts.append(
-            {
-                "predecessor_id": str(r.predecessor_id),
-                "successor_id": str(r.successor_id),
-                "type": r.relationship_type,
-                "lag": r.lag_days,
-            }
-        )
-
-    # Legacy fallback: only when no canonical rows exist for this schedule do
-    # we read the inline JSON, so un-reconciled historical schedules still
-    # compute. Once the table holds any edge it is the sole authority.
-    if not canonical_rows:
-        for act in activities:
-            deps = act.dependencies or []
-            for dep in deps:
-                if isinstance(dep, dict):
-                    pred_id = dep.get("activity_id", "")
-                    rel_dicts.append(
-                        {
-                            "predecessor_id": str(pred_id),
-                            "successor_id": str(act.id),
-                            "type": dep.get("type", "FS"),
-                            "lag": dep.get("lag_days", 0),
-                        }
-                    )
-                elif isinstance(dep, str):
-                    rel_dicts.append(
-                        {
-                            "predecessor_id": dep,
-                            "successor_id": str(act.id),
-                            "type": "FS",
-                            "lag": 0,
-                        }
-                    )
-
-    # Deduplicate relationships by (pred, succ)
-    seen: set[tuple[str, str]] = set()
-    unique_rels: list[dict] = []
-    for r in rel_dicts:
-        key = (r["predecessor_id"], r["successor_id"])
-        if key not in seen:
-            seen.add(key)
-            unique_rels.append(r)
-
-    # Run CPM engine
-    calendar_dict = body.calendar if body else None
-    cpm_results = await calculate_cpm(
-        act_dicts,
-        unique_rels,
-        calendar=calendar_dict,
-        project_start_date=schedule.start_date,
-    )
-
-    # Build lookup from CPM results
-    cpm_map = {r["id"]: r for r in cpm_results}
-
-    # Persist CPM results on each activity and build response
-    all_cpm: list[CPMActivityResult] = []
-    critical_path: list[CPMActivityResult] = []
-    project_duration = 0
-
-    for act in activities:
-        aid = str(act.id)
-        cpm = cpm_map.get(aid)
-        if cpm is None:
-            continue
-
-        es = cpm["early_start"]
-        ef = cpm["early_finish"]
-        ls = cpm["late_start"]
-        lf = cpm["late_finish"]
-        tf = cpm["total_float"]
-        ff = cpm["free_float"]
-        is_crit = cpm["is_critical"]
-
-        # Persist to DB
-        await service.activity_repo.update_fields(
-            act.id,
-            early_start=str(es),
-            early_finish=str(ef),
-            late_start=str(ls),
-            late_finish=str(lf),
-            total_float=tf,
-            free_float=ff,
-            is_critical=is_crit,
-            color="#dc2626" if is_crit else "#0071e3",
-        )
-
-        project_duration = max(project_duration, ef)
-
-        result = CPMActivityResult(
-            activity_id=act.id,
-            name=act.name,
-            duration_days=act.duration_days or 0,
-            early_start=es,
-            early_finish=ef,
-            late_start=ls,
-            late_finish=lf,
-            total_float=tf,
-            is_critical=is_crit,
-        )
-        all_cpm.append(result)
-        if is_crit:
-            critical_path.append(result)
-
-    return CriticalPathResponse(
-        schedule_id=schedule_id,
-        project_duration_days=project_duration,
-        critical_path=critical_path,
-        all_activities=all_cpm,
-    )
+    return await service.run_cpm(schedule_id, persist=True, calendar=body.calendar if body else None)
 
 
 # ── Schedule Baselines ─────────────────────────────────────────────────────
