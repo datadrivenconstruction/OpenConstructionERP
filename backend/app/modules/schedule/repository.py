@@ -132,9 +132,11 @@ class ActivityRepository:
         schedule_id: uuid.UUID,
         *,
         offset: int = 0,
-        limit: int = 1000,
+        limit: int | None = 1000,
     ) -> tuple[list[Activity], int]:
         """List activities for a schedule in display order. Returns (activities, total).
+
+        ``limit=None`` loads every row (CPM needs the whole network).
 
         Children and work_orders are NOT loaded to avoid N+1 on list queries.
 
@@ -156,8 +158,9 @@ class ActivityRepository:
             )
             .order_by(*activity_order_terms())
             .offset(offset)
-            .limit(limit)
         )
+        if limit is not None:
+            stmt = stmt.limit(limit)
         result = await self.session.execute(stmt)
         activities = list(result.scalars().all())
 

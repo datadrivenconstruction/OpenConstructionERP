@@ -91,10 +91,10 @@ class _StubActivityRepo:
         schedule_id: uuid.UUID,
         *,
         offset: int = 0,
-        limit: int = 1000,
+        limit: int | None = 1000,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.schedule_id == schedule_id]
-        return rows[offset : offset + limit], len(rows)
+        return rows[offset : None if limit is None else offset + limit], len(rows)
 
     async def dependency_mirrors(self, schedule_id: uuid.UUID) -> list[tuple[uuid.UUID, list]]:
         return [
@@ -214,12 +214,17 @@ class _StubSession:
         means the DEFAULT Monday-to-Friday week, which these tests do not measure."""
 
 
+async def _no_default_calendar(*_args: Any, **_kwargs: Any) -> None:
+    return None
+
+
 def _make_service() -> ScheduleService:
     service = ScheduleService.__new__(ScheduleService)
     service.schedule_repo = _StubScheduleRepo()
     service.activity_repo = _StubActivityRepo()
     service.relationship_repo = _StubRelationshipRepo()
     service.session = _StubSession(service.activity_repo)
+    service._project_default_calendar = _no_default_calendar  # type: ignore[method-assign]
     return service
 
 
