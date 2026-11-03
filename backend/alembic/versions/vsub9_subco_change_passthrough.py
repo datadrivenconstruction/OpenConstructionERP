@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vsub9_subco_change_passthrough"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vdup9_orders_receipts_role_split"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

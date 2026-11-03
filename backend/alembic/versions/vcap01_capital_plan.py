@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vcap01_capital_plan"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vdro01_site_survey_captures"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

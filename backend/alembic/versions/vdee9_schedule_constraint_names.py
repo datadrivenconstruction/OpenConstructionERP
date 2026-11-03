@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdee9_schedule_constraint_names"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vsub9_subco_change_passthrough"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

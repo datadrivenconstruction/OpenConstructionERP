@@ -23,7 +23,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vpar01_partner_api_keys_webhooks"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vcap01_capital_plan"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

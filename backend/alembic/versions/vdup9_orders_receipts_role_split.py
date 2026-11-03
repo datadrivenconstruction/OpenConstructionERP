@@ -23,7 +23,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdup9_orders_receipts_role_split"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vsci01_scim_provisioning"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
