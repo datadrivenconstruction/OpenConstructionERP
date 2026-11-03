@@ -285,6 +285,16 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                         {t('schedule.cpm.critical_badge')}
                       </Badge>
                     ) : null}
+                    {a.total_float != null && a.total_float < 0 ? (
+                      <span data-testid={`cpm-late-${a.id}`}>
+                        <Badge variant="error">
+                          {t('schedule.cpm.late_by', {
+                            count: Math.abs(a.total_float),
+                            defaultValue: 'late by {{count}} days',
+                          })}
+                        </Badge>
+                      </span>
+                    ) : null}
                   </td>
                 </tr>
               ))}

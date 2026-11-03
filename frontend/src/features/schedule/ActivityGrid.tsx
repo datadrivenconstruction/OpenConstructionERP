@@ -18,6 +18,17 @@ import { useHasPermission } from '@/shared/lib/permissionGates';
 
 const TYPES = ['task', 'milestone', 'summary'] as const;
 
+const CONSTRAINTS = [
+  'must_start_on',
+  'must_finish_on',
+  'start_no_earlier',
+  'start_no_later',
+  'finish_no_earlier',
+  'finish_no_later',
+  'as_late_as_possible',
+] as const;
+const UNDATED_CONSTRAINTS: readonly string[] = ['as_late_as_possible'];
+
 const CELL_INPUT_CLS =
   'w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-sm text-content-primary ' +
   'hover:border-border-light focus:border-oe-blue focus:bg-surface-primary focus:outline-none disabled:opacity-60';
@@ -333,6 +344,25 @@ export function ActivityGrid({
     updateMutation.mutate({ id: a.id, body: { activity_type: type } });
   };
 
+  const commitConstraintType = (a: Activity, raw: string) => {
+    const next = raw || null;
+    if ((a.constraint_type ?? null) === next) return;
+    const dated = next !== null && !UNDATED_CONSTRAINTS.includes(next);
+    // A dated constraint needs a date: start from the activity's own, which the
+    // planner then adjusts. Clearing the constraint clears its date too.
+    const date = !dated
+      ? null
+      : (a.constraint_date?.slice(0, 10) ||
+        (next?.startsWith('finish') || next === 'must_finish_on' ? a.end_date : a.start_date).slice(0, 10));
+    updateMutation.mutate({ id: a.id, body: { constraint_type: next, constraint_date: date } });
+  };
+
+  const commitConstraintDate = (a: Activity, raw: string) => {
+    const day = raw.slice(0, 10);
+    if (!day || day === (a.constraint_date ?? '').slice(0, 10)) return;
+    updateMutation.mutate({ id: a.id, body: { constraint_date: day } });
+  };
+
   const commitStart = (a: Activity, raw: string) => {
     const start = raw.slice(0, 10);
     const current = a.start_date.slice(0, 10);
@@ -379,6 +409,7 @@ export function ActivityGrid({
       { key: 'duration', label: t('schedule.duration', { defaultValue: 'Duration' }), align: 'right' as const },
       { key: 'progress', label: t('schedule.progress', { defaultValue: 'Progress' }), align: 'right' as const },
       { key: 'calendar', label: t('schedule.calendar.column', { defaultValue: 'Calendar' }), align: 'left' as const },
+      { key: 'constraint', label: t('schedule.constraint_col', { defaultValue: 'Constraint' }), align: 'left' as const },
       { key: 'resources', label: t('schedule.assigned_resources', { defaultValue: 'Resources' }), align: 'left' as const },
       { key: 'assignee', label: t('schedule.assignee', { defaultValue: 'Assignee' }), align: 'left' as const },
       { key: 'deps', label: t('schedule.predecessors', { defaultValue: 'Predecessors' }), align: 'left' as const },
@@ -626,6 +657,38 @@ export function ActivityGrid({
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="min-w-[170px] px-2 py-1.5 align-middle">
+                      <select
+                        key={`constraint-${a.id}-${a.constraint_type ?? ''}`}
+                        data-testid={`grid-constraint-${a.id}`}
+                        aria-label={t('schedule.constraint_col', { defaultValue: 'Constraint' })}
+                        className={CELL_INPUT_CLS}
+                        defaultValue={a.constraint_type ?? ''}
+                        disabled={cellsDisabled}
+                        onChange={(e) => commitConstraintType(a, e.target.value)}
+                      >
+                        <option value="">
+                          {t('schedule.constraint_kind.none', { defaultValue: 'None' })}
+                        </option>
+                        {CONSTRAINTS.map((c) => (
+                          <option key={c} value={c}>
+                            {t(`schedule.constraint_kind.${c}`, { defaultValue: c })}
+                          </option>
+                        ))}
+                      </select>
+                      {a.constraint_type && !UNDATED_CONSTRAINTS.includes(a.constraint_type) ? (
+                        <input
+                          key={`constraint-date-${a.id}-${a.constraint_date ?? ''}`}
+                          type="date"
+                          data-testid={`grid-constraint-date-${a.id}`}
+                          aria-label={t('schedule.constraint_date_aria', { defaultValue: 'Constraint date' })}
+                          className={CELL_INPUT_CLS}
+                          defaultValue={(a.constraint_date ?? '').slice(0, 10)}
+                          disabled={cellsDisabled}
+                          onBlur={(e) => commitConstraintDate(a, e.target.value)}
+                        />
+                      ) : null}
                     </td>
                     <td
                       className="px-3 py-1.5 align-middle"
