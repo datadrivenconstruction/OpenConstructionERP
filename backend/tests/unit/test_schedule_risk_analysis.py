@@ -91,10 +91,10 @@ class _StubActivityRepo:
         schedule_id: uuid.UUID,
         *,
         offset: int = 0,
-        limit: int = 1000,
+        limit: int | None = 1000,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.schedule_id == schedule_id]
-        return rows[offset : offset + limit], len(rows)
+        return rows[offset : None if limit is None else offset + limit], len(rows)
 
     async def bulk_update_fields(self, updates: list[dict[str, Any]]) -> None:
         for entry in updates:
@@ -151,12 +151,17 @@ class _StubRelationshipRepo:
         )
 
 
+async def _no_default_calendar(*_args: Any, **_kwargs: Any) -> None:
+    return None
+
+
 def _make_service() -> ScheduleService:
     svc = ScheduleService.__new__(ScheduleService)
     svc.schedule_repo = _StubScheduleRepo()
     svc.activity_repo = _StubActivityRepo()
     svc.relationship_repo = _StubRelationshipRepo()
     svc.session = None  # never touched: no deps -> no completion guard / project lookup
+    svc._project_default_calendar = _no_default_calendar  # type: ignore[method-assign]
     return svc
 
 
@@ -167,6 +172,8 @@ async def _create_schedule(svc: ScheduleService) -> Any:
             name="Master Schedule",
             start_date="2026-05-01",
             end_date="2027-03-31",
+            # Seven-day week: offsets equal working days, so the hand-computed figures hold.
+            metadata={"calendar": {"work_days": [0, 1, 2, 3, 4, 5, 6], "exceptions": []}},
         )
     )
 

@@ -62,6 +62,10 @@ def coded_http_error(status_code: int, code: str, message: str, **params: object
     return HTTPException(status_code=status_code, detail={"error": code, "message": message, **params})
 
 
+CPM_CRITICAL_COLOR = "#ef4444"
+CPM_NON_CRITICAL_COLOR = "#0071e3"
+
+
 def _normalize_deps(deps: list | None) -> list[dict]:
     """Normalize dependencies to list[dict].
 
@@ -3812,7 +3816,7 @@ class ScheduleService:
                     "total_float": cpm["total_float"],
                     "free_float": cpm["free_float"],
                     "is_critical": is_critical,
-                    "color": "#ef4444" if is_critical else "#0071e3",
+                    "color": CPM_CRITICAL_COLOR if is_critical else CPM_NON_CRITICAL_COLOR,
                 }
             )
 
@@ -4924,296 +4928,247 @@ class ScheduleService:
 
     # ── Critical Path Method ──────────────────────────────────────────────
 
-    async def calculate_critical_path(self, schedule_id: uuid.UUID) -> CriticalPathResponse:
-        """Calculate the critical path using forward/backward pass CPM.
+    async def calculate_critical_path(self, schedule_id: uuid.UUID, *, persist: bool = True) -> CriticalPathResponse:
+        """Thin wrapper over :meth:`run_cpm`, kept for existing callers."""
+        return await self.run_cpm(schedule_id, persist=persist)
 
-        Algorithm adapted from DDC_Toolkit _compute_cpm:
-        - Forward pass: compute Early Start (ES) and Early Finish (EF) for each activity
-        - Backward pass: compute Late Start (LS) and Late Finish (LF)
-        - Total Float = LS - ES
-        - Critical path = activities where Total Float = 0
+    async def run_cpm(
+        self,
+        schedule_id: uuid.UUID,
+        *,
+        persist: bool = True,
+        calendar: dict | None = None,
+    ) -> CriticalPathResponse:
+        """Run the calendar-aware CPM engine over a schedule: the one CPM entry point.
 
-        Supports FS (Finish-to-Start) and SS (Start-to-Start) dependency types.
-        Results are stored in each activity's metadata for later retrieval.
+        Builds the network exactly as :meth:`reschedule` does (per-activity and
+        schedule calendars, start-no-earlier floors for roots, canonical
+        relationships, resolved project start) and runs :func:`app.core.cpm.calculate_cpm`.
+        Summary rows never enter the network: they are rolled up afterwards as
+        min child early start / max child early finish and are never critical.
 
         Args:
-            schedule_id: Target schedule to analyze.
+            schedule_id: Target schedule.
+            persist: Write float, critical flag, colour and ``metadata_["cpm"]``
+                back to the activities. Read-only callers (risk analysis) pass False.
+            calendar: Optional work-calendar override for this run only.
 
         Returns:
-            CriticalPathResponse with all CPM data and the critical path.
+            CriticalPathResponse over the non-summary activities.
 
         Raises:
-            HTTPException 404 if schedule not found or has no activities.
+            HTTPException 404 if the schedule has no activities, 400 on a dependency cycle.
         """
-        await self.get_schedule(schedule_id)
-
-        activities, count = await self.activity_repo.list_for_schedule(schedule_id)
-        if count == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Schedule has no activities",
-            )
-
-        # Snapshot all activity data before the bulk write: ``bulk_update_fields``
-        # still ends in ``session.expire_all()``, so reading an activity back
-        # afterwards raises MissingGreenlet on the async session
-        act_data: list[dict] = []
-        for a in activities:
-            act_data.append(
-                {
-                    "id": str(a.id),
-                    "name": a.name or "",
-                    "duration_days": a.duration_days or 0,
-                    "activity_type": a.activity_type or "task",
-                    "dependencies": _normalize_deps(a.dependencies),
-                    "color": a.color or "#0071e3",
-                    # The CPM write below merges into this, so every other
-                    # key (a milestone's reached marker, import provenance,
-                    # links to sales contracts) survives a recalculation.
-                    "metadata_": dict(a.metadata_) if isinstance(a.metadata_, dict) else {},
-                }
-            )
-
-        # Build activity index and dependency map
-        idx: dict[str, dict] = {d["id"]: d for d in act_data}
-        active_ids = set(idx.keys())
-
-        # Parse dependencies: map activity_id -> list of (predecessor_id, type, lag)
-        deps: dict[str, list[tuple[str, str, int]]] = {d["id"]: [] for d in act_data}
-
-        # ScheduleRelationship is the SINGLE source of truth for edges. CPM reads
-        # ONLY the canonical table so a relationship the user deleted truly
-        # disappears from the network (the historical bug: a deleted row left a
-        # JSON copy that kept blocking CPM because the two were additively
-        # merged). All writers project the JSON into this table, so it is
-        # authoritative.
-        canonical_rows = await self.relationship_repo.list_for_schedule(schedule_id)
-        seen_pairs: set[tuple[str, str]] = set()
-        for r in canonical_rows:
-            pred_id = str(r.predecessor_id)
-            succ_id = str(r.successor_id)
-            if pred_id in active_ids and succ_id in active_ids:
-                deps[succ_id].append((pred_id, (r.relationship_type or "FS").upper(), r.lag_days or 0))
-                seen_pairs.add((pred_id, succ_id))
-
-        # Legacy fallback: only when the canonical table is EMPTY for this
-        # schedule do we read the activity-embedded JSON, so un-reconciled
-        # historical schedules (edges written only to the JSON before the
-        # unification) still compute. As soon as any canonical row exists the
-        # table is the sole authority and the JSON is ignored. The central
-        # migration's reconciliation removes the need for this path on
-        # production data; it is a safety net, never a competing source.
-        if not canonical_rows:
-            for ad in act_data:
-                act_id = ad["id"]
-                for dep in ad["dependencies"]:
-                    pred_id = str(dep.get("activity_id", ""))
-                    dep_type = dep.get("type", "FS")
-                    lag = dep.get("lag_days", 0)
-                    if pred_id in active_ids and (pred_id, act_id) not in seen_pairs:
-                        deps[act_id].append((pred_id, dep_type, lag))
-                        seen_pairs.add((pred_id, act_id))
-
-        # --- Topological sort (Kahn's algorithm) ---
-        # The forward/backward passes must visit each activity AFTER all of its
-        # predecessors. Iterating in raw DB order is unsafe: if a successor is
-        # listed before its predecessor, the forward pass would read ef.get(pred)
-        # as the fallback (0 + pred_dur) and produce wrong CPM dates. We also
-        # detect cycles here so we never silently return nonsense.
         from collections import defaultdict, deque
 
-        adj: dict[str, list[str]] = defaultdict(list)
-        in_degree: dict[str, int] = {d["id"]: 0 for d in act_data}
-        for succ_id, preds in deps.items():
-            for pred_id, _dep_type, _lag in preds:
-                adj[pred_id].append(succ_id)
-                in_degree[succ_id] += 1
+        from app.core.cpm import calculate_cpm
 
-        queue: deque[str] = deque([d["id"] for d in act_data if in_degree[d["id"]] == 0])
-        sorted_ids: list[str] = []
+        schedule = await self.get_schedule(schedule_id)
+        activities, _ = await self.activity_repo.list_for_schedule(schedule_id, limit=None)
+        if not activities:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Schedule has no activities")
+
+        summary_ids = {str(a.id) for a in activities if (a.activity_type or "task") == "summary"}
+        network = [a for a in activities if str(a.id) not in summary_ids]
+        network_ids = {str(a.id) for a in network}
+
+        # ScheduleRelationship is the sole authority for edges. The activity-embedded
+        # JSON is read only when the table is empty for this schedule (un-reconciled
+        # historical data), never merged with it.
+        canonical_rows = await self.relationship_repo.list_for_schedule(schedule_id)
+        raw_edges: list[tuple[str, str, str, int]] = [
+            (str(r.predecessor_id), str(r.successor_id), (r.relationship_type or "FS").upper(), r.lag_days or 0)
+            for r in canonical_rows
+        ]
+        if not canonical_rows:
+            for a in activities:
+                for dep in _normalize_deps(a.dependencies):
+                    raw_edges.append(
+                        (
+                            str(dep.get("activity_id", "")),
+                            str(a.id),
+                            str(dep.get("type") or "FS").upper(),
+                            dep.get("lag_days", 0) or 0,
+                        )
+                    )
+        seen_pairs: set[tuple[str, str]] = set()
+        rel_dicts: list[dict[str, object]] = []
+        for pred_id, succ_id, rel_type, lag in raw_edges:
+            if pred_id not in network_ids or succ_id not in network_ids or (pred_id, succ_id) in seen_pairs:
+                continue
+            seen_pairs.add((pred_id, succ_id))
+            rel_dicts.append({"predecessor_id": pred_id, "successor_id": succ_id, "type": rel_type, "lag": lag})
+
+        in_degree: dict[str, int] = dict.fromkeys(network_ids, 0)
+        adjacency: dict[str, list[str]] = defaultdict(list)
+        for rel in rel_dicts:
+            adjacency[str(rel["predecessor_id"])].append(str(rel["successor_id"]))
+            in_degree[str(rel["successor_id"])] += 1
+        queue: deque[str] = deque(aid for aid, deg in in_degree.items() if deg == 0)
+        visited = 0
         while queue:
             nid = queue.popleft()
-            sorted_ids.append(nid)
-            for succ in adj[nid]:
+            visited += 1
+            for succ in adjacency[nid]:
                 in_degree[succ] -= 1
                 if in_degree[succ] == 0:
                     queue.append(succ)
-
-        if len(sorted_ids) < len(act_data):
-            unsorted_ids = [d["id"] for d in act_data if d["id"] not in set(sorted_ids)]
-            unsorted_names = [idx[aid]["name"] or aid for aid in unsorted_ids[:5]]
+        if visited < len(network_ids):
+            names = [a.name or str(a.id) for a in network if in_degree[str(a.id)] > 0][:5]
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=("Schedule has a dependency cycle. Affected activities: " + ", ".join(unsorted_names)),
+                detail="Schedule has a dependency cycle. Affected activities: " + ", ".join(names),
             )
 
-        sorted_act_data: list[dict] = [idx[aid] for aid in sorted_ids]
+        project_start = self._resolve_project_start(schedule, activities)
+        has_predecessor = {str(r["successor_id"]) for r in rel_dicts}
+        activity_calendars = await self._resolve_activity_calendars(network, schedule.project_id)
+        act_dicts: list[dict[str, object]] = []
+        for a in network:
+            entry: dict[str, object] = {
+                "id": str(a.id),
+                "duration": a.duration_days or 0,
+                "name": a.name or "",
+                "start_offset": (0 if str(a.id) in has_predecessor else self._activity_start_offset(a, project_start)),
+            }
+            activity_calendar = activity_calendars.get(str(a.id))
+            if activity_calendar is not None:
+                entry["calendar"] = activity_calendar
+            act_dicts.append(entry)
 
-        # --- Forward pass: compute ES, EF ---
-        # Supports all 4 dependency types per PMBOK:
-        #   FS (Finish-to-Start): successor starts after predecessor finishes (+lag)
-        #   SS (Start-to-Start):  successor starts after predecessor starts (+lag)
-        #   FF (Finish-to-Finish): successor finishes after predecessor finishes (+lag)
-        #   SF (Start-to-Finish): successor finishes after predecessor starts (+lag)
-        es: dict[str, int] = {}
-        ef: dict[str, int] = {}
-        for ad in sorted_act_data:
-            act_id = ad["id"]
-            dur = ad["duration_days"]
-            act_es = 0
-            for pred_id, dep_type, lag in deps[act_id]:
-                dep_type = (dep_type or "FS").upper()
-                pred_dur = idx[pred_id]["duration_days"]
-                pred_ef = ef.get(pred_id, pred_dur)
-                pred_es = es.get(pred_id, 0)
-                if dep_type == "FS":
-                    candidate = pred_ef + lag
-                elif dep_type == "SS":
-                    candidate = pred_es + lag
-                elif dep_type == "FF":
-                    # Successor finish ≥ predecessor finish + lag → ES = EF_succ - dur
-                    candidate = pred_ef + lag - dur
-                elif dep_type == "SF":
-                    # Successor finish ≥ predecessor start + lag → ES = SF - dur
-                    candidate = pred_es + lag - dur
-                else:
-                    logger.warning(
-                        "Unknown dependency type '%s' on activity %s; treating as FS",
-                        dep_type,
-                        act_id,
-                    )
-                    candidate = pred_ef + lag
-                act_es = max(act_es, candidate)
-            es[act_id] = act_es
-            ef[act_id] = act_es + dur
+        default_calendar = calendar if calendar is not None else await self._resolve_schedule_default_calendar(schedule)
+        cpm_results = await calculate_cpm(
+            act_dicts,
+            rel_dicts,
+            calendar=default_calendar,
+            project_start_date=project_start.isoformat(),
+        )
+        cpm_map = {r["id"]: r for r in cpm_results}
 
-        # Project duration
-        project_duration = max(ef.values()) if ef else 0
-
-        # --- Backward pass: compute LS, LF ---
-        successors: dict[str, list[tuple[str, str, int]]] = {d["id"]: [] for d in act_data}
-        for ad in act_data:
-            act_id = ad["id"]
-            for pred_id, dep_type, lag in deps[act_id]:
-                successors[pred_id].append((act_id, dep_type, lag))
-
-        lf: dict[str, int] = {d["id"]: project_duration for d in act_data}
-        ls: dict[str, int] = {}
-
-        for ad in reversed(sorted_act_data):
-            act_id = ad["id"]
-            dur = ad["duration_days"]
-            for succ_id, dep_type, lag in successors.get(act_id, []):
-                dep_type = (dep_type or "FS").upper()
-                succ_ls = ls.get(succ_id, project_duration)
-                succ_lf = lf.get(succ_id, project_duration)
-                if dep_type == "FS":
-                    # pred LF ≤ succ LS - lag
-                    lf[act_id] = min(lf[act_id], succ_ls - lag)
-                elif dep_type == "SS":
-                    # pred LS ≤ succ LS - lag → LF = LS_succ - lag + dur
-                    lf[act_id] = min(lf[act_id], succ_ls - lag + dur)
-                elif dep_type == "FF":
-                    # pred LF ≤ succ LF - lag
-                    lf[act_id] = min(lf[act_id], succ_lf - lag)
-                elif dep_type == "SF":
-                    # pred LS ≤ succ LF - lag → LF = LF_succ - lag + dur
-                    lf[act_id] = min(lf[act_id], succ_lf - lag + dur)
-                else:
-                    logger.warning(
-                        "Unknown dependency type '%s' on backward pass %s → %s; treating as FS",
-                        dep_type,
-                        act_id,
-                        succ_id,
-                    )
-                    lf[act_id] = min(lf[act_id], succ_ls - lag)
-            ls[act_id] = lf[act_id] - dur
-
-        # --- Compute float and identify critical path ---
         all_results: list[CPMActivityResult] = []
         critical_results: list[CPMActivityResult] = []
-        # Accumulate per-activity persistence payloads and flush them in a
-        # single bulk UPDATE after the loop. The previous implementation issued
-        # one UPDATE *and* one session.expire_all() per activity (the latter via
-        # ActivityRepository.update_fields), which on a few-hundred-activity
-        # schedule meant hundreds of round trips plus repeated full-identity-map
-        # invalidation - the dominant cost of the /calculate-cpm/ button. The
-        # values persisted are byte-identical to before.
+        project_duration = 0
         calculated_at = datetime.now(UTC).isoformat()
-        cpm_updates: list[dict[str, object]] = []
-
-        for ad in act_data:
-            act_id = ad["id"]
-            total_float = ls[act_id] - es[act_id]
-            is_critical = total_float <= 0
-
+        updates: list[dict[str, object]] = []
+        for a in network:
+            aid = str(a.id)
+            cpm = cpm_map.get(aid)
+            if cpm is None:
+                continue
+            is_critical = bool(cpm["is_critical"])
+            project_duration = max(project_duration, cpm["early_finish"])
             result = CPMActivityResult(
-                activity_id=uuid.UUID(act_id),
-                name=ad["name"],
-                duration_days=ad["duration_days"],
-                early_start=es[act_id],
-                early_finish=ef[act_id],
-                late_start=ls[act_id],
-                late_finish=lf[act_id],
-                total_float=total_float,
+                activity_id=a.id,
+                name=a.name or "",
+                duration_days=a.duration_days or 0,
+                early_start=cpm["early_start"],
+                early_finish=cpm["early_finish"],
+                late_start=cpm["late_start"],
+                late_finish=cpm["late_finish"],
+                total_float=cpm["total_float"],
                 is_critical=is_critical,
             )
             all_results.append(result)
             if is_critical:
                 critical_results.append(result)
-
-            # Update activity color + CPM metadata - persist so the frontend
-            # can display ES/EF/LS/LF/float on next load without re-running CPM.
-            cpm_meta = {
-                "es": es[act_id],
-                "ef": ef[act_id],
-                "ls": ls[act_id],
-                "lf": lf[act_id],
-                "total_float": total_float,
-                "is_critical": is_critical,
-                "calculated_at": calculated_at,
-            }
-            new_color = "#ef4444" if is_critical else "#0071e3"
-            # Merge cpm into existing metadata_ so we don't clobber user-set keys
-            activity = idx.get(act_id)
-            existing_meta = {}
-            if activity:
-                raw_meta = activity.get("metadata_") or activity.get("metadata") or {}
-                if isinstance(raw_meta, dict):
-                    existing_meta = dict(raw_meta)
-            existing_meta["cpm"] = cpm_meta
-            cpm_updates.append(
-                {
-                    "id": uuid.UUID(act_id),
-                    "color": new_color,
-                    "metadata_": existing_meta,
+            if persist:
+                meta = dict(a.metadata_) if isinstance(a.metadata_, dict) else {}
+                meta["cpm"] = {
+                    "es": cpm["early_start"],
+                    "ef": cpm["early_finish"],
+                    "ls": cpm["late_start"],
+                    "lf": cpm["late_finish"],
+                    "total_float": cpm["total_float"],
+                    "is_critical": is_critical,
+                    "calculated_at": calculated_at,
                 }
+                updates.append(
+                    {
+                        "id": a.id,
+                        "early_start": str(cpm["early_start"]),
+                        "early_finish": str(cpm["early_finish"]),
+                        "late_start": str(cpm["late_start"]),
+                        "late_finish": str(cpm["late_finish"]),
+                        "total_float": cpm["total_float"],
+                        "free_float": cpm["free_float"],
+                        "is_critical": is_critical,
+                        "color": CPM_CRITICAL_COLOR if is_critical else CPM_NON_CRITICAL_COLOR,
+                        "metadata_": meta,
+                    }
+                )
+
+        summary_updates: list[dict[str, object]] = []
+        if persist and summary_ids:
+            children: dict[str, list[str]] = defaultdict(list)
+            for a in activities:
+                if a.parent_id is not None:
+                    children[str(a.parent_id)].append(str(a.id))
+            bounds: dict[str, tuple[int, int] | None] = {}
+
+            def _span(node: str) -> tuple[int, int] | None:
+                if node in bounds:
+                    return bounds[node]
+                bounds[node] = None  # a parent loop in bad data ends here
+                found: list[tuple[int, int]] = []
+                for child in children.get(node, []):
+                    if child in summary_ids:
+                        child_span = _span(child)
+                        if child_span is not None:
+                            found.append(child_span)
+                    elif child in cpm_map:
+                        found.append((cpm_map[child]["early_start"], cpm_map[child]["early_finish"]))
+                if found:
+                    bounds[node] = (min(f[0] for f in found), max(f[1] for f in found))
+                return bounds[node]
+
+            for a in activities:
+                if str(a.id) not in summary_ids:
+                    continue
+                span = _span(str(a.id))
+                meta = dict(a.metadata_) if isinstance(a.metadata_, dict) else {}
+                meta["cpm"] = {
+                    "es": span[0] if span else None,
+                    "ef": span[1] if span else None,
+                    "ls": None,
+                    "lf": None,
+                    "total_float": None,
+                    "is_critical": False,
+                    "calculated_at": calculated_at,
+                }
+                summary_updates.append(
+                    {
+                        "id": a.id,
+                        "early_start": str(span[0]) if span else None,
+                        "early_finish": str(span[1]) if span else None,
+                        "late_start": None,
+                        "late_finish": None,
+                        "total_float": None,
+                        "free_float": None,
+                        "is_critical": False,
+                        "metadata_": meta,
+                    }
+                )
+
+        if persist:
+            await self.activity_repo.bulk_update_fields(updates)
+            await self.activity_repo.bulk_update_fields(summary_updates)
+            await _safe_publish(
+                "schedule.cpm.calculated",
+                {
+                    "schedule_id": str(schedule_id),
+                    "project_duration": project_duration,
+                    "critical_count": len(critical_results),
+                },
+                source_module="oe_schedule",
             )
 
-        # Single bulk UPDATE by primary key (one statement, executemany under
-        # the hood) instead of N per-row update_fields() calls. The repository
-        # runs expire_all() exactly once afterwards so a subsequent get_by_id
-        # re-reads fresh state - matching the per-call contract the old loop
-        # relied on.
-        if cpm_updates:
-            await self.activity_repo.bulk_update_fields(cpm_updates)
-
-        await _safe_publish(
-            "schedule.cpm.calculated",
-            {
-                "schedule_id": str(schedule_id),
-                "project_duration": project_duration,
-                "critical_count": len(critical_results),
-            },
-            source_module="oe_schedule",
-        )
-
         logger.info(
-            "CPM calculated for schedule %s: duration=%d, critical=%d/%d",
+            "CPM calculated for schedule %s: duration=%d, critical=%d/%d, persisted=%s",
             schedule_id,
             project_duration,
             len(critical_results),
             len(all_results),
+            persist,
         )
 
         return CriticalPathResponse(
@@ -5250,7 +5205,7 @@ class ScheduleService:
             HTTPException 404 if schedule not found or has no activities.
         """
         # First ensure CPM has been calculated (need critical path)
-        cpm_result = await self.calculate_critical_path(schedule_id)
+        cpm_result = await self.run_cpm(schedule_id, persist=False)
 
         det_days = cpm_result.project_duration_days
 
