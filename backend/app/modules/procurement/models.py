@@ -207,6 +207,11 @@ class PurchaseOrderItem(Base):
     # from there to the BOQ positions it was raised from. A plain column, like
     # the requisition's own provenance, so a deleted line does not erase it.
     requisition_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Stock identity of the line: the catalogue item it buys and the warehouse it
+    # is delivered to. Plain ids (the catalogue is an optional module); a line
+    # without them is a service or a direct-to-site delivery and moves no stock.
+    catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    warehouse_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     # ── Receiving requirements (BF-01) ───────────────────────────────────
     # What the delivery of this line must arrive with. The certificate type is

@@ -2849,6 +2849,44 @@ class ProcurementService:
             },
         )
 
+        # One delivery, one posting: the stock subscriber in supplier_catalogs
+        # claims the key, so a replayed event moves stock once.
+        posted_lines = []
+        for gr_item in updated.items:
+            po_item = po_items_by_id.get(gr_item.po_item_id) if gr_item.po_item_id else None
+            if po_item is None:
+                continue
+            try:
+                accepted = Decimal(str(gr_item.quantity_received or "0")) - Decimal(
+                    str(gr_item.quantity_rejected or "0")
+                )
+            except (InvalidOperation, ValueError, TypeError):
+                continue
+            posted_lines.append(
+                {
+                    "po_line_id": str(po_item.id),
+                    "catalog_item_id": str(po_item.catalog_item_id) if po_item.catalog_item_id else None,
+                    "warehouse_id": str(po_item.warehouse_id) if po_item.warehouse_id else None,
+                    "cost_line_id": str(po_item.cost_line_id) if po_item.cost_line_id else None,
+                    "qty": str(max(accepted, Decimal("0"))),
+                    "unit": po_item.unit,
+                    "unit_rate": str(po_item.unit_rate or "0"),
+                    "batch_lot": gr_item.batch_lot,
+                }
+            )
+        await _safe_publish(
+            "procurement.goods_receipt.posted",
+            {
+                "gr_id": str(gr_id),
+                "po_id": str(updated.po_id),
+                "project_id": str(po.project_id),
+                "currency_code": po.currency_code or "",
+                "lines": posted_lines,
+                "actor_id": actor_id,
+                "idempotency_key": f"gr:{gr_id}:posted",
+            },
+        )
+
         logger.info("GR confirmed: %s", gr_id)
         return updated
 
