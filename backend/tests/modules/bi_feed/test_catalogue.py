@@ -143,3 +143,25 @@ async def test_rules_fail_on_a_bad_catalogue() -> None:
     assert not results[0].passed
     results = await v.LimitCapRule().validate(ValidationContext(data={"max_limit": 50001}))
     assert not results[0].passed
+
+
+def test_every_feed_names_the_read_permission_of_its_module() -> None:
+    from app.modules.bi_feed.feeds import FEEDS
+
+    assert all(s.permission.endswith(".read") for s in FEEDS.values())
+
+
+async def test_a_role_without_the_module_permission_gets_403_before_any_query(monkeypatch) -> None:
+    import pytest
+
+    from app.core.permissions import permission_registry
+    from app.modules.bi_feed.feeds import build_catalogue
+    from app.modules.bi_feed.service import BiFeedService
+    from app.modules.bi_feed.validators import BiFeedError, FeedParams
+
+    denied = {"finance.read"}
+    monkeypatch.setattr(permission_registry, "role_has_permission", lambda role, perm: perm not in denied)
+    service = BiFeedService(None, catalogue=build_catalogue())  # type: ignore[arg-type]
+    with pytest.raises(BiFeedError) as raised:
+        await service.export("invoices", "csv", "u", "viewer", FeedParams())
+    assert (raised.value.status_code, raised.value.code) == (403, "BI_FEED_FORBIDDEN")

@@ -93,11 +93,20 @@ class BiFeedService:
     async def _count(self, feed: ResolvedFeed, conditions: list[Any]) -> int:
         return int((await self._run(feed.query(func.count()).where(*conditions))).scalar_one())
 
-    async def list_feeds(self, user_id: str) -> list[FeedInfo]:
-        """Every feed with the caller's visible row count."""
+    @staticmethod
+    def _may_read(feed: ResolvedFeed, role: str) -> bool:
+        """True when the role holds the read permission of the module the feed comes from."""
+        from app.core.permissions import permission_registry
+
+        return permission_registry.role_has_permission(role, feed.spec.permission)
+
+    async def list_feeds(self, user_id: str, role: str) -> list[FeedInfo]:
+        """Every feed the caller's role may read, with the caller's visible row count."""
         await self._arm_timeout()
         infos = []
         for feed in self.catalogue.values():
+            if not self._may_read(feed, role):
+                continue
             conditions = await self._scope(feed, user_id, FeedParams())
             infos.append(
                 FeedInfo(
@@ -109,7 +118,7 @@ class BiFeedService:
             )
         return infos
 
-    async def export(self, feed_id: str, fmt: str, user_id: str, params: FeedParams) -> FeedExport:
+    async def export(self, feed_id: str, fmt: str, user_id: str, role: str, params: FeedParams) -> FeedExport:
         """One page (``limit`` given) or the rest of the feed, encoded as ``fmt``.
 
         Rows come in primary-key order. Offset paging is exact while nothing is inserted
@@ -117,6 +126,8 @@ class BiFeedService:
         gaps even then.
         """
         feed = self.feed(feed_id)
+        if not self._may_read(feed, role):
+            raise BiFeedError(403, "BI_FEED_FORBIDDEN", f"Your role cannot read the {feed_id} feed")
         await self._arm_timeout()
         conditions = await self._scope(feed, user_id, params)
         total = await self._count(feed, conditions)
