@@ -1708,6 +1708,18 @@ class SupplierCatalogsService(PriceListOps):
                 }
         return None
 
+    async def migration_preview(self, project_id: uuid.UUID, user_id: str | None = None) -> dict[str, Any]:
+        """Dry run of the copy into procurement for one project: counts and unmappable rows, nothing written."""
+        from app.modules.supplier_catalogs import legacy_migration
+
+        await self._guard_project(project_id, user_id)
+        result = await self.session.run_sync(
+            lambda sync_session: legacy_migration.migrate_project(
+                sync_session.connection(), str(project_id), write=False
+            )
+        )
+        return result.as_dict()
+
     # ── Invoice & 3-way match ─────────────────────────────────────────────────
 
     async def create_invoice(

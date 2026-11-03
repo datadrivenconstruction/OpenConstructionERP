@@ -46,6 +46,7 @@ class PurchaseOrder(Base):
             "po_number",
             name="uq_procurement_po_project_number",
         ),
+        UniqueConstraint("legacy_source", "legacy_id", name="uq_procurement_po_legacy"),
         # Hot filter: both the supplier scorecard (vendor_contact_id == X AND
         # created_at >= cutoff) and the PO-list ``vendor_contact_id`` filter
         # scan on this column, which was previously unindexed - a full table
@@ -136,6 +137,11 @@ class PurchaseOrder(Base):
     )
 
     # Relationships
+    # Where an order copied from another module came from; null for an order
+    # raised here. The pair is unique, so a copy can be run twice safely.
+    legacy_source: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    legacy_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
     items: Mapped[list["PurchaseOrderItem"]] = relationship(
         back_populates="purchase_order",
         cascade="all, delete-orphan",
@@ -183,6 +189,7 @@ class PurchaseOrderItem(Base):
     """A single line item within a purchase order."""
 
     __tablename__ = "oe_procurement_po_item"
+    __table_args__ = (UniqueConstraint("legacy_source", "legacy_id", name="uq_procurement_po_item_legacy"),)
 
     po_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -212,6 +219,8 @@ class PurchaseOrderItem(Base):
     # without them is a service or a direct-to-site delivery and moves no stock.
     catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     warehouse_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    legacy_source: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    legacy_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     # ── Receiving requirements (BF-01) ───────────────────────────────────
     # What the delivery of this line must arrive with. The certificate type is
@@ -279,6 +288,7 @@ class GoodsReceipt(Base):
     """A goods receipt recorded against a purchase order."""
 
     __tablename__ = "oe_procurement_goods_receipt"
+    __table_args__ = (UniqueConstraint("legacy_source", "legacy_id", name="uq_procurement_gr_legacy"),)
 
     po_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -303,6 +313,8 @@ class GoodsReceipt(Base):
     # live in optional modules.
     approval_instance_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     inspection_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    legacy_source: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    legacy_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
