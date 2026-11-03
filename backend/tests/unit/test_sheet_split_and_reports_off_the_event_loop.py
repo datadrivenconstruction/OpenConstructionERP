@@ -74,7 +74,9 @@ def _split_service(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Any:
     monkeypatch.setattr(documents_service, "DocumentRepository", _Documents)
     monkeypatch.setattr(documents_service, "_register_version_safely", AsyncMock(return_value=None))
     service = documents_service.SheetService(MagicMock())
-    service.repo = SimpleNamespace(create_many=AsyncMock(side_effect=lambda rows: rows))
+    service.repo = SimpleNamespace(
+        create_many=AsyncMock(side_effect=lambda rows: rows), current_by_chain_key=AsyncMock(return_value={})
+    )
     monkeypatch.setattr(service, "_supersede_previous_sheets", AsyncMock(return_value=0))
     return service
 

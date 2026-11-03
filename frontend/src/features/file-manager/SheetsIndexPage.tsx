@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Check,
+  CheckCheck,
   FileStack,
   FileText,
   Layers,
@@ -38,15 +39,26 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   bulkUpdateSheets,
+  confirmSheetExtraction,
+  confirmSheetsBulk,
   rereadTitleBlocks,
   splitPdfIntoSheets,
   SheetSplitError,
   type SheetBulkPatch,
+  type SheetConfirmBulkSummary,
   type SheetRereadSummary,
 } from './api';
 import { SheetsBulkEditBar } from './SheetsBulkEditBar';
 import { SheetDetailDrawer } from './SheetDetailDrawer';
 import { buildSheetsInsights } from './sheetsInsights';
+import {
+  BULK_CONFIRM_THRESHOLD,
+  bulkConfirmable,
+  needsReview,
+  ocrUnavailable,
+  percent,
+  readExtraction,
+} from './sheetExtraction';
 import { earlierRevisionCounts, revisionOrderUnclear } from './sheetStack';
 import type { SheetRow } from './types';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -220,6 +232,34 @@ function HowSheetsWork() {
   );
 }
 
+/** How the row's title block was read and how far to trust it. */
+function ReadBadge({ sheet }: { sheet: SheetRow }) {
+  const { t } = useTranslation();
+  const e = readExtraction(sheet);
+  if (!e) return null;
+  if (e.reason === 'ocr_unavailable' && e.needsReview) {
+    return (
+      <span className="mt-0.5 block font-sans text-2xs text-semantic-warning">
+        {t('sheets.read_unavailable', { defaultValue: 'Not read: OCR unavailable' })}
+      </span>
+    );
+  }
+  const label =
+    e.source === 'ocr'
+      ? t('sheets.read_ocr', { defaultValue: 'Read by OCR, {{percent}}%', percent: percent(e.confidence) })
+      : t('sheets.read_text', { defaultValue: 'Read from text, {{percent}}%', percent: percent(e.confidence) });
+  return (
+    <span
+      className={clsx(
+        'mt-0.5 block font-sans text-2xs',
+        e.needsReview ? 'text-semantic-warning' : 'text-content-tertiary',
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
 /* ── Main page ───────────────────────────────────────────────────────── */
 
 export function SheetsIndexPage() {
@@ -234,6 +274,11 @@ export function SheetsIndexPage() {
   const [openSheet, setOpenSheet] = useState<SheetRow | null>(null);
   const [splitError, setSplitError] = useState<string | null>(null);
   const [splitAdded, setSplitAdded] = useState<number | null>(null);
+  const [splitHeld, setSplitHeld] = useState(0);
+  const [reviewOnly, setReviewOnly] = useState(false);
+  const [confirmAllAsked, setConfirmAllAsked] = useState(false);
+  const [confirmResult, setConfirmResult] = useState<SheetConfirmBulkSummary | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [rereadAsked, setRereadAsked] = useState(false);
   const [rereadResult, setRereadResult] = useState<SheetRereadSummary | null>(null);
   const [rereadError, setRereadError] = useState<string | null>(null);
@@ -285,6 +330,7 @@ export function SheetsIndexPage() {
     onSuccess: (created) => {
       setSplitError(null);
       setSplitAdded(created.length);
+      setSplitHeld(created.filter(needsReview).length);
       queryClient.invalidateQueries({ queryKey: ['sheets', projectId] });
       // The chip row is built from a separate query: a set that brings in a
       // discipline the project had never seen leaves it stale otherwise.
@@ -318,6 +364,40 @@ export function SheetsIndexPage() {
       queryClient.invalidateQueries({ queryKey: ['sheet-disciplines', projectId] });
     },
     onError: (err: unknown) => setBulkError(err instanceof Error ? err.message : String(err)),
+  });
+
+  /* AI suggests, a person confirms: a sheet read by OCR (or from a thin text
+     layer) is held and supersedes nothing until it is confirmed. Confirming
+     places it in its revision stack, which can retire other rows, so every
+     view of the register is refetched. */
+  function refreshAfterConfirm() {
+    queryClient.invalidateQueries({ queryKey: ['sheets', projectId] });
+    queryClient.invalidateQueries({ queryKey: ['sheet-versions'] });
+    queryClient.invalidateQueries({ queryKey: ['sheet-disciplines', projectId] });
+  }
+
+  const confirmRowMutation = useMutation({
+    mutationFn: (id: string) => confirmSheetExtraction(id),
+    onSuccess: () => {
+      setConfirmError(null);
+      refreshAfterConfirm();
+    },
+    onError: (err: unknown) => setConfirmError(err instanceof Error ? err.message : String(err)),
+  });
+
+  const confirmAllMutation = useMutation({
+    mutationFn: () => confirmSheetsBulk(projectId, BULK_CONFIRM_THRESHOLD),
+    onSuccess: (summary) => {
+      setConfirmAllAsked(false);
+      setConfirmError(null);
+      setConfirmResult(summary);
+      refreshAfterConfirm();
+    },
+    onError: (err: unknown) => {
+      setConfirmAllAsked(false);
+      setConfirmResult(null);
+      setConfirmError(err instanceof Error ? err.message : String(err));
+    },
   });
 
   function toggleSelected(id: string) {
@@ -386,6 +466,7 @@ export function SheetsIndexPage() {
     return sheets.filter((s) => {
       if (disciplineFilter && s.discipline !== disciplineFilter) return false;
       if (currentOnly && !s.is_current) return false;
+      if (reviewOnly && !needsReview(s)) return false;
       if (!q) return true;
       const hay = [
         s.sheet_number,
@@ -399,7 +480,7 @@ export function SheetsIndexPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [sheets, disciplineFilter, currentOnly, searchQuery]);
+  }, [sheets, disciplineFilter, currentOnly, reviewOnly, searchQuery]);
   // A bulk edit changes only the ticked sheets the filters still show, so a
   // sheet ticked and then filtered away is never changed out of sight.
   const selectedShown = useMemo(
@@ -410,6 +491,9 @@ export function SheetsIndexPage() {
   /* How many revisions each row stands on, read off the loaded rows' links, so
      a current sheet can say it is the top of a stack and not a lone upload. */
   const earlierCounts = useMemo(() => earlierRevisionCounts(sheets), [sheets]);
+  const reviewCount = useMemo(() => sheets.filter(needsReview).length, [sheets]);
+  const confirmableCount = useMemo(() => bulkConfirmable(sheets).length, [sheets]);
+  const threshold = percent(BULK_CONFIRM_THRESHOLD);
 
   /* Insights are built from the rows the page already holds - no extra
      request. Built from the project's whole set rather than `filtered`: the
@@ -530,6 +614,22 @@ export function SheetsIndexPage() {
                 className={inputCls + ' pl-9'}
               />
             </div>
+            {reviewCount > 0 && (
+              <button
+                type="button"
+                aria-pressed={reviewOnly}
+                onClick={() => setReviewOnly((v) => !v)}
+                className={clsx(
+                  'inline-flex items-center h-7 px-3 rounded-full text-xs font-medium transition-colors',
+                  reviewOnly
+                    ? 'bg-semantic-warning text-white'
+                    : 'bg-semantic-warning/10 text-content-primary hover:bg-semantic-warning/20',
+                )}
+              >
+                {t('sheets.filter_needs_review', { defaultValue: 'Needs review' })}
+                <span className="ms-1.5 tabular-nums opacity-70">{reviewCount}</span>
+              </button>
+            )}
             <label className="inline-flex items-center gap-2 text-sm text-content-secondary">
               <input
                 type="checkbox"
@@ -540,6 +640,24 @@ export function SheetsIndexPage() {
               {t('sheets.filter_current_only', { defaultValue: 'Current revisions only' })}
             </label>
             <div className="sm:ms-auto flex flex-wrap items-center gap-2">
+              {canEdit && reviewCount > 0 && (
+                <Button
+                  variant="secondary"
+                  icon={<CheckCheck size={14} />}
+                  loading={confirmAllMutation.isPending}
+                  disabled={confirmableCount === 0 || splitMutation.isPending}
+                  onClick={() => {
+                    setConfirmResult(null);
+                    setConfirmError(null);
+                    setConfirmAllAsked(true);
+                  }}
+                >
+                  {t('sheets.confirm_all_cta', {
+                    defaultValue: 'Confirm all above {{percent}}%',
+                    percent: threshold,
+                  })}
+                </Button>
+              )}
               {canEdit && sheets.length > 0 && (
                 <Button
                   variant="secondary"
@@ -580,6 +698,26 @@ export function SheetsIndexPage() {
             onCancel={() => setRereadAsked(false)}
           />
 
+          <ConfirmDialog
+            open={confirmAllAsked}
+            variant="warning"
+            loading={confirmAllMutation.isPending}
+            title={t('sheets.confirm_all_title', {
+              defaultValue: 'Confirm all machine-read sheets above {{percent}}%?',
+              percent: threshold,
+            })}
+            message={t('sheets.confirm_all_body', {
+              defaultValue:
+                '{{count}} sheets read at {{percent}}% or better are accepted as read and take their place in the revision stack, superseding earlier revisions of the same sheet. Sheets that OCR could not read, and sheets without a number, stay held.',
+              count: confirmableCount,
+              percent: threshold,
+            })}
+            confirmLabel={t('sheets.confirm_all_action', { defaultValue: 'Confirm' })}
+            cancelLabel={t('sheets.edit_cancel', { defaultValue: 'Cancel' })}
+            onConfirm={() => confirmAllMutation.mutate()}
+            onCancel={() => setConfirmAllAsked(false)}
+          />
+
           {/* Hidden native input - both split triggers proxy their click here. */}
           <input
             ref={pdfInputRef}
@@ -618,6 +756,33 @@ export function SheetsIndexPage() {
                 defaultValue: '{{count}} sheets added to the register.',
                 count: splitAdded,
               })}
+              {splitHeld > 0 && (
+                <>
+                  {' '}
+                  {t('sheets.split_needs_review', {
+                    defaultValue:
+                      '{{count}} of them need review before they supersede earlier revisions.',
+                    count: splitHeld,
+                  })}
+                </>
+              )}
+            </p>
+          )}
+          {confirmResult && !confirmAllMutation.isPending && (
+            <p role="status" className="mb-4 text-sm text-semantic-success">
+              {t('sheets.confirm_all_done', {
+                defaultValue: '{{count}} sheets confirmed.',
+                count: confirmResult.confirmed,
+              })}
+            </p>
+          )}
+          {confirmError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-sm text-semantic-error"
+            >
+              {t('sheets.confirm_failed', { defaultValue: 'The reading could not be confirmed.' })}{' '}
+              {confirmError}
             </p>
           )}
 
@@ -771,6 +936,11 @@ export function SheetsIndexPage() {
                       <th className="text-center px-4 py-2.5 border-b border-border-light font-medium">
                         {t('sheets.col_current', { defaultValue: 'Current?' })}
                       </th>
+                      {canEdit && reviewCount > 0 && (
+                        <th className="text-center px-4 py-2.5 border-b border-border-light font-medium">
+                          {t('sheets.col_review', { defaultValue: 'Review' })}
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -811,6 +981,7 @@ export function SheetsIndexPage() {
                           >
                             {s.sheet_number ?? `p.${s.page_number}`}
                           </button>
+                          <ReadBadge sheet={s} />
                         </td>
                         <td className="px-4 py-3 text-content-primary">
                           {s.sheet_title ?? (
@@ -898,6 +1069,24 @@ export function SheetsIndexPage() {
                             </span>
                           )}
                         </td>
+                        {canEdit && reviewCount > 0 && (
+                          <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+                            {needsReview(s) && !ocrUnavailable(s) && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                loading={confirmRowMutation.isPending && confirmRowMutation.variables === s.id}
+                                aria-label={t('sheets.confirm_row_aria', {
+                                  defaultValue: 'Confirm the reading of sheet {{number}}',
+                                  number: s.sheet_number ?? `p.${s.page_number}`,
+                                })}
+                                onClick={() => confirmRowMutation.mutate(s.id)}
+                              >
+                                {t('sheets.confirm_row', { defaultValue: 'Confirm' })}
+                              </Button>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

@@ -572,3 +572,48 @@ def extract_inline_revision(text: str | None) -> str | None:
     if not text:
         return None
     return _revision_from(text, drop_prose=False)
+
+
+# ── Reading confidence ──────────────────────────────────────────────────────
+
+# A read below this is held for a person to confirm; an OCR read always is.
+REVIEW_THRESHOLD = 0.8
+
+# What a text layer can reach at best: it is trusted, never certain.
+_TEXT_LAYER_CEILING = 0.9
+# Without a sheet number there is nothing to stack on, whatever else was read.
+_NO_NUMBER_CAP = 0.4
+
+
+def field_score(fields: dict[str, object]) -> float:
+    """How complete a title block read is, 0..0.9, from the fields the parser found.
+
+    The sheet number carries half the weight (it is the stacking key), the
+    title and the revision a fifth each, the date or the discipline the rest.
+    A number with a title or a revision is trusted at the review threshold at least.
+    """
+    if not fields.get("sheet_number"):
+        raw = 0.2 * bool(fields.get("sheet_title")) + 0.2 * bool(fields.get("revision"))
+        raw += 0.1 * bool(fields.get("revision_date") or fields.get("discipline"))
+        return round(min(raw * _TEXT_LAYER_CEILING, _NO_NUMBER_CAP), 4)
+    has_title, has_revision = bool(fields.get("sheet_title")), bool(fields.get("revision"))
+    raw = 0.5 + 0.2 * has_title + 0.2 * has_revision
+    raw += 0.1 * bool(fields.get("revision_date") or fields.get("discipline"))
+    score = raw * _TEXT_LAYER_CEILING
+    # A number plus one more labelled field is the sparsest title block a
+    # text layer is still trusted on; a bare number is not.
+    if has_title or has_revision:
+        score = max(score, REVIEW_THRESHOLD)
+    return round(score, 4)
+
+
+def score_fields(fields: dict[str, object], source: str, ocr_confidence: float | None = None) -> float:
+    """Confidence 0..1 of one page's title block read.
+
+    ``source`` is ``"text"`` (the PDF's own text layer) or ``"ocr"``; an OCR read
+    is capped by the recogniser's own mean word confidence.
+    """
+    score = field_score(fields)
+    if source == "ocr":
+        return round(min(max(ocr_confidence or 0.0, 0.0), 1.0, score), 4)
+    return score
