@@ -35760,7 +35760,6 @@
       "module_category": "core",
       "files": [
         "__init__.py",
-        "fx_view.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -35913,12 +35912,6 @@
           "handler": "search_catalog",
           "response_model": "CatalogSearchResponse",
           "request_schema": "OptionalUserPayload"
-        },
-        {
-          "method": "GET",
-          "path": "/fx-view/",
-          "handler": "catalog_fx_view",
-          "response_model": "CatalogFxView"
         },
         {
           "method": "GET",
@@ -36234,9 +36227,7 @@
         }
       ],
       "import_dependencies": [
-        "assemblies",
-        "costs",
-        "projects"
+        "costs"
       ]
     },
     {
@@ -106464,6 +106455,7 @@
         "__init__.py",
         "bank.py",
         "cii.py",
+        "inbound.py",
         "manifest.py",
         "pdf_embed.py",
         "pdf_translations.py",
@@ -106869,6 +106861,10 @@
       "files": [
         "__init__.py",
         "adapters.py",
+        "chain.py",
+        "consolidation.py",
+        "irp.py",
+        "lifecycle.py",
         "manifest.py",
         "mentions.py",
         "models.py",
@@ -106959,6 +106955,12 @@
               "name": "is_active",
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "mode",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
               "nullable": false
             },
             {
@@ -107132,6 +107134,24 @@
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
+            },
+            {
+              "name": "document_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "previous_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "period",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -107254,6 +107274,12 @@
         },
         {
           "method": "GET",
+          "path": "/documents/overview",
+          "handler": "documents_overview",
+          "response_model": "list[OverviewRow]"
+        },
+        {
+          "method": "GET",
           "path": "/documents/{document_id}",
           "handler": "read_clearance_document",
           "response_model": "DocumentResponse"
@@ -107308,6 +107334,32 @@
           "handler": "cancel_clearance_document",
           "response_model": "SubmissionResponse",
           "request_schema": "CancelRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/setup/",
+          "handler": "einvoice_setup",
+          "response_model": "list[SetupRow]"
+        },
+        {
+          "method": "GET",
+          "path": "/documents/{document_id}/lifecycle",
+          "handler": "read_document_lifecycle",
+          "response_model": "LifecycleResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/consolidated/preview",
+          "handler": "preview_consolidated",
+          "response_model": "ConsolidatedPreviewResponse",
+          "request_schema": "ConsolidatedPreviewRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/consolidated/",
+          "handler": "create_consolidated",
+          "response_model": "DocumentSaveResponse",
+          "request_schema": "ConsolidatedPreviewRequest"
         }
       ],
       "schemas": [
@@ -107346,6 +107398,10 @@
               "name": "sandbox",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "mode",
+              "type": "str"
             },
             {
               "name": "is_active",
@@ -107426,6 +107482,11 @@
               "type": "bool"
             },
             {
+              "name": "mode",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "is_active",
               "type": "bool"
             },
@@ -107486,6 +107547,10 @@
             {
               "name": "country_fields",
               "type": "dict[str, str]"
+            },
+            {
+              "name": "document_kind",
+              "type": "str"
             },
             {
               "name": "payload",
@@ -107640,6 +107705,21 @@
             {
               "name": "adapter_key",
               "type": "str"
+            },
+            {
+              "name": "document_kind",
+              "type": "str",
+              "default": "'standard'"
+            },
+            {
+              "name": "previous_hash",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "period",
+              "type": "str",
+              "default": "''"
             },
             {
               "name": "created_at",
@@ -108074,6 +108154,330 @@
             {
               "name": "adapters",
               "type": "list[AdapterResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "LifecycleFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "params",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "DeadlineResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "starts_at",
+              "type": "str"
+            },
+            {
+              "name": "due_at",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "seconds_left",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "LifecycleResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the invoice card shows: state, deadline, next actions, findings.",
+          "fields": [
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "platform",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "mode",
+              "type": "str"
+            },
+            {
+              "name": "document_kind",
+              "type": "str"
+            },
+            {
+              "name": "identifier_label",
+              "type": "str"
+            },
+            {
+              "name": "authority_identifier",
+              "type": "str"
+            },
+            {
+              "name": "deadlines",
+              "type": "list[DeadlineResponse]"
+            },
+            {
+              "name": "allowed_actions",
+              "type": "list[str]"
+            },
+            {
+              "name": "findings",
+              "type": "list[LifecycleFinding]"
+            },
+            {
+              "name": "has_consolidation",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "SetupRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One e-invoicing market as the setup card and the visibility gate read it.",
+          "fields": [
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "platform",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "profile_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "mode",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "ready",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "missing",
+              "type": "list[str]"
+            },
+            {
+              "name": "has_consolidation",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ConsolidatedPreviewRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "profile_id",
+              "type": "UUID"
+            },
+            {
+              "name": "period",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ConsolidatedReceipt",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "date",
+              "type": "str"
+            },
+            {
+              "name": "net",
+              "type": "str"
+            },
+            {
+              "name": "tax",
+              "type": "str"
+            },
+            {
+              "name": "gross",
+              "type": "str"
+            },
+            {
+              "name": "source_id",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ConsolidatedPreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "period",
+              "type": "str"
+            },
+            {
+              "name": "due_date",
+              "type": "str | None"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            },
+            {
+              "name": "net",
+              "type": "str"
+            },
+            {
+              "name": "tax",
+              "type": "str"
+            },
+            {
+              "name": "total",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "included",
+              "type": "list[ConsolidatedReceipt]"
+            },
+            {
+              "name": "excluded",
+              "type": "list[ConsolidatedReceipt]"
+            }
+          ]
+        },
+        {
+          "class_name": "OverviewRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "invoice_id",
+              "type": "UUID | None"
+            },
+            {
+              "name": "invoice_number",
+              "type": "str"
+            },
+            {
+              "name": "invoice_date",
+              "type": "str"
+            },
+            {
+              "name": "buyer_name",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "total_amount",
+              "type": "str"
+            },
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "document_kind",
+              "type": "str"
+            },
+            {
+              "name": "deadline",
+              "type": "DeadlineResponse | None"
+            },
+            {
+              "name": "blocking",
+              "type": "int"
             }
           ]
         }
@@ -154043,7 +154447,8 @@
         "documents",
         "finance",
         "legal_entities",
-        "projects"
+        "projects",
+        "property_dev"
       ]
     },
     {
@@ -200778,6 +201183,58 @@
           "relationships": []
         },
         {
+          "class_name": "BrokerLicence",
+          "tablename": "oe_property_dev_broker_licence",
+          "docstring": "One licence a broker holds with a licensing authority.\n\nNeutral on purpose: the authority code, the number and the validity window\nare data. Which authority a country expects, and what it calls the\nlicence, lives in the country data (``broker_licence`` in the regional\nprofile), never here.",
+          "columns": [
+            {
+              "name": "broker_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_property_dev_broker.id"
+            },
+            {
+              "name": "authority_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "licence_number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "valid_from",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "valid_to",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
           "class_name": "CommissionAgreement",
           "tablename": "oe_property_dev_commission_agreement",
           "docstring": "A broker's commission contract on a development (or all developments).\n\n``structure_type`` determines the shape of the ``structure`` JSONB:\n  - ``flat``:    ``{\"amount\": \"5000\", \"currency\": \"EUR\"}``\n  - ``percent``: ``{\"pct\": \"2.50\"}``\n  - ``ladder``:  ``{\"tiers\": [{\"threshold\": \"100000\", \"pct\": \"1.5\"}, ...]}``\n\n``accrual_trigger`` controls which event lifecycle stage flips this\nagreement into an accrual: lead_qualified / reservation_paid /\nspa_signed (default) / handover_complete.",
@@ -202716,6 +203173,40 @@
           "path": "/brokers/{broker_id}/verify-kyc",
           "handler": "verify_broker_kyc",
           "response_model": "BrokerResponse",
+          "request_schema": "PropertyDevService"
+        },
+        {
+          "method": "GET",
+          "path": "/broker-licences/",
+          "handler": "list_broker_licences",
+          "response_model": "list[BrokerLicenceResponse]",
+          "request_schema": "PropertyDevService"
+        },
+        {
+          "method": "GET",
+          "path": "/brokers/{broker_id}/licences/",
+          "handler": "list_licences_of_broker",
+          "response_model": "list[BrokerLicenceResponse]",
+          "request_schema": "PropertyDevService"
+        },
+        {
+          "method": "POST",
+          "path": "/brokers/{broker_id}/licences/",
+          "handler": "create_broker_licence",
+          "response_model": "BrokerLicenceResponse",
+          "request_schema": "BrokerLicenceCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/brokers/{broker_id}/licences/{licence_id}",
+          "handler": "update_broker_licence",
+          "response_model": "BrokerLicenceResponse",
+          "request_schema": "BrokerLicenceUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/brokers/{broker_id}/licences/{licence_id}",
+          "handler": "delete_broker_licence",
           "request_schema": "PropertyDevService"
         },
         {
@@ -208069,6 +208560,129 @@
               "name": "active",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "BrokerLicenceCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Create a licence record for a broker.",
+          "fields": [
+            {
+              "name": "authority_code",
+              "type": "str"
+            },
+            {
+              "name": "licence_number",
+              "type": "str"
+            },
+            {
+              "name": "valid_from",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "valid_to",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "BrokerLicenceUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Partial update for a licence record.",
+          "fields": [
+            {
+              "name": "authority_code",
+              "type": "str | None"
+            },
+            {
+              "name": "licence_number",
+              "type": "str | None"
+            },
+            {
+              "name": "valid_from",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "valid_to",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str | None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BrokerLicenceResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Broker licence as returned by the API.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "broker_id",
+              "type": "UUID"
+            },
+            {
+              "name": "authority_code",
+              "type": "str"
+            },
+            {
+              "name": "licence_number",
+              "type": "str"
+            },
+            {
+              "name": "valid_from",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "valid_to",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "'active'"
             },
             {
               "name": "metadata",
@@ -237851,6 +238465,11 @@
           "path": "/stats/",
           "handler": "schedule_stats",
           "response_model": "ScheduleStatsResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/holidays/",
+          "handler": "schedule_public_holidays"
         },
         {
           "method": "GET",
@@ -295825,10 +296444,10 @@
     },
     {
       "name": "catalog",
-      "ts_files": 5,
+      "ts_files": 3,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 0,
+      "total_files": 3
     },
     {
       "name": "cde",
@@ -296154,10 +296773,10 @@
     },
     {
       "name": "einvoice-clearance",
-      "ts_files": 9,
+      "ts_files": 19,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 9
+      "test_files": 4,
+      "total_files": 19
     },
     {
       "name": "engineering_brief",
@@ -296924,10 +297543,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 82,
+      "ts_files": 84,
       "css_files": 0,
-      "test_files": 35,
-      "total_files": 82
+      "test_files": 36,
+      "total_files": 84
     },
     {
       "name": "schedule-advanced",
@@ -297399,9 +298018,7 @@
       "users"
     ],
     "catalog": [
-      "assemblies",
-      "costs",
-      "projects"
+      "costs"
     ],
     "cde": [
       "approval_routes",
@@ -298139,7 +298756,8 @@
       "documents",
       "finance",
       "legal_entities",
-      "projects"
+      "projects",
+      "property_dev"
     ],
     "legal_entities": [
       "projects"
@@ -298941,14 +299559,14 @@
   "statistics": {
     "backend_modules": 227,
     "modules_with_manifests": 225,
-    "total_models": 851,
-    "total_columns": 10018,
+    "total_models": 852,
+    "total_columns": 10029,
     "total_relationships": 257,
-    "total_routes": 4895,
-    "total_schemas": 4399,
-    "total_python_files": 3059,
+    "total_routes": 4905,
+    "total_schemas": 4410,
+    "total_python_files": 3063,
     "frontend_features": 224,
-    "frontend_ts_files": 3917,
+    "frontend_ts_files": 3927,
     "frontend_backend_mapped": 200
   },
   "frontend_backend_mapping": {
