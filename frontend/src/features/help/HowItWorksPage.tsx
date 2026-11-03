@@ -90,6 +90,7 @@ import {
 } from './moduleExplanations';
 import { useHelpOrderStore, type HelpSortMode } from './useHelpOrderStore';
 import { useNameCollator } from '@/shared/lib/collator';
+import { DemoQuickStart } from './DemoQuickStart';
 
 /* ── Icon resolution ────────────────────────────────────────────────────── */
 
@@ -418,7 +419,9 @@ export function HowItWorksPage() {
   const totalCount = MODULE_EXPLANATIONS.length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6" data-testid="how-it-works-page">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8" data-testid="how-it-works-page">
+      <DemoQuickStart />
+
       {/* Header. */}
       <div className="mb-6">
         <div className="flex items-center gap-2 text-oe-blue">
