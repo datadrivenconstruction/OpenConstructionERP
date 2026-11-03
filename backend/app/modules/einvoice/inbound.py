@@ -51,6 +51,8 @@ class InboundInvoice:
     amount_tax: Decimal = Decimal("0")
     amount_gross: Decimal = Decimal("0")
     is_credit_note: bool = False
+    order_reference: str = ""
+    lines: list[dict[str, str]] = field(default_factory=list)
     findings: list[dict[str, str]] = field(default_factory=list)
 
     def capture_fields(self) -> dict[str, Any]:
@@ -108,7 +110,32 @@ def _parse_ubl(root: Any) -> InboundInvoice:
     out.amount_net = _d(_t(root, "cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount"))
     out.amount_gross = _d(_t(root, "cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount"))
     out.amount_tax = _d(_t(root, "cac:TaxTotal/cbc:TaxAmount"))
+    out.order_reference = _t(root, "cac:OrderReference/cbc:ID")
+    for node in [*root.findall("cac:InvoiceLine", _NS), *root.findall("cac:CreditNoteLine", _NS)]:
+        out.lines.append(
+            _line(
+                _t(node, "cac:Item/cbc:Name") or _t(node, "cac:Item/cbc:Description"),
+                _t(node, "cbc:InvoicedQuantity") or _t(node, "cbc:CreditedQuantity"),
+                _t(node, "cac:Price/cbc:PriceAmount"),
+                _t(node, "cbc:LineExtensionAmount"),
+            )
+        )
     return out
+
+
+def _line(description: str, quantity: str, unit_rate: str, amount: str) -> dict[str, str]:
+    """One invoice line as the inbox stores it; an unreadable figure becomes ``0``."""
+
+    def num(text: str, default: str) -> str:
+        value = _d(text) if text else Decimal(default)
+        return format(value, "f") if value.is_finite() and value >= 0 else default
+
+    return {
+        "description": description[:500],
+        "quantity": num(quantity, "1"),
+        "unit_rate": num(unit_rate, "0"),
+        "amount": num(amount, "0"),
+    }
 
 
 def _endpoint(node: Any) -> str:
@@ -140,6 +167,19 @@ def _parse_cii(root: Any) -> InboundInvoice:
     out.amount_net = _d(_t(root, f"{summation}/ram:TaxBasisTotalAmount"))
     out.amount_tax = _d(_t(root, f"{summation}/ram:TaxTotalAmount"))
     out.amount_gross = _d(_t(root, f"{summation}/ram:GrandTotalAmount"))
+    out.order_reference = _t(root, f"{agreement}/ram:BuyerOrderReferencedDocument/ram:IssuerAssignedID")
+    for node in root.findall(f"{trade}/ram:IncludedSupplyChainTradeLineItem", _NS):
+        out.lines.append(
+            _line(
+                _t(node, "ram:SpecifiedTradeProduct/ram:Name"),
+                _t(node, "ram:SpecifiedLineTradeDelivery/ram:BilledQuantity"),
+                _t(node, "ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:ChargeAmount"),
+                _t(
+                    node,
+                    "ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount",
+                ),
+            )
+        )
     return out
 
 
