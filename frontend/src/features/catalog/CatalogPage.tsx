@@ -41,6 +41,7 @@ import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { fmtList, fmtPercent, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
 import {
   assembliesApi,
@@ -51,9 +52,10 @@ import {
 import { getResourceTypeLabel } from '@/features/boq/boqResourceTypes';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { copyToClipboard } from '@/shared/lib/browser';
-import { currencyFractionDigits } from '@/shared/lib/money';
+import { currencyFractionDigits, formatCurrency } from '@/shared/lib/money';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { importToastTone } from '@/shared/lib/importToastTone';
+import { pickRegionForProject, convertedPrice, type CatalogFxView } from './catalogFx';
 
 // English fallbacks for the computed `catalog.assembly_cat_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -278,7 +280,7 @@ function RegionImportGrid({
   onImported,
 }: {
   loadedRegionIds: Set<string>;
-  onImported: () => void;
+  onImported: (regionId: string) => void;
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -293,10 +295,16 @@ function RegionImportGrid({
       addToast({
         type: importToastTone(result.imported),
         title: t('catalog.import_success', { defaultValue: 'Import complete' }),
-        message: `${result.imported} ${t('catalog.resources_imported', { defaultValue: 'resources imported' })}`,
+        message: t('catalog.import_counts', {
+          defaultValue: '{{imported}} imported, {{skipped}} skipped',
+          imported: result.imported,
+          skipped: result.skipped ?? 0,
+        }),
       });
       setImportingId(null);
-      onImported();
+      // Land on what was just imported: the list otherwise stays on the
+      // previously selected region and the new rows look as if they never arrived.
+      onImported(result.region);
     },
     onError: (err: Error) => {
       addToast({
@@ -680,6 +688,7 @@ function ResourceRow({
   onSelect,
   onCopy,
   copiedId,
+  fxView,
   t: translate,
 }: {
   resource: CatalogResource;
@@ -689,8 +698,10 @@ function ResourceRow({
   onSelect: () => void;
   onCopy: () => void;
   copiedId: string | null;
+  fxView?: CatalogFxView | null;
   t: ReturnType<typeof useTranslation>['t'];
 }) {
+  const converted = convertedPrice(Number(resource.base_price), resource.currency, fxView);
   const typeColors: Record<string, string> = {
     material: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     equipment: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -774,7 +785,36 @@ function ResourceRow({
 
         {/* Price (avg) */}
         <td className="px-3 py-3 text-right text-xs font-semibold text-content-primary tabular-nums whitespace-nowrap">
-          {fmt(Number(resource.base_price), resource.currency)}
+          <div>
+            {fmt(Number(resource.base_price), resource.currency)}
+            {resource.currency ? (
+              <span className="ml-1 text-2xs font-normal text-content-tertiary">{resource.currency}</span>
+            ) : null}
+          </div>
+          {converted.kind === 'converted' ? (
+            <div
+              className="text-2xs font-normal text-content-tertiary"
+              data-testid="catalog-converted-price"
+              title={translate('catalog.fx_rate_date', {
+                defaultValue: 'Rate of {{date}}',
+                date: converted.asOf ? new Date(converted.asOf).toLocaleDateString(getIntlLocale()) : '-',
+              })}
+            >
+              {'≈ '}
+              {formatCurrency(converted.amount, converted.currency)}
+            </div>
+          ) : converted.kind === 'unpriced' ? (
+            <div
+              className="text-2xs font-normal text-amber-600"
+              data-testid="catalog-no-rate"
+              title={translate('catalog.fx_no_rate_hint', {
+                defaultValue: 'No exchange rate to {{currency}} is on file. Add one in the project currency settings.',
+                currency: converted.currency,
+              })}
+            >
+              {translate('catalog.fx_no_rate', { defaultValue: 'Different currency, not converted' })}
+            </div>
+          ) : null}
         </td>
 
         {/* Price Range */}
@@ -1529,20 +1569,38 @@ export function CatalogPage() {
     retry: false,
   });
 
+  // Rates from every currency on screen into the active project's currency.
+  // Region currencies are included so the project currency is known before
+  // the first region is picked.
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const regionCurrencies = (regionStats ?? [])
+    .map((r) => REGION_MAP[r.region]?.currency)
+    .filter((c): c is string => Boolean(c));
+
   // Auto-pick a region when no filter is active and rows exist somewhere.
-  // Mirrors the CostsPage fallback so a user landing on /catalog after
-  // /setup/databases doesn't see "0 resources" when the just-loaded region
-  // is sitting one click away.
+  // Inside a project the catalogue opens on a region quoted in the project's
+  // currency when one is loaded; otherwise on the first loaded region.
+  // Waits for the project currency so the list does not flash a foreign region.
+  const fxProbeKey = [...new Set(regionCurrencies)].sort().join(',');
+  const { data: probeView, isLoading: probeLoading } = useQuery({
+    queryKey: ['catalog', 'fx-view', activeProjectId, fxProbeKey],
+    queryFn: () =>
+      apiGet<CatalogFxView>(
+        `/v1/catalog/fx-view/?project_id=${encodeURIComponent(activeProjectId ?? '')}&currencies=${fxProbeKey}`,
+      ),
+    enabled: !!activeProjectId && fxProbeKey.length > 0,
+    retry: false,
+  });
   useEffect(() => {
     if (region) return;
     if (regionFromUrl) return;
-    const first = (regionStats ?? [])
-      .map((r) => r.region)
-      .find((r): r is string => Boolean(r));
+    if (activeProjectId && fxProbeKey && probeLoading) return;
+    const loaded = (regionStats ?? []).map((r) => r.region).filter((r): r is string => Boolean(r));
+    const first = pickRegionForProject(loaded, probeView?.project_currency);
     if (!first) return;
     setRegion(first);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionStats]);
+  }, [regionStats, probeLoading, probeView]);
 
   // Fetch resources
   const searchUrl = buildSearchUrl(debouncedQuery, resourceType, category, unit, region, offset);
@@ -1554,6 +1612,18 @@ export function CatalogPage() {
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
+
+  // Rates for the currencies of the rows on screen, into the project currency.
+  const itemCurrencies = [...new Set(items.map((i) => (i.currency || '').toUpperCase()).filter(Boolean))].sort().join(',');
+  const { data: fxView } = useQuery({
+    queryKey: ['catalog', 'fx-view', activeProjectId, 'items', itemCurrencies],
+    queryFn: () =>
+      apiGet<CatalogFxView>(
+        `/v1/catalog/fx-view/?project_id=${encodeURIComponent(activeProjectId ?? '')}&currencies=${itemCurrencies}`,
+      ),
+    enabled: !!activeProjectId && itemCurrencies.length > 0,
+    retry: false,
+  });
 
   // Count per type for tabs
   const typeCountMap = new Map(
@@ -1666,6 +1736,14 @@ export function CatalogPage() {
   const invalidateAll = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['catalog'] });
   }, [queryClient]);
+
+  const handleImported = useCallback(
+    (importedRegion: string) => {
+      invalidateAll();
+      if (importedRegion) handleRegionChange(importedRegion);
+    },
+    [invalidateAll, handleRegionChange],
+  );
 
   return (
     <div className="relative space-y-5 animate-fade-in">
@@ -1790,7 +1868,7 @@ export function CatalogPage() {
 
       {/* Region Import Grid (expandable) */}
       {(showImportGrid || (!hasAnyRegions && totalCount === 0)) && (
-        <RegionImportGrid loadedRegionIds={loadedRegionIds} onImported={invalidateAll} />
+        <RegionImportGrid loadedRegionIds={loadedRegionIds} onImported={handleImported} />
       )}
 
       {/* Region Tab Bar */}
@@ -2151,6 +2229,7 @@ export function CatalogPage() {
                         onSelect={() => toggleSelect(resource.id)}
                         onCopy={() => handleCopyRate(resource)}
                         copiedId={copiedId}
+                        fxView={fxView}
                         t={t}
                       />
                     );

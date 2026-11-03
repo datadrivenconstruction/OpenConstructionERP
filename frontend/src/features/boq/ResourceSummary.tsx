@@ -162,7 +162,8 @@ export function ResourceSummary({
           base_price: resource.avg_unit_rate,
           min_price: resource.avg_unit_rate,
           max_price: resource.avg_unit_rate,
-          currency: resource.currency || 'EUR',
+          // The project's own currency, never an assumed euro; omitted when neither is known.
+          currency: resource.currency || currency || undefined,
           source: 'boq_import',
           region: 'CUSTOM',
           specifications: {
@@ -194,7 +195,7 @@ export function ResourceSummary({
         setSavingResource(null);
       }
     },
-    [addToast, t, boqId, queryClient],
+    [addToast, t, boqId, queryClient, currency],
   );
 
   void savingResource; // used implicitly via savedResources
@@ -840,7 +841,7 @@ function ResourceRow({
                   stats={stats}
                   anchorEl={pillRef.current}
                   unitLabel={resource.unit}
-                  currency={resource.currency || 'EUR'}
+                  currency={resource.currency || currency || ''}
                   defaultStrategy={resource.variant_default ?? 'mean'}
                   onApply={handleApply}
                   onClose={closePicker}

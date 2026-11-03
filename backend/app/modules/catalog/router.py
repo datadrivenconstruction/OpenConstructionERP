@@ -54,6 +54,7 @@ from app.dependencies import (
     RequirePermission,
     SessionDep,
 )
+from app.modules.catalog.fx_view import CatalogFxView
 from app.modules.catalog.schemas import (
     CatalogResourceCreate,
     CatalogResourceResponse,
@@ -539,7 +540,8 @@ async def import_region_catalog(session: AsyncSession, region: str) -> dict[str,
 
     Raises:
         ValueError: ``region`` has no catalogue in ``REGION_MAP``.
-        RuntimeError: The CSV could be neither found locally nor downloaded.
+        RuntimeError: The CSV could be neither found locally nor downloaded, or
+            it held no importable row (the region is then left unchanged).
     """
     import csv
     import io
@@ -554,17 +556,24 @@ async def import_region_catalog(session: AsyncSession, region: str) -> dict[str,
     logger.info("Catalog CSV for %s resolved from %s (%d bytes)", region, csv_source, len(raw_bytes))
 
     text = raw_bytes.decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(text))
+    rows = list(csv.DictReader(io.StringIO(text)))
 
     from sqlalchemy import delete as sql_delete
 
     from app.modules.catalog.models import CatalogResource
 
-    # Delete existing resources for this region (clean reimport)
-    await session.execute(sql_delete(CatalogResource).where(CatalogResource.region == region))
-    await session.flush()
-
-    imported, skipped = await _add_catalog_rows(session, region, reader, source="github_import")
+    # Replace the region's rows inside a savepoint: a file that yields no usable
+    # row must fail the request and leave the existing catalogue as it was,
+    # never report success over an empty or half-replaced region.
+    async with session.begin_nested():
+        await session.execute(sql_delete(CatalogResource).where(CatalogResource.region == region))
+        await session.flush()
+        imported, skipped = await _add_catalog_rows(session, region, rows, source="github_import")
+        if imported == 0:
+            raise RuntimeError(
+                f"The '{region}' catalogue file was read ({len(rows)} rows, {skipped} skipped) "
+                "but no resource could be imported from it. The existing catalogue was left unchanged."
+            )
 
     logger.info(
         "Catalog import complete for %s: %d imported, %d skipped",
@@ -1007,6 +1016,25 @@ async def search_catalog(
         limit=limit,
         offset=offset,
     )
+
+
+@router.get("/fx-view/", response_model=CatalogFxView)
+async def catalog_fx_view(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(description="Project whose currency the rates are quoted in"),
+    currencies: str = Query(default="", description="Comma separated ISO 4217 codes present in the listing"),
+) -> CatalogFxView:
+    """Rate from each listed catalogue currency into the project's currency."""
+    from app.dependencies import verify_project_access
+    from app.modules.assemblies.fx_bridge import load_fx_context
+    from app.modules.catalog.fx_view import build_fx_view
+    from app.modules.projects.repository import ProjectRepository
+
+    await verify_project_access(project_id, user_id, session)
+    project = await ProjectRepository(session).get_by_id(project_id)
+    context = await load_fx_context(session, project)
+    return build_fx_view(context, currencies.split(","))
 
 
 # ── Stats ─────────────────────────────────────────────────────────────────
