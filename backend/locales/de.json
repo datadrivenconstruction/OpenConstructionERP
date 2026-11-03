@@ -2562,5 +2562,6 @@
       "file_missing": "Die Datei von Foto '{name}' fehlt im Speicher",
       "file_missing_fix": "Foto erneut hochladen oder aus einer Sicherung wiederherstellen"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Investitionsplan", "col": {"title": "Projekt", "priority": "Priorität", "status": "Status", "total": "Gesamtkosten"}, "row": {"envelope": "Budgetrahmen", "demand": "Bedarf", "gap": "Deckungslücke"}}}
 }
