@@ -76,7 +76,6 @@ from app.modules.contracts.repository import (
 )
 from app.modules.contracts.schemas import (
     COUNTERPARTY_TYPES,
-    AIAApplicationResponse,
     AutoGenerateClaimRequest,
     ContractCloneRequest,
     ContractCountryDefaultsResponse,
@@ -1595,15 +1594,13 @@ async def delete_claim_line(
     await service.roll_claim_retention(claim.id, gross_follows_lines=True)
 
 
-# ── AIA G702/G703 payment applications (US/CA/AU only) ─────────────────────
+# ── Payment applications ────────────────────────────────────────────────
 #
-# AIA G702 (Application and Certificate for Payment) and G703 (Continuation
-# Sheet) are the standard US progress-billing documents, also adopted in CA and
-# AU. They are country-gated: the service raises 404 unless the claim's project
-# country resolves to US/CA/AU, so for every other market these endpoints behave
-# as if they do not exist (no information leak). They are an additive AIA
-# presentation layer over the existing progress-claim engine - no new claim
-# state, no duplicated retention/finance math.
+# The figures are the same in every market. The printed form they go on is
+# supplied by a regional pack through ``pay_application_forms``; its routes are
+# the catch-all ``/progress-claims/{claim_id}/{form_slug}`` at the end of this
+# file, so every specific claim route above wins first. A project outside the
+# form's market gets 404, as if the form did not exist.
 
 
 @router.get(
@@ -1624,63 +1621,27 @@ async def get_payment_application(
 
 
 @router.get(
-    "/progress-claims/{claim_id}/aia-application",
-    response_model=AIAApplicationResponse,
-    summary="AIA G702 summary + G703 continuation for a progress claim (US/CA/AU)",
+    "/progress-claims/{claim_id}/payment-forms",
+    summary="Payment-application forms the claim's project may use",
 )
-async def get_aia_application(
+async def list_payment_forms(
     claim_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("contracts.read")),
-) -> AIAApplicationResponse:
-    await _verify_claim_access(session, claim_id, user_id)
-    service = ContractsService(session)
-    payload = await service.build_aia_application(claim_id)
-    return AIAApplicationResponse.model_validate(payload)
+) -> list[dict[str, Any]]:
+    from app.modules.contracts.pay_application_forms import eligible_forms
+    from app.modules.projects.models import Project
 
-
-@router.get(
-    "/progress-claims/{claim_id}/aia-application/pdf",
-    summary="Export the AIA G702/G703 application as PDF (US/CA/AU)",
-    response_description="application/pdf stream",
-)
-async def export_aia_application_pdf(
-    claim_id: uuid.UUID,
-    session: SessionDep,
-    user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("contracts.read")),
-) -> StreamingResponse:
-    import io
-
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
-
-    await _verify_claim_access(session, claim_id, user_id)
-    service = ContractsService(session)
-    # English, like every other word on the form and the Content-Language
-    # below. The request's language would have printed one row in German or
-    # Russian on an English page.
-    payload = await service.build_aia_application(claim_id, locale="en")
-    # ReportLab layout is CPU-bound and synchronous; in a thread it does not
-    # stall every other request on the event loop while the form is drawn.
-    pdf_bytes = await asyncio.to_thread(render_aia_application_pdf, payload)
-    safe_num = "".join(c for c in str(payload.get("application_number") or "app") if c.isalnum() or c in "-_") or "app"
-    filename = f"AIA_G702_{safe_num}.pdf"
-    return StreamingResponse(
-        io.BytesIO(pdf_bytes),
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-            # The payment application is drawn from English literals in
-            # aia_pdf.py and no locale reaches it, so the route declares English
-            # rather than letting the Accept-Language middleware answer for it.
-            # The form is a US contract instrument, so English is also the
-            # language it is meant to be read in; that makes the declaration
-            # settled rather than provisional, unlike the exports whose labels
-            # would follow a catalogue if one existed.
-            "Content-Language": "en",
-        },
-    )
+    claim = await _verify_claim_access(session, claim_id, user_id)
+    contract = await ContractsService(session).get_contract(claim.contract_id)
+    project = await session.get(Project, contract.project_id)
+    if project is None:
+        return []
+    return [
+        {"slug": f.slug, "title": f.title, "module": f.module, "language": f.language}
+        for f in eligible_forms(project.country_code, project.address)
+    ]
 
 
 # ── Payment certificate (hakediş) ────────────────────────────────────────
@@ -3156,3 +3117,67 @@ async def contract_completeness(
     await _verify_contract_access(session, contract_id, user_id)
     service = ContractsService(session)
     return await service.validate_contract_completeness(contract_id)
+
+
+# ── Regional payment-application forms (catch-all, keep last) ───────────
+
+
+@router.get(
+    "/progress-claims/{claim_id}/{form_slug}",
+    response_model=PaymentApplicationResponse,
+    summary="A regional payment-application form's figures for a progress claim",
+)
+async def get_form_application(
+    claim_id: uuid.UUID,
+    form_slug: str,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> PaymentApplicationResponse:
+    from app.modules.contracts.pay_application_forms import get_form
+
+    if get_form(form_slug) is None:
+        raise HTTPException(status_code=404, detail="Not Found")
+    await _verify_claim_access(session, claim_id, user_id)
+    payload = await ContractsService(session).build_form_application(form_slug, claim_id)
+    return PaymentApplicationResponse.model_validate(payload)
+
+
+@router.get(
+    "/progress-claims/{claim_id}/{form_slug}/pdf",
+    summary="Export a regional payment-application form as PDF",
+    response_description="application/pdf stream",
+)
+async def export_form_application_pdf(
+    claim_id: uuid.UUID,
+    form_slug: str,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> StreamingResponse:
+    import io
+
+    from app.modules.contracts.pay_application_forms import get_form
+
+    form = get_form(form_slug)
+    if form is None:
+        raise HTTPException(status_code=404, detail="Not Found")
+    await _verify_claim_access(session, claim_id, user_id)
+    service = ContractsService(session)
+    # The form's own language, like every other word on it and the
+    # Content-Language below; the request's language would mix two on one page.
+    payload = await service.build_form_application(form_slug, claim_id, locale=form.language)
+    # ReportLab layout is CPU-bound; in a thread it does not stall the event loop.
+    pdf_bytes = await asyncio.to_thread(form.render_pdf, payload)
+    safe_num = "".join(c for c in str(payload.get("application_number") or "app") if c.isalnum() or c in "-_") or "app"
+    filename = f"{form.filename_prefix}_{safe_num}.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": attachment_disposition(filename),
+            # The form is drawn in its own language and no locale reaches it, so the
+            # route declares that language rather than the Accept-Language middleware.
+            "Content-Language": form.language,
+        },
+    )

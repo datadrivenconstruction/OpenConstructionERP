@@ -123,7 +123,7 @@ async def test_three_generated_cost_plus_months_do_not_drift(pg_session) -> None
             (await _claim(pg_session, job, f"PC-{index - 2}", index)).id,
             AutoGenerateClaimRequest(actual_costs_total=cost),
         )
-        summary = (await svc.build_aia_application(claim.id))["summary"]
+        summary = (await svc.build_form_application("aia-application", claim.id))["summary"]
         expected_period_net = (cost - cost / Decimal("10")).quantize(Decimal("0.0001"))
         rows.append(
             f"month {index}: cost={cost} claim_net={claim.net_due} L4={summary['total_completed_stored']} "

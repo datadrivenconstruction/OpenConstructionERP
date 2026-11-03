@@ -131,7 +131,7 @@ async def _generate(svc: ContractsService, world, claim: ProgressClaim, **comple
 
 async def _certificate(svc: ContractsService, claim: ProgressClaim) -> dict:
     """The claim's application, asserting line 8 is what the claim is owed."""
-    application = await svc.build_aia_application(claim.id)
+    application = await svc.build_form_application("aia-application", claim.id)
     summary = application["summary"]
     # net_due is stored at four places and the certificate prints cents, so
     # compare unquantized: a sub-cent divergence is exactly what this catches.

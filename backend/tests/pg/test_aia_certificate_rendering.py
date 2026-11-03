@@ -152,7 +152,7 @@ async def test_parent_rollup_line_is_not_listed_beside_its_children_rv_s16(pg_se
         await svc.line_repo.update_fields(job.lines[code].id, parent_line_id=parent.id)
 
     claim = await _bill(svc, job, 1, {"A": "40", "B": "40"})
-    app = await svc.build_aia_application(claim.id)
+    app = await svc.build_form_application("aia-application", claim.id)
 
     assert [row["item_number"] for row in app["lines"]] == ["A", "B"]
     assert _column(app, "scheduled_value") == app["summary"]["contract_sum_to_date"] == Decimal("100000.00")
@@ -194,7 +194,7 @@ async def test_a_parent_line_billed_by_hand_stays_on_the_sheet(pg_session) -> No
             cumulative_completed_value=Decimal("1000"),
         )
     )
-    app = await svc.build_aia_application(claim.id)
+    app = await svc.build_form_application("aia-application", claim.id)
 
     assert "P" in [row["item_number"] for row in app["lines"]]
     billed = [row for row in app["lines"] if row["item_number"] == "P"][0]
@@ -221,7 +221,7 @@ async def test_a_line_billed_at_zero_percent_still_shows_what_it_billed(pg_sessi
     second = await _bill(svc, job, 2, {"A": "60"})
     billed = [ln.contract_line_id for ln in await svc.claim_line_repo.list_for_claim(second.id)]
     assert billed.count(job.lines["B"].id) == 1
-    app = await svc.build_aia_application(second.id)
+    app = await svc.build_form_application("aia-application", second.id)
 
     unmoved = [row for row in app["lines"] if row["item_number"] == "B"][0]
     assert unmoved["previous_value"] == Decimal("16000.00")
@@ -251,7 +251,7 @@ async def test_a_claim_with_no_sov_lines_bills_its_own_totals_rv_s13(pg_session,
         return AutoGenerateClaimRequest(time_entries_total=Decimal(amount), material_entries_total=Decimal("0"))
 
     first = await svc.auto_generate_claim_lines((await _claim(svc, job, 1)).id, _request("50000"))
-    app = await svc.build_aia_application(first.id)
+    app = await svc.build_form_application("aia-application", first.id)
     assert len(app["lines"]) == 1
     assert app["summary"]["total_completed_stored"] == Decimal("50000.00")
     assert app["summary"]["retainage"] == Decimal("5000.00")
@@ -259,7 +259,7 @@ async def test_a_claim_with_no_sov_lines_bills_its_own_totals_rv_s13(pg_session,
     await svc.transition_claim(first.id, "submitted")
 
     second = await svc.auto_generate_claim_lines((await _claim(svc, job, 2)).id, _request("30000"))
-    app2 = await svc.build_aia_application(second.id)
+    app2 = await svc.build_form_application("aia-application", second.id)
     row = app2["lines"][0]
     assert row["previous_value"] == Decimal("50000.00")
     assert row["this_period_value"] == Decimal("30000.00")
@@ -302,7 +302,7 @@ async def test_a_cost_plus_sheet_reads_the_same_once_the_month_before_is_certifi
         (await _claim(svc, job, 2)).id,
         AutoGenerateClaimRequest(actual_costs_total=Decimal("30000")),
     )
-    summary = (await svc.build_aia_application(second.id))["summary"]
+    summary = (await svc.build_form_application("aia-application", second.id))["summary"]
     # Reconstructed, not snapshot, and the figure is the same either way here.
     # Month one billed with no lines, so previous_certificates refuses the
     # snapshot: that branch reads a cumulative assembled from schedule lines,
@@ -371,7 +371,7 @@ async def test_a_month_off_the_schedule_reaches_the_sheet_of_the_month_billed_on
     second = await svc.transition_claim(second.id, "certified", "certifier")
     assert Decimal(str(second.gross_amount)) == Decimal("30000.0000")
 
-    app = await svc.build_aia_application(second.id)
+    app = await svc.build_form_application("aia-application", second.id)
     summary = app["summary"]
 
     # The month billed from cost is on the sheet, on a row of its own, and it
@@ -449,7 +449,7 @@ async def test_a_month_off_the_schedule_reaches_the_sheet_of_the_month_billed_on
     await svc.claim_repo.update_fields(third.id, status="approved")
     third = await svc.transition_claim(third.id, "certified", "certifier")
 
-    third_app = await svc.build_aia_application(third.id)
+    third_app = await svc.build_form_application("aia-application", third.id)
     third_summary = third_app["summary"]
 
     # The cost month is still on the sheet and still counted once.

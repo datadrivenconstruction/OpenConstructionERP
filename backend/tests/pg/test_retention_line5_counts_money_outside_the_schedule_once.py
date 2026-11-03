@@ -219,7 +219,7 @@ def _cents(value) -> Decimal:
 
 async def _sheet(svc, claim):
     """The G702 face, the out-of-schedule row's column I, and the claim's stored net due."""
-    application = await svc.build_aia_application(claim.id)
+    application = await svc.build_form_application("aia-application", claim.id)
     summary = application["summary"]
     outside = [row for row in application["lines"] if row["item_number"] == ""]
     return SimpleNamespace(
@@ -326,12 +326,12 @@ async def test_currency_precision_survives_certification_outside_schedule_and_fu
     second = await _schedule_month(svc, pg_session, job, 2, {"A": gross})
     assert second.retention_amount == second.retention_held_to_date == held
     assert second.net_due == amount - held
-    application = await svc.build_aia_application(second.id)
+    application = await svc.build_form_application("aia-application", second.id)
     assert Decimal(str(application["summary"]["retainage"])) == held * 2
     assert Decimal(str(application["summary"]["current_payment_due"])) == second.net_due
     assert sum(Decimal(str(row["retainage"])) for row in application["lines"]) == held * 2
     released = await _release_month(svc, pg_session, job, 3, str(held * 2))
-    application = await svc.build_aia_application(released.id)
+    application = await svc.build_form_application("aia-application", released.id)
     assert Decimal(str(application["summary"]["retainage"])) == 0
     assert sum(Decimal(str(row["retainage"])) for row in application["lines"]) == 0
     assert released.net_due == held * 2
@@ -358,6 +358,6 @@ async def test_reading_a_legacy_certificate_does_not_rewrite_sub_yen_retention(p
     )
     await pg_session.refresh(claim)
     before = (claim.status, claim.retention_amount, claim.retention_held_to_date, claim.net_due)
-    await svc.build_aia_application(claim.id)
+    await svc.build_form_application("aia-application", claim.id)
     await pg_session.refresh(claim)
     assert (claim.status, claim.retention_amount, claim.retention_held_to_date, claim.net_due) == before
