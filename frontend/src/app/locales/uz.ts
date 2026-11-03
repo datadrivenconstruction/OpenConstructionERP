@@ -60783,7 +60783,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Ushbu serverning operatsion tizimi yoki protsessori uchun {{format}} konverteri build’i mavjud emas. Build’lar Windows x64, Linux x64 va ARM64 uchun, shuningdek Intel va Apple silicon’li macOS uchun mavjud. DXF chizmalari har qanday platformada oʻqiladi, IFC modellari esa oʻrnatilgan oʻquvchi orqali BIM Hub’da ochiladi.",
     "api_errors.unsupported_cad_extension": "{{ext}} fayllari bu yerda qo‘llab-quvvatlanmaydi. Quyidagilardan birini ishlating: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} fayllari uchun konverter mavjud emas. Qo‘llab-quvvatlanadigan formatlar: {{supported}}.",
-    "api_errors.module_disabled": "{{module}} moduli ushbu ish maydoni uchun o'chirilgan. Administrator uni Modullar > Yechim paketlari bo'limida yoqishi mumkin.",
+    "api_errors.module_disabled": "{{module}} moduli ushbu ish maydoni uchun oʻchirilgan. Administrator uni Modullar > Yechim paketlari boʻlimida yoqishi mumkin.",
     "conv.stage_upload": "Fayl yuklanmoqda",
     "conv.stage_upload_hint": "Fayl serverga yuborilmoqda. Tugaguncha bu varaqni ochiq qoldiring.",
     "conv.stage_converter": "Konvertor tayyorlanmoqda",

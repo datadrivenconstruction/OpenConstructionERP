@@ -24882,6 +24882,7 @@
         "resource_review_router.py",
         "resource_scaling.py",
         "resource_scaling_service.py",
+        "restructure.py",
         "revit_categories.py",
         "roundtrip.py",
         "router.py",
@@ -25998,6 +25999,13 @@
           "request_schema": "BulkPositionUpdate"
         },
         {
+          "method": "POST",
+          "path": "/boqs/{boq_id}/positions/restructure/",
+          "handler": "restructure_positions",
+          "response_model": "RestructureResult",
+          "request_schema": "BOQService"
+        },
+        {
           "method": "PATCH",
           "path": "/boqs/{boq_id}/positions/sheet-edit/",
           "handler": "sheet_edit_positions",
@@ -27025,7 +27033,7 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Atomic bulk update for a set of positions within a BOQ.\n\nAccepts one of four mutation styles, applied to every ``ids`` entry:\n\n* ``updates`` - direct field assignment (e.g. ``{\"unit\": \"m3\"}`` or\n  ``{\"classification\": {\"din276\": \"330\"}}``). The same payload is\n  written to every selected position.\n* ``rate_factor`` - multiply each row's existing ``unit_rate`` by a\n  scalar (e.g. 1.05 = +5 %). Reads the row's current value, writes\n  back the product. ``quantity`` and ``total`` are recomputed by\n  the service.\n* ``quantity_factor`` - same as ``rate_factor`` but for ``quantity``.\n* ``find_replace`` - find-and-replace text within the ``description``\n  field. Rows with no match are skipped (not failed).\n\nExactly one of ``updates`` / ``rate_factor`` / ``quantity_factor`` /\n``find_replace`` must be supplied. Mixing styles is rejected with 422\nso the audit trail stays unambiguous (one log entry per row per kind).",
+          "docstring": "Atomic bulk update for a set of positions within a BOQ.\n\nAccepts one of four mutation styles, applied to every ``ids`` entry:\n\n* ``updates`` - direct field assignment (e.g. ``{\"unit\": \"m3\"}`` or\n  ``{\"classification\": {\"din276\": \"330\"}}``). The same payload is\n  written to every selected position.\n* ``rate_factor`` - multiply each row's existing ``unit_rate`` by a\n  scalar (e.g. 1.05 = +5 %). Reads the row's current value, writes\n  back the product. ``quantity`` and ``total`` are recomputed by\n  the service.\n* ``quantity_factor`` - same as ``rate_factor`` but for ``quantity``.\n* ``find_replace`` - find-and-replace text within the ``description``\n  field. Rows with no match are skipped (not failed).\n* ``set_rate`` - write one unit rate to every row (a recurring line\n  priced once, the unit-price schedule view of the bill).\n\nExactly one of ``updates`` / ``rate_factor`` / ``quantity_factor`` /\n``find_replace`` must be supplied. Mixing styles is rejected with 422\nso the audit trail stays unambiguous (one log entry per row per kind).",
           "fields": [
             {
               "name": "ids",
@@ -27051,6 +27059,11 @@
               "name": "find_replace",
               "type": "FindReplaceSpec | None",
               "description": "Find-and-replace specification for description text."
+            },
+            {
+              "name": "set_rate",
+              "type": "Decimal | None",
+              "description": "One unit rate written to every selected row (a recurring line priced once). Sections, rows priced from their resources and link-group instances whose master is in the same request are left alone."
             }
           ]
         },
@@ -27084,6 +27097,66 @@
               "name": "log_id",
               "type": "UUID | None",
               "description": "Activity-log entry id for the umbrella bulk action."
+            }
+          ]
+        },
+        {
+          "class_name": "RestructureRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One row of the bill with the level it should take.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "level",
+              "type": "int",
+              "description": "0 = position, n = section of level n."
+            }
+          ]
+        },
+        {
+          "class_name": "RestructureRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every row of the bill, in document order, with its level.",
+          "fields": [
+            {
+              "name": "rows",
+              "type": "list[RestructureRow]"
+            }
+          ]
+        },
+        {
+          "class_name": "RestructureResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What restructuring changed.",
+          "fields": [
+            {
+              "name": "sections",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "converted_to_section",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "converted_to_position",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -295708,10 +295781,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 249,
+      "ts_files": 263,
       "css_files": 0,
-      "test_files": 121,
-      "total_files": 249
+      "test_files": 130,
+      "total_files": 263
     },
     {
       "name": "buyer-portal",
@@ -296412,6 +296485,13 @@
       "css_files": 0,
       "test_files": 1,
       "total_files": 4
+    },
+    {
+      "name": "market",
+      "ts_files": 7,
+      "css_files": 0,
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "markups",
@@ -298853,11 +298933,11 @@
     "total_models": 851,
     "total_columns": 10018,
     "total_relationships": 257,
-    "total_routes": 4893,
-    "total_schemas": 4396,
-    "total_python_files": 3057,
-    "frontend_features": 223,
-    "frontend_ts_files": 3894,
+    "total_routes": 4894,
+    "total_schemas": 4399,
+    "total_python_files": 3058,
+    "frontend_features": 224,
+    "frontend_ts_files": 3915,
     "frontend_backend_mapped": 200
   },
   "frontend_backend_mapping": {
@@ -298983,6 +299063,7 @@
     "labor-rates": "labor_rates",
     "leasing": "leasing",
     "legal-entities": "legal_entities",
+    "market": null,
     "markups": "markups",
     "match": "match",
     "match-elements": "match_elements",
