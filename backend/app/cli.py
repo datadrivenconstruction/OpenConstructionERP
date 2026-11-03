@@ -2774,6 +2774,59 @@ def cmd_pack(args: argparse.Namespace) -> None:
         args._pack_parser.print_help()
 
 
+def cmd_bi(args: argparse.Namespace) -> None:
+    """Dispatch ``bi`` sub-actions (opt-in PostgreSQL views for BI tools); print help when none is given."""
+    action = getattr(args, "bi_action", None)
+    if action not in ("enable", "disable", "status"):
+        args._bi_parser.print_help()
+        return
+    data_dir = _data_dir_from_args(args)
+    _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
+
+    import asyncio
+
+    async def _run() -> int:
+        from app.modules.bi_feed import sqlview
+
+        _register_all_module_models()
+        from app.database import engine
+
+        try:
+            async with engine.begin() as conn:
+                if action == "enable":
+                    result = await conn.run_sync(lambda c: sqlview.enable(c, single_tenant=args.single_tenant))
+                    print(_green(f"Schema {sqlview.SQL_SCHEMA}: {len(result.views)} views ({', '.join(result.views)})"))
+                    if result.password:
+                        print(f"Role {sqlview.SQL_ROLE} created. Password (shown once, not stored): {result.password}")
+                    else:
+                        print(f"Role {sqlview.SQL_ROLE} already exists; its password is unchanged.")
+                    for warning in result.warnings:
+                        print(_yellow(warning))
+                elif action == "disable":
+                    removed = await conn.run_sync(sqlview.disable)
+                    print(_green("SQL access removed.") if removed else "SQL access was not enabled.")
+                else:
+                    info = await conn.run_sync(sqlview.status)
+                    print("enabled" if info["enabled"] else "disabled")
+                    for name in info["views"]:
+                        print(f"  {info['schema']}.{name}")
+        except sqlview.BiSqlError as exc:
+            print(_red(f"{exc.code}: {exc.message}"))
+            return 2 if exc.code == "BI_NEEDS_POSTGRES" else 1
+        return 0
+
+    try:
+        code = asyncio.run(_run())
+    except RuntimeError as exc:
+        # database.py refuses to build an engine for anything but PostgreSQL.
+        if "PostgreSQL" not in str(exc):
+            raise
+        print(_red("needs PostgreSQL"))
+        sys.exit(2)
+    if code:
+        sys.exit(code)
+
+
 # ── Arg parser ────────────────────────────────────────────────────────────
 def _add_common_server_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--host", default=DEFAULT_HOST, help=f"Bind host (default: {DEFAULT_HOST})")
@@ -3027,10 +3080,35 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Overwrite an existing folder of the same slug",
     )
 
+    # bi - opt-in PostgreSQL views and a read-only role for BI tools
+    bi_p = subparsers.add_parser(
+        "bi",
+        help="Enable or disable read-only SQL access for BI tools",
+        description=(
+            "Manage the optional oe_bi schema (one view per data feed) and the read-only oe_bi_reader role.\n\n"
+            "    openconstructionerp bi enable [--single-tenant]\n"
+            "    openconstructionerp bi disable\n"
+            "    openconstructionerp bi status"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    bi_sub = bi_p.add_subparsers(dest="bi_action")
+    bi_enable_p = bi_sub.add_parser("enable", help="Create the oe_bi views and the reader role")
+    bi_enable_p.add_argument(
+        "--single-tenant",
+        action="store_true",
+        help="Allow SQL access on an instance without row-level security (one organisation only)",
+    )
+    _add_data_dir_arg(bi_enable_p)
+    _add_data_dir_arg(bi_sub.add_parser("disable", help="Drop the oe_bi schema and the reader role"))
+    _add_data_dir_arg(bi_sub.add_parser("status", help="Show whether SQL access is enabled"))
+
     # Make each group's own parser reachable from its command so it can print
     # help when invoked with no sub-action (``openconstructionerp module``).
     module_p.set_defaults(_module_parser=module_p)
     pack_p.set_defaults(_pack_parser=pack_p)
+    bi_p.set_defaults(_bi_parser=bi_p)
 
     return parser
 
@@ -3082,6 +3160,8 @@ def main() -> None:
         cmd_module(args)
     elif args.command == "pack":
         cmd_pack(args)
+    elif args.command == "bi":
+        cmd_bi(args)
     elif args.command in ("welcome", "hello"):
         cmd_welcome(args)
     elif args.command is None:
