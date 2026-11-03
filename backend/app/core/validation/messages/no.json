@@ -931,6 +931,10 @@
     "change_time_within_owner": {
       "fail": "Underentreprenørenes tidspåvirkning for {code} er til sammen {sub_days} dager, mer enn de {owner_days} dagene byggherren har gitt",
       "suggestion": "Kontroller underentreprenørenes tidskrav, eller be byggherren om en tilsvarende forlengelse"
+    },
+    "notice_window": {
+      "fail": "Underentreprise-endring {code} ble varslet {late} dager etter fristen på {days} dager i avtalen",
+      "suggestion": "Sjekk varslingsvilkårene før kostnaden godtas: for sent varsel kan føre til at kravet faller bort"
     }
   },
   "submittal": {
@@ -961,6 +965,18 @@
     "linked_scope_present": {
       "fail": "Det innsendte materialet er ikke knyttet til noen arbeidspost og blir derfor aldri samlet under en pakke",
       "suggestion": "Knytt til postene i mengdefortegnelsen som materialet omfatter"
+    },
+    "spec_section_format": {
+      "fail": "Avsnitt {section} er ikke et gjenkjent avsnittsnummer",
+      "suggestion": "Bruk et MasterFormat-nummer som 03 30 00, eller en LB- eller NBS-kode"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} for avsnitt {section} finnes allerede i registeret",
+      "suggestion": "Hopp over forslaget, eller rediger det slik at det blir et annet godkjenningsdokument"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Avsnitt {section} krever normalt et godkjenningsdokument av typen {kind}, som beskrivelsen ikke nevner",
+      "suggestion": "Sjekk beskrivelsen, eller legg til godkjenningsdokumentet manuelt"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "Et lag på {headcount} var på plassen, men ingen arbeid, kontroll eller forsinkelse er registrert.",
       "suggestion": "Legg til hva laget gjorde, eller forsinkelsen som stoppet arbeidet."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Side {page} har ikke noe lesbart tegningsnummer",
+      "suggestion": "Skriv inn tegningsnummeret fra tegningshodet"
+    },
+    "number_unique_in_set": {
+      "fail": "Tegningsnummer {sheet} forekommer på {count} sider i denne opplastingen",
+      "suggestion": "Sjekk tegningssettet for en duplisert eller feilnummerert side"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revisjon {revision} av tegning {sheet} er lavere enn gjeldende revisjon {current}",
+      "suggestion": "Bekreft at dette er en eldre utgave før den legges inn i historikken"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Tegning {sheet} ble lest med tekstgjenkjenning på {confidence} og er ikke bekreftet",
+      "suggestion": "Sjekk feltene i tegningshodet og bekreft avlesningen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Ingen avsnitt i beskrivelsen kunne leses fra {pages} sider",
+      "suggestion": "Hvis boken er skannet, kjør importen på nytt med tekstgjenkjenning på; ellers sjekk at avsnittsoverskriftene ser ut som SECTION 03 30 00 - Title"
     }
   }
 }

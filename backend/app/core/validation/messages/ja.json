@@ -931,6 +931,10 @@
     "change_time_within_owner": {
       "fail": "{code} の下請の工期影響は合計 {sub_days} 日で、発注者が認めた {owner_days} 日を超えています",
       "suggestion": "下請業者の工期の請求を確認するか、発注者に同等の延長を依頼してください"
+    },
+    "notice_window": {
+      "fail": "下請変更 {code} は、契約の{days}日の通知期限から{late}日遅れて通知されました",
+      "suggestion": "費用を認める前に通知条件を確認してください。通知が遅れると請求できなくなる場合があります"
     }
   },
   "submittal": {
@@ -961,6 +965,18 @@
     "linked_scope_present": {
       "fail": "この承認用提出資料は工事範囲の項目に関連付けられていないため、パッケージに集計されません",
       "suggestion": "この提出資料が対象とする内訳書の項目を関連付けてください"
+    },
+    "spec_section_format": {
+      "fail": "仕様セクション {section} は認識できるセクション番号ではありません",
+      "suggestion": "03 30 00 のような MasterFormat 番号、または LB か NBS のコードを使ってください"
+    },
+    "duplicate_in_register": {
+      "fail": "セクション {section} の {title} はすでに台帳にあります",
+      "suggestion": "この提案をスキップするか、別の承認用書類になるよう修正してください"
+    },
+    "required_type_missing_for_section": {
+      "fail": "セクション {section} では通常、種類 {kind} の承認用書類が必要ですが、仕様書に記載がありません",
+      "suggestion": "仕様書を確認するか、承認用書類を手作業で追加してください"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "{page} ページ目に読み取れる図面番号がありません",
+      "suggestion": "表題欄から図面番号を入力してください"
+    },
+    "number_unique_in_set": {
+      "fail": "図面番号 {sheet} がこのアップロードの {count} ページに現れています",
+      "suggestion": "図面セットに重複ページや番号の誤りがないか確認してください"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "図面 {sheet} の改訂 {revision} は現行の改訂 {current} より古いものです",
+      "suggestion": "履歴に積む前に、これが旧版であることを確認してください"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "図面 {sheet} は文字認識で {confidence} として読み取られ、未確認です",
+      "suggestion": "表題欄の各項目を確認し、読み取り結果を確定してください"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} ページから仕様セクションを1つも読み取れませんでした",
+      "suggestion": "スキャンの場合は文字認識をオンにして取り込みをやり直してください。そうでなければ、セクション見出しが SECTION 03 30 00 - Title の形か確認してください"
     }
   }
 }
