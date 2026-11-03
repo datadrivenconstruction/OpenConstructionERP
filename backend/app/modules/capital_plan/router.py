@@ -166,8 +166,10 @@ async def list_items(scenario_id: uuid.UUID, service: CapitalPlanService = Svc) 
     status_code=status.HTTP_201_CREATED,
     dependencies=_WRITE,
 )
-async def create_item(scenario_id: uuid.UUID, body: ItemCreate, service: CapitalPlanService = Svc) -> ItemResponse:
-    return ItemResponse.model_validate(await service.create_item(scenario_id, body))
+async def create_item(
+    scenario_id: uuid.UUID, body: ItemCreate, user_id: CurrentUserId, service: CapitalPlanService = Svc
+) -> ItemResponse:
+    return ItemResponse.model_validate(await service.create_item(scenario_id, body, user_id))
 
 
 @router.patch(
@@ -183,8 +185,10 @@ async def apply_statuses(
 
 
 @router.patch("/items/{item_id}/", response_model=ItemResponse, dependencies=_WRITE)
-async def patch_item(item_id: uuid.UUID, body: ItemPatch, service: CapitalPlanService = Svc) -> ItemResponse:
-    return ItemResponse.model_validate(await service.patch_item(item_id, body))
+async def patch_item(
+    item_id: uuid.UUID, body: ItemPatch, user_id: CurrentUserId, service: CapitalPlanService = Svc
+) -> ItemResponse:
+    return ItemResponse.model_validate(await service.patch_item(item_id, body, user_id))
 
 
 @router.delete("/items/{item_id}/", status_code=status.HTTP_204_NO_CONTENT, dependencies=_WRITE)
