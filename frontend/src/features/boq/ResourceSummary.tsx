@@ -573,6 +573,7 @@ export function ResourceSummary({
                               resource={res}
                               fmt={fmt}
                               fmtMoney={fmtMoney}
+                              currency={currency}
                               onSaveToCatalog={handleSaveToCatalog}
                               isSaved={savedResources.has(`${res.type}:${res.name}`)}
                               onRepickVariant={handleRepickVariant}
@@ -666,6 +667,7 @@ function ResourceRow({
   resource,
   fmt,
   fmtMoney,
+  currency,
   onSaveToCatalog,
   isSaved,
   onRepickVariant,
@@ -677,6 +679,8 @@ function ResourceRow({
   fmt: Intl.NumberFormat;
   /** Costs and rates. Separate because the two answer to different rules. */
   fmtMoney: Intl.NumberFormat;
+  /** The project's base currency, the fallback for a row that carries none. */
+  currency?: string;
   onSaveToCatalog: (resource: ResourceSummaryItem) => void;
   isSaved: boolean;
   onRepickVariant: (resource: ResourceSummaryItem, chosen: CostVariant) => void;

@@ -546,6 +546,7 @@
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/positions/",
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/positions/bulk/",
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/positions/reorder/",
+    "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/positions/restructure/",
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/positions/{position_id}/restore-field/",
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/quantity-links/apply/",
     "backend/app/modules/boq/router.py::POST /boqs/{boq_id}/quantity-links/refresh/",
