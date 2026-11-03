@@ -216,7 +216,7 @@ async def export_boq_gaeb_x31(
 @gaeb_exchange_router.post(
     "/boqs/{boq_id}/import/gaeb-x31/preview/",
     summary="Read a GAEB X31 and propose measured quantities per OZ (writes nothing)",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.read"))],
 )
 async def preview_boq_gaeb_x31(
     boq_id: uuid.UUID,
@@ -282,7 +282,7 @@ class X31ApplyRequest(BaseModel):
 @gaeb_exchange_router.post(
     "/boqs/{boq_id}/import/gaeb-x31/apply/",
     summary="Apply confirmed GAEB X31 measured quantities to positions",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.import"))],
 )
 async def apply_boq_gaeb_x31(
     boq_id: uuid.UUID,

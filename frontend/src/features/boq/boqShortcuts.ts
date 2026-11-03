@@ -58,6 +58,8 @@ export interface BoqShortcutState {
   /** The user may delete positions (`boq.delete`). Only `false` disables
    *  the Delete key, so a caller that does not gate keeps working. */
   canDelete?: boolean;
+  /** The user may import files (`boq.import`). Only `false` disables Ctrl+I. */
+  canImport?: boolean;
 }
 
 /**
@@ -123,7 +125,7 @@ export function resolveBoqShortcut(e: BoqShortcutKey, state: BoqShortcutState): 
   if (state.isEditing) return null;
 
   if (isCmd && !shift && isLetter('e')) return 'export_excel';
-  if (isCmd && !shift && isLetter('i')) return 'import';
+  if (isCmd && !shift && isLetter('i')) return state.canImport === false ? null : 'import';
   if (isCmd && !shift && isLetter('l')) return 'toggle_lock';
 
   // Alt+I toggles the per-position AI copilot. Plain Alt only: Ctrl, Cmd

@@ -1552,6 +1552,10 @@ class TemplateInfo(BaseModel):
     icon: str
     section_count: int
     position_count: int
+    avg_cost_per_m2: float = Field(
+        default=0.0, description="Benchmark cost per m2 of gross floor area: sum of rate x qty_factor"
+    )
+    currency: str = Field(default="EUR", description="ISO 4217 currency of the template rates")
 
 
 class BOQFromTemplateRequest(BaseModel):
