@@ -14,13 +14,14 @@
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import clsx from 'clsx';
 import { Button } from '@/shared/ui';
 import type { SheetPatch } from './api';
 import type { SheetRow } from './types';
 
 type Translate = ReturnType<typeof useTranslation>['t'];
 
-type FieldKey = 'sheet_number' | 'sheet_title' | 'revision' | 'discipline' | 'scale' | 'revision_date';
+export type FieldKey = 'sheet_number' | 'sheet_title' | 'revision' | 'discipline' | 'scale' | 'revision_date';
 
 /** Same ceilings as the backend schema's `max_length`. */
 const MAX_LENGTH: Record<Exclude<FieldKey, 'revision_date'>, number> = {
@@ -88,12 +89,25 @@ export interface SheetEditFormProps {
   error: string | null;
   onSubmit: (patch: SheetPatch) => void;
   onCancel: () => void;
+  /** Fields still carrying the software's reading, highlighted for a person to check. */
+  machineRead?: ReadonlySet<string>;
+  /** Present for a sheet awaiting confirmation: saves the edits and confirms in one go. */
+  onConfirm?: (patch: SheetPatch) => void;
 }
 
 const inputCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
-export function SheetEditForm({ sheet, disciplines, saving, error, onSubmit, onCancel }: SheetEditFormProps) {
+export function SheetEditForm({
+  sheet,
+  disciplines,
+  saving,
+  error,
+  onSubmit,
+  onCancel,
+  machineRead,
+  onConfirm,
+}: SheetEditFormProps) {
   const { t } = useTranslation();
   const [values, setValues] = useState<Record<FieldKey, string>>(() => initialValues(sheet));
   const [submitted, setSubmitted] = useState(false);
@@ -117,6 +131,12 @@ export function SheetEditForm({ sheet, disciplines, saving, error, onSubmit, onC
     setSubmitted(true);
     if (Object.keys(errors).length > 0 || !dirty) return;
     onSubmit(patch);
+  }
+
+  function handleConfirm() {
+    setSubmitted(true);
+    if (Object.keys(errors).length > 0) return;
+    onConfirm?.(patch);
   }
 
   return (
@@ -143,7 +163,13 @@ export function SheetEditForm({ sheet, disciplines, saving, error, onSubmit, onC
               onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
               aria-invalid={fieldError ? true : undefined}
               aria-describedby={fieldError ? `${id}-error` : undefined}
-              className={inputCls}
+              title={
+                machineRead?.has(f.key)
+                  ? t('sheets.machine_read_field', { defaultValue: 'Read by software, please check' })
+                  : undefined
+              }
+              data-machine-read={machineRead?.has(f.key) ? 'true' : undefined}
+              className={clsx(inputCls, machineRead?.has(f.key) && 'border-semantic-warning bg-semantic-warning/5')}
             />
             {fieldError && (
               <p id={`${id}-error`} className="text-2xs text-semantic-error">
@@ -172,9 +198,14 @@ export function SheetEditForm({ sheet, disciplines, saving, error, onSubmit, onC
         <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
           {t('sheets.edit_cancel', { defaultValue: 'Cancel' })}
         </Button>
-        <Button type="submit" variant="primary" loading={saving} disabled={!dirty}>
+        <Button type="submit" variant={onConfirm ? 'secondary' : 'primary'} loading={saving} disabled={!dirty}>
           {t('sheets.edit_save', { defaultValue: 'Save' })}
         </Button>
+        {onConfirm && (
+          <Button type="button" variant="primary" loading={saving} onClick={handleConfirm}>
+            {t('sheets.confirm_save_action', { defaultValue: 'Save and confirm' })}
+          </Button>
+        )}
       </div>
     </form>
   );

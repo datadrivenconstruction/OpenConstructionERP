@@ -68,6 +68,9 @@ from app.modules.documents.schemas import (
     SheetBulkUpdate,
     SheetCompletenessRequest,
     SheetCompletenessResponse,
+    SheetConfirmBulk,
+    SheetConfirmBulkSummary,
+    SheetConfirmRequest,
     SheetListResponse,
     SheetRereadSummary,
     SheetResponse,
@@ -77,6 +80,7 @@ from app.modules.documents.schemas import (
 from app.modules.documents.service import (
     PHOTO_BASE,
     PHOTO_THUMB_BASE,
+    SHEET_THUMB_BASE,
     UPLOAD_BASE,
     DocumentBIMLinkService,
     DocumentService,
@@ -975,6 +979,9 @@ async def list_sheets(
     revision: str | None = Query(default=None),
     document_id: str | None = Query(default=None),
     current_only: bool = Query(default=False),
+    needs_review: bool | None = Query(
+        default=None, description="Only sheets whose title block read awaits confirmation."
+    ),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -997,6 +1004,7 @@ async def list_sheets(
         revision=revision,
         document_id=document_id,
         current_only=current_only,
+        needs_review=needs_review,
     )
     response.headers["X-Total-Count"] = str(total)
     return SheetListResponse(
@@ -1028,6 +1036,7 @@ async def list_disciplines(
 @router.post("/sheets/split-pdf/", response_model=list[SheetResponse], status_code=201)
 async def split_pdf(
     session: SessionDep,
+    response: Response,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
     content_length: int | None = Header(default=None),
@@ -1045,6 +1054,12 @@ async def split_pdf(
     # No upload size cap - per product policy.
     try:
         sheets = await service.split_pdf_to_sheets(project_id, file, user_id)
+        # Counts for the register's "needs review" chip; the body stays the list of sheets.
+        flagged = [s for s in sheets if (s.metadata_ or {}).get("extraction", {}).get("needs_review")]
+        response.headers["X-Sheets-Needs-Review"] = str(len(flagged))
+        response.headers["X-Sheets-Held"] = str(
+            sum(1 for s in flagged if (s.metadata_ or {}).get("status") == "pending_review")
+        )
         return [_sheet_to_response(s) for s in sheets]
     except HTTPException:
         raise
@@ -1134,6 +1149,35 @@ async def get_sheet(
     return _sheet_to_response(sheet)
 
 
+# ── Sheet thumbnail ────────────────────────────────────────────────────
+
+
+@router.get(
+    "/sheets/{sheet_id}/thumbnail/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
+async def get_sheet_thumbnail(
+    sheet_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SheetService = Depends(_get_sheet_service),
+) -> FileResponse:
+    """The page image rendered at split time, for the title block preview.
+
+    Served from the sheet thumbnail directory only; the stored path is
+    re-homed by file name so a data directory that moved still resolves.
+    """
+    sheet = await service.get_sheet(sheet_id)
+    await verify_project_access(sheet.project_id, user_id, session)
+    if not sheet.thumbnail_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet has no thumbnail")
+    base = Path(SHEET_THUMB_BASE).resolve()
+    candidate = (base / str(sheet.project_id) / Path(sheet.thumbnail_path).name).resolve()
+    if base not in candidate.parents or candidate.is_symlink() or not candidate.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Thumbnail not found on disk")
+    return FileResponse(path=str(candidate), media_type="image/png")
+
+
 # ── Update sheet ───────────────────────────────────────────────────────
 
 
@@ -1155,6 +1199,57 @@ async def update_sheet(
     sheet = await service.get_sheet(sheet_id)
     await verify_project_access(sheet.project_id, user_id, session)
     sheet = await service.update_sheet(sheet_id, data)
+    return _sheet_to_response(sheet)
+
+
+@router.post("/sheets/confirm-bulk/", response_model=SheetConfirmBulkSummary)
+async def confirm_sheets_bulk(
+    data: SheetConfirmBulk,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetConfirmBulkSummary:
+    """Confirm every held sheet of a project read at or above ``min_confidence``.
+
+    A sheet OCR could not read, or one with no sheet number, is never confirmed
+    here: it needs a person.
+    """
+    await verify_project_access(data.project_id, user_id, session)
+    return SheetConfirmBulkSummary(**await service.confirm_bulk(data.project_id, str(user_id), data.min_confidence))
+
+
+@router.post("/sheets/check-intake/")
+async def check_sheet_intake(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.read")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> dict:
+    """Run the ``sheet_intake`` rules (number present and unique, revision order, unconfirmed reads)."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.check_intake(project_id, user_id=uuid.UUID(user_id) if user_id else None)
+
+
+@router.post("/sheets/{sheet_id}/confirm-extraction/", response_model=SheetResponse)
+async def confirm_sheet_extraction(
+    sheet_id: uuid.UUID,
+    session: SessionDep,
+    data: SheetConfirmRequest | None = None,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetResponse:
+    """Accept, with optional corrections, how a sheet's title block was read.
+
+    The corrections are recorded as hand edits, then the sheet takes its place
+    in the revision stack and supersedes what it replaces. Confirming again
+    changes nothing.
+    """
+    sheet = await service.get_sheet(sheet_id)
+    await verify_project_access(sheet.project_id, user_id, session)
+    sheet = await service.confirm_extraction(sheet_id, str(user_id), data.changes() if data else None)
     return _sheet_to_response(sheet)
 
 

@@ -52,12 +52,15 @@ from app.modules.documents.schemas import (
 # detect_sheet_info are still imported from here by existing callers.
 from app.modules.documents.sheet_fields import (
     DISCIPLINE_PREFIX_MAP,  # noqa: F401
+    REVIEW_THRESHOLD,
     chain_key_is_bare,
     compare_revisions,
     detect_discipline_from_sheet_number,
     detect_sheet_info,
+    score_fields,
     sheet_chain_key,
 )
+from app.modules.documents.sheet_ocr import OcrUnavailable, ocr_enabled, ocr_title_block
 
 logger = logging.getLogger(__name__)
 
@@ -2165,6 +2168,24 @@ REVISION_ORDER_UNCLEAR = "revision_order_unclear"
 # A re-read of the title blocks leaves exactly those alone.
 MANUALLY_EDITED = "manually_edited"
 
+# Metadata key holding how a sheet's title block was read and whether a person
+# has confirmed it: {source, confidence, needs_review, reason, confirmed_by, confirmed_at}.
+EXTRACTION = "extraction"
+
+# Sheet status while a sheet waits for confirmation and does not yet supersede.
+PENDING_REVIEW = "pending_review"
+
+# Metadata key listing the current sheets a held sheet would supersede once confirmed.
+WOULD_SUPERSEDE = "would_supersede"
+
+# Reasons recorded in the extraction block.
+REASON_OCR_UNAVAILABLE = "ocr_unavailable"
+REASON_OCR_READ = "ocr_read"
+REASON_LOW_CONFIDENCE = "low_confidence"
+
+# A page with fewer extracted characters than this has no usable text layer.
+_MIN_TEXT_CHARS = 20
+
 # Document metadata key for a drawing set's file name before sanitising.
 ORIGINAL_NAME = "original_name"
 
@@ -2257,7 +2278,7 @@ def _read_sheet_pages(
         for page_idx, page in enumerate(pdf.pages):
             page_number = page_idx + 1
             try:
-                info = _page_fields(page, filename)
+                info = _page_fields(page, filename, pdf_path, page_idx, _PDFIUM_RENDER_LOCK)
 
                 # Generate thumbnail
                 thumbnail_path_str: str | None = None
@@ -2285,13 +2306,8 @@ def _read_sheet_pages(
     return pages
 
 
-def _page_fields(page: Any, filename: str | None) -> dict[str, Any]:
-    """The title block fields of one pdfplumber page, as the ``Sheet`` columns hold them."""
-    info = detect_sheet_info(
-        page.extract_text() or "",
-        title_block_text=_title_block_text(page),
-        filename=filename,
-    )
+def _fields_from_info(info: dict[str, Any]) -> dict[str, Any]:
+    """The ``Sheet`` columns of one parsed title block."""
     return {
         "sheet_number": info["sheet_number"],
         "sheet_title": info["sheet_title"],
@@ -2300,6 +2316,47 @@ def _page_fields(page: Any, filename: str | None) -> dict[str, Any]:
         "revision_date": _iso_date_to_datetime(info["revision_date"]),
         "scale": info["scale"],
     }
+
+
+def _extraction(source: str, confidence: float, reason: str | None) -> dict[str, Any]:
+    """The extraction block of a freshly read sheet. AI suggests, a person confirms: every OCR read is reviewed."""
+    needs_review = confidence < REVIEW_THRESHOLD or source == "ocr"
+    if reason is None and needs_review:
+        reason = REASON_OCR_READ if source == "ocr" else REASON_LOW_CONFIDENCE
+    return {"source": source, "confidence": round(confidence, 4), "needs_review": needs_review, "reason": reason}
+
+
+def _page_fields(
+    page: Any,
+    filename: str | None,
+    pdf_path: Path | None = None,
+    page_index: int = 0,
+    render_lock: Any = None,
+) -> dict[str, Any]:
+    """The title block fields of one pdfplumber page, as the ``Sheet`` columns hold them.
+
+    One parser, two text sources: the page's own text layer, or, for a page
+    with next to none (a scan), OCR of the title block corner. The result also
+    carries ``extraction``, how the read was made and how far to trust it.
+    """
+    text = page.extract_text() or ""
+    block = _title_block_text(page)
+    info = detect_sheet_info(text, title_block_text=block, filename=filename)
+    # A short page that still names a sheet number is a text layer, not a scan.
+    if pdf_path is None or len(text.strip()) >= _MIN_TEXT_CHARS or detect_sheet_info(text)["sheet_number"]:
+        fields = _fields_from_info(info)
+        return {**fields, "extraction": _extraction("text", score_fields(fields, "text"), None)}
+
+    try:
+        if not ocr_enabled():
+            raise OcrUnavailable("OCR is switched off")
+        ocr_text, ocr_conf = ocr_title_block(pdf_path, page_index, render_lock=render_lock)
+    except OcrUnavailable:
+        fields = _fields_from_info(detect_sheet_info(text, title_block_text=None, filename=filename))
+        return {**fields, "extraction": _extraction("ocr", 0.0, REASON_OCR_UNAVAILABLE)}
+    info = detect_sheet_info(ocr_text, title_block_text=ocr_text or None, filename=filename)
+    fields = _fields_from_info(info)
+    return {**fields, "extraction": _extraction("ocr", score_fields(fields, "ocr", ocr_conf), None)}
 
 
 def _reread_pages(pdf_path: Path, page_numbers: set[int], original_name: str | None) -> dict[int, dict[str, Any]]:
@@ -2319,10 +2376,23 @@ def _reread_pages(pdf_path: Path, page_numbers: set[int], original_name: str | N
                 continue
             page = pdf.pages[page_number - 1]
             try:
-                fields[page_number] = _page_fields(page, filename)
+                fields[page_number] = _page_fields(page, filename, pdf_path, page_number - 1, _PDFIUM_RENDER_LOCK)
             finally:
                 page.close()
     return fields
+
+
+def _needs_review(sheet: Sheet) -> bool:
+    """Whether a person still has to confirm how this sheet's title block was read."""
+    return bool(((sheet.metadata_ or {}).get(EXTRACTION) or {}).get("needs_review"))
+
+
+def _is_uuid(value: object) -> bool:
+    try:
+        uuid.UUID(str(value))
+    except ValueError:
+        return False
+    return True
 
 
 def _hand_edited(sheet: Sheet) -> set[str]:
@@ -2370,6 +2440,7 @@ class SheetService:
         revision: str | None = None,
         document_id: str | None = None,
         current_only: bool = False,
+        needs_review: bool | None = None,
     ) -> tuple[list[Sheet], int]:
         """List sheets for a project with filters."""
         return await self.repo.list_for_project(
@@ -2380,6 +2451,7 @@ class SheetService:
             revision=revision,
             document_id=document_id,
             current_only=current_only,
+            needs_review=needs_review,
         )
 
     async def get_disciplines(self, project_id: uuid.UUID) -> list[str]:
@@ -2484,7 +2556,8 @@ class SheetService:
         await self.repo.update_fields(sheet_id, **fields)
 
         moved = self._moved_in_stack(sheet, old_key, old_revision, old_title)
-        if moved and "is_current" not in fields:
+        # A held sheet is placed by its confirmation, not by an edit made before it.
+        if moved and "is_current" not in fields and not _needs_review(sheet):
             await self._restack(sheet)
             await self.session.flush()
         await self.session.refresh(sheet)
@@ -2583,7 +2656,9 @@ class SheetService:
 
         # Restacked only once every sheet of the project has its new fields,
         # so each restack sees the corrected numbers of all the others.
-        moved = [s for s in sheets if s.id in before and self._moved_in_stack(s, *before[s.id])]
+        moved = [
+            s for s in sheets if s.id in before and not _needs_review(s) and self._moved_in_stack(s, *before[s.id])
+        ]
         held = {s.id: s.is_current for s in sheets if "is_current" in _hand_edited(s)}
         await self.session.flush()
         for sheet in moved:
@@ -2836,6 +2911,152 @@ class SheetService:
 
         return retired
 
+    async def _hold_for_review(self, project_id: uuid.UUID, held: list[Sheet]) -> None:
+        """Leave sheets that need review unstacked, off the current set where they would replace a sheet.
+
+        A held sheet that matches a current sheet is not current and names the
+        sheets it would supersede, so the register shows one current row per
+        drawing until a person confirms the read.
+        """
+        if not held:
+            return
+        heads = await self.repo.current_by_chain_key(project_id)
+        for sheet in held:
+            metadata = dict(sheet.metadata_ or {})
+            metadata["status"] = PENDING_REVIEW
+            head = self._current_head_for(sheet, heads) if sheet_chain_key(sheet.sheet_number) else None
+            if head is not None:
+                sheet.is_current = False
+                metadata[WOULD_SUPERSEDE] = [str(head.id)]
+            sheet.metadata_ = metadata
+
+    # ── Confirm a machine read ─────────────────────────────────────────────
+
+    async def confirm_extraction(
+        self,
+        sheet_id: uuid.UUID,
+        user_id: str,
+        data: SheetUpdate | None = None,
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> Sheet:
+        """A person accepts (and optionally corrects) the title block read of one sheet.
+
+        The edits go through :meth:`update_sheet`, so they are recorded as hand
+        edits. The sheet is then placed in its revision stack and supersedes
+        what it replaces, in the same transaction. Idempotent: confirming a
+        confirmed sheet changes nothing.
+        """
+        sheet = await self.get_sheet(sheet_id)
+        if project_id is not None and sheet.project_id != project_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+        if data is not None and data.model_fields_set:
+            sheet = await self.update_sheet(sheet_id, data)
+
+        metadata = dict(sheet.metadata_ or {})
+        extraction = dict(metadata.get(EXTRACTION) or {})
+        if not extraction.get("needs_review") and metadata.get("status") != PENDING_REVIEW:
+            return sheet
+
+        # What a person has looked at is theirs: a re-read leaves it alone.
+        looked_at = {name for name in ("sheet_number", "sheet_title", "revision", "discipline") if getattr(sheet, name)}
+        metadata[MANUALLY_EDITED] = sorted({*(metadata.get(MANUALLY_EDITED) or []), *looked_at})
+        extraction["needs_review"] = False
+        extraction["confirmed_by"] = user_id
+        extraction["confirmed_at"] = datetime.now(UTC).isoformat()
+        metadata[EXTRACTION] = extraction
+        metadata.pop("status", None)
+        metadata.pop(WOULD_SUPERSEDE, None)
+        sheet.metadata_ = metadata
+        await self.session.flush()
+
+        if sheet_chain_key(sheet.sheet_number):
+            await self._restack(sheet)
+        else:
+            sheet.is_current = True
+        await self.session.flush()
+        await self.session.refresh(sheet)
+
+        try:
+            from app.core.events import event_bus  # noqa: PLC0415
+
+            event_bus.publish_detached(
+                "documents.sheet.confirmed",
+                {
+                    "project_id": str(sheet.project_id),
+                    "sheet_id": str(sheet.id),
+                    "sheet_number": sheet.sheet_number,
+                    "revision": sheet.revision,
+                    "confirmed_by": user_id,
+                },
+                source_module="oe_documents",
+            )
+        except Exception:
+            logger.debug("Failed to publish documents.sheet.confirmed event", exc_info=True)
+        return sheet
+
+    async def confirm_bulk(
+        self, project_id: uuid.UUID, user_id: str, min_confidence: float = REVIEW_THRESHOLD
+    ) -> dict[str, int]:
+        """Confirm every held sheet read at or above ``min_confidence``.
+
+        Never confirms a sheet OCR could not read (``ocr_unavailable``) or one
+        with no sheet number: those need a person's eyes and hands.
+        """
+        held = await self.repo.list_needing_review(project_id)
+        counts = {"confirmed": 0, "below_threshold": 0, "ocr_unavailable": 0, "no_number": 0}
+        for sheet in held:
+            extraction = (sheet.metadata_ or {}).get(EXTRACTION) or {}
+            if extraction.get("reason") == REASON_OCR_UNAVAILABLE:
+                counts["ocr_unavailable"] += 1
+            elif not sheet.sheet_number:
+                counts["no_number"] += 1
+            elif float(extraction.get("confidence") or 0.0) < min_confidence:
+                counts["below_threshold"] += 1
+            else:
+                await self.confirm_extraction(sheet.id, user_id)
+                counts["confirmed"] += 1
+        return counts
+
+    async def intake_validation_data(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Sheet rows as the ``sheet_intake`` rules read them."""
+        sheets = await self.repo.all_for_project(project_id)
+        by_id = {str(s.id): s for s in sheets}
+        rows: list[dict[str, Any]] = []
+        for sheet in sheets:
+            metadata = sheet.metadata_ or {}
+            extraction = metadata.get(EXTRACTION) or {}
+            would = [by_id[i] for i in metadata.get(WOULD_SUPERSEDE) or [] if i in by_id]
+            rows.append(
+                {
+                    "id": str(sheet.id),
+                    "document_id": sheet.document_id,
+                    "page_number": sheet.page_number,
+                    "sheet_number": sheet.sheet_number,
+                    "revision": sheet.revision,
+                    "needs_review": bool(extraction.get("needs_review")),
+                    "confidence": extraction.get("confidence"),
+                    "source": extraction.get("source"),
+                    "current_revisions": [h.revision for h in would],
+                }
+            )
+        return rows
+
+    async def check_intake(self, project_id: uuid.UUID, *, user_id: uuid.UUID | None = None) -> dict[str, Any]:
+        """Run the ``sheet_intake`` rules over the project's sheets and record the report."""
+        from app.modules.validation.service import ValidationModuleService  # noqa: PLC0415
+
+        rows = await self.intake_validation_data(project_id)
+        return await ValidationModuleService(self.session).run_document_rule_set(
+            project_id,
+            rule_set="sheet_intake",
+            target_id=str(project_id),
+            data={"sheets": rows},
+            source_meta={"sheets": len(rows), "needs_review": sum(1 for r in rows if r["needs_review"])},
+            meta_key="sheet_intake",
+            user_id=user_id,
+        )
+
     async def split_pdf_to_sheets(
         self,
         project_id: uuid.UUID,
@@ -2855,6 +3076,11 @@ class SheetService:
         duplicated, so uploading a revised set leaves one current row per number
         with the earlier row retired and linked. See
         ``_supersede_previous_sheets`` for the rules that decide this.
+
+        A page with no text layer is read by OCR when available. Every sheet
+        carries ``metadata["extraction"]`` (source, confidence, needs_review);
+        one that needs review is held: it supersedes nothing until
+        :meth:`confirm_extraction`.
 
         Returns:
             List of created Sheet records. Only the new rows, never the ones
@@ -2951,6 +3177,7 @@ class SheetService:
                 scale=page["scale"],
                 is_current=True,
                 thumbnail_path=page["thumbnail_path"],
+                metadata_={EXTRACTION: page["extraction"]},
                 created_by=user_id,
             )
             for page in pages
@@ -2963,7 +3190,10 @@ class SheetService:
         # ``current_only=True`` and reconciles against a drawing index by
         # number. Run before the insert so the retirements and the new rows
         # land in one flush.
-        superseded = await self._supersede_previous_sheets(project_id, sheets)
+        # Only sheets read with enough confidence stack now. A held sheet waits
+        # for a person: a wrong number read off a scan must not retire a good sheet.
+        superseded = await self._supersede_previous_sheets(project_id, [s for s in sheets if not _needs_review(s)])
+        await self._hold_for_review(project_id, [s for s in sheets if _needs_review(s)])
 
         if sheets:
             sheets = await self.repo.create_many(sheets)

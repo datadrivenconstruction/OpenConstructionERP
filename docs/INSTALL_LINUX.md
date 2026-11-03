@@ -159,6 +159,10 @@ sudo apt install -y \
 
 ---
 
+## 3b. Optional: reading scanned drawings (OCR)
+
+Optional OCR for scanned drawing sets: `sudo apt install tesseract-ocr` (plus language packs such as `tesseract-ocr-deu`), about 40 MB of disk and about 150 MB of RAM, transient per page. Without it a scanned sheet is still imported, flagged "OCR unavailable", and held until someone fills in its title block and confirms it.
+
 ## 4. Verify the install
 
 ```bash

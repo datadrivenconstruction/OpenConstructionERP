@@ -71,6 +71,11 @@ RULE_SET_DESCRIPTIONS: dict[str, str] = {
         "uploaded sheet set - flags missing sheets (error), extra sheets and revision "
         "mismatches (warning)."
     ),
+    "sheet_intake": (
+        "Sheet intake: every uploaded sheet has a number, a number and revision appears once per "
+        "upload, a held sheet does not step back from a newer current revision, and machine-read "
+        "title blocks are confirmed by a person."
+    ),
     "project_completeness": (
         "Project completeness (universal): the project names its country and currency "
         "(errors), has a priced bill whose rows are in that currency, a base date on "
@@ -330,31 +335,43 @@ class ValidationModuleService:
     ) -> dict[str, Any]:
         """Run the ``sheet_completeness`` rule set and persist a document report.
 
-        Generic (non-BOQ) validation path. The caller (documents.SheetService)
-        has already parsed the drawing index into ``expected`` and loaded the
-        actual ``Sheet`` rows into ``actual``; this runs the rule set over them,
-        persists a :class:`ValidationReport` with ``target_type='document'`` and
-        the reconciliation snapshot in ``metadata.sheet_completeness``, and
-        returns the same summary shape as the BOQ path plus a ``completeness``
-        block. Keeping parsing in documents and persistence here mirrors how the
-        BOQ path splits position loading from :meth:`run_validation`.
+        The caller (documents.SheetService) has already parsed the drawing index
+        into ``expected`` and loaded the actual ``Sheet`` rows into ``actual``.
+        The reconciliation snapshot is stored under ``metadata.sheet_completeness``
+        and echoed back as ``completeness``.
+        """
+        return await self.run_document_rule_set(
+            project_id,
+            rule_set="sheet_completeness",
+            target_id=target_id,
+            data={"expected": expected, "actual": actual},
+            source_meta=source_meta,
+            meta_key="sheet_completeness",
+            user_id=user_id,
+        )
 
-        Args:
-            project_id: Project owning the sheets (authorisation scope).
-            target_id: 36-char UUID string - the index document id, or the
-                project id for pasted-list mode (fits ``target_id String(36)``).
-            expected: Parsed expected sheets (``ExpectedSheet.__dict__`` shape).
-            actual: Actual ``Sheet`` rows as dicts (sheet_number/revision/...).
-            source_meta: Reconciliation snapshot stored under
-                ``metadata.sheet_completeness`` and echoed back as
-                ``completeness``.
-            user_id: Optional user who triggered the run.
+    async def run_document_rule_set(
+        self,
+        project_id: uuid.UUID,
+        *,
+        rule_set: str,
+        target_id: str,
+        data: dict[str, Any],
+        source_meta: dict[str, Any],
+        meta_key: str,
+        user_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
+        """Run one document rule set over ``data`` and persist a document report.
+
+        The generic path under :meth:`run_sheet_completeness`; the snapshot in
+        ``source_meta`` is stored under ``metadata[meta_key]`` and echoed back
+        as ``completeness``.
         """
         from app.core.i18n import get_locale
 
         engine_report: EngineReport = await validation_engine.validate(
-            data={"expected": expected, "actual": actual},
-            rule_sets=["sheet_completeness"],
+            data=data,
+            rule_sets=[rule_set],
             target_type="document",
             target_id=target_id,
             project_id=str(project_id),
@@ -382,7 +399,7 @@ class ValidationModuleService:
             project_id=project_id,
             target_type="document",
             target_id=target_id,
-            rule_set="sheet_completeness",
+            rule_set=rule_set,
             status=engine_report.status.value,
             score=(None if engine_report.score is None else str(round(engine_report.score, 4))),
             total_rules=len(engine_report.results),
@@ -393,10 +410,10 @@ class ValidationModuleService:
             created_by=user_id,
             metadata_={
                 "duration_ms": engine_report.duration_ms,
-                "rule_sets": ["sheet_completeness"],
+                "rule_sets": [rule_set],
                 "supported_rule_sets": engine_report.supported_rule_sets,
                 "unsupported_rule_sets": engine_report.unsupported_rule_sets,
-                "sheet_completeness": source_meta,
+                meta_key: source_meta,
             },
         )
         await self.repo.create(db_report)
@@ -433,7 +450,7 @@ class ValidationModuleService:
             "warning_count": len(engine_report.warnings),
             "error_count": len(engine_report.errors),
             "info_count": len(engine_report.infos),
-            "rule_sets": ["sheet_completeness"],
+            "rule_sets": [rule_set],
             "supported_rule_sets": engine_report.supported_rule_sets,
             "unsupported_rule_sets": engine_report.unsupported_rule_sets,
             "duration_ms": engine_report.duration_ms,

@@ -637,3 +637,46 @@ export async function rereadTitleBlocks(projectId: string): Promise<SheetRereadS
     `${DOCUMENTS_BASE}/sheets/reread-title-blocks/?project_id=${encodeURIComponent(projectId)}`,
   );
 }
+
+/** Corrections that travel with a confirmation. Mirrors `SheetConfirmRequest`. */
+export interface SheetConfirmPatch {
+  number?: string;
+  title?: string;
+  revision?: string;
+  discipline?: string;
+}
+
+/**
+ * Accept, with optional corrections, how a sheet's title block was read.
+ *
+ * Backed by ``POST /v1/documents/sheets/{id}/confirm-extraction/``. The sheet
+ * then takes its place in the revision stack, so the caller refetches the
+ * register. Confirming a confirmed sheet changes nothing.
+ */
+export async function confirmSheetExtraction(sheetId: string, edits?: SheetConfirmPatch): Promise<SheetRow> {
+  return apiPost<SheetRow, SheetConfirmPatch | undefined>(
+    `${DOCUMENTS_BASE}/sheets/${sheetId}/confirm-extraction/`,
+    edits && Object.keys(edits).length > 0 ? edits : undefined,
+  );
+}
+
+/** What a bulk confirmation did. Mirrors `SheetConfirmBulkSummary`. */
+export interface SheetConfirmBulkSummary {
+  confirmed: number;
+  below_threshold: number;
+  ocr_unavailable: number;
+  no_number: number;
+}
+
+/** Confirm every held sheet read at or above `minConfidence`. */
+export async function confirmSheetsBulk(projectId: string, minConfidence: number): Promise<SheetConfirmBulkSummary> {
+  return apiPost<SheetConfirmBulkSummary, { project_id: string; min_confidence: number }>(
+    `${DOCUMENTS_BASE}/sheets/confirm-bulk/`,
+    { project_id: projectId, min_confidence: minConfidence },
+  );
+}
+
+/** The page image rendered when the set was split; protected, load it through `AuthImage`. */
+export function sheetThumbnailUrl(sheetId: string): string {
+  return `/api${DOCUMENTS_BASE}/sheets/${sheetId}/thumbnail/`;
+}

@@ -701,6 +701,24 @@
       "suggestion": "Geben Sie die erwartete Revision aus oder aktualisieren Sie das Verzeichnis auf die aktuelle Revision"
     }
   },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Seite {page} hat keine lesbare Plannummer",
+      "suggestion": "Plannummer aus dem Schriftfeld eintragen; ohne sie lässt sich der Plan nicht auf frühere Stände stapeln"
+    },
+    "number_unique_in_set": {
+      "fail": "Plan {sheet} Index {revision} steht auf den Seiten {first_page} und {page} desselben Uploads",
+      "suggestion": "Schriftfelder beider Seiten prüfen und Nummer oder Index einer Seite korrigieren"
+    },
+    "revision_not_lower": {
+      "fail": "Plan {sheet} hat Index {revision}, der aktuelle Plan ist aber bereits bei {current_revision}",
+      "suggestion": "Das Lesen nur bestätigen, wenn es wirklich ein späterer Stand ist; sonst Index korrigieren oder den Plan verwerfen"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Plan {sheet} wurde mit {confidence} Sicherheit gelesen und ist nicht bestätigt",
+      "suggestion": "Felder mit dem Schriftfeld vergleichen und bestätigen oder korrigieren"
+    }
+  },
   "procurement": {
     "po_has_lines": {
       "fail": "Diese Bestellung hat keine Positionen, der zugesagte Betrag ist damit nicht belegt",

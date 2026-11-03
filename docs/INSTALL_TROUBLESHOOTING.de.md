@@ -187,6 +187,10 @@ Oder klicken Sie die App in "Programme" mit der rechten Maustaste an und wählen
 **Das heißt:** Das veröffentlichte Image ist nur für x86-64 gebaut.
 **Was tun:** Bauen Sie aus dem Quellcode mit `make quickstart`, oder nutzen Sie pip.
 
+## Optional: gescannte Pläne lesen (OCR)
+
+Für gescannte Plansätze installieren Sie optional `sudo apt install tesseract-ocr` (plus Sprachpakete, z. B. `tesseract-ocr-deu`); das braucht etwa 40 MB Speicher und je Seite kurzzeitig etwa 150 MB RAM. Ohne OCR wird ein gescannter Plan trotzdem importiert, als "OCR nicht verfügbar" markiert und zurückgehalten, bis jemand das Schriftfeld ergänzt und bestätigt.
+
 ## Deinstallieren und Ihre Daten
 
 Die Deinstallation entfernt das Programm und behält Ihre Projekte. Sie liegen im Ordner `.openestimate` in Ihrem Benutzerordner (dazu der oben genannte `ProgramData`-Ordner, wenn Ihr Benutzername nicht-lateinische Buchstaben enthält). Eine Neuinstallation fängt deshalb nicht von vorn an. Für einen echten Neuanfang deinstallieren Sie und löschen `.openestimate` selbst, nachdem Sie es an einen sicheren Ort kopiert haben.

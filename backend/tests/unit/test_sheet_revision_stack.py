@@ -118,6 +118,10 @@ async def test_leading_zeros_and_underscores_do_not_split_a_stack(session: Async
 
     assert first.sheet_number == "TAV_01"
     assert first.revision == "01"
+    # No text layer and no OCR: the file name is only a suggestion, so the
+    # second sheet is held until a person confirms it.
+    assert second.previous_version_id is None
+    second = await SheetService(session).confirm_extraction(second.id, user_id)
     assert second.previous_version_id == first.id
     assert (await _reload(session, first.id)).is_current is False
 
@@ -208,9 +212,9 @@ async def test_correcting_a_misread_number_moves_the_sheet_into_its_stack_and_ba
 async def test_correcting_a_revision_reorders_the_stack(session: AsyncSession) -> None:
     """The later upload misread as "ole" is corrected to 00, below the 01 already held."""
     project_id, user_id = await _seed_project(session)
-    rev01 = await _split(session, project_id, user_id, ["SHEET NO: A-101", "REV 01"])
+    rev01 = await _split(session, project_id, user_id, ["SHEET NO: A-101", "SHEET TITLE: Plan", "REV 01"])
     # An upload whose revision was read wrongly. It is the latest, so it is current.
-    wrong = await _split(session, project_id, user_id, ["SHEET NO: A-101", "REV X9Z"])
+    wrong = await _split(session, project_id, user_id, ["SHEET NO: A-101", "SHEET TITLE: Plan", "REV X9Z"])
     assert wrong.is_current is True
 
     corrected = await SheetService(session).update_sheet(wrong.id, SheetUpdate(revision="00"))

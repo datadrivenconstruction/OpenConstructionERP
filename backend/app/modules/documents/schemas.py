@@ -310,6 +310,39 @@ class SheetBulkUpdate(BaseModel):
         return SheetUpdate(**fields)
 
 
+class SheetConfirmRequest(BaseModel):
+    """Optional corrections sent along with confirming a machine-read title block."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    number: str | None = Field(default=None, max_length=100)
+    title: str | None = Field(default=None, max_length=500)
+    revision: str | None = Field(default=None, max_length=50)
+    discipline: str | None = Field(default=None, max_length=100)
+
+    def changes(self) -> SheetUpdate:
+        """The sheet update these corrections stand for; blank fields are left out."""
+        names = {"number": "sheet_number", "title": "sheet_title", "revision": "revision", "discipline": "discipline"}
+        fields = {names[k]: v for k, v in self.model_dump().items() if v not in (None, "")}
+        return SheetUpdate(**fields)
+
+
+class SheetConfirmBulk(BaseModel):
+    """Confirm every held sheet of a project read at or above a confidence."""
+
+    project_id: UUID
+    min_confidence: float = Field(default=0.8, ge=0.0, le=1.0)
+
+
+class SheetConfirmBulkSummary(BaseModel):
+    """How a bulk confirmation went."""
+
+    confirmed: int = 0
+    below_threshold: int = 0
+    ocr_unavailable: int = 0
+    no_number: int = 0
+
+
 class SheetRereadSummary(BaseModel):
     """What re-reading a project's title blocks from the stored drawings changed."""
 
