@@ -62,6 +62,7 @@ from app.modules.users.schemas import (
     UserCreate,
     UserPreferencesUpdate,
 )
+from app.modules.users.sso_enforce import assert_password_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -447,6 +448,7 @@ class UserService:
         from app.config import get_settings as _get_settings
 
         _s = _get_settings()
+        assert_password_allowed(_s, str(data.email))
         mode = getattr(_s, "registration_mode", "open") or "open"
 
         # "First real user becomes admin" bootstrap, only on a genuinely fresh
@@ -541,6 +543,7 @@ class UserService:
             # metadata= here is silently swallowed by the declarative
             # constructor and the registration metadata never persisted.
             metadata_=metadata,
+            provisioned_by="local",
         )
         user = await self.user_repo.create(user)
 
@@ -594,6 +597,7 @@ class UserService:
             is_active=data.is_active,
             # metadata_ is the mapped attribute; metadata= would be dropped.
             metadata_={"registration": {"created_by": "admin"}},
+            provisioned_by="local",
         )
         user = await self.user_repo.create(user)
 
@@ -659,6 +663,7 @@ class UserService:
             return await self.demo_login(email_norm)
 
         user = await self.user_repo.get_by_email(data.email)
+        assert_password_allowed(self.settings, email_norm, user)
 
         if user is None:
             # Dummy bcrypt check to prevent timing side-channel (user enumeration)
@@ -982,6 +987,7 @@ class UserService:
                     is_active=True,
                     oidc_sub=oidc_sub,
                     oidc_issuer=oidc_issuer,
+                    provisioned_by="oidc",
                 )
                 self.session.add(user)
                 await self.session.flush()
@@ -1095,6 +1101,7 @@ class UserService:
         slower than for an unknown one, which is enumeration by stopwatch.
         """
         user = await self.user_repo.get_by_email(data.email)
+        assert_password_allowed(self.settings, data.email, user)
 
         # Generic message regardless of whether the email exists
         message = "If this email exists, a password reset link has been sent."
@@ -1170,6 +1177,8 @@ class UserService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User not found or inactive",
             )
+
+        assert_password_allowed(self.settings, user.email, user)
 
         # Single-use guard: reject the token if password was already changed
         # after this token was issued (iat).  Mirrors the same logic used in
