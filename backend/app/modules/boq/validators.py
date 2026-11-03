@@ -661,6 +661,7 @@ class RiskContingencyFromStaleRun(ValidationRule):
                     markup=str(block.get("name") or ""),
                     percentile=str(block.get("percentile") or "?"),
                     applied_at=applied_at or "?",
+                    source=translate(f"boq_risk.source.{block.get('source') or 'positions'}", locale),
                 ),
                 element_ref=str(block.get("markup_id") or "") or None,
                 suggestion=translate("boq_risk.contingency_stale.suggestion", locale),
@@ -668,8 +669,97 @@ class RiskContingencyFromStaleRun(ValidationRule):
                     "percentile": block.get("percentile"),
                     "amount": block.get("amount"),
                     "applied_at": block.get("applied_at"),
+                    "source": block.get("source"),
                 },
             )
+        ]
+
+
+class RiskContingencyBelowP50(ValidationRule):
+    """The risk line in the estimate holds less than the P50 estimate of the same risk picture."""
+
+    rule_id = "boq.risk.contingency_below_p50"
+    name = "Risk contingency reaches the median estimate"
+    standard = "universal"
+    severity = Severity.INFO
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A contingency taken from a Monte Carlo run is applied at P50 or above. When the money now in "
+        "the line is less than a fresh P50 of the same inputs, it covers fewer than half of the outcomes."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding when the line's current amount is below the current P50 contingency."""
+        data = context.data
+        block = data.get("risk_contingency") if isinstance(data, dict) else None
+        if not isinstance(block, dict) or block.get("p50_amount") is None or block.get("line_amount") is None:
+            return []
+        try:
+            line, p50 = Decimal(str(block["line_amount"])), Decimal(str(block["p50_amount"]))
+        except ArithmeticError:
+            return []
+        if line >= p50:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_risk.contingency_below_p50.fail",
+                    locale,
+                    markup=str(block.get("name") or ""),
+                    amount=str(line),
+                    p50=str(p50),
+                ),
+                element_ref=str(block.get("markup_id") or "") or None,
+                suggestion=translate("boq_risk.contingency_below_p50.suggestion", locale),
+                details={"line_amount": str(line), "p50_amount": str(p50)},
+            )
+        ]
+
+
+class RiskContingencyDoubleCount(ValidationRule):
+    """A manual contingency line sits beside the risk-derived one."""
+
+    rule_id = "boq.risk.contingency_double_count"
+    name = "Risk contingency is not counted twice"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "The risk contingency already covers the uncertainty the simulation sampled. An active contingency "
+        "line typed by hand beside it reserves the same money a second time."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per active non-risk contingency markup while a risk line is active."""
+        data = context.data
+        block = data.get("risk_contingency") if isinstance(data, dict) else None
+        if not isinstance(block, dict):
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_risk.contingency_double_count.fail",
+                    locale,
+                    markup=str(name),
+                    risk_markup=str(block.get("name") or ""),
+                ),
+                element_ref=str(block.get("markup_id") or "") or None,
+                suggestion=translate("boq_risk.contingency_double_count.suggestion", locale),
+                details={"other_contingency": str(name)},
+            )
+            for name in block.get("other_contingency") or []
         ]
 
 
@@ -764,6 +854,8 @@ _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     ManualDrawingRefWithoutRevision(),
     CarriedMeasurementUnconfirmed(),
     RiskContingencyFromStaleRun(),
+    RiskContingencyBelowP50(),
+    RiskContingencyDoubleCount(),
 )
 
 

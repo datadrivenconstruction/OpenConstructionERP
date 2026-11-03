@@ -25,3 +25,7 @@ The BOQ is the crossroads of the platform. Quantities flow into it from [takeoff
 ## Supporting capabilities
 
 Around the core editor, several modules deepen the estimate when you need them: assemblies and calculations for reusable rate build-ups, an all-in labour and crew rate build-up, waste factors to move from net to gross quantities, production-norm expansion to derive resource demand from coefficients, a resource summary that turns the estimate into a procurement-ready schedule of labour, materials and plant, and a basis-of-estimate draft that records the inclusions, exclusions and assumptions behind the number.
+
+## Risk contingency in the estimate
+
+The cost-risk panel turns a Monte Carlo run into one contingency line in the bill, only after you confirm the percentile and the amount you saw. The simulation can sample the bill's own line ranges or the project risk register (open risks only; closed, retired and rejected ones are left out, and all priced risks must share the bill's currency). A register run stores the list of risks behind it, so the money traces back to register items, and the line is flagged stale when a risk changes. The amount can be fixed, or a percentage of the direct cost that follows later quantity edits. Exports label the line with its percentile and source, and validation warns when the line holds less than the median estimate or when a manual contingency line sits beside it.

@@ -37,6 +37,9 @@ from app.modules.risk.contingency import (
     risk_weight,
     to_decimal,
 )
+from app.modules.risk.mc_core import CostItem, draw, simulate_cost
+from app.modules.risk.mc_core import pert_triple_or_point as _pert_triple_or_point
+from app.modules.risk.mc_core import safe_float as _safe_float
 from app.modules.risk.models import RiskItem
 from app.modules.risk.repository import RiskRepository
 from app.modules.risk.schemas import (
@@ -683,31 +686,33 @@ class RiskService:
         per_risk_cost_sum = [0.0] * len(items)
         per_risk_schedule_sum = [0.0] * len(items)
 
-        for _ in range(iterations):
-            c_total = 0.0
-            s_total = 0.0
-            for idx in range(len(items)):
-                c_weight = cost_weights[idx]
-                s_weight = schedule_weights[idx]
-                if sample_cost and c_weight > 0.0:
-                    lo, mid, hi = cost_triples[idx]
-                    # random.triangular(low, high, mode) - note the
-                    # argument order is (low, high, mode), NOT
-                    # (low, mode, high). Easy off-by-one to make.
-                    draw = random.triangular(lo, hi, mid) if hi > lo else mid
-                    contrib = draw * c_weight
-                    c_total += contrib
-                    per_risk_cost_sum[idx] += contrib
-                if sample_schedule and s_weight > 0.0:
-                    lo, mid, hi = schedule_triples[idx]
-                    draw = random.triangular(lo, hi, mid) if hi > lo else mid
-                    contrib = draw * s_weight
-                    s_total += contrib
-                    per_risk_schedule_sum[idx] += contrib
-            if sample_cost:
-                cost_totals.append(c_total)
-            if sample_schedule:
-                schedule_totals.append(s_total)
+        if sample_cost and not sample_schedule:
+            sim = simulate_cost(
+                [CostItem(lo, mid, hi, w) for (lo, mid, hi), w in zip(cost_triples, cost_weights, strict=True)],
+                iterations,
+            )
+            cost_totals = sim.totals
+            per_risk_cost_sum = sim.per_item_sum
+        else:
+            # Cost and schedule draws interleave on one generator, so this path keeps its own loop.
+            for _ in range(iterations):
+                c_total = 0.0
+                s_total = 0.0
+                for idx in range(len(items)):
+                    c_weight = cost_weights[idx]
+                    s_weight = schedule_weights[idx]
+                    if sample_cost and c_weight > 0.0:
+                        contrib = draw(random, *cost_triples[idx]) * c_weight
+                        c_total += contrib
+                        per_risk_cost_sum[idx] += contrib
+                    if sample_schedule and s_weight > 0.0:
+                        contrib = draw(random, *schedule_triples[idx]) * s_weight
+                        s_total += contrib
+                        per_risk_schedule_sum[idx] += contrib
+                if sample_cost:
+                    cost_totals.append(c_total)
+                if sample_schedule:
+                    schedule_totals.append(s_total)
 
         # ── Percentile read-out ─────────────────────────────────────
         # Suppress the cost percentiles when currencies are mixed (a blended
@@ -1081,52 +1086,6 @@ def _line_drawdowns(budget: Any, line_currency: str) -> tuple[DrawdownRecord, ..
 
 
 # ── Monte Carlo helpers (module-level, pure) ──────────────────────────────
-
-
-def _safe_float(value: object, default: float = 0.0) -> float:
-    """Coerce a stored string/Decimal/None numeric to a finite float safely."""
-    if value is None or value == "":
-        return default
-    try:
-        result = float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return default
-    # A legacy / raw-written absurd value (e.g. "1e400") yields inf here with no
-    # exception; inf would poison the simulation percentiles -> Pydantic 500.
-    # Treat non-finite as the default. New rows are guarded by the schema.
-    if not math.isfinite(result):
-        return default
-    return result
-
-
-def _pert_triple_or_point(
-    p10: object,
-    p50: object,
-    p90: object,
-    *,
-    fallback: float,
-) -> tuple[float, float, float]:
-    """Return a (low, mode, high) PERT triple, with safe fallbacks.
-
-    * If all three are present and well-ordered, return them as floats.
-    * If any are missing/unparseable, treat ``fallback`` as a zero-
-      variance point estimate (lo == mid == hi == fallback) - folds the
-      risk into the simulation without inventing data.
-    * If the triple is mis-ordered (e.g. p10 > p90) we clamp it so
-      ``random.triangular`` never raises.
-    """
-    lo = _safe_float(p10, fallback)
-    mid = _safe_float(p50, fallback)
-    hi = _safe_float(p90, fallback)
-    # Clamp ordering: lo ≤ mid ≤ hi. random.triangular requires lo ≤ hi
-    # and the mode in [lo, hi], so a swapped triple would otherwise raise.
-    if hi < lo:
-        lo, hi = hi, lo
-    if mid < lo:
-        mid = lo
-    if mid > hi:
-        mid = hi
-    return lo, mid, hi
 
 
 def _percentiles(

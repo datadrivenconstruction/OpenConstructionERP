@@ -1480,8 +1480,20 @@
   },
   "boq_risk": {
     "contingency_stale": {
-      "fail": "Die Risikozeile „{markup}“ wurde am {applied_at} mit P{percentile} angesetzt, seither haben sich die Positionssummen der Risikoanalyse geändert",
-      "suggestion": "Risikoanalyse neu rechnen und den Risikozuschlag erneut übernehmen, oder die Zeile behalten und den Grund vermerken"
+      "suggestion": "Risikoanalyse neu rechnen und den Risikozuschlag erneut übernehmen, oder die Zeile behalten und den Grund vermerken",
+      "fail": "Reservezeile \"{markup}\" wurde am {applied_at} mit P{percentile} angewendet, aber ihre Quelle ({source}) hat sich seitdem geändert"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Risikoanalyse neu berechnen und die Reserve erneut anwenden oder die Zeile behalten und den Grund vermerken",
+      "fail": "Risikoreserve \"{markup}\" enthält {amount}, weniger als die aktuelle P50-Schätzung von {p50}"
+    },
+    "source": {
+      "positions": "LV-Positionssummen",
+      "register": "Risikoregister"
+    },
+    "contingency_double_count": {
+      "suggestion": "Eine der beiden Zeilen deaktivieren oder vermerken, warum beide nötig sind",
+      "fail": "Reservezeile \"{markup}\" ist neben der Risikoreserve \"{risk_markup}\" aktiv; dieselbe Unsicherheit wird womöglich doppelt abgedeckt"
     }
   },
   "field_productivity": {

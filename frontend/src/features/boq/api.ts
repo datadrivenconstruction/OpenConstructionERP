@@ -1663,6 +1663,26 @@ export interface RiskContingencySuggestion {
   prob_within_base: number;
   confidence: number;
   fingerprint: string;
+  source?: RiskContingencySource;
+  mode?: RiskContingencyMode;
+  /* Direct cost the percentage refers to, and the percentage itself (Decimal-as-strings). */
+  direct_cost?: string | null;
+  percentage?: string | null;
+  /* Register source: how many open risks fed the run. */
+  items_used?: number | null;
+  register_fingerprint?: string | null;
+}
+
+export type RiskContingencySource = 'positions' | 'register';
+export type RiskContingencyMode = 'fixed' | 'percentage';
+
+export interface RiskContingencyItem {
+  id: string;
+  code?: string;
+  title?: string;
+  probability?: string;
+  impact_cost?: string;
+  currency?: string;
 }
 
 export interface AppliedRiskContingency {
@@ -1681,6 +1701,12 @@ export interface AppliedRiskContingency {
   applied_by: string | null;
   applied_by_email: string | null;
   can_undo_to_previous: boolean;
+  source?: RiskContingencySource;
+  mode?: RiskContingencyMode;
+  percentage?: string | null;
+  items_used?: number | null;
+  risk_items?: RiskContingencyItem[] | null;
+  register_fingerprint?: string | null;
 }
 
 export interface RiskContingencyStatus {
@@ -1698,6 +1724,8 @@ export interface ApplyRiskContingencyBody {
   iterations?: number;
   expected_amount?: string;
   name?: string;
+  source?: RiskContingencySource;
+  mode?: RiskContingencyMode;
 }
 
 export interface CostRiskResponse {
@@ -2301,10 +2329,18 @@ export const boqApi = {
   },
 
   /* Risk contingency: preview at a percentile, apply (server recomputes), undo. */
-  getRiskContingency: (boqId: string, percentile?: number, correlation?: number) => {
+  getRiskContingency: (
+    boqId: string,
+    percentile?: number,
+    correlation?: number,
+    source?: RiskContingencySource,
+    mode?: RiskContingencyMode,
+  ) => {
     const qs = new URLSearchParams();
     if (percentile != null) qs.set('percentile', String(percentile));
     if (correlation != null) qs.set('correlation', String(correlation));
+    if (source) qs.set('source', source);
+    if (mode) qs.set('mode', mode);
     const q = qs.toString();
     return apiGet<RiskContingencyStatus>(`/v1/boq/boqs/${boqId}/cost-risk/contingency/${q ? `?${q}` : ''}`);
   },
