@@ -7,7 +7,7 @@ No business logic - pure data access.
 """
 
 import uuid
-from datetime import UTC
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -233,8 +233,6 @@ class APIKeyRepository:
         Rejects keys that are inactive or past their ``expires_at``. A NULL
         ``expires_at`` means the key never expires.
         """
-        from datetime import datetime
-
         now = datetime.now(UTC)
         stmt = select(APIKey).where(
             APIKey.key_hash == key_hash,
@@ -271,10 +269,35 @@ class APIKeyRepository:
         await self.session.execute(stmt)
         await self.session.flush()
 
-    async def update_last_used(self, key_id: uuid.UUID) -> None:
-        """Update the last_used_at timestamp and persist it."""
-        from datetime import datetime
+    async def list_live_for_user(self, user_id: uuid.UUID, now: datetime | None = None) -> list[APIKey]:
+        """Active, unexpired keys of a user, leaving out keys already replaced by a rotation.
 
-        stmt = update(APIKey).where(APIKey.id == key_id).values(last_used_at=datetime.now(UTC))
+        A rotated key stays valid for its overlap window but its successor
+        carries the same name, so it must count once against the name and
+        quota rules.
+        """
+        now = now or datetime.now(UTC)
+        replaced = select(APIKey.rotated_from_id).where(APIKey.user_id == user_id, APIKey.rotated_from_id.is_not(None))
+        stmt = select(APIKey).where(
+            APIKey.user_id == user_id,
+            APIKey.is_active.is_(True),
+            (APIKey.expires_at.is_(None)) | (APIKey.expires_at > now),
+            APIKey.id.not_in(replaced),
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def has_successor(self, key_id: uuid.UUID) -> bool:
+        """True when a rotation already produced a replacement for this key."""
+        result = await self.session.execute(select(APIKey.id).where(APIKey.rotated_from_id == key_id).limit(1))
+        return result.first() is not None
+
+    async def update_last_used(self, key_id: uuid.UUID) -> None:
+        """Stamp last use and count the request in one UPDATE, then persist it."""
+        stmt = (
+            update(APIKey)
+            .where(APIKey.id == key_id)
+            .values(last_used_at=datetime.now(UTC), request_count=APIKey.request_count + 1)
+        )
         await self.session.execute(stmt)
         await self.session.commit()

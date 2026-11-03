@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 if TYPE_CHECKING:
     from app.modules.users.models import User
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy import select
@@ -518,6 +518,9 @@ class ApiKeyPrincipal:
 
     user: "User"
     scopes: list[str]
+    #: The key's per-minute ceiling and what is left of it, for the rate-limit headers.
+    rate_limit: int | None = None
+    rate_remaining: int | None = None
 
 
 def key_scopes_allow(
@@ -593,14 +596,35 @@ async def resolve_api_key_principal(
                 headers={"WWW-Authenticate": "ApiKey"},
             )
         scopes = list(api_key.permissions or [])
-        await APIKeyRepository(session).update_last_used(api_key.id)
         user = await session.get(_UserModel, api_key.user_id)
         if user is None or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="User not found or inactive",
             )
-        return ApiKeyPrincipal(user=user, scopes=scopes)
+
+        from app.core.rate_limiter import api_key_limiter, client_ip
+        from app.modules.users.validators import ip_allowed
+
+        if not ip_allowed(client_ip(request), api_key.allowed_cidrs):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="api_key.ip_denied")
+
+        limit = api_key.rate_limit_per_min or api_key_limiter.max_requests
+        bucket = f"key:{api_key.id}"
+        allowed, remaining = api_key_limiter.is_allowed(bucket, limit)
+        if not allowed:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="api_key.rate_limited",
+                headers={
+                    "Retry-After": str(api_key_limiter.retry_after(bucket)),
+                    "X-RateLimit-Limit": str(limit),
+                    "X-RateLimit-Remaining": "0",
+                },
+            )
+        # Last use and the request count go in one UPDATE, only for a request that was let through.
+        await APIKeyRepository(session).update_last_used(api_key.id)
+        return ApiKeyPrincipal(user=user, scopes=scopes, rate_limit=limit, rate_remaining=remaining)
 
 
 async def get_user_from_api_key(
@@ -731,6 +755,7 @@ class RequirePermissionOrApiKey:
         self,
         request: Request,
         payload: Annotated[dict[str, Any] | None, Depends(get_optional_user_payload)],
+        response: Response = None,  # type: ignore[assignment]
     ) -> str:
         # Interactive caller: a valid bearer token was presented. Attribute the
         # work to the JWT subject, exactly as RequirePermission would gate it.
@@ -741,6 +766,9 @@ class RequirePermissionOrApiKey:
         # Its own 401 (missing / unknown / expired key, or inactive owner)
         # propagates unchanged; a valid key resolves to its owner and scopes.
         principal = await resolve_api_key_principal(request)
+        if response is not None and principal.rate_limit is not None:
+            response.headers["X-RateLimit-Limit"] = str(principal.rate_limit)
+            response.headers["X-RateLimit-Remaining"] = str(principal.rate_remaining or 0)
         self._authorize(getattr(principal.user, "role", "") or "", None, principal.scopes)
         # The global request dependency saw no bearer token and bound an
         # anonymous reader; an API key reads cost items as the key's owner.

@@ -118,19 +118,33 @@ class RateLimiter:
         self._requests: dict[str, list[float]] = defaultdict(list)
         self._lock = Lock()
 
-    def is_allowed(self, key: str) -> tuple[bool, int]:
-        """Check if request is allowed. Returns (allowed, remaining)."""
+    def is_allowed(self, key: str, max_requests: int | None = None) -> tuple[bool, int]:
+        """Check if request is allowed. Returns (allowed, remaining).
+
+        ``max_requests`` overrides the limiter's own ceiling for this call, so
+        one limiter can serve buckets that each carry their own limit.
+        """
+        limit = self.max_requests if max_requests is None else max_requests
         now = time.time()
         with self._lock:
             # Clean old entries
             self._requests[key] = [t for t in self._requests[key] if t > now - self.window_seconds]
 
-            if len(self._requests[key]) >= self.max_requests:
+            if len(self._requests[key]) >= limit:
                 return False, 0
 
             self._requests[key].append(now)
-            remaining = self.max_requests - len(self._requests[key])
+            remaining = limit - len(self._requests[key])
             return True, remaining
+
+    def retry_after(self, key: str) -> int:
+        """Whole seconds until the oldest request in ``key``'s window ages out (at least 1)."""
+        now = time.time()
+        with self._lock:
+            stamps = [t for t in self._requests.get(key, ()) if t > now - self.window_seconds]
+        if not stamps:
+            return 1
+        return max(1, int(min(stamps) + self.window_seconds - now) + 1)
 
 
 def _create_limiters() -> tuple[RateLimiter, RateLimiter, RateLimiter]:
@@ -162,6 +176,10 @@ def _create_limiters() -> tuple[RateLimiter, RateLimiter, RateLimiter]:
 
 # Global instances - configured from environment variables
 ai_limiter, api_limiter, login_limiter = _create_limiters()
+
+# Per-API-key buckets ("key:<id>"). Each call passes the key's own limit, or
+# api_limiter.max_requests when the key sets none.
+api_key_limiter = RateLimiter(max_requests=api_limiter.max_requests, window_seconds=60)
 
 # Rate limiter for approval / financial mutation endpoints.
 # Tighter window to limit potential abuse of state-changing actions.

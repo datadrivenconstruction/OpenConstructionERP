@@ -152,6 +152,13 @@ async def ai_agents_tick() -> None:
     await fire_due_runs()
 
 
+async def webhook_retry_tick() -> None:
+    """Send the webhook deliveries whose retry time has come."""
+    from app.modules.integrations.service import run_retry_tick
+
+    await run_retry_tick()
+
+
 async def file_trash_tick() -> None:
     from app.modules.file_trash.jobs import run_purge_once
 
@@ -343,6 +350,12 @@ def register_builtin_processes(
             ["meetings"],
             category="maintenance",
             logger_names=["app.modules.meetings.audio_service"],
+        ),
+        _spec(
+            "webhook_retry",
+            _loop(30, webhook_retry_tick, SETTLE_S),
+            ["integrations"],
+            logger_names=["app.modules.integrations.service"],
         ),
         _spec(
             "file_trash_purge",
