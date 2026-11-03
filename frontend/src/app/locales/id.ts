@@ -59602,6 +59602,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Tidak ada build konverter {{format}} untuk sistem operasi atau prosesor server ini. Build tersedia untuk Windows x64, Linux x64 dan ARM64, serta macOS pada Intel dan Apple silicon. Gambar DXF dapat dibaca di setiap platform, dan model IFC dibuka di BIM Hub dengan pembaca bawaan.",
     "api_errors.unsupported_cad_extension": "File {{ext}} tidak didukung di sini. Gunakan salah satu: {{accepted}}.",
     "api_errors.converter_format_unknown": "Tidak ada konverter untuk file {{format}}. Format yang didukung: {{supported}}.",
+    "api_errors.module_disabled": "Modul {{module}} dinonaktifkan untuk ruang kerja ini. Administrator dapat mengaktifkannya di Modul > Paket solusi.",
     "conv.stage_upload": "Mengunggah file",
     "conv.stage_upload_hint": "Mengirim file ke server. Biarkan tab ini terbuka sampai selesai.",
     "conv.stage_converter": "Menyiapkan konverter",

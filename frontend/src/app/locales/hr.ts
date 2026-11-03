@@ -60188,6 +60188,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Za operacijski sustav ili procesor ovog poslužitelja ne postoji verzija konvertera {{format}}. Verzije postoje za Windows x64, Linux x64 i ARM64, te za macOS na Intel i Apple silicon procesorima. Crteži DXF čitaju se na svim platformama, a IFC modeli otvaraju se u BIM Hubu ugrađenim čitačem.",
     "api_errors.unsupported_cad_extension": "Datoteke {{ext}} ovdje nisu podržane. Upotrijebite jedan od sljedećih formata: {{accepted}}.",
     "api_errors.converter_format_unknown": "Ne postoji pretvarač za datoteke {{format}}. Podržani formati: {{supported}}.",
+    "api_errors.module_disabled": "Modul {{module}} isključen je za ovaj radni prostor. Administrator ga može uključiti u Moduli > Paketi rješenja.",
     "conv.stage_upload": "Prijenos datoteke",
     "conv.stage_upload_hint": "Šaljemo datoteku na server. Ostavite karticu otvorenom dok ne završi.",
     "conv.stage_converter": "Priprema konvertera",

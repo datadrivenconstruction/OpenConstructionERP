@@ -59811,6 +59811,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "برای سیستم‌عامل یا پردازنده این سرور، نسخه‌ای از مبدل {{format}} وجود ندارد. نسخه‌ها برای Windows x64، Linux x64 و ARM64 و همچنین macOS روی Intel و Apple silicon موجودند. نقشه‌های DXF روی همه پلتفرم‌ها خوانده می‌شوند و مدل‌های IFC با خواننده داخلی در BIM Hub باز می‌شوند.",
     "api_errors.unsupported_cad_extension": "فایل‌های {{ext}} اینجا پشتیبانی نمی‌شوند. یکی از این موارد را استفاده کنید: {{accepted}}.",
     "api_errors.converter_format_unknown": "برای فایل‌های {{format}} مبدلی وجود ندارد. قالب‌های پشتیبانی‌شده: {{supported}}.",
+    "api_errors.module_disabled": "ماژول {{module}} برای این فضای کاری خاموش است. مدیر می‌تواند آن را از ماژول‌ها > بسته‌های راهکار روشن کند.",
     "conv.stage_upload": "در حال بارگذاری فایل",
     "conv.stage_upload_hint": "فایل به سرور ارسال می‌شود. تا پایان کار این زبانه را باز نگه دارید.",
     "conv.stage_converter": "آماده‌سازی مبدل",

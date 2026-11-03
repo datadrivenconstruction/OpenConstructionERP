@@ -60137,6 +60137,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "אין גרסת בנייה של ממיר {{format}} למערכת ההפעלה או למעבד של השרת הזה. יש בניות ל-Windows x64, ל-Linux x64 ול-ARM64, וכן ל-macOS על Intel ו-Apple silicon. שרטוטי DXF נקראים בכל פלטפורמה, ומודלי IFC נפתחים ב-BIM Hub עם הקורא המובנה.",
     "api_errors.unsupported_cad_extension": "קובצי {{ext}} אינם נתמכים כאן. השתמשו באחד מאלה: {{accepted}}.",
     "api_errors.converter_format_unknown": "אין ממיר לקובצי {{format}}. פורמטים נתמכים: {{supported}}.",
+    "api_errors.module_disabled": "המודול {{module}} כבוי בסביבת עבודה זו. מנהל מערכת יכול להפעיל אותו תחת מודולים > חבילות פתרונות.",
     "conv.stage_upload": "מעלה את הקובץ",
     "conv.stage_upload_hint": "הקובץ נשלח לשרת. השאירו את הלשונית פתוחה עד לסיום.",
     "conv.stage_converter": "מכין את הממיר",

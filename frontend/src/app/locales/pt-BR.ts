@@ -55620,6 +55620,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Não há build do conversor {{format}} para o sistema operacional ou processador deste servidor. Existem builds para Windows x64, Linux x64 e ARM64, e para macOS em Intel e Apple silicon. Desenhos DXF são lidos em todas as plataformas, e modelos IFC abrem no BIM Hub com o leitor integrado.",
     "api_errors.unsupported_cad_extension": "Arquivos {{ext}} não são suportados aqui. Use um destes: {{accepted}}.",
     "api_errors.converter_format_unknown": "Não existe conversor para arquivos {{format}}. Formatos suportados: {{supported}}.",
+    "api_errors.module_disabled": "O módulo {{module}} está desativado neste espaço de trabalho. Um administrador pode ativá-lo em Módulos > Pacotes de soluções.",
     "conv.stage_upload": "Enviando o arquivo",
     "conv.stage_upload_hint": "Enviando o arquivo para o servidor. Mantenha esta aba aberta até terminar.",
     "conv.stage_converter": "Preparando o conversor",

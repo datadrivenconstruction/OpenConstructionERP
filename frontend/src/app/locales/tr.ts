@@ -60732,6 +60732,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Bu sunucunun işletim sistemi veya işlemcisi için {{format}} dönüştürücü derlemesi yok. Derlemeler Windows x64, Linux x64 ve ARM64 için, ayrıca Intel ve Apple silicon üzerindeki macOS için mevcut. DXF çizimleri her platformda okunur, IFC modelleri ise yerleşik okuyucuyla BIM Hub'da açılır.",
     "api_errors.unsupported_cad_extension": "{{ext}} dosyaları burada desteklenmez. Şunlardan birini kullanın: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} dosyaları için bir dönüştürücü yok. Desteklenen biçimler: {{supported}}.",
+    "api_errors.module_disabled": "{{module}} modülü bu çalışma alanında kapalı. Bir yönetici Modüller > Çözüm paketleri bölümünden açabilir.",
     "conv.stage_upload": "Dosya yükleniyor",
     "conv.stage_upload_hint": "Dosya sunucuya gönderiliyor. Tamamlanana kadar bu sekmeyi açık tutun.",
     "conv.stage_converter": "Dönüştürücü hazırlanıyor",

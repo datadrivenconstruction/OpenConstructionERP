@@ -18,6 +18,12 @@ describe('extractErrorMessageFromBody', () => {
     expect(extractErrorMessageFromBody(undefined)).toBeNull();
   });
 
+  it('turns the module guard refusal into a translated, actionable message', () => {
+    const msg = extractErrorMessageFromBody({ detail: 'module_disabled', module: 'ai' });
+    expect(msg).not.toBe('module_disabled');
+    expect(msg).toContain('ai');
+  });
+
   it('returns short string body as-is', () => {
     expect(extractErrorMessageFromBody('Something went wrong')).toBe('Something went wrong');
   });

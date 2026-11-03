@@ -1675,6 +1675,7 @@ const resource = {
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
     "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",
     "measurement_book.f_breadth": "Width",
+    "api_errors.module_disabled": "The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.",
   }
 } as { translation: Record<string, string> };
 

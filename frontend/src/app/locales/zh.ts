@@ -62072,6 +62072,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "此服务器的操作系统或处理器没有 {{format}} 转换器的构建版本。构建版本提供 Windows x64、Linux x64 和 ARM64，以及 Intel 和 Apple silicon 的 macOS。DXF 图纸可在所有平台读取，IFC 模型可通过内置读取器在 BIM Hub 中打开。",
     "api_errors.unsupported_cad_extension": "此处不支持 {{ext}} 文件。请使用以下格式之一：{{accepted}}。",
     "api_errors.converter_format_unknown": "没有适用于 {{format}} 文件的转换器。支持的格式：{{supported}}。",
+    "api_errors.module_disabled": "此工作区已关闭 {{module}} 模块。管理员可在“模块 > 解决方案包”中开启。",
     "conv.stage_upload": "正在上传文件",
     "conv.stage_upload_hint": "正在将文件发送到服务器。上传完成前请保持此标签页打开。",
     "conv.stage_converter": "正在准备转换器",

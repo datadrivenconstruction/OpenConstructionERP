@@ -60466,6 +60466,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Det finns ingen version av {{format}}-konverteraren för denna servers operativsystem eller processor. Det finns versioner för Windows x64, Linux x64 och ARM64, samt för macOS på Intel och Apple silicon. DXF-ritningar läses på alla plattformar, och IFC-modeller öppnas i BIM Hub med den inbyggda läsaren.",
     "api_errors.unsupported_cad_extension": "{{ext}}-filer stöds inte här. Använd något av: {{accepted}}.",
     "api_errors.converter_format_unknown": "Det finns ingen konverterare för {{format}}-filer. Format som stöds: {{supported}}.",
+    "api_errors.module_disabled": "Modulen {{module}} är avstängd för den här arbetsytan. En administratör kan slå på den under Moduler > Lösningspaket.",
     "conv.stage_upload": "Laddar upp filen",
     "conv.stage_upload_hint": "Filen skickas till servern. Håll fliken öppen tills det är klart.",
     "conv.stage_converter": "Förbereder konverteraren",

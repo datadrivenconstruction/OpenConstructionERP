@@ -456,6 +456,19 @@ def set_module(
     return metadata, affected
 
 
+def unblock(metadata: dict[str, Any], modules: list[str] | set[str]) -> tuple[dict[str, Any], list[str]]:
+    """Switch on every listed module the packages hide, so an explicit grant elsewhere is honoured.
+
+    Returns the new metadata and the modules switched on (empty: metadata unchanged).
+    """
+    switched: list[str] = []
+    for mod in sorted(set(modules)):
+        if mod in gateable_modules() and is_blocked(metadata, mod):
+            metadata, deps = set_module(metadata, mod, True)
+            switched.extend([mod, *deps])
+    return metadata, sorted(set(switched))
+
+
 def is_blocked(metadata: dict[str, Any] | None, module: str) -> bool:
     """Whether the tenant's packages hide ``module`` (fail-open when no packages)."""
     if not metadata:

@@ -60178,6 +60178,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Nu există un build al convertorului {{format}} pentru sistemul de operare sau procesorul acestui server. Există build-uri pentru Windows x64, Linux x64 și ARM64, precum și pentru macOS pe Intel și Apple silicon. Desenele DXF se citesc pe orice platformă, iar modelele IFC se deschid în BIM Hub cu cititorul integrat.",
     "api_errors.unsupported_cad_extension": "Fișierele {{ext}} nu sunt suportate aici. Folosiți unul dintre: {{accepted}}.",
     "api_errors.converter_format_unknown": "Nu există convertor pentru fișiere {{format}}. Formate suportate: {{supported}}.",
+    "api_errors.module_disabled": "Modulul {{module}} este dezactivat pentru acest spațiu de lucru. Un administrator îl poate activa din Module > Pachete de soluții.",
     "conv.stage_upload": "Se încarcă fișierul",
     "conv.stage_upload_hint": "Fișierul se trimite către server. Lasă fila deschisă până se termină.",
     "conv.stage_converter": "Se pregătește convertorul",

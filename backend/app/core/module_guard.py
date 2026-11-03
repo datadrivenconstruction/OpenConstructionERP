@@ -38,11 +38,19 @@ def invalidate_all() -> None:
     _cache.clear()
 
 
+# Workspace-wide configuration other modules depend on (the AI provider key feeds chat,
+# translation and takeoff), so it stays reachable while the owning module is hidden.
+_ALWAYS_OPEN_PREFIXES = ("ai/settings",)
+
+
 def module_from_path(path: str) -> str | None:
     """The gateable module a ``/api/v1/<segment>/`` path belongs to, or ``None``."""
     if not path.startswith("/api/v1/"):
         return None
-    segment = path[len("/api/v1/") :].split("/", 1)[0].replace("-", "_")
+    rest = path[len("/api/v1/") :]
+    if rest.startswith(_ALWAYS_OPEN_PREFIXES):
+        return None
+    segment = rest.split("/", 1)[0].replace("-", "_")
     return segment if segment in gateable_modules() else None
 
 

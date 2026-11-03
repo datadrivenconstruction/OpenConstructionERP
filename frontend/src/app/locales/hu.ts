@@ -62416,6 +62416,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Ehhez a szerver operációs rendszeréhez vagy processzorához nincs {{format}}-konverter build. Build létezik Windows x64, Linux x64 és ARM64 rendszerekhez, valamint macOS-hez Intel és Apple silicon processzoron. A DXF rajzok minden platformon olvashatók, az IFC modellek pedig a beépített olvasóval nyílnak meg a BIM Hubban.",
     "api_errors.unsupported_cad_extension": "A(z) {{ext}} fájlok itt nem támogatottak. Használja az egyik következőt: {{accepted}}.",
     "api_errors.converter_format_unknown": "A {{format}} fájlokhoz nincs konverter. Támogatott formátumok: {{supported}}.",
+    "api_errors.module_disabled": "A(z) {{module}} modul ki van kapcsolva ebben a munkaterületben. Egy rendszergazda bekapcsolhatja a Modulok > Megoldáscsomagok menüben.",
     "conv.stage_upload": "Fájl feltöltése",
     "conv.stage_upload_hint": "A fájl küldése a szervernek. Ne zárja be a lapot, amíg be nem fejeződik.",
     "conv.stage_converter": "Konverter előkészítése",

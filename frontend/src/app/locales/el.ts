@@ -59811,6 +59811,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Δεν υπάρχει build του μετατροπέα {{format}} για το λειτουργικό σύστημα ή τον επεξεργαστή αυτού του διακομιστή. Υπάρχουν builds για Windows x64, Linux x64 και ARM64, καθώς και για macOS σε Intel και Apple silicon. Τα σχέδια DXF διαβάζονται σε όλες τις πλατφόρμες, και τα μοντέλα IFC ανοίγουν στο BIM Hub με τον ενσωματωμένο αναγνώστη.",
     "api_errors.unsupported_cad_extension": "Τα αρχεία {{ext}} δεν υποστηρίζονται εδώ. Χρησιμοποιήστε ένα από αυτά: {{accepted}}.",
     "api_errors.converter_format_unknown": "Δεν υπάρχει μετατροπέας για αρχεία {{format}}. Υποστηριζόμενες μορφές: {{supported}}.",
+    "api_errors.module_disabled": "Η ενότητα {{module}} είναι απενεργοποιημένη για αυτόν τον χώρο εργασίας. Ένας διαχειριστής μπορεί να την ενεργοποιήσει από Ενότητες > Πακέτα λύσεων.",
     "conv.stage_upload": "Μεταφόρτωση του αρχείου",
     "conv.stage_upload_hint": "Αποστολή του αρχείου στον διακομιστή. Κρατήστε την καρτέλα ανοιχτή μέχρι να ολοκληρωθεί.",
     "conv.stage_converter": "Προετοιμασία του μετατροπέα",

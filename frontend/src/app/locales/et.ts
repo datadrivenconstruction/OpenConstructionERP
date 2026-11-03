@@ -59801,6 +59801,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Selle serveri operatsioonisüsteemi või protsessori jaoks ei ole {{format}} konverteri versiooni. Versioonid on olemas Windows x64, Linux x64 ja ARM64 jaoks ning macOS-ile Inteli ja Apple silicon protsessoritega. DXF-jooniseid loetakse igal platvormil ja IFC-mudelid avanevad BIM Hubis sisseehitatud lugejaga.",
     "api_errors.unsupported_cad_extension": "{{ext}}-faile siin ei toetata. Kasutage ühte järgmistest: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}}-failidele ei ole konverterit. Toetatud vormingud: {{supported}}.",
+    "api_errors.module_disabled": "Moodul {{module}} on selles tööruumis välja lülitatud. Administraator saab selle sisse lülitada jaotises Moodulid > Lahenduspaketid.",
     "conv.stage_upload": "Faili üleslaadimine",
     "conv.stage_upload_hint": "Faili saatmine serverisse. Hoidke vahekaart avatuna, kuni see lõpeb.",
     "conv.stage_converter": "Teisendaja ettevalmistamine",

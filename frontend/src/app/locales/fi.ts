@@ -59855,6 +59855,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Tämän palvelimen käyttöjärjestelmälle tai suorittimelle ei ole {{format}}-muuntimen versiota. Versioita on saatavilla Windows x64, Linux x64 ja ARM64 -järjestelmille sekä macOS-järjestelmille Intel- ja Apple silicon -suorittimilla. DXF-piirustukset luetaan kaikilla alustoilla, ja IFC-mallit avautuvat BIM Hubissa sisäänrakennetulla lukijalla.",
     "api_errors.unsupported_cad_extension": "{{ext}}-tiedostoja ei tueta täällä. Käytä jotakin näistä: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}}-tiedostoille ei ole muunninta. Tuetut muodot: {{supported}}.",
+    "api_errors.module_disabled": "Moduuli {{module}} on poistettu käytöstä tässä työtilassa. Ylläpitäjä voi ottaa sen käyttöön kohdassa Moduulit > Ratkaisupaketit.",
     "conv.stage_upload": "Tiedoston lataaminen",
     "conv.stage_upload_hint": "Tiedosto lähetetään palvelimelle. Pidä välilehti auki, kunnes lataus on valmis.",
     "conv.stage_converter": "Muuntimen valmistelu",

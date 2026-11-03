@@ -59854,6 +59854,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "इस सर्वर के ऑपरेटिंग सिस्टम या प्रोसेसर के लिए {{format}} कन्वर्टर का कोई बिल्ड उपलब्ध नहीं है। Windows x64, Linux x64 और ARM64 के लिए, और Intel व Apple silicon वाले macOS के लिए बिल्ड मौजूद हैं। DXF ड्रॉइंग हर प्लेटफ़ॉर्म पर पढ़ी जाती हैं, और IFC मॉडल बिल्ट-इन रीडर के साथ BIM Hub में खुलते हैं।",
     "api_errors.unsupported_cad_extension": "{{ext}} फ़ाइलें यहाँ समर्थित नहीं हैं। इनमें से एक उपयोग करें: {{accepted}}।",
     "api_errors.converter_format_unknown": "{{format}} फ़ाइलों के लिए कोई कन्वर्टर नहीं है। समर्थित फ़ॉर्मेट: {{supported}}।",
+    "api_errors.module_disabled": "इस वर्कस्पेस के लिए {{module}} मॉड्यूल बंद है। व्यवस्थापक इसे मॉड्यूल > समाधान पैकेज में चालू कर सकता है।",
     "conv.stage_upload": "फ़ाइल अपलोड हो रही है",
     "conv.stage_upload_hint": "फ़ाइल सर्वर को भेजी जा रही है। पूरा होने तक यह टैब खुला रखें।",
     "conv.stage_converter": "कन्वर्टर तैयार हो रहा है",

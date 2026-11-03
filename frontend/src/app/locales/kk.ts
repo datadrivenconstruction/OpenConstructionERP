@@ -59812,6 +59812,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Бұл сервердің операциялық жүйесі немесе процессоры үшін {{format}} конвертерінің құрастырмасы жоқ. Құрастырмалар Windows x64, Linux x64 және ARM64 үшін, сондай-ақ Intel және Apple silicon процессорларындағы macOS үшін бар. DXF сурет файлдары барлық платформада оқылады, ал IFC модельдері BIM Hub-та кірістірілген оқырмен ашылады.",
     "api_errors.unsupported_cad_extension": "{{ext}} файлдары мұнда қолдау көрсетілмейді. Мыналардың бірін пайдаланыңыз: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} файлдары үшін конвертер жоқ. Қолдау көрсетілетін форматтар: {{supported}}.",
+    "api_errors.module_disabled": "{{module}} модулі осы жұмыс кеңістігі үшін өшірулі. Әкімші оны Модульдер > Шешім пакеттері бөлімінде қоса алады.",
     "conv.stage_upload": "Файл жүктелуде",
     "conv.stage_upload_hint": "Файл серверге жіберілуде. Аяқталғанша бұл қойындыны ашық ұстаңыз.",
     "conv.stage_converter": "Конвертер дайындалуда",

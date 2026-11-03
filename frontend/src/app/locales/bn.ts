@@ -60121,6 +60121,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "এই সার্ভারের অপারেটিং সিস্টেম বা প্রসেসরের জন্য {{format}} কনভার্টারের কোনো বিল্ড নেই। Windows x64, Linux x64 ও ARM64, এবং Intel ও Apple silicon-এর macOS-এর জন্য বিল্ড আছে। DXF ড্রয়িং সব প্ল্যাটফর্মে পড়া যায়, আর IFC মডেল অন্তর্নির্মিত রিডার দিয়ে BIM Hub-এ খোলে।",
     "api_errors.unsupported_cad_extension": "{{ext}} ফাইল এখানে সমর্থিত নয়। এর একটি ব্যবহার করুন: {{accepted}}।",
     "api_errors.converter_format_unknown": "{{format}} ফাইলের জন্য কোনো কনভার্টার নেই। সমর্থিত ফরম্যাট: {{supported}}।",
+    "api_errors.module_disabled": "এই ওয়ার্কস্পেসে {{module}} মডিউল বন্ধ আছে। একজন প্রশাসক মডিউল > সমাধান প্যাকেজ থেকে এটি চালু করতে পারেন।",
     "conv.stage_upload": "ফাইল আপলোড হচ্ছে",
     "conv.stage_upload_hint": "ফাইলটি সার্ভারে পাঠানো হচ্ছে। শেষ না হওয়া পর্যন্ত এই ট্যাব খোলা রাখুন।",
     "conv.stage_converter": "কনভার্টার প্রস্তুত হচ্ছে",

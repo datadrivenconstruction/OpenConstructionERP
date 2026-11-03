@@ -61120,6 +61120,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Pro operační systém nebo procesor tohoto serveru neexistuje sestavení konvertoru {{format}}. Sestavení existují pro Windows x64, Linux x64 a ARM64 a pro macOS na Intelu i Apple silicon. Výkresy DXF se čtou na každé platformě a modely IFC se otevírají v BIM Hubu vestavěným čtečkou.",
     "api_errors.unsupported_cad_extension": "Soubory {{ext}} zde nejsou podporovány. Použijte jeden z těchto formátů: {{accepted}}.",
     "api_errors.converter_format_unknown": "Pro soubory {{format}} neexistuje konvertor. Podporované formáty: {{supported}}.",
+    "api_errors.module_disabled": "Modul {{module}} je pro tento pracovní prostor vypnutý. Správce ho může zapnout v Moduly > Balíčky řešení.",
     "conv.stage_upload": "Nahrávání souboru",
     "conv.stage_upload_hint": "Soubor se odesílá na server. Nechte kartu otevřenou, dokud se nahrávání nedokončí.",
     "conv.stage_converter": "Příprava konvertoru",

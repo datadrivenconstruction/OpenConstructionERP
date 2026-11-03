@@ -59817,6 +59817,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "اس سرور کے آپریٹنگ سسٹم یا پروسیسر کے لیے {{format}} کنورٹر کا کوئی بلڈ موجود نہیں۔ بلڈز Windows x64، Linux x64 اور ARM64 کے لیے، اور Intel اور Apple silicon پر macOS کے لیے دستیاب ہیں۔ DXF ڈرائنگز ہر پلیٹ فارم پر پڑھی جاتی ہیں، اور IFC ماڈلز بلٹ ان ریڈر کے ساتھ BIM Hub میں کھلتے ہیں۔",
     "api_errors.unsupported_cad_extension": "{{ext}} فائلیں یہاں سپورٹ نہیں ہیں۔ ان میں سے کوئی ایک استعمال کریں: {{accepted}}۔",
     "api_errors.converter_format_unknown": "{{format}} فائلوں کے لیے کوئی کنورٹر موجود نہیں۔ سپورٹڈ فارمیٹس: {{supported}}۔",
+    "api_errors.module_disabled": "ماڈیول {{module}} اس ورک اسپیس کے لیے بند ہے۔ ایڈمنسٹریٹر اسے ماڈیولز > سلوشن پیکجز میں آن کر سکتا ہے۔",
     "conv.stage_upload": "فائل اپ لوڈ ہو رہی ہے",
     "conv.stage_upload_hint": "فائل سرور کو بھیجی جا رہی ہے۔ مکمل ہونے تک یہ ٹیب کھلا رکھیں۔",
     "conv.stage_converter": "Converter تیار ہو رہا ہے",

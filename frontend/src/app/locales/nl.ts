@@ -60732,6 +60732,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Voor het besturingssysteem of de processor van deze server bestaat geen build van de {{format}}-converter. Er zijn builds voor Windows x64, Linux x64 en ARM64, en voor macOS op Intel en Apple silicon. DXF-tekeningen worden op elk platform gelezen, en IFC-modellen openen in BIM Hub met de ingebouwde lezer.",
     "api_errors.unsupported_cad_extension": "{{ext}}-bestanden worden hier niet ondersteund. Gebruik een van de volgende: {{accepted}}.",
     "api_errors.converter_format_unknown": "Er bestaat geen converter voor {{format}}-bestanden. Ondersteunde formaten: {{supported}}.",
+    "api_errors.module_disabled": "De module {{module}} is uitgeschakeld voor deze werkruimte. Een beheerder kan hem inschakelen via Modules > Oplossingspakketten.",
     "conv.stage_upload": "Bestand uploaden",
     "conv.stage_upload_hint": "Het bestand wordt naar de server gestuurd. Houd dit tabblad open tot het klaar is.",
     "conv.stage_converter": "Converter voorbereiden",

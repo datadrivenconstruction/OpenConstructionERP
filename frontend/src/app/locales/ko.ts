@@ -60219,6 +60219,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "이 서버의 운영체제 또는 프로세서용 {{format}} 컨버터 빌드가 없습니다. 빌드는 Windows x64, Linux x64, ARM64용과 Intel 및 Apple silicon 기반 macOS용으로 제공됩니다. DXF 도면은 모든 플랫폼에서 읽히며, IFC 모델은 내장 리더로 BIM Hub에서 열립니다.",
     "api_errors.unsupported_cad_extension": "{{ext}} 파일은 여기서 지원하지 않습니다. 다음 중 하나를 사용하십시오: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} 파일용 변환기가 없습니다. 지원 형식: {{supported}}.",
+    "api_errors.module_disabled": "이 작업 공간에서 {{module}} 모듈이 꺼져 있습니다. 관리자가 모듈 > 솔루션 패키지에서 켤 수 있습니다.",
     "conv.stage_upload": "파일 업로드 중",
     "conv.stage_upload_hint": "파일을 서버로 보내는 중입니다. 완료될 때까지 이 탭을 열어 두세요.",
     "conv.stage_converter": "변환기 준비 중",

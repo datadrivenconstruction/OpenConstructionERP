@@ -59603,6 +59603,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "ไม่มีบิลด์ของตัวแปลง {{format}} สำหรับระบบปฏิบัติการหรือโปรเซสเซอร์ของเซิร์ฟเวอร์นี้ มีบิลด์สำหรับ Windows x64, Linux x64 และ ARM64 และสำหรับ macOS บน Intel และ Apple silicon ไฟล์ DXF อ่านได้ทุกแพลตฟอร์ม และโมเดล IFC เปิดใน BIM Hub ได้ด้วยตัวอ่านในตัว",
     "api_errors.unsupported_cad_extension": "ไม่รองรับไฟล์ {{ext}} ที่นี่ ใช้หนึ่งในรูปแบบนี้: {{accepted}}",
     "api_errors.converter_format_unknown": "ไม่มีตัวแปลงสำหรับไฟล์ {{format}} รูปแบบที่รองรับ: {{supported}}",
+    "api_errors.module_disabled": "โมดูล {{module}} ถูกปิดสำหรับพื้นที่ทำงานนี้ ผู้ดูแลระบบสามารถเปิดได้ที่ โมดูล > แพ็กเกจโซลูชัน",
     "conv.stage_upload": "กำลังอัปโหลดไฟล์",
     "conv.stage_upload_hint": "กำลังส่งไฟล์ไปยังเซิร์ฟเวอร์ โปรดเปิดแท็บนี้ค้างไว้จนกว่าจะเสร็จ",
     "conv.stage_converter": "กำลังเตรียมตัวแปลง",

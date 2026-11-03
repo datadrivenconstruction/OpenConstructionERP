@@ -59611,6 +59611,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Không có bản build bộ chuyển đổi {{format}} cho hệ điều hành hoặc bộ xử lý của máy chủ này. Có bản build cho Windows x64, Linux x64 và ARM64, cũng như macOS trên Intel và Apple silicon. Bản vẽ DXF được đọc trên mọi nền tảng, còn mô hình IFC mở trong BIM Hub bằng trình đọc tích hợp sẵn.",
     "api_errors.unsupported_cad_extension": "Tệp {{ext}} không được hỗ trợ ở đây. Hãy dùng một trong các định dạng: {{accepted}}.",
     "api_errors.converter_format_unknown": "Không có trình chuyển đổi cho tệp {{format}}. Các định dạng được hỗ trợ: {{supported}}.",
+    "api_errors.module_disabled": "Mô-đun {{module}} đang tắt cho không gian làm việc này. Quản trị viên có thể bật nó trong Mô-đun > Gói giải pháp.",
     "conv.stage_upload": "Đang tải tệp lên",
     "conv.stage_upload_hint": "Tệp đang được gửi lên máy chủ. Vui lòng giữ thẻ này mở cho đến khi xong.",
     "conv.stage_converter": "Đang chuẩn bị bộ chuyển đổi",

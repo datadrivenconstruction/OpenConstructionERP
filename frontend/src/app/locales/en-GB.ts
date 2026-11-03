@@ -722,6 +722,7 @@ const resource = {
     "demo_profiles.developer.point_1": "Property development, leasing and service charges",
     "demo_profiles.developer.point_2": "Escrow-style payment plan and unit handover",
     "demo_profiles.developer.point_3": "Hijri dates and SAR alongside the build budget",
+    "api_errors.module_disabled": "The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.",
   }
 } as { translation: Record<string, string> };
 

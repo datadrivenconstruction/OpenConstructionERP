@@ -59968,6 +59968,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Бул сервердин операциялык системасы же процессору үчүн {{format}} конвертеринин курама версиясы жок. Курамалар Windows x64, Linux x64 жана ARM64 үчүн, ошондой эле Intel жана Apple silicon процессорлорундагы macOS үчүн бар. DXF чийме файлдары бардык платформаларда окулат, ал эми IFC моделдери BIM Hub'та орнотулган окуучу менен ачылат.",
     "api_errors.unsupported_cad_extension": "{{ext}} файлдары бул жерде колдоого алынбайт. Төмөнкүлөрдүн бирин колдонуңуз: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} файлдары үчүн конвертер жок. Колдоого алынган форматтар: {{supported}}.",
+    "api_errors.module_disabled": "{{module}} модулу бул жумуш мейкиндиги үчүн өчүрүлгөн. Администратор аны Модулдар > Чечим пакеттери бөлүмүндө күйгүзө алат.",
     "conv.stage_upload": "Файл жүктөлүүдө",
     "conv.stage_upload_hint": "Файл серверге жөнөтүлүүдө. Бүтмөйүнчө бул өтмөктү ачык кармаңыз.",
     "conv.stage_converter": "Конвертер даярдалууда",

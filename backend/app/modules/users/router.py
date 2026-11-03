@@ -926,6 +926,21 @@ async def revoke_api_key(
 # ── Module Preferences ────────────────────────────────────────────────────
 
 
+def _unblock_granted(metadata: dict[str, Any], modules: list[str]) -> dict[str, Any]:
+    """Switch on, in the solution-package state, modules an admin just granted.
+
+    Without this the package gate kept answering ``module_disabled`` for a module the
+    Modules or access screens showed as on, because they write different keys.
+    """
+    from app.core import module_guard
+    from app.core import solution_packages as sp
+
+    metadata, switched = sp.unblock(metadata, modules)
+    if switched:
+        module_guard.invalidate_all()
+    return metadata
+
+
 @router.get("/me/module-preferences/", response_model=ModulePreferencesPayload)
 async def get_module_preferences(
     user_id: CurrentUserId,
@@ -951,6 +966,7 @@ async def save_module_preferences(
     user = await service.get_user(uuid.UUID(user_id))
     metadata: dict[str, Any] = dict(user.metadata_ or {})
     metadata["module_preferences"] = data.modules
+    metadata = _unblock_granted(metadata, [k for k, on in data.modules.items() if on])
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
     return ModulePreferencesPayload(modules=data.modules)
 
@@ -1779,6 +1795,8 @@ async def set_user_module_access(
         module_prefs[mod_id] = cfg.visible
     metadata["module_access"] = access_data
     metadata["module_preferences"] = module_prefs
+    granted = [m for m, cfg in data.modules.items() if cfg.visible and cfg.access != "none"]
+    metadata = _unblock_granted(metadata, granted)
     if data.custom_role_name is not None:
         metadata["custom_role_name"] = data.custom_role_name
     await service.update_profile(user_id, metadata_=metadata)

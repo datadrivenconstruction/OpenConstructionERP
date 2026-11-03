@@ -59855,6 +59855,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Няма сборка на конвертора {{format}} за операционната система или процесора на този сървър. Има сборки за Windows x64, Linux x64 и ARM64, както и за macOS на Intel и Apple silicon. Чертежите DXF се четат на всяка платформа, а моделите IFC се отварят в BIM Hub с вградения четец.",
     "api_errors.unsupported_cad_extension": "Файловете {{ext}} не се поддържат тук. Използвайте един от: {{accepted}}.",
     "api_errors.converter_format_unknown": "Няма конвертор за файлове {{format}}. Поддържани формати: {{supported}}.",
+    "api_errors.module_disabled": "Модулът {{module}} е изключен за това работно пространство. Администратор може да го включи от Модули > Пакети с решения.",
     "conv.stage_upload": "Качване на файла",
     "conv.stage_upload_hint": "Файлът се изпраща към сървъра. Оставете раздела отворен, докато приключи.",
     "conv.stage_converter": "Подготовка на конвертора",

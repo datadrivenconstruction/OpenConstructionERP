@@ -62917,6 +62917,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "لا يوجد إصدار من محوّل {{format}} لنظام التشغيل أو المعالج في هذا الخادم. تتوفر إصدارات لـ Windows x64 وLinux x64 وARM64، وmacOS على معالجات Intel وApple silicon. تُقرأ رسومات DXF على جميع المنصات، وتُفتح نماذج IFC في BIM Hub بالقارئ المدمج.",
     "api_errors.unsupported_cad_extension": "ملفات {{ext}} غير مدعومة هنا. استخدم أحد ما يلي: {{accepted}}.",
     "api_errors.converter_format_unknown": "لا يوجد محوّل لملفات {{format}}. الصيغ المدعومة: {{supported}}.",
+    "api_errors.module_disabled": "الوحدة {{module}} متوقفة في مساحة العمل هذه. يمكن للمسؤول تشغيلها من الوحدات > حزم الحلول.",
     "conv.stage_upload": "جارٍ رفع الملف",
     "conv.stage_upload_hint": "يُرسل الملف إلى الخادم. أبقِ هذه التبويبة مفتوحة حتى ينتهي الرفع.",
     "conv.stage_converter": "تجهيز المحوّل",

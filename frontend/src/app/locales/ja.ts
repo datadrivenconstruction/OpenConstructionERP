@@ -61135,6 +61135,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "このサーバーのOSまたはプロセッサ向けの{{format}}コンバーターのビルドはありません。ビルドは Windows x64、Linux x64、ARM64、そして Intel および Apple silicon の macOS 向けに提供されています。DXF図面はすべてのプラットフォームで読み取られ、IFCモデルは内蔵リーダーを使って BIM Hub で開けます。",
     "api_errors.unsupported_cad_extension": "{{ext}} ファイルはここではサポートされていません。次のいずれかを使用してください：{{accepted}}。",
     "api_errors.converter_format_unknown": "{{format}} ファイル用のコンバーターはありません。対応形式：{{supported}}。",
+    "api_errors.module_disabled": "このワークスペースでは {{module}} モジュールがオフになっています。管理者は「モジュール > ソリューションパッケージ」でオンにできます。",
     "conv.stage_upload": "ファイルをアップロード中",
     "conv.stage_upload_hint": "ファイルをサーバーへ送信しています。完了するまでこのタブを開いたままにしてください。",
     "conv.stage_converter": "コンバーターを準備中",

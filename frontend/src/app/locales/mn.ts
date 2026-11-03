@@ -59529,6 +59529,7 @@ const resource = {
     "api_errors.converter_platform_unsupported": "Энэ серверийн үйлдлийн систем эсвэл процессорт зориулсан {{format}} хөрвүүлэгчийн build байхгүй байна. Build нь Windows x64, Linux x64, ARM64, мөн Intel болон Apple silicon дээрх macOS-т зориулагдсан. DXF зургийг бүх платформ дээр уншина, IFC загварыг суулгагдсан уншигчаар BIM Hub-д нээнэ.",
     "api_errors.unsupported_cad_extension": "{{ext}} файлыг энд дэмжихгүй. Дараахаас нэгийг ашиглана уу: {{accepted}}.",
     "api_errors.converter_format_unknown": "{{format}} файлд зориулсан хувиргагч байхгүй. Дэмжигдэх форматууд: {{supported}}.",
+    "api_errors.module_disabled": "{{module}} модуль энэ ажлын орчинд унтраалттай байна. Администратор Модулиуд > Шийдлийн багцууд хэсэгт асааж болно.",
     "conv.stage_upload": "Файлыг байршуулж байна",
     "conv.stage_upload_hint": "Файлыг сервер рүү илгээж байна. Дуусах хүртэл энэ табыг нээлттэй байлгана уу.",
     "conv.stage_converter": "Хөрвүүлэгчийг бэлдэж байна",
