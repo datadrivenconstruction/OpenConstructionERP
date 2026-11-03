@@ -1513,6 +1513,7 @@ def _register_all_module_models() -> tuple[int, int, list[tuple[str, str]]]:
         # build it. Without the table the repairs still run and only the record
         # of them is lost, which is the failure that module exists to stop.
         from app.core import data_repairs as _data_repairs_core  # noqa: F401
+        from app.core import event_effects as _event_effects_core  # noqa: F401
     except Exception as exc:  # noqa: BLE001
         logger.warning("schema: core audit models not registered: %s", exc)
 

@@ -4544,6 +4544,9 @@ def create_app() -> FastAPI:
             # written to stop having.
             from app.core import data_repairs as _data_repairs_core  # noqa: F401
 
+            # ``oe_event_effect`` (run-once ledger of event side effects) too.
+            from app.core import event_effects as _event_effects_core  # noqa: F401
+
             # ``oe_process_settings`` lives in app.core as well.
             from app.core.processes import store as _process_store_core  # noqa: F401
 

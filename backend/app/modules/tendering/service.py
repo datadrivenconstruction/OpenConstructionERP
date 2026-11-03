@@ -18,6 +18,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.event_effects import tender_award_key
 from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 
@@ -1219,6 +1220,7 @@ class TenderingService:
                 "rates_skipped_reason": rates_skipped_reason,
                 "boq_id": str(package.boq_id),
                 "awarded_by": str(awarded_by) if awarded_by else None,
+                "idempotency_key": tender_award_key(package_id, bid_id),
             },
             source_module="oe_tendering",
         )

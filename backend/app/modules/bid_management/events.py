@@ -44,6 +44,7 @@ from typing import Any
 
 from sqlalchemy import select
 
+from app.core.event_effects import EFFECT_CONTRACT, claim_effect, tender_award_key
 from app.core.events import Event, _log_failures, event_bus
 from app.database import async_session_factory
 from app.modules.bid_management.award_contract import (
@@ -176,6 +177,11 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
                     package_id,
                 )
                 return
+        claim = await claim_effect(
+            session, tender_award_key(package_id, bid_id), EFFECT_CONTRACT, event_name="tendering.package.awarded"
+        )
+        if claim is None:
+            return
 
         counterparty = await resolve_award_counterparty(
             session,
@@ -254,6 +260,7 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
             contract.metadata_["counterparty_contact_id"] = str(counterparty.contact_id)
         session.add(contract)
         await session.flush()
+        claim.record_id = str(contract.id)
         add_award_party(session, contract.id, counterparty)
 
         drafted_lines: list[ContractLine] = []

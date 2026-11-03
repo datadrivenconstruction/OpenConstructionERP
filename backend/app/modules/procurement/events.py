@@ -66,6 +66,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.event_effects import EFFECT_PURCHASE_ORDER, bid_award_key, claim_effect, tender_award_key
 from app.core.events import Event, _log_failures, event_bus
 from app.database import async_session_factory
 from app.modules.bid_management.award_route import SUPPLY, bid_package_route, tender_award_route
@@ -238,6 +239,15 @@ async def _create_po_from_award(event: Event) -> None:
                 )
                 return
 
+            claim = await claim_effect(
+                session,
+                str(data.get("idempotency_key") or tender_award_key(package_id, bid_id)),
+                EFFECT_PURCHASE_ORDER,
+                event_name=event.name,
+            )
+            if claim is None:
+                return
+
             # Build line items from bid.line_items. The bid carries dicts
             # with description / unit / quantity / unit_rate / position_id.
             line_items_raw = bid.line_items if isinstance(bid.line_items, list) else []
@@ -347,6 +357,7 @@ async def _create_po_from_award(event: Event) -> None:
                 },
             )
             po = await po_repo.create(po)
+            claim.record_id = str(po.id)
 
             # Persist line items
             item_repo = POItemRepository(session)
@@ -464,6 +475,14 @@ async def _create_po_from_bid_award(event: Event) -> None:
                     package_id,
                 )
                 return
+            claim = await claim_effect(
+                session,
+                str(data.get("idempotency_key") or bid_award_key(data.get("award_id") or f"{package_id}:{bidder_id}")),
+                EFFECT_PURCHASE_ORDER,
+                event_name=event.name,
+            )
+            if claim is None:
+                return
 
             # Resolve the winning bidder's submission. A bidder may hold more
             # than one, so which row an award refers to is a decision rather
@@ -571,6 +590,7 @@ async def _create_po_from_bid_award(event: Event) -> None:
                 },
             )
             po = await po_repo.create(po)
+            claim.record_id = str(po.id)
 
             item_repo = POItemRepository(session)
             for item in po_items:
