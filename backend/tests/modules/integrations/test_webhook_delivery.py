@@ -431,6 +431,19 @@ async def test_twenty_endpoints_at_most_per_user(maker):
         await svc.create_webhook({"name": "theirs", "url": URL, "events": ["*"]}, str(other))
 
 
+async def test_reenabling_a_switched_off_endpoint_resets_its_failure_count(maker):
+    uid = await _user(maker)
+    hid = await _hook(maker, uid, is_active=False, failure_count=10)
+    async with maker() as s:
+        svc = WebhookService(s)
+        hook = await svc.get_webhook(hid)
+        await svc.update_webhook(hook, {"is_active": True})
+        await s.commit()
+    hook = await _load(maker, WebhookEndpoint, hid)
+    assert hook.is_active is True
+    assert hook.failure_count == 0
+
+
 # ── Schema rules (no database) ─────────────────────────────────────────────
 
 

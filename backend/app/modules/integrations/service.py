@@ -161,6 +161,9 @@ class WebhookService:
         return webhook
 
     async def update_webhook(self, webhook: WebhookEndpoint, data: dict[str, Any]) -> WebhookEndpoint:
+        if data.get("is_active") is True and not webhook.is_active:
+            # Switching a tripped endpoint back on starts it clean, or one more failure would trip it again.
+            webhook.failure_count = 0
         for field in ("name", "url", "secret", "events", "is_active", "metadata"):
             if field in data and data[field] is not None:
                 col = "metadata_" if field == "metadata" else field
