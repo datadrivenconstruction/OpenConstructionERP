@@ -392,6 +392,9 @@ class SupplierPurchaseOrder(Base):
     tax: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     total: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     terms: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The procurement order this one was copied to. Once set, this row is
+    # history: reads go through the copy and nothing writes here any more.
+    migrated_to_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     lines: Mapped[list[POLine]] = relationship(
         back_populates="po",
@@ -497,6 +500,8 @@ class SupplierGoodsReceipt(Base):
         server_default="[]",
     )
     discrepancy_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The procurement receipt this one was copied to (see the order's column).
+    migrated_to_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     po: Mapped[SupplierPurchaseOrder] = relationship(back_populates="receipts")
     lines: Mapped[list[GRLine]] = relationship(
@@ -504,6 +509,18 @@ class SupplierGoodsReceipt(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+
+
+class LegacyMigrationReport(Base):
+    """A legacy order or receipt that could not be copied into procurement, and why."""
+
+    __tablename__ = "oe_supplier_catalogs_migration_report"
+    __table_args__ = (UniqueConstraint("kind", "legacy_id", name="uq_sc_migration_report_row"),)
+
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    kind: Mapped[str] = mapped_column(String(10), nullable=False)  # po | gr
+    legacy_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
 
 class GRLine(Base):
