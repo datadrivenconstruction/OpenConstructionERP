@@ -142,6 +142,7 @@ const preloaders: Record<string, () => void> = {
 
   // ── Portfolio & Management ──
   '/portfolio': () => void import('@/features/portfolio'),
+  '/capital-plan': () => void import('@/features/capital_plan'),
   '/portfolio/capacity': () => void import('@/features/portfolio/CapacityPlanningPage'),
   '/portfolio/leveling': () => void import('@/features/portfolio/ResourceLevelingPage'),
   '/subcontractors': () => void import('@/features/subcontractors'),

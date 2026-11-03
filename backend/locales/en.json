@@ -2604,5 +2604,6 @@
       "file_missing": "File of photo '{name}' is missing from storage",
       "file_missing_fix": "Upload the photo again or restore it from a backup"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Capital plan","col": {"title": "Project","priority": "Priority","status": "Status","total": "Total cost"},"row": {"envelope": "Envelope","demand": "Demand","gap": "Gap"}}}
 }

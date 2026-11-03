@@ -409,6 +409,14 @@ The platform also includes 3D globe visualization (Cesium), property development
 
 ---
 
+### Capital plan
+
+Rank projects against a limited yearly budget and see what happens if one is delayed. Guide: [English](docs/capital-plan.md) · [Deutsch](docs/capital-plan.de.md) · [Русский](docs/capital-plan.ru.md).
+
+- **Yearly budget** - Funding per year and source, against the cost of each project spread over its years
+- **What-if scenarios** - Copy a scenario, move a start year, compare the two. The baseline is never changed
+- **Suggested funding** - Funds by priority, score and cost until a year runs out; you confirm before anything changes
+
 ## Quick Start
 
 > **Problem while installing or starting?** See the **[installation help page](https://openconstructionerp.com/install-help)** or the same guide in the repo: [English](docs/INSTALL_TROUBLESHOOTING.md), [Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md).

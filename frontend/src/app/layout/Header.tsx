@@ -320,6 +320,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'EAC Block Editor': 'eac.editor.title',
   'Value Realized': 'nav.value',
   'Portfolio': 'portfolio.title',
+  'Capital plan': 'capital_plan.title',
   'Route Classifier': 'project_route.title',
   'Post-calculation': 'postcalc.title',
   'Public Funding': 'funding.title',

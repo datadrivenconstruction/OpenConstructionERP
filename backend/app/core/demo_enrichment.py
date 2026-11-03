@@ -241,6 +241,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.plant_register.seed import seed_plant_register_demo
         from app.modules.pointcloud.seed import seed_pointcloud_demo
         from app.modules.portal.seed import seed_portal_demo
+        from app.modules.capital_plan.seed import seed_capital_plan_demo
         from app.modules.portfolio.seed import seed_portfolio_demo
         from app.modules.procurement_concept.seed import seed_procurement_concept_demo
         from app.modules.progress.seed import seed_position_progress_demo
@@ -580,6 +581,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # it files the whole estate into one tree, so it runs once the
             # estate is complete.
             ("portfolio", None, lambda s: seed_portfolio_demo(s, _demo_pids)),
+            ("capital_plan", None, lambda s: seed_capital_plan_demo(s)),
             # Books the assisted work the other seeders never logged, so the
             # value dashboard has activity to read. Late, so the module mix it
             # books reflects the modules that were actually filled.
