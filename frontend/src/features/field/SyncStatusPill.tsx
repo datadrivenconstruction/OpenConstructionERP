@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, CloudOff, GitMerge, Loader2, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CloudOff, GitMerge, Loader2, LogIn, RefreshCw, X } from 'lucide-react';
 import { useOfflineSync } from '@/shared/lib/offline/useOfflineSync';
 import {
   discardConflict,
@@ -30,6 +30,7 @@ const TONE: Record<OfflineSyncStatus, string> = {
   pending: 'bg-sky-100 text-sky-800',
   error: 'bg-red-100 text-red-800',
   conflict: 'bg-orange-100 text-orange-900',
+  auth: 'bg-orange-100 text-orange-900',
 };
 
 export interface SyncStatusPillProps {
@@ -67,6 +68,10 @@ export function SyncStatusPill({ className = '' }: SyncStatusPillProps) {
       else void sync.syncNow();
       return;
     }
+    if (status === 'auth') {
+      window.location.assign('/login');
+      return;
+    }
     if (status === 'error') {
       setShowProblems((v) => !v);
       return;
@@ -86,6 +91,8 @@ export function SyncStatusPill({ className = '' }: SyncStatusPillProps) {
         return t('offline_sync.status_error', { defaultValue: 'Sync problem' });
       case 'conflict':
         return t('offline_sync.status_conflict', { defaultValue: 'Needs merge' });
+      case 'auth':
+        return t('offline_sync.status_auth', { defaultValue: 'Sign in to sync' });
       default:
         return t('offline_sync.status_pending', {
           count: pending,
@@ -113,7 +120,9 @@ export function SyncStatusPill({ className = '' }: SyncStatusPillProps) {
             ? AlertTriangle
             : status === 'conflict'
               ? GitMerge
-              : RefreshCw;
+              : status === 'auth'
+                ? LogIn
+                : RefreshCw;
 
   const resolve = async (decisions: Parameters<typeof resolveConflict>[1]) => {
     if (!current) return;

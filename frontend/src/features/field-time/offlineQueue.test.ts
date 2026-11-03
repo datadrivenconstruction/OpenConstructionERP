@@ -207,3 +207,37 @@ describe('field-time offline queue - storage', () => {
     expect(await storage.getAll()).toHaveLength(1);
   });
 });
+
+describe('field-time offline queue - legacy migration', () => {
+  it('carries queued days over with their ids and order, then drops the old database', async () => {
+    const { migrateLegacyFieldTimeQueue } = await import('./offlineQueue');
+    const target = new MutationQueue(createMemoryQueueStorage(), async () => ({ kind: 'applied', httpStatus: 200 }));
+    const mk = (id: string, seq: number): QueuedOp => ({
+      seq,
+      clientOpId: id,
+      method: 'POST',
+      path: '/v1/field-time/timesheets/offline/',
+      body: entry('k-' + id, '8'),
+      kind: OP_RECORD,
+      queuedAt: 0,
+      retries: 2,
+    });
+    let dropped = 0;
+    const io = { read: async () => [mk('b', 20), mk('a', 10)], drop: async () => void (dropped += 1) };
+    expect(await migrateLegacyFieldTimeQueue(target, io)).toBe(2);
+    expect((await target.pending()).map((o) => o.clientOpId)).toEqual(['a', 'b']);
+    // A second run finds the same ops, dedups them, and loses nothing.
+    expect(await migrateLegacyFieldTimeQueue(target, io)).toBe(2);
+    expect(await target.pendingCount()).toBe(2);
+    expect(dropped).toBe(2);
+  });
+
+  it('keeps the old database when it could not be read', async () => {
+    const { migrateLegacyFieldTimeQueue } = await import('./offlineQueue');
+    const target = new MutationQueue(createMemoryQueueStorage(), async () => ({ kind: 'applied', httpStatus: 200 }));
+    let dropped = false;
+    const n = await migrateLegacyFieldTimeQueue(target, { read: async () => null, drop: async () => void (dropped = true) });
+    expect(n).toBe(0);
+    expect(dropped).toBe(false);
+  });
+});

@@ -28,6 +28,7 @@ import {
   type FieldHeadersProvider,
   type QueuedOp,
 } from '@/shared/lib/offline';
+import { readFieldSession } from './fieldApi';
 
 /* ── Connectivity hook ─────────────────────────────────────────────────── */
 
@@ -105,7 +106,9 @@ export function useFieldSync(getHeaders: FieldHeadersProvider): FieldSyncState {
 
   const enqueue = useCallback(
     async (input: EnqueueInput) => {
-      await queue.enqueue(input);
+      // Stamp the PIN user so a kiosk shared by several people never sends one person's work as another's.
+      const userId = readFieldSession()?.userId;
+      await queue.enqueue(userId ? { ...input, meta: { ...input.meta, userId } } : input);
       await refreshPending();
       // If we are online, try to flush straight away; offline, it stays queued.
       if (isOnline()) {

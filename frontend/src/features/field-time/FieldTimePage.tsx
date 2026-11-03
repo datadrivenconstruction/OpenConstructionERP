@@ -45,6 +45,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { TimesheetEditor } from './TimesheetEditor';
 import { OfflineDayRecorder } from './OfflineDayRecorder';
+import { SyncStatusPill } from '@/features/field/SyncStatusPill';
 import { WorkingTimeRecordPanel } from './WorkingTimeRecord';
 import { ClockPanel } from './ClockPanel';
 import { ClockApprovals } from './ClockApprovals';
@@ -193,6 +194,7 @@ export function FieldTimePage() {
           defaultValue:
             'Cost-coded, signed timesheets for the labour and plant that worked on site each day.',
         })}
+     actions={<SyncStatusPill />}
       />
       <RequiresProject>
         <FieldTimeContent />

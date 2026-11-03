@@ -8,7 +8,7 @@
  */
 
 import { newClientOpId } from '@/shared/lib/offline';
-import { getFieldTimeQueue } from './offlineQueue';
+import { fieldTimeQueueReady, getFieldTimeQueue } from './offlineQueue';
 import type { ClockEventPayload } from './clockApi';
 
 export const OP_CLOCK = 'field_time.clock';
@@ -17,6 +17,7 @@ const CLOCK_PATH = '/v1/field-time/clock/events/';
 /** Queue one clock tap for replay; resolves to the id sent as client_op_id. */
 export async function enqueueClockEvent(payload: ClockEventPayload): Promise<string> {
   const clientOpId = payload.client_op_id ?? newClientOpId();
+  await fieldTimeQueueReady();
   await getFieldTimeQueue().enqueue({
     clientOpId,
     method: 'POST',

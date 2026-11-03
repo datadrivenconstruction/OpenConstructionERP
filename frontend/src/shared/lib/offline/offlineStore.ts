@@ -14,7 +14,7 @@
  * Falls back to memory when IndexedDB is missing, like the queue storage.
  */
 
-export type OfflineEntityKind = 'diary' | 'diary_entry' | 'punch' | 'inspection';
+export type OfflineEntityKind = 'diary' | 'diary_entry' | 'punch' | 'inspection' | 'checklist';
 
 export interface LocalRecord<T = Record<string, unknown>> {
   /** Client id. For a record created offline this is the temporary id. */

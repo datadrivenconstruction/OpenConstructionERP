@@ -89,6 +89,16 @@ export {
   getRecordQueue,
 } from './recordSync';
 
+export { createJwtSender, jwtOutcomeFromResponse } from './jwtSender';
+export {
+  isAuthHeld,
+  holdAuth,
+  releaseAuthHold,
+  releaseIfCredentialChanged,
+  subscribeAuthHold,
+  type AuthRealm,
+} from './authHold';
+
 export { useOfflineSync, useOfflineSyncLoop, useOfflineRecords } from './useOfflineSync';
 
 export {

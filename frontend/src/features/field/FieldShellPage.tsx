@@ -42,6 +42,7 @@ import { ModuleGuideButton } from '@/shared/ui';
 import { useFieldSync } from './useFieldSync';
 import { OfflineStatusBadge } from './OfflineStatusBadge';
 import { SyncQueuePanel } from './SyncQueuePanel';
+import { FieldReauthBanner } from './FieldReauthBanner';
 import { readFieldSession } from './fieldApi';
 import { TodayTab, CaptureTab, CrewTab } from './FieldTabs';
 import { FieldRaiseIssueTab } from './FieldRaiseIssueTab';
@@ -228,6 +229,8 @@ export function FieldShellPage() {
           <ModuleGuideButton content={fieldGuide} />
         </div>
       </header>
+
+      <FieldReauthBanner onReleased={() => void syncNow()} />
 
       {/* Tab body. */}
       <main className="flex flex-1 flex-col items-stretch overflow-y-auto">

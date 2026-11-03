@@ -18,8 +18,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
-import type { DrainSummary, QueuedOp } from '@/shared/lib/offline';
-import { getFieldTimeQueue } from './offlineQueue';
+import { runSync, type DrainSummary, type QueuedOp } from '@/shared/lib/offline';
+import { fieldTimeQueueReady, getFieldTimeQueue } from './offlineQueue';
 
 /** Milliseconds to let a freshly restored link settle before draining. */
 const SETTLE_MS = 800;
@@ -53,7 +53,9 @@ export function useFieldTimeOfflineSync(): FieldTimeOfflineSync {
   const queue = useMemo(() => getFieldTimeQueue(), []);
 
   const refresh = useCallback(async () => {
-    const ops = await queue.pending();
+    await fieldTimeQueueReady();
+    // The queue is shared with diaries and inspections; this page lists only its own days.
+    const ops = (await queue.pending()).filter((o) => o.kind.startsWith('field_time.'));
     if (mounted.current) setPending(ops);
   }, [queue]);
 
@@ -61,8 +63,9 @@ export function useFieldTimeOfflineSync(): FieldTimeOfflineSync {
     if (!mounted.current) return;
     setSyncing(true);
     try {
-      const summary = await queue.drain();
-      if (!mounted.current) return;
+      // Through the shared engine, so backoff, conflicts and the status pill stay in step.
+      const summary = await runSync({ manual: true });
+      if (!mounted.current || !summary) return;
       // A short-circuited drain (one was already running) reports nothing at
       // all; showing "0 synced" then would be a lie about what happened.
       if (summary.results.length > 0) setLastSummary(summary);

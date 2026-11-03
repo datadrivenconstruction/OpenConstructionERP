@@ -15,7 +15,7 @@
  * "record, then photo" holds even across backoff.
  */
 
-import { apiGet, fetchWithAuth } from '@/shared/lib/api';
+import { apiGet, fetchWithAuth, getAuthToken } from '@/shared/lib/api';
 import { isOnline } from './connectivity';
 import {
   MutationQueue,
@@ -27,6 +27,8 @@ import {
   type QueuedOp,
   type ReplayOutcome,
 } from './mutationQueue';
+import { holdAuth, isAuthHeld, releaseIfCredentialChanged } from './authHold';
+import { createJwtSender } from './jwtSender';
 import {
   getOfflineStore,
   isLocalId,
@@ -81,6 +83,15 @@ export const ENTITY_CONFIG: Record<OfflineEntityKind, EntityConfig> = {
     photos: (id) => `/v1/punchlist/items/${id}/photos/`,
     spec: { longTextFields: ['description'] },
     queryRoots: [['punchlist'], ['punchlist-summary'], ['punchlist-pins']],
+  },
+  // Answers to a checklist: an inspection record whose checklist_data is the payload,
+  // so the per-item merge and the idempotent create are the inspection's own.
+  checklist: {
+    kind: 'checklist',
+    collection: '/v1/inspections/',
+    item: (id) => `/v1/inspections/${id}`,
+    spec: { longTextFields: ['notes'], checklistFields: ['checklist_data'] },
+    queryRoots: [['inspections']],
   },
   inspection: {
     kind: 'inspection',
@@ -181,10 +192,15 @@ export function createRecordSender(deps: SenderDeps = {}): OpSender {
   const fetcher: Fetcher = deps.fetcher ?? fetchWithAuth;
   const getStore = deps.store ?? getOfflineStore;
 
+  const plain = createJwtSender(fetcher);
+
   return async (op: QueuedOp): Promise<ReplayOutcome> => {
     const store = getStore();
     const meta = op.meta ?? {};
     const entity = meta.entity as OfflineEntityKind | undefined;
+    // Field-time days, withdrawals and clock taps ride this queue without a device-side record.
+    if (!entity) return plain(op);
+    if (isAuthHeld('jwt')) return { kind: 'held', detail: 'auth_expired' };
     const localId = typeof meta.localId === 'string' ? meta.localId : null;
     const action = typeof meta.action === 'string' ? meta.action : 'create';
     const rec = entity && localId ? await store.getRecord(entity, localId) : undefined;
@@ -255,6 +271,10 @@ export function createRecordSender(deps: SenderDeps = {}): OpSender {
       };
     }
 
+    if (res.status === 401) {
+      holdAuth('jwt', getAuthToken() ?? '');
+      return { kind: 'held', httpStatus: 401 };
+    }
     const errBody = await readJson(res);
     if (res.status === 409) {
       const c = classifyConflictBody(errBody);
@@ -505,6 +525,8 @@ export function runSync(opts: { manual?: boolean } = {}): Promise<DrainSummary |
   if (syncInFlight) return syncInFlight;
   syncInFlight = (async () => {
     patchOfflineSync({ online: isOnline() });
+    releaseIfCredentialChanged('jwt', getAuthToken());
+    patchOfflineSync({ authHeld: isAuthHeld() });
     if (!isOnline()) {
       await refreshSyncCounts();
       return null;
@@ -513,6 +535,7 @@ export function runSync(opts: { manual?: boolean } = {}): Promise<DrainSummary |
     try {
       const q = getRecordQueue();
       const summary = await q.drain({ ignoreBackoff: opts.manual });
+      patchOfflineSync({ authHeld: isAuthHeld() });
       const prev = useOfflineSyncStore.getState();
       const problems = [...prev.problems];
       const touched = new Set(prev.dirtyKinds);

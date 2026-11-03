@@ -22,9 +22,15 @@ import {
   type ReplayOutcome,
   type QueueStorage,
 } from './mutationQueue';
+import { holdAuth, isAuthHeld } from './authHold';
 
 /** Supplies the auth headers for a field replay request (session token + PIN). */
 export type FieldHeadersProvider = () => Record<string, string>;
+
+export interface FieldSenderOptions {
+  /** The PIN user signed in right now; ops queued by someone else are held, not sent as this user. */
+  getUserId?: () => string | null;
+}
 
 /**
  * Map an HTTP status to a replay outcome.
@@ -44,6 +50,11 @@ async function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
       /* empty / non-JSON body is fine */
     }
     return { kind: 'applied', httpStatus: res.status, resultId };
+  }
+  if (res.status === 401) {
+    // Expired session or PIN: keep the op as it is and ask for the PIN again.
+    holdAuth('field');
+    return { kind: 'held', httpStatus: res.status };
   }
   if (res.status === 409) {
     return { kind: 'conflict', httpStatus: res.status, detail: await safeDetail(res) };
@@ -70,8 +81,12 @@ async function safeDetail(res: Response): Promise<string | undefined> {
  * both in the JSON body (the server dedups on it) and as a header for transports
  * that strip the body, keeping the idempotency guarantee end to end.
  */
-export function createFieldSender(getHeaders: FieldHeadersProvider): OpSender {
+export function createFieldSender(getHeaders: FieldHeadersProvider, opts: FieldSenderOptions = {}): OpSender {
   return async (op: QueuedOp): Promise<ReplayOutcome> => {
+    if (isAuthHeld('field')) return { kind: 'held', detail: 'auth_expired' };
+    const owner = typeof op.meta?.userId === 'string' ? op.meta.userId : '';
+    const current = opts.getUserId?.() ?? '';
+    if (owner && current && owner !== current) return { kind: 'held', detail: 'other_user' };
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -99,6 +114,14 @@ export function pickQueueStorage(): QueueStorage {
   return createMemoryQueueStorage();
 }
 
+function readSessionUserId(): string | null {
+  try {
+    return sessionStorage.getItem('oe_field_session_user');
+  } catch {
+    return null;
+  }
+}
+
 let singleton: MutationQueue | null = null;
 
 /**
@@ -108,7 +131,7 @@ let singleton: MutationQueue | null = null;
  */
 export function getFieldQueue(getHeaders: FieldHeadersProvider): MutationQueue {
   if (!singleton) {
-    singleton = new MutationQueue(pickQueueStorage(), createFieldSender(getHeaders));
+    singleton = new MutationQueue(pickQueueStorage(), createFieldSender(getHeaders, { getUserId: readSessionUserId }));
   }
   return singleton;
 }

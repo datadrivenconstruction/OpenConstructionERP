@@ -47,7 +47,9 @@ export type ReplayOutcome =
       currentVersion?: number;
       current?: unknown;
     }
-  | { kind: 'retry'; httpStatus?: number; detail?: string };
+  | { kind: 'retry'; httpStatus?: number; detail?: string }
+  /** The credentials are gone (expired PIN token / JWT): keep the op untouched until re-auth. */
+  | { kind: 'held'; httpStatus?: number; detail?: string };
 
 /** The server's side of a version conflict, kept on the op until it is merged. */
 export interface MergeConflictInfo {
@@ -88,7 +90,7 @@ export interface QueuedOp {
 export interface DrainResult {
   clientOpId: string;
   kind: string;
-  status: 'applied' | 'conflict' | 'rejected' | 'retry' | 'merge_conflict';
+  status: 'applied' | 'conflict' | 'rejected' | 'retry' | 'merge_conflict' | 'held';
   httpStatus?: number;
   detail?: string;
   resultId?: string | null;
@@ -102,6 +104,8 @@ export interface DrainSummary {
   retry: number;
   /** Versioned writes parked for a merge (still in the queue). */
   merge_conflict: number;
+  /** Ops left untouched because the credentials expired; they replay after re-auth. */
+  held: number;
   results: DrainResult[];
 }
 
@@ -411,6 +415,7 @@ export class MutationQueue {
       rejected: 0,
       retry: 0,
       merge_conflict: 0,
+      held: 0,
       results: [],
     };
     if (this.draining) return summary;
@@ -439,8 +444,10 @@ export class MutationQueue {
         const result = await this.replayOne(op);
         summary.results.push(result);
         summary[result.status] += 1;
+        // Credentials are gone for every remaining op too: stop, do not hammer.
+        if (result.status === 'held') break;
         // A failed or parked op holds back the later ops on the same record.
-        if (key && (result.status === 'retry' || result.status === 'merge_conflict')) {
+        if (key && (result.status === 'retry' || result.status === 'merge_conflict' || result.status === 'held')) {
           blocked.add(key);
         }
       }
@@ -500,6 +507,17 @@ export class MutationQueue {
         status: 'applied',
         httpStatus: outcome.httpStatus,
         resultId: outcome.resultId ?? null,
+      };
+    }
+
+    if (outcome.kind === 'held') {
+      // Not the op's fault: no retry count, no backoff, nothing rewritten.
+      return {
+        clientOpId: op.clientOpId,
+        kind: op.kind,
+        status: 'held',
+        httpStatus: outcome.httpStatus,
+        detail: outcome.detail,
       };
     }
 

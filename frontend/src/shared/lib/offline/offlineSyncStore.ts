@@ -9,7 +9,7 @@
 import { create } from 'zustand';
 import type { OfflineEntityKind } from './offlineStore';
 
-export type OfflineSyncStatus = 'online-synced' | 'offline' | 'syncing' | 'pending' | 'error' | 'conflict';
+export type OfflineSyncStatus = 'online-synced' | 'offline' | 'syncing' | 'pending' | 'error' | 'conflict' | 'auth';
 
 export interface SyncProblem {
   clientOpId: string;
@@ -34,6 +34,8 @@ export interface OfflineSyncState {
   lastSyncAt: number | null;
   /** Entity kinds whose server copy changed since the UI last refetched. */
   dirtyKinds: OfflineEntityKind[];
+  /** Credentials expired: ops are held on the device until the person signs in again. */
+  authHeld: boolean;
   /** Bumped when a conflict or sync outcome should re-run the UI queries. */
   syncedTick: number;
 }
@@ -48,8 +50,10 @@ export function deriveSyncStatus(s: {
   pending: number;
   conflicts: number;
   problems: number;
+  authHeld?: boolean;
 }): OfflineSyncStatus {
   if (s.conflicts > 0) return 'conflict';
+  if (s.authHeld) return 'auth';
   if (!s.online) return 'offline';
   if (s.syncing) return 'syncing';
   if (s.problems > 0) return 'error';
@@ -67,6 +71,7 @@ const initial: OfflineSyncState = {
   problems: [],
   lastSyncAt: null,
   dirtyKinds: [],
+  authHeld: false,
   syncedTick: 0,
 };
 
@@ -84,6 +89,7 @@ export function patchOfflineSync(patch: Partial<Omit<OfflineSyncState, 'status'>
         pending: next.pending,
         conflicts: next.conflicts,
         problems: next.problems.length,
+        authHeld: next.authHeld,
       }),
     };
   });

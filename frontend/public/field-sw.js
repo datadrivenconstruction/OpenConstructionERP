@@ -64,7 +64,14 @@ self.addEventListener('activate', (event) => {
 });
 
 function isFieldDataRequest(url) {
-  return url.pathname.startsWith('/api/v1/field-diary/') || url.pathname.startsWith('/api/v1/field/');
+  // Read-cache for the offline field flows: today's diary and its recent days, time, checklist templates.
+  return (
+    url.pathname.startsWith('/api/v1/field-diary/') ||
+    url.pathname.startsWith('/api/v1/field/') ||
+    url.pathname.startsWith('/api/v1/field-time/') ||
+    url.pathname.startsWith('/api/v1/daily-diary/') ||
+    url.pathname.startsWith('/api/v1/inspections/')
+  );
 }
 
 self.addEventListener('fetch', (event) => {

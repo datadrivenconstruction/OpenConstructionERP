@@ -11,6 +11,7 @@
  */
 
 import type { CrewRosterMember } from './crewRosterStore';
+import { releaseAuthHold } from '@/shared/lib/offline/authHold';
 
 /** The field session, persisted by the PIN-redemption screen into sessionStorage. */
 export interface FieldSession {
@@ -29,6 +30,7 @@ export function persistFieldSession(session: FieldSession): void {
     sessionStorage.setItem('oe_field_session_pin', session.pin);
     sessionStorage.setItem('oe_field_session_project', session.projectId);
     sessionStorage.setItem('oe_field_session_user', session.userId);
+    releaseAuthHold('field');
   } catch {
     /* storage unavailable - the shell will show the signed-out state */
   }

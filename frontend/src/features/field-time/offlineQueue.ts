@@ -1,8 +1,11 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * The field-time offline queue — a day recorded with no signal, kept on the
- * device until there is signal again.
+ * The field-time offline queue: a day recorded with no signal, kept on the
+ * device until there is signal again. It rides the shared record queue (same
+ * IndexedDB, backoff, status pill and conflict handling as diaries, punch items
+ * and inspections); `jwtSender` sends these ops because they carry no
+ * `meta.entity`.
  *
  * Two ids, and keeping them apart is the whole design:
  *
@@ -16,33 +19,27 @@
  *    the entry key there and the foreman's second edit of the same day would be
  *    swallowed on the device and never sent at all.
  *
- * The queue is transport-agnostic, so this file supplies the piece it cannot
- * know: a sender that carries the desktop JWT. The field PWA's sender
- * (`shared/lib/offline/fieldQueue`) carries a field session token instead and
- * therefore cannot drain these ops, which is why field time has its own queue
- * rather than borrowing that one.
- *
- * Storage is a database of its own, `oe_field_time_offline`. A second object
- * store inside the field PWA's database would never be created on a browser
- * that had already opened it at version 1, and the storage adapter swallows the
- * resulting error — the queue would accept every entry and lose every one.
+ * Days queued before the queues were merged sit in the old database
+ * `oe_field_time_offline`. `migrateLegacyFieldTimeQueue` copies them over (same
+ * op ids, same order) and drops the old database only after every op is in.
  */
 
 import {
   MutationQueue,
   createIndexedDbQueueStorage,
   createMemoryQueueStorage,
+  getRecordQueue,
+  jwtOutcomeFromResponse,
   newClientOpId,
-  type OpSender,
   type QueueStorage,
   type QueuedOp,
   type ReplayOutcome,
 } from '@/shared/lib/offline';
-import { getAuthToken, API_BASE } from '@/shared/lib/api';
-import type { OfflineEntryPayload, OfflineEntryResult, OfflineWithdrawPayload } from './api';
+import type { OfflineEntryPayload, OfflineWithdrawPayload } from './api';
 
-/** Its own IndexedDB database, never a new store in the field PWA's. */
+/** The pre-merge database; read once by the migration, never written. */
 export const FIELD_TIME_QUEUE_DB = 'oe_field_time_offline';
+const LEGACY_STORE = 'fieldMutationQueue';
 
 /** Queue op kinds, used to group and label pending work in the UI. */
 export const OP_RECORD = 'field_time.entry';
@@ -73,69 +70,12 @@ export function workDateOf(op: QueuedOp): string {
   return body && typeof body.date === 'string' ? body.date : '';
 }
 
-async function safeDetail(res: Response): Promise<string | undefined> {
-  try {
-    const data = (await res.clone().json()) as { detail?: unknown } | null;
-    if (data && typeof data.detail === 'string') return data.detail;
-  } catch {
-    /* a non-JSON body is not worth a failure */
-  }
-  return undefined;
-}
-
 /**
- * Map an HTTP response to a replay outcome.
- *
- *  - 2xx           applied. The server answers 200 for a first write and for a
- *                  redelivery alike, because a draining device has to treat
- *                  both as success and stop resending.
- *  - 409           conflict. The day was withdrawn, or the office has already
- *                  approved it and the correction was not applied. Permanent,
- *                  and the person has to be told - it is not a silent drop.
- *  - other 4xx     rejected. The payload can never be stored; retrying it
- *                  forever would only hide it.
- *  - 5xx / thrown  retry. The server or the link is having a moment.
+ * Map an HTTP response to a replay outcome (2xx applied, 401 held, 409
+ * conflict, other 4xx rejected, 5xx retry). Shared with every plain queued write.
  */
-export async function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
-  if (res.ok) {
-    let resultId: string | null = null;
-    try {
-      const data = (await res.clone().json()) as OfflineEntryResult | null;
-      resultId = data?.timesheet?.id ?? null;
-    } catch {
-      /* an empty body still means it landed */
-    }
-    return { kind: 'applied', httpStatus: res.status, resultId };
-  }
-  if (res.status === 409) {
-    return { kind: 'conflict', httpStatus: res.status, detail: await safeDetail(res) };
-  }
-  if (res.status >= 400 && res.status < 500) {
-    return { kind: 'rejected', httpStatus: res.status, detail: await safeDetail(res) };
-  }
-  return { kind: 'retry', httpStatus: res.status };
-}
-
-/**
- * Build the HTTP sender. The body is sent exactly as it was queued: the entry
- * key already lives inside it, and overwriting anything at replay time would
- * mean the op that finally lands is not the op the foreman recorded.
- */
-export function createFieldTimeSender(): OpSender {
-  return async (op: QueuedOp): Promise<ReplayOutcome> => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    };
-    const token = getAuthToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch(`${API_BASE}${op.path}`, {
-      method: op.method,
-      headers,
-      body: op.body === undefined ? undefined : JSON.stringify(op.body),
-    });
-    return outcomeFromResponse(res);
-  };
+export function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
+  return jwtOutcomeFromResponse(res);
 }
 
 /** IndexedDB where it exists, memory where it does not. Same queue either way. */
@@ -146,23 +86,108 @@ export function pickFieldTimeStorage(): QueueStorage {
   return createMemoryQueueStorage();
 }
 
-let singleton: MutationQueue | null = null;
-
-/** The process-wide field-time queue, built on first use. */
-export function getFieldTimeQueue(): MutationQueue {
-  if (!singleton) {
-    singleton = new MutationQueue(pickFieldTimeStorage(), createFieldTimeSender());
-  }
-  return singleton;
+/**
+ * Read every op of the pre-merge database, or null when it cannot be read.
+ * Unlike the queue's own adapter this never turns a failed read into an empty
+ * list: an empty queue gets its database deleted.
+ */
+function readLegacyOps(): Promise<QueuedOp[] | null> {
+  return new Promise((resolve) => {
+    if (typeof indexedDB === 'undefined') {
+      resolve(null);
+      return;
+    }
+    let created = false;
+    const req = indexedDB.open(FIELD_TIME_QUEUE_DB);
+    req.onupgradeneeded = () => {
+      created = true; // it did not exist: nothing to migrate
+    };
+    req.onerror = () => resolve(null);
+    req.onsuccess = () => {
+      const db = req.result;
+      if (created || !db.objectStoreNames.contains(LEGACY_STORE)) {
+        db.close();
+        if (created) indexedDB.deleteDatabase(FIELD_TIME_QUEUE_DB);
+        resolve([]);
+        return;
+      }
+      const all = db.transaction(LEGACY_STORE, 'readonly').objectStore(LEGACY_STORE).getAll();
+      all.onsuccess = () => {
+        db.close();
+        resolve(all.result as QueuedOp[]);
+      };
+      all.onerror = () => {
+        db.close();
+        resolve(null);
+      };
+    };
+  });
 }
 
-/** Test seam: drop the singleton so the next call rebuilds it. */
+function dropLegacyDb(): Promise<void> {
+  return new Promise((resolve) => {
+    const req = indexedDB.deleteDatabase(FIELD_TIME_QUEUE_DB);
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve();
+    req.onblocked = () => resolve();
+  });
+}
+
+/**
+ * Move days queued in the old database into `queue`. Idempotent: ops dedup on
+ * their client op id, so a run interrupted half way simply finishes next time.
+ * Returns how many ops were carried over.
+ */
+export async function migrateLegacyFieldTimeQueue(
+  queue: MutationQueue,
+  io: { read: () => Promise<QueuedOp[] | null>; drop: () => Promise<void> } = {
+    read: readLegacyOps,
+    drop: dropLegacyDb,
+  },
+): Promise<number> {
+  const ops = await io.read();
+  if (ops === null) return 0;
+  const ordered = [...ops].sort((a, b) => a.seq - b.seq);
+  for (const op of ordered) {
+    await queue.enqueue({
+      clientOpId: op.clientOpId,
+      method: op.method,
+      path: op.path,
+      body: op.body,
+      kind: op.kind,
+      ...(op.meta ? { meta: op.meta } : {}),
+    });
+  }
+  if (ops.length > 0) await io.drop();
+  return ordered.length;
+}
+
+let override: MutationQueue | null = null;
+let migration: Promise<number> | null = null;
+
+/** The shared record queue; the first call also starts the legacy migration. */
+export function getFieldTimeQueue(): MutationQueue {
+  if (override) return override;
+  const queue = getRecordQueue();
+  if (!migration) migration = migrateLegacyFieldTimeQueue(queue).catch(() => 0);
+  return queue;
+}
+
+/** Resolves once days left in the old database are in the shared queue. */
+export async function fieldTimeQueueReady(): Promise<void> {
+  getFieldTimeQueue();
+  if (migration) await migration;
+}
+
+/** Test seam: replace the queue (null restores the shared one). */
 export function resetFieldTimeQueueForTests(queue: MutationQueue | null = null): void {
-  singleton = queue;
+  override = queue;
+  migration = null;
 }
 
 /** Queue one day for replay. A fresh op id every time, so an edit is never lost. */
 export async function enqueueEntry(payload: OfflineEntryPayload): Promise<void> {
+  await fieldTimeQueueReady();
   await getFieldTimeQueue().enqueue({
     clientOpId: newClientOpId(),
     method: 'POST',
@@ -174,6 +199,7 @@ export async function enqueueEntry(payload: OfflineEntryPayload): Promise<void> 
 
 /** Queue a withdrawal for replay. */
 export async function enqueueWithdraw(payload: OfflineWithdrawPayload): Promise<void> {
+  await fieldTimeQueueReady();
   await getFieldTimeQueue().enqueue({
     clientOpId: newClientOpId(),
     method: 'POST',
