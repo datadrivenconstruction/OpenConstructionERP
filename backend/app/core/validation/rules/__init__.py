@@ -12650,6 +12650,17 @@ class SubcontractChangeTimeWithinOwner(_SubcontractRule):
     check_name = "check_change_time_within_owner"
 
 
+class SubcontractChangeNoticeWindow(_SubcontractRule):
+    """The subcontractor must notify the GC of the event inside the agreement's window."""
+
+    rule_id = "subcontract.notice_window"
+    name = "Subcontractor Notice Window"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Flags a subcontract change notified after the days the agreement allows."
+    check_name = "check_change_notice_window"
+
+
 class _BidLevelingRule(_SubcontractRule):
     """Same translation body as the subcontract rules, over ``bid_management.validators``."""
 
@@ -13351,6 +13362,7 @@ def register_builtin_rules() -> None:
         (SubcontractChangeWithinOwnerValue(), ["subcontract_change"]),
         (SubcontractChangeOwnerApproved(), ["subcontract_change"]),
         (SubcontractChangeTimeWithinOwner(), ["subcontract_change"]),
+        (SubcontractChangeNoticeWindow(), ["subcontract_change"]),
         # Bid leveling with plugs, and the award that follows it
         (BidPlugShareWithinThreshold(), ["bid_leveling", "bid_award"]),
         (BidGapsPlugged(), ["bid_leveling", "bid_award"]),

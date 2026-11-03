@@ -1004,6 +1004,10 @@
       "insurance": "Insurance",
       "method_statement": "Method statement",
       "other": "Other document"
+    },
+    "notice_window": {
+      "fail": "Subcontract change {code} was notified {late} days after the {days}-day window in the agreement",
+      "suggestion": "Check the notice terms before accepting the cost, a late notice may bar the claim"
     }
   },
   "submittal": {
