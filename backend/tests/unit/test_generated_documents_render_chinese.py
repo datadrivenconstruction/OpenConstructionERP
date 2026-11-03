@@ -187,8 +187,10 @@ def source_before_the_wiring(path: str, marker: str) -> str:
         return subprocess.run([*args], capture_output=True, cwd=repo, check=True).stdout.decode("utf-8")
 
     for follow in ((), ("--follow",)):
-        for sha in git("git", "log", *follow, "--format=%H", "--", path).split():
-            candidate = git("git", "show", f"{sha}:{path}")
+        # --name-only names the path each commit had, so a renamed file is read where it then lived.
+        lines = git("git", "log", *follow, "--format=%H", "--name-only", "--", path).split()
+        for sha, at in zip(lines[::2], lines[1::2], strict=True):
+            candidate = git("git", "show", f"{sha}:{at}")
             if marker not in candidate:
                 return candidate
     return ""
