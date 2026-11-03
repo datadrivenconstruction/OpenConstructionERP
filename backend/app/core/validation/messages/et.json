@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Alltöövõtu muudatused objektil {code} kokku {sub_total}, rohkem kui tellija muudatuse väärtus {owner_value}",
       "suggestion": "Kontrolli alltöövõtja hindu või nõua vahe tellijalt enne kinnitamist"
+    },
+    "change_owner_approved": {
+      "fail": "Alltöövõtu muudatus {code} on back-to-back, kuid tellija muudatus pole veel kinnitatud (olek: {status})",
+      "suggestion": "Oodake tellija kinnitust enne alltöövõtu muudatuse kinnitamist"
+    },
+    "change_time_within_owner": {
+      "fail": "Alltöövõtjate ajamõju muudatusel {code} on kokku {sub_days} päeva, rohkem kui tellija antud {owner_days} päeva",
+      "suggestion": "Kontrollige alltöövõtjate ajanõudeid või taotlege tellijalt vastavat pikendust"
     }
   },
   "submittal": {

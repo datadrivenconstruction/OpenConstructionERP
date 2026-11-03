@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprisendringene for {code} utgjør til sammen {sub_total}, mer enn byggherrens endringsverdi {owner_value}",
       "suggestion": "Kontroller underentreprenørens priser, eller krev differansen fra byggherren før godkjenning"
+    },
+    "change_owner_approved": {
+      "fail": "Underentreprisetillegget {code} er back-to-back, men byggherrens endring er ikke godkjent ennå (status: {status})",
+      "suggestion": "Vent på at byggherren godkjenner endringen før underentreprisetillegget godkjennes"
+    },
+    "change_time_within_owner": {
+      "fail": "Underentreprenørenes tidspåvirkning for {code} er til sammen {sub_days} dager, mer enn de {owner_days} dagene byggherren har gitt",
+      "suggestion": "Kontroller underentreprenørenes tidskrav, eller be byggherren om en tilsvarende forlengelse"
     }
   },
   "submittal": {

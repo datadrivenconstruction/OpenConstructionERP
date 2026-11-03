@@ -917,6 +917,14 @@
     "change_within_owner_value": {
       "fail": "Die Nachunternehmer-Nachträge zu {code} betragen {sub_total} und liegen über dem Wert der Bauherren-Änderung von {owner_value}",
       "suggestion": "Prüfen Sie die Nachunternehmerpreise oder fordern Sie die Differenz vor der Freigabe beim Bauherrn ein"
+    },
+    "change_owner_approved": {
+      "fail": "Nachtrag {code} an den Nachunternehmer ist Back-to-Back, aber die Änderung des Auftraggebers ist noch nicht freigegeben (Status: {status})",
+      "suggestion": "Die Freigabe des Auftraggebers abwarten, bevor der Nachunternehmer-Nachtrag freigegeben wird"
+    },
+    "change_time_within_owner": {
+      "fail": "Die Fristverlängerungen der Nachunternehmer zu {code} betragen {sub_days} Tage, mehr als die vom Auftraggeber gewährten {owner_days} Tage",
+      "suggestion": "Die Fristansprüche der Nachunternehmer prüfen oder beim Auftraggeber eine entsprechende Verlängerung beantragen"
     }
   },
   "submittal": {

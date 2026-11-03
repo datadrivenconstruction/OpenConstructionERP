@@ -935,6 +935,14 @@
     "change_within_owner_value": {
       "fail": "Subcontract changes for {code} total {sub_total}, more than the owner change value {owner_value}",
       "suggestion": "Check the subcontract prices or recover the difference from the owner before approving"
+    },
+    "change_owner_approved": {
+      "fail": "Subcontract change {code} is back-to-back but the owner change is not approved yet (status: {status})",
+      "suggestion": "Wait for the owner to approve the variation or change order before approving the subcontract change"
+    },
+    "change_time_within_owner": {
+      "fail": "Subcontract time impacts for {code} total {sub_days} days, more than the {owner_days} days the owner granted",
+      "suggestion": "Check the subcontract time claims or request a matching extension from the owner"
     }
   },
   "submittal": {

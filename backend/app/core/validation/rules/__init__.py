@@ -12114,6 +12114,28 @@ class SubcontractChangeWithinOwnerValue(_SubcontractRule):
     check_name = "check_change_margin"
 
 
+class SubcontractChangeOwnerApproved(_SubcontractRule):
+    """A back-to-back subcontract change waits for the owner change it passes down."""
+
+    rule_id = "subcontract.change_owner_approved"
+    name = "Subcontract Change Owner Change Approved"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a back-to-back subcontract change whose owner variation or change order is not approved yet."
+    check_name = "check_change_owner_approved"
+
+
+class SubcontractChangeTimeWithinOwner(_SubcontractRule):
+    """Subcontract time claims should fit inside the days the owner granted."""
+
+    rule_id = "subcontract.change_time_within_owner"
+    name = "Subcontract Change Time Within Owner Change"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags an owner change whose subcontract time impacts add up to more days than the owner grants."
+    check_name = "check_change_time_within_owner"
+
+
 class _BidLevelingRule(_SubcontractRule):
     """Same translation body as the subcontract rules, over ``bid_management.validators``."""
 
@@ -12699,6 +12721,8 @@ def register_builtin_rules() -> None:
         (SubcontractChangeOwnerLinked(), ["subcontract_change"]),
         (SubcontractChangeAmountSet(), ["subcontract_change"]),
         (SubcontractChangeWithinOwnerValue(), ["subcontract_change"]),
+        (SubcontractChangeOwnerApproved(), ["subcontract_change"]),
+        (SubcontractChangeTimeWithinOwner(), ["subcontract_change"]),
         # Bid leveling with plugs, and the award that follows it
         (BidPlugShareWithinThreshold(), ["bid_leveling", "bid_award"]),
         (BidGapsPlugged(), ["bid_leveling", "bid_award"]),

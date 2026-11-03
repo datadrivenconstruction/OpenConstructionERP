@@ -26,12 +26,17 @@ export interface SubcontractChange {
   decided_at?: string | null;
   decision_note?: string | null;
   applied_amount?: string | null;
+  owner_amount?: string | null;
+  markup_pct?: string;
+  time_impact_days?: number;
+  owner_time_days?: number | null;
 }
 
 export interface OwnerChangeRollup {
   owner_code: string;
   owner_title: string;
   owner_status: string;
+  owner_approved?: boolean;
   currency: string;
   owner_value: string;
   sub_cost_approved: string;
@@ -39,6 +44,12 @@ export interface OwnerChangeRollup {
   sub_cost_total: string;
   margin: string;
   margin_percent: string | number | null;
+  approved_sub_total?: string;
+  markup_retained?: string;
+  /** owner value - approved sub total - GC markup kept; negative = the GC absorbs it. */
+  leakage?: string;
+  days_owner?: number | null;
+  days_sub_total?: number;
   changes: SubcontractChange[];
 }
 
@@ -58,6 +69,18 @@ export interface SplitLine {
   amount: string;
   title: string;
   back_to_back: boolean;
+  markup_pct?: number;
+  time_impact_days?: number;
+}
+
+export interface SovChangeLine {
+  change_id: string;
+  code: string;
+  title: string;
+  amount: string;
+  currency: string;
+  markup_pct: string;
+  time_impact_days: number;
 }
 
 const BASE = '/v1/subcontractors/changes';
@@ -99,9 +122,18 @@ export function actOnSubChange(
 
 export function updateSubChange(
   id: string,
-  data: Partial<Pick<SubcontractChange, 'title' | 'amount' | 'back_to_back' | 'description'>>,
+  data: Partial<Pick<SubcontractChange, 'title' | 'amount' | 'back_to_back' | 'description' | 'markup_pct' | 'time_impact_days'>>,
 ): Promise<SubcontractChange> {
   return apiPatch<SubcontractChange>(`${BASE}/${id}`, data);
+}
+
+/** Approved changes not yet billed: candidate lines for the next payment application. */
+export function listSovChangeLines(agreementId: string): Promise<SovChangeLine[]> {
+  return apiGet<SovChangeLine[]>(`/v1/subcontractors/agreements/${agreementId}/changes/sov-lines`);
+}
+
+export function markChangeBilled(id: string, applicationId: string): Promise<SubcontractChange> {
+  return apiPost<SubcontractChange>(`${BASE}/${id}/mark-billed/`, { application_id: applicationId });
 }
 
 export function useOwnerRollup(type: OwnerChangeType, id: string) {

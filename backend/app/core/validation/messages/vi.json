@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Các thay đổi thầu phụ của {code} tổng cộng {sub_total}, cao hơn giá trị thay đổi của chủ đầu tư {owner_value}",
       "suggestion": "Kiểm tra đơn giá thầu phụ hoặc thu hồi chênh lệch từ chủ đầu tư trước khi duyệt"
+    },
+    "change_owner_approved": {
+      "fail": "Thay đổi thầu phụ {code} là back-to-back nhưng thay đổi của chủ đầu tư chưa được phê duyệt (trạng thái: {status})",
+      "suggestion": "Hãy chờ chủ đầu tư phê duyệt thay đổi trước khi phê duyệt thay đổi thầu phụ"
+    },
+    "change_time_within_owner": {
+      "fail": "Tác động thời gian của các thầu phụ cho {code} tổng cộng {sub_days} ngày, nhiều hơn {owner_days} ngày chủ đầu tư đã chấp thuận",
+      "suggestion": "Kiểm tra các yêu cầu về thời gian của thầu phụ hoặc đề nghị chủ đầu tư gia hạn tương ứng"
     }
   },
   "submittal": {

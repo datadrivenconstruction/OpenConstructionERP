@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} 的分包变更合计 {sub_total},高于业主变更价值 {owner_value}",
       "suggestion": "批准前请核对分包单价,或向业主追回差额"
+    },
+    "change_owner_approved": {
+      "fail": "分包变更 {code} 为背靠背，但业主变更尚未批准（状态：{status}）",
+      "suggestion": "请等待业主批准变更后，再批准分包变更"
+    },
+    "change_time_within_owner": {
+      "fail": "{code} 的分包工期影响合计 {sub_days} 天，超过业主批准的 {owner_days} 天",
+      "suggestion": "请核对分包商的工期索赔，或向业主申请相应的延期"
     }
   },
   "submittal": {

@@ -52,7 +52,9 @@ from app.modules.contracts.schemas import (
     HakedisTaxesInput,
 )
 from app.modules.subcontractors.change_chain import (
+    MarkBilled,
     OwnerChangeChainResponse,
+    SovChangeLine,
     SpawnFromOwnerChange,
     SubcontractChangeCreate,
     SubcontractChangeDecision,
@@ -1913,6 +1915,32 @@ async def list_agreement_changes(
     await _verify_agreement_project(agreement_id, user_id, session, SubcontractorService(session))
     rows = await SubcontractChangeService(session).list_for_agreement(agreement_id)
     return [SubcontractChangeResponse.of(r) for r in rows]
+
+
+@router.get("/agreements/{agreement_id}/changes/sov-lines", response_model=list[SovChangeLine])
+async def agreement_change_sov_lines(
+    agreement_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> list[SovChangeLine]:
+    """Approved changes not yet billed, as candidate lines for the next payment application."""
+    await _verify_agreement_project(agreement_id, user_id, session, SubcontractorService(session))
+    rows = await SubcontractChangeService(session).sov_lines(agreement_id)
+    return [SovChangeLine.of(r) for r in rows]
+
+
+@router.post("/changes/{change_id}/mark-billed/", response_model=SubcontractChangeResponse)
+async def mark_subcontract_change_billed(
+    change_id: uuid.UUID,
+    data: MarkBilled,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.approve_change")),
+) -> SubcontractChangeResponse:
+    """Record the payment application that billed an approved change; a replay changes nothing."""
+    svc = await _change_service(session, user_id, change_id)
+    return SubcontractChangeResponse.of(await svc.mark_billed(change_id, data.application_id))
 
 
 @router.post("/changes/", response_model=SubcontractChangeResponse, status_code=201)

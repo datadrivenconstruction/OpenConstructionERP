@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Perubahan subkontrak untuk {code} berjumlah {sub_total}, lebih besar dari nilai perubahan pemilik {owner_value}",
       "suggestion": "Periksa harga subkontraktor atau tagih selisihnya dari pemilik sebelum menyetujui"
+    },
+    "change_owner_approved": {
+      "fail": "Perubahan subkontrak {code} bersifat back-to-back, tetapi perubahan pemilik belum disetujui (status: {status})",
+      "suggestion": "Tunggu persetujuan pemilik atas perubahan sebelum menyetujui perubahan subkontrak"
+    },
+    "change_time_within_owner": {
+      "fail": "Dampak waktu subkontrak untuk {code} berjumlah {sub_days} hari, lebih dari {owner_days} hari yang diberikan pemilik",
+      "suggestion": "Periksa klaim waktu subkontraktor atau minta perpanjangan yang sepadan dari pemilik"
     }
   },
   "submittal": {

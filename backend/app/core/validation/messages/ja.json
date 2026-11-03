@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} の下請変更の合計は {sub_total} で、発注者の変更額 {owner_value} を上回っています",
       "suggestion": "承認する前に下請の単価を確認するか、差額を発注者に請求してください"
+    },
+    "change_owner_approved": {
+      "fail": "下請変更 {code} はバックツーバックですが、発注者の変更がまだ承認されていません（状態：{status}）",
+      "suggestion": "下請変更を承認する前に、発注者による変更の承認をお待ちください"
+    },
+    "change_time_within_owner": {
+      "fail": "{code} の下請の工期影響は合計 {sub_days} 日で、発注者が認めた {owner_days} 日を超えています",
+      "suggestion": "下請業者の工期の請求を確認するか、発注者に同等の延長を依頼してください"
     }
   },
   "submittal": {

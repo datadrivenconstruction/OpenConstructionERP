@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "De subcontractwijzigingen voor {code} bedragen samen {sub_total}, meer dan de waarde van de wijziging van de opdrachtgever {owner_value}",
       "suggestion": "Controleer de prijzen van de onderaannemer of verhaal het verschil op de opdrachtgever voordat u goedkeurt"
+    },
+    "change_owner_approved": {
+      "fail": "Onderaannemingswijziging {code} is back-to-back, maar de wijziging van de opdrachtgever is nog niet goedgekeurd (status: {status})",
+      "suggestion": "Wacht tot de opdrachtgever de wijziging goedkeurt voordat u de onderaannemingswijziging goedkeurt"
+    },
+    "change_time_within_owner": {
+      "fail": "De tijdseffecten van onderaannemers voor {code} bedragen samen {sub_days} dagen, meer dan de {owner_days} dagen die de opdrachtgever toekende",
+      "suggestion": "Controleer de tijdsclaims van de onderaannemers of vraag de opdrachtgever om een gelijkwaardige verlenging"
     }
   },
   "submittal": {
