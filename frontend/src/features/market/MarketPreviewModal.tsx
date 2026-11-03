@@ -78,7 +78,7 @@ export function MarketPreviewModal({
         <div className="space-y-4">
           {suggested && (
             <p className="text-sm text-content-secondary" data-testid="market-preview-suggested">
-              {t(`solution_packages.${suggested}.name`, { defaultValue: suggested.replace(/_/g, ' ') })}
+              {t(`packages.${suggested}.name`, { defaultValue: suggested.replace(/_/g, ' ') })}
             </p>
           )}
           {newPack && <PackFocusPreview slug={newPack} focus={false} onFocusChange={() => undefined} canChoose={false} />}

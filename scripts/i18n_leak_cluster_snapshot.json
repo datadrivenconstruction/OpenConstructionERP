@@ -2077,5 +2077,13 @@
     ],
     "key_count_at_seed": 3,
     "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
+  },
+  {
+    "locale_set": [
+      "de",
+      "en-GB"
+    ],
+    "key_count_at_seed": 3,
+    "note": "German and British English share the words Position and Name; identical by language, not by leak."
   }
 ]

@@ -8,8 +8,6 @@
 import { apiGet, apiPost } from '@/shared/lib/api';
 import type { DocumentSaveResult } from './api';
 
-const BASE = '/v1/einvoice-clearance';
-
 export type DeadlineState = 'ok' | 'warning' | 'overdue';
 
 export interface LifecycleDeadline {
@@ -100,21 +98,21 @@ export interface ConsolidatedBody {
 }
 
 export function getEInvoiceSetup(): Promise<EInvoiceSetupRow[]> {
-  return apiGet<EInvoiceSetupRow[]>(`${BASE}/setup/`);
+  return apiGet<EInvoiceSetupRow[]>(`/v1/einvoice-clearance/setup/`);
 }
 
 export function getDocumentLifecycle(documentId: string): Promise<DocumentLifecycle> {
-  return apiGet<DocumentLifecycle>(`${BASE}/documents/${encodeURIComponent(documentId)}/lifecycle`);
+  return apiGet<DocumentLifecycle>(`/v1/einvoice-clearance/documents/${encodeURIComponent(documentId)}/lifecycle`);
 }
 
 export function getDocumentsOverview(projectId: string): Promise<OverviewRow[]> {
-  return apiGet<OverviewRow[]>(`${BASE}/documents/overview?project_id=${encodeURIComponent(projectId)}`);
+  return apiGet<OverviewRow[]>(`/v1/einvoice-clearance/documents/overview?project_id=${encodeURIComponent(projectId)}`);
 }
 
 export function previewConsolidated(body: ConsolidatedBody): Promise<ConsolidatedPreview> {
-  return apiPost<ConsolidatedPreview, ConsolidatedBody>(`${BASE}/consolidated/preview`, body);
+  return apiPost<ConsolidatedPreview, ConsolidatedBody>(`/v1/einvoice-clearance/consolidated/preview`, body);
 }
 
 export function createConsolidated(body: ConsolidatedBody): Promise<DocumentSaveResult> {
-  return apiPost<DocumentSaveResult, ConsolidatedBody>(`${BASE}/consolidated/`, body);
+  return apiPost<DocumentSaveResult, ConsolidatedBody>(`/v1/einvoice-clearance/consolidated/`, body);
 }
