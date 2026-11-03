@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Capital plan module: set the yearly budget, spread each project's cost over its years and see where demand runs over the budget. Copy a scenario to try a delay without touching the baseline, compare the two, and get a funding suggestion by priority, score and cost that you confirm before it is applied. Imports projects from a portfolio node and exports to Excel.
+- Data feeds: read-only CSV, Parquet and JSON tables over projects, BOQ positions, invoices, purchase orders and schedule activities for Excel, Power Query and BI tools, with a Settings page, `bi:read` API keys and optional PostgreSQL views (`bi enable`).
 
 ## [19.0.0] - 2026-11-02
 

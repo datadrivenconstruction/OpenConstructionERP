@@ -10,6 +10,7 @@ import { TranslationManager } from './TranslationManager';
 import { BackupRestore } from './BackupRestore';
 import { RegionalSettings } from './RegionalSettings';
 import { EInvoiceSettings } from './EInvoiceSettings';
+import { DataFeedsSettings } from './DataFeedsSettings';
 import { ModulesSettings } from './ModulesSettings';
 import { SettingsTeamPanel } from './SettingsTeamPanel';
 import { CompanyDocumentsSettings } from './CompanyDocumentsSettings';
@@ -66,6 +67,7 @@ import {
   ScrollText,
   Building2,
   Boxes,
+  Database,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ConfirmDialog, ModuleGuideButton, CountryFlag } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1469,7 +1471,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'datafeeds' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1504,6 +1506,7 @@ const TABS: readonly TabDef[] = [
   { id: 'ai',           labelKey: 'settings.tab_ai',           defaultLabel: 'AI',           icon: Sparkles, descKey: 'settings.tab_ai_desc',           descDefault: 'AI provider and semantic search' },
   { id: 'security',     labelKey: 'settings.tab_security',     defaultLabel: 'Data & Security', icon: ShieldCheck, descKey: 'settings.tab_security_desc', descDefault: 'Where your data lives and what leaves this instance' },
   { id: 'integrations', labelKey: 'settings.tab_integrations', defaultLabel: 'Integrations', icon: Plug,     descKey: 'settings.tab_integrations_desc', descDefault: 'Slack, Teams, Telegram, webhooks' },
+  { id: 'datafeeds',    labelKey: 'settings.tab_datafeeds',    defaultLabel: 'Data feeds',   icon: Database, descKey: 'settings.tab_datafeeds_desc',    descDefault: 'Tables for Excel, Power Query and BI tools' },
   // Modules — installing and removing backend modules. Visible to everyone
   // (seeing what this instance runs is not privileged), but the toggles are
   // admin-only inside the panel because `system.modules.enable/disable` is.
@@ -2238,6 +2241,9 @@ export function SettingsPage() {
               <McpSettingsPanel />
             </div>
           )}
+
+          {/* ── DATA FEEDS ───────────────────────────────────────── */}
+          {activeTab === 'datafeeds' && (<div className="lg:col-span-2"><DataFeedsSettings /></div>)}
 
           {/* ── GOVERNANCE ─────────────────────────────────────── */}
           {activeTab === 'governance' && (
