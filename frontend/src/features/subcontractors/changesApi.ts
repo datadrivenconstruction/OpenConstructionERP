@@ -66,7 +66,8 @@ export interface SubChangeValidation {
 
 export interface SplitLine {
   agreement_id: string;
-  amount: string;
+  /** Omit on a lone back-to-back line: the server derives it from the owner value less markup. */
+  amount?: string;
   title: string;
   back_to_back: boolean;
   markup_pct?: number;
