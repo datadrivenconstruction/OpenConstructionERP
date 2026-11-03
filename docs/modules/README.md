@@ -54,7 +54,7 @@ Bring any model or drawing in, coordinate it, and turn it into structured quanti
 - BIM Requirements - IDS and COBie import and export for owner data drops.
 - BCF Issues and Viewpoints - round-trip issues and viewpoints through the open BCF standard.
 - OpenCDE API - a compliance layer for the OpenCDE Foundation API and BCF API.
-- Geo Hub - anchor projects, plots and models on a 3D globe with pin layers.
+- Geo Hub - anchor projects, plots and models on a 3D globe with pin layers; site surveys compare a dated drone orthophoto with the schedule.
 
 ## Scheduling, cost and controls
 

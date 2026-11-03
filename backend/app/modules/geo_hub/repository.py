@@ -18,6 +18,8 @@ from app.modules.geo_hub.models import (
     GeoRasterOverlay,
     GeoViewpoint,
     ImageryLayer,
+    SurveyCapture,
+    SurveyObservation,
     TerrainSource,
     TileGenerationJob,
     Tileset,
@@ -382,7 +384,49 @@ class TileJobRepository(_BaseRepo):
         return list(res.scalars().all())
 
 
+# ── Site survey captures ─────────────────────────────────────────────────
+
+
+class SurveyCaptureRepository(_BaseRepo):
+    model = SurveyCapture
+
+    async def list_for_project(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 200
+    ) -> list[SurveyCapture]:
+        stmt = (
+            select(SurveyCapture)
+            .where(SurveyCapture.project_id == project_id)
+            .order_by(SurveyCapture.captured_on.desc(), SurveyCapture.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_for_overlay(self, overlay_id: uuid.UUID, *, exclude: uuid.UUID | None = None) -> int:
+        stmt = select(SurveyCapture.id).where(SurveyCapture.overlay_id == overlay_id)
+        if exclude is not None:
+            stmt = stmt.where(SurveyCapture.id != exclude)
+        return len((await self.session.execute(stmt)).scalars().all())
+
+
+class SurveyObservationRepository(_BaseRepo):
+    model = SurveyObservation
+
+    async def list_for_capture(self, capture_id: uuid.UUID) -> list[SurveyObservation]:
+        stmt = select(SurveyObservation).where(SurveyObservation.capture_id == capture_id)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def get_for(self, capture_id: uuid.UUID, activity_id: uuid.UUID) -> SurveyObservation | None:
+        stmt = select(SurveyObservation).where(
+            SurveyObservation.capture_id == capture_id,
+            SurveyObservation.activity_id == activity_id,
+        )
+        return (await self.session.execute(stmt)).scalars().first()
+
+
 __all__ = [
+    "SurveyCaptureRepository",
+    "SurveyObservationRepository",
     "GeoAnchorRepository",
     "GeoOverlayRepository",
     "GeoRasterOverlayRepository",

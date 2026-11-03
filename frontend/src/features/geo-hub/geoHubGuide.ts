@@ -59,6 +59,14 @@ export const geoHubGuide: ModuleGuideContent = {
         'Switch the projection between 3D globe, 2D map, and Columbus view, and your choice is remembered across visits. When a project is in context you can also pin raster overlays, such as a site plan, onto its location right from this view.',
     },
     {
+      icon: 'ScanLine',
+      titleKey: 'guide.geo_hub.surveys.title',
+      titleDefault: 'Site surveys',
+      bodyKey: 'guide.geo_hub.surveys.body',
+      bodyDefault:
+        'Open a project map and choose Surveys to add a drone orthophoto (GeoTIFF) with its flight date, or to link a scan you already uploaded. The orthophoto is placed on the globe from its own coordinates. Select a survey, then enter how far each schedule activity really is on that date and see it next to the planned progress.',
+    },
+    {
       icon: 'Send',
       titleKey: 'guide.geo_hub.connect.title',
       titleDefault: 'From map to project data',

@@ -75,6 +75,7 @@ from app.modules.geo_hub.schemas import (
     ViewpointUpdate,
 )
 from app.modules.geo_hub.service import GeoHubService
+from app.modules.geo_hub.survey_router import survey_router
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,9 @@ router = APIRouter(tags=["geo_hub"])
 # geometry through the same permission gate the rest of this module uses.
 # Landing page: ``/api/v1/geo-hub/ogc``. See ``ogc_router.py``.
 router.include_router(ogc_router, prefix="/ogc")
+
+# Dated site survey captures (drone orthophotos, scans) and observed progress.
+router.include_router(survey_router, prefix="/surveys")
 
 
 def _svc(session: SessionDep) -> GeoHubService:

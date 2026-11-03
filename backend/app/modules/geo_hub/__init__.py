@@ -52,6 +52,8 @@ async def on_startup() -> None:
     """
     from app.modules.geo_hub.events import register_subscribers
     from app.modules.geo_hub.permissions import register_geo_hub_permissions
+    from app.modules.geo_hub.validators import register_geo_hub_survey_rules
 
     register_geo_hub_permissions()
     register_subscribers()
+    register_geo_hub_survey_rules()

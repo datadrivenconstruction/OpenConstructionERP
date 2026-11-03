@@ -85,3 +85,10 @@ environment instead, and then the question is not asked:
 | `OE_GEOCODER_BASE_URL` | Your own Nominatim; addresses go there without asking. |
 | `OE_GEOCODER_PHOTON_URL` | Your own Photon for suggestions. |
 | `OE_GEOCODER_PHOTON_DISABLED=true` | Suggestions never use Photon. |
+
+## Site surveys
+
+In the Geo Hub map, **Surveys** takes a drone orthophoto (GeoTIFF) with its flight date, or links a scan that is
+already uploaded. The image is placed on the globe from its own coordinates. Select a survey, enter the observed
+percent complete per schedule activity, and the table shows it next to the planned progress for that date. The
+person enters the numbers; nothing is estimated automatically.

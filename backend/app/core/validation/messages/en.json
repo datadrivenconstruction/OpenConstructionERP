@@ -1529,5 +1529,35 @@
       "fail": "Agent draft '{title}' has waited {days} days for review (limit {limit}).",
       "suggestion": "Accept or reject the draft, or switch off the agent if its drafts are not used."
     }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Enter the day the site was flown.",
+      "fail": "The capture date {captured_on} is in the future."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Pick an activity from this project's schedule.",
+      "fail": "The activity does not belong to this project."
+    },
+    "georeferenced": {
+      "suggestion": "Export the orthophoto as a GeoTIFF with its coordinate system.",
+      "fail": "The orthophoto has no coordinate system or bounds, so it cannot be placed on the globe."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Fly lower or export at full resolution for quantity checks.",
+      "fail": "The ground sample distance is {gsd_cm} cm per pixel, too coarse to check quantities."
+    },
+    "observed_pct_range": {
+      "suggestion": "Enter a percentage between 0 and 100.",
+      "fail": "Observed progress {observed_pct} is outside 0 to 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Check the flight date, or the project start and end dates.",
+      "fail": "The capture date {captured_on} is more than 30 days outside the project dates."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Check the coordinate system of the export, or the project anchor.",
+      "fail": "The orthophoto lies {distance_km} km from the project anchor."
+    }
   }
 }

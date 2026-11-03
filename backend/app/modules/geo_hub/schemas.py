@@ -3,9 +3,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -873,7 +873,100 @@ class GlobeImageryResponse(BaseModel):
     streets: GlobeStreetsSource | None = None
 
 
+# ── Site survey captures ─────────────────────────────────────────────────
+
+SurveyKind = Literal["orthophoto", "point_cloud", "dsm"]
+SurveyPlatform = Literal["drone", "aircraft", "ground", "other"]
+
+
+class SurveyFromScan(BaseModel):
+    """Register an existing point cloud scan as a dated survey capture."""
+
+    scan_id: UUID
+    captured_on: date | None = None
+    platform: SurveyPlatform = "drone"
+    name: str | None = Field(default=None, max_length=255)
+
+
+class SurveyCapturePatch(BaseModel):
+    name: str | None = Field(default=None, max_length=255)
+    platform: SurveyPlatform | None = None
+    captured_on: date | None = None
+    sensor: str | None = Field(default=None, max_length=120)
+
+
+class SurveyFinding(BaseModel):
+    """One validation outcome that is worth showing next to a capture."""
+
+    rule_id: str
+    severity: str
+    message: str
+
+
+class SurveyCaptureResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID
+    kind: str
+    platform: str
+    captured_on: date
+    name: str
+    overlay_id: UUID | None = None
+    scan_id: UUID | None = None
+    gsd_cm: Decimal | None = None
+    crs_epsg: int | None = None
+    bbox_min_lat: Decimal | None = None
+    bbox_min_lon: Decimal | None = None
+    bbox_max_lat: Decimal | None = None
+    bbox_max_lon: Decimal | None = None
+    sensor: str | None = None
+    width_px: int | None = None
+    height_px: int | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+    # Filled by the service on create / get: header warnings and rule findings.
+    warnings: list[str] = Field(default_factory=list)
+    findings: list[SurveyFinding] = Field(default_factory=list)
+
+
+class SurveyObservationUpsert(BaseModel):
+    observed_pct: Decimal = Field(..., ge=0, le=100, decimal_places=2)
+    note: str = Field(default="", max_length=4000)
+
+
+class SurveyObservationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    capture_id: UUID
+    activity_id: UUID
+    observed_pct: Decimal
+    note: str
+    confirmed_by: UUID | None = None
+    confirmed_at: datetime | None = None
+
+
+class SurveyProgressRow(BaseModel):
+    activity_id: UUID
+    code: str
+    name: str
+    planned_pct_on_date: float
+    observed_pct: float | None = None
+    variance_pct: float | None = None
+    status: Literal["ahead", "on_track", "behind", "unobserved"]
+    note: str = ""
+
+
 __all__ = [
+    "SurveyCapturePatch",
+    "SurveyCaptureResponse",
+    "SurveyFinding",
+    "SurveyFromScan",
+    "SurveyObservationResponse",
+    "SurveyObservationUpsert",
+    "SurveyProgressRow",
     "AnchorFromAddressRequest",
     "AnchorFromAddressResponse",
     "AnchoredProjectResponse",
