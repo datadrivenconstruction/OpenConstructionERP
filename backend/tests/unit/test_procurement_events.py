@@ -18,6 +18,7 @@ not executed here.
 
 from __future__ import annotations
 
+import contextlib
 import uuid
 from datetime import UTC, datetime
 from types import SimpleNamespace
@@ -25,6 +26,7 @@ from typing import Any
 
 import pytest
 
+from app.core.event_effects import EventEffect
 from app.core.events import Event
 from app.modules.bid_management.models import (
     Bidder,
@@ -86,6 +88,7 @@ class _FakeStore:
         self.purchase_orders: list[PurchaseOrder] = []
         self.po_items: list[PurchaseOrderItem] = []
         self.settings: list[ProcurementProjectSettings] = []
+        self.event_effects: list[EventEffect] = []
 
 
 def _entity_of(stmt: Any) -> Any:
@@ -161,6 +164,7 @@ class _FakeSession:
             TenderBid: self.store.tender_bids,
             PurchaseOrder: self.store.purchase_orders,
             ProcurementProjectSettings: self.store.settings,
+            EventEffect: self.store.event_effects,
         }
         rows = mapping.get(entity, [])
         matched = _filter_eq(rows, stmt)
@@ -177,6 +181,12 @@ class _FakeSession:
             self.store.purchase_orders.append(obj)
         elif isinstance(obj, PurchaseOrderItem):
             self.store.po_items.append(obj)
+        elif isinstance(obj, EventEffect):
+            self.store.event_effects.append(obj)
+
+    @contextlib.asynccontextmanager
+    async def begin_nested(self):
+        yield self
 
     async def flush(self) -> None:
         return None
@@ -345,6 +355,27 @@ async def test_bid_award_replay_is_idempotent(patched: _FakeStore) -> None:
     await proc_events._create_po_from_bid_award(event)
 
     assert len(patched.purchase_orders) == 1
+
+
+@pytest.mark.asyncio
+async def test_two_deliveries_that_both_pass_the_record_scan_draft_one_po(
+    patched: _FakeStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Concurrent deliveries both read "no PO yet"; the effect ledger lets only one write."""
+    package, bidder = _seed_bid_award(patched, project_id=uuid.uuid4())
+
+    async def _blind(*_a: object, **_k: object) -> None:
+        return None
+
+    monkeypatch.setattr(proc_events, "_find_existing_po", _blind)
+    event = _bid_award_event(package, bidder)
+    event.data["idempotency_key"] = "bid_award:a1"
+
+    await proc_events._create_po_from_bid_award(event)
+    await proc_events._create_po_from_bid_award(event)
+
+    assert len(patched.purchase_orders) == 1
+    assert [e.record_id for e in patched.event_effects] == [str(patched.purchase_orders[0].id)]
 
 
 @pytest.mark.asyncio

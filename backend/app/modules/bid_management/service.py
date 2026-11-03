@@ -22,6 +22,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.event_effects import bid_award_key
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
@@ -1393,6 +1394,8 @@ class BidManagementService:
                 # Body text for the same subscriber, which named the package in
                 # its notification and had nothing to name it with.
                 "package_name": package.title or package.code,
+                "award_id": str(award.id),
+                "idempotency_key": bid_award_key(award.id),
             },
             source_module="bid_management",
         )

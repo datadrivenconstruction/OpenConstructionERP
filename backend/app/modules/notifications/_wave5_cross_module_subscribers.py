@@ -392,6 +392,19 @@ async def _on_bid_package_awarded(event: Event) -> None:
                 package.code,
             )
             return
+        from app.core.event_effects import EFFECT_CONTRACT, bid_award_key, claim_effect  # noqa: PLC0415
+
+        claim = await claim_effect(
+            session,
+            str(
+                data.get("idempotency_key")
+                or bid_award_key(data.get("award_id") or f"{package_id}:{awarded_bidder_id}")
+            ),
+            EFFECT_CONTRACT,
+            event_name=event.name,
+        )
+        if claim is None:
+            return
         code = await free_contract_code(session, f"CONTRACT-{package.code}")
 
         # The bidder row is a snapshot nobody else can resolve, so it is
@@ -445,6 +458,7 @@ async def _on_bid_package_awarded(event: Event) -> None:
             contract.metadata_["counterparty_contact_id"] = str(counterparty.contact_id)
         session.add(contract)
         await session.flush()
+        claim.record_id = str(contract.id)
         add_award_party(session, contract.id, counterparty)
 
         # Mirror the package's line items → contract lines, copying

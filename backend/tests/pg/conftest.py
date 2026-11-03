@@ -61,6 +61,7 @@ def _register_all_models() -> None:
     # below never reaches it - the same explicit-import case as audit_log, and
     # ``app/main.py`` carries the same import beside its own for the same reason.
     import app.core.data_repairs  # noqa: F401
+    import app.core.event_effects  # noqa: F401
     import app.core.pg_optimizations  # noqa: F401
 
     # ``oe_process_settings``: declared in app.core.processes, imported by the
