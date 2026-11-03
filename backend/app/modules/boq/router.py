@@ -7664,8 +7664,14 @@ async def preview_boq_excel_import(
     issues: list[dict[str, Any]] = []
     for problem in plan.problems:
         if problem.get("issue") in {"unknown_id", "duplicate_id", "stale_row"}:
+            known = stored_by_id.get(normalise_id(problem.get("position_id")) or "")
             issues.append(
-                {"kind": problem["issue"], "row": problem.get("row"), "position_id": problem.get("position_id")}
+                {
+                    "kind": problem["issue"],
+                    "row": problem.get("row"),
+                    "position_id": problem.get("position_id"),
+                    "ordinal": str(getattr(known, "ordinal", "") or ""),
+                }
             )
     for err in errors:
         if "formula_in_id" in str(err.get("error", "")):
