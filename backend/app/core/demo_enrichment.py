@@ -198,6 +198,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.bcf.seed import seed_bcf_demo
         from app.modules.bid_management.seed import seed_bid_management_demo
         from app.modules.bim_hub.seed import seed_bim_hub
+        from app.modules.capital_plan.seed import seed_capital_plan_demo
         from app.modules.carbon.models import CarbonInventory
         from app.modules.carbon.seed import seed_carbon_demo
         from app.modules.catalog.seed import seed_catalog
@@ -241,7 +242,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.plant_register.seed import seed_plant_register_demo
         from app.modules.pointcloud.seed import seed_pointcloud_demo
         from app.modules.portal.seed import seed_portal_demo
-        from app.modules.capital_plan.seed import seed_capital_plan_demo
         from app.modules.portfolio.seed import seed_portfolio_demo
         from app.modules.procurement_concept.seed import seed_procurement_concept_demo
         from app.modules.progress.seed import seed_position_progress_demo
