@@ -156,6 +156,8 @@ class PositionDrawingRefs:
     unrevised_measurements: int = 0
     #: Measurements carried over from an earlier revision that nobody has confirmed yet.
     carried_unconfirmed: int = 0
+    #: The subset of those placed on the new sheet with match confidence under 0.6.
+    carried_low_confidence: int = 0
 
     @property
     def outdated(self) -> bool:
@@ -172,6 +174,7 @@ class PositionDrawingRefs:
             "manual_outdated": self.manual_outdated,
             "unrevised_measurements": self.unrevised_measurements,
             "carried_unconfirmed": self.carried_unconfirmed,
+            "carried_low_confidence": self.carried_low_confidence,
             "refs": [r.as_dict() for r in self.refs],
         }
 
@@ -344,6 +347,11 @@ async def drawing_refs_for_boq(
         carry = (m.metadata_ or {}).get("carry_over") if isinstance(m.metadata_, dict) else None
         if isinstance(carry, dict) and carry.get("status") == "needs_review":
             entry.carried_unconfirmed += 1
+            try:
+                if carry.get("match_confidence") is not None and float(carry["match_confidence"]) < 0.6:
+                    entry.carried_low_confidence += 1
+            except (TypeError, ValueError):
+                pass
         key = (pid, (m.drawing_document_id or m.document_id, m.drawing_sheet_id, m.drawing_revision, m.page))
         ref = grouped.get(key)
         if ref is None:

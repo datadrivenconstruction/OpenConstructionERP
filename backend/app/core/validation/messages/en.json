@@ -1464,6 +1464,10 @@
     "carried_unconfirmed": {
       "fail": "Position {ordinal}: {count} measurement(s) were carried over from an earlier drawing revision and are not confirmed yet",
       "suggestion": "Check each carried measurement on the new revision and confirm it, or re-measure it"
+    },
+    "low_confidence_pending": {
+      "fail": "Position {ordinal}: {count} carried-over measurement(s) were placed on the new revision with low confidence and wait for review",
+      "suggestion": "Open the carry-over review, check each low-confidence measurement on the new sheet, then confirm or re-measure it"
     }
   },
   "offline_sync": {

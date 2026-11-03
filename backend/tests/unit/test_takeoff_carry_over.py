@@ -14,7 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.core.validation.engine import Severity, ValidationContext
-from app.modules.boq.validators import CarriedMeasurementUnconfirmed
+from app.modules.boq.validators import CarriedLowConfidencePending, CarriedMeasurementUnconfirmed
 from app.modules.takeoff import carry_over as co
 
 
@@ -108,3 +108,23 @@ async def test_unconfirmed_carry_rule_is_info_per_position():
     assert "01.001" in results[0].message and "2" in results[0].message
     data["drawing_refs"]["p1"]["carried_unconfirmed"] = 0
     assert await rule.validate(ValidationContext(data=data)) == []
+
+
+@pytest.mark.asyncio
+async def test_low_confidence_carry_rule_counts_only_the_unsure_ones():
+    rule = CarriedLowConfidencePending()
+    data = {
+        "positions": [{"id": "p1", "ordinal": "01.001", "unit": "m2", "type": "position"}],
+        "drawing_refs": {"p1": {"carried_unconfirmed": 3, "carried_low_confidence": 1, "refs": []}},
+    }
+    results = await rule.validate(ValidationContext(data=data))
+    assert len(results) == 1 and results[0].severity == Severity.WARNING
+    data["drawing_refs"]["p1"]["carried_low_confidence"] = 0
+    assert await rule.validate(ValidationContext(data=data)) == []
+
+
+def test_low_confidence_is_counted_from_the_carry_metadata():
+    from app.modules.boq.drawing_refs import PositionDrawingRefs
+
+    entry = PositionDrawingRefs(position_id="p1", ordinal="1")
+    assert entry.as_dict()["carried_low_confidence"] == 0
