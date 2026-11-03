@@ -20,7 +20,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "vsci01_scim_provisioning"
-down_revision: str | Sequence[str] | None = "vai01_doc_assistant_agent_catalogue"
+down_revision: str | Sequence[str] | None = "vpar01_partner_api_keys_webhooks"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
