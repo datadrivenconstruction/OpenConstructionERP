@@ -3,6 +3,7 @@
 /** Modal wizard for previewing a BOQ file import before committing it. */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   X,
@@ -28,6 +29,15 @@ import {
   type ImportProgress,
 } from './importJob';
 import type { FidelityReport } from './exchangeFidelityApi';
+import {
+  applyFields,
+  hasReviewableChanges,
+  isSpreadsheetName,
+  previewExcelChanges,
+  type ExcelReviewPreview,
+  type ReviewChoices,
+} from './excelReviewApi';
+import { ExcelReviewDialog } from './ExcelReviewDialog';
 import { needsAttention } from './exchangeFidelityText';
 import { FidelityReportView } from './FidelityReportView';
 
@@ -130,6 +140,9 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<Step>('upload');
+  // The dry-run diff of an edited export, shown before it is applied.
+  const [review, setReview] = useState<ExcelReviewPreview | null>(null);
+  const reviewMutation = useMutation({ mutationFn: (f: File) => previewExcelChanges(boqId, f) });
   const [file, setFile] = useState<File | null>(null);
   const [fileFormat, setFileFormat] = useState<string>('');
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
@@ -261,8 +274,22 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
 
   /* ── Step 3: Confirm import ─────────────────────────────────────── */
 
-  const handleImport = useCallback(async (force = false) => {
+  const handleImport = useCallback(async (force = false, choices?: ReviewChoices) => {
     if (!file) return;
+    // A spreadsheet that carries Position IDs is a round trip: show what it
+    // would change first. Any failure here falls through to the import, which
+    // reports the same problem in its own words.
+    if (!choices && isSpreadsheetName(file.name)) {
+      try {
+        const found = await reviewMutation.mutateAsync(file);
+        if (hasReviewableChanges(found)) {
+          setReview(found);
+          return;
+        }
+      } catch {
+        /* the import below answers */
+      }
+    }
     setImporting(true);
     setJobProgress(null);
     setError(null);
@@ -272,6 +299,9 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
     const form = new FormData();
     form.append('file', file);
     if (previewedMapping) form.append('column_mapping', previewedMapping);
+    if (choices) {
+      for (const [key, value] of Object.entries(applyFields(choices))) form.append(key, value);
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90_000);
@@ -389,7 +419,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
       setJobProgress(null);
       jobWaitRef.current = null;
     }
-  }, [file, boqId, addToast, t, onImported, onClose, previewedMapping]);
+  }, [file, boqId, addToast, t, onImported, onClose, previewedMapping, reviewMutation]);
 
   /* ── Drag & drop handlers ───────────────────────────────────────── */
 
@@ -911,14 +941,26 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
             <button
               type="button"
               onClick={() => handleImport()}
-              disabled={importing}
+              disabled={importing || reviewMutation.isPending}
               className="px-4 py-1.5 text-xs font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
             >
-              {importing && <Loader2 size={12} className="animate-spin" />}
+              {(importing || reviewMutation.isPending) && <Loader2 size={12} className="animate-spin" />}
               {t('boq.import_preview.confirm_button', { defaultValue: 'Import' })}
             </button>
           )}
         </div>
+        {review && (
+          <ExcelReviewDialog
+            open
+            preview={review}
+            applying={importing}
+            onCancel={() => setReview(null)}
+            onApply={(choices) => {
+              setReview(null);
+              void handleImport(false, choices);
+            }}
+          />
+        )}
       </div>
     </div>
   );

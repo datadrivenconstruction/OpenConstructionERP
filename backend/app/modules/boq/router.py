@@ -59,7 +59,9 @@ Endpoints:
 
 import asyncio
 import csv
+import hashlib
 import io
+import json
 import logging
 import re
 import tempfile
@@ -133,10 +135,16 @@ from app.modules.boq.importers.excel import (
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
 from app.modules.boq.resource_review_router import resource_review_router
 from app.modules.boq.roundtrip import (
+    EXPORT_META_SHEET,
     ID_COLUMN_HEADER,
+    ROW_VERSION_COLUMN_HEADER,
+    ApplyChoices,
     RoundTripRow,
     diff_import_rows,
+    field_changes,
+    is_formula_id,
     normalise_id,
+    parse_row_version,
 )
 from app.modules.boq.schemas import (
     ActivityLogList,
@@ -5114,6 +5122,10 @@ def _render_boq_xlsx(
         # re-import a row carrying an id that belongs to THIS BOQ updates that
         # position in place instead of duplicating it.
         ID_COLUMN_HEADER,
+        # Optional optimistic-lock stamp (Position.version at export time): a
+        # re-import compares it to the stored version to flag rows changed in
+        # the app since. Absent on older exports, which then skip the check.
+        ROW_VERSION_COLUMN_HEADER,
     ]
     custom_headers = [c.get("display_name", c.get("name", "")) for c in custom_columns]
     # Source drawing (number + revision) per position, after the custom columns so the
@@ -5121,7 +5133,8 @@ def _render_boq_xlsx(
     drawing_header = [DRAWING_COLUMN_HEADER] if drawing_refs else []
     headers = standard_headers + custom_headers + drawing_header
     n_standard = len(standard_headers)
-    id_col = n_standard  # 1-based column index of the "Position ID" column
+    id_col = n_standard - 1  # 1-based column index of the "Position ID" column
+    version_col = n_standard
 
     # ── Reusable styles ──────────────────────────────────────────────────
     bold_font = Font(bold=True)
@@ -5200,6 +5213,7 @@ def _render_boq_xlsx(
             # Round-trip identity: sections carry their id too so a renamed
             # section updates in place instead of duplicating (GitHub #360).
             ws.cell(row=current_row, column=id_col, value=str(pos.id))
+            ws.cell(row=current_row, column=version_col, value=int(getattr(pos, "version", 0) or 0))
             current_row += 1
             continue
 
@@ -5289,6 +5303,8 @@ def _render_boq_xlsx(
         # position in place rather than creating a duplicate.
         id_cell = ws.cell(row=current_row, column=id_col, value=str(pos.id))
         id_cell.fill = light_gray_fill
+        ver_cell = ws.cell(row=current_row, column=version_col, value=int(getattr(pos, "version", 0) or 0))
+        ver_cell.fill = light_gray_fill
 
         # ── Custom column values ─────────────────────────────────────────
         # Custom-column text values are user-controlled and must be
@@ -5425,6 +5441,9 @@ def _render_boq_xlsx(
     # The round-trip UUIDs are for re-import only; hidden, a reader no longer
     # sees internal ids beside section and position rows.
     ws.column_dimensions[get_column_letter(id_col)].hidden = True
+    # Same for the row-version stamp: narrow and hidden, it is only read back on import.
+    ws.column_dimensions[get_column_letter(version_col)].width = 8
+    ws.column_dimensions[get_column_letter(version_col)].hidden = True
 
     # Align numeric columns to the right
     for row in ws.iter_rows(min_row=header_row + 1, max_row=total_row, min_col=4, max_col=6):
@@ -5469,6 +5488,14 @@ def _render_boq_xlsx(
     if ai_row_count:
         wb.custom_doc_props.append(BoolProperty(name=AI_MARK_TOKEN, value=True))
         wb.custom_doc_props.append(IntProperty(name=f"{AI_MARK_TOKEN}-ROWS", value=ai_row_count))
+
+    # Hidden metadata sheet: lets a later import tell which bill and moment the
+    # sheet was cut from. Optional on import; the item-sheet reader skips it.
+    meta_ws = wb.create_sheet(EXPORT_META_SHEET)
+    meta_ws.append(["boq_id", str(getattr(boq_data, "id", "") or "")])
+    meta_ws.append(["exported_at", (exported_at or datetime.now(tz=UTC)).isoformat()])
+    meta_ws.append(["schema", 1])
+    meta_ws.sheet_state = "hidden"
 
     # ── Write to bytes buffer and return ──────────────────────────────────
     buffer = io.BytesIO()
@@ -6744,16 +6771,6 @@ def _parse_numeric_cell(value: Any) -> tuple[float | None, str | None]:
 #   * missing positions are deleted ONLY when the caller opts in.
 
 
-def _dec4(value: Any) -> Decimal | None:
-    """Quantise a numeric-ish value to 4 dp (the storage precision) so a
-    re-imported cell compares equal to the stored value; ``None`` if it
-    cannot be parsed."""
-    try:
-        return Decimal(str(value).strip() or "0").quantize(Decimal("0.0001"))
-    except (InvalidOperation, ValueError, ArithmeticError):
-        return None
-
-
 def _prepared_row_to_create(
     boq_id: uuid.UUID,
     pr: Mapping[str, Any],
@@ -6831,40 +6848,95 @@ def _resolve_import_parent(
     return last_section_id
 
 
-def _prepared_row_to_update(pr: Mapping[str, Any], stored: Any) -> PositionUpdate | None:
+def _classification_with_code(stored: Mapping[str, Any] | None, code: str) -> dict[str, Any]:
+    """The stored classification with the displayed code replaced by ``code``.
+
+    Writes the key :func:`_get_classification_code` reads for display, so the
+    next export shows the new code and the next review sees no difference.
+    """
+    out = dict(stored or {})
+    for key in ("din276", "nrm", "masterformat", "sinapi", "nbr"):
+        if out.get(key):
+            out[key] = code
+            return out
+    for key, val in out.items():
+        if val:
+            out[key] = code
+            return out
+    out["code"] = code
+    return out
+
+
+def _prepared_row_to_update(
+    pr: Mapping[str, Any],
+    stored: Any,
+    *,
+    version: int | None = None,
+) -> PositionUpdate | None:
     """Build a partial update carrying ONLY the changed human-facing fields.
 
-    Returns ``None`` when nothing the sheet carries actually changed, so a
+    The changed fields come from :func:`app.modules.boq.roundtrip.field_changes`,
+    the same function the review preview lists, so a row shown as unchanged is
+    never written. Returns ``None`` when nothing the sheet carries changed, so a
     re-import of an unedited export is idempotent (no version bump / audit
-    noise). Classification, metadata, parent_id and sort_order are never
-    written here - the flat sheet does not round-trip them losslessly, so
-    preserving the stored values is the only safe choice.
+    noise). Metadata, parent_id and sort_order are never written here - the flat
+    sheet does not round-trip them losslessly. ``version`` is the optimistic-lock
+    token the service checks.
     """
-    changed: dict[str, Any] = {}
-
-    new_desc = (pr.get("description") or "").strip()
-    if stored is None or new_desc != ((getattr(stored, "description", "") or "").strip()):
-        changed["description"] = new_desc
-
-    new_unit = (pr.get("unit") or "").strip()
-    if new_unit and (stored is None or new_unit.lower() != (getattr(stored, "unit", "") or "").strip().lower()):
-        changed["unit"] = new_unit
-
-    new_ordinal = (pr.get("ordinal") or "").strip()
-    if new_ordinal and (stored is None or new_ordinal != ((getattr(stored, "ordinal", "") or "").strip())):
-        changed["ordinal"] = new_ordinal
-
-    new_qty = _dec4(pr.get("quantity", 0.0))
-    if new_qty is not None and (stored is None or new_qty != _dec4(getattr(stored, "quantity", 0))):
-        changed["quantity"] = float(new_qty)
-
-    new_rate = _dec4(pr.get("unit_rate", 0))
-    if new_rate is not None and (stored is None or new_rate != _dec4(getattr(stored, "unit_rate", 0))):
-        changed["unit_rate"] = Decimal(str(new_rate))
-
-    if not changed:
+    changes = field_changes(stored, pr, code_of=_get_classification_code)
+    if not changes:
         return None
+    changed: dict[str, Any] = {}
+    for change in changes:
+        if change.field == "quantity":
+            changed["quantity"] = float(Decimal(change.new))
+        elif change.field == "unit_rate":
+            changed["unit_rate"] = Decimal(change.new)
+        elif change.field == "classification":
+            changed["classification"] = _classification_with_code(getattr(stored, "classification", None), change.new)
+        else:
+            changed[change.field] = change.new
+    if version is not None:
+        changed["version"] = version
     return PositionUpdate(**changed)
+
+
+def _plan_round_trip(
+    prepared_rows: list[dict[str, Any]],
+    positions: Sequence[Any],
+    *,
+    delete_missing: bool = False,
+) -> tuple[Any, dict[str, Any], bool]:
+    """Resolve prepared sheet rows against the bill's stored positions.
+
+    Shared by the review preview and the apply, so both see the same updates,
+    creates, deletes and stale rows. ``positions`` must be THIS bill's only.
+
+    Returns:
+        ``(plan, stored_by_id, round_trip)``. ``round_trip`` is true only when
+        the sheet carries at least one Position ID; without it nothing may be
+        reported missing or deleted.
+    """
+    stored_by_id: dict[str, Any] = {str(p.id): p for p in positions}
+    rt_rows = [
+        RoundTripRow(
+            row_index=int(pr.get("row_index", 0) or 0),
+            position_id=pr.get("position_id"),
+            payload=pr,
+            row_version=pr.get("row_version"),
+        )
+        for pr in prepared_rows
+    ]
+    round_trip = any(normalise_id(pr.get("position_id")) for pr in prepared_rows)
+    plan = diff_import_rows(
+        rt_rows,
+        stored_by_id.keys(),
+        delete_missing=delete_missing and round_trip,
+        stored_versions={pid: int(getattr(p, "version", 0) or 0) for pid, p in stored_by_id.items()},
+        stored=stored_by_id,
+        code_of=_get_classification_code,
+    )
+    return plan, stored_by_id, round_trip
 
 
 async def _create_in_document_order(
@@ -6928,8 +7000,17 @@ async def _apply_boq_roundtrip(
     delete_missing: bool = False,
     actor_id: uuid.UUID | None = None,
     document_order: bool = False,
+    choices: ApplyChoices | None = None,
 ) -> dict[str, Any]:
     """Apply validated import rows to a BOQ using the round-trip differ.
+
+    ``choices`` carries what the person decided in the review step. A row
+    exported at another version than the stored one (stale) is applied only
+    when ``choices.overwrite_conflicts`` is set or its id is in
+    ``choices.accept``; otherwise it is reported in ``apply_errors`` with
+    ``error="stale_row"`` and left alone. ``choices.skip`` ids are never
+    written. When ``choices.delete`` is a list, only those missing ids are
+    deleted (and only on a genuine round trip), whatever ``delete_missing`` says.
 
     ``document_order`` is the importer's word that the rows are in tree order
     (see ``ImportedBOQ.document_order``): a plain append is then written in
@@ -6948,31 +7029,24 @@ async def _apply_boq_roundtrip(
     # The id universe is scoped to THIS BOQ only - the structural guarantee
     # that a foreign id can never be honoured as an update.
     existing = await service.get_boq_with_positions(boq_id)
-    stored_by_id: dict[str, Any] = {str(p.id): p for p in existing.positions}
-
-    rt_rows = [
-        RoundTripRow(
-            row_index=int(pr.get("row_index", 0) or 0),
-            position_id=pr.get("position_id"),
-            payload=pr,
-        )
-        for pr in prepared_rows
-    ]
-    # Round-trip is "active" only when the sheet actually carries at least one
-    # Position ID. This gate is a safety floor: without it, a delete_missing
-    # request against a sheet that has NO id column would treat EVERY existing
-    # position as "missing" and wipe the BOQ. Deletes (and the would_delete
-    # report) therefore require a genuine round-trip - a plain no-id append can
-    # never remove anything.
-    round_trip = any(normalise_id(pr.get("position_id")) for pr in prepared_rows)
-    effective_delete = delete_missing and round_trip
-    plan = diff_import_rows(rt_rows, stored_by_id.keys(), delete_missing=effective_delete)
+    choices = choices or ApplyChoices()
+    # Without a stamped Position ID column a delete request could wipe the BOQ
+    # (every position would be "missing"), so deletes need a genuine round trip.
+    plan, stored_by_id, round_trip = _plan_round_trip(
+        prepared_rows,
+        existing.positions,
+        delete_missing=delete_missing and choices.delete is None,
+    )
+    if round_trip and choices.delete is not None:
+        plan.deletes = [token for token in plan.would_delete if token in choices.delete]
 
     apply_errors: list[dict[str, Any]] = []
     created = 0
     updated = 0
     unchanged = 0
     deleted = 0
+    kept = 0
+    stale = 0
 
     # Deletes first: frees any ordinal a following rename / insert wants to
     # reuse. Sections with children raise 409 (cascade off) - caught + skipped
@@ -6989,8 +7063,28 @@ async def _apply_boq_roundtrip(
     for action in plan.updates:
         pid = action.position_id or ""
         stored = stored_by_id.get(pid)
+        if pid in choices.skip:
+            kept += 1
+            continue
+        is_stale = pid in plan.stale_ids
+        if is_stale and not (choices.overwrite_conflicts or pid in choices.accept):
+            stale += 1
+            apply_errors.append(
+                {
+                    "row": action.row.row_index,
+                    "position_id": pid,
+                    "ordinal": str(getattr(stored, "ordinal", "") or ""),
+                    "error": "stale_row",
+                    "message": "Changed in the app since the sheet was exported; not overwritten.",
+                }
+            )
+            continue
         try:
-            update = _prepared_row_to_update(action.row.payload, stored)
+            # A stale row the person chose to overwrite is locked against the
+            # version read now; any other row against the version it was
+            # exported at, so a concurrent edit still ends in the 409.
+            lock = int(getattr(stored, "version", 0) or 0) if is_stale else action.row.row_version
+            update = _prepared_row_to_update(action.row.payload, stored, version=lock)
             if update is None:
                 unchanged += 1
                 continue
@@ -7053,73 +7147,25 @@ async def _apply_boq_roundtrip(
         # column to diff them against).
         "would_delete": len(plan.would_delete) if round_trip else 0,
         "round_trip": round_trip,
+        "kept": kept,
+        "stale": stale,
         "problems": plan.problems,
         "apply_errors": apply_errors,
     }
 
 
-@router.post(
-    "/boqs/{boq_id}/import/excel/",
-    summary="Import positions from Excel/CSV (deprecated - use /import/auto/)",
-    dependencies=[Depends(RequirePermission("boq.update"))],
-)
-async def import_boq_excel(
-    boq_id: uuid.UUID,
-    response: Response,
-    _user_id: CurrentUserId,
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
-    service: BOQService = Depends(_get_service),
-    delete_missing: bool = Query(
-        False,
-        description=(
-            "Round-trip delete (GitHub #360). When true, positions that "
-            "currently exist in the BOQ but are absent from the uploaded "
-            "sheet are DELETED. Off by default - the response always reports "
-            "how many WOULD be deleted so nothing is ever removed silently."
-        ),
-    ),
-) -> dict[str, Any]:
-    """Import BOQ positions from an Excel or CSV file (round-trip aware).
+async def _read_excel_upload(file: UploadFile) -> tuple[bytes, list[dict[str, Any]], dict[str, Any], str]:
+    """Validate an uploaded Excel/CSV and parse it into raw sheet rows.
 
-    .. deprecated::
-        Epic I5 - clients should call ``POST /import/auto/`` and let
-        the dispatcher pick the importer. This route remains supported
-        for backwards compatibility but emits a ``Deprecation: true``
-        response header.
-
-    Accepts a multipart file upload. The file must be .xlsx or .csv.
-
-    Expected columns (all optional except Description):
-    - **Position ID** - the stable UUID an export stamps. A row carrying an
-      id that belongs to THIS BOQ UPDATES that position in place; a blank id
-      CREATES a new position (GitHub #360 round-trip fidelity).
-    - **Pos / Position / Ordinal / Nr.** - position ordinal number
-    - **Description / Beschreibung / Text** - description (required)
-    - **Unit / Einheit / ME** - unit of measurement
-    - **Quantity / Qty / Menge** - quantity
-    - **Unit Rate / Rate / EP / Einheitspreis** - unit rate
-    - **Total** (ignored - auto-calculated from quantity x rate)
-    - **Classification / DIN 276 / KG / NRM / Code** - classification code
+    Shared by the apply route and the review preview so both refuse the same
+    uploads: extension, magic bytes, zip bombs, unreadable files.
 
     Returns:
-        Summary with counts of created / updated / skipped / deleted (and
-        ``would_delete``), plus per-row errors, warnings and round-trip
-        problems.
+        ``(content, rows, import_meta, lowercased_filename)``.
+
+    Raises:
+        HTTPException 400: unsupported, empty, mismatched, corrupt or row-less file.
     """
-    # Epic I5: deprecation signal - clients should migrate to /import/auto/.
-    response.headers["Deprecation"] = "true"
-    response.headers["Link"] = '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
-    response.headers["Sunset"] = "Wed, 31 Dec 2026 23:59:59 GMT"
-
-    # Verify BOQ exists AND the caller owns its project (IDOR guard).
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
-    # Refuse a locked bill up front with the lock's own 409. Past this point
-    # every row write is caught and collected per row, so a lock found there
-    # came back as a row error (or a 200 with nothing imported) instead.
-    await service._ensure_boq_writable(boq_id)
-
     # Validate file type
     filename = (file.filename or "").lower()
     if not filename.endswith((".xlsx", ".csv")):
@@ -7203,6 +7249,22 @@ async def import_boq_excel(
             detail="No data rows found in file. Check that the header row names the columns.",
         )
 
+    return content, rows, import_meta, filename
+
+
+def _prepare_rows(
+    rows: list[dict[str, Any]],
+    import_meta: dict[str, Any],
+    file_name: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], int]:
+    """Validate and normalise raw sheet rows into the prepared dicts the round trip works on.
+
+    The one row-preparation step behind both the review preview and the apply
+    route, so what a person reviews is what gets written.
+
+    Returns:
+        ``(prepared, errors, warnings, skipped)``.
+    """
     # Validate + normalise each row into a "prepared" dict; persistence is
     # deferred to the round-trip apply step (GitHub #360) so a row carrying a
     # known Position ID updates in place instead of duplicating.
@@ -7268,6 +7330,15 @@ async def import_boq_excel(
 
             # Round-trip identity: the stable Position ID an export stamped.
             raw_position_id = row.get("position_id")
+            if is_formula_id(raw_position_id):
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": "Position ID cell starts with a formula character (boq.roundtrip.formula_in_id)",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
 
             # Build ordinal: use from file or auto-generate
             ordinal = str(row.get("ordinal", "")).strip()
@@ -7318,7 +7389,7 @@ async def import_boq_excel(
             )
             if is_section_row:
                 section_meta: dict[str, Any] = {
-                    "import_source": file.filename or "excel",
+                    "import_source": file_name or "excel",
                     "import_row_index": row_idx,
                     "section_header": True,
                 }
@@ -7326,6 +7397,7 @@ async def import_boq_excel(
                     {
                         "row_index": row_idx,
                         "position_id": raw_position_id,
+                        "row_version": parse_row_version(row.get("row_version")),
                         "ordinal": ordinal,
                         "description": description,
                         "unit": "section",
@@ -7414,7 +7486,7 @@ async def import_boq_excel(
             # Stamp import provenance for a later round-trip export.
             pos_metadata: dict[str, Any] = {}
             if import_meta:
-                pos_metadata["import_source"] = file.filename or "excel"
+                pos_metadata["import_source"] = file_name or "excel"
                 pos_metadata["import_row_index"] = row_idx
                 pos_metadata["original_columns"] = import_meta.get("original_columns", [])
 
@@ -7422,6 +7494,7 @@ async def import_boq_excel(
                 {
                     "row_index": row_idx,
                     "position_id": raw_position_id,
+                    "row_version": parse_row_version(row.get("row_version")),
                     "ordinal": ordinal,
                     "description": description,
                     "unit": unit,
@@ -7442,7 +7515,272 @@ async def import_boq_excel(
                     "data": {k: str(v)[:100] for k, v in row.items()},
                 }
             )
-            logger.warning("Import error at row %d for BOQ %s: %s", row_idx, boq_id, exc)
+            logger.warning("Import error at row %d: %s", row_idx, exc)
+
+    return prepared, errors, warnings_list, skipped
+
+
+_FORM_SKIP_DOC = (
+    "Round-trip review. JSON list of Position IDs whose sheet row is NOT applied "
+    "(the person kept the value in the app)."
+)
+_FORM_ACCEPT_DOC = (
+    "Round-trip review. JSON list of Position IDs of stale rows (changed in the app after the "
+    "export) to overwrite with the sheet value."
+)
+_FORM_DELETE_DOC = (
+    "Round-trip review. JSON list of Position IDs absent from the sheet that the person confirmed "
+    "for deletion. When given, only these are deleted and delete_missing is ignored."
+)
+_FORM_OVERWRITE_DOC = "Apply every stale row too (overwrite what changed in the app). Off by default."
+
+
+def _read_id_list(raw: str | None, field_name: str) -> frozenset[str] | None:
+    """A JSON list form field as normalised id tokens; ``None`` when the field is absent."""
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    try:
+        data = json.loads(raw)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{field_name} must be a JSON list of position ids.",
+        ) from exc
+    if not isinstance(data, list):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{field_name} must be a JSON list of position ids.",
+        )
+    return frozenset(token for token in (normalise_id(item) for item in data) if token)
+
+
+def _read_apply_choices(
+    skip: str | None,
+    accept: str | None,
+    delete: str | None,
+    overwrite_conflicts: bool,
+) -> ApplyChoices | None:
+    """The review step's decisions from the form fields; ``None`` when none were sent."""
+    overwrite_conflicts = overwrite_conflicts is True
+    skip_ids = _read_id_list(skip, "skip_position_ids")
+    accept_ids = _read_id_list(accept, "accept_position_ids")
+    delete_ids = _read_id_list(delete, "delete_position_ids")
+    if skip_ids is None and accept_ids is None and delete_ids is None and not overwrite_conflicts:
+        return None
+    return ApplyChoices(
+        accept=accept_ids or frozenset(),
+        skip=skip_ids or frozenset(),
+        delete=delete_ids,
+        overwrite_conflicts=overwrite_conflicts,
+    )
+
+
+_REVIEW_LIST_CAP = 500
+
+
+def _capped(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return items[:_REVIEW_LIST_CAP]
+
+
+@router.post(
+    "/boqs/{boq_id}/import/excel/preview/",
+    summary="Review what an edited Excel export would change (writes nothing)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def preview_boq_excel_import(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Dry run of a round-trip import: field-level diff plus stale-row conflicts.
+
+    Reads the sheet exactly as :func:`import_boq_excel` does (same upload
+    checks, same row preparation, same planner) and reports what an apply would
+    do, without writing anything. A sheet without Position IDs is reported with
+    ``round_trip: false`` and every row under ``created``.
+
+    Returns:
+        ``created``, ``updated`` (with ``changes``), ``unchanged`` (count),
+        ``would_delete``, ``conflicts`` (rows changed in the app since the
+        export, with the sheet's changes), ``problems``, ``errors``,
+        ``validation`` (rule findings), ``counts`` (always full) and
+        ``boq_version_token``. Lists are capped at 500 each; ``truncated``
+        says which were cut.
+    """
+    from app.modules.boq.validators import evaluate_roundtrip
+
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    # A locked bill takes no changes: say so now rather than after the review.
+    await service._ensure_boq_writable(boq_id)
+
+    _content, rows, import_meta, _filename = await _read_excel_upload(file)
+    prepared, errors, warnings_list, skipped = _prepare_rows(rows, import_meta, file.filename or "")
+
+    existing = await service.get_boq_with_positions(boq_id)
+    plan, stored_by_id, round_trip = _plan_round_trip(prepared, existing.positions, delete_missing=True)
+
+    created = [
+        {
+            "row": a.row.row_index,
+            "ordinal": str(a.row.payload.get("ordinal") or ""),
+            "description": str(a.row.payload.get("description") or "")[:200],
+        }
+        for a in plan.creates
+    ]
+    updated: list[dict[str, Any]] = []
+    conflicts: list[dict[str, Any]] = []
+    unchanged = 0
+    for a in plan.updates:
+        pid = a.position_id or ""
+        stored = stored_by_id.get(pid)
+        changes = [c.as_dict() for c in field_changes(stored, a.row.payload, code_of=_get_classification_code)]
+        if not changes:
+            unchanged += 1
+            continue
+        item = {
+            "row": a.row.row_index,
+            "position_id": pid,
+            "ordinal": str(getattr(stored, "ordinal", "") or ""),
+            "changes": changes,
+        }
+        if pid in plan.stale_ids:
+            conflicts.append(
+                {**item, "stored_version": int(getattr(stored, "version", 0) or 0), "file_version": a.row.row_version}
+            )
+        else:
+            updated.append(item)
+    would_delete = [
+        {
+            "position_id": pid,
+            "ordinal": str(getattr(stored_by_id[pid], "ordinal", "") or ""),
+            "description": str(getattr(stored_by_id[pid], "description", "") or "")[:200],
+        }
+        for pid in (plan.would_delete if round_trip else [])
+    ]
+
+    issues: list[dict[str, Any]] = []
+    for problem in plan.problems:
+        if problem.get("issue") in {"unknown_id", "duplicate_id", "stale_row"}:
+            issues.append(
+                {"kind": problem["issue"], "row": problem.get("row"), "position_id": problem.get("position_id")}
+            )
+    for err in errors:
+        if "formula_in_id" in str(err.get("error", "")):
+            issues.append({"kind": "formula_in_id", "row": err.get("row")})
+    validation = [
+        {
+            "rule_id": r.rule_id,
+            "severity": str(getattr(r.severity, "value", r.severity)),
+            "message": r.message,
+            "suggestion": r.suggestion,
+            "element_ref": r.element_ref,
+        }
+        for r in await evaluate_roundtrip(issues, get_locale())
+    ]
+
+    token_source = "|".join(f"{pid}:{int(getattr(p, 'version', 0) or 0)}" for pid, p in sorted(stored_by_id.items()))
+    counts = {
+        "created": len(created),
+        "updated": len(updated),
+        "unchanged": unchanged,
+        "would_delete": len(would_delete),
+        "conflicts": len(conflicts),
+        "problems": len(plan.problems) - len(conflicts),
+        "errors": len(errors),
+        "skipped": skipped,
+    }
+    lists = {"created": created, "updated": updated, "would_delete": would_delete, "conflicts": conflicts}
+    return {
+        "round_trip": round_trip,
+        "created": _capped(created),
+        "updated": _capped(updated),
+        "unchanged": unchanged,
+        "would_delete": _capped(would_delete),
+        "conflicts": _capped(conflicts),
+        # Stale rows are listed under ``conflicts``; the rest of the planner's notes stay here.
+        "problems": [p for p in plan.problems if p.get("issue") != "stale_row"],
+        "errors": errors,
+        "warnings": warnings_list,
+        "validation": validation,
+        "counts": counts,
+        "truncated": {name: len(items) > _REVIEW_LIST_CAP for name, items in lists.items()},
+        "boq_version_token": hashlib.sha256(token_source.encode("utf-8")).hexdigest()[:16],
+    }
+
+
+@router.post(
+    "/boqs/{boq_id}/import/excel/",
+    summary="Import positions from Excel/CSV (deprecated - use /import/auto/)",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def import_boq_excel(
+    boq_id: uuid.UUID,
+    response: Response,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    service: BOQService = Depends(_get_service),
+    delete_missing: bool = Query(
+        False,
+        description=(
+            "Round-trip delete (GitHub #360). When true, positions that "
+            "currently exist in the BOQ but are absent from the uploaded "
+            "sheet are DELETED. Off by default - the response always reports "
+            "how many WOULD be deleted so nothing is ever removed silently."
+        ),
+    ),
+    skip_position_ids: str | None = Form(None, description=_FORM_SKIP_DOC),
+    accept_position_ids: str | None = Form(None, description=_FORM_ACCEPT_DOC),
+    delete_position_ids: str | None = Form(None, description=_FORM_DELETE_DOC),
+    overwrite_conflicts: bool = Form(False, description=_FORM_OVERWRITE_DOC),
+) -> dict[str, Any]:
+    """Import BOQ positions from an Excel or CSV file (round-trip aware).
+
+    .. deprecated::
+        Epic I5 - clients should call ``POST /import/auto/`` and let
+        the dispatcher pick the importer. This route remains supported
+        for backwards compatibility but emits a ``Deprecation: true``
+        response header.
+
+    Accepts a multipart file upload. The file must be .xlsx or .csv.
+
+    Expected columns (all optional except Description):
+    - **Position ID** - the stable UUID an export stamps. A row carrying an
+      id that belongs to THIS BOQ UPDATES that position in place; a blank id
+      CREATES a new position (GitHub #360 round-trip fidelity).
+    - **Pos / Position / Ordinal / Nr.** - position ordinal number
+    - **Description / Beschreibung / Text** - description (required)
+    - **Unit / Einheit / ME** - unit of measurement
+    - **Quantity / Qty / Menge** - quantity
+    - **Unit Rate / Rate / EP / Einheitspreis** - unit rate
+    - **Total** (ignored - auto-calculated from quantity x rate)
+    - **Classification / DIN 276 / KG / NRM / Code** - classification code
+
+    Returns:
+        Summary with counts of created / updated / skipped / deleted (and
+        ``would_delete``), plus per-row errors, warnings and round-trip
+        problems.
+    """
+    # Epic I5: deprecation signal - clients should migrate to /import/auto/.
+    response.headers["Deprecation"] = "true"
+    response.headers["Link"] = '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
+    response.headers["Sunset"] = "Wed, 31 Dec 2026 23:59:59 GMT"
+
+    # Verify BOQ exists AND the caller owns its project (IDOR guard).
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    # Refuse a locked bill up front with the lock's own 409. Past this point
+    # every row write is caught and collected per row, so a lock found there
+    # came back as a row error (or a 200 with nothing imported) instead.
+    await service._ensure_boq_writable(boq_id)
+
+    choices = _read_apply_choices(skip_position_ids, accept_position_ids, delete_position_ids, overwrite_conflicts)
+    content, rows, import_meta, filename = await _read_excel_upload(file)
+
+    prepared, errors, warnings_list, skipped = _prepare_rows(rows, import_meta, file.filename or "")
 
     # ── Round-trip apply (GitHub #360) ────────────────────────────────────
     # Update-in-place on known ids, create on blank/unknown ids, optional
@@ -7456,6 +7794,7 @@ async def import_boq_excel(
         service=service,
         delete_missing=delete_missing,
         actor_id=_user_id,
+        choices=choices,
     )
     created = int(apply_summary["created"])
     updated = int(apply_summary["updated"])
@@ -7499,8 +7838,9 @@ async def import_boq_excel(
     # the client shows "row 2: invalid quantity" rather than a confusing 200
     # with imported=0. Any successful create/update/delete keeps it a 200 with
     # the per-row error list intact.
-    if not created and not updated and not deleted and errors:
-        first = errors[0]
+    hard_errors = [e for e in errors if e.get("error") != "stale_row"]
+    if not created and not updated and not deleted and not apply_summary.get("stale") and hard_errors:
+        first = hard_errors[0]
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(f"Import failed at row {first.get('row', '?')}: {first.get('error', 'unknown error')}"),
@@ -7534,6 +7874,8 @@ async def import_boq_excel(
         "deleted": deleted,
         "would_delete": int(apply_summary["would_delete"]),
         "round_trip": bool(apply_summary["round_trip"]),
+        "kept": int(apply_summary.get("kept", 0)),
+        "stale": int(apply_summary.get("stale", 0)),
         "skipped": skipped,
         "errors": errors,
         "warnings": warnings_list,
@@ -7737,6 +8079,7 @@ async def _persist_imported_boq(
     delete_missing: bool = False,
     actor_id: uuid.UUID | None = None,
     append_on_collision: bool = False,
+    choices: ApplyChoices | None = None,
 ) -> dict[str, Any]:
     """Persist an :class:`ImportedBOQ` via the round-trip differ (GitHub #360).
 
@@ -7764,6 +8107,7 @@ async def _persist_imported_boq(
             {
                 "row_index": int(meta.get("import_row_index", idx) or idx),
                 "position_id": getattr(row, "position_id", None),
+                "row_version": getattr(row, "row_version", None),
                 # Blank ordinals are auto-numbered (parity with the historic
                 # persistence loop); the Excel importer already numbers them.
                 "ordinal": row.ordinal or str(idx),
@@ -7791,6 +8135,7 @@ async def _persist_imported_boq(
         delete_missing=delete_missing,
         actor_id=actor_id,
         document_order=bool(getattr(imported, "document_order", False)),
+        choices=choices,
     )
 
     # Persist parsed markups (GAEB Zuschlagsposition / MarkupItem). The GAEB
@@ -8062,6 +8407,10 @@ async def import_boq_auto(
             "reading."
         ),
     ),
+    skip_position_ids: str | None = Form(None, description=_FORM_SKIP_DOC),
+    accept_position_ids: str | None = Form(None, description=_FORM_ACCEPT_DOC),
+    delete_position_ids: str | None = Form(None, description=_FORM_DELETE_DOC),
+    overwrite_conflicts: bool = Form(False, description=_FORM_OVERWRITE_DOC),
 ) -> dict[str, Any]:
     """Auto-detect a BOQ upload's format and dispatch to the matching importer.
 
@@ -8109,6 +8458,7 @@ async def import_boq_auto(
     from app.modules.boq.importers.excel import column_mapping_warning
 
     overrides = _read_column_mapping(column_mapping)
+    choices = _read_apply_choices(skip_position_ids, accept_position_ids, delete_position_ids, overwrite_conflicts)
 
     head = content[:4096]
     chosen: type | None = None
@@ -8169,6 +8519,7 @@ async def import_boq_auto(
             delete_missing=delete_missing,
             column_mapping=column_mapping,
             force=force,
+            choices=choices.to_json() if choices is not None else None,
         )
         response.status_code = status.HTTP_202_ACCEPTED
         return job
@@ -8182,6 +8533,7 @@ async def import_boq_auto(
         delete_missing=delete_missing,
         actor_id=user_id,
         service=service,
+        choices=choices,
     )
 
 
@@ -8236,6 +8588,7 @@ async def _run_native_import(
     service: BOQService,
     on_phase: Callable[[str], Awaitable[None]] | None = None,
     append_on_collision: bool = False,
+    choices: ApplyChoices | None = None,
 ) -> dict[str, Any]:
     """Read ``content`` with the importer ``chosen`` and write it into the bill: the body of ``/import/auto/``.
 
@@ -8278,14 +8631,20 @@ async def _run_native_import(
         delete_missing=delete_missing,
         actor_id=actor_id,
         append_on_collision=append_on_collision,
+        choices=choices,
     )
     created = int(apply_summary["created"])
     updated = int(apply_summary["updated"])
     deleted = int(apply_summary["deleted"])
     persistence_errors = apply_summary["apply_errors"]
     errors = imported_boq.errors + persistence_errors
-    if not (created + updated + deleted + int(apply_summary["unchanged"])) and errors:
-        first = errors[0]
+    # A row held back as stale is a reported outcome, not a failed import.
+    hard_errors = [e for e in errors if e.get("error") != "stale_row"]
+    if (
+        not (created + updated + deleted + int(apply_summary["unchanged"]) + int(apply_summary.get("stale", 0)))
+        and hard_errors
+    ):
+        first = hard_errors[0]
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -8361,6 +8720,8 @@ async def _run_native_import(
         "deleted": deleted,
         "would_delete": int(apply_summary["would_delete"]),
         "round_trip": bool(apply_summary["round_trip"]),
+        "kept": int(apply_summary.get("kept", 0)),
+        "stale": int(apply_summary.get("stale", 0)),
         "skipped": imported_boq.skipped,
         "errors": imported_boq.errors + persistence_errors,
         "warnings": imported_boq.warnings,

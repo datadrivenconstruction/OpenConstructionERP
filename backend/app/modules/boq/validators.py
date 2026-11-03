@@ -874,6 +874,124 @@ _BOQ_BRANCH_RULES: tuple[ValidationRule, ...] = (
 )
 
 
+# ── Excel round-trip review rules ───────────────────────────────────────────
+#
+# These read ``context.data["roundtrip"]["issues"]``: one dict per finding the
+# round-trip planner or the upload checks produced (``kind``, ``row``,
+# ``position_id``, ``ordinal``). They never reject on their own: the import
+# and preview routes already refuse or demote the row, the rules word the
+# finding in the reader's language with a way forward.
+
+
+def _roundtrip_issues(context: ValidationContext, kind: str) -> list[dict[str, Any]]:
+    data = context.data
+    block = data.get("roundtrip") if isinstance(data, dict) else None
+    issues = block.get("issues") if isinstance(block, dict) else None
+    return [i for i in issues or [] if isinstance(i, dict) and i.get("kind") == kind]
+
+
+class _RoundTripRule(ValidationRule):
+    """One finding per issue of ``kind`` in the round-trip block."""
+
+    kind = ""
+    standard = "universal"
+    category = RuleCategory.CONSISTENCY
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One failed result per issue of this rule's kind."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for issue in _roundtrip_issues(context, self.kind)[:_MAX_CONFLICT_FINDINGS]:
+            ref = str(issue.get("position_id") or "") or None
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        f"boq_roundtrip.{self.kind}.fail",
+                        locale,
+                        row=issue.get("row", ""),
+                        ordinal=str(issue.get("ordinal") or ""),
+                    ),
+                    element_ref=ref,
+                    suggestion=translate(f"boq_roundtrip.{self.kind}.suggestion", locale),
+                    details={"row": issue.get("row"), "position_id": issue.get("position_id")},
+                )
+            )
+        return results
+
+
+class RoundTripFormulaInId(_RoundTripRule):
+    """An id cell that starts like a spreadsheet formula is never imported."""
+
+    rule_id = "boq.roundtrip.formula_in_id"
+    kind = "formula_in_id"
+    name = "Position ID cell is not a formula"
+    severity = Severity.ERROR
+    description = "A Position ID starting with =, +, - or @ would run as a formula when the sheet is reopened."
+
+
+class RoundTripUnknownId(_RoundTripRule):
+    """An id from another bill never updates this one."""
+
+    rule_id = "boq.roundtrip.unknown_id"
+    kind = "unknown_id"
+    name = "Position ID belongs to this bill"
+    severity = Severity.WARNING
+    description = "A row carrying an id that is not in this bill is imported as a new position."
+
+
+class RoundTripDuplicateId(_RoundTripRule):
+    """Two rows cannot both update one position."""
+
+    rule_id = "boq.roundtrip.duplicate_id"
+    kind = "duplicate_id"
+    name = "Position ID appears once"
+    severity = Severity.WARNING
+    description = "The first row with an id updates the position, later rows with it become new positions."
+
+
+class RoundTripStaleRow(_RoundTripRule):
+    """The position changed in the app after the sheet was exported."""
+
+    rule_id = "boq.roundtrip.stale_row"
+    kind = "stale_row"
+    name = "Sheet row is not older than the app"
+    severity = Severity.ERROR
+    description = "A row exported at an older version would silently overwrite a newer edit made in the app."
+
+
+class RoundTripLockedBoq(_RoundTripRule):
+    """A locked bill takes no changes."""
+
+    rule_id = "boq.roundtrip.locked_boq"
+    kind = "locked_boq"
+    name = "Bill is open for changes"
+    severity = Severity.ERROR
+    description = "Changes from Excel cannot be applied to a locked bill."
+
+
+_BOQ_ROUNDTRIP_RULES: tuple[ValidationRule, ...] = (
+    RoundTripFormulaInId(),
+    RoundTripUnknownId(),
+    RoundTripDuplicateId(),
+    RoundTripStaleRow(),
+    RoundTripLockedBoq(),
+)
+
+
+async def evaluate_roundtrip(issues: list[dict[str, Any]], locale: str = DEFAULT_LOCALE) -> list[RuleResult]:
+    """Run the round-trip rules over the issues of one review; the failed results."""
+    context = ValidationContext(data={"roundtrip": {"issues": issues}}, metadata={"locale": locale})
+    out: list[RuleResult] = []
+    for rule in _BOQ_ROUNDTRIP_RULES:
+        out.extend(r for r in await rule.validate(context) if not r.passed)
+    return out
+
+
 def register_boq_markup_rules() -> None:
     """Register the markup rules with the core rule registry.
 
@@ -895,6 +1013,13 @@ def register_boq_resource_rules() -> None:
     logger.debug("Registered %d boq resource validation rules", len(_BOQ_RESOURCE_RULES))
 
 
+def register_boq_roundtrip_rules() -> None:
+    """Register the Excel round-trip rules under the same universal set."""
+    for rule in _BOQ_ROUNDTRIP_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq round-trip validation rules", len(_BOQ_ROUNDTRIP_RULES))
+
+
 def register_boq_branch_rules() -> None:
     """Register the estimate-branch rules under the same universal set."""
     for rule in _BOQ_BRANCH_RULES:
@@ -905,3 +1030,4 @@ def register_boq_branch_rules() -> None:
 register_boq_markup_rules()
 register_boq_resource_rules()
 register_boq_branch_rules()
+register_boq_roundtrip_rules()
