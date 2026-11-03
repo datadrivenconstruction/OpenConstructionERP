@@ -3038,6 +3038,8 @@ class RiskContingencyStatus(BaseModel):
     drift_amount: str | None = None
     drift_pct: float | None = None
     current_fingerprint: str | None = None
+    #: Why no suggestion could be made for the requested source and mode.
+    suggestion_error: str | None = None
 
 
 class ApplyRiskContingencyRequest(BaseModel):
