@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Ang mga pagbabago sa subcontract para sa {code} ay may kabuuang {sub_total}, mas mataas kaysa sa halaga ng pagbabago ng may-ari na {owner_value}",
       "suggestion": "Suriin ang presyo ng subcontractor o singilin ang pagkakaiba sa may-ari bago aprubahan"
+    },
+    "owner_change_approved": {
+      "fail": "Ang pagbabago sa subcontract na {code} ay nagpapasa ng pagbabago ng may-ari na '{status}' pa rin ang status",
+      "suggestion": "Aprubahan muna ang pagbabago ng may-ari, o alisin ang back-to-back flag"
+    },
+    "notice_window": {
+      "fail": "Ang pagbabago sa subcontract na {code} ay naipaalam {late} araw pagkatapos ng {days}-araw na palugit sa kasunduan",
+      "suggestion": "Suriin ang mga tuntunin ng abiso bago tanggapin ang gastos: ang huling abiso ay maaaring magpawalang-bisa sa claim"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Walang naka-link na scope item ang submittal na ito, kaya hindi ito maisasama sa anumang package",
       "suggestion": "I-link ang mga BOQ item na sakop ng submittal na ito"
+    },
+    "spec_section_format": {
+      "fail": "Ang seksyon {section} ay hindi kilalang numero ng seksyon",
+      "suggestion": "Gumamit ng MasterFormat na numero tulad ng 03 30 00, o LB o NBS na code"
+    },
+    "duplicate_in_register": {
+      "fail": "Nasa rehistro na ang {title} para sa seksyon {section}",
+      "suggestion": "Laktawan ang mungkahing ito o baguhin ito para maging ibang dokumentong isusumite para sa pag-apruba"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Karaniwang kailangan ng seksyon {section} ng dokumentong isusumite para sa pag-apruba na uri {kind}, na wala sa specification",
+      "suggestion": "Suriin ang specification, o idagdag nang mano-mano ang dokumento"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Walang mabasang numero ng sheet ang pahina {page}",
+      "suggestion": "Ilagay ang numero ng sheet mula sa title block"
+    },
+    "number_unique_in_set": {
+      "fail": "Ang numero ng sheet na {sheet} ay lumalabas sa {count} pahina ng upload na ito",
+      "suggestion": "Suriin ang set ng mga drawing kung may doble o maling numero na pahina"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Mas mababa ang revision {revision} ng sheet {sheet} kaysa sa kasalukuyang revision {current}",
+      "suggestion": "Tiyaking mas lumang isyu ito bago idagdag sa kasaysayan"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Nabasa ang sheet {sheet} sa pamamagitan ng text recognition na may {confidence} at hindi pa kumpirmado",
+      "suggestion": "Suriin ang mga field ng title block at kumpirmahin ang pagkakabasa"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Walang seksyon ng specification na nabasa mula sa {pages} pahina",
+      "suggestion": "Kung scan ang aklat, patakbuhing muli ang import nang naka-on ang text recognition; kung hindi, tingnan kung ganito ang hitsura ng mga header ng seksyon: SECTION 03 30 00 - Title"
     }
   }
 }

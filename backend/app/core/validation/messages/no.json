@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprisendringene for {code} utgjør til sammen {sub_total}, mer enn byggherrens endringsverdi {owner_value}",
       "suggestion": "Kontroller underentreprenørens priser, eller krev differansen fra byggherren før godkjenning"
+    },
+    "owner_change_approved": {
+      "fail": "Underentreprise-endring {code} videreformidler en byggherreendring som fortsatt har status '{status}'",
+      "suggestion": "Godkjenn byggherreendringen først, eller fjern back-to-back-merkingen"
+    },
+    "notice_window": {
+      "fail": "Underentreprise-endring {code} ble varslet {late} dager etter fristen på {days} dager i avtalen",
+      "suggestion": "Sjekk varslingsvilkårene før kostnaden godtas: for sent varsel kan føre til at kravet faller bort"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Det innsendte materialet er ikke knyttet til noen arbeidspost og blir derfor aldri samlet under en pakke",
       "suggestion": "Knytt til postene i mengdefortegnelsen som materialet omfatter"
+    },
+    "spec_section_format": {
+      "fail": "Avsnitt {section} er ikke et gjenkjent avsnittsnummer",
+      "suggestion": "Bruk et MasterFormat-nummer som 03 30 00, eller en LB- eller NBS-kode"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} for avsnitt {section} finnes allerede i registeret",
+      "suggestion": "Hopp over forslaget, eller rediger det slik at det blir et annet godkjenningsdokument"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Avsnitt {section} krever normalt et godkjenningsdokument av typen {kind}, som beskrivelsen ikke nevner",
+      "suggestion": "Sjekk beskrivelsen, eller legg til godkjenningsdokumentet manuelt"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Side {page} har ikke noe lesbart tegningsnummer",
+      "suggestion": "Skriv inn tegningsnummeret fra tegningshodet"
+    },
+    "number_unique_in_set": {
+      "fail": "Tegningsnummer {sheet} forekommer på {count} sider i denne opplastingen",
+      "suggestion": "Sjekk tegningssettet for en duplisert eller feilnummerert side"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revisjon {revision} av tegning {sheet} er lavere enn gjeldende revisjon {current}",
+      "suggestion": "Bekreft at dette er en eldre utgave før den legges inn i historikken"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Tegning {sheet} ble lest med tekstgjenkjenning på {confidence} og er ikke bekreftet",
+      "suggestion": "Sjekk feltene i tegningshodet og bekreft avlesningen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Ingen avsnitt i beskrivelsen kunne leses fra {pages} sider",
+      "suggestion": "Hvis boken er skannet, kjør importen på nytt med tekstgjenkjenning på; ellers sjekk at avsnittsoverskriftene ser ut som SECTION 03 30 00 - Title"
     }
   }
 }

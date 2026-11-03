@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Zmiany podwykonawcze dla {code} wynoszą razem {sub_total}, więcej niż wartość zmiany inwestora {owner_value}",
       "suggestion": "Sprawdź ceny podwykonawcy lub odzyskaj różnicę od inwestora przed zatwierdzeniem"
+    },
+    "owner_change_approved": {
+      "fail": "Zmiana podwykonawcza {code} przenosi zmianę inwestora, która nadal ma status '{status}'",
+      "suggestion": "Najpierw zatwierdź zmianę inwestora albo usuń znacznik back-to-back"
+    },
+    "notice_window": {
+      "fail": "Zmiana podwykonawcza {code} została zgłoszona {late} dni po terminie {days} dni określonym w umowie",
+      "suggestion": "Sprawdź warunki zgłaszania przed przyjęciem kosztu: spóźnione zgłoszenie może wykluczyć roszczenie"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "To przedłożenie techniczne nie jest powiązane z żadną pozycją zakresu, więc nie jest uwzględniane w zestawieniu pakietu",
       "suggestion": "Powiąż pozycje przedmiaru objęte tym przedłożeniem"
+    },
+    "spec_section_format": {
+      "fail": "Dział {section} nie jest rozpoznanym numerem działu",
+      "suggestion": "Użyj numeru MasterFormat, np. 03 30 00, albo kodu LB lub NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} dla działu {section} jest już w rejestrze",
+      "suggestion": "Pomiń tę propozycję lub zmień ją tak, aby był to inny dokument do zatwierdzenia"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Dział {section} zwykle wymaga dokumentu do zatwierdzenia rodzaju {kind}, którego nie ma w specyfikacji",
+      "suggestion": "Sprawdź specyfikację albo dodaj dokument ręcznie"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Strona {page} nie ma czytelnego numeru arkusza",
+      "suggestion": "Wpisz numer arkusza z tabliczki rysunkowej"
+    },
+    "number_unique_in_set": {
+      "fail": "Numer arkusza {sheet} występuje na {count} stronach tego wgrania",
+      "suggestion": "Sprawdź komplet rysunków pod kątem zdublowanej lub błędnie ponumerowanej strony"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Rewizja {revision} arkusza {sheet} jest niższa niż bieżąca rewizja {current}",
+      "suggestion": "Potwierdź, że to starsze wydanie, zanim trafi do historii"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Arkusz {sheet} odczytano rozpoznawaniem tekstu z wynikiem {confidence} i nie został potwierdzony",
+      "suggestion": "Sprawdź pola tabliczki rysunkowej i potwierdź odczyt"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Z {pages} stron nie udało się odczytać żadnego działu specyfikacji",
+      "suggestion": "Jeśli to skan, powtórz import z włączonym rozpoznawaniem tekstu; w przeciwnym razie sprawdź, czy nagłówki działów mają postać SECTION 03 30 00 - Title"
     }
   }
 }

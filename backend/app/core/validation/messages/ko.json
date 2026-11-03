@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code}의 하도급 변경 합계 {sub_total}이(가) 발주자 변경 금액 {owner_value}보다 큽니다",
       "suggestion": "승인 전에 하도급 단가를 확인하거나 차액을 발주자에게 청구하세요"
+    },
+    "owner_change_approved": {
+      "fail": "하도급 변경 {code}이(가) 아직 '{status}' 상태인 발주자 변경을 그대로 넘기고 있습니다",
+      "suggestion": "먼저 발주자 변경을 승인하거나 back-to-back 표시를 해제하세요"
+    },
+    "notice_window": {
+      "fail": "하도급 변경 {code}이(가) 계약상 {days}일 기한보다 {late}일 늦게 통지되었습니다",
+      "suggestion": "비용을 인정하기 전에 통지 조건을 확인하세요. 늦은 통지는 청구권을 잃게 할 수 있습니다"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "이 승인 요청 자료가 범위 항목에 연결되어 있지 않아 패키지에 집계되지 않습니다",
       "suggestion": "이 자료가 다루는 내역서 항목을 연결하세요"
+    },
+    "spec_section_format": {
+      "fail": "섹션 {section}은(는) 인식 가능한 섹션 번호가 아닙니다",
+      "suggestion": "03 30 00 같은 MasterFormat 번호 또는 LB나 NBS 코드를 사용하세요"
+    },
+    "duplicate_in_register": {
+      "fail": "섹션 {section}의 {title}이(가) 이미 대장에 있습니다",
+      "suggestion": "이 제안을 건너뛰거나 다른 승인 제출물이 되도록 수정하세요"
+    },
+    "required_type_missing_for_section": {
+      "fail": "섹션 {section}에는 보통 {kind} 종류의 승인 제출물이 필요한데 시방서에 나와 있지 않습니다",
+      "suggestion": "시방서를 확인하거나 승인 제출물을 직접 추가하세요"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "{page}페이지에 읽을 수 있는 도면 번호가 없습니다",
+      "suggestion": "표제란의 도면 번호를 입력하세요"
+    },
+    "number_unique_in_set": {
+      "fail": "도면 번호 {sheet}이(가) 이번 업로드의 {count}개 페이지에 나옵니다",
+      "suggestion": "도면 세트에 중복되거나 번호가 잘못된 페이지가 있는지 확인하세요"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "도면 {sheet}의 개정 {revision}이(가) 현재 개정 {current}보다 낮습니다",
+      "suggestion": "이력에 쌓기 전에 이전 발행본이 맞는지 확인하세요"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "도면 {sheet}은(는) 문자 인식으로 {confidence} 수준에서 읽혔고 아직 확인되지 않았습니다",
+      "suggestion": "표제란 항목을 확인하고 읽은 결과를 확정하세요"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages}페이지에서 시방서 섹션을 하나도 읽지 못했습니다",
+      "suggestion": "스캔본이면 문자 인식을 켜고 가져오기를 다시 실행하세요. 아니면 섹션 제목이 SECTION 03 30 00 - Title 형식인지 확인하세요"
     }
   }
 }

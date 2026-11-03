@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} के सबकॉन्ट्रैक्ट बदलावों का कुल {sub_total} है, जो मालिक के बदलाव मूल्य {owner_value} से अधिक है",
       "suggestion": "मंज़ूरी से पहले सबकॉन्ट्रैक्टर की कीमतें जाँचें या अंतर मालिक से वसूलें"
+    },
+    "owner_change_approved": {
+      "fail": "सब-कॉन्ट्रैक्ट बदलाव {code} मालिक का ऐसा बदलाव आगे बढ़ाता है जो अभी '{status}' स्थिति में है",
+      "suggestion": "पहले मालिक का बदलाव मंज़ूर करें, या back-to-back फ़्लैग हटाएँ"
+    },
+    "notice_window": {
+      "fail": "सब-कॉन्ट्रैक्ट बदलाव {code} की सूचना करार की {days} दिन की अवधि के {late} दिन बाद दी गई",
+      "suggestion": "लागत स्वीकार करने से पहले सूचना की शर्तें जाँचें; देर से दी गई सूचना से दावा खारिज हो सकता है"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "यह प्रस्तुति किसी कार्य-क्षेत्र मद से जुड़ी नहीं है, इसलिए किसी पैकेज में सम्मिलित नहीं होती",
       "suggestion": "इस प्रस्तुति से संबंधित मात्रा-सूची मदें जोड़ें"
+    },
+    "spec_section_format": {
+      "fail": "सेक्शन {section} पहचाना हुआ सेक्शन नंबर नहीं है",
+      "suggestion": "03 30 00 जैसा MasterFormat नंबर, या LB या NBS कोड इस्तेमाल करें"
+    },
+    "duplicate_in_register": {
+      "fail": "सेक्शन {section} के लिए {title} रजिस्टर में पहले से है",
+      "suggestion": "इस प्रस्ताव को छोड़ दें या बदलें ताकि यह मंज़ूरी का कोई अलग दस्तावेज़ बने"
+    },
+    "required_type_missing_for_section": {
+      "fail": "सेक्शन {section} को आम तौर पर {kind} प्रकार का मंज़ूरी दस्तावेज़ चाहिए, जो विनिर्देश में दर्ज नहीं है",
+      "suggestion": "विनिर्देश जाँचें या दस्तावेज़ हाथ से जोड़ें"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "पृष्ठ {page} पर पढ़ने योग्य शीट नंबर नहीं है",
+      "suggestion": "टाइटल ब्लॉक से शीट नंबर दर्ज करें"
+    },
+    "number_unique_in_set": {
+      "fail": "शीट नंबर {sheet} इस अपलोड के {count} पृष्ठों पर आता है",
+      "suggestion": "ड्रॉइंग सेट में दोहराया या ग़लत नंबर वाला पृष्ठ जाँचें"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "शीट {sheet} का रिविज़न {revision} मौजूदा रिविज़न {current} से कम है",
+      "suggestion": "इतिहास में जोड़ने से पहले पुष्टि करें कि यह पुराना जारी संस्करण है"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "शीट {sheet} को टेक्स्ट पहचान से {confidence} पर पढ़ा गया और पुष्टि नहीं हुई है",
+      "suggestion": "टाइटल ब्लॉक के फ़ील्ड जाँचें और पढ़े गए मान की पुष्टि करें"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} पृष्ठों से विनिर्देश का कोई सेक्शन नहीं पढ़ा जा सका",
+      "suggestion": "अगर किताब स्कैन की हुई है तो टेक्स्ट पहचान चालू करके इम्पोर्ट दोबारा चलाएँ; नहीं तो जाँचें कि सेक्शन शीर्षक SECTION 03 30 00 - Title जैसे दिखते हैं"
     }
   }
 }

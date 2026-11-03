@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "การเปลี่ยนแปลงผู้รับเหมาช่วงของ {code} รวม {sub_total} มากกว่ามูลค่าการเปลี่ยนแปลงของเจ้าของโครงการ {owner_value}",
       "suggestion": "ตรวจราคาผู้รับเหมาช่วง หรือเรียกเก็บส่วนต่างจากเจ้าของโครงการก่อนอนุมัติ"
+    },
+    "owner_change_approved": {
+      "fail": "การเปลี่ยนแปลงสัญญาผู้รับเหมาช่วง {code} ส่งต่อการเปลี่ยนแปลงของเจ้าของงานที่ยังอยู่ในสถานะ '{status}'",
+      "suggestion": "อนุมัติการเปลี่ยนแปลงของเจ้าของงานก่อน หรือเอาเครื่องหมาย back-to-back ออก"
+    },
+    "notice_window": {
+      "fail": "การเปลี่ยนแปลงสัญญาผู้รับเหมาช่วง {code} แจ้งช้ากว่ากรอบ {days} วันในสัญญา {late} วัน",
+      "suggestion": "ตรวจเงื่อนไขการแจ้งก่อนรับต้นทุน การแจ้งล่าช้าอาจทำให้สิทธิเรียกร้องหมดไป"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "เอกสารเสนออนุมัตินี้ไม่เชื่อมกับรายการขอบเขตงานใด จึงไม่ถูกรวมในชุดงาน",
       "suggestion": "เชื่อมโยงรายการบัญชีปริมาณงานที่เอกสารนี้ครอบคลุม"
+    },
+    "spec_section_format": {
+      "fail": "หมวด {section} ไม่ใช่เลขหมวดที่รู้จัก",
+      "suggestion": "ใช้เลข MasterFormat เช่น 03 30 00 หรือรหัส LB หรือ NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} ของหมวด {section} มีอยู่ในทะเบียนแล้ว",
+      "suggestion": "ข้ามข้อเสนอนี้ หรือแก้ไขให้เป็นเอกสารขออนุมัติอื่น"
+    },
+    "required_type_missing_for_section": {
+      "fail": "หมวด {section} มักต้องมีเอกสารขออนุมัติประเภท {kind} ซึ่งข้อกำหนดไม่ได้ระบุไว้",
+      "suggestion": "ตรวจข้อกำหนด หรือเพิ่มเอกสารขออนุมัติด้วยมือ"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "หน้า {page} ไม่มีเลขแผ่นที่อ่านได้",
+      "suggestion": "กรอกเลขแผ่นจากตารางมุมแบบ"
+    },
+    "number_unique_in_set": {
+      "fail": "เลขแผ่น {sheet} ปรากฏบน {count} หน้าในการอัปโหลดนี้",
+      "suggestion": "ตรวจชุดแบบว่ามีหน้าซ้ำหรือเลขผิดหรือไม่"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "ฉบับแก้ไข {revision} ของแผ่น {sheet} ต่ำกว่าฉบับปัจจุบัน {current}",
+      "suggestion": "ยืนยันว่าเป็นฉบับเก่ากว่าก่อนเพิ่มเข้าประวัติ"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "แผ่น {sheet} ถูกอ่านด้วยการรู้จำข้อความที่ {confidence} และยังไม่ได้ยืนยัน",
+      "suggestion": "ตรวจช่องในตารางมุมแบบและยืนยันค่าที่อ่านได้"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "อ่านหมวดข้อกำหนดไม่ได้เลยจาก {pages} หน้า",
+      "suggestion": "ถ้าเล่มเป็นไฟล์สแกน ให้นำเข้าใหม่โดยเปิดการรู้จำข้อความ มิฉะนั้นตรวจว่าหัวข้อหมวดมีรูปแบบ SECTION 03 30 00 - Title"
     }
   }
 }

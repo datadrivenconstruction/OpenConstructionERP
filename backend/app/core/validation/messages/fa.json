@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "اصلاحیه‌های پیمانکار دست‌دوم برای {code} مجموعاً {sub_total} است که از ارزش تغییر کارفرما یعنی {owner_value} بیشتر است",
       "suggestion": "پیش از تأیید، قیمت‌های پیمانکار دست‌دوم را بررسی کنید یا مابه‌التفاوت را از کارفرما دریافت کنید"
+    },
+    "owner_change_approved": {
+      "fail": "اصلاحیه پیمان پیمانکار دست‌دوم {code} تغییری از کارفرما را منتقل می‌کند که هنوز در وضعیت '{status}' است",
+      "suggestion": "ابتدا تغییر کارفرما را تأیید کنید یا نشانه back-to-back را بردارید"
+    },
+    "notice_window": {
+      "fail": "اصلاحیه پیمان پیمانکار دست‌دوم {code} با {late} روز تأخیر پس از مهلت {days} روزهٔ قرارداد اعلام شد",
+      "suggestion": "پیش از پذیرش هزینه، شرایط اعلام را بررسی کنید؛ اعلام دیرهنگام ممکن است حق مطالبه را از بین ببرد"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "این مدرک ارسالی به هیچ قلم دامنه کار پیوند ندارد؛ بنابراین در هیچ بسته‌ای تجمیع نمی‌شود",
       "suggestion": "ردیف‌های صورت مقادیر تحت پوشش این مدرک را پیوند دهید"
+    },
+    "spec_section_format": {
+      "fail": "بخش {section} شمارهٔ بخش معتبری نیست",
+      "suggestion": "از شماره‌ای مانند 03 30 00 در MasterFormat یا کد LB یا NBS استفاده کنید"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} برای بخش {section} از قبل در دفتر ثبت وجود دارد",
+      "suggestion": "این پیشنهاد را رد کنید یا طوری ویرایش کنید که مدرک دیگری برای تأیید باشد"
+    },
+    "required_type_missing_for_section": {
+      "fail": "بخش {section} معمولاً به مدرک تأییدی از نوع {kind} نیاز دارد که در مشخصات فنی نیامده است",
+      "suggestion": "مشخصات فنی را بررسی کنید یا مدرک را دستی اضافه کنید"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "صفحهٔ {page} شمارهٔ نقشهٔ خوانایی ندارد",
+      "suggestion": "شمارهٔ نقشه را از جدول مشخصات نقشه وارد کنید"
+    },
+    "number_unique_in_set": {
+      "fail": "شمارهٔ نقشهٔ {sheet} در {count} صفحه از این بارگذاری آمده است",
+      "suggestion": "مجموعه نقشه را از نظر صفحهٔ تکراری یا شماره‌گذاری اشتباه بررسی کنید"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "بازنگری {revision} نقشهٔ {sheet} پایین‌تر از بازنگری فعلی {current} است",
+      "suggestion": "پیش از افزودن به تاریخچه، تأیید کنید که نسخهٔ قدیمی‌تر است"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "نقشهٔ {sheet} با تشخیص متن و با {confidence} خوانده شد و تأیید نشده است",
+      "suggestion": "فیلدهای جدول مشخصات نقشه را بررسی و خوانش را تأیید کنید"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "از {pages} صفحه هیچ بخشی از مشخصات فنی خوانده نشد",
+      "suggestion": "اگر کتاب اسکن است، درون‌ریزی را با تشخیص متن روشن دوباره اجرا کنید؛ وگرنه بررسی کنید عنوان بخش‌ها به شکل SECTION 03 30 00 - Title باشد"
     }
   }
 }

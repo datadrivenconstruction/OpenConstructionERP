@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "A(z) {code} alvállalkozói módosításai összesen {sub_total}, ami több, mint a megrendelői módosítás értéke ({owner_value})",
       "suggestion": "Ellenőrizze az alvállalkozó árait, vagy jóváhagyás előtt hárítsa a különbözetet a megrendelőre"
+    },
+    "owner_change_approved": {
+      "fail": "A {code} alvállalkozói módosítás olyan megrendelői módosítást ad tovább, amelynek állapota még '{status}'",
+      "suggestion": "Először hagyja jóvá a megrendelői módosítást, vagy törölje a back-to-back jelölést"
+    },
+    "notice_window": {
+      "fail": "A {code} alvállalkozói módosítást {late} nappal a szerződés szerinti {days} napos határidő után jelezték",
+      "suggestion": "A költség elfogadása előtt ellenőrizze a bejelentési feltételeket: a késői bejelentés elvesztheti az igényt"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "A benyújtandó dokumentáció nincs munkatartalmi tételhez kapcsolva, így nem összesíthető munkacsomaghoz",
       "suggestion": "Kapcsolja hozzá az érintett költségvetési tételeket"
+    },
+    "spec_section_format": {
+      "fail": "A(z) {section} szakasz nem felismerhető szakaszszám",
+      "suggestion": "Használjon MasterFormat-számot, például 03 30 00, vagy LB- vagy NBS-kódot"
+    },
+    "duplicate_in_register": {
+      "fail": "A(z) {section} szakaszhoz tartozó {title} már szerepel a nyilvántartásban",
+      "suggestion": "Hagyja ki ezt a javaslatot, vagy módosítsa úgy, hogy másik jóváhagyandó dokumentum legyen"
+    },
+    "required_type_missing_for_section": {
+      "fail": "A(z) {section} szakasz általában {kind} típusú jóváhagyandó dokumentumot igényel, amelyet a leírás nem sorol fel",
+      "suggestion": "Ellenőrizze a leírást, vagy adja hozzá a dokumentumot kézzel"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "A(z) {page}. oldalon nincs olvasható rajzszám",
+      "suggestion": "Adja meg a rajzszámot a rajzfejből"
+    },
+    "number_unique_in_set": {
+      "fail": "A(z) {sheet} rajzszám {count} oldalon szerepel ebben a feltöltésben",
+      "suggestion": "Ellenőrizze a rajzkészletet: lehet, hogy az oldal kétszer szerepel vagy rosszul van számozva"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "A(z) {sheet} rajz {revision} módosítási jelzése alacsonyabb a jelenlegi {current} jelzésnél",
+      "suggestion": "Erősítse meg, hogy régebbi kiadásról van szó, mielőtt bekerül az előzményekbe"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "A(z) {sheet} rajzot szövegfelismeréssel olvasta be a rendszer {confidence} értékkel, és nincs megerősítve",
+      "suggestion": "Ellenőrizze a rajzfej mezőit, és erősítse meg a beolvasást"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} oldalból egyetlen leírási szakasz sem volt olvasható",
+      "suggestion": "Ha a könyv szkennelt, futtassa újra az importot bekapcsolt szövegfelismeréssel; egyébként ellenőrizze, hogy a szakaszfejlécek így néznek ki: SECTION 03 30 00 - Title"
     }
   }
 }

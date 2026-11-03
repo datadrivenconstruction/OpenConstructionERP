@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} کی سب کنٹریکٹ تبدیلیوں کا کل {sub_total} ہے، جو مالک کی تبدیلی کی مالیت {owner_value} سے زیادہ ہے",
       "suggestion": "منظوری سے پہلے سب کنٹریکٹر کی قیمتیں جانچیں یا فرق مالک سے وصول کریں"
+    },
+    "owner_change_approved": {
+      "fail": "سب کنٹریکٹ تبدیلی {code} مالک کی ایسی تبدیلی آگے بڑھاتی ہے جو ابھی '{status}' حالت میں ہے",
+      "suggestion": "پہلے مالک کی تبدیلی منظور کریں، یا back-to-back کا نشان ہٹا دیں"
+    },
+    "notice_window": {
+      "fail": "سب کنٹریکٹ تبدیلی {code} کی اطلاع معاہدے کی {days} دن کی مدت کے {late} دن بعد دی گئی",
+      "suggestion": "لاگت قبول کرنے سے پہلے اطلاع کی شرائط دیکھیں، دیر سے اطلاع دعوے کو ختم کر سکتی ہے"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "یہ جمع کردہ دستاویز کام کے کسی آئٹم سے منسلک نہیں، اس لیے کسی پیکیج کے مجموعے میں نہیں آتی",
       "suggestion": "اس دستاویز میں شامل BOQ آئٹمز منسلک کریں"
+    },
+    "spec_section_format": {
+      "fail": "سیکشن {section} پہچانا ہوا سیکشن نمبر نہیں ہے",
+      "suggestion": "03 30 00 جیسا MasterFormat نمبر، یا LB یا NBS کوڈ استعمال کریں"
+    },
+    "duplicate_in_register": {
+      "fail": "سیکشن {section} کے لیے {title} پہلے ہی رجسٹر میں موجود ہے",
+      "suggestion": "اس تجویز کو چھوڑ دیں یا اس میں ایسی ترمیم کریں کہ یہ منظوری کی کوئی اور دستاویز بنے"
+    },
+    "required_type_missing_for_section": {
+      "fail": "سیکشن {section} کو عموماً {kind} نوعیت کی منظوری کی دستاویز درکار ہوتی ہے جو تفصیلات میں درج نہیں",
+      "suggestion": "تفصیلات (specification) دیکھیں یا دستاویز ہاتھ سے شامل کریں"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "صفحہ {page} پر شیٹ نمبر پڑھنے کے قابل نہیں",
+      "suggestion": "ٹائٹل بلاک سے شیٹ نمبر درج کریں"
+    },
+    "number_unique_in_set": {
+      "fail": "شیٹ نمبر {sheet} اس اپ لوڈ کے {count} صفحات پر آتا ہے",
+      "suggestion": "ڈرائنگ سیٹ میں دہرایا ہوا یا غلط نمبر والا صفحہ تلاش کریں"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "شیٹ {sheet} کی ریویژن {revision} موجودہ ریویژن {current} سے کم ہے",
+      "suggestion": "تاریخچے میں شامل کرنے سے پہلے تصدیق کریں کہ یہ پرانا اجرا ہے"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "شیٹ {sheet} ٹیکسٹ ریکگنیشن سے {confidence} پر پڑھی گئی اور اس کی تصدیق نہیں ہوئی",
+      "suggestion": "ٹائٹل بلاک کے خانے دیکھیں اور پڑھے گئے متن کی تصدیق کریں"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} صفحات سے تفصیلات کا کوئی سیکشن نہیں پڑھا جا سکا",
+      "suggestion": "اگر کتاب سکین شدہ ہے تو ٹیکسٹ ریکگنیشن آن کر کے امپورٹ دوبارہ چلائیں، ورنہ دیکھیں کہ سیکشن کی سرخیاں SECTION 03 30 00 - Title کی شکل میں ہیں"
     }
   }
 }

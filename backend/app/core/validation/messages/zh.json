@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} 的分包变更合计 {sub_total},高于业主变更价值 {owner_value}",
       "suggestion": "批准前请核对分包单价,或向业主追回差额"
+    },
+    "owner_change_approved": {
+      "fail": "分包变更 {code} 传递了仍处于“{status}”状态的业主变更",
+      "suggestion": "请先批准业主变更，或取消 back-to-back 标记"
+    },
+    "notice_window": {
+      "fail": "分包变更 {code} 的通知比合同规定的 {days} 天期限晚了 {late} 天",
+      "suggestion": "接受费用前请先核对通知条款，逾期通知可能导致索赔失效"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "此报审资料未关联任何工作范围项，因此无法归集到工作包。",
       "suggestion": "请关联此报审资料涵盖的工程量清单项。"
+    },
+    "spec_section_format": {
+      "fail": "规范章节 {section} 不是可识别的章节编号",
+      "suggestion": "请使用 MasterFormat 编号（如 03 30 00）或 LB、NBS 代码"
+    },
+    "duplicate_in_register": {
+      "fail": "章节 {section} 的 {title} 已在台账中",
+      "suggestion": "请跳过此建议，或修改为另一份报审资料"
+    },
+    "required_type_missing_for_section": {
+      "fail": "章节 {section} 通常需要 {kind} 类报审资料，但规范中未列出",
+      "suggestion": "请核对规范，或手工添加该报审资料"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "第 {page} 页没有可识别的图号",
+      "suggestion": "请从图签中录入图号"
+    },
+    "number_unique_in_set": {
+      "fail": "图号 {sheet} 在本次上传的 {count} 页中出现",
+      "suggestion": "请检查图纸集中是否有重复或编号错误的页面"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "图纸 {sheet} 的版次 {revision} 低于当前版次 {current}",
+      "suggestion": "请先确认这是较早版本，再将其计入历史"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "图纸 {sheet} 经文字识别读取，置信度 {confidence}，尚未确认",
+      "suggestion": "请核对图签各字段并确认识别结果"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "在 {pages} 页中未能读取到任何规范章节",
+      "suggestion": "若文件是扫描件，请开启文字识别后重新导入；否则请检查章节标题是否形如 SECTION 03 30 00 - Title"
     }
   }
 }

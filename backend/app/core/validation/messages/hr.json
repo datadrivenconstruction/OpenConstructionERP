@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Izmjene podugovora za {code} iznose ukupno {sub_total}, više od vrijednosti izmjene naručitelja {owner_value}",
       "suggestion": "Provjerite cijene podizvođača ili naplatite razliku od naručitelja prije odobrenja"
+    },
+    "owner_change_approved": {
+      "fail": "Izmjena podugovora {code} prenosi izmjenu naručitelja koja je još u statusu '{status}'",
+      "suggestion": "Prvo odobrite izmjenu naručitelja ili uklonite oznaku back-to-back"
+    },
+    "notice_window": {
+      "fail": "Izmjena podugovora {code} prijavljena je {late} dana nakon roka od {days} dana iz ugovora",
+      "suggestion": "Provjerite uvjete obavještavanja prije prihvaćanja troška: zakašnjela prijava može isključiti zahtjev"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Ovaj podnesak nije povezan ni s jednom stavkom opsega, pa se ne objedinjuje ni u jedan paket",
       "suggestion": "Povežite stavke troškovnika koje ovaj podnesak pokriva"
+    },
+    "spec_section_format": {
+      "fail": "Odjeljak {section} nije prepoznat broj odjeljka",
+      "suggestion": "Koristite MasterFormat broj poput 03 30 00 ili LB odnosno NBS šifru"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} za odjeljak {section} već je u registru",
+      "suggestion": "Preskočite ovaj prijedlog ili ga izmijenite tako da bude drugi dokument za odobrenje"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Odjeljak {section} obično traži dokument za odobrenje vrste {kind}, kojeg specifikacija ne navodi",
+      "suggestion": "Provjerite specifikaciju ili dodajte dokument ručno"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Stranica {page} nema čitljiv broj nacrta",
+      "suggestion": "Unesite broj nacrta iz zaglavlja nacrta"
+    },
+    "number_unique_in_set": {
+      "fail": "Broj nacrta {sheet} pojavljuje se na {count} stranica ovog učitavanja",
+      "suggestion": "Provjerite komplet nacrta zbog udvojene ili pogrešno numerirane stranice"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revizija {revision} nacrta {sheet} niža je od trenutne revizije {current}",
+      "suggestion": "Potvrdite da je riječ o starijem izdanju prije nego što uđe u povijest"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Nacrt {sheet} pročitan je prepoznavanjem teksta s pouzdanošću {confidence} i nije potvrđen",
+      "suggestion": "Provjerite polja u zaglavlju nacrta i potvrdite očitanje"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Iz {pages} stranica nije se mogao pročitati nijedan odjeljak specifikacije",
+      "suggestion": "Ako je knjiga skenirana, ponovite uvoz s uključenim prepoznavanjem teksta; inače provjerite izgledaju li naslovi odjeljaka kao SECTION 03 30 00 - Title"
     }
   }
 }

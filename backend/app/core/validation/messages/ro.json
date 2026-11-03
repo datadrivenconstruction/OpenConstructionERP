@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Modificările de subcontract pentru {code} însumează {sub_total}, mai mult decât valoarea modificării beneficiarului {owner_value}",
       "suggestion": "Verificați prețurile subcontractorului sau recuperați diferența de la beneficiar înainte de aprobare"
+    },
+    "owner_change_approved": {
+      "fail": "Modificarea de subcontract {code} transmite o modificare a beneficiarului care are încă starea '{status}'",
+      "suggestion": "Aprobați mai întâi modificarea beneficiarului sau eliminați marcajul back-to-back"
+    },
+    "notice_window": {
+      "fail": "Modificarea de subcontract {code} a fost notificată la {late} zile după termenul de {days} zile din contract",
+      "suggestion": "Verificați condițiile de notificare înainte de a accepta costul: o notificare tardivă poate pierde dreptul la pretenție"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Documentația înaintată nu este legată de nicio poziție de lucrări, deci nu este agregată la niciun pachet",
       "suggestion": "Legați pozițiile din lista de cantități pe care le acoperă documentația"
+    },
+    "spec_section_format": {
+      "fail": "Secțiunea {section} nu este un număr de secțiune recunoscut",
+      "suggestion": "Folosiți un număr MasterFormat, de exemplu 03 30 00, sau un cod LB ori NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} pentru secțiunea {section} este deja în registru",
+      "suggestion": "Săriți peste această propunere sau modificați-o ca să fie alt document pentru aprobare"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Secțiunea {section} necesită în mod normal un document pentru aprobare de tip {kind}, care nu apare în caietul de sarcini",
+      "suggestion": "Verificați caietul de sarcini sau adăugați documentul manual"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Pagina {page} nu are un număr de plansă lizibil",
+      "suggestion": "Introduceți numărul planșei din cartuș"
+    },
+    "number_unique_in_set": {
+      "fail": "Numărul de plansă {sheet} apare pe {count} pagini din această încărcare",
+      "suggestion": "Verificați setul de planșe: pagină duplicată sau numerotată greșit"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revizia {revision} a planșei {sheet} este mai mică decât revizia curentă {current}",
+      "suggestion": "Confirmați că este o ediție mai veche înainte de a fi adăugată în istoric"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Planșa {sheet} a fost citită prin recunoaștere de text cu {confidence} și nu este confirmată",
+      "suggestion": "Verificați câmpurile din cartuș și confirmați citirea"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Din {pages} pagini nu s-a putut citi nicio secțiune de specificații",
+      "suggestion": "Dacă documentul este scanat, repetați importul cu recunoașterea de text activată; altfel verificați că titlurile secțiunilor arată ca SECTION 03 30 00 - Title"
     }
   }
 }

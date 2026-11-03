@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprisetillæggene for {code} udgør i alt {sub_total}, mere end bygherrens ændringsværdi {owner_value}",
       "suggestion": "Kontroller underentreprenørens priser, eller kræv forskellen hos bygherren, før du godkender"
+    },
+    "owner_change_approved": {
+      "fail": "Underentreprisetillæg {code} videregiver en bygherreændring, der stadig har status '{status}'",
+      "suggestion": "Godkend først bygherreændringen, eller fjern back-to-back-markeringen"
+    },
+    "notice_window": {
+      "fail": "Underentreprisetillæg {code} blev varslet {late} dage efter fristen på {days} dage i aftalen",
+      "suggestion": "Tjek varslingsvilkårene, før omkostningen accepteres: et for sent varsel kan fortabe kravet"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Granskningsmaterialet er ikke knyttet til nogen arbejdspost og indgår derfor aldrig i en pakke",
       "suggestion": "Tilknyt de poster i mængdefortegnelsen, som materialet omfatter"
+    },
+    "spec_section_format": {
+      "fail": "Afsnit {section} er ikke et genkendt afsnitsnummer",
+      "suggestion": "Brug et MasterFormat-nummer som 03 30 00 eller en LB- eller NBS-kode"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} for afsnit {section} findes allerede i registret",
+      "suggestion": "Spring forslaget over, eller ret det, så det er et andet godkendelsesdokument"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Afsnit {section} kræver normalt et godkendelsesdokument af typen {kind}, som beskrivelsen ikke nævner",
+      "suggestion": "Tjek beskrivelsen, eller tilføj godkendelsesdokumentet manuelt"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Side {page} har intet læsbart tegningsnummer",
+      "suggestion": "Indtast tegningsnummeret fra tegningshovedet"
+    },
+    "number_unique_in_set": {
+      "fail": "Tegningsnummer {sheet} forekommer på {count} sider i denne upload",
+      "suggestion": "Tjek tegningssættet for en dubleret eller forkert nummereret side"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revision {revision} af tegning {sheet} er lavere end den gældende revision {current}",
+      "suggestion": "Bekræft, at det er en ældre udgave, før den lægges ind i historikken"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Tegning {sheet} blev læst med tekstgenkendelse på {confidence} og er ikke bekræftet",
+      "suggestion": "Tjek felterne i tegningshovedet, og bekræft aflæsningen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Der kunne ikke læses noget afsnit af beskrivelsen fra {pages} sider",
+      "suggestion": "Er bogen en scanning, så kør importen igen med tekstgenkendelse slået til; ellers tjek, at afsnitsoverskrifterne ser ud som SECTION 03 30 00 - Title"
     }
   }
 }

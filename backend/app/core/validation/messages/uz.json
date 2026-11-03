@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} bo'yicha pudrat osti o'zgarishlari jami {sub_total}, bu buyurtmachi o'zgarishi qiymati {owner_value} dan ko'p",
       "suggestion": "Tasdiqlashdan oldin pudrat osti narxlarini tekshiring yoki farqni buyurtmachidan undiring"
+    },
+    "owner_change_approved": {
+      "fail": "Subpudrat o'zgarishi {code} hali '{status}' holatidagi buyurtmachi o'zgarishini pastga uzatmoqda",
+      "suggestion": "Avval buyurtmachi o'zgarishini tasdiqlang yoki back-to-back belgisini olib tashlang"
+    },
+    "notice_window": {
+      "fail": "Subpudrat o'zgarishi {code} shartnomadagi {days} kunlik muddatdan {late} kun keyin xabar qilindi",
+      "suggestion": "Xarajatni qabul qilishdan oldin xabar qilish shartlarini tekshiring: kechikkan xabar da'voni bekor qilishi mumkin"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Bu taqdim etilgan hujjat hech qanday ish bandiga bogʻlanmagan, shu sababli u hech bir ishlar paketida jamlanmaydi",
       "suggestion": "Ushbu hujjat qamrab oladigan ish hajmlari qaydnomasi bandlarini bogʻlang"
+    },
+    "spec_section_format": {
+      "fail": "{section} bo'limi tanilgan bo'lim raqami emas",
+      "suggestion": "03 30 00 kabi MasterFormat raqamini yoki LB yoki NBS kodini ishlating"
+    },
+    "duplicate_in_register": {
+      "fail": "{section} bo'limi uchun {title} reyestrda allaqachon bor",
+      "suggestion": "Bu taklifni o'tkazib yuboring yoki boshqa tasdiqlash hujjati bo'ladigan qilib o'zgartiring"
+    },
+    "required_type_missing_for_section": {
+      "fail": "{section} bo'limi odatda {kind} turidagi tasdiqlash hujjatini talab qiladi, lekin spetsifikatsiyada yo'q",
+      "suggestion": "Spetsifikatsiyani tekshiring yoki hujjatni qo'lda qo'shing"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "{page}-sahifada o'qiladigan chizma raqami yo'q",
+      "suggestion": "Chizma raqamini asosiy yozuvdan kiriting"
+    },
+    "number_unique_in_set": {
+      "fail": "{sheet} chizma raqami ushbu yuklashning {count} sahifasida uchraydi",
+      "suggestion": "Chizmalar to'plamida takrorlangan yoki noto'g'ri raqamlangan sahifa bor-yo'qligini tekshiring"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "{sheet} chizmasining {revision} tahriri joriy {current} tahridan past",
+      "suggestion": "Tarixga qo'shishdan oldin bu eski nashr ekanini tasdiqlang"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "{sheet} chizmasi matnni tanish orqali {confidence} aniqlikda o'qildi va tasdiqlanmagan",
+      "suggestion": "Asosiy yozuv maydonlarini tekshirib, o'qilganini tasdiqlang"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} sahifadan spetsifikatsiyaning birorta bo'limi o'qilmadi",
+      "suggestion": "Kitob skan bo'lsa, matnni tanishni yoqib importni qayta ishga tushiring; aks holda bo'lim sarlavhalari SECTION 03 30 00 - Title ko'rinishida ekanini tekshiring"
     }
   }
 }

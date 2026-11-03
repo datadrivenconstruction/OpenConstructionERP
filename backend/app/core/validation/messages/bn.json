@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code}-এর সাব-কন্ট্রাক্ট পরিবর্তন মোট {sub_total}, যা মালিকের পরিবর্তন মূল্য {owner_value}-এর চেয়ে বেশি",
       "suggestion": "অনুমোদনের আগে সাব-কন্ট্রাক্টরের দাম যাচাই করুন বা পার্থক্য মালিকের কাছ থেকে আদায় করুন"
+    },
+    "owner_change_approved": {
+      "fail": "সাব-কন্ট্রাক্ট পরিবর্তন {code} মালিকের এমন একটি পরিবর্তন এগিয়ে দিচ্ছে যা এখনও '{status}' অবস্থায় আছে",
+      "suggestion": "আগে মালিকের পরিবর্তন অনুমোদন করুন, অথবা back-to-back ফ্ল্যাগ সরিয়ে দিন"
+    },
+    "notice_window": {
+      "fail": "সাব-কন্ট্রাক্ট পরিবর্তন {code} চুক্তির {days} দিনের সময়সীমার {late} দিন পরে জানানো হয়েছে",
+      "suggestion": "খরচ গ্রহণের আগে বিজ্ঞপ্তির শর্ত দেখুন; দেরিতে বিজ্ঞপ্তি দাবি বাতিল করে দিতে পারে"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "এই জমা দেওয়া নথি কোনো কাজের আইটেমে যুক্ত নয়, তাই কোনো প্যাকেজের হিসাবে আসে না",
       "suggestion": "এই নথিতে অন্তর্ভুক্ত BOQ আইটেমগুলি যুক্ত করুন"
+    },
+    "spec_section_format": {
+      "fail": "সেকশন {section} চেনা সেকশন নম্বর নয়",
+      "suggestion": "03 30 00-এর মতো MasterFormat নম্বর, অথবা LB বা NBS কোড ব্যবহার করুন"
+    },
+    "duplicate_in_register": {
+      "fail": "সেকশন {section}-এর জন্য {title} রেজিস্টারে আগেই আছে",
+      "suggestion": "এই প্রস্তাব বাদ দিন অথবা সম্পাদনা করে এমন করুন যাতে এটি অনুমোদনের অন্য একটি নথি হয়"
+    },
+    "required_type_missing_for_section": {
+      "fail": "সেকশন {section}-এ সাধারণত {kind} ধরনের অনুমোদন নথি লাগে, যা স্পেসিফিকেশনে নেই",
+      "suggestion": "স্পেসিফিকেশন দেখুন অথবা নথিটি হাতে যোগ করুন"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "পৃষ্ঠা {page}-এ পড়ার মতো শিট নম্বর নেই",
+      "suggestion": "টাইটেল ব্লক থেকে শিট নম্বর লিখুন"
+    },
+    "number_unique_in_set": {
+      "fail": "শিট নম্বর {sheet} এই আপলোডের {count}টি পৃষ্ঠায় আছে",
+      "suggestion": "ড্রয়িং সেটে দুইবার আসা বা ভুল নম্বরের পৃষ্ঠা আছে কি না দেখুন"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "শিট {sheet}-এর রিভিশন {revision} বর্তমান রিভিশন {current}-এর চেয়ে নিচে",
+      "suggestion": "ইতিহাসে যোগ করার আগে নিশ্চিত করুন এটি পুরোনো ইস্যু"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "শিট {sheet} টেক্সট শনাক্তকরণে {confidence} নিশ্চয়তায় পড়া হয়েছে এবং নিশ্চিত করা হয়নি",
+      "suggestion": "টাইটেল ব্লকের ঘরগুলো দেখুন এবং পড়া মান নিশ্চিত করুন"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages}টি পৃষ্ঠা থেকে স্পেসিফিকেশনের কোনো সেকশন পড়া যায়নি",
+      "suggestion": "বইটি স্ক্যান করা হলে টেক্সট শনাক্তকরণ চালু করে আবার ইমপোর্ট করুন; না হলে সেকশনের শিরোনাম SECTION 03 30 00 - Title আকারে আছে কি না দেখুন"
     }
   }
 }

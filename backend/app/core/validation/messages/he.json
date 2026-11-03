@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "שינויי קבלן המשנה עבור {code} מסתכמים ב-{sub_total}, יותר מערך שינוי היזם {owner_value}",
       "suggestion": "בדקו את מחירי קבלן המשנה או גבו את ההפרש מהיזם לפני האישור"
+    },
+    "owner_change_approved": {
+      "fail": "שינוי קבלן המשנה {code} מעביר הלאה שינוי של המזמין שעדיין בסטטוס '{status}'",
+      "suggestion": "אשרו תחילה את שינוי המזמין, או הסירו את סימון back-to-back"
+    },
+    "notice_window": {
+      "fail": "שינוי קבלן המשנה {code} הודע {late} ימים אחרי חלון {days} הימים שבהסכם",
+      "suggestion": "בדקו את תנאי ההודעה לפני קבלת העלות; הודעה מאוחרת עלולה לשלול את התביעה"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "מסמך זה המוגש לבדיקה אינו מקושר לאף סעיף עבודה, ולכן אינו נכלל באף חבילה",
       "suggestion": "יש לקשר את סעיפי כתב הכמויות שהמסמך מכסה"
+    },
+    "spec_section_format": {
+      "fail": "סעיף {section} אינו מספר סעיף מזוהה",
+      "suggestion": "השתמשו במספר MasterFormat כגון 03 30 00, או בקוד LB או NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} עבור סעיף {section} כבר קיים ברישום",
+      "suggestion": "דלגו על ההצעה או ערכו אותה כך שתהיה מסמך אחר לאישור"
+    },
+    "required_type_missing_for_section": {
+      "fail": "סעיף {section} דורש בדרך כלל מסמך לאישור מסוג {kind}, שהמפרט לא מציין",
+      "suggestion": "בדקו את המפרט או הוסיפו את המסמך ידנית"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "בעמוד {page} אין מספר גיליון קריא",
+      "suggestion": "הזינו את מספר הגיליון מטבלת הכותרת"
+    },
+    "number_unique_in_set": {
+      "fail": "מספר הגיליון {sheet} מופיע ב-{count} עמודים בהעלאה זו",
+      "suggestion": "בדקו בערכת התוכניות אם יש עמוד כפול או ממוספר שגוי"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "מהדורה {revision} של גיליון {sheet} נמוכה מהמהדורה הנוכחית {current}",
+      "suggestion": "אשרו שזו מהדורה ישנה יותר לפני הוספתה להיסטוריה"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "גיליון {sheet} נקרא בזיהוי טקסט ברמת {confidence} ולא אושר",
+      "suggestion": "בדקו את שדות טבלת הכותרת ואשרו את הקריאה"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "לא ניתן היה לקרוא אף סעיף מפרט מתוך {pages} עמודים",
+      "suggestion": "אם הספר סרוק, הריצו שוב את הייבוא כשזיהוי הטקסט פועל; אחרת בדקו שכותרות הסעיפים נראות כמו SECTION 03 30 00 - Title"
     }
   }
 }

@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Změny subdodávky pro {code} činí celkem {sub_total}, více než hodnota změny investora {owner_value}",
       "suggestion": "Zkontrolujte ceny subdodavatele nebo před schválením vymáhejte rozdíl od investora"
+    },
+    "owner_change_approved": {
+      "fail": "Změna subdodávky {code} předává změnu objednatele, která má stále stav '{status}'",
+      "suggestion": "Nejprve schvalte změnu objednatele nebo odeberte příznak back-to-back"
+    },
+    "notice_window": {
+      "fail": "Změna subdodávky {code} byla oznámena o {late} dnů po lhůtě {days} dnů stanovené smlouvou",
+      "suggestion": "Před přijetím nákladu zkontrolujte podmínky oznámení: pozdní oznámení může nárok zhatit"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Předkládaná dokumentace není propojena s žádnou položkou rozsahu prací, takže se nezahrne do žádného balíčku",
       "suggestion": "Propojte položky soupisu prací, kterých se dokumentace týká"
+    },
+    "spec_section_format": {
+      "fail": "Oddíl {section} není rozpoznané číslo oddílu",
+      "suggestion": "Použijte číslo MasterFormat, např. 03 30 00, nebo kód LB či NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} pro oddíl {section} už v registru je",
+      "suggestion": "Tento návrh přeskočte nebo upravte, aby šlo o jiný podklad ke schválení"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Oddíl {section} obvykle vyžaduje podklad ke schválení druhu {kind}, který specifikace neuvádí",
+      "suggestion": "Zkontrolujte specifikaci nebo podklad přidejte ručně"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Strana {page} nemá čitelné číslo výkresu",
+      "suggestion": "Zadejte číslo výkresu z popisového pole"
+    },
+    "number_unique_in_set": {
+      "fail": "Číslo výkresu {sheet} se vyskytuje na {count} stranách tohoto nahrání",
+      "suggestion": "Zkontrolujte sadu výkresů, zda nejde o zdvojenou nebo špatně očíslovanou stranu"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revize {revision} výkresu {sheet} je nižší než aktuální revize {current}",
+      "suggestion": "Potvrďte, že jde o starší vydání, než se zařadí do historie"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Výkres {sheet} byl přečten rozpoznáním textu s jistotou {confidence} a není potvrzen",
+      "suggestion": "Zkontrolujte pole popisového pole a potvrďte přečtení"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Z {pages} stran se nepodařilo přečíst žádný oddíl specifikace",
+      "suggestion": "Pokud jde o sken, zopakujte import se zapnutým rozpoznáním textu; jinak ověřte, že nadpisy oddílů vypadají jako SECTION 03 30 00 - Title"
     }
   }
 }

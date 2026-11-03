@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Alltöövõtu muudatused objektil {code} kokku {sub_total}, rohkem kui tellija muudatuse väärtus {owner_value}",
       "suggestion": "Kontrolli alltöövõtja hindu või nõua vahe tellijalt enne kinnitamist"
+    },
+    "owner_change_approved": {
+      "fail": "Alltöövõtu muudatus {code} annab edasi tellija muudatuse, mis on endiselt olekus '{status}'",
+      "suggestion": "Kinnitage kõigepealt tellija muudatus või eemaldage back-to-back-märge"
+    },
+    "notice_window": {
+      "fail": "Alltöövõtu muudatusest {code} teatati {late} päeva pärast lepingus ette nähtud {days} päeva tähtaega",
+      "suggestion": "Kontrollige teavitustingimusi enne kulu vastuvõtmist: hilinenud teade võib nõude kehtetuks muuta"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "See kooskõlastusdokument ei ole seotud ühegi töömahu reaga, seega ei koondu see paketti",
       "suggestion": "Siduge mahuloendi read, mida see dokument hõlmab"
+    },
+    "spec_section_format": {
+      "fail": "Jaotis {section} ei ole tuvastatav jaotise number",
+      "suggestion": "Kasutage MasterFormat-numbrit, näiteks 03 30 00, või LB- või NBS-koodi"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} jaotise {section} jaoks on registris juba olemas",
+      "suggestion": "Jätke see ettepanek vahele või muutke seda nii, et see oleks teine kinnitamisele minev dokument"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Jaotis {section} nõuab tavaliselt liiki {kind} kinnitamisele minevat dokumenti, mida spetsifikatsioon ei loetle",
+      "suggestion": "Kontrollige spetsifikatsiooni või lisage dokument käsitsi"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Lehel {page} puudub loetav joonise number",
+      "suggestion": "Sisestage joonise number joonisepäisest"
+    },
+    "number_unique_in_set": {
+      "fail": "Joonise number {sheet} esineb selles üleslaadimises {count} lehel",
+      "suggestion": "Kontrollige joonistekomplekti: leht võib olla dubleeritud või valesti nummerdatud"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Joonise {sheet} redaktsioon {revision} on madalam kui kehtiv redaktsioon {current}",
+      "suggestion": "Kinnitage, et tegu on varasema väljaandega, enne kui see ajalukku lisatakse"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Joonis {sheet} loeti tekstituvastusega täpsusega {confidence} ja seda pole kinnitatud",
+      "suggestion": "Kontrollige joonisepäise välju ja kinnitage lugemistulemus"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} leheküljelt ei õnnestunud ühtegi spetsifikatsiooni jaotist lugeda",
+      "suggestion": "Kui raamat on skaneeritud, käivitage import uuesti tekstituvastus sisse lülitatud; muidu kontrollige, et jaotiste pealkirjad on kujul SECTION 03 30 00 - Title"
     }
   }
 }

@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Die Nachunternehmer-Nachträge zu {code} betragen {sub_total} und liegen über dem Wert der Bauherren-Änderung von {owner_value}",
       "suggestion": "Prüfen Sie die Nachunternehmerpreise oder fordern Sie die Differenz vor der Freigabe beim Bauherrn ein"
+    },
+    "owner_change_approved": {
+      "fail": "Nachtrag {code} des Nachunternehmers gibt eine Auftraggeber-Änderung weiter, die noch den Status '{status}' hat",
+      "suggestion": "Zuerst die Auftraggeber-Änderung freigeben oder die Back-to-back-Kennzeichnung entfernen"
+    },
+    "notice_window": {
+      "fail": "Nachtrag {code} des Nachunternehmers wurde {late} Tage nach Ablauf der im Vertrag vereinbarten Frist von {days} Tagen angezeigt",
+      "suggestion": "Anzeigefristen im Vertrag prüfen, bevor die Kosten anerkannt werden; eine verspätete Anzeige kann den Anspruch ausschließen"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Diese Vorlage ist mit keiner Leistungsposition verknüpft und läuft daher in keinem Paket auf",
       "suggestion": "Verknüpfen Sie die LV-Positionen, die diese Vorlage betrifft"
+    },
+    "spec_section_format": {
+      "fail": "Leistungsbereich {section} ist keine gültige Gliederungsnummer",
+      "suggestion": "Eine MasterFormat-Nummer wie 03 30 00 oder einen LB- oder NBS-Code verwenden"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} für Abschnitt {section} ist bereits im Register vorhanden",
+      "suggestion": "Vorschlag überspringen oder so anpassen, dass es eine andere Freigabeunterlage ist"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Für Abschnitt {section} ist üblicherweise eine Freigabeunterlage der Art {kind} nötig, die in der Leistungsbeschreibung nicht aufgeführt ist",
+      "suggestion": "Leistungsbeschreibung prüfen oder die Freigabeunterlage von Hand ergänzen"
     }
   },
   "rfq": {
@@ -1528,6 +1548,30 @@
     "review_overdue": {
       "fail": "Der Agentenentwurf '{title}' wartet seit {days} Tagen auf Prüfung (Grenze {limit}).",
       "suggestion": "Nehmen Sie den Entwurf an oder lehnen Sie ihn ab, oder schalten Sie den Agenten ab, wenn seine Entwürfe nicht genutzt werden."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Seite {page} hat keine lesbare Plannummer",
+      "suggestion": "Plannummer aus dem Schriftfeld eintragen"
+    },
+    "number_unique_in_set": {
+      "fail": "Plannummer {sheet} kommt auf {count} Seiten dieses Uploads vor",
+      "suggestion": "Plansatz auf doppelte oder falsch nummerierte Seiten prüfen"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Planindex {revision} von Plan {sheet} ist niedriger als der aktuelle Index {current}",
+      "suggestion": "Bestätigen, dass es ein älterer Stand ist, bevor er in die Historie aufgenommen wird"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Plan {sheet} wurde per Texterkennung mit {confidence} gelesen und ist nicht bestätigt",
+      "suggestion": "Felder des Schriftfelds prüfen und das Ergebnis bestätigen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Aus {pages} Seiten konnte kein Abschnitt der Spezifikation gelesen werden",
+      "suggestion": "Bei einem Scan den Import mit eingeschalteter Texterkennung wiederholen; sonst prüfen, ob die Abschnittsköpfe wie SECTION 03 30 00 - Title lauten"
     }
   }
 }

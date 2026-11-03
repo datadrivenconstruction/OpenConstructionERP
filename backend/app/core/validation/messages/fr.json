@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Les avenants de sous-traitance de {code} totalisent {sub_total}, soit plus que la valeur de la modification du maître d'ouvrage {owner_value}",
       "suggestion": "Vérifiez les prix du sous-traitant ou récupérez l'écart auprès du maître d'ouvrage avant d'approuver"
+    },
+    "owner_change_approved": {
+      "fail": "L'avenant de sous-traitance {code} répercute une modification du maître d'ouvrage encore au statut '{status}'",
+      "suggestion": "Approuvez d'abord la modification du maître d'ouvrage, ou retirez l'indicateur back-to-back"
+    },
+    "notice_window": {
+      "fail": "L'avenant de sous-traitance {code} a été notifié {late} jours après le délai de {days} jours prévu au contrat",
+      "suggestion": "Vérifiez les conditions de notification avant d'accepter le coût : une notification tardive peut rendre la réclamation irrecevable"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Ce dossier soumis pour visa n'est lié à aucune prestation ; il n'est donc rattaché à aucun lot dans les synthèses",
       "suggestion": "Reliez les postes du bordereau couverts par ce dossier"
+    },
+    "spec_section_format": {
+      "fail": "La section {section} n'est pas un numéro de section reconnu",
+      "suggestion": "Utilisez un numéro MasterFormat comme 03 30 00, ou un code LB ou NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} pour la section {section} figure déjà au registre",
+      "suggestion": "Ignorez cette proposition ou modifiez-la pour qu'il s'agisse d'un autre document soumis à approbation"
+    },
+    "required_type_missing_for_section": {
+      "fail": "La section {section} exige normalement un document soumis à approbation de type {kind}, absent du descriptif",
+      "suggestion": "Vérifiez le descriptif ou ajoutez le document manuellement"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "La page {page} n'a pas de numéro de planche lisible",
+      "suggestion": "Saisissez le numéro de planche indiqué dans le cartouche"
+    },
+    "number_unique_in_set": {
+      "fail": "Le numéro de planche {sheet} apparaît sur {count} pages de ce dépôt",
+      "suggestion": "Vérifiez le jeu de plans : page en double ou mal numérotée"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "L'indice {revision} de la planche {sheet} est inférieur à l'indice actuel {current}",
+      "suggestion": "Confirmez qu'il s'agit d'une version antérieure avant de l'ajouter à l'historique"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "La planche {sheet} a été lue par reconnaissance de texte à {confidence} et n'est pas confirmée",
+      "suggestion": "Vérifiez les champs du cartouche et confirmez la lecture"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Aucune section de spécification n'a pu être lue sur {pages} pages",
+      "suggestion": "Si le document est un scan, relancez l'import avec la reconnaissance de texte activée ; sinon vérifiez que les titres de section ressemblent à SECTION 03 30 00 - Title"
     }
   }
 }

@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprenadändringarna för {code} uppgår till {sub_total}, mer än beställarens ändringsvärde {owner_value}",
       "suggestion": "Kontrollera underentreprenörens priser eller driv in skillnaden från beställaren innan du godkänner"
+    },
+    "owner_change_approved": {
+      "fail": "Underentreprenadändring {code} för vidare en beställarändring som fortfarande har status '{status}'",
+      "suggestion": "Godkänn beställarändringen först, eller ta bort back-to-back-markeringen"
+    },
+    "notice_window": {
+      "fail": "Underentreprenadändring {code} anmäldes {late} dagar efter fristen på {days} dagar i avtalet",
+      "suggestion": "Kontrollera anmälningsvillkoren innan kostnaden godtas: en sen anmälan kan göra att kravet faller"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Granskningshandlingen är inte kopplad till någon arbetspost och sammanställs därför aldrig under ett arbetspaket",
       "suggestion": "Koppla de poster i mängdförteckningen som handlingen omfattar"
+    },
+    "spec_section_format": {
+      "fail": "Avsnitt {section} är inte ett igenkänt avsnittsnummer",
+      "suggestion": "Använd ett MasterFormat-nummer som 03 30 00, eller en LB- eller NBS-kod"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} för avsnitt {section} finns redan i registret",
+      "suggestion": "Hoppa över förslaget, eller ändra det så att det blir en annan godkännandehandling"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Avsnitt {section} kräver normalt en godkännandehandling av typen {kind}, som förfrågningsunderlaget inte listar",
+      "suggestion": "Kontrollera underlaget, eller lägg till godkännandehandlingen manuellt"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Sida {page} har inget läsbart ritningsnummer",
+      "suggestion": "Ange ritningsnumret från ritningshuvudet"
+    },
+    "number_unique_in_set": {
+      "fail": "Ritningsnummer {sheet} förekommer på {count} sidor i den här uppladdningen",
+      "suggestion": "Kontrollera ritningsuppsättningen för en dubblerad eller felnumrerad sida"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revidering {revision} av ritning {sheet} är lägre än gällande revidering {current}",
+      "suggestion": "Bekräfta att det är en äldre utgåva innan den läggs i historiken"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Ritning {sheet} lästes med textigenkänning på {confidence} och är inte bekräftad",
+      "suggestion": "Kontrollera fälten i ritningshuvudet och bekräfta avläsningen"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Inget avsnitt i beskrivningen kunde läsas från {pages} sidor",
+      "suggestion": "Om boken är skannad, kör importen igen med textigenkänning på; annars kontrollera att avsnittsrubrikerna ser ut som SECTION 03 30 00 - Title"
     }
   }
 }

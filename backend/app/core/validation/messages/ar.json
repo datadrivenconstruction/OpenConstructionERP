@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "تعديلات المقاول من الباطن للبند {code} تبلغ {sub_total}، وهي أكبر من قيمة تعديل المالك {owner_value}",
       "suggestion": "راجع أسعار المقاول من الباطن أو استرد الفرق من المالك قبل الاعتماد"
+    },
+    "owner_change_approved": {
+      "fail": "تعديل عقد المقاول من الباطن {code} ينقل تغييراً من المالك ما زالت حالته '{status}'",
+      "suggestion": "اعتمد تغيير المالك أولاً، أو أزل علامة back-to-back"
+    },
+    "notice_window": {
+      "fail": "تم الإخطار بتعديل عقد المقاول من الباطن {code} بعد انقضاء مهلة {days} يوماً المحددة في العقد بـ {late} يوماً",
+      "suggestion": "راجع شروط الإخطار قبل قبول التكلفة، فقد يُسقط الإخطار المتأخر حق المطالبة"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "هذا التقديم غير مرتبط بأي بند نطاق أعمال، لذا لا يُجمع ضمن أي حزمة",
       "suggestion": "اربط بنود جدول الكميات التي يغطيها هذا التقديم"
+    },
+    "spec_section_format": {
+      "fail": "القسم {section} ليس رقم قسم معروفاً",
+      "suggestion": "استخدم رقم MasterFormat مثل 03 30 00، أو رمز LB أو NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} للقسم {section} موجود بالفعل في السجل",
+      "suggestion": "تجاوز هذا الاقتراح أو عدّله ليصبح مستنداً آخر للاعتماد"
+    },
+    "required_type_missing_for_section": {
+      "fail": "القسم {section} يتطلب عادةً مستنداً للاعتماد من نوع {kind} لم تذكره المواصفات",
+      "suggestion": "راجع المواصفات أو أضف المستند يدوياً"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "الصفحة {page} ليس بها رقم لوحة مقروء",
+      "suggestion": "أدخل رقم اللوحة من إطار العنوان"
+    },
+    "number_unique_in_set": {
+      "fail": "رقم اللوحة {sheet} يظهر في {count} صفحات من هذا الرفع",
+      "suggestion": "افحص مجموعة المخططات بحثاً عن صفحة مكررة أو مرقمة خطأ"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "مراجعة اللوحة {sheet} رقم {revision} أقدم من المراجعة الحالية {current}",
+      "suggestion": "تأكد أنها إصدار أقدم قبل إضافتها إلى السجل التاريخي"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "قُرئت اللوحة {sheet} بالتعرف على النص بنسبة {confidence} ولم تُؤكَّد",
+      "suggestion": "افحص حقول إطار العنوان وأكّد القراءة"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "تعذّرت قراءة أي قسم من المواصفات في {pages} صفحة",
+      "suggestion": "إذا كان الكتاب ممسوحاً ضوئياً فأعد الاستيراد مع تفعيل التعرف على النص، وإلا فتحقق من أن عناوين الأقسام بصيغة SECTION 03 30 00 - Title"
     }
   }
 }

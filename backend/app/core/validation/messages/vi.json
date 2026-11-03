@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Các thay đổi thầu phụ của {code} tổng cộng {sub_total}, cao hơn giá trị thay đổi của chủ đầu tư {owner_value}",
       "suggestion": "Kiểm tra đơn giá thầu phụ hoặc thu hồi chênh lệch từ chủ đầu tư trước khi duyệt"
+    },
+    "owner_change_approved": {
+      "fail": "Thay đổi thầu phụ {code} chuyển tiếp một thay đổi của chủ đầu tư vẫn đang ở trạng thái '{status}'",
+      "suggestion": "Hãy duyệt thay đổi của chủ đầu tư trước, hoặc bỏ cờ back-to-back"
+    },
+    "notice_window": {
+      "fail": "Thay đổi thầu phụ {code} được thông báo trễ {late} ngày so với thời hạn {days} ngày trong hợp đồng",
+      "suggestion": "Kiểm tra điều khoản thông báo trước khi chấp nhận chi phí: thông báo trễ có thể làm mất quyền yêu cầu"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Hồ sơ trình duyệt này không liên kết với công tác nào nên không được tổng hợp vào gói công việc",
       "suggestion": "Liên kết các công tác trong bảng khối lượng mà hồ sơ này bao quát"
+    },
+    "spec_section_format": {
+      "fail": "Mục {section} không phải số mục hợp lệ",
+      "suggestion": "Dùng số MasterFormat như 03 30 00, hoặc mã LB hay NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} cho mục {section} đã có trong sổ đăng ký",
+      "suggestion": "Bỏ qua đề xuất này hoặc sửa để nó trở thành một hồ sơ trình duyệt khác"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Mục {section} thường cần hồ sơ trình duyệt loại {kind}, nhưng đặc tả kỹ thuật không liệt kê",
+      "suggestion": "Kiểm tra đặc tả kỹ thuật hoặc thêm hồ sơ trình duyệt thủ công"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Trang {page} không có số bản vẽ đọc được",
+      "suggestion": "Nhập số bản vẽ từ khung tên"
+    },
+    "number_unique_in_set": {
+      "fail": "Số bản vẽ {sheet} xuất hiện trên {count} trang của lần tải lên này",
+      "suggestion": "Kiểm tra bộ bản vẽ xem có trang bị trùng hoặc đánh số sai không"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Bản sửa đổi {revision} của bản vẽ {sheet} thấp hơn bản sửa đổi hiện hành {current}",
+      "suggestion": "Xác nhận đây là phiên bản cũ hơn trước khi đưa vào lịch sử"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Bản vẽ {sheet} được đọc bằng nhận dạng văn bản với độ tin cậy {confidence} và chưa được xác nhận",
+      "suggestion": "Kiểm tra các trường của khung tên và xác nhận kết quả đọc"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Không đọc được mục đặc tả nào từ {pages} trang",
+      "suggestion": "Nếu tài liệu là bản quét, hãy nhập lại với nhận dạng văn bản bật; nếu không, kiểm tra tiêu đề mục có dạng SECTION 03 30 00 - Title"
     }
   }
 }

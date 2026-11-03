@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} için alt yüklenici değişiklikleri toplam {sub_total}, işveren değişiklik değeri {owner_value} tutarından fazla",
       "suggestion": "Onaylamadan önce alt yüklenici fiyatlarını kontrol edin veya farkı işverenden tahsil edin"
+    },
+    "owner_change_approved": {
+      "fail": "{code} alt yüklenici değişikliği, hâlâ '{status}' durumunda olan bir işveren değişikliğini aktarıyor",
+      "suggestion": "Önce işveren değişikliğini onaylayın ya da back-to-back işaretini kaldırın"
+    },
+    "notice_window": {
+      "fail": "{code} alt yüklenici değişikliği, sözleşmedeki {days} günlük sürenin {late} gün sonrasında bildirildi",
+      "suggestion": "Maliyeti kabul etmeden önce bildirim şartlarını kontrol edin: geç bildirim hak talebini düşürebilir"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Bu sunum hiçbir iş kapsamı kalemine bağlı değil; hiçbir paketin toplamına dahil edilmez",
       "suggestion": "Bu sunumun kapsadığı keşif pozlarını ilişkilendirin"
+    },
+    "spec_section_format": {
+      "fail": "{section} bölümü tanınan bir bölüm numarası değil",
+      "suggestion": "03 30 00 gibi bir MasterFormat numarası ya da LB veya NBS kodu kullanın"
+    },
+    "duplicate_in_register": {
+      "fail": "{section} bölümü için {title} kayıtta zaten var",
+      "suggestion": "Bu öneriyi atlayın ya da başka bir onay dokümanı olacak şekilde düzenleyin"
+    },
+    "required_type_missing_for_section": {
+      "fail": "{section} bölümü normalde {kind} türünde bir onay dokümanı gerektirir, ancak şartnamede listelenmemiş",
+      "suggestion": "Şartnameyi kontrol edin veya onay dokümanını elle ekleyin"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "{page}. sayfada okunabilir bir pafta numarası yok",
+      "suggestion": "Pafta numarasını antetten girin"
+    },
+    "number_unique_in_set": {
+      "fail": "{sheet} pafta numarası bu yüklemenin {count} sayfasında geçiyor",
+      "suggestion": "Çizim setinde mükerrer veya yanlış numaralanmış sayfa olup olmadığını kontrol edin"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "{sheet} paftasının {revision} revizyonu, güncel {current} revizyonundan düşük",
+      "suggestion": "Geçmişe eklenmeden önce bunun eski bir sürüm olduğunu onaylayın"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "{sheet} paftası metin tanıma ile {confidence} güvenle okundu ve onaylanmadı",
+      "suggestion": "Antet alanlarını kontrol edin ve okumayı onaylayın"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} sayfadan hiçbir şartname bölümü okunamadı",
+      "suggestion": "Kitap taranmışsa içe aktarmayı metin tanıma açık olarak yeniden çalıştırın; değilse bölüm başlıklarının SECTION 03 30 00 - Title biçiminde olduğunu kontrol edin"
     }
   }
 }

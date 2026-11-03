@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Le varianti di subappalto per {code} sommano {sub_total}, più del valore della modifica del committente {owner_value}",
       "suggestion": "Verificate i prezzi del subappaltatore o recuperate la differenza dal committente prima di approvare"
+    },
+    "owner_change_approved": {
+      "fail": "La variante di subappalto {code} trasferisce una modifica del committente ancora nello stato '{status}'",
+      "suggestion": "Approvare prima la modifica del committente oppure rimuovere il flag back-to-back"
+    },
+    "notice_window": {
+      "fail": "La variante di subappalto {code} è stata notificata {late} giorni dopo il termine di {days} giorni previsto dal contratto",
+      "suggestion": "Verificare i termini di notifica prima di accettare il costo: una notifica tardiva può precludere la riserva"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Questo documento di trasmissione non è collegato a nessuna voce di ambito, quindi non confluisce mai in un pacchetto",
       "suggestion": "Collegare le voci del BOQ che questa trasmissione riguarda"
+    },
+    "spec_section_format": {
+      "fail": "La sezione {section} non è un numero di sezione riconosciuto",
+      "suggestion": "Usare un numero MasterFormat come 03 30 00, oppure un codice LB o NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} per la sezione {section} è già nel registro",
+      "suggestion": "Saltare questa proposta o modificarla in modo che sia un altro documento da approvare"
+    },
+    "required_type_missing_for_section": {
+      "fail": "La sezione {section} richiede normalmente un documento da approvare di tipo {kind}, non elencato nel capitolato",
+      "suggestion": "Controllare il capitolato o aggiungere il documento a mano"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "La pagina {page} non ha un numero di tavola leggibile",
+      "suggestion": "Inserire il numero di tavola dal cartiglio"
+    },
+    "number_unique_in_set": {
+      "fail": "Il numero di tavola {sheet} compare su {count} pagine di questo caricamento",
+      "suggestion": "Controllare il set di disegni: pagina duplicata o numerata male"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "La revisione {revision} della tavola {sheet} è inferiore alla revisione corrente {current}",
+      "suggestion": "Confermare che si tratta di un'emissione precedente prima di aggiungerla allo storico"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "La tavola {sheet} è stata letta con riconoscimento del testo al {confidence} e non è confermata",
+      "suggestion": "Controllare i campi del cartiglio e confermare la lettura"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Impossibile leggere alcuna sezione del capitolato da {pages} pagine",
+      "suggestion": "Se il documento è una scansione, ripetere l'importazione con il riconoscimento del testo attivo; altrimenti verificare che le intestazioni di sezione siano del tipo SECTION 03 30 00 - Title"
     }
   }
 }

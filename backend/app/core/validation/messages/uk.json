@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Зміни субпідряду за {code} становлять {sub_total}, що більше за вартість зміни замовника {owner_value}",
       "suggestion": "Перевірте ціни субпідрядника або стягніть різницю із замовника перед затвердженням"
+    },
+    "owner_change_approved": {
+      "fail": "Зміна субпідряду {code} передає вниз зміну замовника, яка досі в статусі '{status}'",
+      "suggestion": "Спершу затвердьте зміну замовника або зніміть ознаку back-to-back"
+    },
+    "notice_window": {
+      "fail": "Зміну субпідряду {code} заявлено на {late} дн. пізніше за строк {days} дн., визначений договором",
+      "suggestion": "Перевірте умови повідомлення в договорі, перш ніж приймати витрати: прострочене повідомлення може позбавити права на претензію"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Це подання не пов’язане з жодною позицією обсягу робіт, тому не входить до підсумків пакета",
       "suggestion": "Пов’яжіть кошторисні позиції, яких стосується це подання"
+    },
+    "spec_section_format": {
+      "fail": "Розділ специфікації {section} не є допустимим номером розділу",
+      "suggestion": "Використайте номер MasterFormat на кшталт 03 30 00 або код LB чи NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} за розділом {section} уже є в реєстрі",
+      "suggestion": "Пропустіть цю пропозицію або змініть її так, щоб це був інший submittal"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Для розділу {section} зазвичай потрібен submittal виду {kind}, але в специфікації його немає",
+      "suggestion": "Перевірте специфікацію або додайте submittal вручну"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "На сторінці {page} не читається номер аркуша",
+      "suggestion": "Введіть номер аркуша з основного напису"
+    },
+    "number_unique_in_set": {
+      "fail": "Номер аркуша {sheet} зустрічається на {count} сторінках цього завантаження",
+      "suggestion": "Перевірте комплект креслень: можливий дубль сторінки або хибна нумерація"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Ревізія {revision} аркуша {sheet} нижча за поточну ревізію {current}",
+      "suggestion": "Підтвердьте, що це раніша редакція, перш ніж вона потрапить в історію"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Аркуш {sheet} розпізнано з точністю {confidence}, його не підтверджено",
+      "suggestion": "Перевірте поля основного напису та підтвердьте розпізнане"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "З {pages} стор. не вдалося прочитати жодного розділу специфікації",
+      "suggestion": "Якщо книга відсканована, повторіть імпорт зі ввімкненим розпізнаванням тексту; інакше перевірте, що заголовки розділів мають вигляд SECTION 03 30 00 - Title"
     }
   }
 }

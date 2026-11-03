@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "De subcontractwijzigingen voor {code} bedragen samen {sub_total}, meer dan de waarde van de wijziging van de opdrachtgever {owner_value}",
       "suggestion": "Controleer de prijzen van de onderaannemer of verhaal het verschil op de opdrachtgever voordat u goedkeurt"
+    },
+    "owner_change_approved": {
+      "fail": "Onderaannemersmeerwerk {code} geeft een wijziging van de opdrachtgever door die nog de status '{status}' heeft",
+      "suggestion": "Keur eerst de wijziging van de opdrachtgever goed of verwijder de back-to-back-markering"
+    },
+    "notice_window": {
+      "fail": "Onderaannemersmeerwerk {code} is {late} dagen na de in de overeenkomst genoemde termijn van {days} dagen gemeld",
+      "suggestion": "Controleer de meldingstermijnen voordat u de kosten accepteert: een te late melding kan de claim doen vervallen"
     }
   },
   "submittal": {
@@ -929,6 +937,18 @@
     "linked_scope_present": {
       "fail": "Dit goedkeuringsstuk is niet gekoppeld aan een werkpost en wordt daardoor niet bij een werkpakket opgeteld",
       "suggestion": "Koppel de hoeveelhedenstaatposten waarop dit stuk betrekking heeft"
+    },
+    "spec_section_format": {
+      "fail": "Bestekhoofdstuk {section} is geen herkend hoofdstuknummer",
+      "suggestion": "Gebruik een MasterFormat-nummer zoals 03 30 00, of een LB- of NBS-code"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} voor hoofdstuk {section} staat al in het register",
+      "suggestion": "Sla dit voorstel over of pas het aan zodat het een ander goedkeuringsstuk is"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Voor hoofdstuk {section} is normaal een goedkeuringsstuk van het type {kind} nodig, dat in het bestek niet staat",
+      "suggestion": "Controleer het bestek of voeg het goedkeuringsstuk handmatig toe"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Pagina {page} heeft geen leesbaar tekeningnummer",
+      "suggestion": "Voer het tekeningnummer uit het titelblok in"
+    },
+    "number_unique_in_set": {
+      "fail": "Tekeningnummer {sheet} komt op {count} pagina's van deze upload voor",
+      "suggestion": "Controleer de tekeningenset op een dubbele of verkeerd genummerde pagina"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revisie {revision} van tekening {sheet} is lager dan de huidige revisie {current}",
+      "suggestion": "Bevestig dat dit een oudere uitgave is voordat deze in de historie komt"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Tekening {sheet} is met tekstherkenning gelezen met {confidence} en is niet bevestigd",
+      "suggestion": "Controleer de velden van het titelblok en bevestig de uitlezing"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Uit {pages} pagina's kon geen bestekhoofdstuk worden gelezen",
+      "suggestion": "Als het een scan is, start de import opnieuw met tekstherkenning aan; controleer anders of de hoofdstukkoppen eruitzien als SECTION 03 30 00 - Title"
     }
   }
 }

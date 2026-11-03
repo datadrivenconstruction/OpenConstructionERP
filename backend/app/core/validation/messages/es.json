@@ -917,6 +917,14 @@
     "change_within_owner_value": {
       "fail": "Los cambios de subcontrato de {code} suman {sub_total}, más que el valor del cambio del propietario {owner_value}",
       "suggestion": "Revise los precios del subcontrato o recupere la diferencia del propietario antes de aprobar"
+    },
+    "owner_change_approved": {
+      "fail": "La modificación de subcontrato {code} traslada un cambio de la propiedad que sigue en estado '{status}'",
+      "suggestion": "Apruebe primero el cambio de la propiedad o quite la marca back-to-back"
+    },
+    "notice_window": {
+      "fail": "La modificación de subcontrato {code} se notificó {late} días después del plazo de {days} días fijado en el contrato",
+      "suggestion": "Revise las condiciones de notificación antes de aceptar el coste: una notificación tardía puede hacer perder el derecho a reclamar"
     }
   },
   "submittal": {
@@ -947,6 +955,18 @@
     "linked_scope_present": {
       "fail": "Esta documentacion no esta vinculada a ninguna partida, por lo que nunca se agrega a un paquete",
       "suggestion": "Vincule las partidas del presupuesto que cubre esta documentacion"
+    },
+    "spec_section_format": {
+      "fail": "La sección {section} no es un número de sección reconocido",
+      "suggestion": "Use un número MasterFormat como 03 30 00, o un código LB o NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} de la sección {section} ya está en el registro",
+      "suggestion": "Omita esta propuesta o edítela para que sea otro documento para aprobación"
+    },
+    "required_type_missing_for_section": {
+      "fail": "La sección {section} normalmente requiere un documento para aprobación de tipo {kind}, que el pliego no incluye",
+      "suggestion": "Revise el pliego o añada el documento a mano"
     }
   },
   "rfq": {
@@ -1490,6 +1510,30 @@
     "linked_tender_awarded": {
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "La página {page} no tiene un número de plano legible",
+      "suggestion": "Introduzca el número de plano del cajetín"
+    },
+    "number_unique_in_set": {
+      "fail": "El número de plano {sheet} aparece en {count} páginas de esta carga",
+      "suggestion": "Revise el juego de planos por si hay una página duplicada o mal numerada"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "La revisión {revision} del plano {sheet} es inferior a la revisión vigente {current}",
+      "suggestion": "Confirme que es una edición anterior antes de añadirla al historial"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "El plano {sheet} se leyó por reconocimiento de texto con {confidence} y no está confirmado",
+      "suggestion": "Revise los campos del cajetín y confirme la lectura"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "No se pudo leer ninguna sección de especificaciones en {pages} páginas",
+      "suggestion": "Si el libro es un escaneo, repita la importación con el reconocimiento de texto activado; si no, compruebe que los títulos de sección tengan la forma SECTION 03 30 00 - Title"
     }
   }
 }
