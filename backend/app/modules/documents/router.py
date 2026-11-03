@@ -1224,7 +1224,7 @@ async def check_sheet_intake(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("documents.read")),
+    _perm: None = Depends(RequirePermission("documents.create")),
     service: SheetService = Depends(_get_sheet_service),
 ) -> dict:
     """Run the ``sheet_intake`` rules (number present and unique, revision order, unconfirmed reads)."""
