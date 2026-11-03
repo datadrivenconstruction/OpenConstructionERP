@@ -15,7 +15,14 @@ vendor-rating events out to ``match_elements.vector_reindex`` and
 from __future__ import annotations
 
 import logging
+import uuid
+from decimal import Decimal, InvalidOperation
+from typing import Any
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.event_effect import claim_effect
 from app.core.events import Event, event_bus
 
 VENDOR_CREATED = "supplier_catalogs.vendor.created"
@@ -54,6 +61,9 @@ PO_RECEIVED = "supplier_catalogs.po.received"
 PO_CLOSED = "supplier_catalogs.po.closed"
 
 GR_POSTED = "supplier_catalogs.gr.posted"
+# Published by procurement when a goods receipt is confirmed; the stock ledger
+# here advances from it.
+PROCUREMENT_GR_POSTED = "procurement.goods_receipt.posted"
 
 INVOICE_MATCHED = "supplier_catalogs.invoice.matched"
 INVOICE_EXCEPTION = "supplier_catalogs.invoice.exception"
@@ -176,8 +186,99 @@ async def _on_vendor_rated(event: Event) -> None:
         )
 
 
+def _uuid(value: Any) -> uuid.UUID | None:
+    try:
+        return uuid.UUID(str(value)) if value else None
+    except (ValueError, AttributeError):
+        return None
+
+
+async def _default_warehouse(session: AsyncSession, project_id: uuid.UUID | None) -> uuid.UUID | None:
+    """The project's own active warehouse (lowest code), else none."""
+    if project_id is None:
+        return None
+    from app.modules.supplier_catalogs.models import Warehouse
+
+    q = (
+        select(Warehouse.id)
+        .where(Warehouse.project_id == project_id, Warehouse.status == "active")
+        .order_by(Warehouse.code)
+        .limit(1)
+    )
+    return (await session.execute(q)).scalar_one_or_none()
+
+
+async def apply_goods_receipt_posted(session: AsyncSession, data: dict[str, Any]) -> int:
+    """Advance warehouse stock for one posted procurement goods receipt; returns lines booked.
+
+    Guarded by the event's idempotency key, so a replayed event moves nothing.
+    A line with no catalogue item, no quantity or no resolvable warehouse is
+    logged and skipped: stock never blocks a receipt.
+    """
+    from app.modules.supplier_catalogs.service import SupplierCatalogsService
+
+    key = str(data.get("idempotency_key") or "")
+    gr_id = _uuid(data.get("gr_id"))
+    if not key or gr_id is None:
+        return 0
+    if not await claim_effect(session, key, "supplier_catalogs.stock_in"):
+        _logger.info("procurement GR %s already booked into stock (replay skipped)", gr_id)
+        return 0
+    project_id = _uuid(data.get("project_id"))
+    service = SupplierCatalogsService(session)
+    fallback = None
+    booked = 0
+    alerts: list[dict[str, Any]] = []
+    for line in data.get("lines") or []:
+        item_id = _uuid(line.get("catalog_item_id"))
+        try:
+            qty = Decimal(str(line.get("qty") or "0"))
+            price = Decimal(str(line.get("unit_rate") or "0"))
+        except InvalidOperation:
+            continue
+        if item_id is None or qty <= 0:
+            continue
+        warehouse_id = _uuid(line.get("warehouse_id"))
+        if warehouse_id is None:
+            fallback = fallback or await _default_warehouse(session, project_id)
+            warehouse_id = fallback
+        if warehouse_id is None:
+            _logger.info("GR %s line %s: no warehouse resolves; stock not moved", gr_id, line.get("po_line_id"))
+            continue
+        alert = await service.receive_into_stock(
+            warehouse_id=warehouse_id,
+            catalog_item_id=item_id,
+            quantity=qty,
+            unit_price=price,
+            currency=data.get("currency_code") or None,
+            batch_lot=line.get("batch_lot"),
+            gr_id=gr_id,
+            project_id=project_id,
+            user_id=data.get("actor_id"),
+        )
+        booked += 1
+        if alert is not None:
+            alerts.append(alert)
+    for alert in alerts:
+        event_bus.publish_detached(STOCK_LOW, alert, source_module="supplier_catalogs")
+    return booked
+
+
+async def _on_procurement_gr_posted(event: Event) -> None:
+    """``procurement.goods_receipt.posted`` -> warehouse stock, once per receipt."""
+    from app.database import async_session_factory
+
+    try:
+        async with async_session_factory() as session:
+            await apply_goods_receipt_posted(session, event.data or {})
+            await session.commit()
+    except Exception:
+        _logger.warning("supplier_catalogs: stock booking for a posted receipt failed", exc_info=True)
+
+
 def register_subscribers() -> None:
     """Idempotently subscribe supplier-catalogs cross-module handlers."""
     event_bus.subscribe_once(MATERIAL_ADDED, _on_material_added)
     event_bus.subscribe_once(VENDOR_RATED, _on_vendor_rated)
-    _logger.info("Supplier Catalogs: 2 cross-module subscriber(s) registered")
+    event_bus.subscribe_once(PROCUREMENT_GR_POSTED, _on_procurement_gr_posted)
+    _logger.info("Supplier Catalogs: 3 cross-module subscriber(s) registered")

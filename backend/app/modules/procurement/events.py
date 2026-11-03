@@ -790,6 +790,7 @@ PUBLISHED_EVENTS = (
     "procurement.po.deleted",
     "procurement.gr.created",
     "procurement.gr.confirmed",
+    "procurement.goods_receipt.posted",
     "procurement.po.retainage_released",
 )
 
