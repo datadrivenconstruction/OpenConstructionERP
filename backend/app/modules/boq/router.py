@@ -4157,10 +4157,10 @@ async def validate_boq(
     branch_block = await BranchService(session).divergence(boq_id)
     if branch_block is not None:
         markup_context["branch"] = branch_block
-    # The applied risk contingency against the current risk inputs, for boq.risk.contingency_stale.
-    from app.modules.boq.risk_contingency import risk_inputs, stale_block
+    # The applied risk contingency against the current risk inputs, for the boq.risk.* rules.
+    from app.modules.boq.risk_contingency import RiskContingencyService
 
-    risk_block = stale_block(await service.list_markups(boq_id), risk_inputs(list(boq_data.positions)))
+    risk_block = await RiskContingencyService(service).rule_block(boq_id, boq_data, await service.list_markups(boq_id))
     if risk_block is not None:
         markup_context["risk_contingency"] = risk_block
 
@@ -11155,6 +11155,8 @@ async def get_risk_contingency(
     optimistic_pct: float = Query(default=15.0, ge=0.0, le=50.0),
     pessimistic_pct: float = Query(default=25.0, ge=0.0, le=100.0),
     correlation: float = Query(default=cre.DEFAULT_CORRELATION, ge=0.0, le=0.95),
+    source: Literal["positions", "register"] = Query(default="positions", description="Simulation input"),
+    mode: Literal["fixed", "percentage"] = Query(default="fixed", description="How the amount lands"),
     service: BOQService = Depends(_get_service),
 ) -> RiskContingencyStatus:
     """Suggested contingency at ``percentile`` (when given) plus the applied line.
@@ -11167,7 +11169,7 @@ async def get_risk_contingency(
 
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     params = (
-        RunParams(percentile, iterations, optimistic_pct, pessimistic_pct, correlation)
+        RunParams(percentile, iterations, optimistic_pct, pessimistic_pct, correlation, source, mode)
         if percentile is not None
         else None
     )
@@ -11198,7 +11200,15 @@ async def apply_risk_contingency(
     from app.modules.boq.risk_contingency import RiskContingencyService, RunParams
 
     await _verify_boq_owner(session, boq_id, user_id, payload)
-    params = RunParams(data.percentile, data.iterations, data.optimistic_pct, data.pessimistic_pct, data.correlation)
+    params = RunParams(
+        data.percentile,
+        data.iterations,
+        data.optimistic_pct,
+        data.pessimistic_pct,
+        data.correlation,
+        data.source,
+        data.mode,
+    )
     result = await RiskContingencyService(service).apply(
         boq_id,
         params,
