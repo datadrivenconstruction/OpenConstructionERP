@@ -735,6 +735,28 @@ class VendorInvoiceResponse(BaseModel):
     exception_reason: str | None = None
 
 
+class MigrationCounts(BaseModel):
+    total: int
+    to_copy: int
+    already: int
+
+
+class MigrationUnmappable(BaseModel):
+    kind: str
+    legacy_id: str
+    reference: str
+    reason: str
+
+
+class MigrationPreview(BaseModel):
+    """What copying a project's legacy orders and receipts into procurement would do."""
+
+    project_id: str
+    orders: MigrationCounts
+    receipts: MigrationCounts
+    unmappable: list[MigrationUnmappable]
+
+
 class MatchResult(BaseModel):
     """Outcome of an invoice 3-way match.
 

@@ -40,6 +40,7 @@ from app.modules.supplier_catalogs.schemas import (
     KYCDocumentCreate,
     KYCDocumentResponse,
     MatchResult,
+    MigrationPreview,
     PeppolIngestResult,
     POCreateExt,
     POResponseExt,
@@ -900,6 +901,20 @@ async def post_goods_receipt(
 ) -> GRResponse:
     gr = await service.post_goods_receipt(data, user_id=user_id)
     return GRResponse.model_validate(gr)
+
+
+@router.get(
+    "/migration/preview",
+    response_model=MigrationPreview,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.po.create"))],
+)
+async def migration_preview(
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    service: SupplierCatalogsService = Depends(_svc),
+) -> MigrationPreview:
+    """Dry run of moving this project's legacy orders and receipts under Procurement."""
+    return MigrationPreview.model_validate(await service.migration_preview(project_id, user_id=user_id))
 
 
 # ── Invoices ─────────────────────────────────────────────────────────────────
