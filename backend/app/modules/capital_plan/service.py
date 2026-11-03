@@ -257,8 +257,19 @@ class CapitalPlanService:
         await self.get_scenario(scenario_id)
         return await self.repo.list_items(scenario_id)
 
-    async def create_item(self, scenario_id: uuid.UUID, data: ItemCreate) -> CapitalPlanItem:
+    async def _require_project(self, project_id: uuid.UUID | None, user_id: str | None) -> None:
+        """A linked project must exist and be reachable by the caller."""
+        if project_id is None or user_id is None:
+            return
+        reachable = await accessible_project_ids(self.session, user_id, live_only=True)
+        if reachable is not None and project_id not in reachable:
+            raise _not_found("Project")
+
+    async def create_item(
+        self, scenario_id: uuid.UUID, data: ItemCreate, user_id: str | None = None
+    ) -> CapitalPlanItem:
         await self.get_scenario(scenario_id)
+        await self._require_project(data.project_id, user_id)
         item = CapitalPlanItem(
             scenario_id=scenario_id,
             project_id=data.project_id,
@@ -274,9 +285,10 @@ class CapitalPlanService:
         await self.repo.add(item)
         return item
 
-    async def patch_item(self, item_id: uuid.UUID, data: ItemPatch) -> CapitalPlanItem:
+    async def patch_item(self, item_id: uuid.UUID, data: ItemPatch, user_id: str | None = None) -> CapitalPlanItem:
         item = await self.get_item(item_id)
         fields = data.model_dump(exclude_unset=True)
+        await self._require_project(fields.get("project_id"), user_id)
         phasing = fields.pop("phasing", None)
         for key, value in fields.items():
             if value is not None or key in ("project_id", "score"):
