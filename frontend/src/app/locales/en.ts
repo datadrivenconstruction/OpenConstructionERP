@@ -42543,6 +42543,7 @@ const resource = {
     "geo_hub.surveys.list.no_overlay": "No image to show for this survey.",
     "geo_hub.surveys.list.delete": "Delete survey",
     "geo_hub.surveys.list.delete_confirm": "Delete this survey and its recorded progress? A linked scan is kept.",
+    "geo_hub.surveys.list.delete_failed": "The survey was not deleted",
     "geo_hub.surveys.progress.title": "Progress on {{date}}",
     "geo_hub.surveys.progress.hint": "Enter how far each activity really is on the survey date. The variance compares it with the schedule.",
     "geo_hub.surveys.progress.col_code": "Code",
