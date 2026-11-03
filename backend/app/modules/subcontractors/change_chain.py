@@ -601,6 +601,16 @@ class SubcontractChangeService:
                 payload["linked_sub_total"] = str(
                     sum((Decimal(str(c.amount)) for c in siblings if c.status in _LIVE_STATUSES), Decimal("0"))
                 )
+        agreement = await self.session.get(SubcontractAgreement, row.agreement_id)
+        terms = (agreement.metadata_ or {}) if agreement is not None else {}
+        days = terms.get("change_notice_days")
+        meta = row.metadata_ or {}
+        if isinstance(days, int):
+            payload["notice_window_days"] = days
+            payload["event_date"] = meta.get("event_date")
+            payload["notified_on"] = meta.get("notified_on") or (
+                row.created_at.date().isoformat() if row.created_at else None
+            )
         return payload
 
     async def validate(self, change_id: uuid.UUID) -> ValidationReport:
