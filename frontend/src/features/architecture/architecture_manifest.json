@@ -283411,6 +283411,11 @@
             {
               "name": "bids",
               "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "provis",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -283440,6 +283445,10 @@
             },
             {
               "name": "budget_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "budget_provis_total",
               "type": "Decimal"
             },
             {
