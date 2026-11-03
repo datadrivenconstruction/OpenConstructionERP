@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "As alterações de subempreitada de {code} somam {sub_total}, mais do que o valor da alteração do dono da obra {owner_value}",
       "suggestion": "Verifique os preços da subempreitada ou recupere a diferença junto do dono da obra antes de aprovar"
+    },
+    "change_owner_approved": {
+      "fail": "A alteração de subempreitada {code} é back-to-back, mas a alteração do dono da obra ainda não foi aprovada (estado: {status})",
+      "suggestion": "Aguarde a aprovação da alteração pelo dono da obra antes de aprovar a alteração de subempreitada"
+    },
+    "change_time_within_owner": {
+      "fail": "Os impactos de prazo das subempreitadas de {code} somam {sub_days} dias, mais do que os {owner_days} dias concedidos pelo dono da obra",
+      "suggestion": "Verifique os pedidos de prazo dos subempreiteiros ou solicite ao dono da obra uma prorrogação equivalente"
     }
   },
   "submittal": {

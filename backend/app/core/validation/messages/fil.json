@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Ang mga pagbabago sa subcontract para sa {code} ay may kabuuang {sub_total}, mas mataas kaysa sa halaga ng pagbabago ng may-ari na {owner_value}",
       "suggestion": "Suriin ang presyo ng subcontractor o singilin ang pagkakaiba sa may-ari bago aprubahan"
+    },
+    "change_owner_approved": {
+      "fail": "Ang pagbabago sa subcontract na {code} ay back-to-back, ngunit hindi pa aprubado ang pagbabago ng may-ari (katayuan: {status})",
+      "suggestion": "Hintayin muna na aprubahan ng may-ari ang pagbabago bago aprubahan ang pagbabago sa subcontract"
+    },
+    "change_time_within_owner": {
+      "fail": "Ang kabuuang epekto sa oras ng mga subcontract para sa {code} ay {sub_days} araw, mas marami kaysa sa {owner_days} araw na ibinigay ng may-ari",
+      "suggestion": "Suriin ang mga claim sa oras ng mga subcontractor o humiling sa may-ari ng katumbas na extension"
     }
   },
   "submittal": {

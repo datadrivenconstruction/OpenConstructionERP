@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Změny subdodávky pro {code} činí celkem {sub_total}, více než hodnota změny investora {owner_value}",
       "suggestion": "Zkontrolujte ceny subdodavatele nebo před schválením vymáhejte rozdíl od investora"
+    },
+    "change_owner_approved": {
+      "fail": "Změna subdodávky {code} je typu back-to-back, ale změna investora ještě není schválena (stav: {status})",
+      "suggestion": "Počkejte na schválení změny investorem, než schválíte změnu subdodávky"
+    },
+    "change_time_within_owner": {
+      "fail": "Časové dopady subdodávek u {code} činí celkem {sub_days} dní, více než {owner_days} dní přiznaných investorem",
+      "suggestion": "Zkontrolujte nároky subdodavatelů na čas nebo požádejte investora o odpovídající prodloužení"
     }
   },
   "submittal": {

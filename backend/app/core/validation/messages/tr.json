@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} için alt yüklenici değişiklikleri toplam {sub_total}, işveren değişiklik değeri {owner_value} tutarından fazla",
       "suggestion": "Onaylamadan önce alt yüklenici fiyatlarını kontrol edin veya farkı işverenden tahsil edin"
+    },
+    "change_owner_approved": {
+      "fail": "{code} alt yüklenici değişikliği back-to-back'tir, ancak işveren değişikliği henüz onaylanmadı (durum: {status})",
+      "suggestion": "Alt yüklenici değişikliğini onaylamadan önce işverenin değişikliği onaylamasını bekleyin"
+    },
+    "change_time_within_owner": {
+      "fail": "{code} için alt yüklenicilerin süre etkileri toplam {sub_days} gündür; işverenin verdiği {owner_days} günden fazladır",
+      "suggestion": "Alt yüklenicilerin süre taleplerini kontrol edin veya işverenden eşdeğer bir uzatma isteyin"
     }
   },
   "submittal": {

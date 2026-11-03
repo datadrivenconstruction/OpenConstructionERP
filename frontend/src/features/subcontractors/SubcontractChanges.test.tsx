@@ -45,7 +45,13 @@ const rollup = {
   sub_cost_total: '12000.00',
   margin: '-2000.00',
   margin_percent: '-20',
-  changes: [change()],
+  owner_approved: true,
+  approved_sub_total: '3000.00',
+  markup_retained: '300.00',
+  leakage: '-2300.00',
+  days_owner: 10,
+  days_sub_total: 13,
+  changes: [change({ markup_pct: '10.000', time_impact_days: 4 })],
 };
 
 function wrap(ui: React.ReactNode) {
@@ -95,8 +101,48 @@ describe('SubcontractChangesPanel', () => {
     expect(vi.mocked(apiPost).mock.calls[0][1]).toEqual({
       owner_change_type: 'variation_order',
       owner_change_id: 'vo-1',
-      lines: [{ agreement_id: 'ag-1', amount: '2500', title: 'Extra slab', back_to_back: true }],
+      lines: [
+        { agreement_id: 'ag-1', amount: '2500', title: 'Extra slab', back_to_back: true, markup_pct: 0, time_impact_days: 0 },
+      ],
     });
+  });
+});
+
+describe('SubcontractChangesPanel pass-through', () => {
+  it('shows markup and days columns and the leakage strip', async () => {
+    wrap(<SubcontractChangesPanel ownerType="variation_order" ownerId="vo-1" projectId="p-1" />);
+    expect((await screen.findByTestId('sc-markup-SC-001')).textContent).toBe('10.000');
+    expect(screen.getByTestId('sc-days-SC-001').textContent).toBe('4');
+    expect(screen.getByTestId('sc-leakage').textContent).toMatch(/2[,.\s]?300/);
+    expect(screen.getByTestId('sc-leakage').className).toContain('text-semantic-error');
+    expect(screen.getByTestId('sc-markup-retained').textContent).toMatch(/300/);
+    expect(screen.getByTestId('sc-days').textContent).toContain('10');
+    expect(screen.getByTestId('sc-days').textContent).toContain('13');
+  });
+
+  it('blocks approval with a chip while the owner change is not approved', async () => {
+    vi.mocked(apiGet).mockImplementation(async (path: string) => {
+      if (path.includes('/changes/by-owner-change/')) {
+        return { ...rollup, owner_status: 'draft', owner_approved: false, changes: [change({ status: 'submitted' })] };
+      }
+      if (path.includes('/validate/')) return { status: 'ok', results: [] };
+      return [];
+    });
+    wrap(<SubcontractChangesPanel ownerType="variation_order" ownerId="vo-1" projectId="p-1" />);
+    expect(await screen.findByTestId('sc-blocker-SC-001')).toBeTruthy();
+    expect(screen.getByText('approve').closest('button')?.disabled).toBe(true);
+  });
+
+  it('shows no chip and an enabled approve once the owner approved', async () => {
+    vi.mocked(apiGet).mockImplementation(async (path: string) => {
+      if (path.includes('/changes/by-owner-change/')) return { ...rollup, changes: [change({ status: 'submitted' })] };
+      if (path.includes('/validate/')) return { status: 'ok', results: [] };
+      return [];
+    });
+    wrap(<SubcontractChangesPanel ownerType="variation_order" ownerId="vo-1" projectId="p-1" />);
+    await screen.findByText('SC-001');
+    expect(screen.queryByTestId('sc-blocker-SC-001')).toBeNull();
+    expect(screen.getByText('approve').closest('button')?.disabled).toBe(false);
   });
 });
 

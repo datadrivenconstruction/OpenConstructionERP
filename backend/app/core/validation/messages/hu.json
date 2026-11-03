@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "A(z) {code} alvállalkozói módosításai összesen {sub_total}, ami több, mint a megrendelői módosítás értéke ({owner_value})",
       "suggestion": "Ellenőrizze az alvállalkozó árait, vagy jóváhagyás előtt hárítsa a különbözetet a megrendelőre"
+    },
+    "change_owner_approved": {
+      "fail": "A {code} alvállalkozói módosítás back-to-back, de a megrendelői módosítást még nem hagyták jóvá (állapot: {status})",
+      "suggestion": "Várja meg a megrendelő jóváhagyását, mielőtt jóváhagyja az alvállalkozói módosítást"
+    },
+    "change_time_within_owner": {
+      "fail": "A {code} alvállalkozói időhatásai összesen {sub_days} napot tesznek ki, többet a megrendelő által megadott {owner_days} napnál",
+      "suggestion": "Ellenőrizze az alvállalkozók időigényeit, vagy kérjen a megrendelőtől megfelelő hosszabbítást"
     }
   },
   "submittal": {
