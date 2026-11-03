@@ -6,6 +6,8 @@ Five families:
 * ``geo_hub.read``      - list / get any geo entity.
 * ``geo_hub.write``     - create / update anchors, imagery, terrain,
                           viewpoints, overlays.
+* ``geo_hub.create`` / ``geo_hub.update`` - site survey captures and the
+                          observations recorded against them.
 * ``geo_hub.delete``    - destructive removal of any project-scoped geo
                           entity (anchor, tileset, imagery layer,
                           viewpoint, vector overlay). Gated to MANAGER+
@@ -36,6 +38,8 @@ from app.core.permissions import Role, permission_registry
 GEO_HUB_PERMISSIONS: dict[str, Role] = {
     "geo_hub.read": Role.VIEWER,
     "geo_hub.write": Role.EDITOR,
+    "geo_hub.create": Role.EDITOR,
+    "geo_hub.update": Role.EDITOR,
     "geo_hub.delete": Role.MANAGER,
     "geo_hub.admin": Role.MANAGER,
     "geo_hub.job_run": Role.EDITOR,

@@ -43,6 +43,7 @@ import {
   ServerCrash,
   Loader2,
   MapPin,
+  ScanSearch,
   Crosshair,
   X,
 } from 'lucide-react';
@@ -73,6 +74,7 @@ import { GeoOverlayHud } from './GeoOverlayHud';
 import { MapLayerLegend } from './MapLayerLegend';
 import { OverlayLayer } from './OverlayLayer';
 import { OverlayPanel, type OverlayEditMode } from './OverlayPanel';
+import { SurveysPanel } from './SurveysPanel';
 import { TilesetSidebar } from './TilesetSidebar';
 import type { GeoPinBundle, Tileset } from './types';
 
@@ -373,6 +375,7 @@ export function ProjectGeoPage() {
   // drops the chosen one onto the map. Opened from the header button and
   // from the ``no_tilesets`` empty state.
   const [pickerOpen, setPickerOpen] = useState<boolean>(false);
+  const [surveysOpen, setSurveysOpen] = useState<boolean>(false);
   // After a PDF drawing is placed we fly the camera straight to its
   // centroid. ``key`` is a nonce so re-placing the same drawing re-flies
   // (the viewer's flyToTarget effect keys on it). 3D models use the
@@ -698,6 +701,9 @@ export function ProjectGeoPage() {
       onChangeEditMode={changeOverlayEditMode}
     />
   );
+  const chromeSurveys = surveysOpen ? (
+    <SurveysPanel projectId={projectId} onClose={() => setSurveysOpen(false)} />
+  ) : null;
   const chromeRest = (
     <>
       {/* Placement mode banner - while the user is dropping the
@@ -820,6 +826,18 @@ export function ProjectGeoPage() {
               {t('geo_hub.place.header_cta', { defaultValue: 'Place on map' })}
             </button>
           )}
+          {data?.anchor && (
+            <button
+              type="button"
+              onClick={() => setSurveysOpen((v) => !v)}
+              aria-pressed={surveysOpen}
+              data-testid="geo-surveys-toggle"
+              className="inline-flex items-center gap-1.5 rounded-md border border-black/10 px-3 py-1.5 text-xs font-semibold text-content-primary transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 aria-pressed:border-oe-blue dark:border-white/20 dark:hover:bg-white/10"
+            >
+              <ScanSearch size={14} strokeWidth={2.25} />
+              {t('geo_hub.surveys.tab', { defaultValue: 'Surveys' })}
+            </button>
+          )}
           {engine === '2d' && (
             <BasemapPicker current={basemap} onChange={chooseBasemap} />
           )}
@@ -921,6 +939,7 @@ export function ProjectGeoPage() {
                 <>
                   {chromeHud}
                   {chromeOverlayPanel}
+                  {chromeSurveys}
                   {chromeRest}
                 </>
               }
@@ -967,6 +986,7 @@ export function ProjectGeoPage() {
                     onChangeOpacity={tilesetOverlay.setOpacity}
                   />
                   {chromeOverlayPanel}
+                  {chromeSurveys}
                   <OverlayLayer
                     projectId={projectId}
                     cesium={cesiumRuntime?.cesium ?? null}

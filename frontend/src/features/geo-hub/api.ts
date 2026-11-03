@@ -28,6 +28,10 @@ import type {
   TileJob,
   Tileset,
   Viewpoint,
+  SurveyCapture,
+  SurveyObservation,
+  SurveyPlatform,
+  SurveyProgressRow,
 } from './types';
 
 const BASE = '/v1/geo-hub';
@@ -640,4 +644,50 @@ export function purgeGeocodeCache(
   return apiDelete<GeocodeCachePurgeResult>(
     `${BASE}/geocode/cache?older_than_days=${olderThanDays}`,
   );
+}
+
+/* ── Site survey captures ─────────────────────────────────────────────── */
+
+const SURVEY_BASE = `${BASE}/surveys`;
+
+export function listSurveys(projectId: string): Promise<SurveyCapture[]> {
+  return apiGet<SurveyCapture[]>(`${SURVEY_BASE}/?project_id=${encodeURIComponent(projectId)}`);
+}
+
+export function uploadOrthophoto(
+  projectId: string,
+  file: File,
+  options: { capturedOn: string; platform: SurveyPlatform; name?: string | null },
+): Promise<SurveyCapture> {
+  const fd = new FormData();
+  fd.append('project_id', projectId);
+  fd.append('captured_on', options.capturedOn);
+  fd.append('platform', options.platform);
+  if (options.name) fd.append('name', options.name);
+  fd.append('file', file);
+  return multipartUpload<SurveyCapture>(`${SURVEY_BASE}/orthophoto`, fd);
+}
+
+export function surveyFromScan(body: {
+  scan_id: string;
+  captured_on?: string | null;
+  platform: SurveyPlatform;
+}): Promise<SurveyCapture> {
+  return apiPost<SurveyCapture, typeof body>(`${SURVEY_BASE}/from-scan`, body);
+}
+
+export function deleteSurvey(id: string): Promise<void> {
+  return apiDelete(`${SURVEY_BASE}/${id}`);
+}
+
+export function getSurveyProgress(id: string): Promise<SurveyProgressRow[]> {
+  return apiGet<SurveyProgressRow[]>(`${SURVEY_BASE}/${id}/progress`);
+}
+
+export function putSurveyObservation(
+  surveyId: string,
+  activityId: string,
+  body: { observed_pct: number; note?: string },
+): Promise<SurveyObservation> {
+  return apiPut<SurveyObservation, typeof body>(`${SURVEY_BASE}/${surveyId}/observations/${activityId}`, body);
 }

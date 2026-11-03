@@ -34,14 +34,17 @@ use ``Decimal`` for stable serialisation across SQLite + Postgres.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime  # noqa: F401 - used in Mapped[datetime] annotations
+from datetime import date, datetime  # noqa: F401 - used in Mapped[...] annotations
 from decimal import Decimal
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -798,7 +801,81 @@ class GeocodingConsent(Base):
     decided_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
 
+# ── Site survey captures ─────────────────────────────────────────────────
+
+
+class SurveyCapture(Base):
+    """One dated reality capture of a site: an orthophoto or a point cloud scan.
+
+    ``overlay_id`` (orthophoto: a raster overlay this capture created) and
+    ``scan_id`` (an existing point cloud scan, never owned by the capture) are
+    mutually exclusive for orthophoto and point_cloud; a dsm may use either.
+    """
+
+    __tablename__ = "oe_geo_survey_capture"
+    __table_args__ = (
+        Index("ix_oe_geo_survey_capture_project_date", "project_id", "captured_on"),
+        CheckConstraint(
+            "(kind = 'orthophoto' AND overlay_id IS NOT NULL AND scan_id IS NULL)"
+            " OR (kind = 'point_cloud' AND scan_id IS NOT NULL AND overlay_id IS NULL)"
+            " OR (kind = 'dsm' AND (overlay_id IS NOT NULL OR scan_id IS NOT NULL))",
+            name="ck_oe_geo_survey_capture_source",
+        ),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    platform: Mapped[str] = mapped_column(String(16), nullable=False, default="drone", server_default="drone")
+    captured_on: Mapped[date] = mapped_column(Date, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    overlay_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), ForeignKey("oe_geo_hub_raster_overlay.id", ondelete="CASCADE"), nullable=True
+    )
+    scan_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), ForeignKey("oe_pointcloud_scan_dataset.id", ondelete="CASCADE"), nullable=True
+    )
+    gsd_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    crs_epsg: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    bbox_min_lat: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    bbox_min_lon: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    bbox_max_lat: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    bbox_max_lon: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    sensor: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    width_px: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height_px: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}"
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<SurveyCapture {self.id} ({self.kind} / {self.captured_on})>"
+
+
+class SurveyObservation(Base):
+    """A human-entered "how far is it really" for one activity on one capture."""
+
+    __tablename__ = "oe_geo_survey_observation"
+    __table_args__ = (UniqueConstraint("capture_id", "activity_id", name="uq_oe_geo_survey_observation"),)
+
+    capture_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_geo_survey_capture.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    activity_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_schedule_activity.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    observed_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 __all__ = [
+    "SurveyCapture",
+    "SurveyObservation",
     "GeoAnchor",
     "GeoOverlay",
     "GeoRasterOverlay",
