@@ -23,6 +23,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, UploadFile, status
@@ -160,6 +161,11 @@ class InvoiceCaptureService:
             raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, str(exc)) from exc
 
         engine, text, fields, conf = self._extract(payload, mime)
+        if "po_reference" not in fields and text:
+            ref = logic.extract_po_reference(text)
+            if ref:
+                fields["po_reference"] = ref
+                conf["po_reference"] = 0.5
 
         row = CapturedInvoice(
             id=capture_id,
@@ -178,8 +184,11 @@ class InvoiceCaptureService:
             created_by=uuid.UUID(user_id) if user_id else None,
         )
         self._apply_fields(row, fields)
+        if fields.get("line_items"):
+            row.line_items = list(fields["line_items"])
         self.session.add(row)
         await self.session.flush()
+        await self._resolve_po_reference(row)
 
         await self._log(
             row,
@@ -213,8 +222,10 @@ class InvoiceCaptureService:
             field_confidence={},
             created_by=uuid.UUID(user_id) if user_id else None,
         )
+        row.po_reference = (data.po_reference or "").strip() or None
         self.session.add(row)
         await self.session.flush()
+        await self._resolve_po_reference(row)
         await self._log(row, action="captured", to_status="captured", actor_id=user_id, metadata={"engine": "manual"})
         return row
 
@@ -247,6 +258,10 @@ class InvoiceCaptureService:
             logger.info("Inbound XML is not a UBL/CII invoice: %s", exc)
             return "none", "", {}, {}
         fields = {k: v for k, v in parsed.capture_fields().items() if v not in ("", None)}
+        if parsed.order_reference:
+            fields["po_reference"] = parsed.order_reference
+        if parsed.lines:
+            fields["line_items"] = parsed.lines
         summary = (
             f"{parsed.syntax.upper()} e-invoice {parsed.invoice_number} from {parsed.supplier_name}"
             f" ({parsed.supplier_endpoint or 'no endpoint'})"
@@ -356,6 +371,10 @@ class InvoiceCaptureService:
                 setattr(row, money_field, logic.to_decimal(patch[money_field]))
         if "line_items" in patch and patch["line_items"] is not None:
             row.line_items = [dict(li) for li in patch["line_items"]]
+        if "po_reference" in patch and patch["po_reference"] is not None:
+            row.po_reference = patch["po_reference"].strip() or None
+            if row.purchase_order_id is None:
+                await self._resolve_po_reference(row)
         await self.session.flush()
         await self._log(row, action="updated", actor_id=user_id, before=before, after=self._snapshot(row))
         return row
@@ -405,17 +424,35 @@ class InvoiceCaptureService:
         )
         return row
 
-    async def approve(self, capture_id: uuid.UUID, user_id: str | None) -> CapturedInvoice:
+    async def approve(
+        self, capture_id: uuid.UUID, user_id: str | None, *, acknowledge_match: bool = False
+    ) -> CapturedInvoice:
         row = await self.get(capture_id)
         self._require_transition(row, "approved")
-        findings = await self._validate(row, require_booking=True, require_approval=False)
+        findings = await self._validate(
+            row, require_booking=True, require_approval=False, enforce_match_ack=True, ack_all=acknowledge_match
+        )
         self._raise_on_errors(findings)
+        match_codes = sorted({f.code for f in findings if f.code.startswith("po_match:")})
+        if match_codes:
+            # Reassign, not mutate: a JSON column does not track in-place edits.
+            row.metadata_ = {
+                **(row.metadata_ or {}),
+                "po_match_ack": {"codes": match_codes, "by": user_id, "at": _utcnow_iso()},
+            }
         prior = row.status
         row.status = "approved"
         row.approver_id = uuid.UUID(user_id) if user_id else None
         row.approved_at = _utcnow_iso()
         await self.session.flush()
-        await self._log(row, action="approved", from_status=prior, to_status="approved", actor_id=user_id)
+        await self._log(
+            row,
+            action="approved",
+            from_status=prior,
+            to_status="approved",
+            actor_id=user_id,
+            metadata={"acknowledged_match": match_codes} if match_codes else None,
+        )
         return row
 
     async def reject(self, capture_id: uuid.UUID, reason: str, user_id: str | None) -> CapturedInvoice:
@@ -458,7 +495,7 @@ class InvoiceCaptureService:
             return row
         self._require_transition(row, "posted")
 
-        findings = await self._validate(row, require_booking=True, require_approval=True)
+        findings = await self._validate(row, require_booking=True, require_approval=True, enforce_match_ack=True)
         self._raise_on_errors(findings)
 
         net = logic.to_decimal(row.amount_net)
@@ -491,6 +528,8 @@ class InvoiceCaptureService:
             )
         )
 
+        cost_lines = await self._resolve_cost_lines(row, booking_project, net)
+
         # Create the payable Invoice for downstream payment tracking, linked back.
         linked = await self.finance.create_invoice(
             InvoiceCreate(
@@ -505,7 +544,8 @@ class InvoiceCaptureService:
                 tax_amount=logic.money_str(tax),
                 amount_total=logic.money_str(gross),
                 status="approved",
-                line_items=self._invoice_line_items(row),
+                purchase_order_id=row.purchase_order_id,
+                line_items=self._invoice_line_items(row, cost_lines),
                 metadata={
                     "captured_invoice_id": str(row.id),
                     "gl_transaction_ref": transaction_ref,
@@ -522,6 +562,7 @@ class InvoiceCaptureService:
             # by ``logic.validate_amounts``.
             enforce_line_sum=False,
         )
+        actuals = await self._post_actuals(row, linked.id, booking_project, cost_lines)
 
         sealed_at = _utcnow_iso()
         row.status = "posted"
@@ -544,13 +585,108 @@ class InvoiceCaptureService:
                 "linked_invoice_id": str(linked.id),
                 "archive_hash": row.archive_hash,
                 "retention_until": row.retention_until,
+                "cost_actuals": actuals,
             },
         )
         return row
 
-    def _invoice_line_items(self, row: CapturedInvoice) -> list[InvoiceLineItemCreate]:
+    # ── Cost control: actuals on the cost line ────────────────────────────────
+
+    async def _resolve_cost_lines(
+        self, row: CapturedInvoice, project_id: uuid.UUID, net: Decimal
+    ) -> list[tuple[int | None, uuid.UUID | None, Decimal]]:
+        """Pair each posted amount with the cost line its code names, as (line index, cost line, amount).
+
+        Draft lines are used one by one only when they add up to the net; otherwise the whole net goes to
+        the booking cost code (index ``None``), so cost control and the ledger always carry the same figure.
+        """
+        lines = [dict(li) for li in (row.line_items or [])]
+        amounts = [logic.to_decimal(li.get("amount")) for li in lines]
+        per_line = bool(lines) and abs(sum(amounts, Decimal("0")) - net) <= logic.AMOUNT_TOLERANCE
+        if not per_line:
+            lines, amounts = [{"cost_code": row.booking_cost_code}], [net]
+        codes = {str(li.get("cost_code") or row.booking_cost_code or "").strip() for li in lines} - {""}
+        by_code: dict[str, uuid.UUID] = {}
+        if codes:
+            try:
+                from app.modules.costmodel.models import CostLine
+            except ImportError:
+                logger.debug("costmodel not installed; invoice actuals stay on the ledger only")
+            else:
+                found = await self.session.execute(
+                    select(CostLine.code, CostLine.id).where(
+                        CostLine.project_id == project_id, CostLine.code.in_(sorted(codes))
+                    )
+                )
+                by_code = {code: cid for code, cid in found.all()}
+        out: list[tuple[int | None, uuid.UUID | None, Decimal]] = []
+        for idx, (li, amount) in enumerate(zip(lines, amounts, strict=True)):
+            code = str(li.get("cost_code") or row.booking_cost_code or "").strip()
+            out.append((idx if per_line else None, by_code.get(code), amount))
+        return out
+
+    async def _post_actuals(
+        self,
+        row: CapturedInvoice,
+        invoice_id: uuid.UUID,
+        project_id: uuid.UUID,
+        cost_lines: list[tuple[int | None, uuid.UUID | None, Decimal]],
+    ) -> dict[str, Any]:
+        """Post the approved invoice's net as actual cost on the cost spine, once per line.
+
+        Never fails the booking: the ledger entry is already written, so a spine problem (no project base
+        currency, costmodel not installed) is recorded in the audit trail and the row metadata instead.
+        """
+        try:
+            from app.modules.costmodel.service import CostSpineService
+            from app.modules.finance.service import _convert_to_base, _project_fx_map
+            from app.modules.projects.repository import ProjectRepository
+        except ImportError:
+            return {"posted": 0, "skipped": "costmodel_unavailable"}
+
+        project = await ProjectRepository(self.session).get_by_id(project_id)
+        base = (getattr(project, "currency", "") or "").strip().upper() if project else ""
+        fx_map = _project_fx_map(project)
+        currency = row.currency_code or ""
+        spine = CostSpineService(self.session)
+        posted = uncoded = 0
+        errors: list[str] = []
+        for idx, (_line, cost_line_id, amount) in enumerate(cost_lines):
+            if amount <= 0:
+                continue
+            ref = f"{row.id}:{idx}"
+            base_amount, _missing = _convert_to_base({currency: amount}, base_currency=base, fx_rates_map=fx_map)
+            try:
+                async with self.session.begin_nested():
+                    await spine.post_actual_to_budget_line(
+                        project_id=project_id,
+                        cost_line_id=cost_line_id,
+                        cost_category=None,
+                        amount_base=base_amount,
+                        currency=currency,
+                        source_kind="inbox_invoice",
+                        source_ref=ref,
+                        idempotency_key=f"capture-actual:{ref}",
+                    )
+                posted += 1
+                uncoded += cost_line_id is None
+            except HTTPException as exc:
+                errors.append(str(exc.detail)[:200])
+        result: dict[str, Any] = {"posted": posted, "uncoded": uncoded, "invoice_id": str(invoice_id)}
+        if errors:
+            result["errors"] = errors
+            logger.warning("Invoice %s: cost actuals not posted: %s", row.id, errors)
+        row.metadata_ = {**(row.metadata_ or {}), "cost_actuals": result}
+        return result
+
+    def _invoice_line_items(
+        self,
+        row: CapturedInvoice,
+        cost_lines: list[tuple[int | None, uuid.UUID | None, Decimal]] | None = None,
+    ) -> list[InvoiceLineItemCreate]:
+        line_ids = {idx: cid for idx, cid, _ in (cost_lines or []) if idx is not None}
         items: list[InvoiceLineItemCreate] = []
-        for li in row.line_items or []:
+        for idx, li in enumerate(row.line_items or []):
             items.append(
                 InvoiceLineItemCreate(
                     description=str(li.get("description") or "Invoice line")[:500],
@@ -558,6 +694,7 @@ class InvoiceCaptureService:
                     unit_rate=logic.money_str(li.get("unit_rate", "0")),
                     amount=logic.money_str(li.get("amount", "0")),
                     cost_category=(str(li["cost_code"])[:100] if li.get("cost_code") else None),
+                    cost_line_id=line_ids.get(idx),
                 )
             )
         if not items:
@@ -660,12 +797,15 @@ class InvoiceCaptureService:
         require_booking: bool,
         require_approval: bool,
         override_booking: BookingInput | None = None,
+        enforce_match_ack: bool = False,
+        ack_all: bool = False,
     ) -> list[logic.Finding]:
         expense = override_booking.expense_account if override_booking else row.booking_expense_account
         payable = override_booking.payable_account if override_booking else row.booking_payable_account
         tax_acct = override_booking.tax_account if override_booking else row.booking_tax_account
         duplicate = await self._find_duplicate(row)
-        return logic.validate_capture(
+        po_summary, match_results = await self._po_summary_and_match(row)
+        findings = logic.validate_capture(
             status=row.status,
             net=logic.to_decimal(row.amount_net),
             tax=logic.to_decimal(row.amount_tax),
@@ -680,6 +820,122 @@ class InvoiceCaptureService:
             require_booking=require_booking,
             require_approval=require_approval,
         )
+        findings.extend(
+            logic.validate_po_link(
+                po=po_summary,
+                po_reference=row.po_reference or "",
+                supplier_contact_id=row.supplier_contact_id,
+                currency_code=row.currency_code or "",
+            )
+        )
+        match = logic.match_report_findings(match_results)
+        findings.extend(match)
+        if enforce_match_ack:
+            stored = (row.metadata_ or {}).get("po_match_ack") or {}
+            acked = {f.code for f in match} if ack_all else set(stored.get("codes") or [])
+            findings.extend(logic.match_unacknowledged(match, acked))
+        return findings
+
+    # ── Order link ──────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _procurement(session: AsyncSession) -> Any | None:
+        try:
+            from app.modules.procurement.service import ProcurementService
+        except ImportError:
+            return None
+        return ProcurementService(session)
+
+    async def _po_summary_and_match(self, row: CapturedInvoice) -> tuple[dict | None, list[dict]]:
+        """The linked order as a summary dict plus the failed/passed ``invoice_po_match`` rule results.
+
+        The matching itself is procurement's: invoiced-so-far, confirmed goods receipts and the order's own
+        tolerances live there, so the inbox neither re-implements them nor drifts from the invoice form.
+        """
+        if row.purchase_order_id is None:
+            return None, []
+        procurement = self._procurement(self.session)
+        if procurement is None:
+            return None, []
+        try:
+            po = await procurement.get_po(row.purchase_order_id)
+        except HTTPException:
+            return {}, []
+        summary = {
+            "number": po.po_number,
+            "status": po.status,
+            "vendor_contact_id": po.vendor_contact_id,
+            "currency_code": po.currency_code,
+        }
+        report = await procurement.check_invoice_against_po(
+            po.id,
+            invoice_net=format(logic.to_decimal(row.amount_net), "f"),
+            lines=[dict(li) for li in (row.line_items or [])],
+            exclude_invoice_id=row.posted_invoice_id,
+            invoice_ref=row.invoice_number or None,
+        )
+        return summary, list(report.get("results") or [])
+
+    async def _resolve_po_reference(self, row: CapturedInvoice) -> None:
+        """Link the order whose number the invoice names, when exactly one open order on the project has it."""
+        ref = (row.po_reference or "").strip()
+        if not ref or row.purchase_order_id is not None:
+            return
+        try:
+            from app.modules.procurement.models import PurchaseOrder
+        except ImportError:
+            return
+        found = (
+            await self.session.execute(
+                select(PurchaseOrder.id, PurchaseOrder.status, PurchaseOrder.vendor_contact_id).where(
+                    PurchaseOrder.project_id == row.project_id,
+                    func.lower(PurchaseOrder.po_number) == ref.lower(),
+                )
+            )
+        ).all()
+        if len(found) == 1 and found[0][1] in logic.BILLABLE_PO_STATUSES:
+            row.purchase_order_id = found[0][0]
+            if not row.supplier_contact_id and found[0][2]:
+                row.supplier_contact_id = found[0][2]
+            await self.session.flush()
+
+    async def link_purchase_order(
+        self, capture_id: uuid.UUID, purchase_order_id: uuid.UUID | None, user_id: str | None
+    ) -> CapturedInvoice:
+        """Link (or unlink) the order a captured invoice bills; any earlier acknowledgement is dropped."""
+        row = await self.get(capture_id)
+        self._guard_editable(row)
+        before = self._snapshot(row)
+        if purchase_order_id is not None:
+            procurement = self._procurement(self.session)
+            if procurement is None:
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Procurement is not installed.")
+            po = await procurement.get_po(purchase_order_id)
+            if po.project_id != row.project_id:
+                raise HTTPException(
+                    status.HTTP_422_UNPROCESSABLE_CONTENT, "The purchase order does not belong to this project."
+                )
+            if po.status not in logic.BILLABLE_PO_STATUSES:
+                raise HTTPException(
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    f"Order {po.po_number} is '{po.status}'; only an issued order can be invoiced.",
+                )
+            row.purchase_order_id = po.id
+            row.po_reference = po.po_number
+            if not row.supplier_contact_id and po.vendor_contact_id:
+                row.supplier_contact_id = po.vendor_contact_id
+        else:
+            row.purchase_order_id = None
+        row.metadata_ = {k: v for k, v in (row.metadata_ or {}).items() if k != "po_match_ack"}
+        await self.session.flush()
+        await self._log(
+            row,
+            action="po_linked" if purchase_order_id else "po_unlinked",
+            actor_id=user_id,
+            before=before,
+            after=self._snapshot(row),
+        )
+        return row
 
     async def _find_duplicate(self, row: CapturedInvoice) -> dict | None:
         if not (row.invoice_number or "").strip():

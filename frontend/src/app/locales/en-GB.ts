@@ -1269,6 +1269,12 @@ const resource = {
     "sheets.split_needs_review_other": "{{count}} of them need review before they supersede earlier revisions.",
     "sheets.title_block_alt": "Title block of the sheet",
     "sheets.title_block_preview": "Title block",
+    "finance.inbox.po_section": "Purchase order",
+    "finance.inbox.po_reference": "Order reference on the invoice",
+    "finance.inbox.po_label": "Purchase order",
+    "finance.inbox.po_none": "Not linked to an order",
+    "finance.inbox.po_no_orders": "No open purchase orders on this project.",
+    "finance.inbox.po_ack": "I accept the mismatch between this invoice and its order or goods receipts.",
   }
 } as { translation: Record<string, string> };
 

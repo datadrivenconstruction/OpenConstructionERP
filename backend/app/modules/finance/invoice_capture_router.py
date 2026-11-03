@@ -33,6 +33,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.finance.invoice_capture_logic import BookingProposal, Finding, findings_to_dicts
 from app.modules.finance.invoice_capture_models import CapturedInvoice
 from app.modules.finance.invoice_capture_schemas import (
+    ApproveInput,
     ArchiveVerifyResponse,
     AuditEntryResponse,
     AuditListResponse,
@@ -42,6 +43,7 @@ from app.modules.finance.invoice_capture_schemas import (
     CaptureManualCreate,
     CaptureResponse,
     CaptureUpdate,
+    PurchaseOrderLink,
     QueryInput,
     RejectInput,
 )
@@ -268,6 +270,7 @@ async def approve_capture(
     capture_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
+    data: ApproveInput | None = None,
     _perm: None = Depends(RequirePermission("finance.approve")),
     service: InvoiceCaptureService = Depends(_get_capture_service),
 ) -> CaptureResponse:
@@ -275,7 +278,27 @@ async def approve_capture(
     if not allowed:
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_capture_access(session, capture_id, user_id)
-    row = await service.approve(capture_id, user_id)
+    row = await service.approve(capture_id, user_id, acknowledge_match=bool(data and data.acknowledge_match))
+    return await _detailed_response(service, row)
+
+
+@capture_router.put(
+    "/{capture_id}/purchase-order",
+    response_model=CaptureResponse,
+    summary="Link a captured invoice to its purchase order",
+    description="Match the invoice against an order and its goods receipts (the procurement matcher, "
+    "with the order's own tolerances). Send null to clear the link.",
+)
+async def link_purchase_order(
+    capture_id: uuid.UUID,
+    data: PurchaseOrderLink,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.capture.create")),
+    service: InvoiceCaptureService = Depends(_get_capture_service),
+) -> CaptureResponse:
+    await _require_capture_access(session, capture_id, user_id)
+    row = await service.link_purchase_order(capture_id, data.purchase_order_id, user_id)
     return await _detailed_response(service, row)
 
 

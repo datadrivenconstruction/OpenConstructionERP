@@ -26,12 +26,14 @@ import {
   apiGet,
   apiPost,
   apiPatch,
+  apiPut,
   API_BASE,
   getAuthToken,
   extractErrorMessageFromBody,
   downloadWithAuth,
 } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { InvoiceInboxOrderLink, hasOrderMismatch } from './InvoiceInboxOrderLink';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -62,6 +64,9 @@ interface Capture {
   has_document: boolean;
   supplier_name: string;
   supplier_tax_id: string | null;
+  supplier_contact_id: string | null;
+  po_reference: string | null;
+  purchase_order_id: string | null;
   invoice_number: string;
   invoice_date: string;
   due_date: string | null;
@@ -100,6 +105,7 @@ interface LedgerAccount {
 type EditableField =
   | 'supplier_name'
   | 'supplier_tax_id'
+  | 'po_reference'
   | 'invoice_number'
   | 'invoice_date'
   | 'due_date'
@@ -446,6 +452,7 @@ function CaptureDetail({
   const [verify, setVerify] = useState<ArchiveVerify | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [queryNote, setQueryNote] = useState('');
+  const [ackMatch, setAckMatch] = useState(false);
 
   // Seed the local form once the capture loads or changes identity.
   const seededFor = useRef<string | null>(null);
@@ -454,6 +461,7 @@ function CaptureDetail({
     setDraft({
       supplier_name: capture.supplier_name,
       supplier_tax_id: capture.supplier_tax_id,
+      po_reference: capture.po_reference,
       invoice_number: capture.invoice_number,
       invoice_date: capture.invoice_date,
       due_date: capture.due_date,
@@ -470,6 +478,7 @@ function CaptureDetail({
       cost_code: capture.booking_cost_code ?? p?.cost_code ?? '',
     });
     setVerify(null);
+    setAckMatch(false);
   }
 
   const refresh = () => {
@@ -503,6 +512,17 @@ function CaptureDetail({
       addToast({ type: 'error', title: t('finance.inbox.action_failed', { defaultValue: 'Action failed' }), message: e.message }),
   });
 
+  const linkMut = useMutation({
+    mutationFn: (poId: string) =>
+      apiPut<Capture>(`/v1/finance/inbox/${captureId}/purchase-order`, { purchase_order_id: poId || null }),
+    onSuccess: () => {
+      setAckMatch(false);
+      refresh();
+    },
+    onError: (e: Error) =>
+      addToast({ type: 'error', title: t('finance.inbox.action_failed', { defaultValue: 'Action failed' }), message: e.message }),
+  });
+
   const enrichMut = useMutation({
     mutationFn: () => apiPost<Capture>(`/v1/finance/inbox/${captureId}/enrich`),
     onSuccess: () => {
@@ -527,6 +547,7 @@ function CaptureDetail({
     saveMut.mutate({
       supplier_name: draft.supplier_name ?? '',
       supplier_tax_id: draft.supplier_tax_id ?? null,
+      po_reference: draft.po_reference ?? '',
       invoice_number: draft.invoice_number ?? '',
       invoice_date: draft.invoice_date ?? '',
       due_date: draft.due_date || null,
@@ -569,6 +590,7 @@ function CaptureDetail({
   const status = capture?.status;
   const errors = (capture?.validation ?? []).filter((f) => f.severity === 'error');
   const warnings = (capture?.validation ?? []).filter((f) => f.severity === 'warning');
+  const mismatch = hasOrderMismatch(capture?.validation);
 
   const footer = (
     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -607,7 +629,10 @@ function CaptureDetail({
           </Button>
         )}
         {status === 'coded' && (
-          <Button onClick={() => actionMut.mutate({ path: 'approve' })} disabled={actionMut.isPending}>
+          <Button
+            onClick={() => actionMut.mutate({ path: 'approve', body: { acknowledge_match: ackMatch } })}
+            disabled={actionMut.isPending || (mismatch && !ackMatch)}
+          >
             <CheckCircle2 size={15} />
             {t('finance.inbox.approve', { defaultValue: 'Approve' })}
           </Button>
@@ -798,6 +823,48 @@ function CaptureDetail({
                 />
               </Field>
             </div>
+          </section>
+
+          {/* Purchase order and goods-receipt match */}
+          <section>
+            <h4 className="mb-2 text-sm font-semibold text-content-primary">
+              {t('finance.inbox.po_section', { defaultValue: 'Purchase order' })}
+            </h4>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label={t('finance.inbox.po_reference', { defaultValue: 'Order reference on the invoice' })}>
+                <input
+                  className={inputCls}
+                  disabled={!editable}
+                  maxLength={100}
+                  value={draft.po_reference ?? ''}
+                  onChange={(e) => setField('po_reference', e.target.value)}
+                />
+              </Field>
+              <Field label={t('finance.inbox.po_label', { defaultValue: 'Purchase order' })}>
+                <InvoiceInboxOrderLink
+                  projectId={capture.project_id}
+                  supplierContactId={capture.supplier_contact_id}
+                  value={capture.purchase_order_id ?? ''}
+                  disabled={!editable || linkMut.isPending}
+                  onChange={(poId) => linkMut.mutate(poId)}
+                />
+              </Field>
+            </div>
+            {mismatch && status === 'coded' && (
+              <label className="mt-3 flex items-start gap-2 text-sm text-content-primary" data-testid="inbox-po-ack">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={ackMatch}
+                  onChange={(e) => setAckMatch(e.target.checked)}
+                />
+                <span>
+                  {t('finance.inbox.po_ack', {
+                    defaultValue: 'I accept the mismatch between this invoice and its order or goods receipts.',
+                  })}
+                </span>
+              </label>
+            )}
           </section>
 
           {/* Booking */}
