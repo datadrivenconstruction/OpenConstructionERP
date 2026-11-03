@@ -377,6 +377,9 @@ const ConstructionControlPage = lazy(() =>
 const PortfolioPage = lazy(() =>
   import('@/features/portfolio').then((m) => ({ default: m.PortfolioPage }))
 );
+const CapitalPlanPage = lazy(() =>
+  import('@/features/capital_plan').then((m) => ({ default: m.CapitalPlanPage }))
+);
 const ReportingPage = lazy(() =>
   import('@/features/reporting/ReportingPage').then((m) => ({ default: m.ReportingPage }))
 );
@@ -1678,6 +1681,7 @@ export default function App() {
             so it is NOT scoped to the active project. Note: /portfolio/capacity
             and /portfolio/leveling are distinct resource-planning surfaces. */}
         <Route path="/portfolio" element={<P title="Portfolio"><PortfolioPage /></P>} />
+        <Route path="/capital-plan" element={<P title="Capital plan"><CapitalPlanPage /></P>} />
         <Route path="/portfolio/wip" element={<P title="WIP report"><WipReportPage /></P>} />
         <Route path="/projects/:projectId/wip" element={<P title="WIP report"><ProjectWipPage /></P>} />
 

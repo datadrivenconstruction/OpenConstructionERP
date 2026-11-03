@@ -448,6 +448,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
       { labelKey: 'nav.schedule_advanced', to: '/schedule-advanced', icon: LineChart, advancedOnly: true },
       { labelKey: 'portfolio.title', to: '/portfolio', icon: Network, advancedOnly: true },
+      { labelKey: 'capital_plan.title', to: '/capital-plan', icon: Wallet, advancedOnly: true },
       { labelKey: 'nav.takt', to: '/takt', icon: GitBranch, advancedOnly: true },
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
     ],

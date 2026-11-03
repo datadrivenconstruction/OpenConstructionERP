@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- Capital plan module: set the yearly budget, spread each project's cost over its years and see where demand runs over the budget. Copy a scenario to try a delay without touching the baseline, compare the two, and get a funding suggestion by priority, score and cost that you confirm before it is applied. Imports projects from a portfolio node and exports to Excel.
+
 ## [19.0.0] - 2026-11-02
 
 ### Added

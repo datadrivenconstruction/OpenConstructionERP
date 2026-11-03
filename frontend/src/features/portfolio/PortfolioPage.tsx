@@ -241,6 +241,14 @@ export function PortfolioPage() {
           defaultValue:
             'An enterprise schedule-of-schedules: organise projects into portfolios and programmes, then run one critical-path pass across every linked schedule under a node to see the cross-project critical path and finish date.',
         })}
+        actions={
+          <Link
+            to="/capital-plan"
+            className="inline-flex h-9 items-center rounded-lg border border-border bg-surface-primary px-3 text-sm font-medium text-content-primary hover:bg-surface-secondary"
+          >
+            {t('capital_plan.open', { defaultValue: 'Capital plan' })}
+          </Link>
+        }
       />
 
       <div className="mt-4">

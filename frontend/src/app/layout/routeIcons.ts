@@ -184,6 +184,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/cost-control': Scale,
   '/progress': Activity,
   '/measurement-book': Ruler,
+  '/capital-plan': Wallet,
   '/portfolio/capacity': CalendarRange,
   '/portfolio/leveling': Scale,
   '/risks': ShieldAlert,
