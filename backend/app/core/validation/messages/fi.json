@@ -968,6 +968,10 @@
       "insurance": "Vakuutus",
       "method_statement": "Työselostus",
       "other": "Muu asiakirja"
+    },
+    "notice_window": {
+      "fail": "Aliurakan muutos {code} ilmoitettiin {late} päivää sopimuksen {days} päivän määräajan jälkeen",
+      "suggestion": "Tarkista ilmoitusehdot ennen kustannuksen hyväksymistä: myöhästynyt ilmoitus voi sulkea vaatimuksen pois"
     }
   },
   "submittal": {
@@ -998,6 +1002,18 @@
     "linked_scope_present": {
       "fail": "Tätä hyväksyntäaineistoa ei ole yhdistetty yhteenkään työsisältönimikkeeseen, joten se ei kohdistu pakettiin",
       "suggestion": "Yhdistä määräluettelon nimikkeet, jotka tämä aineisto kattaa"
+    },
+    "spec_section_format": {
+      "fail": "Osa {section} ei ole tunnistettu osanumero",
+      "suggestion": "Käytä MasterFormat-numeroa, esimerkiksi 03 30 00, tai LB- tai NBS-koodia"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} osalle {section} on jo rekisterissä",
+      "suggestion": "Ohita ehdotus tai muokkaa sitä niin, että se on eri hyväksyttävä asiakirja"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Osa {section} vaatii yleensä hyväksyttävän asiakirjan lajia {kind}, jota erittely ei luettele",
+      "suggestion": "Tarkista erittely tai lisää asiakirja käsin"
     }
   },
   "rfq": {
@@ -2555,6 +2571,30 @@
     },
     "index_attribution": {
       "fail": "ArchSD-hintaindeksistä puuttuu lähde: mainitse Architectural Services Department"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Sivulla {page} ei ole luettavaa piirustusnumeroa",
+      "suggestion": "Syötä piirustusnumero piirustusotsikosta"
+    },
+    "number_unique_in_set": {
+      "fail": "Piirustusnumero {sheet} esiintyy {count} sivulla tässä latauksessa",
+      "suggestion": "Tarkista piirustussarja: sivu voi olla kaksinkertainen tai väärin numeroitu"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Piirustuksen {sheet} versio {revision} on pienempi kuin nykyinen versio {current}",
+      "suggestion": "Vahvista, että kyseessä on vanhempi versio, ennen kuin se lisätään historiaan"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Piirustus {sheet} luettiin tekstintunnistuksella tarkkuudella {confidence}, eikä sitä ole vahvistettu",
+      "suggestion": "Tarkista piirustusotsikon kentät ja vahvista luenta"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "{pages} sivulta ei voitu lukea yhtään erittelyn osaa",
+      "suggestion": "Jos kirja on skannattu, aja tuonti uudelleen tekstintunnistus päällä; muuten tarkista, että osien otsikot ovat muotoa SECTION 03 30 00 - Title"
     }
   }
 }

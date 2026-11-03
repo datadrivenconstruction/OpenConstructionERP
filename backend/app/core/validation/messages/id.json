@@ -968,6 +968,10 @@
       "insurance": "Asuransi",
       "method_statement": "Metode kerja",
       "other": "Dokumen lain"
+    },
+    "notice_window": {
+      "fail": "Perubahan subkontrak {code} diberitahukan {late} hari setelah batas {days} hari dalam perjanjian",
+      "suggestion": "Periksa ketentuan pemberitahuan sebelum menerima biaya: pemberitahuan terlambat dapat menggugurkan klaim"
     }
   },
   "submittal": {
@@ -998,6 +1002,18 @@
     "linked_scope_present": {
       "fail": "Dokumen pengajuan ini tidak terhubung ke item lingkup mana pun, sehingga tidak pernah diagregasi ke paket",
       "suggestion": "Hubungkan item daftar kuantitas yang dicakup dokumen ini"
+    },
+    "spec_section_format": {
+      "fail": "Bagian {section} bukan nomor bagian yang dikenali",
+      "suggestion": "Gunakan nomor MasterFormat seperti 03 30 00, atau kode LB atau NBS"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} untuk bagian {section} sudah ada di register",
+      "suggestion": "Lewati usulan ini atau ubah agar menjadi dokumen persetujuan yang berbeda"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Bagian {section} biasanya memerlukan dokumen persetujuan jenis {kind}, yang tidak tercantum dalam spesifikasi",
+      "suggestion": "Periksa spesifikasi, atau tambahkan dokumen persetujuan secara manual"
     }
   },
   "rfq": {
@@ -2555,6 +2571,30 @@
     },
     "index_attribution": {
       "fail": "Indeks harga ArchSD tidak mencantumkan sumber: sebutkan Architectural Services Department"
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Halaman {page} tidak memiliki nomor lembar yang terbaca",
+      "suggestion": "Masukkan nomor lembar dari kepala gambar"
+    },
+    "number_unique_in_set": {
+      "fail": "Nomor lembar {sheet} muncul di {count} halaman unggahan ini",
+      "suggestion": "Periksa set gambar apakah ada halaman ganda atau salah nomor"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revisi {revision} lembar {sheet} lebih rendah dari revisi saat ini {current}",
+      "suggestion": "Pastikan ini terbitan lama sebelum ditambahkan ke riwayat"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Lembar {sheet} dibaca dengan pengenalan teks pada {confidence} dan belum dikonfirmasi",
+      "suggestion": "Periksa isian kepala gambar dan konfirmasi hasil bacaan"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Tidak ada bagian spesifikasi yang bisa dibaca dari {pages} halaman",
+      "suggestion": "Jika berkas berupa hasil pindai, jalankan impor lagi dengan pengenalan teks aktif; jika bukan, periksa apakah judul bagian berbentuk SECTION 03 30 00 - Title"
     }
   }
 }
