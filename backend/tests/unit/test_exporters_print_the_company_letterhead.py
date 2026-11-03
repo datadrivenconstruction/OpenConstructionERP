@@ -35,7 +35,7 @@ import pytest
 from PIL import Image
 from reportlab.platypus import Spacer
 
-import app.modules.contracts.aia_pdf as aia_pdf
+import app.modules.us_pack.aia_pdf as aia_pdf
 from app.core.paper_size import PAPER_SIZES
 from app.modules.closeout.cover_pdf import render_cover_pdf
 from app.modules.file_transmittals.models import (

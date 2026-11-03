@@ -171,7 +171,7 @@ def _rfi() -> bytes:
 
 
 def _pay_application() -> bytes:
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     line = {
         "item_number": "01",
@@ -399,9 +399,9 @@ def workspace_only_reads(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     import app.core.register_export as register_export
     import app.modules.closeout.cover_pdf as cover_pdf
-    import app.modules.contracts.aia_pdf as aia_pdf
     import app.modules.daily_diary.pdf_export as diary_pdf
     import app.modules.rfi.pdf_export as rfi_pdf
+    import app.modules.us_pack.aia_pdf as aia_pdf
 
     letterhead = pdf_branding.branded_letterhead
     appearance = pdf_branding.branded_appearance

@@ -27,7 +27,7 @@ import pypdf
 import pytest
 
 from app.core.money import CURRENCIES, minor_units
-from app.modules.contracts.aia_pdf import _amount, _money, render_aia_application_pdf
+from app.modules.us_pack.aia_pdf import _amount, _money, render_aia_application_pdf
 
 #: One amount with a different non-zero digit at every place the platform can
 #: print, so rounding it to 0, 2 or 3 decimals gives three strings that differ

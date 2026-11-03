@@ -129,7 +129,7 @@ async def test_a_draft_before_the_claim_is_not_previously_certified(pg_session) 
     assert row.prior_completed_value == Decimal("0")
     assert row.period_completed_value == Decimal("60000")
     assert april.prior_claims_total == Decimal("0")
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     assert application["lines"][0]["previous_value"] == Decimal("0.00")
     assert application["summary"]["previous_certificates_total"] == Decimal("0.00")
     assert application["summary"]["current_payment_due"] == april.net_due == Decimal("54000")
@@ -191,7 +191,7 @@ async def test_a_claim_that_left_draft_keeps_the_claims_it_counted(pg_session) -
     await pg_session.refresh(april)
     assert april.metadata_[PRIOR_CLAIM_IDS_KEY] == []
     assert april.metadata_["note"] == "sent by post"
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     assert application["summary"]["previous_certificates_total"] == Decimal("0.00")
     assert application["summary"]["current_payment_due"] == Decimal("54000.00")
 
@@ -219,7 +219,7 @@ async def test_an_earlier_claim_sent_back_to_draft_stays_previous_to_the_claim_t
     # April billed only the twenty per cent on top of it.
     await svc.transition_claim(march.id, "rejected")
     await svc.transition_claim(march.id, "draft")
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     assert application["summary"]["previous_certificates_total"] == Decimal("36000.00")
     assert application["summary"]["current_payment_due"] == Decimal("18000.00")
     await svc.transition_claim(march.id, "submitted")

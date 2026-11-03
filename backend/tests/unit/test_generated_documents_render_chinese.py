@@ -1355,7 +1355,7 @@ def aia_payload(*, description: str) -> dict[str, Any]:
 
 
 def payment_application(*, description: str) -> bytes:
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     return render_aia_application_pdf(aia_payload(description=description))
 
@@ -1547,10 +1547,10 @@ def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring(mon
     import reportlab.rl_config as rl_config
     from reportlab.lib.enums import TA_LEFT
 
-    from app.modules.contracts import aia_pdf
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack import aia_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
-    source = source_before_the_wiring("backend/app/modules/contracts/aia_pdf.py", "pdf_style_for_text")
+    source = source_before_the_wiring("backend/app/modules/us_pack/aia_pdf.py", "pdf_style_for_text")
     assert source, "no version of the application builder predating the wiring is reachable in this history"
 
     module = types.ModuleType("aia_pdf_before")
@@ -1651,7 +1651,7 @@ def test_a_chinese_certifier_name_renders_in_a_string_cell() -> None:
     """The gap the previous commit named and left open."""
     payload = aia_payload(description="Substructure and ground floor slab")
     payload["certification"]["architect_certified_by"] = CN_CERTIFIER
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     assert_renders(render_aia_application_pdf(payload), CN_CERTIFIER)
 
@@ -1660,7 +1660,7 @@ def test_a_chinese_certifier_name_is_boxed_without_the_wiring(switch_off: None) 
     """The control. With the Chinese rung gone the same cell boxes again."""
     payload = aia_payload(description="Substructure and ground floor slab")
     payload["certification"]["architect_certified_by"] = CN_CERTIFIER
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     assert_boxed(render_aia_application_pdf(payload), CN_CERTIFIER)
 
@@ -1670,7 +1670,7 @@ def test_a_chinese_application_number_renders_in_a_different_table() -> None:
     the certification one, so wiring one table would leave this boxing."""
     payload = aia_payload(description="Substructure and ground floor slab")
     payload["application_number"] = CN_CERTIFIER
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     assert_renders(render_aia_application_pdf(payload), CN_CERTIFIER)
 
@@ -1686,7 +1686,7 @@ def test_a_bold_label_keeps_its_weight_beside_an_escalated_cell() -> None:
     """
     payload = aia_payload(description="Substructure and ground floor slab")
     payload["certification"]["architect_certified_by"] = CN_CERTIFIER
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     data = render_aia_application_pdf(payload)
     assert "Bold" in drawn_face(data, "Architect certified"), "the bold label lost its weight"

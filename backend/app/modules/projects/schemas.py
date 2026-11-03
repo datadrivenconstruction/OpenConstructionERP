@@ -768,15 +768,23 @@ class ProjectResponse(BaseModel):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def is_aia_eligible(self) -> bool:
-        """True when this project may use AIA G702/G703 (US/CA/AU only).
+        """True when a pack supplies the ``aia-application`` form and this project may use it.
 
-        Derived from the project country so the front end can render the AIA
-        payment-application UI only where it is the local norm. The backend
-        enforces the same gate independently on the AIA endpoints.
+        Kept under its historical name for existing clients; the gate itself
+        lives with the pack that supplies the form.
         """
-        from app.modules.contracts.aia import is_aia_eligible
+        from app.modules.contracts.pay_application_forms import get_form
 
-        return is_aia_eligible(self.country_code, self.address)
+        form = get_form("aia-application")
+        return form is not None and form.is_eligible(self.country_code, self.address)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def payment_forms(self) -> list[str]:
+        """Slugs of the payment-application forms regional packs supply for this project."""
+        from app.modules.contracts.pay_application_forms import eligible_forms
+
+        return [f.slug for f in eligible_forms(self.country_code, self.address)]
 
     @computed_field  # type: ignore[prop-decorator]
     @property

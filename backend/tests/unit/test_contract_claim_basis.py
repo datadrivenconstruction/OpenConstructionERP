@@ -21,7 +21,7 @@ import uuid
 from decimal import Decimal
 from types import SimpleNamespace
 
-from app.modules.contracts.aia import build_g702_summary, build_g703_line
+from app.modules.contracts.pay_application import build_g702_summary, build_g703_line
 from app.modules.contracts.service import (
     claim_line_percent_regressed,
     compute_progress_claim_line,
