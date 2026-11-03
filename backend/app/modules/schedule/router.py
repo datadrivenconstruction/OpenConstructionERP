@@ -97,6 +97,7 @@ from app.modules.schedule.schemas import (
     WorkOrderCreate,
     WorkOrderResponse,
     WorkOrderUpdate,
+    progress_pct_text,
 )
 from app.modules.schedule.service import (
     ScheduleService,
@@ -1612,8 +1613,15 @@ async def create_progress_update(
     data: ProgressUpdateCreate,
     session: SessionDep,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
 ) -> ProgressUpdateResponse:
-    """Create a progress update record."""
+    """Create a progress update record.
+
+    Editors file ``draft`` or ``submitted`` updates; ``approved`` needs
+    ``schedule.progress.approve``. Who submitted and who approved is the caller.
+    """
+    if data.status == "approved":
+        await RequirePermission("schedule.progress.approve")(payload)
     await verify_project_access(data.project_id, _user_id, session)
     from sqlalchemy import select
 
@@ -1633,14 +1641,14 @@ async def create_progress_update(
         project_id=data.project_id,
         activity_id=data.activity_id,
         update_date=data.update_date,
-        progress_pct=data.progress_pct,
+        progress_pct=progress_pct_text(data.progress_pct),
         actual_start=data.actual_start,
         actual_finish=data.actual_finish,
-        remaining_duration=data.remaining_duration,
+        remaining_duration=None if data.remaining_duration is None else str(data.remaining_duration),
         notes=data.notes,
         status=data.status,
-        submitted_by=data.submitted_by,
-        approved_by=data.approved_by,
+        submitted_by=uuid.UUID(_user_id),
+        approved_by=uuid.UUID(_user_id) if data.status == "approved" else None,
         metadata_=data.metadata,
     )
     session.add(record)
@@ -1708,8 +1716,9 @@ async def update_progress_update(
     data: ProgressUpdateEdit,
     session: SessionDep,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
 ) -> ProgressUpdateResponse:
-    """Update a progress update record."""
+    """Update a progress update record. An approved record accepts only notes."""
     from sqlalchemy import update
 
     from app.modules.schedule.models import ProgressUpdate as ProgressUpdateModel
@@ -1720,6 +1729,19 @@ async def update_progress_update(
     await verify_project_access(record.project_id, _user_id, session)
 
     updates = data.model_dump(exclude_unset=True)
+    if record.status == "approved" and set(updates) - {"notes"}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An approved progress update is read-only")
+    if updates.get("status") == "approved" and record.status != "approved":
+        await RequirePermission("schedule.progress.approve")(payload)
+        updates["approved_by"] = uuid.UUID(_user_id)
+    if "progress_pct" in updates:
+        updates["progress_pct"] = progress_pct_text(updates["progress_pct"])
+    if updates.get("remaining_duration") is not None:
+        updates["remaining_duration"] = str(updates["remaining_duration"])
+    merged_start = updates.get("actual_start", record.actual_start)
+    merged_finish = updates.get("actual_finish", record.actual_finish)
+    if merged_start and merged_finish and str(merged_finish) < str(merged_start):
+        raise HTTPException(status_code=422, detail="actual_finish must not be before actual_start")
     if "metadata" in updates:
         updates["metadata_"] = updates.pop("metadata")
     if updates:
