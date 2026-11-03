@@ -2734,6 +2734,16 @@ class SheetService:
         ):
             sheet.discipline = derived
             changed += 1
+        # A sheet still waiting for confirmation shows the trust of its latest read.
+        fresh = read.get(EXTRACTION)
+        if fresh and _needs_review(sheet):
+            sheet.metadata_ = {
+                **(sheet.metadata_ or {}),
+                EXTRACTION: {
+                    **sheet.metadata_[EXTRACTION],
+                    **{k: fresh[k] for k in ("source", "confidence", "reason")},
+                },
+            }
         return changed
 
     # ── Split PDF ──────────────────────────────────────────────────────────
