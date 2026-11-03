@@ -105,6 +105,7 @@ import {
 import { submittalsGuide } from './submittalsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildSubmittalsInsights } from './submittalsInsights';
+import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -806,6 +807,9 @@ const SubmittalRow = React.memo(function SubmittalRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          <div className="flex justify-end">
+            <RunAgentButton agent="submittal_checker" inputs={{ submittal_id: submittal.id }} />
+          </div>
           {submittal.description && (
             <div className="rounded-lg bg-surface-secondary p-3">
               <p className="text-xs text-content-tertiary mb-1 font-medium uppercase tracking-wide">
@@ -1426,6 +1430,7 @@ export function SubmittalsPage() {
         actions={
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <RunAgentButton agent="submittal_checker" />
             <ModuleGuideButton content={submittalsGuide} />
             <SubmittalRegisterExport projectId={projectId} filters={filters} empty={registerEmpty} />
             <Button

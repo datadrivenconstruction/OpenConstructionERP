@@ -271,6 +271,8 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/architecture': GitBranch,
   // ── 19. Automation & AI ───────────────────────────────────────────
   '/ai-agents': Bot,
+  '/ai-agents/catalogue': Bot,
+  '/document-assistant': MessageSquare,
   '/advisor': MessageSquare,
   '/chat': MessageSquare,
   '/teams': ShieldCheck,

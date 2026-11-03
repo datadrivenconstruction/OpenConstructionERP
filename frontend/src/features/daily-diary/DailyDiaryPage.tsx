@@ -137,6 +137,7 @@ import { buildDailyDiaryInsights } from './dailyDiaryInsights';
 import { fmtList } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { VideoHint } from '@/features/videos/VideoHint';
+import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
 
 type Tab = 'diaries' | 'today' | 'archive';
 
@@ -409,6 +410,7 @@ export function DailyDiaryPage() {
             {/* Insights toggle - shows or hides this module's visualization
                 panel. Leads the cluster so charts are one obvious click away. */}
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <RunAgentButton agent="daily_reporter" inputs={{ date: new Date().toISOString().slice(0, 10) }} />
             <ModuleGuideButton content={dailyDiaryGuide} />
             <Button
               variant="secondary"

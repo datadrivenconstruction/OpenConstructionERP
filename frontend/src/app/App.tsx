@@ -715,6 +715,12 @@ const CPMView = lazy(() =>
 const AgentsPage = lazy(() =>
   import('@/features/ai-agents').then((m) => ({ default: m.AgentsPage }))
 );
+const ProjectAgentsPage = lazy(() =>
+  import('@/features/ai-agents/ProjectAgentsPage').then((m) => ({ default: m.ProjectAgentsPage }))
+);
+const DocAssistantPage = lazy(() =>
+  import('@/features/doc-assistant/DocAssistantPage').then((m) => ({ default: m.DocAssistantPage }))
+);
 
 // Admin/settings/assemblies — code-split out of the boot bundle.
 // These pages are reachable from the sidebar but not part of the default
@@ -1400,6 +1406,8 @@ export default function App() {
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
         <Route path="/ai-estimator" element={<P title="AI Estimate Builder"><AiEstimatorPage /></P>} />
         <Route path="/ai-agents" element={<P title="AI Agents"><AgentsPage /></P>} />
+        <Route path="/ai-agents/catalogue" element={<P title="Project Agents"><ProjectAgentsPage /></P>} />
+        <Route path="/document-assistant" element={<P title="Document Assistant"><DocAssistantPage /></P>} />
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
         <Route path="/chat" element={<P title="AI Chat"><ERPChatPage /></P>} />
         <Route path="/chat/admin" element={<P title="Chat Observability"><ERPChatAdminStatsPage /></P>} />

@@ -1452,5 +1452,17 @@
       "fail": "{project} is active but has no contract, invoice, order, subcontract or plan to forecast cash from.",
       "suggestion": "Enter the client contract with its payment plan, or a planned cash flow in the cost model."
     }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "The saved answer cites no project document, so nothing backs it.",
+      "suggestion": "Ask again until the answer cites a document, or mark the text as your own note."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Agent draft '{title}' has waited {days} days for review (limit {limit}).",
+      "suggestion": "Accept or reject the draft, or switch off the agent if its drafts are not used."
+    }
   }
 }

@@ -118,6 +118,8 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Geo Hub': 'sidebar.geo_hub',
   // AI
   'AI Agents': 'nav.ai_agents',
+  'Project Agents': 'nav.project_agents',
+  'Document Assistant': 'nav.doc_assistant',
   'AI Cost Advisor': 'nav.ai_advisor',
   'AI Chat': 'nav.erp_chat',
   // Commercial
@@ -1430,7 +1432,9 @@ const ROUTE_COMPONENT_MAP: ReadonlyArray<readonly [string, string]> = [
   ['/full-evm', 'Earned Value'],
   ['/fx', 'Currencies'],
   ['/ai-estimate', 'AI Quick Estimate'],
+  ['/ai-agents/catalogue', 'Project Agents'],
   ['/ai-agents', 'AI Agents'],
+  ['/document-assistant', 'Document Assistant'],
   ['/advisor', 'AI Cost Advisor'],
   ['/chat', 'AI Chat'],
   ['/projects', 'Projects'],
