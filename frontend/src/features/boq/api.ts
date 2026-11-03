@@ -1669,7 +1669,11 @@ export interface AppliedRiskContingency {
   markup_id: string;
   name: string;
   is_active: boolean;
-  line_amount: string;
+  line_amount: string | null;
+  /** `fixed` money as typed, `percentage` share of the direct cost (follows quantity edits). */
+  mode?: 'fixed' | 'percentage';
+  percentage?: number | null;
+  scope_position_id?: string | null;
   percentile: number;
   amount: string;
   pct_of_base: number | null;
@@ -1690,6 +1694,8 @@ export interface RiskContingencyStatus {
   drift_amount: string | null;
   drift_pct: number | null;
   current_fingerprint: string | null;
+  /** Other active contingency lines: the same risk may be counted twice. */
+  other_contingency?: string[];
 }
 
 export interface ApplyRiskContingencyBody {
@@ -1698,6 +1704,8 @@ export interface ApplyRiskContingencyBody {
   iterations?: number;
   expected_amount?: string;
   name?: string;
+  mode?: 'fixed' | 'percentage';
+  scope_position_id?: string;
 }
 
 export interface CostRiskResponse {

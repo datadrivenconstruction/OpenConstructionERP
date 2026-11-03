@@ -99,4 +99,27 @@ describe('RiskContingencyApply', () => {
     fireEvent.click(screen.getByRole('button', { name: /Remove/ }));
     await waitFor(() => expect(boqApi.undoRiskContingency).toHaveBeenCalledWith('b1'));
   });
+
+  it('can apply as a percentage and warns about another contingency line', async () => {
+    boqApi.getRiskContingency.mockResolvedValue({
+      suggestion: SUGGESTION,
+      applied: null,
+      stale: false,
+      other_contingency: ['Manual contingency'],
+    });
+    boqApi.applyRiskContingency.mockResolvedValue({ suggestion: SUGGESTION, applied: null, stale: false });
+    renderIt();
+    const apply = await screen.findByRole('button', { name: /Apply P80 contingency/ });
+    await waitFor(() => expect(apply).not.toBeDisabled());
+    fireEvent.click(apply);
+    expect(screen.getByTestId('risk-contingency-double-count').textContent).toContain('Manual contingency');
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() =>
+      expect(boqApi.applyRiskContingency).toHaveBeenCalledWith(
+        'b1',
+        expect.objectContaining({ percentile: 80, mode: 'percentage' }),
+      ),
+    );
+  });
 });

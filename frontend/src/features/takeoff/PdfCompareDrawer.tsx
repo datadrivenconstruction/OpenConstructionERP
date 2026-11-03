@@ -36,9 +36,9 @@ import {
 
 import { SideDrawer, MoneyDisplay, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-  type CarryAlignOptions,
-  type TakeoffDocumentResponse,
+import {
   takeoffApi,
+  type CarryAlignOptions,
   type TakeoffDocumentResponse,
   type TakeoffCompareResponse,
   type TakeoffMeasurementDiffRow,
@@ -183,7 +183,10 @@ export function PdfCompareDrawer({
     queryClient.invalidateQueries({ queryKey: ['takeoff-compare', projectId, fromId, toId] });
 
   const carryMutation = useMutation({
-    mutationFn: (opts?: CarryAlignOptions) => takeoffApi.carryOver(projectId, fromId, toId, opts),
+    mutationFn: (opts?: CarryAlignOptions) =>
+      opts
+        ? takeoffApi.carryOver(projectId, fromId, toId, opts)
+        : takeoffApi.carryOver(projectId, fromId, toId),
     onSuccess: (r) => {
       refreshCompare();
       const rescaled = (r.scale_checks.changed ?? 0) + (r.scale_checks.unverified ?? 0);

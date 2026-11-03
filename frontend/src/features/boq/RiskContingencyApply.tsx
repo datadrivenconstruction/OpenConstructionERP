@@ -39,6 +39,7 @@ export function RiskContingencyApply({
   const [percentile, setPercentile] = useState<number>(80);
   const [custom, setCustom] = useState('');
   const [confirming, setConfirming] = useState(false);
+  const [asPercentage, setAsPercentage] = useState(false);
 
   const queryKey = ['boq-risk-contingency', boqId, percentile, correlation];
   const { data, isFetching } = useQuery<RiskContingencyStatus>({
@@ -62,6 +63,7 @@ export function RiskContingencyApply({
         correlation,
         iterations: data?.suggestion?.iterations,
         expected_amount: data?.suggestion?.amount,
+        ...(asPercentage ? { mode: 'percentage' as const } : {}),
         name: t('boq.risk_contingency_line_name', { defaultValue: 'Risk contingency P{{p}}', p: percentile }),
       }),
     onSuccess: (next) => {
@@ -212,6 +214,25 @@ export function RiskContingencyApply({
               amount: money(s?.amount, fmt),
             })}
           </span>
+          <label className="inline-flex items-center gap-1.5 text-2xs text-content-secondary cursor-pointer">
+            <input
+              type="checkbox"
+              checked={asPercentage}
+              onChange={(e) => setAsPercentage(e.target.checked)}
+              className="h-3.5 w-3.5 accent-oe-blue"
+            />
+            {t('boq.risk_contingency_as_percentage', {
+              defaultValue: 'Keep as a percentage of the direct cost, so it follows quantity edits',
+            })}
+          </label>
+          {(data?.other_contingency?.length ?? 0) > 0 && (
+            <span className="basis-full text-2xs text-amber-600" data-testid="risk-contingency-double-count">
+              {t('boq.risk_contingency_double_count', {
+                defaultValue: 'Another contingency line is active ({{names}}): the same risk may be counted twice.',
+                names: (data?.other_contingency ?? []).join(', '),
+              })}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => apply.mutate()}
