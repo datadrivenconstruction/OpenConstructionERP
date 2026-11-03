@@ -379,3 +379,63 @@ export interface PdfOverlayUploadResponse {
   overlay: GeoRasterOverlay;
   page_count: number;
 }
+
+/* ── Site survey captures (orthophotos / scans) ──────────────────────── */
+
+export type SurveyKind = 'orthophoto' | 'point_cloud' | 'dsm';
+export type SurveyPlatform = 'drone' | 'aircraft' | 'ground' | 'other';
+export type SurveyStatus = 'ahead' | 'on_track' | 'behind' | 'unobserved';
+
+export interface SurveyFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+}
+
+/** Mirrors backend ``SurveyCaptureResponse``. */
+export interface SurveyCapture {
+  id: string;
+  project_id: string;
+  kind: SurveyKind;
+  platform: SurveyPlatform;
+  captured_on: string;
+  name: string;
+  overlay_id: string | null;
+  scan_id: string | null;
+  gsd_cm: string | null;
+  crs_epsg: number | null;
+  bbox_min_lat: string | null;
+  bbox_min_lon: string | null;
+  bbox_max_lat: string | null;
+  bbox_max_lon: string | null;
+  sensor: string | null;
+  width_px: number | null;
+  height_px: number | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  warnings: string[];
+  findings: SurveyFinding[];
+}
+
+/** Mirrors backend ``SurveyProgressRow``. */
+export interface SurveyProgressRow {
+  activity_id: string;
+  code: string;
+  name: string;
+  planned_pct_on_date: number;
+  observed_pct: number | null;
+  variance_pct: number | null;
+  status: SurveyStatus;
+  note: string;
+}
+
+export interface SurveyObservation {
+  id: string;
+  capture_id: string;
+  activity_id: string;
+  observed_pct: string;
+  note: string;
+  confirmed_by: string | null;
+  confirmed_at: string | null;
+}
