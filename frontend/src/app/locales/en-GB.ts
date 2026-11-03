@@ -541,6 +541,7 @@ const resource = {
     "offline_sync.field_notes": "Notes",
     "offline_sync.field_description": "Description",
     "offline_sync.field_checklist_data": "Checklist",
+    "offline_sync.status_auth": "Sign in to sync",
     "punch.description_saved": "Description saved",
     "punch.no_description": "No description yet.",
     "punch.edit_description": "Edit description",
@@ -851,6 +852,8 @@ const resource = {
     "accountingSync.doc_source.payroll": "Payroll",
     "accountingSync.category.payroll_cost": "Payroll cost",
     "accountingSync.category.payroll_liability": "Wages payable",
+    "field.reauth_title": "Your work is saved. Enter your PIN to send it.",
+    "field.reauth_submit": "Send now",
   }
 } as { translation: Record<string, string> };
 

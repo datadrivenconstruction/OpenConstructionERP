@@ -1682,6 +1682,9 @@ const resource = {
     "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",
     "measurement_book.f_breadth": "Width",
     "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
+    "offline_sync.status_auth": "Sign in to sync",
+    "field.reauth_title": "Your work is saved. Enter your PIN to send it.",
+    "field.reauth_submit": "Send now",
   }
 } as { translation: Record<string, string> };
 
