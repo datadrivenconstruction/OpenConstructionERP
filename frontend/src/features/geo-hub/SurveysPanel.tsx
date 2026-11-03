@@ -140,7 +140,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
       queryClient.invalidateQueries({ queryKey: ['geo-hub', 'surveys', projectId] });
       refreshOverlays();
     },
-    onError: (err) => fail('geo_hub.surveys.list.delete', 'Delete survey', err),
+    onError: (err) => fail('geo_hub.surveys.list.delete_failed', 'The survey was not deleted', err),
   });
 
   const observeMutation = useMutation({
