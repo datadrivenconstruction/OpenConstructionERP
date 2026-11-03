@@ -6060,6 +6060,7 @@ def build_gaeb_xml(
     stating what was actually written, for the exchange fidelity report
     (``exchange_fidelity.analyze_gaeb_export``).
     """
+    import re as _re
     import xml.etree.ElementTree as ET
     from datetime import date
     from decimal import Decimal
@@ -6105,11 +6106,21 @@ def build_gaeb_xml(
     # ── PrjInfo. The X84 schema restricts PrjInfo to NamePrj + LblPrj only;
     # the X83 schema uses the full base type (which also allows Cur). Emit the
     # phase-valid subset.
+    # A bill imported from GAEB answers under the issuer's own project number
+    # and label, so the returned file matches the tender it belongs to.
+    boq_meta = getattr(boq_data, "metadata", None)
+    gaeb_header = boq_meta.get("gaeb_header") if isinstance(boq_meta, dict) else None
+    if not isinstance(gaeb_header, dict):
+        gaeb_header = {}
+    prj_number = str(gaeb_header.get("project_number") or "").strip() or (project_name or "")
+    prj_label = str(gaeb_header.get("project_label") or "").strip()
     prj_info = ET.SubElement(gaeb, "PrjInfo")
-    ET.SubElement(prj_info, "NamePrj").text = (project_name or "")[:60]
+    ET.SubElement(prj_info, "NamePrj").text = prj_number[:60]
     if is_priced:
-        ET.SubElement(prj_info, "LblPrj").text = (project_name or "")[:60]
+        ET.SubElement(prj_info, "LblPrj").text = (prj_label or project_name or "")[:60]
     else:
+        if prj_label:
+            ET.SubElement(prj_info, "LblPrj").text = prj_label[:60]
         ET.SubElement(prj_info, "Cur").text = project_currency
 
     # ── Award. Order: DP, AwardInfo, ..., BoQ. Cur lives under AwardInfo
@@ -6121,6 +6132,14 @@ def build_gaeb_xml(
     ET.SubElement(award_info, "Cur").text = project_currency
     if project_currency == "EUR":
         ET.SubElement(award_info, "CurLbl").text = "EUR"
+    _re_date = _re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    _re_time = _re.compile(r"^\d{2}:\d{2}:\d{2}$")
+    open_date = str(gaeb_header.get("submission_date") or "").strip()
+    if _re_date.match(open_date):
+        ET.SubElement(award_info, "OpenDate").text = open_date
+        open_time = str(gaeb_header.get("submission_time") or "").strip()
+        if _re_time.match(open_time):
+            ET.SubElement(award_info, "OpenTime").text = open_time
 
     # CTR (Bieter/Auftragnehmer) is REQUIRED by the X84 schema - an
     # Angebotsabgabe must name the bidder. The X84 CTR requires Address (with
@@ -6247,8 +6266,6 @@ def build_gaeb_xml(
         it_fallback = str(it_stored.quantize(c2, rounding=ROUND_HALF_UP)) if it_stored is not None else "0.00"
         return ("0.000", up_fallback, it_fallback)
 
-    import re as _re
-
     def _mint_id(prefix: str) -> str:
         """Mint a valid xs:ID (NCName) handle - never the OZ.
 
@@ -6259,6 +6276,8 @@ def build_gaeb_xml(
         return f"{prefix}{uuid.uuid4().hex[:16]}"
 
     _RNOPART_OK = _re.compile(r"^[A-Za-z0-9_]{1,14}$")
+    _NCNAME = _re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
+    _GAEB_SHORT_TEXT_MAX = 70
 
     def _rnopart(segment: str, depth: int) -> str:
         """Coerce one OZ segment into a valid ``tgRNoPart`` token.
@@ -6317,7 +6336,7 @@ def build_gaeb_xml(
                 ET.SubElement(p, "span")
         return el
 
-    def _set_description(item: ET.Element, text: str) -> None:
+    def _set_description(item: ET.Element, text: str, short_text: str = "") -> None:
         """Append a schema-valid ``Description`` block to an Item / MarkupItem.
 
         ``Description / CompleteText / DetailTxt``. In X83 the ``DetailTxt``
@@ -6330,13 +6349,20 @@ def build_gaeb_xml(
         desc = ET.SubElement(item, "Description")
         complete = ET.SubElement(desc, "CompleteText")
         detail = ET.SubElement(complete, "DetailTxt")
-        if is_priced:
-            return
-        text_el = ET.SubElement(detail, "Text")
-        for line in (text or "").split("\n"):
-            p = ET.SubElement(text_el, "p")
-            span = ET.SubElement(p, "span")
-            span.text = line
+        if not is_priced:
+            text_el = ET.SubElement(detail, "Text")
+            for line in (text or "").split("\n"):
+                p = ET.SubElement(text_el, "p")
+                span = ET.SubElement(p, "span")
+                span.text = line
+        # The Kurztext travels in both phases, so a returned bid keeps its names.
+        short = " ".join((short_text or "").split())[:_GAEB_SHORT_TEXT_MAX]
+        if short:
+            outline = ET.SubElement(complete, "OutlineText")
+            outl_txt = ET.SubElement(outline, "OutlTxt")
+            text_outl = ET.SubElement(outl_txt, "TextOutlTxt")
+            p = ET.SubElement(text_outl, "p")
+            ET.SubElement(p, "span").text = short
 
     def _gaeb_unit(unit: str) -> str:
         """Convert internal unit to GAEB-compatible unit code.
@@ -6403,34 +6429,78 @@ def build_gaeb_xml(
             lines.append(reason)
         return lines
 
-    def _emit_item(parent_list: ET.Element, pos: Any, parent_ordinal: str, ctgy_part: str = "") -> None:
+    def _pos_meta(pos: Any) -> dict[str, Any]:
+        meta = getattr(pos, "metadata_", None)
+        if not isinstance(meta, dict):
+            meta = getattr(pos, "metadata", None)
+        return meta if isinstance(meta, dict) else {}
+
+    used_ids: set[str] = set()
+
+    def _source_id(meta: dict[str, Any], prefix: str) -> str:
+        """The element ID the source file used, when still a free valid xs:ID."""
+        candidate = str(meta.get("gaeb_id") or "").strip()
+        if candidate and _NCNAME.match(candidate) and candidate not in used_ids:
+            used_ids.add(candidate)
+            return candidate
+        minted = _mint_id(prefix)
+        used_ids.add(minted)
+        return minted
+
+    def _unit_for_export(pos: Any) -> str:
+        """The ``QU`` to write: the file's own unit string while it still holds."""
+        original = str(_pos_meta(pos).get("gaeb_unit_original") or "").strip()
+        if original:
+            return original[:4]
+        return _gaeb_unit(pos.unit)[:4]
+
+    def _emit_item(
+        parent_list: ET.Element,
+        pos: Any,
+        parent_ordinal: str,
+        ctgy_part: str = "",
+        *,
+        leaf_override: str | None = None,
+    ) -> None:
         """Write one schema-valid ``Item`` into an ``Itemlist``.
 
         Phase-correct element set:
-        - X83 (unpriced): ``Qty``, ``QU``, ``Description`` (UP/IT are
-          forbidden by the X83 schema - it is the tender request).
-        - X84 (priced): ``Qty``, ``UP``, ``IT``, ``Description`` (the X84
-          schema drops ``QU`` from the Item - the unit comes from the paired
-          X83 - so we omit it).
+        - X83 (unpriced): ``Provis``, ``Qty``, ``QU``, ``Description`` (UP/IT
+          are forbidden by the X83 schema - it is the tender request).
+        - X84 (priced): ``Provis``, ``Qty``, ``QU``, ``UP``, ``IT``,
+          ``Description`` with the Kurztext, so the returned bid keeps units
+          and names on any re-import.
+
+        ``QU`` is the source file's own unit string while it still holds, and
+        is left out when the unit was only guessed at import.
 
         The OZ leaf goes in ``@RNoPart``; ``@ID`` is an opaque xs:ID handle.
         """
-        leaf = _leaf_segment(str(getattr(pos, "ordinal", "") or ""), parent_ordinal)
+        meta = _pos_meta(pos)
+        leaf = (
+            leaf_override
+            if leaf_override is not None
+            else _leaf_segment(str(getattr(pos, "ordinal", "") or ""), parent_ordinal)
+        )
         item = ET.SubElement(
             parent_list,
             "Item",
-            ID=_mint_id("oeItem"),
+            ID=_source_id(meta, "oeItem"),
             RNoPart=_rnopart(leaf, 9),
         )
+        provis = str(meta.get("gaeb_provis") or "").strip()
+        if provis in ("WithTotal", "WithoutTotal"):
+            ET.SubElement(item, "Provis").text = provis
         qty_s, up_s, it_s = _gaeb_line_prices(pos.quantity, pos.unit_rate, pos.total)
         ET.SubElement(item, "Qty").text = qty_s
         qu_written: str | None = None
+        if not _unit_was_invented(pos):
+            qu_written = _unit_for_export(pos) or None
+            if qu_written:
+                ET.SubElement(item, "QU").text = qu_written
         if is_priced:
             ET.SubElement(item, "UP").text = up_s
             ET.SubElement(item, "IT").text = it_s
-        elif not _unit_was_invented(pos):
-            qu_written = _gaeb_unit(pos.unit)[:4]
-            ET.SubElement(item, "QU").text = qu_written
         if trace is not None:
             trace.append(
                 {
@@ -6451,12 +6521,14 @@ def build_gaeb_xml(
         ai_line = ai_mark_text(ai_src) if ai_src else None
         drawing_text = drawing_export_text(pos)
         drawing_line = f"Drawing: {drawing_text}" if drawing_text else None
-        description = str(getattr(pos, "description", "") or "")
+        short_text = str(getattr(pos, "description", "") or "")
+        long_text = str(meta.get("gaeb_long_text") or "").strip()
+        description = long_text or short_text
         if ai_line and not is_priced:
             description = f"{description}\n{ai_line}"
         if drawing_line and not is_priced:
             description = f"{description}\n{drawing_line}"
-        _set_description(item, description)
+        _set_description(item, description, short_text if (long_text or is_priced) else "")
         # Schema order: BidComm follows Description in the X84 Item.
         comm_lines = _alt_rationale_lines(pos) if is_alternate_bid else []
         if ai_line and is_priced:
@@ -6538,7 +6610,82 @@ def build_gaeb_xml(
     # single root Itemlist.
     use_categories = bool(boq_data.sections)
 
-    if use_categories:
+    from app.modules.boq.gaeb_common import is_excluded_from_total, plan_oz_layout, write_oz_body
+
+    all_items = [p for sec in boq_data.sections for p in sec.positions] + list(boq_data.positions)
+    tree_layout = plan_oz_layout(str(getattr(p, "ordinal", "") or "") for p in all_items) if all_items else None
+    use_tree = (
+        use_categories
+        and tree_layout is not None
+        and tree_layout.depth >= 2
+        and not tree_layout.rejected
+        and not tree_layout.index
+    )
+    if use_tree:
+        # Mirror the source LV: one BoQCtgy per OZ level, labels and IDs from
+        # the section rows, and the mask widths the file declared (when known).
+        sections_by_oz = {str(getattr(sec, "ordinal", "") or ""): sec for sec in boq_data.sections}
+        source_mask: list[int] = []
+        for pos in all_items:
+            mask = _pos_meta(pos).get("gaeb_oz_mask")
+            if isinstance(mask, list) and len(mask) >= tree_layout.depth:
+                source_mask = [int(w) for w in mask if str(w).isdigit()]
+                break
+        for level in range(tree_layout.depth):
+            width = tree_layout.lengths[level]
+            if level < len(source_mask):
+                width = max(width, source_mask[level])
+            tree_layout.lengths[level] = width
+        for old in boq_info.findall("BoQBkdn"):
+            boq_info.remove(old)
+        for level in range(tree_layout.depth):
+            bkdn = ET.SubElement(boq_info, "BoQBkdn")
+            ET.SubElement(bkdn, "Type").text = "Item" if level == tree_layout.depth - 1 else "BoQLevel"
+            ET.SubElement(bkdn, "Length").text = str(max(1, min(14, tree_layout.lengths[level])))
+            ET.SubElement(bkdn, "Num").text = "Yes" if tree_layout.numeric[level] else "No"
+
+        def _open_ctgy(ctgy: ET.Element, path: list[str], _under: list[Any]) -> None:
+            sec = sections_by_oz.get(".".join(path))
+            if sec is not None:
+                ctgy.set("ID", _source_id(_pos_meta(sec), "oeCtgy"))
+            if not is_priced:
+                label = str(getattr(sec, "description", "") or "") if sec is not None else ""
+                _set_ml_text(ctgy, "LblTx", label or ".".join(path))
+
+        def _close_ctgy(ctgy: ET.Element, _path: list[str], under: list[Any]) -> None:
+            if is_priced:
+                # A Bedarfsposition ohne Gesamtbetrag is priced but never summed.
+                subtotal = sum(
+                    (_to_dec(getattr(p, "total", 0)) or Decimal("0") for p in under if not is_excluded_from_total(p)),
+                    Decimal("0"),
+                )
+                _emit_category_totals(ctgy, subtotal)
+
+        def _tree_item(itemlist: ET.Element, leaf: str, _ordinal: str, pos: Any) -> None:
+            _emit_item(itemlist, pos, "", leaf_override=leaf)
+
+        write_oz_body(
+            boq_body,
+            tree_layout,
+            [(str(getattr(p, "ordinal", "") or ""), p) for p in all_items],
+            emit_item=_tree_item,
+            open_category=_open_ctgy,
+            close_category=_close_ctgy,
+        )
+        if is_priced and active_markups:
+            mk_ctgy = ET.SubElement(boq_body, "BoQCtgy", ID=_mint_id("oeCtgy"), RNoPart=_rnopart("Z", 0))
+            mk_body = ET.SubElement(mk_ctgy, "BoQBody")
+            mk_list = ET.SubElement(mk_body, "Itemlist")
+            running_subtotal = _to_dec(boq_data.direct_cost) or Decimal("0")
+            for idx, m in enumerate(active_markups, start=1):
+                base = _markup_base_for(m, running_subtotal)
+                _emit_markup_item(mk_list, m, idx, base)
+                running_subtotal += _to_dec(getattr(m, "amount", 0)) or Decimal("0")
+            _emit_category_totals(
+                mk_ctgy,
+                sum((_to_dec(getattr(m, "amount", 0)) or Decimal("0") for m in active_markups), Decimal("0")),
+            )
+    elif use_categories:
         # Sections → BoQCtgy (nested BoQBody / Itemlist). X84 BoQCtgy has no
         # LblTx (label only exists in X83) but REQUIRES a Totals child.
         for section in boq_data.sections:
@@ -6560,7 +6707,11 @@ def build_gaeb_xml(
                 subtotal = _to_dec(getattr(section, "subtotal", None))
                 if subtotal is None:
                     subtotal = sum(
-                        (_to_dec(getattr(p, "total", 0)) or Decimal("0") for p in section.positions),
+                        (
+                            _to_dec(getattr(p, "total", 0)) or Decimal("0")
+                            for p in section.positions
+                            if not is_excluded_from_total(p)
+                        ),
                         Decimal("0"),
                     )
                 _emit_category_totals(ctgy, subtotal)
@@ -8084,6 +8235,30 @@ async def import_boq_gaeb(
 # ── Auto-detect dispatcher (Epic I4) ─────────────────────────────────────────
 
 
+async def _persist_gaeb_header(boq_id: uuid.UUID, imported: Any, *, service: BOQService) -> None:
+    """Keep a GAEB file's header (project number, deadline, period, AddText) on the bill.
+
+    The X84 written back to the issuer reuses it, and the editor can show it.
+    A best-effort write: a bill without a stored row (test doubles) is left alone.
+    """
+    meta = getattr(imported, "metadata", None)
+    header = meta.get("gaeb_header") if isinstance(meta, dict) else None
+    if not isinstance(header, dict) or not header:
+        return
+    repo = getattr(service, "boq_repo", None)
+    if repo is None or not hasattr(repo, "get_by_id"):
+        return
+    boq = await repo.get_by_id(boq_id)
+    if boq is None:
+        return
+    current = dict(boq.metadata_ or {}) if isinstance(boq.metadata_, dict) else {}
+    current["gaeb_header"] = header
+    catalogues = meta.get("gaeb_catalogues") if isinstance(meta, dict) else None
+    if isinstance(catalogues, dict) and catalogues:
+        current["gaeb_catalogues"] = catalogues
+    await repo.update_fields(boq_id, metadata_=current)
+
+
 async def _persist_imported_boq(
     boq_id: uuid.UUID,
     imported: "ImportedBOQ",  # noqa: F821 - imported inside function body at call site
@@ -8158,6 +8333,8 @@ async def _persist_imported_boq(
     # silently lost its markup and under-stated the cost. Map each one onto a
     # native BOQMarkup row so an imported BOQ carries markup exactly like a
     # natively created one (and a later GAEB export round-trips it).
+    await _persist_gaeb_header(boq_id, imported, service=service)
+
     if (summary["created"] + summary["updated"] + summary["deleted"]) > 0:
         await _persist_imported_markups(boq_id, imported, service=service, errors=summary["apply_errors"])
         await _persist_import_deductions(boq_id, imported, service=service, errors=summary["apply_errors"])

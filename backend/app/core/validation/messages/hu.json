@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "A(z) {ordinal}. tétel {quantity} mennyisége {decimals} tizedesjegyet tartalmaz; a GAEB X83 szerinti határ 3",
       "suggestion": "Kerekítse a mennyiséget legfeljebb 3 tizedesjegyre a GAEB X83 szerint"
+    },
+    "provis_without_total": {
+      "fail": "A(z) {ordinal} tétel szükség szerinti tétel összeg nélkül: a(z) {total} összeg látszik, de egyik összesítésbe sem számít bele",
+      "suggestion": "Lehívás esetén külön rendelje meg; a GAEB szerint az ajánlati összegen kívül marad"
+    },
+    "ordinal_changed": {
+      "fail": "{ordinal} tétel: az OZ eltér a forrásfájltól ({source}); a megrendelő OZ alapján párosítja az ajánlatot",
+      "suggestion": "Állítsa vissza az eredeti OZ-t, hogy az ajánlat és a megrendelő hivatkozásai egyezzenek"
+    },
+    "unit_exportable": {
+      "fail": "{ordinal} tétel: a(z) '{unit}' egység nem fér el a 4 karakteres GAEB QU mezőben, exportkor levágódik",
+      "suggestion": "Legfeljebb 4 karakteres GAEB egységkódot használjon (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

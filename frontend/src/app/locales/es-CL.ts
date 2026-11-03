@@ -50546,6 +50546,9 @@ const resource = {
     "boq.risk_contingency_source_positions": "Rangos del BOQ",
     "boq.risk_contingency_source_register": "Registro de riesgos",
     "boq.risk_contingency_stale_register": "El registro de riesgos cambió después de aplicarlo. Un nuevo cálculo con los mismos ajustes da {{drift}} ({{pct}}). Vuelva a aplicarlo para actualizarlo.",
+    "boq.provis_badge": "Eventual",
+    "boq.provis_without_total_tip": "Partida eventual sin total: valorada, pero no se suma a ningún total.",
+    "boq.provis_with_total_tip": "Partida eventual con total: se suma a los totales.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

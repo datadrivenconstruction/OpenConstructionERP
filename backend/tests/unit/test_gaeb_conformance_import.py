@@ -124,7 +124,10 @@ class TestConformanceEmbeddedGraphics:
         # 001.002.0010 is the item whose Langtext embeds the graphic.
         item = by_ordinal["001.002.0010"]
         assert item.description.startswith("Sohlplatte in Ortbeton")
-        assert len(item.description) > 40
+        # The Kurztext is the description; the full Langtext travels in metadata.
+        long_text = item.metadata.get("gaeb_long_text") or item.description
+        assert long_text.startswith("Sohlplatte in Ortbeton")
+        assert len(long_text) > 40
 
     def test_descriptions_fit_the_position_schema(self, conformance_result) -> None:
         """No description exceeds the 5000-char PositionCreate cap (422 class)."""

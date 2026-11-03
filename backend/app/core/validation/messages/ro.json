@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Poziția {ordinal}: cantitatea {quantity} are {decimals} zecimale – convenția GAEB X83 limitează numărul la 3",
       "suggestion": "Rotunjiți cantitatea la cel mult 3 zecimale conform GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Poziția {ordinal} este o poziție la nevoie fără total: suma {total} este afișată, dar nu intră în niciun total",
+      "suggestion": "Atribuiți-o separat dacă beneficiarul o solicită; conform GAEB rămâne în afara valorii ofertei"
+    },
+    "ordinal_changed": {
+      "fail": "Poziția {ordinal}: OZ modificat față de fișierul sursă ({source}); beneficiarul potrivește oferta după OZ",
+      "suggestion": "Restabiliți OZ-ul original ca oferta și trimiterile beneficiarului să corespundă"
+    },
+    "unit_exportable": {
+      "fail": "Poziția {ordinal}: unitatea '{unit}' nu încape în câmpul GAEB QU de 4 caractere și ar fi tăiată la export",
+      "suggestion": "Folosiți un cod de unitate GAEB de cel mult 4 caractere (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

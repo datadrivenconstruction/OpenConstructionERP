@@ -246,6 +246,24 @@ def _position_meta(position: Any) -> dict[str, Any]:
     return meta if isinstance(meta, dict) else {}
 
 
+#: ``Provis`` value of a Bedarfsposition whose amount never enters a total.
+PROVIS_WITHOUT_TOTAL = "WithoutTotal"
+
+
+def provis_kind(position: Any) -> str:
+    """The GAEB ``Provis`` flag a position carries (``""`` for a normal item)."""
+    return str(_position_meta(position).get("gaeb_provis") or "").strip()
+
+
+def is_excluded_from_total(position: Any) -> bool:
+    """True for a Bedarfsposition ohne Gesamtbetrag (``Provis=WithoutTotal``).
+
+    GAEB prices such an item (UP and IT are shown) but its amount never enters
+    a category total or the Angebotssumme, so every rollup skips it.
+    """
+    return provis_kind(position).lower() == PROVIS_WITHOUT_TOTAL.lower()
+
+
 class PositionIndex:
     """Look positions up by the OZ a GAEB file names.
 

@@ -94,7 +94,7 @@ def test_units_and_nonround_quantities(frankfurt_result) -> None:
 
 def test_german_texts_survive(frankfurt_result) -> None:
     """Real German construction wording, umlauts intact."""
-    blob = "\n".join(p.description for p in _items(frankfurt_result))
+    blob = "\n".join(f"{p.description}\n{p.metadata.get('gaeb_long_text', '')}" for p in _items(frankfurt_result))
     for term in ("Bewehrung", "Schalung", "Ortbeton C25/30", "Kalksandstein", "Abdichtung"):
         assert term in blob, f"expected German term {term!r} in imported descriptions"
     assert "Wände" in blob, "umlauts must survive the import"

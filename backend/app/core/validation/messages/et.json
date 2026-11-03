@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Rida {ordinal}: kogusel {quantity} on {decimals} komakohta; GAEB X83 tava lubab kuni 3",
       "suggestion": "Ümardage kogus GAEB X83 järgi kuni 3 komakohani"
+    },
+    "provis_without_total": {
+      "fail": "Positsioon {ordinal} on vajaduspõhine positsioon ilma summata: summa {total} kuvatakse, kuid seda ei arvestata üheski kogusummas",
+      "suggestion": "Tellige see eraldi, kui tellija selle välja kutsub; GAEB järgi jääb see pakkumissummast välja"
+    },
+    "ordinal_changed": {
+      "fail": "Positsioon {ordinal}: OZ muudetud lähtefailiga võrreldes ({source}); tellija seob pakkumise OZ järgi",
+      "suggestion": "Taastage algne OZ, et pakkumine ja tellija viited ühtiksid"
+    },
+    "unit_exportable": {
+      "fail": "Positsioon {ordinal}: ühik '{unit}' ei mahu 4-märgilisse GAEB välja QU ja lõigatakse ekspordil",
+      "suggestion": "Kasutage kuni 4-märgilist GAEB ühikukoodi (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

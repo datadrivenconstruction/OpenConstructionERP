@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Stavka {ordinal}: količina {quantity} ima {decimals} decimalnih mjesta; pravilo GAEB X83 dopušta najviše 3",
       "suggestion": "Zaokružite količinu na najviše 3 decimalna mjesta prema GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Stavka {ordinal} je stavka po potrebi bez ukupnog iznosa: iznos {total} je prikazan, ali ne ulazi ni u jedan zbroj",
+      "suggestion": "Ugovorite je zasebno ako je naručitelj aktivira; prema GAEB-u ostaje izvan iznosa ponude"
+    },
+    "ordinal_changed": {
+      "fail": "Stavka {ordinal}: OZ promijenjen u odnosu na izvornu datoteku ({source}); naručitelj sparuje ponudu po OZ-u",
+      "suggestion": "Vratite izvorni OZ kako bi se ponuda i naručiteljeve reference podudarale"
+    },
+    "unit_exportable": {
+      "fail": "Stavka {ordinal}: jedinica '{unit}' ne stane u GAEB polje QU od 4 znaka i bit će skraćena pri izvozu",
+      "suggestion": "Koristite GAEB oznaku jedinice od najviše 4 znaka (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

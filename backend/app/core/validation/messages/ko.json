@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "항목 {ordinal}: 수량 {quantity}의 소수 자릿수는 {decimals}자리입니다. GAEB X83 관례상 최대 3자리입니다",
       "suggestion": "GAEB X83에 따라 수량을 소수점 이하 최대 3자리로 반올림하세요"
+    },
+    "provis_without_total": {
+      "fail": "항목 {ordinal}은(는) 합계 미포함 예비 항목입니다: 금액 {total}이(가) 표시되지만 어떤 합계에도 포함되지 않습니다",
+      "suggestion": "발주자가 요청하면 별도로 발주하세요. GAEB에 따라 입찰 총액에서 제외됩니다"
+    },
+    "ordinal_changed": {
+      "fail": "항목 {ordinal}: OZ가 원본 파일과 다릅니다({source}). 발주자는 OZ로 입찰을 대조합니다",
+      "suggestion": "원래 OZ로 되돌려 입찰과 발주자 참조가 일치하도록 하세요"
+    },
+    "unit_exportable": {
+      "fail": "항목 {ordinal}: 단위 '{unit}'이(가) 4자 GAEB QU 필드에 맞지 않아 내보낼 때 잘립니다",
+      "suggestion": "4자 이하의 GAEB 단위 코드를 사용하세요 (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

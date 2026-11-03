@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Posisyong {ordinal}: may {decimals} decimal place ang daming {quantity}; nililimitahan ng kombensiyong GAEB X83 sa 3",
       "suggestion": "I-round ang dami sa hindi hihigit sa 3 decimal place ayon sa GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Ang item {ordinal} ay opsyonal na item na walang kabuuan: ipinapakita ang halagang {total} pero hindi ito binibilang sa anumang kabuuan",
+      "suggestion": "Igawad ito nang hiwalay kapag tinawag ng kliyente; ayon sa GAEB nasa labas ito ng halaga ng bid"
+    },
+    "ordinal_changed": {
+      "fail": "Item {ordinal}: nagbago ang OZ mula sa source file ({source}); itinutugma ng kliyente ang bid ayon sa OZ",
+      "suggestion": "Ibalik ang orihinal na OZ para magtugma ang bid at ang mga sanggunian ng kliyente"
+    },
+    "unit_exportable": {
+      "fail": "Item {ordinal}: hindi kasya ang unit na '{unit}' sa 4-character na GAEB QU field at mapuputol sa export",
+      "suggestion": "Gumamit ng GAEB unit code na hanggang 4 na character (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

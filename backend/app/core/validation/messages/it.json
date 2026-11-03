@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Voce {ordinal}: la quantità {quantity} ha {decimals} cifre decimali - la convenzione GAEB X83 ne consente al massimo 3",
       "suggestion": "Arrotondare la quantità ad al massimo 3 cifre decimali secondo GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "La voce {ordinal} è una voce eventuale senza totale: l'importo {total} è mostrato ma non entra in nessun totale",
+      "suggestion": "Affidarla a parte se il committente la richiama; secondo GAEB resta fuori dall'importo dell'offerta"
+    },
+    "ordinal_changed": {
+      "fail": "Voce {ordinal}: OZ modificato rispetto al file di origine ({source}); il committente abbina l'offerta per OZ",
+      "suggestion": "Ripristinare l'OZ originale perché offerta e rimandi del committente coincidano"
+    },
+    "unit_exportable": {
+      "fail": "Voce {ordinal}: l'unità '{unit}' non entra nel campo GAEB QU di 4 caratteri e verrebbe troncata in esportazione",
+      "suggestion": "Usare un codice unità GAEB di massimo 4 caratteri (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

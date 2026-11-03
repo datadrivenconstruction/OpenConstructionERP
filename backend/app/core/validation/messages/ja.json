@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "項目 {ordinal}: 数量 {quantity} の小数点以下は {decimals} 桁です。GAEB X83 の慣例では 3 桁までです",
       "suggestion": "GAEB X83 に従い、数量を小数点以下 3 桁以内に丸めてください"
+    },
+    "provis_without_total": {
+      "fail": "項目 {ordinal} は合計に含めない予備項目です：金額 {total} は表示されますが、どの合計にも算入されません",
+      "suggestion": "発注者が呼び出した場合は別途発注してください。GAEB では入札総額の外に置かれます"
+    },
+    "ordinal_changed": {
+      "fail": "項目 {ordinal}：OZ が元ファイルから変更されています（{source}）。発注者は OZ で入札を照合します",
+      "suggestion": "元の OZ に戻し、入札と発注者の参照を一致させてください"
+    },
+    "unit_exportable": {
+      "fail": "項目 {ordinal}：単位「{unit}」は 4 文字の GAEB QU 欄に収まらず、エクスポート時に切り詰められます",
+      "suggestion": "4 文字以内の GAEB 単位コードを使用してください（m、m2、m3、St、h、psch、kg、t）"
     }
   },
   "nrm": {

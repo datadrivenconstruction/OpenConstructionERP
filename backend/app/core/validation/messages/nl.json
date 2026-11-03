@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Post {ordinal}: hoeveelheid {quantity} heeft {decimals} decimalen; GAEB X83 hanteert maximaal 3",
       "suggestion": "Rond de hoeveelheid volgens GAEB X83 af op maximaal 3 decimalen"
+    },
+    "provis_without_total": {
+      "fail": "Post {ordinal} is een stelpost zonder totaal: het bedrag {total} wordt getoond maar telt in geen enkel totaal mee",
+      "suggestion": "Gun deze apart als de opdrachtgever hem afroept; volgens GAEB blijft hij buiten de inschrijfsom"
+    },
+    "ordinal_changed": {
+      "fail": "Post {ordinal}: OZ gewijzigd ten opzichte van het bronbestand ({source}); de opdrachtgever koppelt de inschrijving op OZ",
+      "suggestion": "Herstel de oorspronkelijke OZ zodat inschrijving en verwijzingen van de opdrachtgever kloppen"
+    },
+    "unit_exportable": {
+      "fail": "Post {ordinal}: eenheid '{unit}' past niet in het GAEB-veld QU van 4 tekens en wordt bij export afgekapt",
+      "suggestion": "Gebruik een GAEB-eenheidscode van maximaal 4 tekens (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, downloadWithAuth, API_BASE } from '@/shared/lib/api';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
-import { resourceAwareTotalInBase } from './boqHelpers';
+import { resourceAwareTotalInBase, isExcludedFromTotal } from './boqHelpers';
 import { toNum } from '@/shared/lib/money';
 
 /* ── Core BOQ types ──────────────────────────────────────────────────── */
@@ -714,7 +714,8 @@ export function billDirectCost(
   const isHeader = (p: Pick<Position, 'unit' | 'quantity' | 'unit_rate'>) =>
     isSection(p) && !Number(p.quantity) && !Number(p.unit_rate);
   return positions.reduce(
-    (sum, p) => (isHeader(p) ? sum : sum + resourceAwareTotalInBase(p, baseCurrency, fxRates)),
+    (sum, p) =>
+      isHeader(p) || isExcludedFromTotal(p) ? sum : sum + resourceAwareTotalInBase(p, baseCurrency, fxRates),
     0,
   );
 }
@@ -833,7 +834,7 @@ export function groupPositionsIntoSections(
     if (pos.parent_id && sectionMap.has(pos.parent_id)) {
       const group = sectionMap.get(pos.parent_id)!;
       group.children.push(pos);
-      group.subtotal += rebase(pos);
+      if (!isExcludedFromTotal(pos)) group.subtotal += rebase(pos);
     } else {
       ungrouped.push(pos);
     }

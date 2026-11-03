@@ -50307,6 +50307,9 @@ const resource = {
     "boq.risk_contingency_source_positions": "Faixas do BOQ",
     "boq.risk_contingency_source_register": "Registro de riscos",
     "boq.risk_contingency_stale_register": "O registro de riscos mudou depois que isto foi aplicado. Um novo cálculo com as mesmas configurações dá {{drift}} ({{pct}}). Aplique de novo para atualizar.",
+    "boq.provis_badge": "Eventual",
+    "boq.provis_without_total_tip": "Item eventual sem total: orçado, mas não entra em nenhum total.",
+    "boq.provis_with_total_tip": "Item eventual com total: entra nos totais.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",

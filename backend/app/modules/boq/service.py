@@ -294,6 +294,7 @@ async def _safe_audit(
 # move. The table itself lives in a module the methodology catalogue can import.
 from app.modules.boq.activity_text import activity_description
 from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day, tax_point
+from app.modules.boq.gaeb_common import is_excluded_from_total
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
     CONSTRUCTION_TIER_TAX_CODE,
@@ -917,6 +918,9 @@ def _leaf_total_base_with_resources(
     Pure function - no DB I/O.  Safe to call from the structured rollup,
     compare, and export paths.
     """
+    if is_excluded_from_total(pos):
+        # A Bedarfsposition ohne Gesamtbetrag is priced but never summed.
+        return Decimal("0")
     meta = getattr(pos, "metadata_", None)
     if not isinstance(meta, dict):
         meta = getattr(pos, "metadata", None)
@@ -8705,7 +8709,8 @@ class BOQService:
 
         for pos in items:
             total_val = _str_to_float(pos.total)
-            direct_cost += Decimal(str(total_val))
+            if not is_excluded_from_total(pos):
+                direct_cost += Decimal(str(total_val))
 
             rate = _str_to_float(pos.unit_rate)
             qty = _str_to_float(pos.quantity)

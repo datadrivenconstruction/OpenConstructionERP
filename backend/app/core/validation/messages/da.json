@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Post {ordinal}: mængden {quantity} har {decimals} decimaler – GAEB X83-konventionen begrænser antallet til 3",
       "suggestion": "Afrund mængden til højst 3 decimaler efter GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Post {ordinal} er en optionspost uden total: beløbet {total} vises, men tælles ikke med i nogen total",
+      "suggestion": "Bestil den separat, hvis bygherren kalder den af; efter GAEB ligger den uden for tilbudssummen"
+    },
+    "ordinal_changed": {
+      "fail": "Post {ordinal}: OZ ændret i forhold til kildefilen ({source}); bygherren matcher tilbuddet på OZ",
+      "suggestion": "Gendan det oprindelige OZ, så tilbud og bygherrens henvisninger passer"
+    },
+    "unit_exportable": {
+      "fail": "Post {ordinal}: enheden '{unit}' passer ikke i GAEB-feltet QU på 4 tegn og afkortes ved eksport",
+      "suggestion": "Brug en GAEB-enhedskode på højst 4 tegn (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

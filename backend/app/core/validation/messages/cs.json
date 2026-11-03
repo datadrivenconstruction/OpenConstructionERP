@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Položka {ordinal}: množství {quantity} má {decimals} desetinných míst – konvence GAEB X83 povoluje nejvýše 3",
       "suggestion": "Zaokrouhlete množství nejvýše na 3 desetinná místa podle GAEB X83"
+    },
+    "provis_without_total": {
+      "fail": "Položka {ordinal} je položka dle potřeby bez součtu: částka {total} se zobrazuje, ale nezapočítává se do žádného součtu",
+      "suggestion": "Při odvolání ji zadejte zvlášť; podle GAEB zůstává mimo nabídkovou cenu"
+    },
+    "ordinal_changed": {
+      "fail": "Položka {ordinal}: OZ změněno oproti zdrojovému souboru ({source}); zadavatel páruje nabídku podle OZ",
+      "suggestion": "Obnovte původní OZ, aby nabídka a odkazy zadavatele souhlasily"
+    },
+    "unit_exportable": {
+      "fail": "Položka {ordinal}: jednotka '{unit}' se nevejde do 4znakového pole GAEB QU a při exportu by byla zkrácena",
+      "suggestion": "Použijte kód jednotky GAEB s nejvýše 4 znaky (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {

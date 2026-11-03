@@ -171,18 +171,19 @@ async def test_a_real_x84_round_trips_without_gaining_a_unit() -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(not _X84.exists(), reason="X84 conformance fixture not present")
-async def test_the_x84_export_still_omits_qu_for_its_own_reason() -> None:
-    """X84 omits QU on every item regardless, and that is unchanged.
+async def test_the_x84_export_writes_a_stated_unit_and_omits_an_invented_one() -> None:
+    """X84 follows the same rule as X83: a stated unit travels, a guessed one does not.
 
-    The two paths now agree for a position imported from an X84, but they
-    agree for different reasons: X84 omits QU because the phase has no slot
-    for it, X83 omits it because this particular source stated none. An X83
-    export of a hand-built BOQ still carries units.
+    The bid returned to the issuer carries ``QU`` so a re-import, ours or the
+    issuer's, keeps the unit; a unit this program invented is still never
+    written as somebody else's fact.
     """
     xml = build_gaeb_xml(
-        _boq([_pos("001", "m2", {"gaeb_unit_original": "m2"})]),
+        _boq([_pos("001", "m2", {"gaeb_unit_original": "m2"}), _pos("002", "pcs", {"gaeb_unit_original": ""})]),
         project_name="P",
         project_currency="EUR",
         gaeb_format="x84",
     )
-    assert _qu_by_ordinal(xml)["001"] is None
+    qu = _qu_by_ordinal(xml)
+    assert qu["001"] == "m2"
+    assert qu["002"] is None

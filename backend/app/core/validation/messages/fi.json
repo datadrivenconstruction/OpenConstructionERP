@@ -287,6 +287,18 @@
     "quantity_decimals": {
       "fail": "Nimike {ordinal}: määrässä {quantity} on {decimals} desimaalia; GAEB X83 -käytäntö sallii enintään 3",
       "suggestion": "Pyöristä määrä enintään 3 desimaaliin GAEB X83:n mukaisesti"
+    },
+    "provis_without_total": {
+      "fail": "Nimike {ordinal} on optionimike ilman summaa: summa {total} näytetään, mutta sitä ei lasketa mihinkään summaan",
+      "suggestion": "Tilaa se erikseen, jos tilaaja kutsuu sen; GAEB:n mukaan se jää tarjoussumman ulkopuolelle"
+    },
+    "ordinal_changed": {
+      "fail": "Nimike {ordinal}: OZ muuttunut lähdetiedostoon nähden ({source}); tilaaja kohdistaa tarjouksen OZ:n perusteella",
+      "suggestion": "Palauta alkuperäinen OZ, jotta tarjous ja tilaajan viittaukset täsmäävät"
+    },
+    "unit_exportable": {
+      "fail": "Nimike {ordinal}: yksikkö '{unit}' ei mahdu 4 merkin GAEB-kenttään QU ja katkaistaan viennissä",
+      "suggestion": "Käytä enintään 4 merkin GAEB-yksikkökoodia (m, m2, m3, St, h, psch, kg, t)"
     }
   },
   "nrm": {
