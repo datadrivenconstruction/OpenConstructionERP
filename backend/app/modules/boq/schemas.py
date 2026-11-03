@@ -2976,10 +2976,23 @@ class RiskContingencySuggestion(BaseModel):
     prob_within_base: float
     confidence: float = Field(..., ge=0.0, le=1.0)
     fingerprint: str
+    source: Literal["positions", "register"] = "positions"
+    mode: Literal["fixed", "percentage"] = "fixed"
+    #: Direct cost a percentage line refers to.
+    direct_cost: Decimal | None = None
+    #: Percentage the line would carry in ``percentage`` mode (4 dp, Decimal-as-string).
+    percentage: Decimal | None = None
+    #: Register source: number of risks used.
+    items_used: int | None = None
+    register_fingerprint: str | None = None
 
-    @field_serializer("amount", "base_total", "budget", when_used="json")
-    def _ser_money(self, v: Decimal) -> str | None:
-        return _serialise_money(v)
+    @field_serializer("amount", "base_total", "budget", "direct_cost", when_used="json")
+    def _ser_money(self, v: Decimal | None) -> str | None:
+        return None if v is None else _serialise_money(v)
+
+    @field_serializer("percentage", when_used="json")
+    def _ser_percentage(self, v: Decimal | None) -> str | None:
+        return None if v is None else str(v)
 
 
 class AppliedRiskContingency(BaseModel):
@@ -3004,6 +3017,14 @@ class AppliedRiskContingency(BaseModel):
     applied_by: str | None = None
     applied_by_email: str | None = None
     can_undo_to_previous: bool = False
+    source: Literal["positions", "register"] = "positions"
+    mode: Literal["fixed", "percentage"] = "fixed"
+    #: Percentage the line carries (percentage mode).
+    percentage: str | None = None
+    #: Register source: the risks behind the run, as they stood when it was applied.
+    items_used: int | None = None
+    risk_items: list[dict[str, Any]] | None = None
+    register_fingerprint: str | None = None
 
 
 class RiskContingencyStatus(BaseModel):
@@ -3036,3 +3057,7 @@ class ApplyRiskContingencyRequest(BaseModel):
     correlation: float = Field(default=0.2, ge=0.0, le=0.95)
     expected_amount: Decimal | None = Field(default=None, ge=0)
     name: str | None = Field(default=None, max_length=255)
+    #: ``positions`` samples the bill's ranges, ``register`` the project risk register.
+    source: Literal["positions", "register"] = "positions"
+    #: ``fixed`` writes the amount, ``percentage`` a share of the direct cost that follows quantity edits.
+    mode: Literal["fixed", "percentage"] = "fixed"

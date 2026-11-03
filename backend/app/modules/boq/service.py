@@ -8412,7 +8412,12 @@ class BOQService:
 
             embed_markups = embed_enabled(structured.metadata)
         if embed_markups:
-            return (await self.embed_markups_in_export(structured))[0].payload
+            structured = (await self.embed_markups_in_export(structured))[0].payload
+        # The one place every export format reads markup names from: a risk line says which run backs it.
+        from app.modules.boq.risk_contingency import export_label
+
+        for markup in structured.markups:
+            markup.name = export_label(markup.name, markup.metadata)
         return structured
 
     async def embed_markups_in_export(self, structured: BOQWithSections) -> tuple[Any, Any]:

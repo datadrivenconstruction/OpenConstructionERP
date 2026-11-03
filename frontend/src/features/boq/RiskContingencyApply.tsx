@@ -1,15 +1,18 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Loader2, Undo2 } from 'lucide-react';
-import { boqApi, type RiskContingencyStatus } from './api';
+import { boqApi, type RiskContingencyMode, type RiskContingencySource, type RiskContingencyStatus } from './api';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { fmtFixed, fmtPercent } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 
 const PRESETS = [50, 80] as const;
+const SOURCES: RiskContingencySource[] = ['positions', 'register'];
+const MODES: RiskContingencyMode[] = ['fixed', 'percentage'];
 
 function money(v: string | number | null | undefined, fmt: Intl.NumberFormat): string {
   const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''));
@@ -39,13 +42,16 @@ export function RiskContingencyApply({
   const [percentile, setPercentile] = useState<number>(80);
   const [custom, setCustom] = useState('');
   const [confirming, setConfirming] = useState(false);
+  const [source, setSource] = useState<RiskContingencySource>('positions');
+  const [mode, setMode] = useState<RiskContingencyMode>('fixed');
 
-  const queryKey = ['boq-risk-contingency', boqId, percentile, correlation];
-  const { data, isFetching } = useQuery<RiskContingencyStatus>({
+  const queryKey = ['boq-risk-contingency', boqId, percentile, correlation, source, mode];
+  const { data, isFetching, error: previewError } = useQuery<RiskContingencyStatus>({
     queryKey,
-    queryFn: () => boqApi.getRiskContingency(boqId, percentile, correlation),
+    queryFn: () => boqApi.getRiskContingency(boqId, percentile, correlation, source, mode),
     enabled: !!boqId,
     placeholderData: keepPreviousData,
+    retry: false,
   });
 
   const refresh = (next: RiskContingencyStatus) => {
@@ -62,6 +68,8 @@ export function RiskContingencyApply({
         correlation,
         iterations: data?.suggestion?.iterations,
         expected_amount: data?.suggestion?.amount,
+        source,
+        mode,
         name: t('boq.risk_contingency_line_name', { defaultValue: 'Risk contingency P{{p}}', p: percentile }),
       }),
     onSuccess: (next) => {
@@ -117,6 +125,16 @@ export function RiskContingencyApply({
         ? t('boq.cost_risk_marginal', { defaultValue: 'Marginal' })
         : t('boq.cost_risk_low_confidence', { defaultValue: 'Low confidence' });
 
+  const sourceLabel = (v: RiskContingencySource) =>
+    v === 'register'
+      ? t('boq.risk_contingency_source_register', { defaultValue: 'Risk register' })
+      : t('boq.risk_contingency_source_positions', { defaultValue: 'BOQ ranges' });
+  const modeLabel = (v: RiskContingencyMode) =>
+    v === 'percentage'
+      ? t('boq.risk_contingency_mode_percentage', { defaultValue: 'Follows quantities' })
+      : t('boq.risk_contingency_mode_fixed', { defaultValue: 'Fixed amount' });
+  const previewMessage = previewError ? getErrorMessage(previewError) : null;
+
   const pickCustom = (raw: string) => {
     setCustom(raw);
     const n = Math.round(Number(raw));
@@ -167,6 +185,55 @@ export function RiskContingencyApply({
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-2xs text-content-secondary">
+        <div className="flex items-center gap-1" role="group" aria-label={t('boq.risk_contingency_source', { defaultValue: 'Risk source' })}>
+          {SOURCES.map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                setSource(v);
+                setConfirming(false);
+              }}
+              aria-pressed={source === v}
+              className={`px-2 py-0.5 rounded font-medium border ${
+                source === v
+                  ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+                  : 'border-border-light text-content-secondary hover:bg-surface-secondary'
+              }`}
+            >
+              {sourceLabel(v)}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1" role="group" aria-label={t('boq.risk_contingency_mode', { defaultValue: 'Amount mode' })}>
+          {MODES.map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                setMode(v);
+                setConfirming(false);
+              }}
+              aria-pressed={mode === v}
+              className={`px-2 py-0.5 rounded font-medium border ${
+                mode === v
+                  ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+                  : 'border-border-light text-content-secondary hover:bg-surface-secondary'
+              }`}
+            >
+              {modeLabel(v)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {previewMessage && !s && (
+        <div className="text-xs text-amber-700 dark:text-amber-400" role="alert">
+          {previewMessage}
+        </div>
+      )}
+
       {s && (
         <div className="text-xs text-content-secondary space-y-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -193,6 +260,26 @@ export function RiskContingencyApply({
               seed: s.seed,
             })}
           </div>
+          {s.source === 'register' && (
+            <div className="text-2xs text-content-tertiary" data-testid="risk-contingency-register">
+              {t('boq.risk_contingency_register_basis', {
+                defaultValue: '{{n}} open risks from the register. The P{{p}} value of their expected cost is the reserve.',
+                n: s.items_used ?? 0,
+                p: s.percentile,
+              })}{' '}
+              <Link to="/risks" className="text-oe-blue hover:underline">
+                {t('boq.risk_contingency_open_register', { defaultValue: 'Open the risk register' })}
+              </Link>
+            </div>
+          )}
+          {s.mode === 'percentage' && s.percentage != null && (
+            <div className="text-2xs text-content-tertiary" data-testid="risk-contingency-percentage">
+              {t('boq.risk_contingency_percentage_basis', {
+                defaultValue: 'Stored as {{pct}}% of the direct cost, so the line follows quantity changes.',
+                pct: s.percentage,
+              })}
+            </div>
+          )}
           {s.below_base && (
             <div className="text-2xs text-content-tertiary">
               {t('boq.risk_contingency_below_base', {
@@ -273,6 +360,14 @@ export function RiskContingencyApply({
                 : t('boq.risk_contingency_undo', { defaultValue: 'Remove' })}
             </button>
           </div>
+          {applied.source === 'register' && (
+            <div className="text-2xs text-content-tertiary">
+              {t('boq.risk_contingency_applied_register', {
+                defaultValue: 'From the risk register: {{n}} risks at the time of the run.',
+                n: applied.items_used ?? applied.risk_items?.length ?? 0,
+              })}
+            </div>
+          )}
           <div className="text-2xs text-content-tertiary">
             {t('boq.risk_contingency_provenance', {
               defaultValue: 'P{{p}}, seed {{seed}}, {{iterations}} iterations, applied {{date}} by {{who}}',
@@ -285,9 +380,11 @@ export function RiskContingencyApply({
           </div>
           {data?.stale && (
             <div className="text-2xs text-amber-700 dark:text-amber-400">
-              {t('boq.risk_contingency_stale', {
+              {t(applied.source === 'register' ? 'boq.risk_contingency_stale_register' : 'boq.risk_contingency_stale', {
                 defaultValue:
-                  'Line totals changed since this was applied. A re-run at the same settings gives {{drift}} ({{pct}}). Re-apply to bring it up to date.',
+                  applied.source === 'register'
+                    ? 'The risk register changed since this was applied. A re-run at the same settings gives {{drift}} ({{pct}}). Re-apply to bring it up to date.'
+                    : 'Line totals changed since this was applied. A re-run at the same settings gives {{drift}} ({{pct}}). Re-apply to bring it up to date.',
                 drift: `${Number(data.drift_amount) > 0 ? '+' : ''}${money(data.drift_amount, fmt)}`,
                 pct: data.drift_pct == null ? '-' : fmtPercent(data.drift_pct),
               })}
