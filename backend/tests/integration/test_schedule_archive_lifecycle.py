@@ -458,8 +458,17 @@ async def test_explicit_purge_permission_does_not_let_a_viewer_purge():
 
 
 @pytest.mark.asyncio
-async def test_an_editor_who_owns_the_project_purges_the_archive():
+async def test_an_editor_without_purge_permission_is_stopped_at_the_route():
     async with api("editor") as (client, session, _service, schedule, _project, _payload):
+        schedule.status = "archived"
+        await session.flush()
+        assert (await client.delete(url(schedule, "/permanent/"))).status_code == 403
+        assert await session.get(Schedule, schedule.id) is not None
+
+
+@pytest.mark.asyncio
+async def test_an_editor_who_owns_the_project_purges_the_archive():
+    async with api("editor", ["schedule.purge"]) as (client, session, _service, schedule, _project, _payload):
         schedule.status = "archived"
         await session.flush()
         assert (await client.get(url(schedule, "/delete-impact/"))).json()["can_delete"] is True
