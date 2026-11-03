@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Final, NamedTuple
+from typing import TYPE_CHECKING, Any, Final, Literal, NamedTuple
 
 from fastapi import HTTPException, status
 
@@ -515,6 +515,13 @@ def _compute_total(
     q = _to_decimal(quantity)
     r = _to_decimal(unit_rate)
     return str(_quantize_money(q * r))
+
+
+def _resource_line_total(
+    quantity: str | int | float | Decimal | None, rate: str | int | float | Decimal | None
+) -> Decimal:
+    """One resource line total (qty x rate) in exact Decimal, 4dp like a position total."""
+    return _quantize_money(_to_decimal(quantity) * _to_decimal(rate))
 
 
 def _str_to_float(value: str | None) -> float:
@@ -2311,7 +2318,7 @@ class BOQService:
         if row is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="BOQ not found",
+                detail=translate("errors.boq_not_found", locale=get_locale()),
             )
         if row[0]:
             raise HTTPException(
@@ -2831,7 +2838,7 @@ class BOQService:
         if boq is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="BOQ not found",
+                detail=translate("errors.boq_not_found", locale=get_locale()),
             )
         return boq
 
@@ -5922,11 +5929,7 @@ class BOQService:
         full_label = chosen.get("full_label")
         if isinstance(full_label, str) and full_label.strip():
             target_resource["name"] = full_label.strip()[:400]
-        try:
-            qty_val = float(target_resource.get("quantity", 0) or 0)
-        except (TypeError, ValueError):
-            qty_val = 0.0
-        target_resource["total"] = round(qty_val * new_price, 4)
+        target_resource["total"] = float(_resource_line_total(target_resource.get("quantity"), new_price))
         # Drop the old snapshot so ``_stamp_resource_variant_snapshots``
         # writes a fresh ``captured_at`` for the changed resource. Other
         # resources still carry their original snapshots and remain idempotent.
@@ -5949,13 +5952,11 @@ class BOQService:
         # Recalculate the position-level unit_rate from per-unit resource
         # subtotals. Mirrors the convention in ``update_position``:
         #   unit_rate(position) = Σ(r.quantity × r.unit_rate)
-        new_unit_rate = round(
+        new_unit_rate = _quantize_money(
             sum(
-                (float(r.get("quantity", 0) or 0) * float(r.get("unit_rate", 0) or 0))
-                for r in resources
-                if isinstance(r, dict)
-            ),
-            4,
+                (_resource_line_total(r.get("quantity"), r.get("unit_rate")) for r in resources if isinstance(r, dict)),
+                Decimal("0"),
+            )
         )
         new_total = _compute_total(position.quantity, str(new_unit_rate))
 
@@ -8021,9 +8022,7 @@ class BOQService:
                     for f, v in delta.items():
                         r[f] = v
                     # Recompute THIS resource's total against ITS OWN qty.
-                    r_qty = _str_to_float(r.get("quantity"))
-                    r_rate = _str_to_float(r.get("unit_rate"))
-                    r["total"] = round(r_qty * r_rate, 2)
+                    r["total"] = float(_resource_line_total(r.get("quantity"), r.get("unit_rate")))
                     touched = True
                 if not touched:
                     continue
@@ -8144,7 +8143,9 @@ class BOQService:
         # of three times, which is most of its time on the event loop.
         boq = await self.boq_repo.get_header(boq_id)
         if boq is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+            )
         positions = await self.position_repo.list_all_for_boq(boq_id)
 
         # Build position responses + count. Section headers carry no unit and
@@ -8493,7 +8494,7 @@ class BOQService:
         if await self.boq_repo.get_header(boq_id) is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="BOQ not found",
+                detail=translate("errors.boq_not_found", locale=get_locale()),
             )
         all_positions = await self.position_repo.list_all_for_boq(boq_id)
 
@@ -8587,7 +8588,7 @@ class BOQService:
                 # No usable resource split: classify the whole position by its
                 # description keywords (fast heuristic).
                 cat = self._classify_position_category(pos.description)
-                short_name = pos.description[:60] if pos.description else "Position"
+                short_name = pos.description[:60] if pos.description else ""
                 _add(cat, short_name, pos_total_base, pos.id)
 
         # Build categories sorted by amount descending
@@ -8634,14 +8635,15 @@ class BOQService:
                         CostBreakdownMarkup(
                             name=markup_obj.name,
                             percentage=_str_to_float(markup_obj.percentage),
-                            amount=round(float(amount), 2),
+                            amount=_round_currency(amount),
                         )
                     )
-                    markup_total += amount
+                    markup_total += _round_currency(amount)
 
         # OC-47: keep as str-serialised Decimal so openpyxl writes a clean
         # number without binary-float tails like 30695.000000000004.
-        grand_total = direct_cost_val + markup_total
+        # Sum the rounded parts so direct cost + markup lines add up to the grand total to the cent.
+        grand_total = _round_currency(direct_cost_val) + markup_total
 
         # Top 10 resources by cost
         top_resources: list[CostBreakdownResource] = []
@@ -8993,6 +8995,11 @@ class BOQService:
         for template_id, tpl in TEMPLATES.items():
             section_count = len(tpl["sections"])
             position_count = sum(len(sec["positions"]) for sec in tpl["sections"])
+            avg_cost_per_m2 = sum(
+                float(p.get("rate", 0) or 0) * float(p.get("qty_factor", 0) or 0)
+                for sec in tpl["sections"]
+                for p in sec["positions"]
+            )
             result.append(
                 TemplateInfo(
                     id=template_id,
@@ -9001,6 +9008,8 @@ class BOQService:
                     icon=tpl["icon"],
                     section_count=section_count,
                     position_count=position_count,
+                    avg_cost_per_m2=round(avg_cost_per_m2, 2),
+                    currency=str(tpl.get("currency") or "EUR"),
                 )
             )
         return result
@@ -9269,7 +9278,7 @@ class BOQService:
         if row is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="BOQ not found",
+                detail=translate("errors.boq_not_found", locale=get_locale()),
             )
 
         # Resolve classification system from the project's country.
@@ -11109,7 +11118,9 @@ class BOQService:
         # Fetch BOQ positions
         boq = await self.boq_repo.get_by_id(boq_id)
         if not boq:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+            )
 
         # Unbounded read: the analysis reports total_positions and summarises the
         # whole BOQ, so the paginated list_for_boq (1000-row cap, returns a tuple)
@@ -11308,10 +11319,10 @@ class BOQService:
         self,
         project_id: uuid.UUID,
         *,
-        group: str = "cost",
+        group: Literal["cost"] = "cost",
         top_n: int = 20,
     ) -> list[dict[str, Any]]:
-        """Top-N line items by cost for the Pareto widget (RFC 25)."""
+        """Top-N line items by cost for the Pareto widget (RFC 25). ``group`` is always 'cost'."""
         top_n = max(1, min(top_n, 200))
         positions = await self._list_positions_for_project(project_id)
         if not positions:

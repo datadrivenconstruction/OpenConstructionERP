@@ -2118,6 +2118,7 @@ export function BOQEditorPage() {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   // The Delete key asks the same role gate as the grid's delete controls.
   const canDeletePositions = useHasPermission('boq.delete');
+  const canImportPositions = useHasPermission('boq.import');
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -2130,6 +2131,7 @@ export function BOQEditorPage() {
         isEditing: isTextEntryElement(document.activeElement) || isTextEntryElement(e.target),
         hasSelection: selectedPositionIds.length > 0,
         canDelete: canDeletePositions,
+        canImport: canImportPositions,
       });
       if (!action) return;
 
@@ -2212,7 +2214,7 @@ export function BOQEditorPage() {
     // these app-level shortcuts before we see them.
     document.addEventListener('keydown', handleKeyDown, true);
     return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked, boq?.positions, canDeletePositions]);
+  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked, boq?.positions, canDeletePositions, canImportPositions]);
 
   /* ── Activity panel ───────────────────────────────────────────────── */
 

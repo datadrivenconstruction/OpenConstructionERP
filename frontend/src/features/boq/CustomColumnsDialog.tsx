@@ -750,7 +750,7 @@ export function CustomColumnsDialog({
                         id="column-options"
                         value={newOptions}
                         onChange={(e) => setNewOptions(e.target.value)}
-                        placeholder="Approved, Pending, Rejected"
+                        placeholder={t('boq.column_options_placeholder', { defaultValue: 'Approved, Pending, Rejected' })}
                         rows={2}
                         className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all resize-none"
                       />

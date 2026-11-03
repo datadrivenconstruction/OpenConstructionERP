@@ -356,7 +356,9 @@ function ResourceRow({
         <span
           className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${CATEGORY_BG_CLASSES[resource.type] ?? 'bg-gray-500'}`}
         />
-        <span className="text-content-secondary truncate">{resource.name}</span>
+        <span className="text-content-secondary truncate">
+          {resource.name || t('boq.cost_breakdown_position', { defaultValue: 'Position' })}
+        </span>
         <span className="text-content-tertiary flex-shrink-0">
           ({resource.positions_count} {t('boq.cost_breakdown_pos', { defaultValue: 'pos.' })})
         </span>

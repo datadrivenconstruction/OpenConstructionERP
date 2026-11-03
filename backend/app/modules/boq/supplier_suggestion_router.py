@@ -21,6 +21,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.i18n import get_locale
+from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -74,10 +76,14 @@ async def _position_with_access(position_id: uuid.UUID, user_id: str, session: A
     repo = PositionRepository(session)
     position = await repo.get_by_id(position_id)
     if position is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     project_id = await repo.project_id_for_boq(position.boq_id)
     if project_id is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await verify_project_access(project_id, user_id, session)
     return position
 
