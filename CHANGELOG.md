@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- Data feeds: read-only CSV, Parquet and JSON tables over projects, BOQ positions, invoices, purchase orders and schedule activities for Excel, Power Query and BI tools, with a Settings page, `bi:read` API keys and optional PostgreSQL views (`bi enable`).
+
 ## [19.0.0] - 2026-11-02
 
 ### Added
