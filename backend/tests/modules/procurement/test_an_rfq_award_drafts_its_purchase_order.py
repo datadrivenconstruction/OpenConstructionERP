@@ -1046,3 +1046,47 @@ async def test_procurement_subscribes_to_the_rfq_award() -> None:
     from app.modules.procurement import events as procurement_events  # noqa: F401 - registers on import
 
     assert rfq_award.on_rfq_awarded in event_bus._handlers.get("rfq.awarded", [])
+
+
+# ── One need, one order ─────────────────────────────────────────────────────
+
+
+async def test_an_rfq_award_after_a_package_award_adds_no_second_order(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(session, bidder=str(contact.id))
+    package = str(uuid.uuid4())
+    rfq.metadata_ = {"bid_package_id": package}
+    other = PurchaseOrder(
+        project_id=rfq.project_id,
+        po_number="PO-0001",
+        currency_code="EUR",
+        status="draft",
+        metadata_={"bid_package_id": package},
+    )
+    session.add(other)
+    await session.flush()
+
+    result = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    assert result == other.id
+    assert [po.id for po in await orders(session, rfq.project_id)] == [other.id]
+
+
+async def test_a_package_award_after_an_rfq_award_finds_the_rfqs_order(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    from app.modules.procurement.events import _find_existing_po
+
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(session, bidder=str(contact.id))
+    package = str(uuid.uuid4())
+    rfq.metadata_ = {"bid_package_id": package}
+    await session.flush()
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    found = await _find_existing_po(session, rfq.project_id, keys={"bid_package_id": package})
+    assert found is not None and found.id == po_id
+    assert [po.id for po in await orders(session, rfq.project_id)] == [po_id]
