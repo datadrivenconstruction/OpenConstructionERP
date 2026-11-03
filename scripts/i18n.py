@@ -113,7 +113,12 @@ class Bundle:
                 self.lines[anchor] = text + b"," + self.cr
         self.lines.insert(anchor + 1, self._line(indent, key, value))
         self.end += 1
-        self._scan()
+        # Shift line numbers in place; a full rescan per key is quadratic on 9 MB bundles.
+        pos = anchor + 1
+        self.order = [(n + 1 if n >= pos else n, k) for n, k in self.order]
+        at = next((j for j, (n, _) in enumerate(self.order) if n > pos), len(self.order))
+        self.order.insert(at, (pos, key))
+        self.index = {k: n for n, k in reversed(self.order)}
 
     def rename(self, old: str, new: str) -> None:
         i = self.index[old]
