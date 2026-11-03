@@ -70,6 +70,7 @@ class CaptureManualCreate(BaseModel):
     amount_net: str = Field(default="0", max_length=50)
     amount_tax: str = Field(default="0", max_length=50)
     amount_gross: str = Field(default="0", max_length=50)
+    po_reference: str | None = Field(default=None, max_length=100)
     line_items: list[CaptureLineItem] = Field(default_factory=list)
 
     @field_validator("amount_net", "amount_tax", "amount_gross")
@@ -93,6 +94,7 @@ class CaptureUpdate(BaseModel):
     amount_net: str | None = Field(default=None, max_length=50)
     amount_tax: str | None = Field(default=None, max_length=50)
     amount_gross: str | None = Field(default=None, max_length=50)
+    po_reference: str | None = Field(default=None, max_length=100)
     line_items: list[CaptureLineItem] | None = None
 
     @field_validator("amount_net", "amount_tax", "amount_gross")
@@ -113,6 +115,21 @@ class BookingInput(BaseModel):
     tax_account: str | None = Field(default=None, max_length=100)
     cost_code: str | None = Field(default=None, max_length=100)
     booking_project_id: UUID | None = Field(default=None)
+
+
+class PurchaseOrderLink(BaseModel):
+    """Link a captured invoice to its purchase order (``null`` clears the link)."""
+
+    purchase_order_id: UUID | None = None
+
+
+class ApproveInput(BaseModel):
+    """Optional body of the approve call."""
+
+    acknowledge_match: bool = Field(
+        default=False,
+        description="Accept the open order / goods-receipt mismatches of this invoice.",
+    )
 
 
 class RejectInput(BaseModel):
@@ -173,6 +190,9 @@ class CaptureResponse(BaseModel):
     amount_tax: str = "0"
     amount_gross: str = "0"
     line_items: list[dict[str, Any]] = Field(default_factory=list)
+
+    po_reference: str | None = None
+    purchase_order_id: UUID | None = None
 
     extraction_engine: str = "manual"
     field_confidence: dict[str, Any] = Field(default_factory=dict)

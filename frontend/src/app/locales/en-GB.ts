@@ -851,6 +851,12 @@ const resource = {
     "accountingSync.doc_source.payroll": "Payroll",
     "accountingSync.category.payroll_cost": "Payroll cost",
     "accountingSync.category.payroll_liability": "Wages payable",
+    "finance.inbox.po_section": "Purchase order",
+    "finance.inbox.po_reference": "Order reference on the invoice",
+    "finance.inbox.po_label": "Purchase order",
+    "finance.inbox.po_none": "Not linked to an order",
+    "finance.inbox.po_no_orders": "No open purchase orders on this project.",
+    "finance.inbox.po_ack": "I accept the mismatch between this invoice and its order or goods receipts.",
   }
 } as { translation: Record<string, string> };
 

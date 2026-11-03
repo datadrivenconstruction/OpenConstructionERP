@@ -548,6 +548,118 @@ def validate_capture(
     return findings
 
 
+# ── Order link (PO + goods-receipt match) ────────────────────────────────────
+
+#: Order statuses an invoice may be billed against (draft and cancelled orders commit nothing).
+BILLABLE_PO_STATUSES = frozenset({"issued", "partially_received", "completed"})
+
+_PO_REF_RE = re.compile(
+    r"(?:purchase\s+order|order\s+(?:no|number|ref)|bestell(?:ung)?(?:s)?(?:\s*-?\s*(?:nr|nummer))?|PO)"
+    r"\s*(?:no\.?|nr\.?|number|#|:)?\s*[:#]?\s*([A-Z0-9][A-Z0-9/_-]{2,40})",
+    re.IGNORECASE,
+)
+
+
+def extract_po_reference(text: str) -> str:
+    """Best-effort order reference from OCR text; empty when none is labelled as one."""
+    for match in _PO_REF_RE.finditer(text or ""):
+        token = match.group(1).strip("-/_")
+        if any(ch.isdigit() for ch in token):
+            return token[:100]
+    return ""
+
+
+def validate_po_link(
+    *,
+    po: dict | None,
+    po_reference: str,
+    supplier_contact_id: str | None,
+    currency_code: str,
+) -> list[Finding]:
+    """Check the order a capture is linked to (``po`` is its summary dict, ``None`` = no link).
+
+    ``po`` carries ``number``, ``status``, ``vendor_contact_id``, ``currency_code``; ``{}`` means the linked
+    order no longer exists.
+    """
+    if po is None:
+        if (po_reference or "").strip():
+            return [
+                Finding(
+                    "warning",
+                    "po_reference_unresolved",
+                    f"The invoice names order '{po_reference}', but no such order exists on this project. "
+                    "Link the order by hand or correct the reference.",
+                    "purchase_order_id",
+                )
+            ]
+        return []
+    if not po:
+        return [Finding("error", "po_missing", "The linked purchase order no longer exists.", "purchase_order_id")]
+    findings: list[Finding] = []
+    number = po.get("number") or "?"
+    if po.get("status") not in BILLABLE_PO_STATUSES:
+        findings.append(
+            Finding(
+                "error",
+                "po_not_open",
+                f"Order {number} is '{po.get('status')}'; only an issued order can be invoiced.",
+                "purchase_order_id",
+            )
+        )
+    vendor = (po.get("vendor_contact_id") or "").strip()
+    if vendor and supplier_contact_id and vendor != supplier_contact_id.strip():
+        findings.append(
+            Finding(
+                "error",
+                "po_supplier_mismatch",
+                f"Order {number} was placed with a different supplier than the one on this invoice.",
+                "supplier_contact_id",
+            )
+        )
+    po_ccy = (po.get("currency_code") or "").strip().upper()
+    inv_ccy = (currency_code or "").strip().upper()
+    if po_ccy and inv_ccy and po_ccy != inv_ccy:
+        findings.append(
+            Finding(
+                "error",
+                "po_currency_mismatch",
+                f"Order {number} is in {po_ccy}, the invoice is in {inv_ccy}.",
+                "currency_code",
+            )
+        )
+    return findings
+
+
+def match_report_findings(results: list[dict]) -> list[Finding]:
+    """Failed ``invoice_po_match`` rule results (procurement's matcher) as inbox findings."""
+    return [
+        Finding(
+            "error" if str(r.get("severity")) == "error" else "warning",
+            f"po_match:{r.get('rule_id')}",
+            str(r.get("message") or ""),
+            "purchase_order_id",
+        )
+        for r in results
+        if not r.get("passed", True)
+    ]
+
+
+def match_unacknowledged(findings: list[Finding], acknowledged_codes: set[str]) -> list[Finding]:
+    """An error for every order-match warning nobody has acknowledged yet."""
+    open_codes = [f.code for f in findings if f.code.startswith("po_match:") and f.code not in acknowledged_codes]
+    if not open_codes:
+        return []
+    return [
+        Finding(
+            "error",
+            "po_match_unacknowledged",
+            "The invoice does not match its order or goods receipts. An approver must acknowledge the "
+            "mismatch before the invoice can be approved.",
+            "purchase_order_id",
+        )
+    ]
+
+
 def has_errors(findings: list[Finding]) -> bool:
     return any(f.is_error for f in findings)
 

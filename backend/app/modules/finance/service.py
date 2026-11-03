@@ -1756,6 +1756,9 @@ class FinanceService:
                 logger.exception("Spine posting failed for invoice line ref=%s - skipped", posting_ref)
 
         for inv in paid_invoices:
+            # An inbox invoice put its actual on the spine when it was posted; paying it adds no cost.
+            if (inv.metadata_ or {}).get("source") == "invoice_capture":
+                continue
             inv_currency = inv.currency_code or ""
             items = list(inv.line_items or [])
             if items:

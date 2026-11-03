@@ -96,6 +96,12 @@ class CapturedInvoice(Base):
         server_default="[]",
     )
 
+    # ── Order link (PO + goods-receipt match) ───────────────────────────────
+    # The order reference as printed or e-invoiced, and the order it resolved
+    # to. Plain GUID: procurement is an optional module.
+    po_reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    purchase_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+
     # ── Extraction provenance (AI-augmented, human-confirmed) ───────────────
     # How the draft was produced: manual | plaintext | pdfium (pymupdf on older rows) | pytesseract |
     # xml | llm | none. Drives the confidence UI and the audit story.
