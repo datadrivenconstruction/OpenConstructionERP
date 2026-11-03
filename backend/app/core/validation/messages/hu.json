@@ -1687,5 +1687,19 @@
       "suggestion": "Ellenőrizze az export koordináta-rendszerét vagy a projekt horgonypontját.",
       "fail": "Az ortofotó {distance_km} km-re van a projekt horgonypontjától."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Az átcsoportosítás tételeinek összege két vagy több különböző költségtételen nulla kell legyen (eltérés: {difference}).",
+      "suggestion": "Vonja le ugyanazt az összeget az egyik költségtételből, és vigye fel egy másikra."
+    },
+    "below_committed": {
+      "fail": "{line} költségvetése {budget} maradna, ami kevesebb a rajta már lekötött {committed} összegnél.",
+      "suggestion": "Csoportosítson át kisebb összeget, vagy előbb szabadítson fel lekötéseket a költségtételen."
+    },
+    "approved_immutable": {
+      "fail": "{code} el van döntve, és már nem módosítható vagy törölhető.",
+      "suggestion": "Rögzítsen új átcsoportosítást vagy költségvetés-módosítást, amely kijavítja."
+    }
   }
 }

@@ -1687,5 +1687,19 @@
       "suggestion": "Dışa aktarmanın koordinat sistemini veya proje çapasını kontrol edin.",
       "fail": "Ortofoto proje çapasından {distance_km} km uzakta."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Bu aktarımın kalemleri, iki veya daha fazla farklı maliyet kaleminde toplamda sıfır etmelidir (fark: {difference}).",
+      "suggestion": "Aynı tutarı bir maliyet kaleminden düşüp diğerine ekleyin."
+    },
+    "below_committed": {
+      "fail": "{line} kaleminin bütçesi {budget} kalırdı; bu, kalem üzerinde zaten taahhüt edilen {committed} tutarının altında.",
+      "suggestion": "Daha küçük bir tutar aktarın veya önce maliyet kalemindeki taahhütleri serbest bırakın."
+    },
+    "approved_immutable": {
+      "fail": "{code} hakkında karar verildi; artık değiştirilemez veya silinemez.",
+      "suggestion": "Bunu düzeltecek yeni bir aktarım veya bütçe değişikliği girin."
+    }
   }
 }

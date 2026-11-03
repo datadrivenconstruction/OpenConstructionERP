@@ -1687,5 +1687,19 @@
       "suggestion": "Verificați sistemul de coordonate al exportului sau ancora proiectului.",
       "fail": "Ortofotoplanul se află la {distance_km} km de ancora proiectului."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Părțile acestui transfer trebuie să însumeze zero pe două sau mai multe linii de cost diferite (diferență: {difference}).",
+      "suggestion": "Scădeți aceeași sumă de la o linie de cost și adăugați-o la alta."
+    },
+    "below_committed": {
+      "fail": "{line} ar rămâne cu un buget de {budget}, mai mic decât cei {committed} deja angajați pe ea.",
+      "suggestion": "Transferați o sumă mai mică sau eliberați mai întâi angajamentele de pe linia de cost."
+    },
+    "approved_immutable": {
+      "fail": "Pentru {code} s-a luat o decizie și nu mai poate fi modificat sau șters.",
+      "suggestion": "Introduceți un nou transfer sau o modificare de buget care să îl corecteze."
+    }
   }
 }

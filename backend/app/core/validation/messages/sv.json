@@ -1687,5 +1687,19 @@
       "suggestion": "Kontrollera exportens koordinatsystem, eller projektets förankringspunkt.",
       "fail": "Ortofotot ligger {distance_km} km från projektets förankringspunkt."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Delarna i denna överföring måste summera till noll på två eller fler olika kostnadsposter (differens: {difference}).",
+      "suggestion": "Ta samma belopp från en kostnadspost och lägg det på en annan."
+    },
+    "below_committed": {
+      "fail": "{line} skulle få en budget på {budget}, lägre än de {committed} som redan är bokade på den.",
+      "suggestion": "Flytta ett mindre belopp, eller frigör åtaganden på kostnadsposten först."
+    },
+    "approved_immutable": {
+      "fail": "{code} har beslutats och kan inte längre ändras eller tas bort.",
+      "suggestion": "Registrera en ny överföring eller budgetändring som rättar den."
+    }
   }
 }

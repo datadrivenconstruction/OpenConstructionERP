@@ -1687,5 +1687,19 @@
       "suggestion": "Controleer het coördinatensysteem van de export, of het ankerpunt van het project.",
       "fail": "De orthofoto ligt {distance_km} km van het ankerpunt van het project."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "De posten van deze verschuiving moeten op twee of meer verschillende kostenregels samen nul zijn (verschil: {difference}).",
+      "suggestion": "Haal hetzelfde bedrag van de ene kostenregel af en zet het op een andere."
+    },
+    "below_committed": {
+      "fail": "{line} houdt een budget van {budget} over, minder dan het al vastgelegde {committed}.",
+      "suggestion": "Verschuif een kleiner bedrag of maak eerst verplichtingen op de kostenregel vrij."
+    },
+    "approved_immutable": {
+      "fail": "Over {code} is besloten; het kan niet meer worden gewijzigd of verwijderd.",
+      "suggestion": "Voer een nieuwe verschuiving of budgetwijziging in die het corrigeert."
+    }
   }
 }

@@ -1687,5 +1687,19 @@
       "suggestion": "Kontroller eksportens koordinatsystem eller projektets forankringspunkt.",
       "fail": "Ortofotoet ligger {distance_km} km fra projektets forankringspunkt."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Posteringerne i denne overførsel skal give nul på to eller flere forskellige omkostningslinjer (forskel: {difference}).",
+      "suggestion": "Træk samme beløb fra én omkostningslinje og læg det på en anden."
+    },
+    "below_committed": {
+      "fail": "{line} ville stå tilbage med et budget på {budget}, mindre end de {committed}, der allerede er bundet.",
+      "suggestion": "Overfør et mindre beløb, eller frigiv først bindinger på omkostningslinjen."
+    },
+    "approved_immutable": {
+      "fail": "{code} er afgjort og kan ikke længere ændres eller slettes.",
+      "suggestion": "Opret en ny overførsel eller budgetændring, der retter den."
+    }
   }
 }

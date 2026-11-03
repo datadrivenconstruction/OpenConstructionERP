@@ -1687,5 +1687,19 @@
       "suggestion": "Tarkista viennin koordinaattijärjestelmä tai hankkeen ankkuripiste.",
       "fail": "Ortokuva sijaitsee {distance_km} km:n päässä hankkeen ankkuripisteestä."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Siirron kirjausten summan on oltava nolla vähintään kahdella eri kustannusrivillä (erotus: {difference}).",
+      "suggestion": "Vähennä sama summa yhdeltä kustannusriviltä ja lisää se toiselle."
+    },
+    "below_committed": {
+      "fail": "Riville {line} jäisi budjetti {budget}, joka on pienempi kuin siihen jo sidotut {committed}.",
+      "suggestion": "Siirrä pienempi summa tai vapauta ensin sitoumuksia kustannusriviltä."
+    },
+    "approved_immutable": {
+      "fail": "{code} on päätetty, eikä sitä voi enää muuttaa tai poistaa.",
+      "suggestion": "Tee uusi siirto tai budjettimuutos, joka korjaa sen."
+    }
   }
 }

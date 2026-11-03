@@ -1687,5 +1687,19 @@
       "suggestion": "Zkontrolujte souřadnicový systém exportu nebo kotvu projektu.",
       "fail": "Ortofoto leží {distance_km} km od kotvy projektu."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Strany tohoto přesunu se musí na dvou nebo více různých nákladových položkách sečíst na nulu (rozdíl: {difference}).",
+      "suggestion": "Odečtěte stejnou částku z jedné nákladové položky a přičtěte ji k jiné."
+    },
+    "below_committed": {
+      "fail": "Položce {line} by zůstal rozpočet {budget}, méně než již zavázaných {committed}.",
+      "suggestion": "Přesuňte menší částku, nebo nejprve uvolněte závazky na nákladové položce."
+    },
+    "approved_immutable": {
+      "fail": "{code} je rozhodnut a už ho nelze měnit ani mazat.",
+      "suggestion": "Zadejte nový přesun nebo změnu rozpočtu, která ho opraví."
+    }
   }
 }

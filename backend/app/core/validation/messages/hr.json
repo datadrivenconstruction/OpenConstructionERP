@@ -1687,5 +1687,19 @@
       "suggestion": "Provjerite koordinatni sustav izvoza ili sidro projekta.",
       "fail": "Ortofoto se nalazi {distance_km} km od sidra projekta."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Stavke ovog prijenosa moraju na dvije ili više različitih troškovnih stavki dati zbroj nula (razlika: {difference}).",
+      "suggestion": "Oduzmite isti iznos s jedne troškovne stavke i dodajte ga na drugu."
+    },
+    "below_committed": {
+      "fail": "Stavci {line} ostao bi proračun od {budget}, manji od već ugovorenih {committed}.",
+      "suggestion": "Prenesite manji iznos ili prvo oslobodite obveze na troškovnoj stavki."
+    },
+    "approved_immutable": {
+      "fail": "{code} je odlučen i više se ne može mijenjati ni brisati.",
+      "suggestion": "Unesite novi prijenos ili izmjenu proračuna koja ga ispravlja."
+    }
   }
 }

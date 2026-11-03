@@ -1883,3 +1883,9 @@ async def clear_position_allocation(
 from app.modules.costmodel.cashflow_forecast_router import router as _cashflow_forecast_router  # noqa: E402
 
 router.include_router(_cashflow_forecast_router)
+
+# ── Budget ledger: transfers and budget modifications ───────────────────────
+
+from app.modules.costmodel.budget_ledger_router import router as _budget_ledger_router  # noqa: E402
+
+router.include_router(_budget_ledger_router)
