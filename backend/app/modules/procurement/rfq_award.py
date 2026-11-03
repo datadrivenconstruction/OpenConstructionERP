@@ -89,6 +89,11 @@ logger = logging.getLogger(__name__)
 #: ``metadata.origin`` of an order drafted here.
 ORIGIN = "rfq_award"
 
+#: RFQ metadata keys that name the tender or bid package the RFQ prices. The
+#: awards of those packages stamp the same keys on their order, so one need is
+#: one order whichever award fires first.
+NEED_KEYS = ("bid_package_id", "tender_package_id")
+
 #: RFQ statuses in which an award stands. ``po_issued`` and ``completed`` come
 #: after the award in the RFQ lifecycle and keep it.
 _AWARD_STANDING_STATUSES = frozenset({"awarded", "po_issued", "completed"})
@@ -274,6 +279,8 @@ async def _draft(
         return None
     rfq_key = str(rfq_id)
     award_key = str(award_id)
+    rfq_md = rfq.metadata_ if isinstance(rfq.metadata_, dict) else {}
+    need = {k: str(rfq_md[k]) for k in NEED_KEYS if rfq_md.get(k)}
 
     orders = (
         (await session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == project_id))).scalars().all()
@@ -288,6 +295,13 @@ async def _draft(
             return po.id
         if md.get("origin") == ORIGIN and md.get("rfq_id") == rfq_key:
             earlier.append(po)
+        elif any(md.get(k) == v for k, v in need.items()):
+            logger.info(
+                "rfq.awarded: order %s already exists for the package RFQ %s prices (idempotent skip)",
+                po.po_number,
+                rfq_id,
+            )
+            return po.id
 
     for po in earlier:
         if po.status != "draft":
@@ -340,6 +354,7 @@ async def _draft(
             "rfq_number": rfq.rfq_number,
             "rfq_title": rfq.title,
             "rfq_award_id": award_key,
+            **need,
             "rfq_bid_id": str(bid_id),
             "supplier_name": vendor.name,
             "vendor_link": vendor.link,
