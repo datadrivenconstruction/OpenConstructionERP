@@ -7,7 +7,7 @@ sort) of one list page, owned by a user and optionally shared with the
 user's tenant.
 
 Revision ID: vlv01_list_views
-Revises: v3344_user_secondary_calendar
+Revises: v3346_broker_licence_register
 Create Date: 2026-10-27
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vlv01_list_views"
-down_revision: str | Sequence[str] | None = "v3344_user_secondary_calendar"
+down_revision: str | Sequence[str] | None = "v3346_broker_licence_register"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
