@@ -1329,6 +1329,7 @@ class RFQService:
         # does not exist. Best-effort: a flaky subscriber must not roll back
         # the award itself.
         try:
+            from app.core.event_effects import rfq_award_key
             from app.core.events import publish_after_commit
 
             publish_after_commit(
@@ -1351,6 +1352,7 @@ class RFQService:
                     "normalised_amount": format(candidate.normalised_amount or Decimal("0"), "f"),
                     "basis_currency": comparison.basis_currency,
                     "award_id": str(award.id),
+                    "idempotency_key": rfq_award_key(award.id),
                     "is_override": is_override,
                 },
                 source_module="rfq_bidding",

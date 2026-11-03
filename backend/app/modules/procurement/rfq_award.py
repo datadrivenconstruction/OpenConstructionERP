@@ -76,6 +76,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.event_effects import EFFECT_PURCHASE_ORDER, claim_effect, rfq_award_key
 from app.core.events import Event, _log_failures
 from app.database import async_session_factory
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
@@ -332,6 +333,14 @@ async def _draft(
     vendor = await _resolve_vendor(session, bid.bidder_contact_id, actor_id=actor_id, project_id=project_id)
     notes = _notes(rfq, bid, lines=lines, vendor=vendor, headline=headline, subtotal=subtotal, currency=currency)
 
+    claim = await claim_effect(
+        session,
+        rfq_award_key(award_id),
+        EFFECT_PURCHASE_ORDER,
+        event_name="rfq.awarded",
+    )
+    if claim is None:
+        return None
     po_number = await PurchaseOrderRepository(session).next_po_number(project_id)
     po = PurchaseOrder(
         project_id=project_id,
@@ -370,6 +379,7 @@ async def _draft(
     )
     session.add(po)
     await session.flush()
+    claim.record_id = str(po.id)
     for idx, item in enumerate(items):
         session.add(
             PurchaseOrderItem(
