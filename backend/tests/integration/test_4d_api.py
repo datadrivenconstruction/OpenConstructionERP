@@ -389,7 +389,7 @@ async def test_snapshot_cost_reconciles_to_bac(client: AsyncClient, schedule_id:
             end_date="2027-12-31",
             duration_days=365,
             progress_pct="0",
-            cost_planned=Decimal("200.00"),
+            cost_planned=Decimal("400.00"),
         )
         session.add_all([linked, loose])
         await session.commit()
@@ -405,7 +405,7 @@ async def test_snapshot_cost_reconciles_to_bac(client: AsyncClient, schedule_id:
     assert parts + Decimal(body["other_elements_cost"]) + Decimal(body["unlinked_cost"]) == Decimal(
         body["totals"]["bac"]
     )
-    assert Decimal(body["unlinked_cost"]) == Decimal("200.00")
+    assert Decimal(body["unlinked_cost"]) == Decimal("400.00")
     assert Decimal(body["totals"]["ev"]) == Decimal("500.01")
     assert body["coverage_low"] is True
 

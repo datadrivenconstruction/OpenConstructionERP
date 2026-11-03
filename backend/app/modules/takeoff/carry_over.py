@@ -23,6 +23,8 @@ from typing import Any
 
 from fastapi import HTTPException, status
 
+from app.modules.takeoff import revision_match as rm
+
 CARRY_KEY = "carry_over"
 CARRIED_TO_KEY = "carried_to"
 RELEASED_LINK_KEY = "released_boq_link"
@@ -95,6 +97,7 @@ class CarryReport:
     already_carried: int = 0
     skipped_unreviewed: int = 0
     skipped_page_missing: int = 0
+    remeasure_ids: list[str] = field(default_factory=list)
     scale_checks: dict[str, int] = field(default_factory=dict)
     revision_link: str = "unlinked"
 
@@ -106,6 +109,7 @@ class CarryReport:
             "already_carried": self.already_carried,
             "skipped_unreviewed": self.skipped_unreviewed,
             "skipped_page_missing": self.skipped_page_missing,
+            "remeasure_ids": self.remeasure_ids,
             "scale_checks": self.scale_checks,
             "revision_link": self.revision_link,
         }
@@ -204,6 +208,120 @@ async def revision_link(session: Any, from_source: str | None, to_source: str | 
     return "register" if chained.first() is not None else "unlinked"
 
 
+ALIGN_NONE = "none"
+ALIGN_AUTO = "auto"
+
+
+async def _page_meta(session: Any, source_id: str | None, doc: Any) -> list[dict[str, Any]]:
+    """``[{page, number, title}]`` for a revision: its register sheets, else bare page numbers."""
+    from sqlalchemy import select  # noqa: PLC0415
+
+    from app.modules.documents.models import Sheet  # noqa: PLC0415
+
+    rows: dict[int, dict[str, Any]] = {}
+    if source_id:
+        found = await session.execute(
+            select(Sheet.page_number, Sheet.sheet_number, Sheet.sheet_title).where(Sheet.document_id == source_id)
+        )
+        for page, number, title in found.all():
+            rows[int(page)] = {"page": int(page), "number": number, "title": title}
+    pages = int(getattr(doc, "pages", 0) or 0)
+    for page in range(1, pages + 1):
+        rows.setdefault(page, {"page": page, "number": None, "title": None})
+    return [rows[k] for k in sorted(rows)]
+
+
+def _page_anchors(page_scales: Any, page: int) -> list[Any]:
+    """Anchor points saved with a page's calibration (``byPage[page].anchors``), if any."""
+    by_page = page_scales.get("byPage") if isinstance(page_scales, dict) else None
+    entry = by_page.get(str(page)) if isinstance(by_page, dict) else None
+    anchors = entry.get("anchors") if isinstance(entry, dict) else None
+    return anchors if isinstance(anchors, list) else []
+
+
+class Alignment:
+    """Where each old page lands on the new revision, and the geometry fit per page."""
+
+    def __init__(self, matches: list[rm.PageMatch], from_scales: Any, to_scales: Any, *, auto: bool) -> None:
+        self.matches = {m.old: m for m in matches}
+        self.auto = auto
+        self.transforms: dict[int, rm.Transform] = {}
+        self.diagonals: dict[int, float | None] = {}
+        for m in matches:
+            if m.new is None:
+                continue
+            old_a, new_a = _page_anchors(from_scales, m.old), _page_anchors(to_scales, m.new)
+            self.transforms[m.old] = rm.estimate_transform(old_a, new_a) if auto else rm.Transform()
+            xy = [p for p in (rm.anchor_xy(a) for a in new_a) if p]
+            if len(xy) >= 2:
+                xs, ys = [p[0] for p in xy], [p[1] for p in xy]
+                self.diagonals[m.old] = ((max(xs) - min(xs)) ** 2 + (max(ys) - min(ys)) ** 2) ** 0.5
+            else:
+                self.diagonals[m.old] = None
+
+    def propose(self, old: Any, scale_check: str) -> dict[str, Any] | None:
+        """The proposal for one measurement, or None when its sheet has no counterpart."""
+        match = self.matches.get(old.page or 1)
+        if match is None or match.new is None:
+            return None
+        transform = self.transforms[match.old]
+        conf = rm.confidence(match.score, transform, self.diagonals.get(match.old), scale_check)
+        moved = rm.apply_transform(list(old.points or []), transform) if self.auto and transform.ok else None
+        return {
+            "page": match.new,
+            "from_page": match.old,
+            "page_method": match.method,
+            "match_confidence": conf,
+            "band": rm.band(conf),
+            "transform": transform.as_dict(),
+            "points": moved if moved else list(old.points or []),
+        }
+
+
+async def build_alignment(
+    session: Any,
+    from_source: str | None,
+    from_doc: Any,
+    to_source: str | None,
+    to_doc: Any,
+    *,
+    align: str,
+    page_map: dict[int, int] | None,
+) -> Alignment:
+    """Match the sheets of two revisions and fit each matched pair's geometry."""
+    old_meta = await _page_meta(session, from_source, from_doc)
+    new_meta = await _page_meta(session, to_source, to_doc)
+    if align == ALIGN_AUTO:
+        matches = rm.match_pages(old_meta, new_meta, page_map)
+    else:
+        # Manual map only: unmapped pages stay on the same page number, as before.
+        new_pages = {m["page"] for m in new_meta}
+        matches = []
+        for m in old_meta:
+            target = (page_map or {}).get(m["page"])
+            if target in new_pages:
+                matches.append(rm.PageMatch(m["page"], target, 1.0, rm.METHOD_MANUAL))
+            else:
+                same = m["page"] if m["page"] in new_pages else None
+                matches.append(rm.PageMatch(m["page"], same, 1.0, rm.METHOD_INDEX))
+    return Alignment(
+        matches,
+        getattr(from_doc, "page_scales", None),
+        getattr(to_doc, "page_scales", None),
+        auto=align == ALIGN_AUTO,
+    )
+
+
+def carried_values_at(old: Any, new_scale: float | None, points: list[Any]) -> dict[str, Any]:
+    """:func:`carried_values` for points that were moved onto the new sheet."""
+
+    class _Moved:
+        def __getattr__(self, name: str) -> Any:
+            return points if name == "points" else getattr(old, name)
+
+    return carried_values(_Moved(), new_scale)
+
+
 async def carry_measurements(
     service: Any,
     project_id: uuid.UUID,
@@ -212,10 +330,16 @@ async def carry_measurements(
     *,
     user_id: str,
     measurement_ids: list[str] | None = None,
+    align: str = ALIGN_NONE,
+    page_map: dict[int, int] | None = None,
 ) -> dict[str, Any]:
     """Copy the confirmed measurements of ``from`` onto ``to``, flagged for review.
 
     Idempotent: a measurement already carried onto ``to`` is not copied twice.
+    With ``align="auto"`` sheets are matched by number/title and geometry is
+    fitted to anchor pairs; ``page_map`` (old page -> new page) overrides the
+    match. Proposals under the review band are not copied and are listed in
+    ``remeasure_ids``. The default ``none`` keeps the same page, same pixels.
     """
     from app.modules.takeoff.models import TakeoffMeasurement  # noqa: PLC0415
     from app.modules.takeoff.service import MAX_COMPARE_MEASUREMENTS  # noqa: PLC0415
@@ -226,7 +350,7 @@ async def carry_measurements(
             detail="Pick two different revisions",
         )
     session = service.session
-    from_source, _from_doc = await _source_document_id(session, from_document_id, project_id)
+    from_source, from_doc = await _source_document_id(session, from_document_id, project_id)
     to_source, to_doc = await _source_document_id(session, to_document_id, project_id)
     report = CarryReport(revision_link=await revision_link(session, from_source, to_source))
 
@@ -245,6 +369,11 @@ async def carry_measurements(
     pages = int(getattr(to_doc, "pages", 0) or 0)
     scales = getattr(to_doc, "page_scales", None)
     now = datetime.now(UTC).isoformat()
+    aligned: Alignment | None = None
+    if align == ALIGN_AUTO or page_map:
+        aligned = await build_alignment(
+            session, from_source, from_doc, to_source, to_doc, align=align, page_map=page_map
+        )
 
     copies: list[tuple[Any, Any]] = []
     for old in sorted(old_rows, key=lambda m: (m.page or 1, str(m.id))):
@@ -257,13 +386,30 @@ async def carry_measurements(
             # A proposal nobody accepted, or a copy nobody checked, is not a measurement to propagate.
             report.skipped_unreviewed += 1
             continue
-        if pages and (old.page or 1) > pages:
-            report.skipped_page_missing += 1
-            continue
-        new_scale = page_scale(scales, old.page or 1)
+        proposal: dict[str, Any] | None = None
+        target_page = old.page or 1
+        if aligned is None:
+            if pages and target_page > pages:
+                report.skipped_page_missing += 1
+                continue
+        else:
+            match = aligned.matches.get(target_page)
+            if match is None or match.new is None:
+                report.skipped_page_missing += 1
+                continue
+            target_page = match.new
+        new_scale = page_scale(scales, target_page)
         verdict = scale_verdict(old.type, old.scale_pixels_per_unit, new_scale)
+        if aligned is not None:
+            proposal = aligned.propose(old, verdict)
+            if proposal is not None and align == ALIGN_AUTO and proposal["band"] == rm.BAND_REMEASURE:
+                report.remeasure_ids.append(str(old.id))
+                continue
         report.scale_checks[verdict] = report.scale_checks.get(verdict, 0) + 1
-        values = carried_values(old, new_scale)
+        if proposal is not None:
+            values = carried_values_at(old, new_scale, proposal["points"])
+        else:
+            values = carried_values(old, new_scale)
         base_meta = {
             k: v for k, v in (old.metadata_ or {}).items() if k not in (CARRY_KEY, CARRIED_TO_KEY, RELEASED_LINK_KEY)
         }
@@ -279,15 +425,22 @@ async def carry_measurements(
             "carried_at": now,
             "carried_by": user_id,
         }
+        if proposal is not None:
+            base_meta[CARRY_KEY].update(
+                match_confidence=proposal["match_confidence"],
+                page_match=proposal["page_method"],
+                transform=proposal["transform"],
+                from_page=proposal["from_page"],
+            )
         copy = TakeoffMeasurement(
             project_id=project_id,
             document_id=to_document_id,
-            page=old.page or 1,
+            page=target_page,
             type=old.type,
             group_name=old.group_name,
             group_color=old.group_color,
             annotation=old.annotation,
-            points=list(old.points or []),
+            points=list(proposal["points"]) if proposal is not None else list(old.points or []),
             measurement_value=values["measurement_value"],
             measurement_unit=old.measurement_unit,
             depth=old.depth,
@@ -315,6 +468,74 @@ async def carry_measurements(
             await service.measurement_repo.update_fields(old.id, metadata_=meta)
             report.carried_ids.append(str(copy.id))
     return report.as_dict()
+
+
+async def preview_carry(
+    service: Any,
+    project_id: uuid.UUID,
+    from_document_id: str,
+    to_document_id: str,
+    *,
+    align: str = ALIGN_AUTO,
+    page_map: dict[int, int] | None = None,
+) -> dict[str, Any]:
+    """What a carry-over would do, with zero writes: page matches, fit and per-item confidence."""
+    from app.modules.takeoff.service import MAX_COMPARE_MEASUREMENTS  # noqa: PLC0415
+
+    if from_document_id == to_document_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Pick two different revisions",
+        )
+    session = service.session
+    from_source, from_doc = await _source_document_id(session, from_document_id, project_id)
+    to_source, to_doc = await _source_document_id(session, to_document_id, project_id)
+    link = await revision_link(session, from_source, to_source)
+    aligned = await build_alignment(session, from_source, from_doc, to_source, to_doc, align=align, page_map=page_map)
+    old_rows = await service.measurement_repo.list_all_for_document(
+        project_id, from_document_id, max_rows=MAX_COMPARE_MEASUREMENTS
+    )
+    new_rows = await service.measurement_repo.list_all_for_document(
+        project_id, to_document_id, max_rows=MAX_COMPARE_MEASUREMENTS
+    )
+    already = {
+        str((m.metadata_ or {}).get(CARRY_KEY, {}).get("from_measurement_id"))
+        for m in new_rows
+        if isinstance(m.metadata_, dict) and isinstance(m.metadata_.get(CARRY_KEY), dict)
+    }
+    scales = getattr(to_doc, "page_scales", None)
+    items: list[dict[str, Any]] = []
+    for old in sorted(old_rows, key=lambda m: (m.page or 1, str(m.id))):
+        if str(old.id) in already or (old.review_status or CONFIRMED) != CONFIRMED or is_carried_pending(old):
+            continue
+        match = aligned.matches.get(old.page or 1)
+        if match is None or match.new is None:
+            items.append(
+                {"measurement_id": str(old.id), "page_old": old.page or 1, "page_new": None, "confidence": 0.0}
+                | {"band": rm.BAND_REMEASURE, "points_after": []}
+            )
+            continue
+        verdict = scale_verdict(old.type, old.scale_pixels_per_unit, page_scale(scales, match.new))
+        proposal = aligned.propose(old, verdict)
+        if proposal is None:
+            continue
+        items.append(
+            {
+                "measurement_id": str(old.id),
+                "page_old": proposal["from_page"],
+                "page_new": proposal["page"],
+                "confidence": proposal["match_confidence"],
+                "band": proposal["band"],
+                "points_after": proposal["points"],
+            }
+        )
+    first = next((t for t in aligned.transforms.values() if t.ok), rm.Transform())
+    return {
+        "revision_link": link,
+        "pages": [m.as_dict() for m in aligned.matches.values()],
+        "transform": first.as_dict(),
+        "items": items,
+    }
 
 
 async def confirm_carried(
