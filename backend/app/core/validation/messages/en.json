@@ -719,6 +719,24 @@
       "suggestion": "Issue the expected revision or update the index to the current revision"
     }
   },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Page {page} has no readable sheet number",
+      "suggestion": "Enter the sheet number from the title block; without it the sheet cannot be stacked on earlier revisions"
+    },
+    "number_unique_in_set": {
+      "fail": "Sheet {sheet} revision {revision} appears on pages {first_page} and {page} of the same upload",
+      "suggestion": "Check the title blocks of both pages and correct the number or the revision of one of them"
+    },
+    "revision_not_lower": {
+      "fail": "Sheet {sheet} is at revision {revision} but the current sheet is already at {current_revision}",
+      "suggestion": "Confirm the read only if this is really a later issue; otherwise correct the revision or discard the sheet"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Sheet {sheet} was read with {confidence} confidence and is not confirmed",
+      "suggestion": "Compare the fields with the title block and confirm or correct them"
+    }
+  },
   "procurement": {
     "po_has_lines": {
       "fail": "This purchase order has no lines, so its committed amount is not accounted for",

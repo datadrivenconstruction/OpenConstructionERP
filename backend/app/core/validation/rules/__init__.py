@@ -11170,6 +11170,155 @@ class SheetRevisionMismatch(ValidationRule):
         return out
 
 
+# ── Sheet intake (title block read of an uploaded drawing set) ───────────────
+
+
+def _intake_sheets(context: ValidationContext) -> list[dict[str, Any]]:
+    data = context.data if isinstance(context.data, dict) else {}
+    return [s for s in (data.get("sheets") or []) if isinstance(s, dict)]
+
+
+def _intake_results(
+    rule: ValidationRule,
+    context: ValidationContext,
+    failures: list[tuple[str, dict[str, Any]]],
+    key: str,
+) -> list[RuleResult]:
+    """One failing row per ``(element_ref, message_params)``, else one green summary row."""
+    locale = _get_locale(context)
+    out = [
+        RuleResult(
+            rule_id=rule.rule_id,
+            rule_name=rule.name,
+            severity=rule.severity,
+            category=rule.category,
+            passed=False,
+            message=translate(f"sheet_intake.{key}.fail", locale=locale, **params),
+            element_ref=ref,
+            details=params,
+            suggestion=translate(f"sheet_intake.{key}.suggestion", locale=locale),
+        )
+        for ref, params in failures
+    ]
+    if not out:
+        out.append(
+            RuleResult(
+                rule_id=rule.rule_id,
+                rule_name=rule.name,
+                severity=rule.severity,
+                category=rule.category,
+                passed=True,
+                message=_ok(locale),
+            )
+        )
+    return out
+
+
+class SheetNumberPresent(ValidationRule):
+    rule_id = "sheet.number_present"
+    name = "Sheet has a number"
+    standard = "sheet_intake"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Every uploaded sheet needs a sheet number, the key its revisions stack on"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        failures = [
+            (str(s.get("id")), {"page": s.get("page_number", "?")})
+            for s in _intake_sheets(context)
+            if not str(s.get("sheet_number") or "").strip()
+        ]
+        return _intake_results(self, context, failures, "number_present")
+
+
+class SheetNumberUniqueInSet(ValidationRule):
+    rule_id = "sheet.number_unique_in_set"
+    name = "Sheet number and revision appear once per upload"
+    standard = "sheet_intake"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "The same sheet number at the same revision must not appear twice in one uploaded set"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.documents.sheet_fields import sheet_chain_key  # noqa: PLC0415
+
+        seen: dict[tuple[str, str, str], dict[str, Any]] = {}
+        failures: list[tuple[str, dict[str, Any]]] = []
+        for s in _intake_sheets(context):
+            key = sheet_chain_key(s.get("sheet_number"))
+            if not key:
+                continue
+            ident = (str(s.get("document_id") or ""), key, str(s.get("revision") or "").strip().casefold())
+            if ident in seen:
+                failures.append(
+                    (
+                        str(s.get("id")),
+                        {
+                            "sheet": s.get("sheet_number"),
+                            "revision": s.get("revision") or "-",
+                            "page": s.get("page_number", "?"),
+                            "first_page": seen[ident].get("page_number", "?"),
+                        },
+                    )
+                )
+            else:
+                seen[ident] = s
+        return _intake_results(self, context, failures, "number_unique_in_set")
+
+
+class SheetRevisionNotLowerThanCurrent(ValidationRule):
+    rule_id = "sheet.revision_not_lower_than_current"
+    name = "Incoming revision is not older than the current one"
+    standard = "sheet_intake"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "A held sheet must not replace a newer revision; it stays held until a person confirms it"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.documents.sheet_fields import compare_revisions  # noqa: PLC0415
+
+        failures: list[tuple[str, dict[str, Any]]] = []
+        for s in _intake_sheets(context):
+            for current in s.get("current_revisions") or []:
+                order = compare_revisions(s.get("revision"), current)
+                if order is not None and order < 0:
+                    failures.append(
+                        (
+                            str(s.get("id")),
+                            {
+                                "sheet": s.get("sheet_number"),
+                                "revision": s.get("revision") or "-",
+                                "current_revision": current or "-",
+                            },
+                        )
+                    )
+                    break
+        return _intake_results(self, context, failures, "revision_not_lower")
+
+
+class SheetLowConfidenceUnconfirmed(ValidationRule):
+    rule_id = "sheet.low_confidence_unconfirmed"
+    name = "Machine-read title block is confirmed"
+    standard = "sheet_intake"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "A title block read by OCR, or read with low confidence, needs a person to confirm it"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        failures = [
+            (
+                str(s.get("id")),
+                {
+                    "sheet": s.get("sheet_number") or f"p.{s.get('page_number', '?')}",
+                    "confidence": f"{round(float(s.get('confidence') or 0.0) * 100)}%",
+                },
+            )
+            for s in _intake_sheets(context)
+            if s.get("needs_review")
+        ]
+        return _intake_results(self, context, failures, "low_confidence_unconfirmed")
+
+
 # ── Procurement (purchase-order commitment gate) ────────────────────────────
 #
 # A purchase order is where an estimate becomes committed money: approval
@@ -12586,6 +12735,11 @@ def register_builtin_rules() -> None:
         (SheetCompletenessMissing(), ["sheet_completeness"]),
         (SheetCompletenessExtra(), ["sheet_completeness"]),
         (SheetRevisionMismatch(), ["sheet_completeness"]),
+        # Sheet intake (title block read of an uploaded drawing set)
+        (SheetNumberPresent(), ["sheet_intake"]),
+        (SheetNumberUniqueInSet(), ["sheet_intake"]),
+        (SheetRevisionNotLowerThanCurrent(), ["sheet_intake"]),
+        (SheetLowConfidenceUnconfirmed(), ["sheet_intake"]),
         # Project completeness (universal). Twenty two demo templates asked for
         # this set while nothing registered into it; the rules live in their own
         # module and read the project record the shared payload builder carries.

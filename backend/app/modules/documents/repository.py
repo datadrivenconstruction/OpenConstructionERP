@@ -330,6 +330,11 @@ class PhotoRepository:
             await self.session.flush()
 
 
+def _needs_review_flag():  # noqa: ANN202 - a SQL expression
+    """``metadata.extraction.needs_review`` as a boolean column expression (NULL when never read)."""
+    return Sheet.metadata_["extraction"]["needs_review"].as_boolean()
+
+
 class SheetRepository:
     """Data access for Sheet models."""
 
@@ -362,9 +367,13 @@ class SheetRepository:
         revision: str | None = None,
         document_id: str | None = None,
         current_only: bool = False,
+        needs_review: bool | None = None,
     ) -> tuple[list[Sheet], int]:
         """List sheets for a project with pagination and filters."""
         base = select(Sheet).where(Sheet.project_id == project_id)
+        if needs_review is not None:
+            flag = _needs_review_flag()
+            base = base.where(flag.is_(True) if needs_review else or_(flag.is_(None), flag.is_(False)))
 
         if discipline is not None:
             base = base.where(Sheet.discipline == discipline)
@@ -489,6 +498,16 @@ class SheetRepository:
     async def all_for_project(self, project_id: uuid.UUID) -> list[Sheet]:
         """Every sheet of a project, current and retired, oldest upload first."""
         stmt = select(Sheet).where(Sheet.project_id == project_id).order_by(Sheet.created_at, Sheet.id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def list_needing_review(self, project_id: uuid.UUID) -> list[Sheet]:
+        """Sheets whose title block read still waits for a person, in upload order."""
+        stmt = (
+            select(Sheet)
+            .where(Sheet.project_id == project_id, _needs_review_flag().is_(True))
+            .order_by(Sheet.created_at, Sheet.page_number, Sheet.id)
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

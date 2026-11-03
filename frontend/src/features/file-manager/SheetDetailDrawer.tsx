@@ -40,14 +40,16 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { AlertTriangle, ArrowRight, FileText, History, ImageOff, Pencil, Ruler } from 'lucide-react';
-import { Badge, Button, DateDisplay, SideDrawer } from '@/shared/ui';
+import { AlertTriangle, ArrowRight, Check, FileText, History, ImageOff, Pencil, Ruler } from 'lucide-react';
+import { AuthImage, Badge, Button, DateDisplay, SideDrawer } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { useHasPermission } from '@/shared/lib/permissionGates';
-import { updateSheet, type SheetPatch } from './api';
+import { confirmSheetExtraction, sheetThumbnailUrl, updateSheet, type SheetPatch } from './api';
 import { SheetEditForm } from './SheetEditForm';
+import { machineReadFields, ocrUnavailable, percent, readExtraction } from './sheetExtraction';
 import { orderStack, revisionOrderUnclear } from './sheetStack';
 import type { SheetRow } from './types';
+import type { Page } from '@/shared/lib/api';
 
 /** Mirrors `SheetVersionHistory` from the documents module. `current` is the
  *  sheet that was asked about, NOT necessarily the newest one; `history` is
@@ -68,9 +70,21 @@ export interface SheetDetailDrawerProps {
 
 /** One label/value line. Renders an em dash when the field is not set, so the
  *  panel keeps the same shape whether or not the PDF carried a title block. */
-function Field({ label, value }: { label: string; value: ReactNode | null }) {
+function Field({
+  label,
+  value,
+  machineRead = false,
+}: {
+  label: string;
+  value: ReactNode | null;
+  /** Still the software's reading: nobody has confirmed or typed it. */
+  machineRead?: boolean;
+}) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5">
+    <div
+      className={clsx('flex items-baseline justify-between gap-4 py-1.5', machineRead && 'bg-semantic-warning/5')}
+      data-machine-read={machineRead ? 'true' : undefined}
+    >
       <dt className="shrink-0 text-2xs uppercase tracking-wider text-content-tertiary">{label}</dt>
       <dd className="min-w-0 truncate text-end text-sm text-content-primary">
         {value ?? <span className="text-content-quaternary">&mdash;</span>}
@@ -120,6 +134,33 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
     },
   });
 
+  /* Save the edits, then confirm the reading. The title block fields travel
+     with the confirmation; a scale or an issue date, which the confirmation
+     does not carry, is saved first. */
+  const confirmMutation = useMutation({
+    mutationFn: async (patch: SheetPatch) => {
+      const id = sheet?.id ?? '';
+      const { scale, revision_date: issued, ...fields } = patch;
+      const rest: SheetPatch = {};
+      if (scale !== undefined) rest.scale = scale;
+      if (issued !== undefined) rest.revision_date = issued;
+      if (Object.keys(rest).length > 0) await updateSheet(id, rest);
+      return confirmSheetExtraction(id, {
+        ...(fields.sheet_number ? { number: fields.sheet_number } : {}),
+        ...(fields.sheet_title ? { title: fields.sheet_title } : {}),
+        ...(fields.revision ? { revision: fields.revision } : {}),
+        ...(fields.discipline ? { discipline: fields.discipline } : {}),
+      });
+    },
+    onSuccess: (updated) => {
+      setEditing(false);
+      onSheetChange?.(updated);
+      queryClient.invalidateQueries({ queryKey: ['sheets', updated.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-versions'] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-disciplines', updated.project_id] });
+    },
+  });
+
   /* The whole stack in one list, newest first, so the panel can render it as a
      single sequence instead of "this one" plus "some others". The backend hands
      back the asked-for sheet separately from the rest of the chain. */
@@ -138,17 +179,25 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
 
   if (!sheet) return null;
 
+  const extraction = readExtraction(sheet);
+  const awaitingReview = extraction?.needsReview === true;
+  const unread = ocrUnavailable(sheet);
+  const machineRead = machineReadFields(sheet);
+  // The sheets a held one would replace, named from the register already loaded.
+  const loaded = queryClient.getQueryData<Page<SheetRow>>(['sheets', sheet.project_id])?.items ?? [];
+  const wouldReplace = (extraction?.wouldSupersede ?? []).map((id) => {
+    const found = loaded.find((s) => s.id === id);
+    return found ? `${found.sheet_number ?? `p.${found.page_number}`} ${found.revision ?? ''}`.trim() : null;
+  });
+
   const sheetName = sheet.sheet_number ?? `p.${sheet.page_number}`;
   const planRoomTo = `/plan-room?doc=${encodeURIComponent(sheet.document_id)}&page=${sheet.page_number}`;
   const takeoffTo =
     `/takeoff?tab=measurements&source=document&doc=${encodeURIComponent(sheet.document_id)}` +
     `&page=${sheet.page_number}`;
   const filesTo = `/files?file=${encodeURIComponent(sheet.document_id)}`;
-  const saveError = saveMutation.error
-    ? saveMutation.error instanceof Error
-      ? saveMutation.error.message
-      : String(saveMutation.error)
-    : null;
+  const failure = saveMutation.error ?? confirmMutation.error;
+  const saveError = failure ? (failure instanceof Error ? failure.message : String(failure)) : null;
 
   const actionCls =
     'inline-flex items-center justify-between gap-2 rounded-lg border border-border-light px-3 py-2.5 text-sm font-medium text-content-primary transition-colors hover:border-oe-blue hover:bg-surface-secondary';
@@ -162,15 +211,98 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
       widthClass="max-w-md"
     >
       <div className="p-5">
-        {/* Preview slot. Honest about why it is empty - see the file header. */}
-        <div className="mb-5 flex h-32 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-light bg-surface-secondary/40 text-content-tertiary">
-          <ImageOff size={20} strokeWidth={1.5} />
-          <p className="px-4 text-center text-2xs">
-            {t('sheets.preview_unavailable', {
-              defaultValue: 'No preview available for this sheet yet.',
-            })}
-          </p>
-        </div>
+        {/* Title block: the bottom-right of the page image, cropped with CSS, so
+            the fields below can be checked against what is drawn. Where there is
+            no image the panel says so plainly. */}
+        {sheet.thumbnail_path ? (
+          <figure className="mb-5">
+            <div className="relative h-36 overflow-hidden rounded-lg border border-border-light bg-white">
+              <AuthImage
+                src={sheetThumbnailUrl(sheet.id)}
+                alt={t('sheets.title_block_alt', { defaultValue: 'Title block of the sheet' })}
+                style={{ position: 'absolute', right: 0, bottom: 0, width: '200%', maxWidth: 'none' }}
+                fallback={
+                  <span className="flex h-36 items-center justify-center text-2xs text-content-tertiary">
+                    {t('sheets.preview_unavailable', { defaultValue: 'No preview available for this sheet yet.' })}
+                  </span>
+                }
+              />
+            </div>
+            <figcaption className="mt-1 text-2xs text-content-tertiary">
+              {t('sheets.title_block_preview', { defaultValue: 'Title block' })}
+            </figcaption>
+          </figure>
+        ) : (
+          <div className="mb-5 flex h-32 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-light bg-surface-secondary/40 text-content-tertiary">
+            <ImageOff size={20} strokeWidth={1.5} />
+            <p className="px-4 text-center text-2xs">
+              {t('sheets.preview_unavailable', {
+                defaultValue: 'No preview available for this sheet yet.',
+              })}
+            </p>
+          </div>
+        )}
+
+        {awaitingReview && (
+          <div className="mb-4 flex gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 px-3 py-2 text-xs text-content-secondary">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
+            <div>
+              {unread ? (
+                <>
+                  <p className="font-medium text-content-primary">
+                    {t('sheets.ocr_unavailable_title', { defaultValue: 'Title block not read' })}
+                  </p>
+                  <p className="mt-0.5">
+                    {t('sheets.ocr_unavailable_body', {
+                      defaultValue:
+                        'This page has no text and text recognition (OCR) is not installed on this server. Enter the sheet details by hand, then confirm. An administrator can enable OCR by installing tesseract-ocr.',
+                    })}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-content-primary">
+                    {t('sheets.review_note_title', {
+                      defaultValue: 'Read by software, {{percent}}% sure. Please check',
+                      percent: percent(extraction?.confidence ?? 0),
+                    })}
+                  </p>
+                  <p className="mt-0.5">
+                    {t('sheets.review_note_body', {
+                      defaultValue:
+                        'Compare the highlighted fields with the title block and correct them if needed. The sheet supersedes earlier revisions only after you confirm.',
+                    })}
+                  </p>
+                </>
+              )}
+              {!sheet.is_current && wouldReplace.length > 0 && (
+                <p className="mt-1 font-medium text-content-primary">
+                  {wouldReplace.every(Boolean)
+                    ? t('sheets.held_note', {
+                        defaultValue: 'Held: not yet superseding {{sheets}}',
+                        sheets: wouldReplace.join(', '),
+                      })
+                    : t('sheets.held_note_unknown', {
+                        defaultValue: 'Held: not yet superseding the current revision',
+                      })}
+                </p>
+              )}
+              {canEdit && !editing && !unread && (
+                <div className="mt-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<Check size={13} />}
+                    loading={confirmMutation.isPending}
+                    onClick={() => confirmMutation.mutate({})}
+                  >
+                    {t('sheets.confirm_action', { defaultValue: 'Confirm reading' })}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Metadata, or the form that corrects it. The button is left out for
             a role the PATCH would refuse rather than offered and failed. */}
@@ -182,6 +314,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
               icon={<Pencil size={13} />}
               onClick={() => {
                 saveMutation.reset();
+                confirmMutation.reset();
                 setEditing(true);
               }}
             >
@@ -193,28 +326,34 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
           <SheetEditForm
             sheet={sheet}
             disciplines={disciplines}
-            saving={saveMutation.isPending}
+            saving={saveMutation.isPending || confirmMutation.isPending}
             error={saveError}
             onSubmit={(patch) => saveMutation.mutate(patch)}
             onCancel={() => setEditing(false)}
+            machineRead={machineRead}
+            onConfirm={awaitingReview ? (patch) => confirmMutation.mutate(patch) : undefined}
           />
         ) : (
           <dl className="divide-y divide-border-light">
             <Field
               label={t('sheets.col_number', { defaultValue: 'Sheet #' })}
               value={sheet.sheet_number}
+              machineRead={machineRead.has('sheet_number')}
             />
             <Field
               label={t('sheets.col_title', { defaultValue: 'Title' })}
               value={sheet.sheet_title}
+              machineRead={machineRead.has('sheet_title')}
             />
             <Field
               label={t('sheets.col_discipline', { defaultValue: 'Discipline' })}
               value={sheet.discipline}
+              machineRead={machineRead.has('discipline')}
             />
             <Field
               label={t('sheets.col_revision', { defaultValue: 'Rev' })}
               value={sheet.revision}
+              machineRead={machineRead.has('revision')}
             />
             <Field
               label={t('sheets.col_issue_date', { defaultValue: 'Issue Date' })}
