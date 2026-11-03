@@ -11,3 +11,8 @@ async def on_startup() -> None:
     from app.modules.users.permissions import register_user_permissions
 
     register_user_permissions()
+
+    from app.config import get_settings
+    from app.modules.users.sso_enforce import warn_if_misconfigured
+
+    warn_if_misconfigured(get_settings())

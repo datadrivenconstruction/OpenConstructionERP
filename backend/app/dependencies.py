@@ -552,6 +552,8 @@ def key_scopes_allow(
 
 async def resolve_api_key_principal(
     request: Request,
+    *,
+    allow_bearer: bool = False,
 ) -> ApiKeyPrincipal:
     """Resolve an ``X-API-Key`` header to its owner and the key's own scopes.
 
@@ -576,6 +578,10 @@ async def resolve_api_key_principal(
     from app.modules.users.repository import APIKeyRepository
 
     header = request.headers.get("x-api-key")
+    if not header and allow_bearer:
+        # Only the SCIM router opts in: identity providers can send nothing but a bearer token.
+        scheme, _, token = (request.headers.get("authorization") or "").partition(" ")
+        header = token.strip() if scheme.lower() == "bearer" else None
     if not header:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

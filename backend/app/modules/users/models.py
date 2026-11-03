@@ -43,6 +43,10 @@ class User(Base):
     # OIDC login and used to match returning OIDC users to local accounts.
     oidc_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
     oidc_issuer: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Identity of this person at the company IdP (SCIM externalId) and which path created the
+    # account: "scim", "oidc" or "local". NULL means created before provisioning was tracked.
+    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
+    provisioned_by: Mapped[str | None] = mapped_column(String(20), nullable=True)
     # Storage key of the 256 px profile photo; NULL means initials are shown.
     avatar_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- SCIM 2.0 provisioning (Users and Groups) for Entra, Okta, Keycloak and other identity providers: people appear, change role through groups an admin maps in Settings > Identity, and lose access (sessions and API keys included) when they leave. New setting `SSO_ENFORCED_DOMAINS` turns off password sign-in for chosen email domains, with a break-glass admin exemption. SAML is covered by an identity provider side SAML-to-OIDC bridge, see `docs/scim.md`.
+
 ## [19.0.0] - 2026-11-02
 
 ### Added

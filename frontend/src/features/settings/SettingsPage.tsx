@@ -66,6 +66,7 @@ import {
   ScrollText,
   Building2,
   Boxes,
+  KeyRound,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ConfirmDialog, ModuleGuideButton, CountryFlag } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -79,6 +80,7 @@ import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { ScimPanel } from './ScimPanel';
 import { AvatarEditor } from './AvatarEditor';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import {
@@ -1469,7 +1471,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'identity' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1513,6 +1515,8 @@ const TABS: readonly TabDef[] = [
   // page component enforces `audit.view` on the backend, and we role-gate the
   // tab itself in the component so it never shows for viewers/editors.
   { id: 'governance',   labelKey: 'settings.tab_governance',   defaultLabel: 'Governance',   icon: Scale,    descKey: 'settings.tab_governance_desc',   descDefault: 'Permissions, approval routes, and validation rules' },
+  // Single sign-on provisioning (SCIM). Admin only: it hands out a token that creates accounts.
+  { id: 'identity',     labelKey: 'settings.tab_identity',     defaultLabel: 'Identity',     icon: KeyRound, descKey: 'settings.tab_identity_desc',     descDefault: 'Connect your identity provider: SCIM provisioning and group roles' },
   { id: 'audit',        labelKey: 'settings.tab_audit',        defaultLabel: 'Audit log',    icon: ScrollText, descKey: 'settings.tab_audit_desc',      descDefault: 'Read-only timeline of every recorded change' },
   { id: 'advanced',     labelKey: 'settings.tab_advanced',     defaultLabel: 'Advanced',     icon: Wrench,   descKey: 'settings.tab_advanced_desc',     descDefault: 'Backup, databases, setup wizard' },
 ];
@@ -1653,9 +1657,11 @@ export function SettingsPage() {
     () =>
       TABS.filter(
         (tab) =>
-          (tab.id !== 'audit' || canViewAudit) && (tab.id !== 'einvoice' || canEditEInvoice),
+          (tab.id !== 'audit' || canViewAudit) &&
+          (tab.id !== 'einvoice' || canEditEInvoice) &&
+          (tab.id !== 'identity' || userRole === 'admin'),
       ),
-    [canViewAudit, canEditEInvoice],
+    [canViewAudit, canEditEInvoice, userRole],
   );
 
   const rawTab = searchParams.get('tab') ?? '';
@@ -2295,6 +2301,13 @@ export function SettingsPage() {
                   </Link>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* ── IDENTITY (SCIM) ──────────────────────────────────── */}
+          {activeTab === 'identity' && userRole === 'admin' && (
+            <div className="lg:col-span-2">
+              <ScimPanel />
             </div>
           )}
 
