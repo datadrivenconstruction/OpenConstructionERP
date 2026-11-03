@@ -510,6 +510,13 @@ class Settings(BaseSettings):
     oidc_role_claims: str = "groups,roles"
     # Role for a new SSO user that matches no mapped group. Least privilege by default.
     oidc_default_role: Literal["admin", "manager", "editor", "viewer"] = "viewer"
+    # SCIM 2.0 provisioning (module oe_scim). A group may map to the admin role only when
+    # this is true; the IdP can never send a role itself, an admin sets it on the group.
+    scim_allow_admin_groups: bool = False
+    # Comma separated email domains that must sign in through SSO: password login, register
+    # and password reset answer 403 auth.sso_required. An admin with metadata.break_glass
+    # set to true is exempt, so a broken IdP cannot lock everybody out.
+    sso_enforced_domains: str = ""
     # Default role handed to users who self-register after the very first
     # (bootstrap) user. ``viewer`` is the safe default - read-only across
     # the app. Can be raised to ``editor`` or ``manager`` for trusted

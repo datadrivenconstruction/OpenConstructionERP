@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Iterable
 from typing import Any
 
 import httpx
@@ -144,6 +145,15 @@ def extract_groups(claim_names: str, id_claims: dict[str, Any], userinfo: dict[s
     return found
 
 
+def most_privileged(roles: Iterable[str]) -> str | None:
+    """The most privileged valid role among *roles*, or None; shared by OIDC and SCIM."""
+    matched = set(roles)
+    for role in VALID_ROLES:
+        if role in matched:
+            return role
+    return None
+
+
 def resolve_role(groups: list[str], group_role_map: str) -> str | None:
     """Map groups to a local role; the most privileged match wins."""
     if not group_role_map:
@@ -154,8 +164,4 @@ def resolve_role(groups: list[str], group_role_map: str) -> str | None:
         return None
     if not isinstance(mapping, dict):
         return None
-    matched = {mapping[g] for g in groups if mapping.get(g) in VALID_ROLES}
-    for role in VALID_ROLES:
-        if role in matched:
-            return role
-    return None
+    return most_privileged(mapping[g] for g in groups if mapping.get(g) in VALID_ROLES)

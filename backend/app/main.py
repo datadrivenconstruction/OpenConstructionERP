@@ -5057,6 +5057,15 @@ def create_app() -> FastAPI:
         except Exception:
             logger.debug("OpenCDE API router not available (non-fatal)")
 
+        # SCIM 2.0 server at the protocol path identity providers expect (/scim/v2);
+        # the module loader mounts only the admin API under /api/v1/scim.
+        try:
+            from app.modules.scim.router import scim_router
+
+            app.include_router(scim_router, prefix="/scim/v2")
+        except Exception:
+            logger.exception("SCIM router not available")
+
         # Variations alias (plan §3.3) - mount changeorders also at /api/v1/variations
         try:
             from app.modules.changeorders.router import router as co_router
