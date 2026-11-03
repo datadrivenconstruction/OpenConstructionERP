@@ -1687,5 +1687,19 @@
       "suggestion": "Suriin ang coordinate system ng export, o ang anchor ng proyekto.",
       "fail": "Ang orthophoto ay {distance_km} km mula sa anchor ng proyekto."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Ang mga bahagi ng paglilipat na ito ay dapat magkabuuang zero sa dalawa o higit pang magkaibang cost line (pagkakaiba: {difference}).",
+      "suggestion": "Bawasan ng parehong halaga ang isang cost line at idagdag sa isa pa."
+    },
+    "below_committed": {
+      "fail": "Ang {line} ay maiiwan sa budget na {budget}, mas mababa sa {committed} na committed na rito.",
+      "suggestion": "Maglipat ng mas maliit na halaga, o palayain muna ang mga commitment sa cost line."
+    },
+    "approved_immutable": {
+      "fail": "Napagdesisyunan na ang {code} at hindi na ito mababago o mabubura.",
+      "suggestion": "Maglagay ng bagong paglilipat o pagbabago sa budget na magwawasto rito."
+    }
   }
 }

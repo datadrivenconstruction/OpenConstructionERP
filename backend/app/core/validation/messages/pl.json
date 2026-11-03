@@ -1687,5 +1687,19 @@
       "suggestion": "Sprawdź układ współrzędnych eksportu lub punkt zakotwiczenia projektu.",
       "fail": "Ortofotomapa leży {distance_km} km od punktu zakotwiczenia projektu."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Strony tego przesunięcia muszą sumować się do zera na co najmniej dwóch różnych pozycjach kosztów (różnica: {difference}).",
+      "suggestion": "Zdejmij tę samą kwotę z jednej pozycji kosztów i dodaj do drugiej."
+    },
+    "below_committed": {
+      "fail": "Pozycji {line} zostałby budżet {budget}, mniejszy niż zaangażowane już na niej {committed}.",
+      "suggestion": "Przesuń mniejszą kwotę albo najpierw zwolnij zobowiązania na pozycji kosztów."
+    },
+    "approved_immutable": {
+      "fail": "Dla {code} zapadła decyzja i nie można jej już zmieniać ani usuwać.",
+      "suggestion": "Wprowadź nowe przesunięcie lub zmianę budżetu, która ją skoryguje."
+    }
   }
 }

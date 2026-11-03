@@ -1687,5 +1687,19 @@
       "suggestion": "Prüfen Sie das Koordinatensystem des Exports oder den Projektanker.",
       "fail": "Das Orthofoto liegt {distance_km} km vom Projektanker entfernt."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Die Buchungen dieser Umbuchung müssen sich auf zwei oder mehr verschiedenen Kostenpositionen zu null summieren (Differenz: {difference}).",
+      "suggestion": "Buchen Sie denselben Betrag von einer Kostenposition ab und auf eine andere."
+    },
+    "below_committed": {
+      "fail": "{line} behielte ein Budget von {budget}, weniger als die bereits gebundenen {committed}.",
+      "suggestion": "Buchen Sie einen kleineren Betrag um oder geben Sie zuerst Bindungen der Kostenposition frei."
+    },
+    "approved_immutable": {
+      "fail": "{code} ist entschieden und kann nicht mehr geändert oder gelöscht werden.",
+      "suggestion": "Erfassen Sie eine neue Umbuchung oder Budgetänderung, die sie korrigiert."
+    }
   }
 }

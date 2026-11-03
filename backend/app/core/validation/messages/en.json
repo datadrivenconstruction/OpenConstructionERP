@@ -1687,5 +1687,19 @@
       "margin": "Margin",
       "risk": "Risk"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "The legs of this transfer must add up to zero on two or more different cost lines (difference: {difference}).",
+      "suggestion": "Take the same amount off one cost line and put it on another."
+    },
+    "below_committed": {
+      "fail": "{line} would be left with a budget of {budget}, less than the {committed} already committed on it.",
+      "suggestion": "Move a smaller amount, or free up commitments on the cost line first."
+    },
+    "approved_immutable": {
+      "fail": "{code} has been decided and can no longer be changed or deleted.",
+      "suggestion": "Enter a new transfer or budget change that corrects it."
+    }
   }
 }

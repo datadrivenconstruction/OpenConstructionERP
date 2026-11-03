@@ -764,3 +764,11 @@ def _install_frozen_guards() -> None:
 
 
 _install_frozen_guards()
+
+
+from app.modules.costmodel.budget_ledger_models import (  # noqa: E402,F401
+    BudgetLedgerAudit,
+    BudgetModification,
+    BudgetTransfer,
+    BudgetTransferLeg,
+)

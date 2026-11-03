@@ -1687,5 +1687,19 @@
       "suggestion": "请检查导出的坐标系，或项目锚点。",
       "fail": "正射影像距项目锚点 {distance_km} 公里。"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "本次调拨的各笔必须在两个或更多不同成本项上合计为零（差额：{difference}）。",
+      "suggestion": "从一个成本项扣减同样金额，并加到另一个成本项上。"
+    },
+    "below_committed": {
+      "fail": "{line} 的预算将剩 {budget}，低于其上已承诺的 {committed}。",
+      "suggestion": "请调拨较小金额，或先释放该成本项上的承诺。"
+    },
+    "approved_immutable": {
+      "fail": "{code} 已有决定，不能再修改或删除。",
+      "suggestion": "请录入一笔新的调拨或预算变更来更正。"
+    }
   }
 }

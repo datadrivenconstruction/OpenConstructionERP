@@ -1687,5 +1687,19 @@
       "suggestion": "Controlli il sistema di coordinate dell'esportazione oppure l'ancoraggio del progetto.",
       "fail": "L'ortofoto si trova a {distance_km} km dall'ancoraggio del progetto."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Le registrazioni di questo trasferimento devono sommarsi a zero su due o più voci di costo diverse (differenza: {difference}).",
+      "suggestion": "Sottrai lo stesso importo da una voce di costo e aggiungilo a un'altra."
+    },
+    "below_committed": {
+      "fail": "{line} resterebbe con un budget di {budget}, inferiore ai {committed} già impegnati.",
+      "suggestion": "Sposta un importo minore, oppure libera prima gli impegni sulla voce di costo."
+    },
+    "approved_immutable": {
+      "fail": "{code} è stato deciso e non può più essere modificato o eliminato.",
+      "suggestion": "Inserisci un nuovo trasferimento o una variazione di budget che lo corregga."
+    }
   }
 }

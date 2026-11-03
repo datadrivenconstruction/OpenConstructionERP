@@ -1687,5 +1687,19 @@
       "suggestion": "Verifique o sistema de coordenadas da exportação ou a âncora do projeto.",
       "fail": "A ortofoto fica a {distance_km} km da âncora do projeto."
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "As partes desta transferência devem somar zero em duas ou mais linhas de custo diferentes (diferença: {difference}).",
+      "suggestion": "Retire o mesmo valor de uma linha de custo e lance em outra."
+    },
+    "below_committed": {
+      "fail": "{line} ficaria com orçamento de {budget}, abaixo dos {committed} já comprometidos nela.",
+      "suggestion": "Remaneje um valor menor ou libere antes os compromissos da linha de custo."
+    },
+    "approved_immutable": {
+      "fail": "{code} já foi decidido e não pode mais ser alterado nem excluído.",
+      "suggestion": "Registre uma nova transferência ou alteração de orçamento que o corrija."
+    }
   }
 }
