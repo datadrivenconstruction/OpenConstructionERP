@@ -243,7 +243,11 @@ export function extractErrorMessageFromBody(body: unknown): string | null {
   // Route guard refusal: the workspace's solution packages hide this module.
   if (obj.detail === 'module_disabled') {
     const module = typeof obj.module === 'string' ? obj.module : '';
-    return i18next.t('api_errors.module_disabled', { module });
+    return i18next.t('api_errors.module_disabled', {
+      module,
+      defaultValue:
+        'The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.',
+    });
   }
 
   // FastAPI HTTPException — `detail` as a string
