@@ -19,6 +19,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -36,11 +37,19 @@ router = APIRouter()
 SCOPE_READ = "bi:read"
 
 
+@dataclass(frozen=True)
+class FeedCaller:
+    """Who is reading: the user id and the role that decides which feeds are open."""
+
+    user_id: str
+    role: str
+
+
 async def bi_feed_caller(
     request: Request,
     session: SessionDep,
     payload: Annotated[dict[str, Any] | None, Depends(get_optional_user_payload)],
-) -> AsyncIterator[str]:
+) -> AsyncIterator[FeedCaller]:
     """The id of the person reading: the bearer token's subject, or the owner of a ``bi:read`` key.
 
     A key authenticates as its owner and is bound to the owner's tenant for the request, so it
@@ -48,7 +57,7 @@ async def bi_feed_caller(
     opt-in per key.
     """
     if payload is not None:
-        yield str(payload["sub"])
+        yield FeedCaller(str(payload["sub"]), str(payload.get("role") or ""))
         return
     raw = request.headers.get("x-api-key")
     if not raw:
@@ -70,12 +79,12 @@ async def bi_feed_caller(
     await keys.update_last_used(api_key.id)
     token = rls.set_request_tenant(resolve_tenant_id({"sub": str(user.id)}))
     try:
-        yield str(user.id)
+        yield FeedCaller(str(user.id), str(user.role or ""))
     finally:
         rls.reset_request_tenant(token)
 
 
-Caller = Annotated[str, Depends(bi_feed_caller, scope="function")]
+Caller = Annotated[FeedCaller, Depends(bi_feed_caller, scope="function")]
 
 
 def _error(exc: BiFeedError) -> JSONResponse:
@@ -83,24 +92,24 @@ def _error(exc: BiFeedError) -> JSONResponse:
 
 
 @router.get("/feeds", response_model=list[FeedInfo])
-async def list_feeds(session: SessionDep, user_id: Caller) -> Any:
+async def list_feeds(session: SessionDep, caller: Caller) -> Any:
     """The feeds the caller can read."""
     try:
-        return await BiFeedService(session).list_feeds(user_id)
+        return await BiFeedService(session).list_feeds(caller.user_id, caller.role)
     except BiFeedError as exc:
         return _error(exc)
 
 
 @router.get("/sql-status", response_model=SqlAccessStatus)
-async def sql_status(session: SessionDep, user_id: Caller) -> Any:  # noqa: ARG001 - authentication only
+async def sql_status(session: SessionDep, caller: Caller) -> Any:  # noqa: ARG001 - authentication only
     """Whether SQL access (the ``oe_bi`` schema) has been enabled on this instance."""
     return await BiFeedService(session).sql_status()
 
 
-async def _serve(request: Request, session: Any, user_id: str, feed_id: str, fmt: str) -> Response:
+async def _serve(request: Request, session: Any, caller: FeedCaller, feed_id: str, fmt: str) -> Response:
     try:
         params = parse_params(dict(request.query_params))
-        result = await BiFeedService(session).export(feed_id, fmt, user_id, params)
+        result = await BiFeedService(session).export(feed_id, fmt, caller.user_id, caller.role, params)
     except BiFeedError as exc:
         return _error(exc)
     headers = {
@@ -117,18 +126,18 @@ async def _serve(request: Request, session: Any, user_id: str, feed_id: str, fmt
 
 
 @router.get("/feeds/{feed_id}.csv")
-async def feed_csv(feed_id: str, request: Request, session: SessionDep, user_id: Caller) -> Response:
+async def feed_csv(feed_id: str, request: Request, session: SessionDep, caller: Caller) -> Response:
     """A feed as CSV."""
-    return await _serve(request, session, user_id, feed_id, "csv")
+    return await _serve(request, session, caller, feed_id, "csv")
 
 
 @router.get("/feeds/{feed_id}.parquet")
-async def feed_parquet(feed_id: str, request: Request, session: SessionDep, user_id: Caller) -> Response:
+async def feed_parquet(feed_id: str, request: Request, session: SessionDep, caller: Caller) -> Response:
     """A feed as Parquet."""
-    return await _serve(request, session, user_id, feed_id, "parquet")
+    return await _serve(request, session, caller, feed_id, "parquet")
 
 
 @router.get("/feeds/{feed_id}.json")
-async def feed_json(feed_id: str, request: Request, session: SessionDep, user_id: Caller) -> Response:
+async def feed_json(feed_id: str, request: Request, session: SessionDep, caller: Caller) -> Response:
     """A feed as JSON."""
-    return await _serve(request, session, user_id, feed_id, "json")
+    return await _serve(request, session, caller, feed_id, "json")

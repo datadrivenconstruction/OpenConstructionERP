@@ -74,6 +74,7 @@ class FeedSpec:
     joins: tuple[JoinSpec, ...] = ()
     order_by: str = "id"
     updated_col: str = "updated_at"
+    permission: str = ""
 
 
 @dataclass(frozen=True)
@@ -124,6 +125,7 @@ _STAMPS = (_c("created_at", "datetime"), _c("updated_at", "datetime"))
 FEEDS: dict[str, FeedSpec] = {
     "projects": FeedSpec(
         id="projects",
+        permission="projects.read",
         title_key="bi_feed.feed.projects",
         model="app.modules.projects.models:Project",
         project_col="id",
@@ -139,6 +141,7 @@ FEEDS: dict[str, FeedSpec] = {
     ),
     "boq_positions": FeedSpec(
         id="boq_positions",
+        permission="boq.read",
         title_key="bi_feed.feed.boq_positions",
         model="app.modules.boq.models:Position",
         project_col="boq.project_id",
@@ -165,6 +168,7 @@ FEEDS: dict[str, FeedSpec] = {
     ),
     "invoices": FeedSpec(
         id="invoices",
+        permission="finance.read",
         title_key="bi_feed.feed.invoices",
         model="app.modules.finance.models:Invoice",
         project_col="project_id",
@@ -188,6 +192,7 @@ FEEDS: dict[str, FeedSpec] = {
     ),
     "purchase_orders": FeedSpec(
         id="purchase_orders",
+        permission="procurement.read",
         title_key="bi_feed.feed.purchase_orders",
         model="app.modules.procurement.models:PurchaseOrder",
         project_col="project_id",
@@ -209,6 +214,7 @@ FEEDS: dict[str, FeedSpec] = {
     ),
     "schedule_activities": FeedSpec(
         id="schedule_activities",
+        permission="schedule.read",
         title_key="bi_feed.feed.schedule_activities",
         model="app.modules.schedule.models:Activity",
         project_col="schedule.project_id",
