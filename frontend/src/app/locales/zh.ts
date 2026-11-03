@@ -62678,6 +62678,8 @@ const resource = {
     "boq.pdf_details_col_qty_unit": "数量和单位",
     "boq.pdf_details_col_rate": "单价",
     "boq.gaeb_long_text": "详细文本",
+    "boq.risk_contingency_as_percentage": "按直接成本的百分比保留，以便随工程量修改而变化",
+    "boq.risk_contingency_double_count": "另一条预备费行已启用（{{names}}）：同一风险可能被计算两次。",
     "guide.cost_control.title": "成本控制",
     "guide.cost_control.intro": "成本控制回答一个问题：项目最终要花多少钱，为什么。它直接读取各模块中已有的预算、估算、合同、变更、实测工程量和发票，不需要重复录入。",
     "guide.cost_control.methods.title": "四种预测口径",
