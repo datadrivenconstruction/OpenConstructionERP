@@ -178,6 +178,14 @@ describe('the rest of the editor keys', () => {
     expect(resolveBoqShortcut({ key: 'Backspace' }, noDelete)).toBeNull();
     expect(resolveBoqShortcut({ key: 'Delete' }, { ...noDelete, canDelete: true })).toBe('delete_selected');
   });
+
+  it('Ctrl+I does nothing for a user without the import permission', () => {
+    const state = { isEditing: false, hasSelection: false };
+    const ev = ctrl('i');
+    expect(resolveBoqShortcut(ev, { ...state, canImport: false })).toBeNull();
+    expect(resolveBoqShortcut(ev, { ...state, canImport: true })).toBe('import');
+    expect(resolveBoqShortcut(ev, state)).toBe('import');
+  });
 });
 
 describe('isTextEntryElement', () => {

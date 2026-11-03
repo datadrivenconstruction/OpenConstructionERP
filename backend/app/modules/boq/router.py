@@ -384,7 +384,9 @@ async def _verify_boqs_owner(
     for boq_id in boq_ids:
         row = by_boq.get(boq_id)
         if row is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+            )
         _, project_id, owner_id, is_member = row
         if project_id is None:
             raise HTTPException(
@@ -395,7 +397,7 @@ async def _verify_boqs_owner(
             continue
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="BOQ not found",
+            detail=translate("errors.boq_not_found", locale=get_locale()),
         )
 
 
@@ -435,7 +437,7 @@ async def _verify_project_owner_for_boq(
         return
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail="You do not have access to this project",
+        detail=translate("errors.project_access_denied", locale=get_locale()),
     )
 
 
@@ -965,7 +967,7 @@ async def classify_position(
         # instead of an empty suggestion list that looks like "no matches".
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Classification service unavailable: {exc}",
+            detail=translate("errors.boq_classification_unavailable", locale=get_locale()),
         )
 
     suggestions = [
@@ -1758,7 +1760,7 @@ async def lock_boq(
         # to refresh or surface an "already locked" message.
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="BOQ is already locked.",
+            detail=translate("errors.boq_already_locked", locale=get_locale()),
         )
 
     # FSM audit row - record draft -> final transition in oe_activity_log
@@ -1838,7 +1840,7 @@ async def unlock_boq(
     if role not in ("admin", "manager"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admin or manager can unlock a BOQ.",
+            detail=translate("errors.boq_unlock_role", locale=get_locale()),
         )
 
     # IDOR guard - a project manager must also belong to this BOQ's project
@@ -1864,7 +1866,7 @@ async def unlock_boq(
     if result.rowcount == 0:  # type: ignore[union-attr]
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="BOQ is not locked.",
+            detail=translate("errors.boq_not_locked", locale=get_locale()),
         )
 
     # FSM audit row - record final -> draft transition in oe_activity_log
@@ -1927,14 +1929,14 @@ async def create_budget_from_boq(
     if not boq.is_locked:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="BOQ must be locked before creating a budget. Lock the estimate first.",
+            detail=translate("errors.boq_budget_requires_lock", locale=get_locale()),
         )
 
     positions = boq.positions or []
     if not positions:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="BOQ has no positions - nothing to budget.",
+            detail=translate("errors.boq_budget_no_positions", locale=get_locale()),
         )
 
     try:
@@ -1970,12 +1972,12 @@ async def create_budget_from_boq(
         _log.exception("Failed to create budgets from BOQ %s: %s", boq_id, exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create budget lines. Finance module may not be available.",
+            detail=translate("errors.boq_budget_failed", locale=get_locale()),
         )
     if not budgets:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No budgetable positions found in BOQ.",
+            detail=translate("errors.boq_budget_nothing_budgetable", locale=get_locale()),
         )
     budget_ids = [str(b.id) for b in budgets]
     created_ids = [str(b.id) for b in budgets if (b.wbs_id or "ungrouped") not in existing_group_keys]
@@ -1994,7 +1996,7 @@ async def create_budget_from_boq(
         _log.exception("Failed to create costmodel budget lines from BOQ %s: %s", boq_id, exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create costmodel budget lines. Cost model module may not be available.",
+            detail=translate("errors.boq_costmodel_budget_failed", locale=get_locale()),
         )
 
     await _log_activity(
@@ -2131,7 +2133,7 @@ async def bulk_add_positions(
     if not items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="'items' list is required and must not be empty",
+            detail=translate("errors.boq_bulk_items_required", locale=get_locale()),
         )
 
     # Determine next ordinal base from existing positions (cheap, one query)
@@ -2188,7 +2190,9 @@ async def bulk_add_positions(
     if errors and not payloads:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"All {len(errors)} items failed validation. First error: {errors[0]['error']}",
+            detail=translate(
+                "errors.boq_bulk_all_failed", locale=get_locale(), count=len(errors), error=errors[0]["error"]
+            ),
         )
     if errors:
         # Mixed batch - historically the serial path accepted partial
@@ -2449,7 +2453,9 @@ async def restore_position_field(
     if existing is None or existing.boq_id != boq_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Position {position_id} not found in BOQ {boq_id}",
+            detail=translate(
+                "errors.boq_position_not_in_boq", locale=get_locale(), position_id=position_id, boq_id=boq_id
+            ),
         )
     updated = await service.restore_position_field(
         position_id,
@@ -2661,7 +2667,9 @@ async def _require_boq_position(service: BOQService, position_id: uuid.UUID, boq
     if pos is None or pos.boq_id != boq_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Position {position_id} not found in BOQ {boq_id}",
+            detail=translate(
+                "errors.boq_position_not_in_boq", locale=get_locale(), position_id=position_id, boq_id=boq_id
+            ),
         )
     return pos
 
@@ -2718,7 +2726,7 @@ async def apply_audit_fix(
         if data.position_id is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="position_id is required for this fix",
+                detail=translate("errors.boq_fix_position_id_required", locale=get_locale()),
             )
         await _require_boq_position(service, data.position_id, boq_id)
         if data.fix_type == "set_rate_to_median":
@@ -2726,7 +2734,7 @@ async def apply_audit_fix(
             if rate is None or rate < 0:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="A non-negative 'unit_rate' param is required",
+                    detail=translate("errors.boq_fix_unit_rate_required", locale=get_locale()),
                 )
             update = PositionUpdate(unit_rate=rate)
         else:
@@ -2734,7 +2742,7 @@ async def apply_audit_fix(
             if not unit:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="A non-empty 'unit' param is required",
+                    detail=translate("errors.boq_fix_unit_required", locale=get_locale()),
                 )
             update = PositionUpdate(unit=unit)
         try:
@@ -2748,7 +2756,7 @@ async def apply_audit_fix(
         if not isinstance(dup_ids, list) or not dup_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="'duplicate_position_ids' must be a non-empty list",
+                detail=translate("errors.boq_fix_duplicates_required", locale=get_locale()),
             )
         boq_data = await service.get_boq_with_positions(boq_id)
         existing_ordinals = {p.ordinal for p in (boq_data.positions or [])}
@@ -4887,13 +4895,13 @@ async def export_embedding_preview(
 @router.get(
     "/boqs/{boq_id}/export/csv",
     summary="Export BOQ as CSV (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
     include_in_schema=False,
 )
 @router.get(
     "/boqs/{boq_id}/export/csv/",
     summary="Export BOQ as CSV",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_csv(
     boq_id: uuid.UUID,
@@ -5506,13 +5514,13 @@ def _render_boq_xlsx(
 @router.get(
     "/boqs/{boq_id}/export/excel",
     summary="Export BOQ as Excel (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
     include_in_schema=False,
 )
 @router.get(
     "/boqs/{boq_id}/export/excel/",
     summary="Export BOQ as Excel",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_excel(
     boq_id: uuid.UUID,
@@ -5609,13 +5617,13 @@ async def _build_excel_export(
 @router.get(
     "/boqs/{boq_id}/export/pdf",
     summary="Export BOQ as PDF (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
     include_in_schema=False,
 )
 @router.get(
     "/boqs/{boq_id}/export/pdf/",
     summary="Export BOQ as PDF",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_pdf(
     boq_id: uuid.UUID,
@@ -5816,13 +5824,13 @@ async def export_boq_pdf(
 @router.get(
     "/boqs/{boq_id}/export/gaeb",
     summary="Export BOQ as GAEB XML 3.3 (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
     include_in_schema=False,
 )
 @router.get(
     "/boqs/{boq_id}/export/gaeb/",
     summary="Export BOQ as GAEB XML 3.3 (X83 Angebotsaufforderung default, ?format=x84 for Angebotsabgabe)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_gaeb(
     boq_id: uuid.UUID,
@@ -5945,13 +5953,13 @@ async def _build_gaeb_export(
 @router.get(
     "/boqs/{boq_id}/export/bc3",
     summary="Export BOQ as FIEBDC-3 / BC3 (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
     include_in_schema=False,
 )
 @router.get(
     "/boqs/{boq_id}/export/bc3/",
     summary="Export BOQ as a FIEBDC-3 (BC3) budget - Spain / LATAM interchange",
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_bc3(
     boq_id: uuid.UUID,
@@ -7720,7 +7728,7 @@ async def preview_boq_excel_import(
 @router.post(
     "/boqs/{boq_id}/import/excel/",
     summary="Import positions from Excel/CSV (deprecated - use /import/auto/)",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.import"))],
 )
 async def import_boq_excel(
     boq_id: uuid.UUID,
@@ -7910,7 +7918,7 @@ async def import_boq_excel(
 @router.post(
     "/boqs/{boq_id}/import/gaeb/",
     summary="Import positions from GAEB XML 3.3 (deprecated - use /import/auto/)",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.import"))],
 )
 async def import_boq_gaeb(
     boq_id: uuid.UUID,
@@ -8353,7 +8361,7 @@ async def _persist_imported_markups(
 @router.post(
     "/boqs/{boq_id}/import/auto/",
     summary="Auto-detect format and import BOQ positions",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.import"))],
 )
 async def import_boq_auto(
     boq_id: uuid.UUID,
@@ -9329,7 +9337,7 @@ async def _smart_native_result(
 @router.post(
     "/boqs/{boq_id}/import/smart/",
     summary="Smart import: any file via AI (deprecated - use /import/auto/)",
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("boq.import"))],
 )
 async def smart_import(
     boq_id: uuid.UUID,
@@ -11918,7 +11926,10 @@ async def get_line_items(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(..., description="Project scope"),
-    group: str = Query(default="cost", description="Grouping strategy - reserved; defaults to 'cost'"),
+    group: Literal["cost"] = Query(
+        default="cost",
+        description="Grouping strategy. Only 'cost' (largest lines first) is supported; any other value is a 422.",
+    ),
     top_n: int = Query(default=20, ge=1, le=200),
     service: BOQService = Depends(_get_service),
 ) -> list[LineItemResponse]:

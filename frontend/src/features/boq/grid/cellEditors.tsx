@@ -11,7 +11,7 @@ import {
   useLayoutEffect,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { AlertTriangle, X as XIcon } from 'lucide-react';
 import type { ICellEditorParams } from 'ag-grid-community';
 import { AutocompleteInput } from '../AutocompleteInput';
@@ -304,13 +304,13 @@ function toastInvalidNumber(t: TranslateFn): void {
  *   { kind: 'idle' }     — empty input, nothing to show
  *   { kind: 'number' }   — a plain numeric input (not a formula)
  *   { kind: 'ok',  v }   — a valid formula evaluated to v
- *   { kind: 'err', m }   — looks like a formula but failed to parse
+ *   { kind: 'err', m }   — failed to parse; m is an error code the renderer translates
  */
 type FormulaPreview =
   | { kind: 'idle' }
   | { kind: 'number'; v: number }
   | { kind: 'ok'; v: number }
-  | { kind: 'err'; m: string };
+  | { kind: 'err'; m: 'not_number' | 'syntax' };
 
 /**
  * Discriminated result of parsing the editor's raw text (Issue #290).
@@ -342,13 +342,13 @@ function previewFor(input: string, ctx?: FormulaContext, ftInActive = false): Fo
     // Strict numeric check (matches parseInput) so "abc" / a malformed ft-in
     // surfaces as an error instead of a silently truncated number.
     const n = parsePlainNumber(t);
-    return n !== null ? { kind: 'number', v: n } : { kind: 'err', m: 'Not a number' };
+    return n !== null ? { kind: 'number', v: n } : { kind: 'err', m: 'not_number' };
   }
   // Issue #292: evaluate with the FormulaContext threaded from the grid so
   // $VAR / pos(...) / section(...) resolve in the live preview instead of
   // always erroring for a lack of context.
   const r = evalFormulaImpl(t, ctx);
-  if (r === null) return { kind: 'err', m: 'Syntax error or unresolved reference' };
+  if (r === null) return { kind: 'err', m: 'syntax' };
   return { kind: 'ok', v: r };
 }
 
@@ -748,11 +748,14 @@ export const FormulaCellEditor = forwardRef(
               </span>
             )}
             {preview.kind === 'number' && isFormulaMode === false && value.trim() !== '' && (
-              <span className="text-content-tertiary">numeric input</span>
+              <span className="text-content-tertiary">{t('boq.formula_numeric_input', { defaultValue: 'numeric input' })}</span>
             )}
             {preview.kind === 'err' && (
               <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400">
-                <AlertTriangle size={11} strokeWidth={2} /> {preview.m}
+                <AlertTriangle size={11} strokeWidth={2} />{' '}
+                {preview.m === 'not_number'
+                  ? t('boq.formula_err_not_number', { defaultValue: 'Not a number' })
+                  : t('boq.formula_err_syntax', { defaultValue: 'Syntax error or unresolved reference' })}
               </span>
             )}
           </div>
@@ -765,7 +768,7 @@ export const FormulaCellEditor = forwardRef(
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-content-primary">Formula syntax</span>
+              <span className="font-semibold text-content-primary">{t('boq.formula_help_title', { defaultValue: 'Formula syntax' })}</span>
               <button
                 type="button"
                 onClick={() => setShowHelp(false)}
@@ -776,19 +779,19 @@ export const FormulaCellEditor = forwardRef(
               </button>
             </div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-[10px]">
-              <span className="text-violet-600 dark:text-violet-300">+ − * /</span><span>basic math</span>
-              <span className="text-violet-600 dark:text-violet-300">^ or **</span><span>exponent</span>
-              <span className="text-violet-600 dark:text-violet-300">( )</span><span>grouping</span>
-              <span className="text-violet-600 dark:text-violet-300">PI, E</span><span>constants</span>
-              <span className="text-violet-600 dark:text-violet-300">sqrt(x)</span><span>square root</span>
-              <span className="text-violet-600 dark:text-violet-300">pow(x,y)</span><span>x to the y</span>
-              <span className="text-violet-600 dark:text-violet-300">abs round</span><span>abs / round</span>
-              <span className="text-violet-600 dark:text-violet-300">floor ceil</span><span>floor / ceil</span>
-              <span className="text-violet-600 dark:text-violet-300">min max</span><span>multi-arg</span>
-              <span className="text-violet-600 dark:text-violet-300">sin cos tan</span><span>trig (radians)</span>
+              <span className="text-violet-600 dark:text-violet-300">+ − * /</span><span>{t('boq.formula_help_basic_math', { defaultValue: 'basic math' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">^ or **</span><span>{t('boq.formula_help_exponent', { defaultValue: 'exponent' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">( )</span><span>{t('boq.formula_help_grouping', { defaultValue: 'grouping' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">PI, E</span><span>{t('boq.formula_help_constants', { defaultValue: 'constants' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">sqrt(x)</span><span>{t('boq.formula_help_sqrt', { defaultValue: 'square root' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">pow(x,y)</span><span>{t('boq.formula_help_pow', { defaultValue: 'x to the y' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">abs round</span><span>{t('boq.formula_help_abs_round', { defaultValue: 'abs / round' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">floor ceil</span><span>{t('boq.formula_help_floor_ceil', { defaultValue: 'floor / ceil' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">min max</span><span>{t('boq.formula_help_multi_arg', { defaultValue: 'multi-arg' })}</span>
+              <span className="text-violet-600 dark:text-violet-300">sin cos tan</span><span>{t('boq.formula_help_trig', { defaultValue: 'trig (radians)' })}</span>
             </div>
             <div className="mt-2.5 pt-2 border-t border-border-light/70">
-              <div className="font-semibold text-content-primary mb-1">Examples</div>
+              <div className="font-semibold text-content-primary mb-1">{t('boq.formula_help_examples', { defaultValue: 'Examples' })}</div>
               <ul className="font-mono text-[10px] space-y-0.5">
                 <li><span className="text-violet-600 dark:text-violet-300">=2*PI()^2*3</span><span className="text-content-tertiary"> → 59.22</span></li>
                 <li><span className="text-violet-600 dark:text-violet-300">=sqrt(144) + 5</span><span className="text-content-tertiary"> → 17</span></li>
@@ -796,7 +799,14 @@ export const FormulaCellEditor = forwardRef(
               </ul>
             </div>
             <div className="mt-2 text-[10px] text-content-tertiary">
-              Prefix with <kbd className="px-1 rounded bg-surface-secondary">=</kbd> or just type the expression. Press <kbd className="px-1 rounded bg-surface-secondary">Esc</kbd> to close.
+              <Trans
+                i18nKey="boq.formula_help_footer"
+                defaults="Prefix with <eq>=</eq> or just type the expression. Press <esc>Esc</esc> to close."
+                components={{
+                  eq: <kbd className="px-1 rounded bg-surface-secondary" />,
+                  esc: <kbd className="px-1 rounded bg-surface-secondary" />,
+                }}
+              />
             </div>
           </div>
         )}

@@ -72,6 +72,7 @@ import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { formatCurrency } from '@/shared/lib/money';
 import { useBoqDescDensityStore, type BoqDescDensity } from '@/stores/useBoqDescDensityStore';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 
 export interface BOQToolbarProps {
   t: (key: string, options?: Record<string, string | number>) => string;
@@ -279,6 +280,7 @@ export function BOQToolbar({
 }: BOQToolbarProps) {
   // Routes are registered per enabled module (ModuleRoutes filters on the same
   // flag), so linking to a module the operator switched off would dead-end.
+  const canImport = useHasPermission('boq.import');
   const gaebExchangeEnabled = useModuleStore((s) => s.isModuleEnabled('gaeb-exchange'));
   const ownerScheduleEnabled = useModuleStore((s) => s.isModuleEnabled('owner_schedule'));
 
@@ -501,7 +503,7 @@ export function BOQToolbar({
           <span className="mx-0.5 h-5 w-px shrink-0 bg-border-light" />
 
           {/* File: import / export / paste / density / carbon */}
-          {!readOnly && (
+          {!readOnly && canImport && (
             <IconBtn
               icon={isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
               title={t('common.import')}

@@ -30,24 +30,16 @@ import type { BOQ } from './api';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
-interface TemplatePosition {
-  ordinal: string;
-  description: string;
-  unit: string;
-  rate_per_m2: number;
-  section: string;
-}
-
+/** Shape of GET /v1/boq/boqs/templates/. */
 interface BOQTemplate {
   id: string;
   name: string;
   description: string;
-  building_type: string;
   icon: string;
-  sections: number;
-  positions: number;
+  section_count: number;
+  position_count: number;
   avg_cost_per_m2: number;
-  template_positions: TemplatePosition[];
+  currency: string;
 }
 
 interface CreateFromTemplateData {
@@ -69,139 +61,6 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   retail: <ShoppingBag size={28} strokeWidth={1.5} />,
   infrastructure: <Factory size={28} strokeWidth={1.5} />,
 };
-
-/* ── Fallback templates (used when API returns 404) ─────────────────── */
-
-const FALLBACK_TEMPLATES: BOQTemplate[] = [
-  {
-    id: 'tpl_residential',
-    name: 'Residential Building',
-    description: 'Multi-story residential with standard finishes, MEP, and exterior works',
-    building_type: 'residential',
-    icon: 'residential',
-    sections: 9,
-    positions: 35,
-    avg_cost_per_m2: 1250,
-    template_positions: [
-      { ordinal: '01', description: 'Earthworks & Foundations', unit: '', rate_per_m2: 0, section: '01' },
-      { ordinal: '01.01', description: 'Excavation', unit: 'm3', rate_per_m2: 45, section: '01' },
-      { ordinal: '01.02', description: 'Foundation concrete C30/37', unit: 'm3', rate_per_m2: 85, section: '01' },
-      { ordinal: '01.03', description: 'Foundation reinforcement', unit: 'kg', rate_per_m2: 22, section: '01' },
-      { ordinal: '01.04', description: 'Waterproofing membrane', unit: 'm2', rate_per_m2: 18, section: '01' },
-      { ordinal: '02', description: 'Structural Frame', unit: '', rate_per_m2: 0, section: '02' },
-      { ordinal: '02.01', description: 'Reinforced concrete walls', unit: 'm3', rate_per_m2: 120, section: '02' },
-      { ordinal: '02.02', description: 'RC floor slabs', unit: 'm2', rate_per_m2: 95, section: '02' },
-      { ordinal: '02.03', description: 'Concrete columns', unit: 'pcs', rate_per_m2: 35, section: '02' },
-      { ordinal: '02.04', description: 'Structural steel beams', unit: 'kg', rate_per_m2: 28, section: '02' },
-      { ordinal: '03', description: 'Envelope & Facade', unit: '', rate_per_m2: 0, section: '03' },
-      { ordinal: '03.01', description: 'External masonry walls', unit: 'm2', rate_per_m2: 65, section: '03' },
-      { ordinal: '03.02', description: 'Thermal insulation ETICS', unit: 'm2', rate_per_m2: 42, section: '03' },
-      { ordinal: '03.03', description: 'Windows triple-glazed', unit: 'pcs', rate_per_m2: 55, section: '03' },
-      { ordinal: '03.04', description: 'Entrance doors', unit: 'pcs', rate_per_m2: 15, section: '03' },
-      { ordinal: '04', description: 'Roofing', unit: '', rate_per_m2: 0, section: '04' },
-      { ordinal: '04.01', description: 'Flat roof waterproofing', unit: 'm2', rate_per_m2: 38, section: '04' },
-      { ordinal: '04.02', description: 'Roof insulation', unit: 'm2', rate_per_m2: 25, section: '04' },
-      { ordinal: '04.03', description: 'Roof drainage', unit: 'lm', rate_per_m2: 12, section: '04' },
-      { ordinal: '05', description: 'Interior Finishes', unit: '', rate_per_m2: 0, section: '05' },
-      { ordinal: '05.01', description: 'Interior partitions drywall', unit: 'm2', rate_per_m2: 35, section: '05' },
-      { ordinal: '05.02', description: 'Floor tiling ceramic', unit: 'm2', rate_per_m2: 48, section: '05' },
-      { ordinal: '05.03', description: 'Laminate flooring', unit: 'm2', rate_per_m2: 32, section: '05' },
-      { ordinal: '05.04', description: 'Wall painting', unit: 'm2', rate_per_m2: 18, section: '05' },
-      { ordinal: '05.05', description: 'Suspended ceilings', unit: 'm2', rate_per_m2: 28, section: '05' },
-      { ordinal: '06', description: 'Mechanical (HVAC)', unit: '', rate_per_m2: 0, section: '06' },
-      { ordinal: '06.01', description: 'Heating system incl. radiators', unit: 'lsum', rate_per_m2: 65, section: '06' },
-      { ordinal: '06.02', description: 'Ventilation system', unit: 'lsum', rate_per_m2: 45, section: '06' },
-      { ordinal: '07', description: 'Plumbing', unit: '', rate_per_m2: 0, section: '07' },
-      { ordinal: '07.01', description: 'Sanitary installations', unit: 'set', rate_per_m2: 55, section: '07' },
-      { ordinal: '07.02', description: 'Water supply piping', unit: 'lm', rate_per_m2: 25, section: '07' },
-      { ordinal: '07.03', description: 'Drainage piping', unit: 'lm', rate_per_m2: 22, section: '07' },
-      { ordinal: '08', description: 'Electrical', unit: '', rate_per_m2: 0, section: '08' },
-      { ordinal: '08.01', description: 'Power distribution', unit: 'lsum', rate_per_m2: 55, section: '08' },
-      { ordinal: '08.02', description: 'Lighting installation', unit: 'pcs', rate_per_m2: 35, section: '08' },
-      { ordinal: '08.03', description: 'Low-voltage systems', unit: 'lsum', rate_per_m2: 22, section: '08' },
-      { ordinal: '09', description: 'External Works', unit: '', rate_per_m2: 0, section: '09' },
-      { ordinal: '09.01', description: 'Landscaping & paving', unit: 'm2', rate_per_m2: 28, section: '09' },
-      { ordinal: '09.02', description: 'Site utilities connections', unit: 'lsum', rate_per_m2: 32, section: '09' },
-    ],
-  },
-  {
-    id: 'tpl_office',
-    name: 'Office Building',
-    description: 'Modern office with open floor plans, raised floors, and advanced MEP',
-    building_type: 'office',
-    icon: 'office',
-    sections: 7,
-    positions: 28,
-    avg_cost_per_m2: 1480,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_warehouse',
-    name: 'Warehouse / Logistics',
-    description: 'Steel-frame industrial building with concrete slab and basic services',
-    building_type: 'warehouse',
-    icon: 'warehouse',
-    sections: 5,
-    positions: 18,
-    avg_cost_per_m2: 620,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_school',
-    name: 'School / Educational',
-    description: 'Educational facility with classrooms, assembly hall, and sports areas',
-    building_type: 'school',
-    icon: 'school',
-    sections: 7,
-    positions: 22,
-    avg_cost_per_m2: 1350,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_hospital',
-    name: 'Hospital / Healthcare',
-    description: 'Healthcare facility with specialized MEP, clean rooms, and medical gas',
-    building_type: 'hospital',
-    icon: 'hospital',
-    sections: 8,
-    positions: 25,
-    avg_cost_per_m2: 2800,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_hotel',
-    name: 'Hotel / Hospitality',
-    description: 'Multi-story hotel with standard rooms, lobby, restaurant, and spa',
-    building_type: 'hotel',
-    icon: 'hotel',
-    sections: 7,
-    positions: 20,
-    avg_cost_per_m2: 1650,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_retail',
-    name: 'Retail / Commercial',
-    description: 'Retail space with shopfronts, HVAC, and tenant fit-out allowances',
-    building_type: 'retail',
-    icon: 'retail',
-    sections: 6,
-    positions: 18,
-    avg_cost_per_m2: 980,
-    template_positions: [],
-  },
-  {
-    id: 'tpl_infrastructure',
-    name: 'Infrastructure',
-    description: 'Civil works including roads, bridges, utilities, and drainage',
-    building_type: 'infrastructure',
-    icon: 'infrastructure',
-    sections: 6,
-    positions: 20,
-    avg_cost_per_m2: 450,
-    template_positions: [],
-  },
-];
 
 /* ── Number formatters ──────────────────────────────────────────────── */
 //
@@ -232,6 +91,11 @@ export function TemplatesPage() {
   // m² becomes so the per-unit figure rescales correctly (e.g. EUR/m² -> EUR/ft²).
   const areaUnitScale = q.convert(1, 'm²').value || 1;
   const areaRateUnit = q.unitFor('m²');
+  // Built-in template text is keyed on the template id; the API text is the fallback.
+  const tplName = (tpl: BOQTemplate) =>
+    t(`boq_templates.name_${tpl.id}`, { defaultValue: tpl.name });
+  const tplDescription = (tpl: BOQTemplate) =>
+    t(`boq_templates.desc_${tpl.id}`, { defaultValue: tpl.description });
 
   /* ── State ───────────────────────────────────────────────────────── */
 
@@ -248,13 +112,9 @@ export function TemplatesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProjectId]);
 
-  /* ── Fetch templates from API (fall back to local data) ──────────── */
+  /* ── Fetch templates from the API ────────────────────────────────── */
 
-  // Only a 404 means "this deployment has no template endpoint", which is the
-  // case the built-in list exists for. Anything else is a real failure and has
-  // to surface: swallowing a 500 or a dropped connection here used to show the
-  // built-in templates as if they had come from the server, so a broken backend
-  // looked like a working one.
+  // Any failure surfaces in the error state below; there is no invented list.
   const {
     data,
     isPending: templatesPending,
@@ -263,16 +123,7 @@ export function TemplatesPage() {
     refetch: refetchTemplates,
   } = useQuery({
     queryKey: ['boq-templates'],
-    queryFn: async () => {
-      try {
-        return await apiGet<BOQTemplate[]>('/v1/boq/boqs/templates/');
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 404) {
-          return FALLBACK_TEMPLATES;
-        }
-        throw err;
-      }
-    },
+    queryFn: () => apiGet<BOQTemplate[]>('/v1/boq/boqs/templates/'),
     staleTime: 5 * 60 * 1000,
   });
   const templates = data ?? [];
@@ -328,7 +179,7 @@ export function TemplatesPage() {
 
   const generatedName = useMemo(() => {
     if (!selected) return '';
-    return `${selected.name} - ${fmt.format(areaNum)}m\u00B2`;
+    return `${tplName(selected)} - ${fmt.format(areaNum)}m\u00B2`;
   }, [selected, areaNum]);
 
   /* ── Auto-populate BOQ name when template or area changes ────────── */
@@ -338,7 +189,7 @@ export function TemplatesPage() {
       setSelectedId((prev) => (prev === id ? null : id));
       const tpl = templates.find((t) => t.id === id);
       if (tpl) {
-        setBoqName(`${tpl.name} - ${fmt.format(areaNum)}m\u00B2`);
+        setBoqName(`${tplName(tpl)} - ${fmt.format(areaNum)}m\u00B2`);
       }
     },
     [templates, areaNum],
@@ -349,7 +200,7 @@ export function TemplatesPage() {
       setArea(raw);
       const val = parseDecimalInput(raw);
       if (val !== null && selected) {
-        setBoqName(`${selected.name} - ${fmt.format(val)}m\u00B2`);
+        setBoqName(`${tplName(selected)} - ${fmt.format(val)}m\u00B2`);
       }
     },
     [selected],
@@ -466,11 +317,11 @@ export function TemplatesPage() {
                 <p
                   className={`text-sm font-semibold ${isSelected ? 'text-oe-blue' : 'text-content-primary'}`}
                 >
-                  {tpl.name}
+                  {tplName(tpl)}
                 </p>
                 <p className="mt-0.5 text-xs text-content-tertiary">
                   {t('boq.item_count', {
-                    count: tpl.positions,
+                    count: tpl.position_count,
                     defaultValue_one: '{{count}} item',
                     defaultValue_other: '{{count}} items',
                   })}
@@ -479,7 +330,7 @@ export function TemplatesPage() {
 
               {/* Cost indicator - benchmark rate per unit area (reciprocal). */}
               <Badge variant={isSelected ? 'blue' : 'neutral'} size="sm">
-                ~{fmt.format(tpl.avg_cost_per_m2 / areaUnitScale)} EUR/{areaRateUnit}
+                ~{fmt.format(tpl.avg_cost_per_m2 / areaUnitScale)} {tpl.currency}/{areaRateUnit}
               </Badge>
             </button>
           );
@@ -497,8 +348,8 @@ export function TemplatesPage() {
                   {ICON_MAP[selected.icon] ?? <Building2 size={22} strokeWidth={1.5} />}
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-content-primary">{selected.name}</h2>
-                  <p className="text-sm text-content-secondary">{selected.description}</p>
+                  <h2 className="text-lg font-semibold text-content-primary">{tplName(selected)}</h2>
+                  <p className="text-sm text-content-secondary">{tplDescription(selected)}</p>
                 </div>
               </div>
             </div>
@@ -563,8 +414,8 @@ export function TemplatesPage() {
                     {t('boq.preview', { defaultValue: 'Preview' })}
                   </p>
                   <p className="mt-0.5 text-sm text-content-primary">
-                    {selected.sections} {t('boq.sections', { defaultValue: 'sections' })},{' '}
-                    {selected.positions} {t('boq.positions', { defaultValue: 'positions' })}
+                    {selected.section_count} {t('boq.sections', { defaultValue: 'sections' })},{' '}
+                    {selected.position_count} {t('boq.positions', { defaultValue: 'positions' })}
                   </p>
                 </div>
                 <div className="h-8 w-px bg-border-light" />
@@ -574,7 +425,7 @@ export function TemplatesPage() {
                   </p>
                   <p className="mt-0.5 text-lg font-bold text-content-primary tabular-nums">
                     ~{fmtCurrency.format(estimatedTotal)}{' '}
-                    <span className="text-sm font-normal text-content-secondary">EUR</span>
+                    <span className="text-sm font-normal text-content-secondary">{selected.currency}</span>
                   </p>
                 </div>
               </div>

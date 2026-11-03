@@ -24,6 +24,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
+from app.core.i18n import get_locale
+from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.boq.change_review import ChangeReviewService
 from app.modules.boq.change_review_schemas import (
@@ -45,13 +47,17 @@ async def _verify_boq_access(session: SessionDep, boq_id: uuid.UUID, user_id: st
     """404 unless the caller may see the BOQ's project (owner, member or admin)."""
     row = (await session.execute(select(BOQ.project_id).where(BOQ.id == boq_id))).first()
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+        )
     try:
         await verify_project_access(row[0], user_id, session)
     except HTTPException as exc:
         # Same answer for "missing" and "not yours", and named after the BOQ
         # the caller asked for rather than a project they never mentioned.
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found") from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+        ) from exc
 
 
 def _user_uuid(user_id: str) -> uuid.UUID | None:

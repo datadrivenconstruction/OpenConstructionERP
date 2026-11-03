@@ -362,3 +362,53 @@ async def test_upload_does_not_block_event_loop(
 
     rows = await asyncio.to_thread(_parse_rows_from_csv, csv_bytes)
     assert len(rows) == 500, f"Expected 500 rows, got {len(rows)}"
+
+
+# ── boq.import is editor-gated (viewer holds boq.update, not boq.import) ─────
+
+
+async def _user_with_role(client: AsyncClient, role: str) -> dict[str, str]:
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.users.models import User
+
+    email = f"boqimp-{role}-{uuid.uuid4().hex[:8]}@test.io"
+    password = f"BoqImp{uuid.uuid4().hex[:6]}9"
+    reg = await client.post(
+        "/api/v1/users/auth/register",
+        json={"email": email, "password": password, "full_name": f"Import {role}"},
+    )
+    assert reg.status_code in (200, 201), reg.text
+    async with async_session_factory() as s:
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
+        await s.commit()
+    login = await client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
+    assert login.status_code == 200, login.text
+    return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+_IMPORT_ROUTES = [
+    ("import/excel", "data.csv", b"Pos,Description,Unit,Quantity,Rate\n0010,Wall,m2,1,1\n", "text/csv"),
+    ("import/auto", "data.csv", b"Pos,Description,Unit,Quantity,Rate\n0010,Wall,m2,1,1\n", "text/csv"),
+    ("import/smart", "data.csv", b"Pos,Description,Unit,Quantity,Rate\n0010,Wall,m2,1,1\n", "text/csv"),
+    ("import/gaeb", "boq.x83", b"<GAEB></GAEB>", "application/xml"),
+    ("import/gaeb-x31/apply", "m.x31", b"<GAEB></GAEB>", "application/xml"),
+]
+
+
+@pytest.mark.parametrize("suffix,fname,blob,ctype", _IMPORT_ROUTES)
+@pytest.mark.asyncio
+async def test_import_routes_need_boq_import_permission(shared_client, shared_auth, suffix, fname, blob, ctype):
+    """A VIEWER gets 403 (missing boq.import) on file imports; an EDITOR passes the permission gate."""
+    boq_id = await _create_boq(shared_client, shared_auth)
+    viewer = await _user_with_role(shared_client, "viewer")
+    editor = await _user_with_role(shared_client, "editor")
+
+    url = f"/api/v1/boq/boqs/{boq_id}/{suffix}/"
+    denied = await shared_client.post(url, files={"file": (fname, blob, ctype)}, headers=viewer)
+    assert denied.status_code == 403, denied.text
+    assert "boq.import" in denied.text
+    allowed = await shared_client.post(url, files={"file": (fname, blob, ctype)}, headers=editor)
+    # The owner gate may still reject a non-member editor, but never the permission check.
+    assert "boq.import" not in allowed.text, allowed.text
