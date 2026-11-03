@@ -2587,5 +2587,21 @@
       "file_missing": "Foto '{name}' faili pole salvestusruumis",
       "file_missing_fix": "Laadige foto uuesti üles või taastage see varukoopiast"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Kapitaliplaan",
+      "col": {
+        "title": "Projekt",
+        "priority": "Prioriteet",
+        "status": "Staatus",
+        "total": "Kogukulu"
+      },
+      "row": {
+        "envelope": "Eelarve",
+        "demand": "Vajadus",
+        "gap": "Puudujääk"
+      }
+    }
   }
 }

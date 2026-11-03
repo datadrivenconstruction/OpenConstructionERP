@@ -2585,5 +2585,21 @@
       "file_missing": "Filen för bilden '{name}' saknas i lagringen",
       "file_missing_fix": "Ladda upp bilden igen eller återställ den från en säkerhetskopia"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Investeringsplan",
+      "col": {
+        "title": "Projekt",
+        "priority": "Prioritet",
+        "status": "Status",
+        "total": "Total kostnad"
+      },
+      "row": {
+        "envelope": "Ram",
+        "demand": "Behov",
+        "gap": "Gap"
+      }
+    }
   }
 }

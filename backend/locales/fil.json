@@ -2597,5 +2597,6 @@
       "file_missing": "Nawawala sa storage ang file ng larawang '{name}'",
       "file_missing_fix": "I-upload ulit ang larawan o ibalik mula sa backup"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Capital plan","col": {"title": "Proyekto","priority": "Prayoridad","status": "Status","total": "Kabuuang gastos"},"row": {"envelope": "Badyet","demand": "Demand","gap": "Gap"}}}
 }

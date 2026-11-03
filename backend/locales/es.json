@@ -2567,5 +2567,6 @@
       "file_missing": "Falta en el almacenamiento el archivo de la foto '{name}'",
       "file_missing_fix": "Suba la foto de nuevo o restáurela desde una copia de seguridad"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Plan de inversiones", "col": {"title": "Proyecto", "priority": "Prioridad", "status": "Estado", "total": "Coste total"}, "row": {"envelope": "Techo presupuestario", "demand": "Demanda", "gap": "Brecha"}}}
 }

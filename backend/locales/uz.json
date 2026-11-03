@@ -1,4 +1,5 @@
 {
+  "capital_plan": {"export": {"sheet": "Kapital reja", "col": {"title": "Loyiha", "priority": "Ustuvorlik", "status": "Holat", "total": "Jami xarajat"}, "row": {"envelope": "Byudjet chegarasi", "demand": "Talab", "gap": "Tafovut"}}},
   "costs.catalog_name_unavailable": "Bu nomdan yangi katalog uchun foydalanib boʻlmaydi. Boshqa nom tanlang.",
   "app": {
     "name": "OpenConstructionERP",

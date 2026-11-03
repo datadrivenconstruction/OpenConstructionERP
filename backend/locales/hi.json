@@ -1,4 +1,5 @@
 {
+  "capital_plan": {"export": {"sheet": "पूँजी योजना", "col": {"title": "प्रोजेक्ट", "priority": "प्राथमिकता", "status": "स्थिति", "total": "कुल लागत"}, "row": {"envelope": "बजट सीमा", "demand": "माँग", "gap": "अंतर"}}},
   "costs.catalog_name_unavailable": "यह नाम नए कैटलॉग के लिए उपयोग नहीं किया जा सकता। कोई दूसरा नाम चुनें।",
   "app": {
     "name": "OpenConstructionERP",

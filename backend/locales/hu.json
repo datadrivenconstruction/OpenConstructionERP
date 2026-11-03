@@ -2585,5 +2585,6 @@
       "file_missing": "A(z) '{name}' fotó fájlja hiányzik a tárhelyről",
       "file_missing_fix": "Töltse fel újra a fotót, vagy állítsa vissza biztonsági mentésből"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Tőketerv","col": {"title": "Projekt","priority": "Prioritás","status": "Állapot","total": "Teljes költség"},"row": {"envelope": "Éves keret","demand": "Igény","gap": "Hiány"}}}
 }

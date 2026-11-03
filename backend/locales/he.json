@@ -2588,5 +2588,6 @@
       "file_missing": "קובץ התמונה '{name}' חסר באחסון",
       "file_missing_fix": "העלו את התמונה שוב או שחזרו אותה מגיבוי"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "תוכנית הון", "col": {"title": "פרויקט", "priority": "עדיפות", "status": "סטטוס", "total": "עלות כוללת"}, "row": {"envelope": "מסגרת תקציב", "demand": "דרישה", "gap": "פער"}}}
 }

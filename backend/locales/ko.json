@@ -2586,5 +2586,6 @@
       "file_missing": "사진 '{name}'의 파일이 저장소에 없습니다",
       "file_missing_fix": "사진을 다시 업로드하거나 백업에서 복원하세요"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "투자 계획","col": {"title": "프로젝트","priority": "우선순위","status": "상태","total": "총비용"},"row": {"envelope": "예산 한도","demand": "수요","gap": "차액"}}}
 }

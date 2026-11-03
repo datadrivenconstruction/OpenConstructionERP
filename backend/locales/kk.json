@@ -1,4 +1,5 @@
 {
+  "capital_plan": {"export": {"sheet": "Капитал жоспары", "col": {"title": "Жоба", "priority": "Басымдық", "status": "Күйі", "total": "Жалпы құны"}, "row": {"envelope": "Бюджет шегі", "demand": "Қажеттілік", "gap": "Тапшылық"}}},
   "costs.catalog_name_unavailable": "Бұл атауды жаңа анықтамалық үшін пайдалануға болмайды. Басқа атау таңдаңыз.",
   "app": {
     "name": "OpenConstructionERP",

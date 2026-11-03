@@ -2589,5 +2589,21 @@
       "file_missing": "Kuvan '{name}' tiedosto puuttuu tallennustilasta",
       "file_missing_fix": "Lataa kuva uudelleen tai palauta se varmuuskopiosta"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Pääomasuunnitelma",
+      "col": {
+        "title": "Projekti",
+        "priority": "Prioriteetti",
+        "status": "Tila",
+        "total": "Kokonaiskustannus"
+      },
+      "row": {
+        "envelope": "Budjetti",
+        "demand": "Tarve",
+        "gap": "Aukko"
+      }
+    }
   }
 }

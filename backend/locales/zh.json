@@ -2564,5 +2564,6 @@
       "file_missing": "存储中缺少照片“{name}”的文件",
       "file_missing_fix": "请重新上传照片，或从备份中恢复"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "投资计划","col": {"title": "项目","priority": "优先级","status": "状态","total": "总费用"},"row": {"envelope": "预算额度","demand": "需求","gap": "缺口"}}}
 }

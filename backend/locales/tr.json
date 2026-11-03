@@ -2547,5 +2547,21 @@
       "file_missing": "'{name}' fotoğrafının dosyası depolamada yok",
       "file_missing_fix": "Fotoğrafı yeniden yükleyin veya yedekten geri getirin"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Sermaye planı",
+      "col": {
+        "title": "Proje",
+        "priority": "Öncelik",
+        "status": "Durum",
+        "total": "Toplam maliyet"
+      },
+      "row": {
+        "envelope": "Bütçe",
+        "demand": "Talep",
+        "gap": "Açık"
+      }
+    }
   }
 }

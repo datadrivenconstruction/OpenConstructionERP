@@ -2560,5 +2560,6 @@
       "file_missing": "Het bestand van foto '{name}' ontbreekt in de opslag",
       "file_missing_fix": "Upload de foto opnieuw of herstel hem vanuit een back-up"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Investeringsplan","col": {"title": "Project","priority": "Prioriteit","status": "Status","total": "Totale kosten"},"row": {"envelope": "Jaarbudget","demand": "Vraag","gap": "Tekort"}}}
 }
