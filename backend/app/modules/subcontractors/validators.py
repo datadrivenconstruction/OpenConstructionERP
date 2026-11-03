@@ -903,6 +903,34 @@ def check_change_owner_approved(change: dict[str, Any]) -> list[Finding]:
     ]
 
 
+def check_change_notice_window(change: dict[str, Any]) -> list[Finding]:
+    """The sub must notify the GC within the contract days of the event (downstream clock)."""
+    window = change.get("notice_window_days")
+    event = _as_date(change.get("event_date"))
+    notified = _as_date(change.get("notified_on"))
+    if not isinstance(window, int) or window <= 0 or event is None or notified is None:
+        return []
+    late = (notified - event).days - window
+    if late <= 0:
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={"code": _change_ref(change), "days": str(window), "late": str(late)},
+            details={"window_days": window, "days_late": late},
+        )
+    ]
+
+
+def _as_date(raw: Any) -> date | None:
+    if isinstance(raw, date):
+        return raw
+    try:
+        return date.fromisoformat(str(raw)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
 def check_change_time_within_owner(change: dict[str, Any]) -> list[Finding]:
     """Subcontract time claims should not add up to more days than the owner granted."""
     owner_days = change.get("owner_time_days")

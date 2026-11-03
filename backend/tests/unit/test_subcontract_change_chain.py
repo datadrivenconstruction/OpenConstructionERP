@@ -131,3 +131,33 @@ async def test_a_draft_cannot_jump_to_approved_and_rejection_moves_nothing(quiet
     await svc.transition(change.id, "rejected", note="price too high")
     assert agreement.total_value == Decimal("100000.00") and quiet == []
     assert SimpleNamespace(status=change.status).status == "rejected"
+
+
+def test_notice_window_flags_a_late_sub_notification() -> None:
+    base = {"code": "SCO-9", "notice_window_days": 7, "event_date": "2026-03-01"}
+    [finding] = checks.check_change_notice_window({**base, "notified_on": "2026-03-12"})
+    assert finding.details == {"window_days": 7, "days_late": 4}
+    assert checks.check_change_notice_window({**base, "notified_on": "2026-03-08"}) == []
+    assert checks.check_change_notice_window({"code": "SCO-9", "notified_on": "2026-03-08"}) == []
+
+
+@pytest.mark.asyncio
+async def test_back_to_back_approval_is_blocked_until_the_owner_change_is_approved(
+    quiet: list[tuple[str, dict]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    agreement, change = _pair()
+    change.owner_change_type, change.owner_change_id = "change_order", uuid.uuid4()
+    svc = SubcontractChangeService(_Session(agreement, change))  # type: ignore[arg-type]
+
+    async def owner(_t: str, _i: uuid.UUID) -> dict:
+        return {"status": state["status"]}
+
+    state = {"status": "draft"}
+    monkeypatch.setattr(svc, "owner_change", owner)
+    with pytest.raises(HTTPException) as exc:
+        await svc.transition(change.id, "approved")
+    assert exc.value.status_code == 409 and agreement.total_value == Decimal("100000.00")
+
+    state["status"] = "approved"
+    await svc.transition(change.id, "approved")
+    assert agreement.total_value == Decimal("102500.00")
