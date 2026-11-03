@@ -27,8 +27,10 @@ set are ever emitted as an ``update``.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+import unicodedata
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 
 # Header label written into the dedicated identity column of every export,
@@ -46,6 +48,13 @@ ID_COLUMN_ALIASES: frozenset[str] = frozenset(
         "uuid",
     }
 )
+
+# Optional export column holding ``Position.version`` at export time. A sheet
+# without it (old export, hand-built) is never checked for stale rows.
+ROW_VERSION_COLUMN_HEADER = "Row Version"
+# Hidden sheet an export appends (boq_id, exported_at, schema).
+EXPORT_META_SHEET = "_oe_meta"
+ROW_VERSION_COLUMN_ALIASES: frozenset[str] = frozenset({"row version", "row_version", "row-version"})
 
 
 def normalise_id(raw: Any) -> str | None:
@@ -67,6 +76,20 @@ def normalise_id(raw: Any) -> str | None:
     return text.lower()
 
 
+def is_formula_id(raw: Any) -> bool:
+    """True when an id cell would run as a spreadsheet formula (``= + - @``, tab, CR).
+
+    Uses the same trigger set as the export-side neutraliser. A genuine
+    position id is a UUID and can never start with one of these.
+    """
+    from app.core.csv_safety import neutralise_formula
+
+    if not isinstance(raw, str):
+        return False
+    text = raw.lstrip(" ")
+    return bool(text) and neutralise_formula(text) != text
+
+
 @dataclass(slots=True, frozen=True)
 class RoundTripRow:
     """One parsed spreadsheet row as seen by the differ.
@@ -80,6 +103,8 @@ class RoundTripRow:
     row_index: int
     position_id: str | None = None
     payload: Mapping[str, Any] = field(default_factory=dict)
+    # ``Position.version`` the sheet was exported at; ``None`` = not stamped.
+    row_version: int | None = None
 
 
 @dataclass(slots=True, frozen=True)
@@ -106,6 +131,10 @@ class RoundTripPlan:
     would_delete: list[str] = field(default_factory=list)
     # Per-row advisories (unknown id -> new, duplicate id -> new, ...).
     problems: list[dict[str, Any]] = field(default_factory=list)
+    # Normalised ids of ``updates`` whose row was exported at an older
+    # ``Position.version`` than the one stored now AND that actually differ
+    # from the stored values. Applied only on explicit consent.
+    stale_ids: set[str] = field(default_factory=set)
 
     @property
     def counts(self) -> dict[str, int]:
@@ -119,11 +148,179 @@ class RoundTripPlan:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class ApplyChoices:
+    """What the person chose in the review step, as normalised id tokens.
+
+    ``delete`` is ``None`` when the caller did not list ids (then the plain
+    ``delete_missing`` flag decides); a list, even an empty one, means only
+    those ids may be deleted.
+    """
+
+    accept: frozenset[str] = frozenset()
+    skip: frozenset[str] = frozenset()
+    delete: frozenset[str] | None = None
+    overwrite_conflicts: bool = False
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "accept": sorted(self.accept),
+            "skip": sorted(self.skip),
+            "delete": None if self.delete is None else sorted(self.delete),
+            "overwrite_conflicts": self.overwrite_conflicts,
+        }
+
+    @classmethod
+    def from_json(cls, data: Mapping[str, Any] | None) -> ApplyChoices | None:
+        if not data:
+            return None
+        delete = data.get("delete")
+        return cls(
+            accept=frozenset(data.get("accept") or ()),
+            skip=frozenset(data.get("skip") or ()),
+            delete=None if delete is None else frozenset(delete),
+            overwrite_conflicts=bool(data.get("overwrite_conflicts")),
+        )
+
+
+@dataclass(slots=True, frozen=True)
+class FieldChange:
+    """One human-facing field whose sheet value differs from the stored one."""
+
+    field: str
+    old: Any
+    new: Any
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"field": self.field, "old": self.old, "new": self.new}
+
+
+_QUANT = Decimal("0.0001")
+
+
+def _dec4(value: Any) -> Decimal | None:
+    """Quantise a numeric-ish value to 4 dp (the storage precision); ``None`` if unparsable."""
+    try:
+        d = Decimal(str(value).strip() or "0")
+        if not d.is_finite():
+            return None
+        return d.quantize(_QUANT)
+    except (InvalidOperation, ValueError, ArithmeticError):
+        return None
+
+
+def _text(value: Any) -> str:
+    """Trimmed NFC text; ``None`` is empty."""
+    return unicodedata.normalize("NFC", str(value or "")).strip()
+
+
+def _attr(stored: Any, name: str) -> Any:
+    if isinstance(stored, Mapping):
+        return stored.get(name)
+    return getattr(stored, name, None)
+
+
+def _num_out(value: Decimal) -> str:
+    """Plain trailing-zero-free string for a Decimal (display and JSON safe)."""
+    return format(value.normalize(), "f")
+
+
+def field_changes(
+    stored: Any,
+    payload: Mapping[str, Any],
+    *,
+    code_of: Callable[[Mapping[str, Any]], str] | None = None,
+) -> list[FieldChange]:
+    """Fields of ``payload`` (a prepared sheet row) that differ from ``stored``.
+
+    The single source of truth for "does this row change the position": the
+    apply step builds its update from exactly these changes, so a row listed
+    as unchanged in a preview is never written by the apply. Rules:
+
+    * text is trimmed and NFC-normalised; unit is compared case-insensitively;
+    * a blank unit / ordinal / classification cell never clears the stored
+      value (a missing cell is not an edit);
+    * numbers are compared as Decimals at the 4 dp storage precision;
+    * ``stored is None`` reports every field as changed.
+
+    Args:
+        stored: The stored position (object or mapping).
+        payload: The prepared row (description, unit, ordinal, quantity,
+            unit_rate, classification).
+        code_of: Reads the displayed classification code out of a stored
+            classification dict. Defaults to the ``code`` key.
+    """
+    out: list[FieldChange] = []
+
+    new_desc = _text(payload.get("description"))
+    old_desc = _text(_attr(stored, "description")) if stored is not None else ""
+    if stored is None or new_desc != old_desc:
+        out.append(FieldChange("description", old_desc, new_desc))
+
+    new_unit = _text(payload.get("unit"))
+    old_unit = _text(_attr(stored, "unit")) if stored is not None else ""
+    if new_unit and (stored is None or new_unit.lower() != old_unit.lower()):
+        out.append(FieldChange("unit", old_unit, new_unit))
+
+    new_ord = _text(payload.get("ordinal"))
+    old_ord = _text(_attr(stored, "ordinal")) if stored is not None else ""
+    if new_ord and (stored is None or new_ord != old_ord):
+        out.append(FieldChange("ordinal", old_ord, new_ord))
+
+    new_qty = _dec4(payload.get("quantity", 0.0))
+    old_qty = _dec4(_attr(stored, "quantity") if stored is not None else 0)
+    if new_qty is not None and (stored is None or new_qty != old_qty):
+        out.append(FieldChange("quantity", None if old_qty is None else _num_out(old_qty), _num_out(new_qty)))
+
+    new_rate = _dec4(payload.get("unit_rate", 0))
+    old_rate = _dec4(_attr(stored, "unit_rate") if stored is not None else 0)
+    if new_rate is not None and (stored is None or new_rate != old_rate):
+        out.append(FieldChange("unit_rate", None if old_rate is None else _num_out(old_rate), _num_out(new_rate)))
+
+    new_cls = payload.get("classification") or {}
+    new_code = _text(new_cls.get("code") if isinstance(new_cls, Mapping) else "")
+    if new_code:
+        old_cls = (_attr(stored, "classification") if stored is not None else None) or {}
+        reader = code_of or (lambda c: str(c.get("code", "") or ""))
+        old_code = _text(reader(old_cls)) if isinstance(old_cls, Mapping) else ""
+        if new_code != old_code:
+            out.append(FieldChange("classification", old_code, new_code))
+
+    return out
+
+
+def conflict(stored_version: int | None, row_version: int | None) -> bool:
+    """True when the sheet was exported at another row version than the stored one.
+
+    A row without a stamped version (``None``) is never a conflict.
+    """
+    if row_version is None or stored_version is None:
+        return False
+    return int(row_version) != int(stored_version)
+
+
+def parse_row_version(raw: Any) -> int | None:
+    """Row-version cell to a non-negative int, or ``None`` when blank or unreadable."""
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        text = str(raw).strip()
+        if not text:
+            return None
+        value = int(Decimal(text))
+    except (InvalidOperation, ValueError):
+        return None
+    return value if value >= 0 else None
+
+
 def diff_import_rows(
     rows: Iterable[RoundTripRow],
     current_position_ids: Iterable[str],
     *,
     delete_missing: bool = False,
+    stored_versions: Mapping[str, int] | None = None,
+    stored: Mapping[str, Any] | None = None,
+    code_of: Callable[[Mapping[str, Any]], str] | None = None,
 ) -> RoundTripPlan:
     """Resolve one re-import into create / update / delete actions.
 
@@ -136,6 +333,12 @@ def diff_import_rows(
         delete_missing: When ``True``, current positions not referenced by any
             row are queued for deletion; otherwise they are only reported via
             ``would_delete``.
+        stored_versions: ``id -> Position.version`` now. With it, an update
+            whose row carries another ``row_version`` is flagged
+            ``stale_row`` (an error problem) and listed in ``stale_ids``.
+        stored: ``id -> stored position``. When given, a stale row whose
+            values equal the stored ones is not a conflict (nothing to lose).
+        code_of: Classification-code reader, see :func:`field_changes`.
 
     Returns:
         A :class:`RoundTripPlan`. Guarantees:
@@ -202,6 +405,23 @@ def diff_import_rows(
             continue
         consumed.add(token)
         plan.updates.append(RoundTripAction(kind="update", row=row, position_id=token))
+        if stored_versions is not None and conflict(stored_versions.get(token), row.row_version):
+            if stored is not None and not field_changes(stored.get(token), row.payload, code_of=code_of):
+                continue
+            plan.stale_ids.add(token)
+            plan.problems.append(
+                {
+                    "row": row.row_index,
+                    "position_id": str(row.position_id),
+                    "severity": "error",
+                    "issue": "stale_row",
+                    "message": (
+                        "This position changed in the app after the sheet was exported "
+                        f"(version {stored_versions.get(token)}, sheet {row.row_version}); "
+                        "it is not overwritten unless you choose the Excel value."
+                    ),
+                }
+            )
 
     # Deterministic order so reporting / tests are stable.
     missing = sorted(token for token in current if token not in consumed)

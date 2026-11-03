@@ -261,3 +261,225 @@ def test_current_ids_are_normalised_before_matching() -> None:
     plan = diff_import_rows([_row(2, pid)], current_position_ids=[f"  {pid.upper()}  "])
     assert len(plan.updates) == 1
     assert plan.updates[0].position_id == pid
+
+
+# ── Review step: field changes, stale rows, formula ids ──────────────────────
+
+from decimal import Decimal  # noqa: E402
+from types import SimpleNamespace  # noqa: E402
+
+from app.modules.boq.roundtrip import (  # noqa: E402
+    ROW_VERSION_COLUMN_ALIASES,
+    ApplyChoices,
+    conflict,
+    field_changes,
+    is_formula_id,
+    parse_row_version,
+)
+
+
+def _stored(**kw: object) -> SimpleNamespace:
+    base = {
+        "description": "Concrete C30/37",
+        "unit": "m3",
+        "ordinal": "01.01",
+        "quantity": Decimal("12.5000"),
+        "unit_rate": Decimal("85.2500"),
+        "classification": {"din276": "331"},
+        "version": 2,
+    }
+    base.update(kw)
+    return SimpleNamespace(**base)
+
+
+def _payload(**kw: object) -> dict[str, object]:
+    base = {
+        "description": "Concrete C30/37",
+        "unit": "m3",
+        "ordinal": "01.01",
+        "quantity": 12.5,
+        "unit_rate": 85.25,
+        "classification": {"code": "331"},
+    }
+    base.update(kw)
+    return base
+
+
+def _code(cls: dict) -> str:
+    return str(cls.get("din276", ""))
+
+
+def test_unedited_row_has_no_changes() -> None:
+    assert field_changes(_stored(), _payload(), code_of=_code) == []
+
+
+def test_changes_are_reported_per_field_with_old_and_new() -> None:
+    changes = field_changes(_stored(), _payload(quantity=20.0, unit_rate=90), code_of=_code)
+    assert [(c.field, c.old, c.new) for c in changes] == [
+        ("quantity", "12.5", "20"),
+        ("unit_rate", "85.25", "90"),
+    ]
+
+
+def test_trim_nfc_and_case_do_not_count_as_edits() -> None:
+    stored = _stored(description="Café floor", unit="M3")
+    payload = _payload(description="  Café floor  ", unit="m3")
+    assert field_changes(stored, payload, code_of=_code) == []
+
+
+def test_decimal_precision_beyond_storage_is_not_an_edit() -> None:
+    assert field_changes(_stored(), _payload(quantity=12.50004), code_of=_code) == []
+    assert [c.field for c in field_changes(_stored(), _payload(quantity=12.5001), code_of=_code)] == ["quantity"]
+
+
+def test_blank_cells_never_clear_stored_values() -> None:
+    changes = field_changes(_stored(), _payload(unit="", ordinal="", classification={}), code_of=_code)
+    assert changes == []
+
+
+def test_classification_change_uses_the_displayed_code() -> None:
+    changes = field_changes(_stored(), _payload(classification={"code": "334"}), code_of=_code)
+    assert [(c.field, c.old, c.new) for c in changes] == [("classification", "331", "334")]
+
+
+def test_conflict_needs_a_stamp_and_a_difference() -> None:
+    assert conflict(3, 2) is True
+    assert conflict(3, 3) is False
+    assert conflict(3, None) is False
+    assert conflict(None, 3) is False
+
+
+def test_parse_row_version() -> None:
+    assert parse_row_version("4") == 4
+    assert parse_row_version(4.0) == 4
+    assert parse_row_version("") is None
+    assert parse_row_version("abc") is None
+    assert parse_row_version(-1) is None
+    assert parse_row_version(True) is None
+    assert "row version" in ROW_VERSION_COLUMN_ALIASES
+
+
+def test_stale_update_is_flagged_and_listed() -> None:
+    pid = _uuid()
+    row = RoundTripRow(row_index=2, position_id=pid, payload=_payload(quantity=99.0), row_version=1)
+    plan = diff_import_rows(
+        [row],
+        [pid],
+        stored_versions={pid: 3},
+        stored={pid: _stored()},
+        code_of=_code,
+    )
+    assert plan.stale_ids == {pid}
+    assert [p["issue"] for p in plan.problems] == ["stale_row"]
+    assert plan.problems[0]["severity"] == "error"
+    assert len(plan.updates) == 1
+
+
+def test_stale_row_with_nothing_to_lose_is_not_a_conflict() -> None:
+    pid = _uuid()
+    row = RoundTripRow(row_index=2, position_id=pid, payload=_payload(), row_version=1)
+    plan = diff_import_rows([row], [pid], stored_versions={pid: 3}, stored={pid: _stored()}, code_of=_code)
+    assert plan.stale_ids == set()
+    assert plan.problems == []
+
+
+def test_sheet_without_row_version_has_no_conflict_check() -> None:
+    pid = _uuid()
+    row = RoundTripRow(row_index=2, position_id=pid, payload=_payload(quantity=99.0))
+    plan = diff_import_rows([row], [pid], stored_versions={pid: 7}, stored={pid: _stored()}, code_of=_code)
+    assert plan.stale_ids == set()
+    assert plan.problems == []
+
+
+def test_unchanged_agrees_with_apply_update_builder() -> None:
+    from app.modules.boq.router import _prepared_row_to_update
+
+    stored = _stored()
+    for payload in (_payload(), _payload(description=" Concrete C30/37 "), _payload(quantity=12.50001)):
+        no_changes = field_changes(stored, payload, code_of=_code) == []
+        assert no_changes == (_prepared_row_to_update(payload, stored) is None)
+    edited = _payload(quantity=20.0, classification={"code": "334"})
+    update = _prepared_row_to_update(edited, stored, version=2)
+    assert update is not None
+    assert update.quantity == 20.0
+    assert update.version == 2
+    assert update.classification == {"din276": "334"}
+
+
+def test_foreign_id_with_a_version_never_updates() -> None:
+    mine, foreign = _uuid(), _uuid()
+    row = RoundTripRow(row_index=2, position_id=foreign, payload=_payload(), row_version=1)
+    plan = diff_import_rows([row], [mine], stored_versions={mine: 1}, stored={mine: _stored()})
+    assert plan.updates == []
+    assert len(plan.creates) == 1
+    assert [p["issue"] for p in plan.problems] == ["unknown_id"]
+
+
+def test_duplicate_id_second_row_is_a_create() -> None:
+    pid = _uuid()
+    rows = [
+        RoundTripRow(row_index=2, position_id=pid, payload=_payload(), row_version=3),
+        RoundTripRow(row_index=3, position_id=pid, payload=_payload(), row_version=3),
+    ]
+    plan = diff_import_rows(rows, [pid], stored_versions={pid: 3})
+    assert len(plan.updates) == 1
+    assert len(plan.creates) == 1
+    assert [p["issue"] for p in plan.problems] == ["duplicate_id"]
+
+
+def test_formula_ids_are_detected() -> None:
+    for bad in ("=1+1", "+cmd", "-2", "@SUM(A1)", "\t=x", " =x"):
+        assert is_formula_id(bad), bad
+    for ok in (None, "", "550e8400-e29b-41d4-a716-446655440000", 5):
+        assert not is_formula_id(ok), ok
+
+
+def test_apply_choices_json_round_trip() -> None:
+    choices = ApplyChoices(accept=frozenset({"a"}), skip=frozenset({"b"}), delete=frozenset({"c"}))
+    assert ApplyChoices.from_json(choices.to_json()) == choices
+    assert ApplyChoices.from_json(None) is None
+
+
+def test_decimal_comma_sheet_agrees_with_stored_values() -> None:
+    from app.modules.boq import router as boq_router
+
+    pid = "550e8400-e29b-41d4-a716-446655440000"
+    csv_bytes = (
+        "Pos.;Description;Unit;Quantity;Unit Rate;Position ID;Row Version\n"
+        f"01.01;Beton C30;m3;1.234,50;85,25;{pid};3\n"
+        "01.02;Stahl;kg;10,5;2,10;=cmd|x;1\n"
+    ).encode()
+    rows = boq_router._parse_rows_from_csv(csv_bytes)
+    prepared, errors, _warnings, _skipped = boq_router._prepare_rows(rows, {}, "x.csv")
+    assert prepared[0]["quantity"] == 1234.5
+    assert prepared[0]["unit_rate"] == 85.25
+    assert prepared[0]["row_version"] == 3
+    assert len(prepared) == 1
+    assert "formula_in_id" in errors[0]["error"]
+    stored = _stored(description="Beton C30", quantity=Decimal("1234.5"), unit_rate=Decimal("85.25"))
+    assert field_changes(stored, prepared[0], code_of=_code) == []
+
+
+def test_roundtrip_rules_word_each_finding() -> None:
+    import asyncio
+
+    from app.modules.boq.validators import evaluate_roundtrip
+
+    issues = [
+        {"kind": "formula_in_id", "row": 3},
+        {"kind": "unknown_id", "row": 4, "position_id": "x"},
+        {"kind": "duplicate_id", "row": 5, "position_id": "y"},
+        {"kind": "stale_row", "row": 6, "position_id": "z", "ordinal": "01.02"},
+        {"kind": "locked_boq"},
+    ]
+    results = asyncio.run(evaluate_roundtrip(issues, "en"))
+    assert {r.rule_id for r in results} == {
+        "boq.roundtrip.formula_in_id",
+        "boq.roundtrip.unknown_id",
+        "boq.roundtrip.duplicate_id",
+        "boq.roundtrip.stale_row",
+        "boq.roundtrip.locked_boq",
+    }
+    stale = next(r for r in results if r.rule_id == "boq.roundtrip.stale_row")
+    assert "01.02" in stale.message
+    assert all("boq_roundtrip" not in r.message for r in results)
