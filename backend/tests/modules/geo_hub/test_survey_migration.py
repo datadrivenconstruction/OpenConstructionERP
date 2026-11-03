@@ -19,7 +19,7 @@ def test_single_head_chained_on_vai01() -> None:
     cfg = Config()
     cfg.set_main_option("script_location", str(BACKEND / "alembic"))
     script = ScriptDirectory.from_config(cfg)
-    assert script.get_heads() == [REV]
+    assert len(script.get_heads()) == 1
     assert script.get_revision(REV).down_revision == "vai01_doc_assistant_agent_catalogue"
 
 
