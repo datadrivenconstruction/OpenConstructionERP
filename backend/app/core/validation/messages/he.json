@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "סכום שני צדי ההעברה חייב להיות אפס על שני סעיפי עלות שונים לפחות (הפרש: {difference}).",
+      "suggestion": "הורידו אותו סכום מסעיף עלות אחד והוסיפו אותו לאחר."
+    },
+    "below_committed": {
+      "fail": "בסעיף {line} יישאר תקציב של {budget}, פחות מה-{committed} שכבר מחויבים עליו.",
+      "suggestion": "העבירו סכום קטן יותר, או שחררו קודם התחייבויות בסעיף העלות."
+    },
+    "approved_immutable": {
+      "fail": "{code} כבר הוכרע ולא ניתן עוד לשנותו או למחוק אותו.",
+      "suggestion": "הזינו העברה או שינוי תקציב חדשים שמתקנים אותו."
+    }
   }
 }

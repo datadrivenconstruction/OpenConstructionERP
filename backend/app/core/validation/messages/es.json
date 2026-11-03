@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Los apuntes de este traspaso deben sumar cero en dos o más partidas de coste distintas (diferencia: {difference}).",
+      "suggestion": "Reste el mismo importe de una partida de coste y súmelo a otra."
+    },
+    "below_committed": {
+      "fail": "{line} quedaría con un presupuesto de {budget}, inferior a los {committed} ya comprometidos en ella.",
+      "suggestion": "Traspase un importe menor, o libere antes compromisos de la partida de coste."
+    },
+    "approved_immutable": {
+      "fail": "{code} ya está resuelto y no se puede modificar ni eliminar.",
+      "suggestion": "Introduzca un nuevo traspaso o cambio de presupuesto que lo corrija."
+    }
   }
 }

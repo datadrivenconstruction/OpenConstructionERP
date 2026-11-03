@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Bu o'tkazmaning qismlari ikki yoki undan ortiq xil xarajat moddasida yig'indisi nolga teng bo'lishi kerak (farq: {difference}).",
+      "suggestion": "Bir xarajat moddasidan xuddi shu summani ayirib, boshqasiga qo'shing."
+    },
+    "below_committed": {
+      "fail": "{line} moddasida {budget} byudjet qolar edi, bu unga nisbatan band qilingan {committed} dan kam.",
+      "suggestion": "Kamroq summani o'tkazing yoki avval xarajat moddasidagi majburiyatlarni bo'shating."
+    },
+    "approved_immutable": {
+      "fail": "{code} bo'yicha qaror qabul qilingan, uni endi o'zgartirib yoki o'chirib bo'lmaydi.",
+      "suggestion": "Uni tuzatadigan yangi o'tkazma yoki byudjet o'zgarishini kiriting."
+    }
   }
 }

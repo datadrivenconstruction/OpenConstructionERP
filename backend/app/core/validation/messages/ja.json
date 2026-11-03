@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "この振替の内訳は、異なる2つ以上の原価項目で合計がゼロになる必要があります（差額: {difference}）。",
+      "suggestion": "ある原価項目から同額を減らし、別の原価項目に加えてください。"
+    },
+    "below_committed": {
+      "fail": "{line} の予算は {budget} となり、すでに発注済みの {committed} を下回ります。",
+      "suggestion": "振替額を小さくするか、先に原価項目の発注を解除してください。"
+    },
+    "approved_immutable": {
+      "fail": "{code} は決裁済みのため、変更も削除もできません。",
+      "suggestion": "修正するには、新しい振替または予算変更を入力してください。"
+    }
   }
 }

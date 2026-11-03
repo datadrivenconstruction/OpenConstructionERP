@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Бұл аударымның бөліктері екі немесе одан көп түрлі шығын жолында қосындысы нөлге тең болуы керек (айырма: {difference}).",
+      "suggestion": "Бір шығын жолынан сол соманы алып тастап, басқасына қосыңыз."
+    },
+    "below_committed": {
+      "fail": "{line} жолында {budget} бюджет қалар еді, бұл оған қатысты келісімшартталған {committed} сомасынан аз.",
+      "suggestion": "Аз соманы аударыңыз немесе алдымен шығын жолындағы міндеттемелерді босатыңыз."
+    },
+    "approved_immutable": {
+      "fail": "{code} бойынша шешім қабылданған, оны енді өзгертуге немесе жоюға болмайды.",
+      "suggestion": "Оны түзететін жаңа аударым немесе бюджет өзгерісін енгізіңіз."
+    }
   }
 }

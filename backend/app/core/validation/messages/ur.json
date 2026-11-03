@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "اس منتقلی کے حصوں کا مجموعہ لاگت کی دو یا زیادہ مختلف مدوں پر صفر ہونا چاہیے (فرق: {difference})۔",
+      "suggestion": "ایک لاگت کی مد سے وہی رقم کم کریں اور دوسری میں شامل کریں۔"
+    },
+    "below_committed": {
+      "fail": "{line} کا بجٹ {budget} رہ جائے گا، جو اس پر پہلے سے پابند {committed} سے کم ہے۔",
+      "suggestion": "کم رقم منتقل کریں، یا پہلے لاگت کی مد پر پابندیاں آزاد کریں۔"
+    },
+    "approved_immutable": {
+      "fail": "{code} پر فیصلہ ہو چکا ہے اور اب اسے تبدیل یا حذف نہیں کیا جا سکتا۔",
+      "suggestion": "اسے درست کرنے کے لیے نئی منتقلی یا بجٹ تبدیلی درج کریں۔"
+    }
   }
 }

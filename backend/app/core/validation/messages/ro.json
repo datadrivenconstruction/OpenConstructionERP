@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Părțile acestui transfer trebuie să însumeze zero pe două sau mai multe linii de cost diferite (diferență: {difference}).",
+      "suggestion": "Scădeți aceeași sumă de la o linie de cost și adăugați-o la alta."
+    },
+    "below_committed": {
+      "fail": "{line} ar rămâne cu un buget de {budget}, mai mic decât cei {committed} deja angajați pe ea.",
+      "suggestion": "Transferați o sumă mai mică sau eliberați mai întâi angajamentele de pe linia de cost."
+    },
+    "approved_immutable": {
+      "fail": "Pentru {code} s-a luat o decizie și nu mai poate fi modificat sau șters.",
+      "suggestion": "Introduceți un nou transfer sau o modificare de buget care să îl corecteze."
+    }
   }
 }

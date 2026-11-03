@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "এই স্থানান্তরের দুই পক্ষের যোগফল দুই বা তার বেশি আলাদা খরচের খাতে শূন্য হতে হবে (পার্থক্য: {difference})।",
+      "suggestion": "একটি খরচের খাত থেকে একই পরিমাণ বাদ দিয়ে অন্যটিতে যোগ করুন।"
+    },
+    "below_committed": {
+      "fail": "{line}-এর বাজেট থাকবে {budget}, যা এর ওপর ইতিমধ্যে প্রতিশ্রুত {committed}-এর চেয়ে কম।",
+      "suggestion": "কম পরিমাণ স্থানান্তর করুন, অথবা আগে খরচের খাতের প্রতিশ্রুতি মুক্ত করুন।"
+    },
+    "approved_immutable": {
+      "fail": "{code} নিষ্পত্তি হয়ে গেছে, আর পরিবর্তন বা মুছে ফেলা যাবে না।",
+      "suggestion": "এটি সংশোধন করে এমন নতুন স্থানান্তর বা বাজেট পরিবর্তন লিপিবদ্ধ করুন।"
+    }
   }
 }

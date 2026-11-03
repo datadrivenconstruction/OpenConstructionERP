@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Les écritures de ce transfert doivent s'annuler (somme nulle) sur au moins deux lignes de coût différentes (écart : {difference}).",
+      "suggestion": "Retirez le même montant d'une ligne de coût et ajoutez-le à une autre."
+    },
+    "below_committed": {
+      "fail": "{line} resterait avec un budget de {budget}, inférieur aux {committed} déjà engagés dessus.",
+      "suggestion": "Transférez un montant plus faible, ou libérez d'abord des engagements sur la ligne de coût."
+    },
+    "approved_immutable": {
+      "fail": "{code} a fait l'objet d'une décision et ne peut plus être modifié ni supprimé.",
+      "suggestion": "Saisissez un nouveau transfert ou une modification de budget qui le corrige."
+    }
   }
 }

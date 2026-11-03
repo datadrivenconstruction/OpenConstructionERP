@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Delarna i denna överföring måste summera till noll på två eller fler olika kostnadsposter (differens: {difference}).",
+      "suggestion": "Ta samma belopp från en kostnadspost och lägg det på en annan."
+    },
+    "below_committed": {
+      "fail": "{line} skulle få en budget på {budget}, lägre än de {committed} som redan är bokade på den.",
+      "suggestion": "Flytta ett mindre belopp, eller frigör åtaganden på kostnadsposten först."
+    },
+    "approved_immutable": {
+      "fail": "{code} har beslutats och kan inte längre ändras eller tas bort.",
+      "suggestion": "Registrera en ny överföring eller budgetändring som rättar den."
+    }
   }
 }

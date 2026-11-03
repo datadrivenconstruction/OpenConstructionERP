@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "이 이체의 항목은 서로 다른 둘 이상의 원가 항목에서 합계가 0이어야 합니다 (차이: {difference}).",
+      "suggestion": "한 원가 항목에서 같은 금액을 빼서 다른 항목에 더하세요."
+    },
+    "below_committed": {
+      "fail": "{line}의 예산이 {budget}이 되어, 이미 약정된 {committed}보다 적어집니다.",
+      "suggestion": "이체 금액을 줄이거나 먼저 해당 원가 항목의 약정을 해제하세요."
+    },
+    "approved_immutable": {
+      "fail": "{code}은(는) 결정이 끝나 더 이상 변경하거나 삭제할 수 없습니다.",
+      "suggestion": "이를 바로잡는 새 이체나 예산 변경을 입력하세요."
+    }
   }
 }

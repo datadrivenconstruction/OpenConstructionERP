@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Плечі цього перенесення мають у сумі давати нуль щонайменше на двох різних статтях витрат (різниця: {difference}).",
+      "suggestion": "Спишіть одну й ту саму суму з однієї статті витрат і зарахуйте на іншу."
+    },
+    "below_committed": {
+      "fail": "У статті {line} залишиться бюджет {budget}, що менше за вже законтрактовані за нею {committed}.",
+      "suggestion": "Переносьте меншу суму або спершу зніміть зобов'язання зі статті витрат."
+    },
+    "approved_immutable": {
+      "fail": "За {code} рішення ухвалено, змінювати чи видаляти його вже не можна.",
+      "suggestion": "Введіть нове перенесення або зміну бюджету, яка його виправить."
+    }
   }
 }

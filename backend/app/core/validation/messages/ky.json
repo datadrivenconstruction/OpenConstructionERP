@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Бул которуунун бөлүктөрү эки же андан көп башка чыгым сабында суммасы нөлгө барабар болушу керек (айырма: {difference}).",
+      "suggestion": "Бир чыгым сабынан ошол сумманы алып, башка сапка кошуңуз."
+    },
+    "below_committed": {
+      "fail": "{line} сабында {budget} бюджет калмак, бул ага келишимделген {committed} суммасынан аз.",
+      "suggestion": "Азыраак сумманы которуңуз же адегенде чыгым сабындагы милдеттенмелерди бошотуңуз."
+    },
+    "approved_immutable": {
+      "fail": "{code} боюнча чечим кабыл алынган, аны мындан ары өзгөртүүгө же өчүрүүгө болбойт.",
+      "suggestion": "Аны оңдой турган жаңы которууну же бюджет өзгөрүүсүн киргизиңиз."
+    }
   }
 }

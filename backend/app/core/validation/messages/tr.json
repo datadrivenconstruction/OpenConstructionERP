@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Bu aktarımın kalemleri, iki veya daha fazla farklı maliyet kaleminde toplamda sıfır etmelidir (fark: {difference}).",
+      "suggestion": "Aynı tutarı bir maliyet kaleminden düşüp diğerine ekleyin."
+    },
+    "below_committed": {
+      "fail": "{line} kaleminin bütçesi {budget} kalırdı; bu, kalem üzerinde zaten taahhüt edilen {committed} tutarının altında.",
+      "suggestion": "Daha küçük bir tutar aktarın veya önce maliyet kalemindeki taahhütleri serbest bırakın."
+    },
+    "approved_immutable": {
+      "fail": "{code} hakkında karar verildi; artık değiştirilemez veya silinemez.",
+      "suggestion": "Bunu düzeltecek yeni bir aktarım veya bütçe değişikliği girin."
+    }
   }
 }

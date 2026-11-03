@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Ang mga bahagi ng paglilipat na ito ay dapat magkabuuang zero sa dalawa o higit pang magkaibang cost line (pagkakaiba: {difference}).",
+      "suggestion": "Bawasan ng parehong halaga ang isang cost line at idagdag sa isa pa."
+    },
+    "below_committed": {
+      "fail": "Ang {line} ay maiiwan sa budget na {budget}, mas mababa sa {committed} na committed na rito.",
+      "suggestion": "Maglipat ng mas maliit na halaga, o palayain muna ang mga commitment sa cost line."
+    },
+    "approved_immutable": {
+      "fail": "Napagdesisyunan na ang {code} at hindi na ito mababago o mabubura.",
+      "suggestion": "Maglagay ng bagong paglilipat o pagbabago sa budget na magwawasto rito."
+    }
   }
 }

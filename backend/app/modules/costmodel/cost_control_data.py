@@ -179,6 +179,11 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
 
     budget_rows = await spine.budget_aggregate_by_cost_line(project_id)
     budget = {k: v.get("planned", ZERO) for k, v in budget_rows.items()}
+    # Approved budget transfers and modifications make the revised budget.
+    from app.modules.costmodel.budget_ledger_service import approved_budget_delta
+
+    for ledger_key, ledger_delta in (await approved_budget_delta(session, project_id)).items():
+        budget[ledger_key] = budget.get(ledger_key, ZERO) + ledger_delta
     committed = await spine.committed_by_cost_line(project_id)
 
     # A cost line may carry its estimate in its own currency, like every other figure.

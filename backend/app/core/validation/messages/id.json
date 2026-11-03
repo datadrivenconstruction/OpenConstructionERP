@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Sisi-sisi pemindahan ini harus berjumlah nol pada dua pos biaya berbeda atau lebih (selisih: {difference}).",
+      "suggestion": "Kurangi jumlah yang sama dari satu pos biaya dan tambahkan ke pos lainnya."
+    },
+    "below_committed": {
+      "fail": "{line} akan tersisa dengan anggaran {budget}, kurang dari {committed} yang sudah terikat kontrak.",
+      "suggestion": "Pindahkan jumlah yang lebih kecil, atau lepaskan dulu komitmen pada pos biaya tersebut."
+    },
+    "approved_immutable": {
+      "fail": "{code} sudah diputuskan dan tidak dapat diubah atau dihapus lagi.",
+      "suggestion": "Buat pemindahan atau perubahan anggaran baru yang mengoreksinya."
+    }
   }
 }

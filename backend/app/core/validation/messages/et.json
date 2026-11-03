@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Selle ümbertõstmise kanded peavad kahel või enamal erineval kuluridadal andma summaks nulli (vahe: {difference}).",
+      "suggestion": "Võta sama summa ühelt kuluridalt maha ja lisa teisele."
+    },
+    "below_committed": {
+      "fail": "Reale {line} jääks eelarve {budget}, mis on väiksem kui sellele juba seotud {committed}.",
+      "suggestion": "Tõsta väiksem summa ümber või vabasta kõigepealt kuluridalt kohustused."
+    },
+    "approved_immutable": {
+      "fail": "{code} on otsustatud ning seda ei saa enam muuta ega kustutada.",
+      "suggestion": "Sisesta uus ümbertõstmine või eelarve muudatus, mis seda parandab."
+    }
   }
 }

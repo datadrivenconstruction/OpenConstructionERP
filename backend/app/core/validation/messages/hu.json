@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Az átcsoportosítás tételeinek összege két vagy több különböző költségtételen nulla kell legyen (eltérés: {difference}).",
+      "suggestion": "Vonja le ugyanazt az összeget az egyik költségtételből, és vigye fel egy másikra."
+    },
+    "below_committed": {
+      "fail": "{line} költségvetése {budget} maradna, ami kevesebb a rajta már lekötött {committed} összegnél.",
+      "suggestion": "Csoportosítson át kisebb összeget, vagy előbb szabadítson fel lekötéseket a költségtételen."
+    },
+    "approved_immutable": {
+      "fail": "{code} el van döntve, és már nem módosítható vagy törölhető.",
+      "suggestion": "Rögzítsen új átcsoportosítást vagy költségvetés-módosítást, amely kijavítja."
+    }
   }
 }

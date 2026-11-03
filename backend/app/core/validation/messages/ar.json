@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "يجب أن يكون مجموع طرفي هذا التحويل صفراً على بندي تكلفة مختلفين أو أكثر (الفرق: {difference}).",
+      "suggestion": "اخصم المبلغ نفسه من بند تكلفة وأضفه إلى بند آخر."
+    },
+    "below_committed": {
+      "fail": "سيتبقى للبند {line} ميزانية قدرها {budget}، وهي أقل من {committed} الملتزم بها عليه بالفعل.",
+      "suggestion": "حوّل مبلغاً أصغر، أو حرّر الالتزامات على بند التكلفة أولاً."
+    },
+    "approved_immutable": {
+      "fail": "تم البتّ في {code} ولم يعد ممكناً تعديله أو حذفه.",
+      "suggestion": "أدخل تحويلاً أو تعديلاً جديداً على الميزانية يصحّحه."
+    }
   }
 }

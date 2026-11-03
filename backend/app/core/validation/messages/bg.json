@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Записите на това прехвърляне трябва да са с нулева сума върху две или повече различни разходни позиции (разлика: {difference}).",
+      "suggestion": "Извадете същата сума от една разходна позиция и я добавете към друга."
+    },
+    "below_committed": {
+      "fail": "На {line} би останал бюджет {budget}, по-малък от вече поетите {committed}.",
+      "suggestion": "Прехвърлете по-малка сума или първо освободете поетите ангажименти по позицията."
+    },
+    "approved_immutable": {
+      "fail": "{code} е решено и вече не може да се променя или изтрива.",
+      "suggestion": "Въведете ново прехвърляне или промяна в бюджета, която го коригира."
+    }
   }
 }

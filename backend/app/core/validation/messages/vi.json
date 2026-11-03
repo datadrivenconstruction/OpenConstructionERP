@@ -1491,5 +1491,19 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "budget_ledger": {
+    "net_zero": {
+      "fail": "Các phần của lần điều chuyển này phải có tổng bằng không trên hai dòng chi phí khác nhau trở lên (chênh lệch: {difference}).",
+      "suggestion": "Trừ cùng một số tiền ở một dòng chi phí và cộng vào dòng khác."
+    },
+    "below_committed": {
+      "fail": "{line} sẽ còn ngân sách {budget}, thấp hơn {committed} đã cam kết trên dòng này.",
+      "suggestion": "Hãy điều chuyển số tiền nhỏ hơn, hoặc giải phóng các cam kết trên dòng chi phí trước."
+    },
+    "approved_immutable": {
+      "fail": "{code} đã có quyết định và không thể sửa hay xóa nữa.",
+      "suggestion": "Hãy nhập một lần điều chuyển hoặc điều chỉnh ngân sách mới để sửa lại."
+    }
   }
 }
