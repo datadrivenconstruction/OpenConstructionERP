@@ -655,8 +655,9 @@ class ChangeOrderService:
         currency = await self._resolve_currency(data.project_id, data.currency)
 
         last_exc: Exception | None = None
+        # Read once: a retry only bumps the ordinal, it does not re-count.
+        count = await self.repo.count_for_project(data.project_id)
         for attempt in range(_MAX_RETRIES):
-            count = await self.repo.count_for_project(data.project_id)
             code = f"CO-{count + 1 + attempt:03d}"
 
             order = ChangeOrder(
@@ -730,12 +731,13 @@ class ChangeOrderService:
             .scalars()
             .all()
         )
+        co_ids = {vo.reference_change_order_id for vo in vos if vo.reference_change_order_id is not None}
+        co_statuses = await self.repo.get_statuses(co_ids)
         rows: list[dict[str, Any]] = []
         for vo in vos:
             co_status: str | None = None
             if vo.reference_change_order_id is not None:
-                co = await self.repo.get_by_id(vo.reference_change_order_id)
-                co_status = co.status if co is not None else None
+                co_status = co_statuses.get(vo.reference_change_order_id)
             linked = vo.reference_change_order_id is not None and co_status not in (None, *REPLACEABLE_CO_STATUSES)
             rows.append(
                 {
