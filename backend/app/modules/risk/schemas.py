@@ -38,6 +38,8 @@ def _serialise_money(v: Decimal | None) -> str | None:
 # quantize on a stored value never raises InvalidOperation on an otherwise-
 # "valid" huge input (e.g. '1e400'). Mirrors changeorders/schemas.py:_MONEY_MAX.
 _MONEY_MAX = Decimal("1e15")
+# 100 years in days; keeps the value inside the INTEGER column and the PERT sums.
+_DAYS_MAX = 36500
 
 
 def _bound_money(v: Decimal | None) -> Decimal | None:
@@ -120,7 +122,7 @@ class RiskCreate(BaseModel):
     )
     probability: float = Field(default=0.5, ge=0.0, le=1.0)
     impact_cost: Decimal = Field(default=Decimal("0"), ge=0)
-    impact_schedule_days: int = Field(default=0, ge=0)
+    impact_schedule_days: int = Field(default=0, ge=0, le=_DAYS_MAX)
     impact_severity: str = Field(
         default="medium",
         pattern=_SEVERITY_PATTERN,
@@ -166,7 +168,7 @@ class RiskUpdate(BaseModel):
     )
     probability: float | None = Field(default=None, ge=0.0, le=1.0)
     impact_cost: Decimal | None = Field(default=None, ge=0)
-    impact_schedule_days: int | None = Field(default=None, ge=0)
+    impact_schedule_days: int | None = Field(default=None, ge=0, le=_DAYS_MAX)
     impact_severity: str | None = Field(
         default=None,
         pattern=_SEVERITY_PATTERN,

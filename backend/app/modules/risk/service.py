@@ -167,8 +167,7 @@ class RiskService:
         user_id: str | None = None,
     ) -> RiskItem:
         """Create a new risk item with auto-generated code."""
-        count = await self.repo.count_for_project(data.project_id)
-        code = f"R-{count + 1:03d}"
+        code = await self.repo.next_code(data.project_id)
 
         # Currency is data-driven: an explicit payload value wins, else it
         # is inherited from the owning project. Never a hardcoded "EUR".

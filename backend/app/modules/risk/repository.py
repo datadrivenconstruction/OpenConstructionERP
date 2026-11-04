@@ -6,15 +6,45 @@ All database queries for risk items live here.
 No business logic - pure data access.
 """
 
+import re
 import uuid
 
-from sqlalchemy import func, select, update
+from sqlalchemy import Float, case, cast, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
 from app.modules.risk.models import RiskItem
+
+# Numeric values are kept as strings in these columns, so they are cast for
+# ordering; "" on legacy rows sorts as 0 instead of failing the cast.
+_NUMERIC_SORT = ("risk_score", "probability", "impact_cost", "response_cost")
+_PLAIN_SORT = (
+    "created_at",
+    "updated_at",
+    "code",
+    "title",
+    "status",
+    "category",
+    "impact_severity",
+    "impact_schedule_days",
+    "probability_score",
+    "risk_tier",
+)
+
+
+def _order_clause(sort_by: str | None, sort_order: str) -> ClauseElement:
+    """ORDER BY for the register list; unknown fields fall back to newest first."""
+    desc = sort_order == "desc"
+    if sort_by in _NUMERIC_SORT:
+        col = getattr(RiskItem, sort_by)
+        key = case((col == "", 0), else_=cast(col, Float))
+    elif sort_by in _PLAIN_SORT:
+        key = getattr(RiskItem, sort_by)
+    else:
+        return RiskItem.created_at.desc()
+    return key.desc() if desc else key.asc()
 
 
 class RiskRepository:
@@ -51,14 +81,7 @@ class RiskRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Sorting
-        order_clause = None
-        if sort_by:
-            col = getattr(RiskItem, sort_by, None)
-            if col is not None:
-                order_clause = col.desc() if sort_order == "desc" else col.asc()
-        if order_clause is None:
-            order_clause = RiskItem.created_at.desc()
+        order_clause = _order_clause(sort_by, sort_order)
 
         stmt = base.order_by(order_clause).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
@@ -101,6 +124,16 @@ class RiskRepository:
         if item is not None:
             await self.session.delete(item)
             await self.session.flush()
+
+    async def next_code(self, project_id: uuid.UUID) -> str:
+        """Next ``R-NNN`` code: one past the highest used, so deletes never cause a repeat."""
+        codes = (await self.session.execute(select(RiskItem.code).where(RiskItem.project_id == project_id))).scalars()
+        highest = 0
+        for code in codes:
+            match = re.fullmatch(r"R-(\d+)", code or "")
+            if match:
+                highest = max(highest, int(match.group(1)))
+        return f"R-{highest + 1:03d}"
 
     async def count_for_project(self, project_id: uuid.UUID) -> int:
         """Count risk items for a project (used for code generation)."""
