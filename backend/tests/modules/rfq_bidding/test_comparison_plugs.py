@@ -243,3 +243,57 @@ async def test_rule_plugged_quote_disclosed_passes_without_plugs() -> None:
     bids = [_bid("a", {1: "100", 2: "10"}), _bid("b", {1: "100", 2: "50"})]
     results = await _run(checks.RFQPlugDisclosed(), _rfq(bids, n_lines=2))
     assert [r.passed for r in results] == [True]
+
+
+def test_lump_sum_above_its_lines_is_not_plugged_but_needs_clarification() -> None:
+    """A headline above the sum of its lines may already cover the unlisted item."""
+    bids = [
+        _bid("a", {1: "100", 2: "100"}, bid_amount="300"),  # lines 200, lump sum 300
+        _bid("b", {1: "100", 2: "100", 3: "100"}),
+        _bid("c", {1: "110", 2: "110", 3: "130"}),
+    ]
+    result = cmp.compare(_rfq(bids))
+    a = result.get("a")
+    assert a is not None
+    assert cmp.REASON_LUMP_SUM_NEEDS_CLARIFICATION in a.reasons
+    assert a.plugs_applied is False
+    assert a.plug_total == Decimal("0")
+    assert a.normalised_amount is None
+    assert "a" not in [q.bid_id for q in result.ranked]
+
+
+def test_lump_sum_matching_its_lines_is_still_plugged() -> None:
+    bids = [_bid("a", {1: "100", 2: "100"}), _bid("b", {1: "100", 2: "100", 3: "100"})]
+    a = cmp.compare(_rfq(bids)).get("a")
+    assert a is not None
+    assert a.plugs_applied is True
+    assert cmp.REASON_LUMP_SUM_NEEDS_CLARIFICATION not in a.reasons
+
+
+def test_lump_sum_only_quote_with_partial_scope_is_not_ranked_until_confirmed() -> None:
+    lump = {"id": "l", "bidder_contact_id": "l", "bid_amount": "50", "currency_code": "EUR", "status": "received"}
+    full = _bid("b", {1: "100", 2: "100", 3: "100"})
+    result = cmp.compare(_rfq([dict(lump), full]))
+    quote = result.get("l")
+    assert quote is not None
+    assert cmp.REASON_SCOPE_UNCONFIRMED in quote.reasons
+    assert [q.bid_id for q in result.ranked] == ["b"]
+
+    confirmed = cmp.compare(_rfq([dict(lump, scope_confirmed=True), full]))
+    assert [q.bid_id for q in confirmed.ranked] == ["l", "b"]
+    assert cmp.REASON_SCOPE_UNCONFIRMED not in confirmed.get("l").reasons  # type: ignore[union-attr]
+
+
+def test_estimate_rate_in_another_currency_is_not_used_as_a_plug() -> None:
+    rfq = _rfq([_bid("a", {1: "100"}), _bid("b", {1: "100", 2: "50"})], n_lines=2)
+    rfq["lines"][1]["estimate_rate"] = "7"
+    rfq["lines"][1]["estimate_currency"] = "USD"
+    plug = cmp.compare(rfq).get("a").plug_sources[0]  # type: ignore[union-attr]
+    assert plug["source"] != "estimate"
+
+
+def test_estimate_rate_in_the_basis_currency_is_used() -> None:
+    rfq = _rfq([_bid("a", {1: "100"}), _bid("b", {1: "100", 2: "50"})], n_lines=2)
+    rfq["lines"][1]["estimate_rate"] = "7"
+    rfq["lines"][1]["estimate_currency"] = "eur"
+    assert cmp.compare(rfq).get("a").plug_sources[0]["source"] == "estimate"  # type: ignore[union-attr]
