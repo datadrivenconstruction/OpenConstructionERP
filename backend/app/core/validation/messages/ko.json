@@ -1763,5 +1763,51 @@
       "fail": "결과는 {result}인데 체크리스트 {count}개 항목이 불합격입니다.",
       "suggestion": "결과를 수정하거나 불합격 항목을 검토하세요."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "하한은 0 이하, 상한은 0 이상이어야 합니다.",
+      "fail": "정확도 범위 {low} %~{high} %가 견적을 포함하지 않습니다."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "단위당 선질량을 kg으로 입력하거나 질량 기준을 해제하십시오.",
+      "fail": "단가는 {basis}당으로 지정되었지만 단위당 질량이 없거나 0입니다."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "수량을 신뢰하기 전에 도면 축척을 설정하거나 보정하십시오.",
+      "fail": "이 길이 또는 면적은 아직 기본 축척 1:1인 도면에서 측정되었습니다."
+    },
+    "price_date_stale": {
+      "suggestion": "승인 전에 견적을 다시 산정하거나 단가를 지수로 조정하십시오.",
+      "fail": "단가 기준일은 {date}로 1년 넘게 지났습니다."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "먼저 제안을 확정하십시오. 물량 내역서에는 확정된 측정만 반영됩니다.",
+      "fail": "상태가 {status}인 측정은 물량 내역서 항목에 연결할 수 없습니다."
+    },
+    "scale_missing": {
+      "suggestion": "도면 시트의 축척을 보정한 뒤 다시 측정하십시오.",
+      "fail": "{type} 유형의 측정에는 도면 축척이 없어 수량이 검증되지 않았습니다."
+    },
+    "scale_unusual": {
+      "suggestion": "축척을 확인하거나 알려진 치수로 다시 보정하십시오.",
+      "fail": "도면 축척 1:{scale}은(는) 일반적인 범위를 벗어났습니다."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "단가가 톤당인지 kg당인지 선택하거나 질량을 해제하십시오.",
+      "fail": "단위당 질량 {mass} kg이 지정되었지만 단가 기준(톤당 또는 kg당)이 없습니다."
+    },
+    "mass_needs_basis": {
+      "suggestion": "점을 충분히 두어 도형을 다시 그리거나 측정을 삭제하십시오.",
+      "fail": "{type} 유형의 측정에는 점이 {count}개뿐입니다. 최소 {needed}개가 필요합니다."
+    },
+    "unit_mismatch": {
+      "suggestion": "거리에는 길이, 면적에는 면적, 부피에는 부피 단위를 사용하십시오.",
+      "fail": "단위 {unit}은(는) {type} 유형의 측정과 맞지 않습니다."
+    },
+    "count_not_whole": {
+      "suggestion": "온전한 개수만 세고 값을 고치십시오.",
+      "fail": "수량 {value}은(는) 정수가 아닙니다."
+    }
   }
 }

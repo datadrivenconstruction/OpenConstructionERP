@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.dwg_takeoff.permissions import register_dwg_takeoff_permissions
 
     register_dwg_takeoff_permissions()
+    from app.modules.dwg_takeoff.validators import register_dwg_takeoff_validation_rules
+
+    register_dwg_takeoff_validation_rules()

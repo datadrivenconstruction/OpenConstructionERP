@@ -968,6 +968,62 @@ class DwgTakeoffService:
         self.annotation_repo = DwgAnnotationRepository(session)
         self.group_repo = DwgEntityGroupRepository(session)
 
+    # ── Validation rules (rule set ``dwg_takeoff``) ───────────────────────
+
+    @staticmethod
+    def _annotation_state(a: Any, **over: Any) -> dict[str, Any]:
+        """An annotation as the ``dwg_takeoff`` rule set reads it, with ``over`` applied on top."""
+        state = {
+            "id": str(getattr(a, "id", "") or ""),
+            "annotation_type": a.annotation_type,
+            "measurement_value": a.measurement_value,
+            "measurement_unit": a.measurement_unit,
+            "scale_override": a.scale_override,
+            "linked_boq_position_id": a.linked_boq_position_id,
+        }
+        state.update(over)
+        return state
+
+    @staticmethod
+    def _drawing_state(d: Any, **over: Any) -> dict[str, Any]:
+        state = {
+            "id": str(getattr(d, "id", "") or ""),
+            "scale_denominator": d.scale_denominator,
+            "scale_mode": d.scale_mode,
+        }
+        state.update(over)
+        return state
+
+    async def _gate(
+        self,
+        project_id: uuid.UUID,
+        operation: str,
+        *,
+        annotation: dict[str, Any] | None = None,
+        drawing: dict[str, Any] | None = None,
+        before: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Run the ``dwg_takeoff`` rules; errors answer a coded 422, warnings are returned."""
+        from app.core.validation.estimating_rules import gate_rules  # noqa: PLC0415
+        from app.core.validation.quality_rules import warning_findings  # noqa: PLC0415
+        from app.modules.dwg_takeoff.validators import (  # noqa: PLC0415
+            DWG_TAKEOFF_RULE_SET,
+            register_dwg_takeoff_validation_rules,
+        )
+
+        data = {"annotation": annotation or {}, "drawing": drawing or {}}
+        report = await gate_rules(
+            DWG_TAKEOFF_RULE_SET,
+            data,
+            target_type="dwg_annotation" if annotation else "dwg_drawing",
+            target_id=str((annotation or drawing or {}).get("id", "")),
+            project_id=str(project_id),
+            operation=operation,
+            before=before,
+            register=register_dwg_takeoff_validation_rules,
+        )
+        return warning_findings(report)
+
     # ── Drawing upload & processing ─────────────────────────────────────
 
     async def upload_drawing(
@@ -1912,12 +1968,19 @@ class DwgTakeoffService:
         drawing is opened on a tablet.
         """
         drawing = await self.get_drawing(drawing_id)
+        findings = await self._gate(
+            drawing.project_id,
+            "scale",
+            drawing=self._drawing_state(drawing, scale_denominator=scale_denominator, scale_mode=scale_mode),
+            before={"annotation": {}, "drawing": self._drawing_state(drawing)},
+        )
         await self.drawing_repo.update_fields(
             drawing_id,
             scale_denominator=scale_denominator,
             scale_mode=scale_mode,
         )
         await self.session.refresh(drawing)
+        drawing.validation_warnings = findings  # type: ignore[attr-defined]
         return drawing
 
     async def delete_drawing(self, drawing_id: uuid.UUID) -> None:
@@ -2652,7 +2715,7 @@ class DwgTakeoffService:
     ) -> DwgAnnotation:
         """Create a new annotation on a drawing."""
         # Verify drawing exists
-        await self.get_drawing(data.drawing_id)
+        drawing = await self.get_drawing(data.drawing_id)
 
         item = DwgAnnotation(
             project_id=data.project_id,
@@ -2674,7 +2737,14 @@ class DwgTakeoffService:
             created_by=user_id,
             metadata_=data.metadata,
         )
+        findings = await self._gate(
+            data.project_id,
+            "create",
+            annotation=self._annotation_state(item),
+            drawing=self._drawing_state(drawing),
+        )
         item = await self.annotation_repo.create(item)
+        item.validation_warnings = findings  # type: ignore[attr-defined]
         logger.info(
             "Annotation created: %s type=%s drawing=%s",
             item.id,
@@ -2724,8 +2794,19 @@ class DwgTakeoffService:
         if not fields:
             return item
 
+        drawing = await self.get_drawing(item.drawing_id)
+        before = self._annotation_state(item)
+        after = self._annotation_state(item, **{k: v for k, v in fields.items() if k in before})
+        findings = await self._gate(
+            item.project_id,
+            "update",
+            annotation=after,
+            drawing=self._drawing_state(drawing),
+            before={"annotation": before, "drawing": self._drawing_state(drawing)},
+        )
         await self.annotation_repo.update_fields(annotation_id, **fields)
         await self.session.refresh(item)
+        item.validation_warnings = findings  # type: ignore[attr-defined]
 
         logger.info("Annotation updated: %s (fields=%s)", annotation_id, list(fields.keys()))
         return item
@@ -2767,8 +2848,17 @@ class DwgTakeoffService:
 
             await BOQService(self.session)._ensure_boq_writable(boq.id)  # noqa: SLF001 - the BOQ lock guard
 
+        drawing = await self.get_drawing(item.drawing_id)
+        findings = await self._gate(
+            item.project_id,
+            "link_boq",
+            annotation=self._annotation_state(item, linked_boq_position_id=position_id),
+            drawing=self._drawing_state(drawing),
+            before={"annotation": self._annotation_state(item), "drawing": self._drawing_state(drawing)},
+        )
         await self.annotation_repo.update_fields(annotation_id, linked_boq_position_id=position_id)
         await self.session.refresh(item)
+        item.validation_warnings = findings  # type: ignore[attr-defined]
 
         logger.info("Annotation %s linked to BOQ position %s", annotation_id, position_id)
 

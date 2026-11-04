@@ -1763,5 +1763,51 @@
       "fail": "Resultatet är {result}, men {count} checklistpunkter underkändes.",
       "suggestion": "Rätta resultatet eller granska de underkända punkterna."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Den nedre gränsen måste vara 0 eller lägre och den övre 0 eller högre.",
+      "fail": "Noggrannhetsintervallet {low} % till {high} % omfattar inte kalkylen."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Ange löpande massa i kg per enhet, eller ta bort massgrunden.",
+      "fail": "Priset anges per {basis}, men massan per enhet saknas eller är noll."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Ställ in eller kalibrera ritningens skala innan du litar på mängden.",
+      "fail": "Den här längden eller ytan är mätt på en ritning som fortfarande har standardskalan 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Prissätt kalkylen igen eller indexera priserna innan den godkänns.",
+      "fail": "Priserna är daterade {date}, mer än ett år gamla."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Bekräfta förslaget först; bara en bekräftad mätning matar mängdförteckningen.",
+      "fail": "En mätning med status {status} kan inte kopplas till en post i mängdförteckningen."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrera arkets skala och mät igen.",
+      "fail": "Mätningen av typen {type} saknar ritningsskala, så mängden är inte kontrollerad."
+    },
+    "scale_unusual": {
+      "suggestion": "Kontrollera skalan eller kalibrera den med ett känt mått.",
+      "fail": "Ritningsskalan 1:{scale} ligger utanför det vanliga intervallet."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Välj om priset gäller per ton eller per kg, eller ta bort massan.",
+      "fail": "En massa på {mass} kg per enhet anges, men inte prisgrunden (per ton eller per kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Rita formen igen med tillräckligt många punkter, eller ta bort mätningen.",
+      "fail": "En mätning av typen {type} har {count} punkter; minst {needed} krävs."
+    },
+    "unit_mismatch": {
+      "suggestion": "Använd en längdenhet för avstånd, en areaenhet för ytor och en volymenhet för volymer.",
+      "fail": "Enheten {unit} passar inte för en mätning av typen {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Räkna bara hela enheter och rätta värdet.",
+      "fail": "Ett antal på {value} är inte ett heltal."
+    }
   }
 }

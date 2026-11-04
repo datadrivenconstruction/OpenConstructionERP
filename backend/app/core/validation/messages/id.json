@@ -1763,5 +1763,51 @@
       "fail": "Hasilnya {result}, tetapi {count} butir daftar periksa tidak lulus.",
       "suggestion": "Perbaiki hasilnya atau tinjau butir yang tidak lulus."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Batas bawah harus 0 atau kurang dan batas atas 0 atau lebih.",
+      "fail": "Rentang akurasi {low} % sampai {high} % tidak mengapit estimasi."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Isi massa linear dalam kg per satuan, atau hapus dasar massa.",
+      "fail": "Harga dinyatakan per {basis}, tetapi massa per satuan tidak ada atau nol."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Atur atau kalibrasi skala gambar sebelum mengandalkan kuantitas.",
+      "fail": "Panjang atau luas ini diukur pada gambar yang masih berskala bawaan 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Hitung ulang harga estimasi atau indeksasi harga sebelum disahkan.",
+      "fail": "Harga bertanggal {date}, lebih dari setahun lalu."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Konfirmasi usulan terlebih dahulu; hanya pengukuran terkonfirmasi yang mengisi daftar kuantitas.",
+      "fail": "Pengukuran berstatus {status} tidak dapat dikaitkan dengan item daftar kuantitas."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrasi skala lembar gambar lalu ukur ulang.",
+      "fail": "Pengukuran bertipe {type} tidak punya skala gambar, sehingga kuantitasnya belum terverifikasi."
+    },
+    "scale_unusual": {
+      "suggestion": "Periksa skala atau kalibrasi ulang dari dimensi yang diketahui.",
+      "fail": "Skala gambar 1:{scale} di luar rentang yang lazim."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Pilih apakah harga per ton atau per kg, atau hapus massanya.",
+      "fail": "Massa {mass} kg per satuan dicantumkan, tetapi dasar harga (per ton atau per kg) tidak."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Gambar ulang bentuk dengan titik yang cukup, atau hapus pengukuran.",
+      "fail": "Pengukuran bertipe {type} memiliki {count} titik; diperlukan minimal {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Gunakan satuan panjang untuk jarak, satuan luas untuk luasan, dan satuan volume untuk volume.",
+      "fail": "Satuan {unit} tidak cocok untuk pengukuran bertipe {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Hitung hanya unit utuh dan perbaiki nilainya.",
+      "fail": "Hitungan {value} bukan bilangan bulat."
+    }
   }
 }

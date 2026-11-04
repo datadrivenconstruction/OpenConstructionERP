@@ -280,6 +280,12 @@ async def insert_batch(
         if row.code not in existing
     ]
     if items:
+        from app.modules.costs.service import _item_rule_row, gate_cost_items  # noqa: PLC0415
+
+        # A list the platform imports is not refused over one row: the findings are logged and the rows go in.
+        findings = await gate_cost_items([_item_rule_row(i) for i in items], "price_list_import", warn_only=True)
+        if findings:
+            logger.info("Price list batch: %d cost rule findings in %d rows", len(findings), len(items))
         session.add_all(items)
         await session.flush()
         for item in items:

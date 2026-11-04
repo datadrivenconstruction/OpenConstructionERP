@@ -1510,6 +1510,52 @@ class TakeoffService:
         self.measurement_repo = MeasurementRepository(session)
         self.plan_read_repo = AiTakeoffRunRepository(session)
 
+    # ── Validation rules (rule set ``takeoff``) ───────────────────────────
+
+    @staticmethod
+    def _rule_state(m: Any, **over: Any) -> dict[str, Any]:
+        """A measurement as the ``takeoff`` rule set reads it, with ``over`` applied on top."""
+        state = {
+            "id": str(getattr(m, "id", "") or ""),
+            "type": m.type,
+            "review_status": getattr(m, "review_status", None) or "confirmed",
+            "measurement_value": m.measurement_value,
+            "measurement_unit": m.measurement_unit,
+            "volume": m.volume,
+            "points": m.points or [],
+            "scale_pixels_per_unit": m.scale_pixels_per_unit,
+            "linked_boq_position_id": m.linked_boq_position_id,
+        }
+        state.update(over)
+        return state
+
+    async def _gate(
+        self,
+        state: dict[str, Any],
+        project_id: uuid.UUID,
+        operation: str,
+        *,
+        before: dict[str, Any] | None = None,
+        warn_only: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Run the ``takeoff`` rules; errors answer a coded 422, the rest is returned as findings."""
+        from app.core.validation.estimating_rules import all_findings, gate_rules  # noqa: PLC0415
+        from app.core.validation.quality_rules import warning_findings  # noqa: PLC0415
+        from app.modules.takeoff.validators import TAKEOFF_RULE_SET, register_takeoff_validation_rules  # noqa: PLC0415
+
+        report = await gate_rules(
+            TAKEOFF_RULE_SET,
+            {"measurement": state},
+            target_type="takeoff_measurement",
+            target_id=state.get("id", ""),
+            project_id=str(project_id),
+            operation=operation,
+            before={"measurement": before} if before is not None else None,
+            warn_only=warn_only,
+            register=register_takeoff_validation_rules,
+        )
+        return all_findings(report) if warn_only else warning_findings(report)
+
     async def upload_document(
         self,
         *,
@@ -2145,7 +2191,9 @@ class TakeoffService:
             created_by=created_by,
         )
         await self._stamp_drawing(measurement)
+        findings = await self._gate(self._rule_state(measurement), data.project_id, "create")
         measurement = await self.measurement_repo.create(measurement)
+        measurement.validation_warnings = findings  # type: ignore[attr-defined]
         logger.info(
             "Measurement created: %s type=%s project=%s value=%s (client=%s)",
             measurement.id,
@@ -2300,6 +2348,10 @@ class TakeoffService:
 
         for row in rows:
             await self._stamp_drawing(row)
+            # Detector output is a proposal queue, not a record: findings are logged and the reviewer decides.
+            noted = await self._gate(self._rule_state(row), row.project_id, "detector_proposal", warn_only=True)
+            if noted:
+                logger.info("Detector proposal on page %s: %d takeoff rule findings", page, len(noted))
         stored = await self.measurement_repo.create_bulk(rows)
         return [{**cand, "measurement_id": str(row.id)} for cand, row in zip(candidates, stored, strict=True)]
 
@@ -2677,10 +2729,17 @@ class TakeoffService:
         # blows up inside the update compiler rather than writing the column.
         fields["metadata_"] = meta
 
+        findings: list[dict[str, Any]] = []
+        if action == "accept":
+            # Confirming makes the row a billed quantity, so it is judged as one; a rejection leaves the queue.
+            after = self._rule_state(item, **{k: v for k, v in fields.items() if k in ("points", "measurement_value")})
+            after["review_status"] = "confirmed"
+            findings = await self._gate(after, item.project_id, "review", before=self._rule_state(item))
         await self.measurement_repo.update_fields(measurement_id, **fields)
         updated = await self.measurement_repo.get_by_id(measurement_id)
         if updated is None:  # pragma: no cover - the row was just written
             raise HTTPException(status_code=404, detail="Measurement not found")
+        updated.validation_warnings = findings  # type: ignore[attr-defined]
         return updated
 
     async def update_measurement(
@@ -2841,8 +2900,12 @@ class TakeoffService:
         if not fields:
             return item
 
+        before = self._rule_state(item)
+        after = self._rule_state(item, **{k: v for k, v in fields.items() if k in before})
+        findings = await self._gate(after, item.project_id, "update", before=before)
         await self.measurement_repo.update_fields(measurement_id, **fields)
         await self.session.refresh(item)
+        item.validation_warnings = findings  # type: ignore[attr-defined]
 
         logger.info("Measurement updated: %s (fields=%s)", measurement_id, list(fields.keys()))
         return item
@@ -2929,9 +2992,15 @@ class TakeoffService:
             )
             for data in items
         ]
+        findings_by_row: list[list[dict[str, Any]]] = []
         for measurement in measurements:
             await self._stamp_drawing(measurement)
+            findings_by_row.append(
+                await self._gate(self._rule_state(measurement), measurement.project_id, "bulk_create")
+            )
         result = await self.measurement_repo.create_bulk(measurements)
+        for measurement, findings in zip(result, findings_by_row, strict=True):
+            measurement.validation_warnings = findings  # type: ignore[attr-defined]
         logger.info("Bulk created %d measurements (server-side recomputed)", len(result))
         return result
 
@@ -3030,8 +3099,15 @@ class TakeoffService:
             from app.modules.boq.service import BOQService  # noqa: PLC0415 - avoid import cycle
 
             await BOQService(self.session)._ensure_boq_writable(boq.id)  # noqa: SLF001 - the BOQ lock guard
+        findings = await self._gate(
+            self._rule_state(item, linked_boq_position_id=boq_position_id),
+            item.project_id,
+            "link_boq",
+            before=self._rule_state(item),
+        )
         await self.measurement_repo.update_fields(measurement_id, linked_boq_position_id=boq_position_id)
         await self.session.refresh(item)
+        item.validation_warnings = findings  # type: ignore[attr-defined]
         logger.info(
             "Measurement %s linked to BOQ position %s",
             measurement_id,
@@ -3251,6 +3327,14 @@ class TakeoffService:
                 position_meta["pdf_document_id"] = doc.filename
                 position_meta["pdf_takeoff_document_id"] = str(doc.id)
 
+        # The new line will be linked to this measurement, so the link is judged before the line is written.
+        findings = await self._gate(
+            self._rule_state(measurement, linked_boq_position_id="new"),
+            measurement.project_id,
+            "create_boq_position",
+            before=self._rule_state(measurement),
+        )
+        measurement.validation_warnings = findings  # type: ignore[attr-defined]
         position = await boq_service.add_position(
             PositionCreate(
                 boq_id=boq.id,

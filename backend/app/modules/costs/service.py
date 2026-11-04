@@ -57,6 +57,76 @@ from app.modules.costs.schemas import (
 logger = logging.getLogger(__name__)
 
 
+def _rule_row(
+    *,
+    code: str,
+    unit: str,
+    rate: object,
+    currency: str,
+    mass_per_unit: str,
+    mass_basis: str,
+    components: list | None,
+    metadata: dict | None,
+) -> dict[str, Any]:
+    """One cost item as the ``costs`` rule set reads it."""
+    return {
+        "code": code,
+        "unit": unit,
+        "rate": rate,
+        "currency": currency,
+        "mass_per_unit": mass_per_unit,
+        "mass_basis": mass_basis,
+        "components": components or [],
+        "metadata": metadata or {},
+    }
+
+
+def _item_rule_row(item: CostItem) -> dict[str, Any]:
+    return _rule_row(
+        code=item.code,
+        unit=item.unit,
+        rate=item.rate,
+        currency=item.currency,
+        mass_per_unit=item.mass_per_unit,
+        mass_basis=item.mass_basis,
+        components=item.components,
+        metadata=item.metadata_,
+    )
+
+
+async def gate_cost_items(
+    rule_rows: list[dict[str, Any]],
+    operation: str,
+    *,
+    before: list[dict[str, Any]] | None = None,
+    warn_only: bool = False,
+) -> list[dict[str, Any]]:
+    """Run the ``costs`` rule set over rows about to be stored; errors answer a coded 422.
+
+    Returns the findings that did not block (warnings, or every finding when ``warn_only``).
+    """
+    from app.core.validation.estimating_rules import all_findings, gate_rules  # noqa: PLC0415
+    from app.core.validation.quality_rules import warning_findings  # noqa: PLC0415
+    from app.modules.costs.validators import COSTS_RULE_SET, register_costs_validation_rules  # noqa: PLC0415
+
+    report = await gate_rules(
+        COSTS_RULE_SET,
+        {"cost_items": rule_rows},
+        target_type="cost_item",
+        target_id=str(rule_rows[0].get("code", "")) if len(rule_rows) == 1 else "",
+        project_id=None,
+        operation=operation,
+        before={"cost_items": before} if before is not None else None,
+        warn_only=warn_only,
+        register=register_costs_validation_rules,
+    )
+    return all_findings(report) if warn_only else warning_findings(report)
+
+
+def _attach_findings(item: CostItem, findings: list[dict[str, Any]]) -> None:
+    item.validation_warnings = [f for f in findings if f["element_ref"] in ("", item.code)]  # type: ignore[attr-defined]
+
+
 def _currency_for_region(currency: str | None, region: str | None) -> str:
     """Return the currency a cost item should be stored with.
 
@@ -570,6 +640,21 @@ class CostItemService:
                 currency = catalog.currency
         currency = _currency_for_region(currency, data.region)
 
+        findings = await gate_cost_items(
+            [
+                _rule_row(
+                    code=data.code,
+                    unit=data.unit,
+                    rate=data.rate,
+                    currency=currency,
+                    mass_per_unit=data.mass_per_unit,
+                    mass_basis=data.mass_basis,
+                    components=data.components,
+                    metadata=data.metadata,
+                )
+            ],
+            "create",
+        )
         item = CostItem(
             code=data.code,
             description=data.description,
@@ -588,6 +673,7 @@ class CostItemService:
             metadata_=data.metadata,
         )
         item = await self.repo.create(item)
+        _attach_findings(item, findings)
 
         await _safe_publish(
             "costs.item.created",
@@ -897,7 +983,13 @@ class CostItemService:
                     detail=f"Cost item with code '{new_code}' already exists for region '{region_label}'",
                 )
 
+        findings: list[dict[str, Any]] = []
         if fields:
+            before = _item_rule_row(item)
+            after = {**before, **{k: v for k, v in fields.items() if k in before}}
+            if "metadata_" in fields:
+                after["metadata"] = fields["metadata_"]
+            findings = await gate_cost_items([after], "update", before=[before])
             await self.repo.update_fields(item_id, **fields)
 
         updated = await self.repo.get_by_id(item_id)
@@ -906,6 +998,7 @@ class CostItemService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cost item not found",
             )
+        _attach_findings(updated, findings)
 
         await _safe_publish(
             "costs.item.updated",
@@ -1008,7 +1101,10 @@ class CostItemService:
             created.append(item)
 
         if created:
+            findings = await gate_cost_items([_item_rule_row(i) for i in created], "bulk_import")
             created = await self.repo.bulk_create(created)
+            for item in created:
+                _attach_findings(item, findings)
 
         payload: dict[str, object] = {
             "created_count": len(created),

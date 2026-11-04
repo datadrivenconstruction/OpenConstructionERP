@@ -1763,5 +1763,51 @@
       "fail": "O resultado é {result}, mas {count} itens da lista de verificação foram reprovados.",
       "suggestion": "Corrija o resultado ou reveja os itens reprovados."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "O limite inferior deve ser 0 ou menos e o superior 0 ou mais.",
+      "fail": "A faixa de precisão de {low} % a {high} % não abrange a estimativa."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Introduza a massa linear em kg por unidade ou remova a base de massa.",
+      "fail": "O preço é dado por {basis}, mas a massa por unidade falta ou é zero."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Defina ou calibre a escala do desenho antes de confiar na quantidade.",
+      "fail": "Este comprimento ou área foi medido num desenho ainda na escala predefinida 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Reprecifique a estimativa ou atualize os preços antes de a aprovar.",
+      "fail": "Os preços são de {date}, há mais de um ano."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Confirme primeiro a proposta; só uma medição confirmada alimenta o orçamento.",
+      "fail": "Uma medição no estado {status} não pode ser ligada a uma posição do orçamento."
+    },
+    "scale_missing": {
+      "suggestion": "Calibre a escala da folha e meça de novo.",
+      "fail": "A medição do tipo {type} não tem escala do desenho, por isso a quantidade não está verificada."
+    },
+    "scale_unusual": {
+      "suggestion": "Verifique a escala ou calibre-a com uma cota conhecida.",
+      "fail": "A escala do desenho 1:{scale} está fora do intervalo habitual."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Escolha se o preço é por tonelada ou por kg, ou remova a massa.",
+      "fail": "Foi indicada uma massa de {mass} kg por unidade, mas não a base do preço (por tonelada ou por kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Desenhe a forma de novo com pontos suficientes ou elimine a medição.",
+      "fail": "Uma medição do tipo {type} tem {count} pontos; precisa de pelo menos {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Use uma unidade de comprimento para distâncias, de área para áreas e de volume para volumes.",
+      "fail": "A unidade {unit} não serve para uma medição do tipo {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Conte apenas unidades inteiras e corrija o valor.",
+      "fail": "Uma contagem de {value} não é um número inteiro."
+    }
   }
 }

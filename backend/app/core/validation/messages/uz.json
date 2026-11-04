@@ -1763,5 +1763,51 @@
       "fail": "Natija {result}, lekin tekshiruv roʻyxatining {count} bandi oʻtmadi.",
       "suggestion": "Natijani toʻgʻrilang yoki oʻtmagan bandlarni koʻrib chiqing."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Pastki chegara 0 yoki undan kam, yuqori chegara 0 yoki undan koʻp boʻlishi kerak.",
+      "fail": "{low} % dan {high} % gacha aniqlik oraligʻi smetani qamrab olmaydi."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Bir birlikka toʻgʻri keladigan chiziqli massani kg da kiriting yoki massa asosini olib tashlang.",
+      "fail": "Narx {basis} uchun berilgan, ammo bir birlikning massasi yoʻq yoki nolga teng."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Hajmga tayanishdan oldin chizma masshtabini oʻrnating yoki kalibrlang.",
+      "fail": "Bu uzunlik yoki maydon hamon standart 1:1 masshtabdagi chizmada oʻlchangan."
+    },
+    "price_date_stale": {
+      "suggestion": "Tasdiqlashdan oldin smetani qayta baholang yoki narxlarni indekslang.",
+      "fail": "Narxlar {date} sanasiga tegishli, yaʼni bir yildan koʻp avval."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Avval taklifni tasdiqlang; hajmlar qaydnomasiga faqat tasdiqlangan oʻlchov tushadi.",
+      "fail": "{status} holatidagi oʻlchovni hajmlar qaydnomasining bandiga bogʻlab boʻlmaydi."
+    },
+    "scale_missing": {
+      "suggestion": "Varaq masshtabini kalibrlang va qayta oʻlchang.",
+      "fail": "{type} turidagi oʻlchovda chizma masshtabi yoʻq, shuning uchun uning hajmi tekshirilmagan."
+    },
+    "scale_unusual": {
+      "suggestion": "Masshtabni tekshiring yoki maʼlum oʻlcham boʻyicha qayta kalibrlang.",
+      "fail": "Chizma masshtabi 1:{scale} odatiy oraliqdan tashqarida."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Narx tonnagami yoki kg gami, shuni tanlang yoki massani olib tashlang.",
+      "fail": "Bir birlikka {mass} kg massa koʻrsatilgan, ammo narx asosi (tonnaga yoki kg ga) koʻrsatilmagan."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Shaklni yetarli nuqta bilan qayta chizing yoki oʻlchovni oʻchiring.",
+      "fail": "{type} turidagi oʻlchovda {count} ta nuqta bor; kamida {needed} ta kerak."
+    },
+    "unit_mismatch": {
+      "suggestion": "Masofa uchun uzunlik, maydon uchun maydon, hajm uchun hajm birligidan foydalaning.",
+      "fail": "{unit} birligi {type} turidagi oʻlchovga mos kelmaydi."
+    },
+    "count_not_whole": {
+      "suggestion": "Faqat butun donalarni sanang va qiymatni tuzating.",
+      "fail": "{value} soni butun son emas."
+    }
   }
 }

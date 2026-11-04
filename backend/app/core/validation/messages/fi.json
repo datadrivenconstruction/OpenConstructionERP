@@ -1763,5 +1763,51 @@
       "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa hylättiin.",
       "suggestion": "Korjaa tulos tai tarkista hylätyt kohdat."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Alarajan on oltava 0 tai pienempi ja ylärajan 0 tai suurempi.",
+      "fail": "Tarkkuusväli {low} % - {high} % ei kata kustannusarviota."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Anna juoksumassa kg yksikköä kohti tai poista massaperuste.",
+      "fail": "Hinta on ilmoitettu yksikköä {basis} kohti, mutta yksikkömassa puuttuu tai on nolla."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Aseta tai kalibroi piirustuksen mittakaava ennen kuin luotat määrään.",
+      "fail": "Tämä pituus tai ala on mitattu piirustuksesta, jossa on yhä oletusmittakaava 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Hinnoittele arvio uudelleen tai indeksoi hinnat ennen hyväksymistä.",
+      "fail": "Hinnat ovat päivätty {date}, yli vuoden takaa."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Vahvista ehdotus ensin; määräluetteloa syöttää vain vahvistettu mittaus.",
+      "fail": "Tilassa {status} olevaa mittausta ei voi liittää määräluettelon nimikkeeseen."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibroi arkin mittakaava ja mittaa uudelleen.",
+      "fail": "Tyypin {type} mittauksella ei ole piirustuksen mittakaavaa, joten määrää ei ole tarkistettu."
+    },
+    "scale_unusual": {
+      "suggestion": "Tarkista mittakaava tai kalibroi se tunnetun mitan avulla.",
+      "fail": "Piirustuksen mittakaava 1:{scale} on tavallisen vaihteluvälin ulkopuolella."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Valitse, onko hinta tonnia vai kg kohti, tai poista massa.",
+      "fail": "Massa {mass} kg yksikköä kohti on annettu, mutta hinnan perustetta (tonnia tai kg kohti) ei."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Piirrä muoto uudelleen riittävällä pistemäärällä tai poista mittaus.",
+      "fail": "Tyypin {type} mittauksessa on {count} pistettä; tarvitaan vähintään {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Käytä pituusyksikköä etäisyyksille, pinta-alayksikköä aloille ja tilavuusyksikköä tilavuuksille.",
+      "fail": "Yksikkö {unit} ei sovi tyypin {type} mittaukseen."
+    },
+    "count_not_whole": {
+      "suggestion": "Laske vain kokonaisia kappaleita ja korjaa arvo.",
+      "fail": "Lukumäärä {value} ei ole kokonaisluku."
+    }
   }
 }

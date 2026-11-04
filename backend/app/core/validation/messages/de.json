@@ -1763,5 +1763,51 @@
       "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte wurden nicht bestanden.",
       "suggestion": "Ergebnis korrigieren oder die nicht bestandenen Prüfpunkte kontrollieren."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Die untere Grenze muss 0 oder kleiner, die obere Grenze 0 oder größer sein.",
+      "fail": "Die Genauigkeitsspanne {low} % bis {high} % schließt die Kalkulation nicht ein."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Die laufende Masse in kg je Einheit eintragen oder die Massenbasis löschen.",
+      "fail": "Der Preis gilt je {basis}, aber die Masse je Einheit fehlt oder ist null."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Den Planmaßstab einstellen oder kalibrieren, bevor man sich auf die Menge verlässt.",
+      "fail": "Diese Länge oder Fläche wurde auf einem Plan gemessen, der noch auf dem Standardmaßstab 1:1 steht."
+    },
+    "price_date_stale": {
+      "suggestion": "Die Kalkulation neu bepreisen oder die Preise fortschreiben, bevor sie freigegeben wird.",
+      "fail": "Die Preise stammen vom {date}, also von vor mehr als einem Jahr."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Den Vorschlag zuerst bestätigen; nur bestätigte Messungen speisen das Leistungsverzeichnis.",
+      "fail": "Eine Messung mit Status {status} kann nicht mit einer Leistungsverzeichnis-Position verknüpft werden."
+    },
+    "scale_missing": {
+      "suggestion": "Den Maßstab des Plans kalibrieren und erneut messen.",
+      "fail": "Die Messung vom Typ {type} hat keinen Planmaßstab, ihre Menge ist daher ungeprüft."
+    },
+    "scale_unusual": {
+      "suggestion": "Den Maßstab prüfen oder anhand eines bekannten Maßes neu kalibrieren.",
+      "fail": "Der Planmaßstab 1:{scale} liegt außerhalb des üblichen Bereichs."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Festlegen, ob der Preis je Tonne oder je kg gilt, oder die Masse löschen.",
+      "fail": "Eine Masse von {mass} kg je Einheit ist angegeben, aber nicht die Preisbasis (je Tonne oder je kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Die Form mit genügend Punkten neu zeichnen oder die Messung löschen.",
+      "fail": "Eine Messung vom Typ {type} hat {count} Punkte; mindestens {needed} sind nötig."
+    },
+    "unit_mismatch": {
+      "suggestion": "Für Strecken eine Längeneinheit, für Flächen eine Flächeneinheit und für Volumen eine Volumeneinheit verwenden.",
+      "fail": "Die Einheit {unit} passt nicht zu einer Messung vom Typ {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Nur ganze Stücke zählen und den Wert korrigieren.",
+      "fail": "Eine Anzahl von {value} ist keine ganze Zahl."
+    }
   }
 }

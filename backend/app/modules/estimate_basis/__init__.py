@@ -18,3 +18,6 @@ async def on_startup() -> None:
     from app.modules.estimate_basis.permissions import register_estimate_basis_permissions
 
     register_estimate_basis_permissions()
+    from app.modules.estimate_basis.validators import register_estimate_basis_validation_rules
+
+    register_estimate_basis_validation_rules()

@@ -1763,5 +1763,51 @@
       "fail": "Resultatet er {result}, men {count} sjekklistepunkter er ikke bestått.",
       "suggestion": "Rett resultatet, eller gå gjennom punktene som ikke er bestått."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Nedre grense må være 0 eller lavere og øvre grense 0 eller høyere.",
+      "fail": "Nøyaktighetsintervallet {low} % til {high} % omslutter ikke overslaget."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Oppgi løpende masse i kg pr. enhet, eller fjern massegrunnlaget.",
+      "fail": "Prisen er oppgitt pr. {basis}, men massen pr. enhet mangler eller er null."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Sett eller kalibrer tegningens målestokk før du stoler på mengden.",
+      "fail": "Denne lengden eller dette arealet er målt på en tegning som fortsatt står på standard målestokk 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Prisfastsett overslaget på nytt, eller indekser prisene før det godkjennes.",
+      "fail": "Prisene er datert {date}, mer enn ett år gamle."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Bekreft forslaget først; bare en bekreftet måling mater mengdeberegningen.",
+      "fail": "En måling med status {status} kan ikke knyttes til en post i mengdeberegningen."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrer målestokken på arket og mål på nytt.",
+      "fail": "Målingen av typen {type} har ingen tegningsmålestokk, så mengden er ikke kontrollert."
+    },
+    "scale_unusual": {
+      "suggestion": "Kontroller målestokken, eller kalibrer den ut fra et kjent mål.",
+      "fail": "Tegningens målestokk 1:{scale} ligger utenfor det vanlige området."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Velg om prisen er pr. tonn eller pr. kg, eller fjern massen.",
+      "fail": "Det er oppgitt en masse på {mass} kg pr. enhet, men ikke prisgrunnlaget (pr. tonn eller pr. kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Tegn formen på nytt med nok punkter, eller slett målingen.",
+      "fail": "En måling av typen {type} har {count} punkter; det kreves minst {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Bruk en lengdeenhet for avstander, en arealenhet for arealer og en volumenhet for volum.",
+      "fail": "Enheten {unit} passer ikke til en måling av typen {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Tell bare hele stykker, og rett verdien.",
+      "fail": "Et antall på {value} er ikke et helt tall."
+    }
   }
 }

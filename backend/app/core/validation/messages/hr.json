@@ -1763,5 +1763,51 @@
       "fail": "Rezultat je {result}, ali nije prošlo stavki kontrolnog popisa: {count}.",
       "suggestion": "Ispravite rezultat ili pregledajte stavke koje nisu prošle."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Donja granica mora biti 0 ili manja, a gornja 0 ili veća.",
+      "fail": "Raspon točnosti od {low} % do {high} % ne obuhvaća procjenu."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Unesite linearnu masu u kg po jedinici ili uklonite masovnu osnovu.",
+      "fail": "Cijena je navedena po {basis}, ali masa po jedinici nedostaje ili je nula."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Postavite ili kalibrirajte mjerilo nacrta prije nego se pouzdate u količinu.",
+      "fail": "Ova duljina ili površina izmjerena je na nacrtu koji je još na zadanom mjerilu 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Ponovno procijenite troškovnik ili indeksirajte cijene prije odobrenja.",
+      "fail": "Cijene su datirane {date}, prije više od godinu dana."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Prvo potvrdite prijedlog; troškovnik puni samo potvrđeno mjerenje.",
+      "fail": "Mjerenje sa statusom {status} ne može se povezati sa stavkom troškovnika."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrirajte mjerilo lista i izmjerite ponovno.",
+      "fail": "Mjerenje tipa {type} nema mjerilo nacrta pa njegova količina nije provjerena."
+    },
+    "scale_unusual": {
+      "suggestion": "Provjerite mjerilo ili ga kalibrirajte prema poznatoj mjeri.",
+      "fail": "Mjerilo nacrta 1:{scale} izvan je uobičajenog raspona."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Odaberite je li cijena po toni ili po kg, ili uklonite masu.",
+      "fail": "Navedena je masa od {mass} kg po jedinici, ali ne i osnova cijene (po toni ili po kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Ponovno nacrtajte oblik s dovoljno točaka ili izbrišite mjerenje.",
+      "fail": "Mjerenje tipa {type} ima {count} točaka; potrebno je najmanje {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Za udaljenosti upotrijebite jedinicu duljine, za površine jedinicu površine, a za volumene jedinicu volumena.",
+      "fail": "Jedinica {unit} ne odgovara mjerenju tipa {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Brojite samo cijele komade i ispravite vrijednost.",
+      "fail": "Broj {value} nije cijeli broj."
+    }
   }
 }

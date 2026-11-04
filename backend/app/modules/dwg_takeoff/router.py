@@ -160,6 +160,7 @@ def _drawing_to_response(
         scale_denominator=float(getattr(item, "scale_denominator", 1.0) or 1.0),
         scale_mode=str(getattr(item, "scale_mode", "preset") or "preset"),
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", []),
         created_by=item.created_by,  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
@@ -205,6 +206,7 @@ def _annotation_to_response(item: object) -> DwgAnnotationResponse:
         linked_punch_item_id=item.linked_punch_item_id,  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", []),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
     )
