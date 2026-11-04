@@ -20,6 +20,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from app.core.currency_registry import minor_units as currency_minor_units
+from app.core.decimal_types import FiniteDecimal
 from app.modules.full_evm.metrics import EAC_METHODS
 from app.modules.full_evm.models import BASELINE_STATUSES, MEASURE_SOURCES
 
@@ -227,8 +228,10 @@ class BaselinePeriodWrite(BaseModel):
 
     period_end: date
     label: str = Field(default="", max_length=64)
-    planned_value: Decimal = Field(description="Cumulative planned value at period_end, not the period's own amount")
-    planned_quantity: Decimal | None = Field(
+    planned_value: FiniteDecimal = Field(
+        description="Cumulative planned value at period_end, not the period's own amount"
+    )
+    planned_quantity: FiniteDecimal | None = Field(
         default=None,
         description="Cumulative planned physical quantity at period_end",
     )
@@ -295,7 +298,7 @@ class BaselineCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
-    bac: Decimal = Field(description="Budget At Completion for the scope this baseline measures")
+    bac: FiniteDecimal = Field(description="Budget At Completion for the scope this baseline measures")
     currency: str | None = Field(default=None, min_length=3, max_length=3, description="ISO 4217 code, label only")
     minor_units: int = Field(
         default_factory=lambda data: currency_minor_units(data.get("currency")),
@@ -343,7 +346,7 @@ class BaselineUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
-    bac: Decimal | None = None
+    bac: FiniteDecimal | None = None
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     minor_units: int | None = Field(default=None, ge=0, le=4)
     start_date: date | None = None
@@ -430,12 +433,14 @@ class MeasureCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     data_date: date
-    ev: Decimal = Field(description="Cumulative earned value at the data date")
-    ac: Decimal = Field(description="Cumulative actual cost at the data date")
-    pv: Decimal | None = Field(default=None, description="Override for the baseline curve value at this date")
-    bac: Decimal | None = Field(default=None, description="Override for the baseline budget in force at this date")
-    planned_quantity: Decimal | None = None
-    actual_quantity: Decimal | None = None
+    ev: FiniteDecimal = Field(description="Cumulative earned value at the data date")
+    ac: FiniteDecimal = Field(description="Cumulative actual cost at the data date")
+    pv: FiniteDecimal | None = Field(default=None, description="Override for the baseline curve value at this date")
+    bac: FiniteDecimal | None = Field(
+        default=None, description="Override for the baseline budget in force at this date"
+    )
+    planned_quantity: FiniteDecimal | None = None
+    actual_quantity: FiniteDecimal | None = None
     eac_method: EacMethod = Field(default="auto", description="Which EAC formula to headline")
     source: MeasureSource = "manual"
     notes: str | None = None

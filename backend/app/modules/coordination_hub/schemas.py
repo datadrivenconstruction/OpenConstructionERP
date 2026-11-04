@@ -16,6 +16,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
+from app.core.decimal_types import Decimal18_4, FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py - money fields are stored /
@@ -133,7 +135,7 @@ class TradeMatrixCell(BaseModel):
     count: int = 0
     open: int = 0
     resolved: int = 0
-    cost_impact: Decimal = Decimal("0")
+    cost_impact: FiniteDecimal = Decimal("0")
 
     @field_serializer("cost_impact", when_used="json")
     def _ser_cost_impact(self, v: Decimal) -> str | None:
@@ -228,10 +230,10 @@ class ThresholdRow(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     metric: str
-    warn_value: Decimal
-    error_value: Decimal
+    warn_value: Decimal18_4
+    error_value: Decimal18_4
     enabled: bool
-    current_value: Decimal
+    current_value: FiniteDecimal
     level: ThresholdLevel
     message: str = ""
 
@@ -240,8 +242,8 @@ class ThresholdAlert(BaseModel):
     """A single in-breach metric - surfaces in the dashboard banner."""
 
     metric: str
-    current_value: Decimal
-    threshold_value: Decimal
+    current_value: FiniteDecimal
+    threshold_value: FiniteDecimal
     level: ThresholdLevel
     message: str
 
@@ -262,8 +264,8 @@ class CoordinationThresholdUpdate(BaseModel):
     PUT cannot be a no-op that still bumps ``updated_at``.
     """
 
-    warn_value: Decimal | None = Field(default=None)
-    error_value: Decimal | None = Field(default=None)
+    warn_value: Decimal18_4 | None = Field(default=None)
+    error_value: Decimal18_4 | None = Field(default=None)
     enabled: bool | None = Field(default=None)
 
     @model_validator(mode="after")

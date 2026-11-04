@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal15_2
+
 # ── Canonical enumerations (also enforced by the regex below) ──────────
 
 DOC_TYPES: tuple[str, ...] = (
@@ -56,7 +58,7 @@ class ComplianceDocCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     issuer: str | None = Field(default=None, max_length=255)
     policy_number: str | None = Field(default=None, max_length=100)
-    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_amount: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str = Field(default="", max_length=3)
     effective_date: date
     expires_at: date
@@ -93,7 +95,7 @@ class ComplianceDocUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     issuer: str | None = Field(default=None, max_length=255)
     policy_number: str | None = Field(default=None, max_length=100)
-    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_amount: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     effective_date: date | None = None
     expires_at: date | None = None

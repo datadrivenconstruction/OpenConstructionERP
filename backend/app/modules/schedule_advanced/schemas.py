@@ -16,6 +16,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from app.core.cpm import MAX_WEEKDAY, MIN_WEEKDAY
+from app.core.decimal_types import Decimal5_2, Decimal6_2, Decimal6_4, Decimal12_2, Decimal15_3, FiniteDecimal
 from app.modules.schedule_advanced.cpm import normalise_holidays
 
 # ── Common patterns ────────────────────────────────────────────────────────
@@ -309,7 +310,7 @@ class CommitmentCreate(BaseModel):
     week_plan_id: UUID
     task_ref: UUID
     worker_or_crew: str = ""
-    promised_qty: Decimal = Decimal("0")
+    promised_qty: Decimal15_3 = Decimal("0")
     unit: str = ""
     planned_start: date | None = None
     planned_finish: date | None = None
@@ -317,7 +318,7 @@ class CommitmentCreate(BaseModel):
     made_by_user_id: UUID | None = None
     made_at: datetime | None = None
     subcontractor_id: UUID | None = None
-    target_progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    target_progress_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
 
 
 class CommitmentUpdate(BaseModel):
@@ -326,15 +327,15 @@ class CommitmentUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     worker_or_crew: str | None = None
-    promised_qty: Decimal | None = None
+    promised_qty: Decimal15_3 | None = None
     unit: str | None = None
     planned_start: date | None = None
     planned_finish: date | None = None
     status: str | None = Field(default=None, pattern=_COMMITMENT_STATUS)
-    actual_qty: Decimal | None = None
+    actual_qty: Decimal15_3 | None = None
     completed_at: datetime | None = None
     subcontractor_id: UUID | None = None
-    target_progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    target_progress_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
 
 
 class CommitmentResponse(BaseModel):
@@ -526,7 +527,7 @@ class CalendarCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
     work_days: list[Mon0Weekday] = Field(default_factory=lambda: [0, 1, 2, 3, 4])
-    work_hours_per_day: Decimal = Decimal("8")
+    work_hours_per_day: Decimal5_2 = Decimal("8")
     holidays: list[str] = Field(default_factory=list)
     special_shifts: dict[str, Any] = Field(default_factory=dict)
     is_default: bool = False
@@ -541,7 +542,7 @@ class CalendarUpdate(BaseModel):
 
     name: str | None = Field(default=None, max_length=255)
     work_days: list[Mon0Weekday] | None = None
-    work_hours_per_day: Decimal | None = None
+    work_hours_per_day: Decimal5_2 | None = None
     holidays: list[str] | None = None
     special_shifts: dict[str, Any] | None = None
     is_default: bool | None = None
@@ -689,9 +690,9 @@ class EVMActivityInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     id: str = Field(..., min_length=1, max_length=80)
-    budget_at_completion: Decimal = Decimal("0")
-    percent_complete: Decimal = Decimal("0")
-    actual_cost: Decimal = Decimal("0")
+    budget_at_completion: FiniteDecimal = Decimal("0")
+    percent_complete: FiniteDecimal = Decimal("0")
+    actual_cost: FiniteDecimal = Decimal("0")
     planned_start_workday: int = 0
     planned_finish_workday: int = 0
 
@@ -826,8 +827,8 @@ class WeeklyCommitmentCreate(BaseModel):
 
     activity_id: UUID
     week_start: date
-    planned_complete_pct: Decimal = Field(default=Decimal("0"), ge=0, le=1)
-    actual_complete_pct: Decimal = Field(default=Decimal("0"), ge=0, le=1)
+    planned_complete_pct: Decimal6_4 = Field(default=Decimal("0"), ge=0, le=1)
+    actual_complete_pct: Decimal6_4 = Field(default=Decimal("0"), ge=0, le=1)
 
 
 class WeeklyCommitmentResponse(BaseModel):
@@ -870,7 +871,7 @@ class LocationCreate(BaseModel):
     sequence_order: int = Field(..., ge=1)
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
-    work_area_sqm: Decimal | None = None
+    work_area_sqm: Decimal12_2 | None = None
 
 
 class LocationResponse(BaseModel):
@@ -967,7 +968,7 @@ class TaktActivityUpdate(BaseModel):
     crew_size: int | None = Field(default=None, ge=1, le=10_000)
     crew_skill_codes: list[str] | None = None
     buffer_days_before: int | None = Field(default=None, ge=0, le=365)
-    actual_cycle_duration_days: Decimal | None = None
+    actual_cycle_duration_days: Decimal6_2 | None = None
     status: str | None = Field(default=None, pattern=_TAKT_ACTIVITY_STATUS)
 
 
@@ -1116,11 +1117,11 @@ class CostRiskInputSchema(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    base_cost: Decimal = Field(..., ge=0)
-    cost_low: Decimal | None = Field(default=None, ge=0)
-    cost_mode: Decimal | None = Field(default=None, ge=0)
-    cost_high: Decimal | None = Field(default=None, ge=0)
-    cost_target: Decimal | None = Field(default=None, ge=0)
+    base_cost: FiniteDecimal = Field(..., ge=0)
+    cost_low: FiniteDecimal | None = Field(default=None, ge=0)
+    cost_mode: FiniteDecimal | None = Field(default=None, ge=0)
+    cost_high: FiniteDecimal | None = Field(default=None, ge=0)
+    cost_target: FiniteDecimal | None = Field(default=None, ge=0)
     distribution: str = Field(default="pert", pattern=r"^(pert|triangular|uniform|normal|lognormal)$")
 
     @field_serializer("base_cost", "cost_low", "cost_mode", "cost_high", "cost_target", when_used="json")
@@ -1195,11 +1196,11 @@ class JointConfidenceSchema(BaseModel):
     """
 
     target_finish: float = 0.0
-    target_cost: Decimal = Decimal("0")
+    target_cost: FiniteDecimal = Decimal("0")
     jcl: float = 0.0
     prob_on_time: float = 0.0
     prob_on_budget: float = 0.0
-    cost_mean: Decimal = Decimal("0")
+    cost_mean: FiniteDecimal = Decimal("0")
     cost_percentiles: dict[str, float] = Field(default_factory=dict)
     correlation: float = 0.0
     scatter: list[ScatterPointSchema] = Field(default_factory=list)
@@ -1495,7 +1496,7 @@ class LpsBoardTask(BaseModel):
     start_date: date
     end_date: date
     week_start: date
-    progress_pct: Decimal
+    progress_pct: FiniteDecimal
     is_ready: bool
     open_constraints: int
     committed: bool
@@ -1524,7 +1525,7 @@ class LpsPpcWeek(BaseModel):
     status: str
     committed: int
     completed: int
-    ppc_percent: Decimal | None = None
+    ppc_percent: Decimal5_2 | None = None
 
 
 class LpsParetoRow(BaseModel):
@@ -1532,8 +1533,8 @@ class LpsParetoRow(BaseModel):
 
     category: str
     count: int
-    percent: Decimal
-    cumulative_percent: Decimal
+    percent: FiniteDecimal
+    cumulative_percent: FiniteDecimal
 
 
 class LpsPpcHistoryResponse(BaseModel):

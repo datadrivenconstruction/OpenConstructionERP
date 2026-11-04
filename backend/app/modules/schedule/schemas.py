@@ -17,6 +17,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.core.cpm import canonical_exception_dates, check_work_days_in_range
+from app.core.decimal_types import Decimal18_4, Decimal20_4, FiniteDecimal
 from app.modules.schedule.constraints import normalize_constraint
 
 
@@ -302,12 +303,12 @@ class ActivityCreate(BaseModel):
     # mirror the work-order money pair. The unit quantities take ``ge=0`` only,
     # matching ``progress_schemas.TypedProgressRequest``, which is the other
     # writer of the same two columns.
-    cost_planned: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
-    cost_actual: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_planned: Decimal20_4 | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_actual: Decimal20_4 | None = Field(default=None, ge=0, le=Decimal("1e12"))
     percent_complete_type: str = Field(default="physical", pattern=r"^(physical|duration|units)$")
     remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
-    budgeted_units: Decimal | None = Field(default=None, ge=0)
-    installed_units: Decimal | None = Field(default=None, ge=0)
+    budgeted_units: Decimal18_4 | None = Field(default=None, ge=0)
+    installed_units: Decimal18_4 | None = Field(default=None, ge=0)
     # Contact responsible for the activity (id in the contacts module).
     assignee_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -381,12 +382,12 @@ class ActivityUpdate(BaseModel):
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
     # ── Cost-loaded / progress-rigor columns ──────────────────────────────
-    cost_planned: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
-    cost_actual: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_planned: Decimal20_4 | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_actual: Decimal20_4 | None = Field(default=None, ge=0, le=Decimal("1e12"))
     percent_complete_type: str | None = Field(default=None, pattern=r"^(physical|duration|units)$")
     remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
-    budgeted_units: Decimal | None = Field(default=None, ge=0)
-    installed_units: Decimal | None = Field(default=None, ge=0)
+    budgeted_units: Decimal18_4 | None = Field(default=None, ge=0)
+    installed_units: Decimal18_4 | None = Field(default=None, ge=0)
     # Contact responsible for the activity; an explicit null unassigns it.
     assignee_id: UUID | None = None
     metadata: dict[str, Any] | None = None
@@ -560,8 +561,8 @@ class WorkOrderCreate(BaseModel):
     planned_end: str | None = Field(default=None, max_length=20)
     actual_start: str | None = Field(default=None, max_length=20)
     actual_end: str | None = Field(default=None, max_length=20)
-    planned_cost: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("1e12"))
-    actual_cost: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("1e12"))
+    planned_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0, le=Decimal("1e12"))
+    actual_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0, le=Decimal("1e12"))
     status: str = Field(
         default="planned",
         pattern=r"^(planned|issued|in_progress|completed|cancelled)$",
@@ -594,8 +595,8 @@ class WorkOrderUpdate(BaseModel):
     planned_end: str | None = Field(default=None, max_length=20)
     actual_start: str | None = Field(default=None, max_length=20)
     actual_end: str | None = Field(default=None, max_length=20)
-    planned_cost: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
-    actual_cost: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    planned_cost: FiniteDecimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    actual_cost: FiniteDecimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
     status: str | None = Field(
         default=None,
         pattern=r"^(planned|issued|in_progress|completed|cancelled)$",
@@ -1129,7 +1130,7 @@ class _ProgressInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
-    progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    progress_pct: FiniteDecimal | None = Field(default=None, ge=0, le=100)
     actual_start: str | None = Field(default=None, max_length=20)
     actual_finish: str | None = Field(default=None, max_length=20)
     remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
@@ -1223,8 +1224,8 @@ class LaborCostByPhaseRow(BaseModel):
 
     phase: str = Field("", description="Phase label - wbs_code prefix or activity_type")
     activity_count: int = 0
-    labor_cost: Decimal = Decimal("0")
-    total_cost: Decimal = Decimal("0")
+    labor_cost: FiniteDecimal = Decimal("0")
+    total_cost: FiniteDecimal = Decimal("0")
     start_date: str | None = None
     end_date: str | None = None
 

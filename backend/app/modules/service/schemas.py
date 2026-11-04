@@ -17,6 +17,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal18_2, Decimal18_4
+
 # ── Reusable enum patterns ─────────────────────────────────────────────────
 
 PRIORITY_PATTERN = r"^(low|med|high|critical)$"
@@ -48,7 +50,7 @@ class ServiceContractCreate(BaseModel):
     sla_definition_id: UUID | None = None
     sla_tier: str = Field(default="standard", max_length=50)
     status: str = Field(default="draft", pattern=CONTRACT_STATUS_PATTERN)
-    value: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    value: Decimal18_2 = Field(default=Decimal("0"), ge=Decimal("0"))
     currency: str = Field(default="", max_length=10)
     auto_renew: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -65,7 +67,7 @@ class ServiceContractUpdate(BaseModel):
     sla_definition_id: UUID | None = None
     sla_tier: str | None = Field(default=None, max_length=50)
     status: str | None = Field(default=None, pattern=CONTRACT_STATUS_PATTERN)
-    value: Decimal | None = Field(default=None, ge=Decimal("0"))
+    value: Decimal18_2 | None = Field(default=None, ge=Decimal("0"))
     currency: str | None = Field(default=None, max_length=10)
     auto_renew: bool | None = None
     metadata: dict[str, Any] | None = None
@@ -247,10 +249,10 @@ class WorkOrderItemCreate(BaseModel):
 
     item_type: str = Field(default="labor", pattern=WO_ITEM_TYPE_PATTERN)
     description: str = Field(default="", max_length=2000)
-    quantity: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    quantity: Decimal18_4 = Field(default=Decimal("0"), ge=Decimal("0"))
     unit: str = Field(default="", max_length=20)
-    unit_rate: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    total: Decimal | None = Field(default=None, ge=Decimal("0"))
+    unit_rate: Decimal18_4 = Field(default=Decimal("0"), ge=Decimal("0"))
+    total: Decimal18_2 | None = Field(default=None, ge=Decimal("0"))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

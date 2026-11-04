@@ -10,6 +10,17 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import (
+    Decimal4_3,
+    Decimal5_2,
+    Decimal6_2,
+    Decimal7_3,
+    Decimal8_2,
+    Decimal10_2,
+    Decimal10_7,
+    FiniteDecimal,
+)
+
 # Regex patterns shared across create + update + response shapes.
 _SOURCE_KIND_PATTERN = r"^(bim_model|federation|development|upload|point_cloud|photogrammetry)$"
 _TILESET_STATUS_PATTERN = r"^(draft|generating|ready|failed|obsolete)$"
@@ -53,9 +64,9 @@ class GeoAnchorCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    lat: Decimal = Field(default=Decimal("0"))
-    lon: Decimal = Field(default=Decimal("0"))
-    alt: Decimal = Field(default=Decimal("0"))
+    lat: Decimal10_7 = Field(default=Decimal("0"))
+    lon: Decimal10_7 = Field(default=Decimal("0"))
+    alt: Decimal8_2 = Field(default=Decimal("0"))
     epsg_code: int = Field(default=4326, gt=0, le=999999)
     region_code: str | None = Field(default=None, pattern=_REGION_CODE_PATTERN)
     address: str | None = Field(default=None, max_length=500)
@@ -64,7 +75,7 @@ class GeoAnchorCreate(BaseModel):
     # represented via the precision metadata on the GeoAnchor, not a
     # numeric uncertainty disc on the map (which Cesium would draw as
     # the size of a small country).
-    accuracy_m: Decimal | None = Field(default=None, ge=0, le=10_000)
+    accuracy_m: Decimal6_2 | None = Field(default=None, ge=0, le=10_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     _v_lat = field_validator("lat")(lambda cls, v: _check_lat(v))  # type: ignore[arg-type, misc]
@@ -76,9 +87,9 @@ class GeoAnchorUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    lat: Decimal | None = None
-    lon: Decimal | None = None
-    alt: Decimal | None = None
+    lat: Decimal10_7 | None = None
+    lon: Decimal10_7 | None = None
+    alt: Decimal8_2 | None = None
     epsg_code: int | None = Field(default=None, gt=0, le=999999)
     region_code: str | None = Field(default=None, pattern=_REGION_CODE_PATTERN)
     address: str | None = Field(default=None, max_length=500)
@@ -87,7 +98,7 @@ class GeoAnchorUpdate(BaseModel):
     # represented via the precision metadata on the GeoAnchor, not a
     # numeric uncertainty disc on the map (which Cesium would draw as
     # the size of a small country).
-    accuracy_m: Decimal | None = Field(default=None, ge=0, le=10_000)
+    accuracy_m: Decimal6_2 | None = Field(default=None, ge=0, le=10_000)
     metadata: dict[str, Any] | None = None
 
     @field_validator("lat")
@@ -145,7 +156,7 @@ class TilesetCreate(BaseModel):
     prefix: str = Field(default="", max_length=500)
     tileset_json_uri: str | None = Field(default=None, max_length=2000)
     bounding_volume: dict[str, Any] | None = None
-    geometric_error: Decimal = Field(default=Decimal("0"), ge=0)
+    geometric_error: Decimal10_2 = Field(default=Decimal("0"), ge=0)
     tile_format: str = Field(default="b3dm", pattern=_TILE_FORMAT_PATTERN)
     tile_count: int = Field(default=0, ge=0)
     total_bytes: int = Field(default=0, ge=0)
@@ -159,7 +170,7 @@ class TilesetUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=255)
     tileset_json_uri: str | None = Field(default=None, max_length=2000)
     bounding_volume: dict[str, Any] | None = None
-    geometric_error: Decimal | None = Field(default=None, ge=0)
+    geometric_error: Decimal10_2 | None = Field(default=None, ge=0)
     status: str | None = Field(default=None, pattern=_TILESET_STATUS_PATTERN)
     metadata: dict[str, Any] | None = None
 
@@ -206,7 +217,7 @@ class CanonicalToTilesetRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    heading_deg: Decimal = Field(default=Decimal("0"), ge=-360, le=720)
+    heading_deg: FiniteDecimal = Field(default=Decimal("0"), ge=-360, le=720)
     name: str | None = Field(default=None, max_length=255)
     tags: list[str] = Field(default_factory=list)
 
@@ -306,12 +317,12 @@ class ViewpointCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=120)
     description: str | None = None
-    camera_lat: Decimal = Field(default=Decimal("0"))
-    camera_lon: Decimal = Field(default=Decimal("0"))
-    camera_alt: Decimal = Field(default=Decimal("0"))
-    heading: Decimal = Field(default=Decimal("0"), ge=-360, le=720)
-    pitch: Decimal = Field(default=Decimal("0"), ge=-180, le=180)
-    roll: Decimal = Field(default=Decimal("0"), ge=-180, le=180)
+    camera_lat: Decimal10_7 = Field(default=Decimal("0"))
+    camera_lon: Decimal10_7 = Field(default=Decimal("0"))
+    camera_alt: Decimal8_2 = Field(default=Decimal("0"))
+    heading: Decimal7_3 = Field(default=Decimal("0"), ge=-360, le=720)
+    pitch: Decimal7_3 = Field(default=Decimal("0"), ge=-180, le=180)
+    roll: Decimal7_3 = Field(default=Decimal("0"), ge=-180, le=180)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     _v_lat = field_validator("camera_lat")(lambda cls, v: _check_lat(v))  # type: ignore[arg-type, misc]
@@ -323,12 +334,12 @@ class ViewpointUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=120)
     description: str | None = None
-    camera_lat: Decimal | None = None
-    camera_lon: Decimal | None = None
-    camera_alt: Decimal | None = None
-    heading: Decimal | None = Field(default=None, ge=-360, le=720)
-    pitch: Decimal | None = Field(default=None, ge=-180, le=180)
-    roll: Decimal | None = Field(default=None, ge=-180, le=180)
+    camera_lat: Decimal10_7 | None = None
+    camera_lon: Decimal10_7 | None = None
+    camera_alt: Decimal8_2 | None = None
+    heading: Decimal7_3 | None = Field(default=None, ge=-360, le=720)
+    pitch: Decimal7_3 | None = Field(default=None, ge=-180, le=180)
+    roll: Decimal7_3 | None = Field(default=None, ge=-180, le=180)
     metadata: dict[str, Any] | None = None
 
 
@@ -486,8 +497,8 @@ class GeoRasterOverlayCreate(BaseModel):
     raster_width_px: int = Field(default=0, ge=0, le=200_000)
     raster_height_px: int = Field(default=0, ge=0, le=200_000)
     corners_geojson: list[Any] = Field(default_factory=list)
-    rotation_deg: Decimal = Field(default=Decimal("0"), ge=-720, le=720)
-    opacity: Decimal = Field(default=Decimal("0.7"), ge=0, le=1)
+    rotation_deg: Decimal7_3 = Field(default=Decimal("0"), ge=-720, le=720)
+    opacity: Decimal4_3 = Field(default=Decimal("0.7"), ge=0, le=1)
     crop_polygon_geojson: dict[str, Any] | None = None
     z_order: int = Field(default=0, ge=-1000, le=1000)
     visible: bool = True
@@ -508,8 +519,8 @@ class GeoRasterOverlayUpdate(BaseModel):
 
     name: str | None = Field(default=None, max_length=255)
     corners_geojson: list[Any] | None = None
-    rotation_deg: Decimal | None = Field(default=None, ge=-720, le=720)
-    opacity: Decimal | None = Field(default=None, ge=0, le=1)
+    rotation_deg: Decimal7_3 | None = Field(default=None, ge=-720, le=720)
+    opacity: Decimal4_3 | None = Field(default=None, ge=0, le=1)
     crop_polygon_geojson: dict[str, Any] | None = None
     z_order: int | None = Field(default=None, ge=-1000, le=1000)
     visible: bool | None = None
@@ -932,7 +943,7 @@ class SurveyCaptureResponse(BaseModel):
 
 
 class SurveyObservationUpsert(BaseModel):
-    observed_pct: Decimal = Field(..., ge=0, le=100, decimal_places=2)
+    observed_pct: Decimal5_2 = Field(..., ge=0, le=100, decimal_places=2)
     note: str = Field(default="", max_length=4000)
 
 

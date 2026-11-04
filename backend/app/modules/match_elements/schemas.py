@@ -11,6 +11,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
 from app.core.match_service.config import DEFAULT_AUTO_CONFIRM_THRESHOLD
 from app.core.match_service.envelope import MatchCandidate
 
@@ -337,7 +338,7 @@ class ApplyResourcePreview(BaseModel):
     quantity: float  # factor × parent quantity - measurement, not money
     unit: str
     # v3 §10 - money as Decimal, serialised to JSON as a plain string.
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
 
     @field_serializer("unit_rate", when_used="json")
     def _ser_unit_rate(self, v: Decimal) -> str | None:
@@ -351,9 +352,9 @@ class ApplyPositionPreview(BaseModel):
     unit: str
     quantity: float  # measurement, not money
     # v3 §10 - money as Decimal, serialised to JSON as a plain string.
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     currency: str
-    line_total: Decimal = Decimal("0")
+    line_total: FiniteDecimal = Decimal("0")
     resources: list[ApplyResourcePreview] = Field(default_factory=list)
 
     @field_serializer("unit_rate", "line_total", when_used="json")
@@ -382,7 +383,7 @@ class NoMatchRequest(BaseModel):
     custom_description: str | None = None
     custom_unit: str | None = None
     # v3 §10 - money as Decimal; accepts str/number on input.
-    custom_rate: Decimal | None = None
+    custom_rate: FiniteDecimal | None = None
     save_to_my_catalogue: bool = False
     # When action=rfq:
     rfq_supplier_ids: list[uuid.UUID] | None = None
