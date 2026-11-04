@@ -35760,6 +35760,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "fx_view.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -35912,6 +35913,12 @@
           "handler": "search_catalog",
           "response_model": "CatalogSearchResponse",
           "request_schema": "OptionalUserPayload"
+        },
+        {
+          "method": "GET",
+          "path": "/fx-view/",
+          "handler": "catalog_fx_view",
+          "response_model": "CatalogFxView"
         },
         {
           "method": "GET",
@@ -36227,7 +36234,9 @@
         }
       ],
       "import_dependencies": [
-        "costs"
+        "assemblies",
+        "costs",
+        "projects"
       ]
     },
     {
@@ -283402,11 +283411,6 @@
             {
               "name": "bids",
               "type": "list[dict[str, Any]]"
-            },
-            {
-              "name": "provis",
-              "type": "str",
-              "default": "''"
             }
           ]
         },
@@ -283436,10 +283440,6 @@
             },
             {
               "name": "budget_total",
-              "type": "Decimal"
-            },
-            {
-              "name": "budget_provis_total",
               "type": "Decimal"
             },
             {
@@ -295825,10 +295825,10 @@
     },
     {
       "name": "catalog",
-      "ts_files": 3,
+      "ts_files": 5,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 5
     },
     {
       "name": "cde",
@@ -296385,10 +296385,10 @@
     },
     {
       "name": "help",
-      "ts_files": 28,
+      "ts_files": 30,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 28
+      "test_files": 1,
+      "total_files": 30
     },
     {
       "name": "hse-advanced",
@@ -297399,7 +297399,9 @@
       "users"
     ],
     "catalog": [
-      "costs"
+      "assemblies",
+      "costs",
+      "projects"
     ],
     "cde": [
       "approval_routes",
@@ -298942,11 +298944,11 @@
     "total_models": 851,
     "total_columns": 10018,
     "total_relationships": 257,
-    "total_routes": 4894,
+    "total_routes": 4895,
     "total_schemas": 4399,
-    "total_python_files": 3058,
+    "total_python_files": 3059,
     "frontend_features": 224,
-    "frontend_ts_files": 3915,
+    "frontend_ts_files": 3919,
     "frontend_backend_mapped": 200
   },
   "frontend_backend_mapping": {
