@@ -662,6 +662,16 @@ class GRLineCreate(BaseModel):
     serial_numbers: list[str] | None = None
     notes: str | None = Field(default=None, max_length=1000)
 
+    @model_validator(mode="after")
+    def _check_split(self) -> GRLineCreate:
+        """Accepted and rejected can never add up to more than what arrived."""
+        accepted = self.accepted_qty if self.accepted_qty is not None else self.received_qty - self.rejected_qty
+        if accepted < 0:
+            raise ValueError("rejected_qty cannot exceed received_qty")
+        if accepted + self.rejected_qty > self.received_qty:
+            raise ValueError("accepted_qty + rejected_qty cannot exceed received_qty")
+        return self
+
 
 class GoodsReceiptCreate(BaseModel):
     po_id: UUID
