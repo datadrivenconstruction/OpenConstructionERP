@@ -1302,11 +1302,24 @@ class UserService:
         # Capture old role before overwriting so the audit row has before/after.
         old_role: str | None = None
         new_role: str | None = None
-        if "role" in fields:
+        if "role" in fields or "is_active" in fields:
             prior = await self.user_repo.get_by_id(user_id)
-            if prior is not None:
+            if prior is None or prior.deleted_at is not None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            demoting = "role" in fields and str(fields["role"]) != "admin"
+            deactivating = fields.get("is_active") is False
+            if prior.role == "admin" and prior.is_active and (demoting or deactivating):
+                if await self.user_repo.count_active_admins(exclude_id=user_id) == 0:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=(
+                            "This is the last active administrator. Promote another user to "
+                            "admin first so the workspace is not left without an administrator."
+                        ),
+                    )
+            if "role" in fields:
                 old_role = prior.role
-            new_role = str(fields["role"])
+                new_role = str(fields["role"])
 
         await self.user_repo.update_fields(user_id, **fields)
         user = await self.user_repo.get_by_id(user_id)
