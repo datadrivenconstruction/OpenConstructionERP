@@ -103,3 +103,15 @@ async def test_update_runs_the_rules_on_the_merged_record(client, admin_auth, pr
         assert err.value.status_code == 422
         assert "ncr.cost_impact_described" in _rule_ids(err.value)
         await session.rollback()
+
+
+@pytest.mark.asyncio
+async def test_legacy_record_with_existing_violation_stays_editable(client, admin_auth, project_id):
+    async with async_session_factory() as session:
+        svc = NCRService(session)
+        ncr = await svc.create_ncr(_data(project_id, cost_impact="1500"))
+        await svc.repo.update_fields(ncr.id, description="")
+        await session.refresh(ncr)
+        updated = await svc.update_ncr(ncr.id, NCRUpdate.model_construct(_fields_set={"title"}, title="Renamed"))
+        assert updated.title == "Renamed"
+        await session.rollback()
