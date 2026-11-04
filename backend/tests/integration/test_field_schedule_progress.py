@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import AsyncIterator
 
 os.environ["EXPOSE_DEV_AUTH_SECRETS"] = "true"  # request-magic-link returns dev_token/dev_pin
@@ -162,7 +163,7 @@ async def test_field_progress_updates_activity_via_t32(app_and_client) -> None:
     op_id = str(uuid.uuid4())
     payload = {
         "client_op_id": op_id,
-        "captured_at": "2026-06-07T08:00:00",
+        "captured_at": (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
         "activity_id": str(activity_id),
         "percent_complete": 40,
     }
@@ -258,7 +259,7 @@ async def test_field_progress_records_actuals_on_progress_entry(app_and_client) 
     op_id = str(uuid.uuid4())
     payload = {
         "client_op_id": op_id,
-        "captured_at": "2026-06-07T08:00:00",
+        "captured_at": (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
         "activity_id": str(activity_id),
         "percent_complete": 60,
         "actual_start": "2026-06-03",

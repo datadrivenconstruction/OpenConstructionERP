@@ -133,9 +133,11 @@ class DiaryAttachmentRepository(_BaseRepo):
 
 
 class FieldSyncLedgerRepository(_BaseRepo):
-    async def get_by_client_op_id(self, client_op_id: str) -> FieldSyncLedger | None:
+    async def get_by_client_op_id(self, client_op_id: str, project_id: uuid.UUID) -> FieldSyncLedger | None:
+        """Look an op up inside one project; the same id in another project is a different op."""
         stmt = select(FieldSyncLedger).where(
             FieldSyncLedger.client_op_id == client_op_id,
+            FieldSyncLedger.project_id == project_id,
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()

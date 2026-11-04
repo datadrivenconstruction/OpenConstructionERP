@@ -793,7 +793,7 @@ class FieldTimeService:
             self._assert_line_xor(line.resource_id, line.equipment_id)
 
         ledger_repo = FieldSyncLedgerRepository(self.session)
-        ledger = await ledger_repo.get_by_client_op_id(data.entry_key)
+        ledger = await ledger_repo.get_by_client_op_id(data.entry_key, data.project_id)
         if ledger is not None:
             self._assert_offline_key_is_ours(data.entry_key, ledger, data.project_id)
 
@@ -887,7 +887,7 @@ class FieldTimeService:
                 project.
         """
         ledger_repo = FieldSyncLedgerRepository(self.session)
-        ledger = await ledger_repo.get_by_client_op_id(data.entry_key)
+        ledger = await ledger_repo.get_by_client_op_id(data.entry_key, data.project_id)
         if ledger is not None:
             self._assert_offline_key_is_ours(data.entry_key, ledger, data.project_id)
 
