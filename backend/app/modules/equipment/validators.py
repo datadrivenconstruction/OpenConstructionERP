@@ -141,6 +141,22 @@ class IdleBelowThreshold(_MachineRule):
         )
 
 
+class DeviceReportsRegularly(_MachineRule):
+    """A hired machine with a telematics device has sent a reading within the last 24 hours."""
+
+    key = "device_silent"
+    rule_id = "equipment_telematics.device_silent"
+    name = "Device Reports Regularly"
+    description = "A telematics device on a machine hired to a project has reported in the last 24 hours."
+    text = "{equipment} has not reported for {hours} h while hired to a project; check the device and its power"
+
+    def check(self, machine: dict[str, Any], context: ValidationContext) -> RuleResult | None:
+        if not machine.get("has_device") or not machine.get("allocated_project_id"):
+            return None
+        silent = machine.get("device_silent_hours")
+        return self._result(machine, silent is None, hours=silent if silent is not None else 0)
+
+
 class OwningCostKnown(_MachineRule):
     """A machine on the cost board has an owning cost basis, otherwise its cost reads as zero."""
 
@@ -183,6 +199,7 @@ EQUIPMENT_RULES: tuple[type[_MachineRule], ...] = (
     MaintenanceNotOverdue,
     MachineInsideGeofence,
     IdleBelowThreshold,
+    DeviceReportsRegularly,
     OwningCostKnown,
     CostPerHourWithinMarket,
 )

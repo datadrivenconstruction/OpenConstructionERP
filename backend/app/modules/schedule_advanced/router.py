@@ -21,6 +21,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import date
+from typing import Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
@@ -2699,6 +2700,129 @@ async def auto_delay_fragnet(
     return FragnetResponse.model_validate(saved)
 
 
+async def _snapshot_points(analysis, session: SessionDep) -> list:
+    """Stored baselines of the analysis' project as window snapshots, oldest first."""
+    from sqlalchemy import select
+
+    from app.modules.schedule_advanced.delay_windows import SnapshotPoint, baseline_durations
+    from app.modules.schedule_advanced.models import Baseline, MasterSchedule
+
+    stmt = (
+        select(Baseline)
+        .join(MasterSchedule, MasterSchedule.id == Baseline.master_schedule_id)
+        .where(MasterSchedule.project_id == analysis.project_id, Baseline.captured_at.is_not(None))
+    )
+    if analysis.as_planned_baseline_id is not None:
+        chosen = await session.get(Baseline, analysis.as_planned_baseline_id)
+        if chosen is not None:
+            stmt = stmt.where(Baseline.master_schedule_id == chosen.master_schedule_id)
+    rows = (await session.execute(stmt.order_by(Baseline.captured_at))).scalars().all()
+    return [
+        SnapshotPoint(name=b.name, data_date=b.captured_at.date(), durations=baseline_durations(b.snapshot))
+        for b in rows
+    ]
+
+
+async def _windows_plan(analysis, mode: str, act_rows: list, current: list, session: SessionDep):
+    """Windows, one activity list per window boundary, and the work-day bounds per window."""
+    import dataclasses
+    from datetime import date as _date
+
+    from app.modules.schedule_advanced.delay_windows import build_windows, pick_snapshot
+    from app.modules.schedule_advanced.service import _parse_date
+
+    starts = [d for d in (_parse_date(a.start_date) for a in act_rows) if d is not None]
+    if not starts:
+        return [], [], None
+    data_date = _parse_date(analysis.data_date) or _date.today()
+    points = await _snapshot_points(analysis, session)
+    plan = build_windows(mode, min(starts), data_date, points)  # type: ignore[arg-type]
+    boundaries = [w.opens for w in plan] + ([plan[-1].closes] if plan else [])
+    nets: list = []
+    for i, day in enumerate(boundaries):
+        snap = None if i == len(boundaries) - 1 else pick_snapshot(day, points)
+        if snap is None:
+            nets.append(list(current))
+        else:
+            nets.append([dataclasses.replace(a, duration=snap.durations.get(str(a.id), a.duration)) for a in current])
+    return plan, nets, [(w.open_workday, w.close_workday) for w in plan]
+
+
+@router.get("/delay-analyses/{analysis_id}/windows/preview")
+async def preview_delay_windows(
+    analysis_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    mode: Literal["snapshot", "month", "quarter"] = Query(default="snapshot"),
+    _perm: None = Depends(RequirePermission("schedule_advanced.read")),
+) -> dict:
+    """Propose windows for the Windows method; nothing is saved until /compute runs with ``window_mode``."""
+    svc = _get_delay_service(session)
+    analysis = await _load_delay_analysis(analysis_id, svc, user_id, session)
+    if analysis.schedule_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Analysis has no schedule to cut into windows."
+        )
+    act_rows, rel_rows = await _load_schedule_rows(analysis.schedule_id, session)
+    current = _build_str_network(act_rows, rel_rows).activities
+    plan, _nets, _bounds = await _windows_plan(analysis, mode, act_rows, current, session)
+    return {
+        "mode": mode,
+        "windows": [
+            {
+                "sequence_order": w.sequence_order,
+                "opens": w.opens.isoformat(),
+                "closes": w.closes.isoformat(),
+                "snapshot_open": w.snapshot_open,
+                "snapshot_close": w.snapshot_close,
+                "no_snapshot": w.no_snapshot,
+            }
+            for w in plan
+        ],
+    }
+
+
+@router.get("/delay-analyses/{analysis_id}/validation")
+async def validate_delay_analysis(
+    analysis_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("schedule_advanced.read")),
+) -> dict:
+    """Rule results (``schedule_delay``): baseline present, events inside the project, no fragnet loop."""
+    from app.modules.schedule_advanced.delay_windows import workday_index
+    from app.modules.schedule_advanced.service import _parse_date
+    from app.modules.schedule_advanced.validators import fragnet_makes_cycle, run_delay_rules
+
+    svc = _get_delay_service(session)
+    analysis = await _load_delay_analysis(analysis_id, svc, user_id, session)
+    act_rows: list = []
+    base: list = []
+    if analysis.schedule_id is not None:
+        act_rows, rel_rows = await _load_schedule_rows(analysis.schedule_id, session)
+        base = _build_str_network(act_rows, rel_rows).activities
+    has_baseline = analysis.as_planned_baseline_id is not None or bool(await _snapshot_points(analysis, session))
+    starts = [d for d in (_parse_date(a.start_date) for a in act_rows) if d is not None]
+    ends = [d for d in (_parse_date(a.end_date) for a in act_rows) if d is not None]
+    last_workday = workday_index(min(starts), max(ends)) if starts and ends else None
+    events = []
+    for ev, spec in zip(await svc.list_events(analysis.id), await svc.build_event_specs(analysis.id), strict=False):
+        lo, hi = ev.start_workday, ev.end_workday
+        outside = None
+        if last_workday is not None and (lo is not None or hi is not None):
+            outside = (lo is not None and lo < 0) or (hi is not None and hi > last_workday)
+        cycle = fragnet_makes_cycle(base, spec) if base and spec["fragnets"] else None
+        events.append(
+            {"id": str(ev.id), "code": ev.code or ev.title, "outside_project_dates": outside, "fragnet_cycle": cycle}
+        )
+    payload = {
+        "analysis": {"id": str(analysis.id), "name": analysis.name, "has_baseline": has_baseline},
+        "events": events,
+    }
+    results = await run_delay_rules(payload)
+    return {"results": results, "failed": sum(1 for r in results if not r["passed"])}
+
+
 @router.post("/delay-analyses/{analysis_id}/compute", response_model=DelayAnalysisResponse)
 async def compute_delay_analysis(
     analysis_id: uuid.UUID,
@@ -2730,6 +2854,16 @@ async def compute_delay_analysis(
     baseline = network.activities
     event_specs = await svc.build_event_specs(analysis.id)
     apportionment = data.apportionment_method or analysis.apportionment_method
+    snapshots = [baseline, baseline]
+    window_bounds = None
+    plan: list = []
+    if analysis.method == "windows" and data.window_mode:
+        plan, snapshots, window_bounds = await _windows_plan(analysis, data.window_mode, act_rows, baseline, session)
+        if not plan:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="The schedule has no date span to cut into windows.",
+            )
     try:
         result = run_analysis(
             analysis.method,
@@ -2737,10 +2871,17 @@ async def compute_delay_analysis(
             asbuilt_activities=baseline,
             events=event_specs,
             apportionment=apportionment,
-            snapshots=[baseline, baseline],
+            snapshots=snapshots,
+            window_bounds=window_bounds,
         )
     except CycleError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    if plan:
+        result["window_mode"] = data.window_mode
+        for w, spec in zip(result.get("windows") or [], plan, strict=False):
+            w["window_start"] = spec.opens.isoformat()
+            w["window_end"] = spec.closes.isoformat()
+            w["no_snapshot"] = spec.no_snapshot
     await svc.persist_compute(analysis, result)
     return await _delay_response(svc, analysis)
 

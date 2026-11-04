@@ -552,6 +552,7 @@ class UtilisationDay(Base):
     hire_cost: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
     allocated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    counter_reset: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     def __repr__(self) -> str:
         return f"<UtilisationDay equipment={self.equipment_id} {self.day}>"

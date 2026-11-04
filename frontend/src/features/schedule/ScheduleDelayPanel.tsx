@@ -47,12 +47,14 @@ import {
   addDelayEvent,
   autoDelayFragnet,
   computeDelayAnalysis,
+  fetchDelayValidation,
   issueDelayAnalysis,
   raiseEotClaim,
   type DelayAnalysis,
   type DelayAnalysisListItem,
   type DelayMethod,
   type DelayResponsibility,
+  type DelayWindowMode,
   type DelayStatus,
 } from '@/features/schedule-advanced/api';
 
@@ -261,9 +263,9 @@ export function ScheduleDelayPanel({
 
   /* ── Compute ──────────────────────────────────────────────────────── */
   const computeMut = useMutation({
-    mutationFn: () => {
+    mutationFn: (windowMode?: DelayWindowMode) => {
       if (!selectedId) throw new Error('No analysis selected');
-      return computeDelayAnalysis(selectedId);
+      return computeDelayAnalysis(selectedId, undefined, windowMode);
     },
     onSuccess: (data) => {
       invalidateDetail();
@@ -484,7 +486,7 @@ export function ScheduleDelayPanel({
             addEventPending={addEventMut.isPending}
             onAutoFragnet={(ev) => autoFragnetMut.mutate(ev)}
             autoFragnetPending={autoFragnetMut.isPending}
-            onCompute={() => computeMut.mutate()}
+            onCompute={(mode) => computeMut.mutate(mode)}
             computePending={computeMut.isPending}
             onIssue={() => issueMut.mutate()}
             issuePending={issueMut.isPending}
@@ -537,7 +539,7 @@ function DelayDetail({
   addEventPending: boolean;
   onAutoFragnet: (ev: { id: string; ref: string; days: number }) => void;
   autoFragnetPending: boolean;
-  onCompute: () => void;
+  onCompute: (windowMode?: DelayWindowMode) => void;
   computePending: boolean;
   onIssue: () => void;
   issuePending: boolean;
@@ -549,6 +551,14 @@ function DelayDetail({
   const isComputed = analysis.status === 'computed';
   const isIssued = analysis.status === 'issued';
   const hasResult = isComputed || isIssued;
+  const [windowMode, setWindowMode] = useState<DelayWindowMode>('snapshot');
+  const checksQ = useQuery({
+    queryKey: ['schedule', 'delay', 'validation', analysis.id, analysis.status, analysis.events.length],
+    queryFn: () => fetchDelayValidation(analysis.id),
+  });
+  const failedChecks = (checksQ.data?.results ?? []).filter((r) => !r.passed);
+  const rawWindows = (analysis.result_json?.windows as Array<{ no_snapshot?: boolean }> | undefined) ?? [];
+  const concurrency = analysis.result_json?.concurrency as { present?: boolean; days?: number } | undefined;
 
   const respLabel = (r: DelayResponsibility): string =>
     ({
@@ -580,10 +590,31 @@ function DelayDetail({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {analysis.method === 'windows' && !isIssued && (
+              <label className="flex items-center gap-1.5 text-xs text-content-secondary">
+                {t('schedule.delay.window_cut', { defaultValue: 'Cut windows by' })}
+                <select
+                  value={windowMode}
+                  onChange={(e) => setWindowMode(e.target.value as DelayWindowMode)}
+                  className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-sm text-content-primary"
+                  data-testid="delay-window-mode"
+                >
+                  <option value="snapshot">
+                    {t('schedule.delay.window_cut_snapshot', { defaultValue: 'Snapshot' })}
+                  </option>
+                  <option value="month">
+                    {t('schedule.delay.window_cut_month', { defaultValue: 'Month' })}
+                  </option>
+                  <option value="quarter">
+                    {t('schedule.delay.window_cut_quarter', { defaultValue: 'Quarter' })}
+                  </option>
+                </select>
+              </label>
+            )}
             <Button
               variant="primary"
               size="sm"
-              onClick={onCompute}
+              onClick={() => onCompute(analysis.method === 'windows' ? windowMode : undefined)}
               disabled={computePending || isIssued}
               icon={
                 computePending ? (
@@ -630,6 +661,25 @@ function DelayDetail({
           </div>
         </div>
 
+        {failedChecks.length > 0 && (
+          <div
+            className="mt-3 rounded-lg bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary"
+            data-testid="delay-checks"
+          >
+            <p className="mb-1 flex items-center gap-1.5 font-medium">
+              <AlertTriangle size={14} className="shrink-0 text-semantic-warning" />
+              {t('schedule.delay.checks_title', { defaultValue: 'Check before you rely on this result' })}
+            </p>
+            <ul className="list-disc space-y-0.5 pl-5">
+              {failedChecks.map((r) => (
+                <li key={`${r.rule_id}-${r.element_ref}`}>
+                  {t(r.details.message_key ?? '', { ...r.details, defaultValue: r.message })}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {isIssued && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-semantic-success-bg px-3 py-2 text-xs text-semantic-success">
             <ShieldCheck size={14} className="shrink-0" />
@@ -673,6 +723,21 @@ function DelayDetail({
             />
           </dl>
 
+          {concurrency?.present && (
+            <p className="mt-3 text-sm text-content-secondary" data-testid="delay-concurrent-note">
+              {t('schedule.delay.concurrent_note', {
+                defaultValue:
+                  '{{days}} day(s) were delayed by the employer and the contractor at the same time. Who carries them follows the apportionment rule above.',
+                days: concurrency.days ?? 0,
+              })}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-content-tertiary">
+            {t('schedule.delay.indicative_note', {
+              defaultValue: 'Indicative result from the schedule data, not an expert opinion.',
+            })}
+          </p>
+
           {/* Per-window attribution */}
           {analysis.windows.length > 0 ? (
             <div className="mt-4 overflow-x-auto">
@@ -703,12 +768,24 @@ function DelayDetail({
                   </tr>
                 </thead>
                 <tbody>
-                  {analysis.windows.map((w) => (
+                  {analysis.windows.map((w, i) => (
                     <tr key={w.id} className="border-t border-border-light align-top">
                       <td className="px-3 py-2">
                         <span className="font-mono tabular-nums text-content-secondary">
-                          {w.sequence_order + 1}
+                          {i + 1}
                         </span>
+                        {w.window_start && w.window_end && (
+                          <span className="ml-2 text-2xs text-content-tertiary">
+                            {w.window_start} - {w.window_end}
+                          </span>
+                        )}
+                        {rawWindows[i]?.no_snapshot && (
+                          <p className="mt-0.5 max-w-xs text-2xs text-semantic-warning">
+                            {t('schedule.delay.window_no_snapshot', {
+                              defaultValue: 'No schedule snapshot inside this window, so slip cannot be placed here.',
+                            })}
+                          </p>
+                        )}
                         {w.narrative && (
                           <p className="mt-0.5 max-w-xs text-2xs text-content-tertiary">
                             {w.narrative}
