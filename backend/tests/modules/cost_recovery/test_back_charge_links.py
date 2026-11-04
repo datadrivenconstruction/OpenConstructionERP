@@ -154,7 +154,7 @@ async def test_a_back_charge_from_a_punch_item_takes_its_rework_cost(session: As
     pid = await _project(session)
     punch = await _punch(session, pid)
 
-    bc = await create_back_charge(session, pid, BackChargeCreate(punch_item_id=punch.id))
+    bc = await create_back_charge(session, pid, BackChargeCreate(punch_item_id=punch.id, responsible_party="Sub A"))
 
     assert bc.punch_item_id == punch.id
     assert bc.gross_amount == Decimal("480.00")
@@ -167,7 +167,7 @@ async def test_a_back_charge_from_an_ncr_takes_its_cost_impact(session: AsyncSes
     pid = await _project(session)
     ncr = await _ncr(session, pid)
 
-    bc = await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id))
+    bc = await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id, responsible_party="Sub A"))
 
     assert bc.ncr_id == ncr.id
     assert bc.gross_amount == Decimal("1250.50")
@@ -182,9 +182,9 @@ async def test_a_source_from_another_project_is_refused(session: AsyncSession) -
     punch = await _punch(session, other)
 
     with pytest.raises(InvalidBackChargeLink):
-        await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id))
+        await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id, responsible_party="Sub A"))
     with pytest.raises(InvalidBackChargeLink):
-        await create_back_charge(session, pid, BackChargeCreate(punch_item_id=punch.id))
+        await create_back_charge(session, pid, BackChargeCreate(punch_item_id=punch.id, responsible_party="Sub A"))
 
 
 # --- pending deduction ----------------------------------------------------
@@ -271,7 +271,9 @@ async def test_an_apportioned_charge_deducts_only_this_subcontractors_share(sess
 @pytest.mark.asyncio
 async def test_relinking_on_update_is_checked(session: AsyncSession) -> None:
     pid = await _project(session)
-    bc = await create_back_charge(session, pid, BackChargeCreate(gross_amount=Decimal("10")))
+    bc = await create_back_charge(
+        session, pid, BackChargeCreate(responsible_party="Sub A", gross_amount=Decimal("10"), currency="EUR")
+    )
     with pytest.raises(InvalidBackChargeLink):
         await update_back_charge(session, pid, bc.id, BackChargeUpdate(subcontractor_id=uuid.uuid4()))
     sub = await _sub(session)
@@ -304,7 +306,7 @@ async def test_a_cost_impact_in_another_currency_keeps_its_currency(session: Asy
     ncr.cost_impact = "EUR 8400"
     await session.flush()
 
-    bc = await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id))
+    bc = await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id, responsible_party="Sub A"))
 
     assert bc.gross_amount == Decimal("8400")
     assert bc.currency == "EUR"

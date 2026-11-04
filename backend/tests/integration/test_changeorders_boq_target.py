@@ -794,6 +794,7 @@ async def _seed_over_http(
             "title": "Extra piling to grid F",
             "description": "Ground conditions differed from the geotechnical report.",
             "schedule_impact_days": 4,
+            "currency": "EUR",
         },
         headers=author,
     )

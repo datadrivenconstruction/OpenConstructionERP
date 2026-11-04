@@ -88,6 +88,7 @@ def _serialize(back_charge: BackCharge) -> BackChargeOut:
         contact_id=str(back_charge.contact_id) if back_charge.contact_id else None,
         ncr_id=str(back_charge.ncr_id) if back_charge.ncr_id else None,
         punch_item_id=str(back_charge.punch_item_id) if back_charge.punch_item_id else None,
+        validation_warnings=list(getattr(back_charge, "validation_warnings", None) or []),
     )
 
 

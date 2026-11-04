@@ -118,6 +118,7 @@ async def test_update_stamps_and_closes(session: AsyncSession) -> None:
         ),
     )
 
+    await update_back_charge(session, pid, back_charge.id, BackChargeUpdate(status="agreed"))
     updated = await update_back_charge(
         session,
         pid,
@@ -215,6 +216,7 @@ async def test_create_rejects_unknown_subject_kind(session: AsyncSession) -> Non
             BackChargeCreate(
                 responsible_party="x",
                 gross_amount=Decimal("1"),
+                currency="USD",
                 subject_kind="not_a_kind",
                 subject_id=uuid.uuid4(),
             ),
@@ -234,6 +236,7 @@ async def test_create_rejects_missing_subject(session: AsyncSession) -> None:
             BackChargeCreate(
                 responsible_party="x",
                 gross_amount=Decimal("1"),
+                currency="USD",
                 subject_kind="change_order",
                 subject_id=uuid.uuid4(),
             ),

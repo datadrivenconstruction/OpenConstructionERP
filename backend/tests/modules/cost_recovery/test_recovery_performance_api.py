@@ -76,6 +76,9 @@ async def _back_charge(
     if band is not None:
         bc.metadata_ = {"traceability_band": band}
     if status != "proposed" or recovered is not None:
+        if status == "recovered":
+            # A recovery is only booked against an agreed claim.
+            await update_back_charge(session, project_id, bc.id, BackChargeUpdate(status="agreed"))
         # Only set recovered_amount when supplied: passing None would clear a
         # NOT NULL column (model_dump(exclude_unset) keeps an explicit None).
         update_fields: dict[str, object] = {"status": status}
