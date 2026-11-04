@@ -235,6 +235,10 @@ class RiskResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
     @field_serializer("impact_cost", "response_cost", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:

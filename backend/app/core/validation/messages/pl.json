@@ -1770,5 +1770,59 @@
     "required_when": "Pole {field} należy wypełnić, gdy {other_field} ma wartość {other_value}.",
     "limit_exceeded": "{field} ({value}) przekracza limit {limit} wynikający z {limit_field}.",
     "suggestion": "Sprawdź zapis i przed zapisaniem popraw błędną wartość lub datę."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Daty {value} w polu {field} nie ma w kalendarzu.",
+      "suggestion": "Wpisz istniejącą datę kalendarzową."
+    },
+    "checklist_open": {
+      "fail": "Otwartych pozycji listy kontrolnej: {count} z {total}.",
+      "suggestion": "Odhacz lub usuń otwarte pozycje przed zakończeniem zadania."
+    },
+    "decision_unrecorded": {
+      "fail": "Zadanie decyzyjne jest zakończone, ale nie zapisano decyzji.",
+      "suggestion": "Wpisz decyzję w wyniku, aby zespół na budowie mógł według niej działać."
+    },
+    "owner_missing": {
+      "fail": "Nie wskazano osoby odpowiedzialnej.",
+      "suggestion": "Wskaż osobę odpowiedzialną lub kontakt przed rozpoczęciem prac."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Zmiany o poziomie ryzyka {risk_level} nie można zaakceptować bez środka ograniczającego ryzyko.",
+      "suggestion": "Zapisz środek ograniczający w wierszu wpływu, a potem zaakceptuj zmianę."
+    },
+    "decline_reason_missing": {
+      "fail": "Zmiana została odrzucona bez podania powodu.",
+      "suggestion": "Zapisz powód odrzucenia, aby wnioskodawca i ścieżka audytu mogły go prześledzić."
+    },
+    "mitigation_missing": {
+      "fail": "Ryzyko ma status {status}, ale nie zapisano strategii ani działania ograniczającego.",
+      "suggestion": "Opisz ograniczenie ryzyka, zanim przeniesiesz je do tego statusu."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Koszt reakcji {response} jest wyższy niż pełny wpływ {impact}.",
+      "suggestion": "Sprawdź obie kwoty albo zaakceptuj ryzyko zamiast wydawać na jego obsługę więcej, niż może kosztować."
+    },
+    "closed_unaddressed": {
+      "fail": "Ryzyko o wadze {level} zamknięto, choć nie zostało ograniczone ani nie wystąpiło.",
+      "suggestion": "Najpierw je ogranicz albo zapisz, dlaczego już nie obowiązuje."
+    },
+    "progress_regression": {
+      "fail": "Odczyt {new}% jest niższy od poprzedniego odczytu {previous}%.",
+      "suggestion": "Jeśli to korekta, podaj powód; w przeciwnym razie sprawdź wpis."
+    },
+    "completion_unevidenced": {
+      "fail": "Zgłoszono 100% bez zdjęcia ani notatki jako potwierdzenia.",
+      "suggestion": "Dołącz zdjęcie lub dodaj notatkę, aby można było zweryfikować ukończenie."
+    },
+    "geo_incomplete": {
+      "fail": "Podano tylko szerokość lub tylko długość geograficzną.",
+      "suggestion": "Podaj obie współrzędne albo zostaw lokalizację pustą."
+    },
+    "plan_order": {
+      "fail": "Planowane {pct}% na {period} jest sprzeczne z {other_pct}% zaplanowanymi na {other}; plan narastający nigdy nie maleje.",
+      "suggestion": "Popraw planowane procenty tak, aby rosły z okresu na okres."
+    }
   }
 }

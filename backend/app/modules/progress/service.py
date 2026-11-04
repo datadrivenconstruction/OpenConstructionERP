@@ -43,6 +43,7 @@ carries no quantities.
 from __future__ import annotations
 
 import logging
+import re
 import uuid
 from collections.abc import Mapping
 from decimal import Decimal
@@ -71,8 +72,23 @@ from app.modules.progress.schemas import (
     SCurvePoint,
     SCurveResponse,
 )
+from app.modules.progress.validators import (
+    CompletionEvidencedRule,
+    GeoPairCompleteRule,
+    PlanCumulativeRule,
+    ReadingNotBackwardsRule,
+)
 
 logger = logging.getLogger(__name__)
+
+# Rule ids per write point: a reading is not judged by the plan rule, nor a plan point by the reading rules.
+_ENTRY_RULES = (GeoPairCompleteRule, ReadingNotBackwardsRule, CompletionEvidencedRule)
+_PLAN_RULES = (PlanCumulativeRule,)
+
+
+def _period_key(label: str) -> list[Any]:
+    """Natural order of a period label, so W9 sorts before W10."""
+    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", label)]
 
 
 def _validate_geo(lat: float | None, lon: float | None) -> None:
@@ -249,6 +265,32 @@ class ProgressService:
         # Geo validation
         _validate_geo(data.geo_lat, data.geo_lon)
 
+        from app.core.validation.control_rules import gate  # noqa: PLC0415
+        from app.modules.progress.validators import PROGRESS_RULE_SET  # noqa: PLC0415
+
+        last = (
+            await self.repo.get_latest_for_position(data.project_id, data.boq_position_id)
+            if data.boq_position_id is not None
+            else await self.repo.get_latest_project_entry(data.project_id)
+        )
+        warnings = await gate(
+            PROGRESS_RULE_SET,
+            {
+                "entry": {
+                    "percent_complete": data.percent_complete,
+                    "previous_percent": float(last.percent_complete) if last is not None else None,
+                    "geo_lat": data.geo_lat,
+                    "geo_lon": data.geo_lon,
+                    "photos": data.photos,
+                    "notes": data.notes,
+                }
+            },
+            target_type="progress_entry",
+            target_id=str(data.boq_position_id or data.project_id),
+            project_id=data.project_id,
+            only=[r.rule_id for r in _ENTRY_RULES],
+        )
+
         entry = ProgressEntry(
             project_id=data.project_id,
             boq_position_id=data.boq_position_id,
@@ -262,6 +304,7 @@ class ProgressService:
             metadata_=data.metadata,
         )
         entry = await self.repo.create_entry(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info(
             "Progress recorded: position=%s period=%s pct=%.3f by=%s",
             data.boq_position_id,
@@ -771,12 +814,40 @@ class ProgressService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"planned_pct {data.planned_pct} must be in [0, 100]",
             )
+        from app.core.validation.control_rules import gate  # noqa: PLC0415
+        from app.modules.progress.validators import PROGRESS_RULE_SET  # noqa: PLC0415
+
+        others = [p for p in await self.repo.list_plan(data.project_id) if p.period_label != data.period_label]
+        warnings = await gate(
+            PROGRESS_RULE_SET,
+            {
+                "plan": {
+                    "period_label": data.period_label,
+                    "planned_pct": data.planned_pct,
+                    "earlier": [
+                        [p.period_label, float(p.planned_pct)]
+                        for p in others
+                        if _period_key(p.period_label) < _period_key(data.period_label)
+                    ],
+                    "later": [
+                        [p.period_label, float(p.planned_pct)]
+                        for p in others
+                        if _period_key(p.period_label) > _period_key(data.period_label)
+                    ],
+                }
+            },
+            target_type="progress_plan",
+            target_id=data.period_label,
+            project_id=data.project_id,
+            only=[r.rule_id for r in _PLAN_RULES],
+        )
         plan = await self.repo.upsert_plan(
             data.project_id,
             data.period_label,
             data.planned_pct,
             notes=data.notes,
         )
+        plan.validation_warnings = warnings
         return plan
 
     async def list_plan(self, project_id: uuid.UUID) -> list[Any]:

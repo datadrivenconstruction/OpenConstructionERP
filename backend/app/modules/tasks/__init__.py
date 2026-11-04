@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.tasks.permissions import register_tasks_permissions
 
     register_tasks_permissions()
+    from app.modules.tasks.validators import register_tasks_validation_rules
+
+    register_tasks_validation_rules()

@@ -1770,5 +1770,59 @@
     "required_when": "当 {other_field} 为 {other_value} 时，必须填写 {field}。",
     "limit_exceeded": "{field}（{value}）超出了 {limit_field} 规定的限值 {limit}。",
     "suggestion": "请检查该记录，并在保存前更正错误的数值或日期。"
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "字段 {field} 中的日期 {value} 在日历中不存在。",
+      "suggestion": "请输入日历上真实存在的日期。"
+    },
+    "checklist_open": {
+      "fail": "检查清单 {total} 项中仍有 {count} 项未关闭。",
+      "suggestion": "完成任务前，请勾选或删除未关闭的项目。"
+    },
+    "decision_unrecorded": {
+      "fail": "决策任务已完成，但未记录任何决定。",
+      "suggestion": "请把决定写入结果，便于现场团队据此执行。"
+    },
+    "owner_missing": {
+      "fail": "未指定责任人。",
+      "suggestion": "开工前请指定责任人或联系人。"
+    },
+    "high_risk_unmitigated": {
+      "fail": "风险等级为 {risk_level} 的变更，在没有缓解措施的情况下不能批准。",
+      "suggestion": "请先在影响行中记录缓解措施，再批准该变更。"
+    },
+    "decline_reason_missing": {
+      "fail": "该变更被驳回，但未说明原因。",
+      "suggestion": "请记录驳回原因，以便提出人和审计轨迹可以追溯。"
+    },
+    "mitigation_missing": {
+      "fail": "该风险的状态为 {status}，但未记录缓解策略或措施。",
+      "suggestion": "将风险转入此状态之前，请先说明缓解措施。"
+    },
+    "response_exceeds_exposure": {
+      "fail": "应对成本 {response} 高于全部影响 {impact}。",
+      "suggestion": "请核对两个金额，或接受该风险，而不是为处理它花费超过其可能造成的损失。"
+    },
+    "closed_unaddressed": {
+      "fail": "严重程度为 {level} 的风险在未缓解、也未发生的情况下被关闭。",
+      "suggestion": "请先缓解该风险，或注明其不再适用的原因。"
+    },
+    "progress_regression": {
+      "fail": "读数 {new}% 低于上一次读数 {previous}%。",
+      "suggestion": "如果是更正，请注明原因；否则请检查录入。"
+    },
+    "completion_unevidenced": {
+      "fail": "上报了 100%，但没有照片或备注作为依据。",
+      "suggestion": "请附上照片或添加备注，以便核实完工情况。"
+    },
+    "geo_incomplete": {
+      "fail": "只填写了纬度或经度中的一个。",
+      "suggestion": "请同时填写两个坐标，或将位置留空。"
+    },
+    "plan_order": {
+      "fail": "{period} 的计划 {pct}% 与 {other} 的计划 {other_pct}% 相矛盾；累计计划不会下降。",
+      "suggestion": "请修正计划百分比，使其逐期递增。"
+    }
   }
 }

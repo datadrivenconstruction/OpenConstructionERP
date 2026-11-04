@@ -1770,5 +1770,59 @@
     "required_when": "Phải nhập {field} khi {other_field} là {other_value}.",
     "limit_exceeded": "{field} ({value}) vượt quá giới hạn {limit} do {limit_field} quy định.",
     "suggestion": "Kiểm tra bản ghi và sửa giá trị hoặc ngày sai trước khi lưu."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Ngày {value} trong trường {field} không tồn tại trên lịch.",
+      "suggestion": "Hãy nhập một ngày hợp lệ trên lịch."
+    },
+    "checklist_open": {
+      "fail": "Còn {count} trên {total} mục của danh sách kiểm tra chưa đóng.",
+      "suggestion": "Hãy đánh dấu hoặc xóa các mục đang mở trước khi hoàn thành công việc."
+    },
+    "decision_unrecorded": {
+      "fail": "Công việc ra quyết định đã hoàn thành nhưng chưa ghi nhận quyết định nào.",
+      "suggestion": "Hãy ghi quyết định vào kết quả để đội công trường có thể thực hiện theo."
+    },
+    "owner_missing": {
+      "fail": "Chưa chỉ định người chịu trách nhiệm.",
+      "suggestion": "Hãy chỉ định người chịu trách nhiệm hoặc đầu mối trước khi bắt đầu thi công."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Thay đổi có mức rủi ro {risk_level} không thể được chấp thuận nếu thiếu biện pháp giảm thiểu.",
+      "suggestion": "Hãy ghi biện pháp giảm thiểu vào một dòng tác động rồi chấp thuận thay đổi."
+    },
+    "decline_reason_missing": {
+      "fail": "Thay đổi bị từ chối mà không có lý do.",
+      "suggestion": "Hãy ghi lý do từ chối để người đề xuất và nhật ký kiểm toán có thể theo dõi."
+    },
+    "mitigation_missing": {
+      "fail": "Rủi ro đang ở trạng thái {status} nhưng chưa ghi nhận chiến lược hoặc hành động giảm thiểu.",
+      "suggestion": "Hãy mô tả biện pháp giảm thiểu trước khi chuyển rủi ro sang trạng thái này."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Chi phí ứng phó {response} cao hơn toàn bộ tác động {impact}.",
+      "suggestion": "Hãy kiểm tra cả hai số tiền, hoặc chấp nhận rủi ro thay vì chi cho xử lý nhiều hơn mức nó có thể gây tốn kém."
+    },
+    "closed_unaddressed": {
+      "fail": "Một rủi ro mức nghiêm trọng {level} đã bị đóng mà chưa được giảm thiểu cũng chưa xảy ra.",
+      "suggestion": "Hãy giảm thiểu trước, hoặc ghi chú vì sao nó không còn áp dụng."
+    },
+    "progress_regression": {
+      "fail": "Số đọc {new}% thấp hơn số đọc trước đó {previous}%.",
+      "suggestion": "Nếu là hiệu chỉnh, hãy ghi lý do; nếu không, hãy kiểm tra lại mục nhập."
+    },
+    "completion_unevidenced": {
+      "fail": "Báo cáo 100% mà không có ảnh hoặc ghi chú làm bằng chứng.",
+      "suggestion": "Hãy đính kèm ảnh hoặc thêm ghi chú để có thể xác minh việc hoàn thành."
+    },
+    "geo_incomplete": {
+      "fail": "Chỉ có vĩ độ hoặc chỉ có kinh độ được cung cấp.",
+      "suggestion": "Hãy nhập cả hai tọa độ hoặc để trống vị trí."
+    },
+    "plan_order": {
+      "fail": "{pct}% kế hoạch cho {period} mâu thuẫn với {other_pct}% kế hoạch cho {other}; kế hoạch lũy kế không bao giờ giảm.",
+      "suggestion": "Hãy sửa các tỷ lệ phần trăm kế hoạch để chúng tăng dần từ kỳ này sang kỳ khác."
+    }
   }
 }

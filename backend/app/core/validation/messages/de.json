@@ -1770,5 +1770,59 @@
     "required_when": "{field} muss angegeben werden, wenn {other_field} den Wert {other_value} hat.",
     "limit_exceeded": "{field} ({value}) überschreitet den Grenzwert {limit} aus {limit_field}.",
     "suggestion": "Prüfen Sie den Datensatz und korrigieren Sie vor dem Speichern die falsche Angabe oder das falsche Datum."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Das Datum {value} in {field} gibt es im Kalender nicht.",
+      "suggestion": "Geben Sie ein gültiges Kalenderdatum ein."
+    },
+    "checklist_open": {
+      "fail": "{count} von {total} Checklistenpunkten sind noch offen.",
+      "suggestion": "Haken Sie die offenen Punkte ab oder entfernen Sie sie, bevor Sie die Aufgabe abschließen."
+    },
+    "decision_unrecorded": {
+      "fail": "Die Entscheidungsaufgabe ist abgeschlossen, aber es ist keine Entscheidung festgehalten.",
+      "suggestion": "Tragen Sie die Entscheidung ins Ergebnis ein, damit das Baustellenteam danach handeln kann."
+    },
+    "owner_missing": {
+      "fail": "Es ist niemand als verantwortlich benannt.",
+      "suggestion": "Benennen Sie eine verantwortliche Person oder einen Ansprechpartner, bevor die Arbeit beginnt."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Eine Änderung mit Risikostufe {risk_level} kann ohne Gegenmaßnahme nicht genehmigt werden.",
+      "suggestion": "Erfassen Sie die Gegenmaßnahme in einer Auswirkungszeile und genehmigen Sie die Änderung dann."
+    },
+    "decline_reason_missing": {
+      "fail": "Die Änderung wurde ohne Begründung abgelehnt.",
+      "suggestion": "Halten Sie fest, warum sie abgelehnt wurde, damit Antragsteller und Prüfpfad es nachvollziehen können."
+    },
+    "mitigation_missing": {
+      "fail": "Das Risiko hat den Status {status}, aber es ist keine Minderungsstrategie oder -maßnahme erfasst.",
+      "suggestion": "Beschreiben Sie die Minderung, bevor Sie das Risiko in diesen Status setzen."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Die Kosten der Gegenmaßnahme {response} liegen über der vollen Auswirkung {impact}.",
+      "suggestion": "Prüfen Sie beide Werte oder akzeptieren Sie das Risiko, statt mehr für die Behandlung auszugeben, als es kosten kann."
+    },
+    "closed_unaddressed": {
+      "fail": "Ein Risiko mit Schweregrad {level} wurde geschlossen, ohne gemindert worden oder eingetreten zu sein.",
+      "suggestion": "Mindern Sie es zuerst oder vermerken Sie, warum es nicht mehr zutrifft."
+    },
+    "progress_regression": {
+      "fail": "Der Messwert {new} % liegt unter dem vorherigen Messwert {previous} %.",
+      "suggestion": "Ist es eine Korrektur, vermerken Sie den Grund; andernfalls prüfen Sie die Eingabe."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % werden ohne Foto oder Vermerk als Nachweis gemeldet.",
+      "suggestion": "Fügen Sie ein Foto oder einen Vermerk hinzu, damit die Fertigstellung überprüft werden kann."
+    },
+    "geo_incomplete": {
+      "fail": "Es ist nur Breiten- oder Längengrad angegeben.",
+      "suggestion": "Geben Sie beide Koordinaten an oder lassen Sie den Standort leer."
+    },
+    "plan_order": {
+      "fail": "Die geplanten {pct} % für {period} widersprechen den {other_pct} % für {other}; ein kumulierter Plan fällt nie.",
+      "suggestion": "Korrigieren Sie die Planprozente so, dass sie von Periode zu Periode steigen."
+    }
   }
 }

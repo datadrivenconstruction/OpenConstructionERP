@@ -113,6 +113,7 @@ def _to_response(
         updated_at=item.updated_at,  # type: ignore[attr-defined]
         completed_at=completed_at,
         is_overdue=_compute_is_overdue(item),
+        validation_warnings=getattr(item, "validation_warnings", None) or [],
     )
 
 

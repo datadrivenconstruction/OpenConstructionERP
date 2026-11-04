@@ -1770,5 +1770,59 @@
     "required_when": "{field} skal angives, når {other_field} er {other_value}.",
     "limit_exceeded": "{field} ({value}) overskrider grænsen {limit} fastsat af {limit_field}.",
     "suggestion": "Kontrollér posten, og ret den forkerte værdi eller dato, før du gemmer."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Datoen {value} i {field} findes ikke i kalenderen.",
+      "suggestion": "Angiv en gyldig kalenderdato."
+    },
+    "checklist_open": {
+      "fail": "{count} af {total} punkter på tjeklisten er stadig åbne.",
+      "suggestion": "Afkryds eller fjern de åbne punkter, før opgaven afsluttes."
+    },
+    "decision_unrecorded": {
+      "fail": "Beslutningsopgaven er afsluttet, men der er ikke noteret nogen beslutning.",
+      "suggestion": "Skriv beslutningen i resultatet, så byggepladsholdet kan handle efter den."
+    },
+    "owner_missing": {
+      "fail": "Ingen er udpeget som ansvarlig.",
+      "suggestion": "Udpeg en ansvarlig person eller kontakt, før arbejdet går i gang."
+    },
+    "high_risk_unmitigated": {
+      "fail": "En ændring med risikoniveau {risk_level} kan ikke godkendes uden en afbødende foranstaltning.",
+      "suggestion": "Notér foranstaltningen på en påvirkningslinje, og godkend derefter ændringen."
+    },
+    "decline_reason_missing": {
+      "fail": "Ændringen er afvist uden begrundelse.",
+      "suggestion": "Notér hvorfor den blev afvist, så indsenderen og revisionssporet kan følge det."
+    },
+    "mitigation_missing": {
+      "fail": "Risikoen har status {status}, men der er ikke noteret nogen afbødende strategi eller handling.",
+      "suggestion": "Beskriv afbødningen, før risikoen flyttes til denne status."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Omkostningen til indsatsen {response} er højere end den fulde påvirkning {impact}.",
+      "suggestion": "Kontrollér begge beløb, eller accepter risikoen i stedet for at bruge mere på at håndtere den, end den kan koste."
+    },
+    "closed_unaddressed": {
+      "fail": "En risiko med alvorlighed {level} er lukket uden at være afbødet eller indtruffet.",
+      "suggestion": "Afbød den først, eller notér hvorfor den ikke længere gælder."
+    },
+    "progress_regression": {
+      "fail": "Aflæsningen {new} % er lavere end den forrige aflæsning {previous} %.",
+      "suggestion": "Hvis det er en rettelse, angiv årsagen; ellers kontrollér indtastningen."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % er meldt uden foto eller notat som dokumentation.",
+      "suggestion": "Vedhæft et foto eller tilføj et notat, så færdiggørelsen kan kontrolleres."
+    },
+    "geo_incomplete": {
+      "fail": "Kun enten bredde- eller længdegrad er angivet.",
+      "suggestion": "Angiv begge koordinater, eller lad placeringen stå tom."
+    },
+    "plan_order": {
+      "fail": "De planlagte {pct} % for {period} strider mod {other_pct} % planlagt for {other}; en kumulativ plan falder aldrig.",
+      "suggestion": "Ret de planlagte procenter, så de stiger fra periode til periode."
+    }
   }
 }

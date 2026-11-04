@@ -10,3 +10,6 @@ async def on_startup() -> None:
 
     register_moc_permissions()
     register_subscribers()
+    from app.modules.moc.validators import register_moc_validation_rules
+
+    register_moc_validation_rules()

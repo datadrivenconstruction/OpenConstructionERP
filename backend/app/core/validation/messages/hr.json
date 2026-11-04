@@ -1770,5 +1770,59 @@
     "required_when": "{field} treba navesti kada je {other_field} {other_value}.",
     "limit_exceeded": "{field} ({value}) premašuje granicu {limit} koju određuje {limit_field}.",
     "suggestion": "Provjerite zapis i prije spremanja ispravite pogrešnu vrijednost ili datum."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Datum {value} u polju {field} ne postoji u kalendaru.",
+      "suggestion": "Unesite postojeći kalendarski datum."
+    },
+    "checklist_open": {
+      "fail": "Otvorenih stavki kontrolnog popisa: {count} od {total}.",
+      "suggestion": "Označite ili uklonite otvorene stavke prije dovršetka zadatka."
+    },
+    "decision_unrecorded": {
+      "fail": "Zadatak odluke je dovršen, ali odluka nije zabilježena.",
+      "suggestion": "Upišite odluku u rezultat kako bi ekipa na gradilištu mogla postupiti prema njoj."
+    },
+    "owner_missing": {
+      "fail": "Nije imenovana odgovorna osoba.",
+      "suggestion": "Imenujte odgovornu osobu ili kontakt prije početka radova."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Promjena s razinom rizika {risk_level} ne može se prihvatiti bez mjere za ublažavanje rizika.",
+      "suggestion": "Zabilježite mjeru u retku utjecaja, a zatim prihvatite promjenu."
+    },
+    "decline_reason_missing": {
+      "fail": "Promjena je odbijena bez obrazloženja.",
+      "suggestion": "Zabilježite zašto je odbijena kako bi predlagatelj i revizijski trag to mogli pratiti."
+    },
+    "mitigation_missing": {
+      "fail": "Rizik je u statusu {status}, ali nije zabilježena strategija ni radnja ublažavanja.",
+      "suggestion": "Opišite ublažavanje prije nego rizik prebacite u ovaj status."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Trošak odgovora {response} veći je od punog utjecaja {impact}.",
+      "suggestion": "Provjerite oba iznosa ili prihvatite rizik umjesto da za njegovo rješavanje trošite više nego što može stajati."
+    },
+    "closed_unaddressed": {
+      "fail": "Rizik ozbiljnosti {level} zatvoren je a da nije ublažen niti se dogodio.",
+      "suggestion": "Najprije ga ublažite ili zabilježite zašto više ne vrijedi."
+    },
+    "progress_regression": {
+      "fail": "Očitanje {new} % niže je od prethodnog očitanja {previous} %.",
+      "suggestion": "Ako je riječ o ispravku, navedite razlog; inače provjerite unos."
+    },
+    "completion_unevidenced": {
+      "fail": "Prijavljeno je 100 % bez fotografije ili bilješke kao dokaza.",
+      "suggestion": "Priložite fotografiju ili dodajte bilješku kako bi se dovršetak mogao provjeriti."
+    },
+    "geo_incomplete": {
+      "fail": "Navedena je samo zemljopisna širina ili samo dužina.",
+      "suggestion": "Navedite obje koordinate ili ostavite lokaciju praznom."
+    },
+    "plan_order": {
+      "fail": "Planiranih {pct} % za {period} proturječi s {other_pct} % planiranih za {other}; kumulativni plan nikada ne pada.",
+      "suggestion": "Ispravite planirane postotke tako da rastu od razdoblja do razdoblja."
+    }
   }
 }

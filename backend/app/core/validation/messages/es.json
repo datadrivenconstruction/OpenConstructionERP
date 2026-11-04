@@ -1770,5 +1770,59 @@
     "required_when": "{field} debe indicarse cuando {other_field} es {other_value}.",
     "limit_exceeded": "{field} ({value}) supera el límite {limit} fijado por {limit_field}.",
     "suggestion": "Revise el registro y corrija la cifra o la fecha errónea antes de guardar."
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "La fecha {value} del campo {field} no existe en el calendario.",
+      "suggestion": "Introduzca una fecha de calendario válida."
+    },
+    "checklist_open": {
+      "fail": "Quedan {count} de {total} puntos de la lista de verificación sin cerrar.",
+      "suggestion": "Marque o elimine los puntos abiertos antes de completar la tarea."
+    },
+    "decision_unrecorded": {
+      "fail": "La tarea de decisión está completada, pero no se ha registrado ninguna decisión.",
+      "suggestion": "Escriba la decisión en el resultado para que el equipo de obra pueda actuar."
+    },
+    "owner_missing": {
+      "fail": "No hay nadie designado como responsable.",
+      "suggestion": "Designe a un responsable o un contacto antes de iniciar los trabajos."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Un cambio con riesgo {risk_level} no puede aceptarse sin una medida de mitigación.",
+      "suggestion": "Registre la mitigación en una línea de impacto y luego acepte el cambio."
+    },
+    "decline_reason_missing": {
+      "fail": "El cambio se rechaza sin indicar el motivo.",
+      "suggestion": "Registre por qué se rechazó, para que el solicitante y la pista de auditoría puedan seguirlo."
+    },
+    "mitigation_missing": {
+      "fail": "El riesgo está en estado {status}, pero no hay estrategia ni acción de mitigación registrada.",
+      "suggestion": "Describa la mitigación antes de pasar el riesgo a este estado."
+    },
+    "response_exceeds_exposure": {
+      "fail": "El coste de la respuesta {response} supera el impacto total {impact}.",
+      "suggestion": "Revise ambas cifras o acepte el riesgo en lugar de gastar en tratarlo más de lo que puede costar."
+    },
+    "closed_unaddressed": {
+      "fail": "Un riesgo de gravedad {level} se cierra sin haberse mitigado ni haberse producido.",
+      "suggestion": "Mitíguelo primero o anote por qué ya no aplica."
+    },
+    "progress_regression": {
+      "fail": "La lectura de {new} % es inferior a la lectura anterior de {previous} %.",
+      "suggestion": "Si es una corrección, indique el motivo; si no, revise el registro."
+    },
+    "completion_unevidenced": {
+      "fail": "Se declara el 100 % sin foto ni nota como prueba.",
+      "suggestion": "Adjunte una foto o añada una nota para poder verificar la finalización."
+    },
+    "geo_incomplete": {
+      "fail": "Solo se indica la latitud o la longitud.",
+      "suggestion": "Indique ambas coordenadas o deje la ubicación vacía."
+    },
+    "plan_order": {
+      "fail": "El {pct} % previsto para {period} contradice el {other_pct} % previsto para {other}; un plan acumulado nunca baja.",
+      "suggestion": "Corrija los porcentajes previstos para que aumenten de un periodo al siguiente."
+    }
   }
 }
