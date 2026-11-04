@@ -599,6 +599,8 @@ class ClockService:
                 user_id,
             )
         else:
+            # Refreshing rewrites the lines, so a locked payroll period blocks it like any edit.
+            await service._assert_payroll_open(project_id, day)
             timesheet = existing
             for line in list(timesheet.lines):
                 await self.session.delete(line)
