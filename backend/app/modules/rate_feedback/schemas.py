@@ -30,7 +30,6 @@ class ProposalResponse(BaseModel):
     total_quantity: Decimal
     spread_pct: Decimal | None
     confidence: Decimal
-    project_ids: list[str]
     status: str
     decided_at: datetime | None
     applied_rate: Decimal | None
@@ -68,7 +67,7 @@ class RefreshResponse(BaseModel):
 class ConfirmRequest(BaseModel):
     """``rate`` lets the estimator keep a figure of their own instead of the suggestion."""
 
-    rate: Decimal | None = Field(default=None, gt=0)
+    rate: Decimal | None = Field(default=None, gt=0, lt=Decimal("100000000000"), decimal_places=4)
     apply_hours: bool = True
     note: str | None = Field(default=None, max_length=1000)
 
