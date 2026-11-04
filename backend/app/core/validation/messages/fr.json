@@ -1817,5 +1817,59 @@
       "fail": "Les majorations totalisent {percent} % du coût direct.",
       "suggestion": "Vérifiez les lignes de frais généraux, bénéfice, aléas et actualisation : pourcentage saisi comme montant ou compté deux fois."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "La date {value} du champ {field} n'existe pas au calendrier.",
+      "suggestion": "Saisissez une date de calendrier valide."
+    },
+    "checklist_open": {
+      "fail": "{count} points de la liste de contrôle sur {total} sont encore ouverts.",
+      "suggestion": "Cochez ou supprimez les points ouverts avant de clôturer la tâche."
+    },
+    "decision_unrecorded": {
+      "fail": "La tâche de décision est terminée, mais aucune décision n'est consignée.",
+      "suggestion": "Consignez la décision dans le résultat pour que l'équipe de chantier puisse agir."
+    },
+    "owner_missing": {
+      "fail": "Aucun responsable n'est désigné.",
+      "suggestion": "Désignez un responsable ou un contact avant le démarrage des travaux."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Une modification de niveau de risque {risk_level} ne peut pas être acceptée sans mesure d'atténuation.",
+      "suggestion": "Consignez la mesure d'atténuation sur une ligne d'impact, puis acceptez la modification."
+    },
+    "decline_reason_missing": {
+      "fail": "La modification est refusée sans motif.",
+      "suggestion": "Consignez le motif du refus, afin que le demandeur et la piste d'audit puissent le suivre."
+    },
+    "mitigation_missing": {
+      "fail": "Le risque est au statut {status}, mais aucune stratégie ni action d'atténuation n'est consignée.",
+      "suggestion": "Décrivez l'atténuation avant de faire passer le risque à ce statut."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Le coût de la réponse {response} dépasse l'impact total {impact}.",
+      "suggestion": "Vérifiez les deux montants, ou acceptez le risque plutôt que de payer pour le traiter plus qu'il ne peut coûter."
+    },
+    "closed_unaddressed": {
+      "fail": "Un risque de gravité {level} est clos sans avoir été atténué ni s'être produit.",
+      "suggestion": "Atténuez-le d'abord, ou notez pourquoi il ne s'applique plus."
+    },
+    "progress_regression": {
+      "fail": "Le relevé de {new} % est inférieur au relevé précédent de {previous} %.",
+      "suggestion": "S'il s'agit d'une correction, indiquez le motif ; sinon vérifiez la saisie."
+    },
+    "completion_unevidenced": {
+      "fail": "Un avancement de 100 % est déclaré sans photo ni note comme preuve.",
+      "suggestion": "Joignez une photo ou ajoutez une note pour que l'achèvement puisse être vérifié."
+    },
+    "geo_incomplete": {
+      "fail": "Seule la latitude ou la longitude est renseignée.",
+      "suggestion": "Renseignez les deux coordonnées ou laissez l'emplacement vide."
+    },
+    "plan_order": {
+      "fail": "Les {pct} % prévus pour {period} contredisent les {other_pct} % prévus pour {other} ; un plan cumulé ne diminue jamais.",
+      "suggestion": "Corrigez les pourcentages prévus pour qu'ils augmentent d'une période à l'autre."
+    }
   }
 }

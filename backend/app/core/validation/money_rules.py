@@ -86,12 +86,15 @@ class MoneyRule(ValidationRule):
 
     severity = Severity.ERROR
     category = RuleCategory.CONSISTENCY
-    #: Message section and keys a rule set owns; every other key is the shared ``money`` text.
+    #: Message section of the rule set. With ``own_message_keys`` set, only those keys read from it and
+    #: every other key is the shared ``money`` text; without, every key reads from it.
     message_section = "money"
     own_message_keys: frozenset[str] = frozenset()
 
     def _section_of(self, key: str) -> str:
-        return self.message_section if key in self.own_message_keys else "money"
+        if not self.own_message_keys or key in self.own_message_keys:
+            return self.message_section
+        return "money"
 
     def ok(self, ref: str = "") -> RuleResult:
         """A passing result."""
@@ -112,9 +115,11 @@ class MoneyRule(ValidationRule):
         *,
         ref: str = "",
         severity: Severity | None = None,
+        section: str | None = None,
         **params: Any,
     ) -> RuleResult:
-        """A failing result whose text is the rule's own or the shared ``money`` text in the caller's locale."""
+        """A failing result whose text is ``<section>.<key>`` in the caller's locale."""
+        section = section or self._section_of(key)
         locale = locale_of(context)
         return RuleResult(
             rule_id=self.rule_id,
@@ -122,9 +127,9 @@ class MoneyRule(ValidationRule):
             severity=severity or self.severity,
             category=self.category,
             passed=False,
-            message=translate(f"{self._section_of(key)}.{key}.fail", locale=locale, **params),
+            message=translate(f"{section}.{key}.fail", locale=locale, **params),
             element_ref=ref,
-            suggestion=translate(f"{self._section_of(key)}.{key}.suggestion", locale=locale),
+            suggestion=translate(f"{section}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
 

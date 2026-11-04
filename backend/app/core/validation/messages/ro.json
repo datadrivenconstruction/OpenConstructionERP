@@ -1817,5 +1817,59 @@
       "fail": "Majorările însumează {percent} % din costul direct.",
       "suggestion": "Verificați rândurile de regie, profit, risc și actualizare: procent introdus ca sumă sau numărat de două ori."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Data {value} din câmpul {field} nu există în calendar.",
+      "suggestion": "Introduceți o dată calendaristică existentă."
+    },
+    "checklist_open": {
+      "fail": "{count} din {total} puncte ale listei de verificare sunt încă deschise.",
+      "suggestion": "Bifați sau eliminați punctele deschise înainte de a finaliza sarcina."
+    },
+    "decision_unrecorded": {
+      "fail": "Sarcina de decizie este finalizată, dar nu este înregistrată nicio decizie.",
+      "suggestion": "Scrieți decizia în rezultat, ca echipa de pe șantier să poată acționa."
+    },
+    "owner_missing": {
+      "fail": "Nu este desemnat niciun responsabil.",
+      "suggestion": "Desemnați un responsabil sau o persoană de contact înainte de începerea lucrărilor."
+    },
+    "high_risk_unmitigated": {
+      "fail": "O modificare cu nivel de risc {risk_level} nu poate fi acceptată fără o măsură de atenuare.",
+      "suggestion": "Înregistrați măsura de atenuare pe o linie de impact, apoi acceptați modificarea."
+    },
+    "decline_reason_missing": {
+      "fail": "Modificarea este respinsă fără motiv.",
+      "suggestion": "Înregistrați motivul respingerii, ca inițiatorul și pista de audit să îl poată urmări."
+    },
+    "mitigation_missing": {
+      "fail": "Riscul are statusul {status}, dar nu este înregistrată nicio strategie sau acțiune de atenuare.",
+      "suggestion": "Descrieți atenuarea înainte de a trece riscul la acest status."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Costul răspunsului {response} depășește impactul total {impact}.",
+      "suggestion": "Verificați ambele sume sau acceptați riscul, în loc să cheltuiți pentru tratarea lui mai mult decât poate costa."
+    },
+    "closed_unaddressed": {
+      "fail": "Un risc de gravitate {level} a fost închis fără să fi fost atenuat sau să se fi produs.",
+      "suggestion": "Atenuați-l mai întâi sau notați de ce nu mai este valabil."
+    },
+    "progress_regression": {
+      "fail": "Citirea de {new} % este sub citirea anterioară de {previous} %.",
+      "suggestion": "Dacă este o corecție, indicați motivul; altfel verificați înregistrarea."
+    },
+    "completion_unevidenced": {
+      "fail": "Se declară 100 % fără fotografie sau notă drept dovadă.",
+      "suggestion": "Atașați o fotografie sau adăugați o notă pentru ca finalizarea să poată fi verificată."
+    },
+    "geo_incomplete": {
+      "fail": "Este indicată doar latitudinea sau doar longitudinea.",
+      "suggestion": "Indicați ambele coordonate sau lăsați locația goală."
+    },
+    "plan_order": {
+      "fail": "Cei {pct} % planificați pentru {period} contrazic cei {other_pct} % planificați pentru {other}; un plan cumulat nu scade niciodată.",
+      "suggestion": "Corectați procentele planificate astfel încât să crească de la o perioadă la alta."
+    }
   }
 }

@@ -1817,5 +1817,59 @@
       "fail": "Ek oranlar doğrudan maliyetin %{percent} düzeyine ulaşıyor.",
       "suggestion": "Genel gider, kâr, risk ve fiyat farkı satırlarında tutar olarak girilmiş veya iki kez sayılmış bir yüzde olup olmadığını kontrol edin."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "{field} alanındaki {value} tarihi takvimde yok.",
+      "suggestion": "Takvimde bulunan geçerli bir tarih girin."
+    },
+    "checklist_open": {
+      "fail": "Kontrol listesindeki {total} maddenin {count} tanesi hâlâ açık.",
+      "suggestion": "Görevi tamamlamadan önce açık maddeleri işaretleyin veya kaldırın."
+    },
+    "decision_unrecorded": {
+      "fail": "Karar görevi tamamlandı ancak kayıtlı bir karar yok.",
+      "suggestion": "Şantiye ekibinin buna göre hareket edebilmesi için kararı sonuca yazın."
+    },
+    "owner_missing": {
+      "fail": "Sorumlu kişi belirtilmemiş.",
+      "suggestion": "İşler başlamadan önce bir sorumlu veya irtibat kişisi atayın."
+    },
+    "high_risk_unmitigated": {
+      "fail": "{risk_level} risk düzeyindeki bir değişiklik, azaltma önlemi olmadan kabul edilemez.",
+      "suggestion": "Önlemi bir etki satırına kaydedin, ardından değişikliği kabul edin."
+    },
+    "decline_reason_missing": {
+      "fail": "Değişiklik gerekçe gösterilmeden reddedildi.",
+      "suggestion": "Talep sahibi ve denetim izi takip edebilsin diye neden reddedildiğini kaydedin."
+    },
+    "mitigation_missing": {
+      "fail": "Risk {status} durumunda, ancak kayıtlı bir azaltma stratejisi veya eylemi yok.",
+      "suggestion": "Riski bu duruma almadan önce azaltma önlemini tanımlayın."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Müdahale maliyeti {response}, tam etki olan {impact} değerinden yüksek.",
+      "suggestion": "Her iki tutarı da kontrol edin veya riski ele almak için maliyetinden fazlasını harcamak yerine riski kabul edin."
+    },
+    "closed_unaddressed": {
+      "fail": "{level} şiddetindeki bir risk, azaltılmadan ve gerçekleşmeden kapatıldı.",
+      "suggestion": "Önce riski azaltın veya artık neden geçerli olmadığını not edin."
+    },
+    "progress_regression": {
+      "fail": "%{new} değerindeki ölçüm, önceki %{previous} ölçümünün altında.",
+      "suggestion": "Bu bir düzeltmeyse nedenini yazın; değilse kaydı kontrol edin."
+    },
+    "completion_unevidenced": {
+      "fail": "Kanıt olarak fotoğraf veya not olmadan %100 bildirildi.",
+      "suggestion": "Tamamlanmanın doğrulanabilmesi için fotoğraf ekleyin veya not girin."
+    },
+    "geo_incomplete": {
+      "fail": "Yalnızca enlem veya yalnızca boylam verilmiş.",
+      "suggestion": "Her iki koordinatı da girin veya konumu boş bırakın."
+    },
+    "plan_order": {
+      "fail": "{period} için planlanan %{pct}, {other} için planlanan %{other_pct} ile çelişiyor; kümülatif plan hiçbir zaman düşmez.",
+      "suggestion": "Planlanan yüzdeleri dönemden döneme artacak şekilde düzeltin."
+    }
   }
 }

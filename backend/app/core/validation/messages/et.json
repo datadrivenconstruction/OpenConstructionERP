@@ -1817,5 +1817,59 @@
       "fail": "Juurdehindlused on kokku {percent} % otsekuludest.",
       "suggestion": "Kontrollige üldkulu, kasumi, riski ja hinnatõusu ridu summana sisestatud või kaks korda arvestatud protsendi suhtes."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Kuupäeva {value} väljal {field} kalendris ei ole.",
+      "suggestion": "Sisestage olemasolev kalendrikuupäev."
+    },
+    "checklist_open": {
+      "fail": "Kontrollnimekirja punkte on lahti {count} / {total}.",
+      "suggestion": "Märkige avatud punktid tehtuks või eemaldage need enne ülesande lõpetamist."
+    },
+    "decision_unrecorded": {
+      "fail": "Otsuseülesanne on lõpetatud, kuid otsust pole kirja pandud.",
+      "suggestion": "Kirjutage otsus tulemusse, et ehitusplatsi meeskond saaks selle järgi tegutseda."
+    },
+    "owner_missing": {
+      "fail": "Vastutajat pole määratud.",
+      "suggestion": "Määrake vastutaja või kontakt enne töö algust."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Riskitasemega {risk_level} muudatust ei saa heaks kiita ilma riski leevendava meetmeta.",
+      "suggestion": "Kirjutage meede mõjurealt üles ja kiitke seejärel muudatus heaks."
+    },
+    "decline_reason_missing": {
+      "fail": "Muudatus on tagasi lükatud põhjendamata.",
+      "suggestion": "Kirjutage üles, miks see tagasi lükati, et algataja ja auditijälg saaksid seda jälgida."
+    },
+    "mitigation_missing": {
+      "fail": "Riski olek on {status}, kuid leevendusstrateegiat ega -tegevust pole kirja pandud.",
+      "suggestion": "Kirjeldage leevendust enne, kui viite riski sellesse olekusse."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Reageerimise kulu {response} on suurem kui kogu mõju {impact}.",
+      "suggestion": "Kontrollige mõlemat summat või võtke risk vastu, selle asemel et kulutada selle käsitlemisele rohkem, kui see võib maksta."
+    },
+    "closed_unaddressed": {
+      "fail": "Raskusastmega {level} risk on suletud, ilma et seda oleks leevendatud või see oleks aset leidnud.",
+      "suggestion": "Leevendage see esmalt või märkige, miks see enam ei kehti."
+    },
+    "progress_regression": {
+      "fail": "Näit {new} % on väiksem kui eelmine näit {previous} %.",
+      "suggestion": "Kui tegemist on parandusega, märkige põhjus; muidu kontrollige kannet."
+    },
+    "completion_unevidenced": {
+      "fail": "Teatatud on 100 % ilma foto või märkuseta tõendina.",
+      "suggestion": "Lisage foto või märkus, et valmimist saaks kontrollida."
+    },
+    "geo_incomplete": {
+      "fail": "Antud on ainult laius- või ainult pikkuskraad.",
+      "suggestion": "Andke mõlemad koordinaadid või jätke asukoht tühjaks."
+    },
+    "plan_order": {
+      "fail": "Perioodi {period} kavandatud {pct} % on vastuolus perioodi {other} kavandatud {other_pct} %-ga; kumulatiivne kava ei lange kunagi.",
+      "suggestion": "Parandage kavandatud protsendid nii, et need kasvaksid perioodist perioodi."
+    }
   }
 }

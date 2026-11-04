@@ -80,6 +80,10 @@ class ProgressEntryResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
 
 # ── Progress Plan ─────────────────────────────────────────────────────────────
@@ -116,6 +120,10 @@ class ProgressPlanResponse(BaseModel):
     notes: str | None = None
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
 
 # ── Position progress summary ─────────────────────────────────────────────────

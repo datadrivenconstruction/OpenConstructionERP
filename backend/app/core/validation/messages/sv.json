@@ -1817,5 +1817,59 @@
       "fail": "Påläggen uppgår till {percent} % av direkt kostnad.",
       "suggestion": "Kontrollera raderna för omkostnader, vinst, risk och prisglidning med avseende på procent angiven som belopp eller dubbelräknad."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Datumet {value} i {field} finns inte i kalendern.",
+      "suggestion": "Ange ett riktigt kalenderdatum."
+    },
+    "checklist_open": {
+      "fail": "{count} av {total} punkter i checklistan är fortfarande öppna.",
+      "suggestion": "Bocka av eller ta bort de öppna punkterna innan uppgiften slutförs."
+    },
+    "decision_unrecorded": {
+      "fail": "Beslutsuppgiften är slutförd men inget beslut är noterat.",
+      "suggestion": "Skriv in beslutet i resultatet så att arbetsplatsteamet kan agera efter det."
+    },
+    "owner_missing": {
+      "fail": "Ingen är utsedd som ansvarig.",
+      "suggestion": "Utse en ansvarig person eller kontakt innan arbetet påbörjas."
+    },
+    "high_risk_unmitigated": {
+      "fail": "En ändring med risknivå {risk_level} kan inte godkännas utan en riskreducerande åtgärd.",
+      "suggestion": "Notera åtgärden på en påverkansrad och godkänn sedan ändringen."
+    },
+    "decline_reason_missing": {
+      "fail": "Ändringen har avslagits utan motivering.",
+      "suggestion": "Notera varför den avslogs så att sökanden och revisionsspåret kan följa det."
+    },
+    "mitigation_missing": {
+      "fail": "Risken har status {status} men ingen riskreducerande strategi eller åtgärd är noterad.",
+      "suggestion": "Beskriv åtgärden innan risken flyttas till den här statusen."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Kostnaden för åtgärden {response} är högre än hela påverkan {impact}.",
+      "suggestion": "Kontrollera båda beloppen, eller acceptera risken i stället för att lägga mer på att hantera den än den kan kosta."
+    },
+    "closed_unaddressed": {
+      "fail": "En risk med allvarlighetsgrad {level} har stängts utan att ha reducerats eller inträffat.",
+      "suggestion": "Reducera den först, eller notera varför den inte längre gäller."
+    },
+    "progress_regression": {
+      "fail": "Avläsningen {new} % är lägre än föregående avläsning {previous} %.",
+      "suggestion": "Om det är en rättelse, ange orsaken; kontrollera annars uppgiften."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % rapporteras utan foto eller anteckning som belägg.",
+      "suggestion": "Bifoga ett foto eller lägg till en anteckning så att färdigställandet kan kontrolleras."
+    },
+    "geo_incomplete": {
+      "fail": "Bara latitud eller longitud är angiven.",
+      "suggestion": "Ange båda koordinaterna eller lämna platsen tom."
+    },
+    "plan_order": {
+      "fail": "Planerade {pct} % för {period} strider mot {other_pct} % planerade för {other}; en ackumulerad plan sjunker aldrig.",
+      "suggestion": "Rätta de planerade procenten så att de ökar från period till period."
+    }
   }
 }

@@ -77,6 +77,37 @@ class TaskService:
         self.session = session
         self.repo = TaskRepository(session)
 
+    async def _gate(
+        self,
+        task_id: Any,
+        project_id: uuid.UUID,
+        *,
+        values: dict[str, Any],
+        previous_status: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Run the task rules over the record as it will be after the write.
+
+        Errors raise a coded 422; the warnings come back for the response.
+        """
+        from app.core.validation.control_rules import gate  # noqa: PLC0415
+        from app.modules.tasks.validators import TASKS_RULE_SET  # noqa: PLC0415
+
+        meta = values.get("metadata") if isinstance(values.get("metadata"), dict) else {}
+        task = {
+            "id": str(task_id or ""),
+            "project_id": str(project_id),
+            "previous_status": previous_status,
+            "assignee_name": meta.get("assignee_name"),
+            **{k: v for k, v in values.items() if k != "metadata"},
+        }
+        return await gate(
+            TASKS_RULE_SET,
+            {"task": task},
+            target_type="task",
+            target_id=str(task_id or ""),
+            project_id=project_id,
+        )
+
     async def create_task(
         self,
         data: TaskCreate,
@@ -118,6 +149,20 @@ class TaskService:
                     ),
                 )
 
+        warnings = await self._gate(
+            None,
+            data.project_id,
+            values={
+                "task_type": data.task_type,
+                "status": data.status,
+                "due_date": data.due_date,
+                "responsible_id": responsible_id,
+                "checklist": checklist,
+                "result": data.result,
+                "metadata": metadata,
+            },
+        )
+
         task = Task(
             project_id=data.project_id,
             task_type=data.task_type,
@@ -139,6 +184,7 @@ class TaskService:
             metadata_=metadata,
         )
         task = await self.repo.create(task)
+        task.validation_warnings = warnings  # type: ignore[attr-defined]
 
         await _safe_audit(
             self.session,
@@ -487,12 +533,29 @@ class TaskService:
         if not fields:
             return task
 
+        warnings = await self._gate(
+            task_id,
+            task.project_id,
+            previous_status=task.status,
+            values={
+                "task_type": fields.get("task_type", task.task_type),
+                "status": fields.get("status", task.status),
+                # Only a due date being written is judged, so a legacy value never blocks an unrelated edit.
+                "due_date": fields.get("due_date"),
+                "responsible_id": fields.get("responsible_id", task.responsible_id),
+                "checklist": fields.get("checklist", task.checklist),
+                "result": fields.get("result", task.result),
+                "metadata": fields.get("metadata_", getattr(task, "metadata_", None)),
+            },
+        )
+
         # Detect reassignment so we can fire task.assigned
         old_responsible = str(task.responsible_id) if task.responsible_id else None
         new_responsible = fields.get("responsible_id")
 
         await self.repo.update_fields(task_id, **fields)
         await self.session.refresh(task)
+        task.validation_warnings = warnings  # type: ignore[attr-defined]
 
         await _safe_audit(
             self.session,
@@ -587,8 +650,23 @@ class TaskService:
         if result is not None:
             fields["result"] = result
 
+        warnings = await self._gate(
+            task_id,
+            task.project_id,
+            previous_status=task.status,
+            values={
+                "task_type": task.task_type,
+                "status": "completed",
+                "responsible_id": task.responsible_id,
+                "checklist": task.checklist,
+                "result": fields.get("result", task.result),
+                "metadata": getattr(task, "metadata_", None),
+            },
+        )
+
         await self.repo.update_fields(task_id, **fields)
         await self.session.refresh(task)
+        task.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Task completed: %s", task_id)
 
         await _safe_audit(

@@ -1817,5 +1817,59 @@
       "fail": "Lisät ovat yhteensä {percent} % välittömistä kustannuksista.",
       "suggestion": "Tarkista yleiskustannus-, voitto-, riski- ja hintatasonmuutosrivit prosentin varalta, joka on syötetty summana tai laskettu kahdesti."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Päivämäärää {value} kentässä {field} ei ole kalenterissa.",
+      "suggestion": "Anna olemassa oleva kalenteripäivä."
+    },
+    "checklist_open": {
+      "fail": "Tarkistuslistan kohtia on yhä avoinna {count} / {total}.",
+      "suggestion": "Merkitse avoimet kohdat tehdyiksi tai poista ne ennen tehtävän päättämistä."
+    },
+    "decision_unrecorded": {
+      "fail": "Päätöstehtävä on valmis, mutta päätöstä ei ole kirjattu.",
+      "suggestion": "Kirjaa päätös tulokseen, jotta työmaan väki voi toimia sen mukaan."
+    },
+    "owner_missing": {
+      "fail": "Vastuuhenkilöä ei ole nimetty.",
+      "suggestion": "Nimeä vastuuhenkilö tai yhteyshenkilö ennen töiden aloittamista."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Muutosta, jonka riskitaso on {risk_level}, ei voi hyväksyä ilman riskiä pienentävää toimenpidettä.",
+      "suggestion": "Kirjaa toimenpide vaikutusriville ja hyväksy muutos sen jälkeen."
+    },
+    "decline_reason_missing": {
+      "fail": "Muutos on hylätty ilman perustetta.",
+      "suggestion": "Kirjaa hylkäyksen syy, jotta esittäjä ja auditointijälki voivat seurata sitä."
+    },
+    "mitigation_missing": {
+      "fail": "Riskin tila on {status}, mutta riskiä pienentävää strategiaa tai toimenpidettä ei ole kirjattu.",
+      "suggestion": "Kuvaa riskin pienentäminen ennen kuin siirrät riskin tähän tilaan."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Vastetoimen kustannus {response} on suurempi kuin koko vaikutus {impact}.",
+      "suggestion": "Tarkista molemmat summat tai hyväksy riski sen sijaan, että käsittelyyn käytetään enemmän kuin riski voi maksaa."
+    },
+    "closed_unaddressed": {
+      "fail": "Vakavuudeltaan {level} oleva riski on suljettu, vaikka sitä ei ole pienennetty eikä se ole toteutunut.",
+      "suggestion": "Pienennä se ensin tai kirjaa, miksi se ei enää päde."
+    },
+    "progress_regression": {
+      "fail": "Lukema {new} % on pienempi kuin edellinen lukema {previous} %.",
+      "suggestion": "Jos kyseessä on korjaus, kirjaa syy; muuten tarkista merkintä."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % on ilmoitettu ilman kuvaa tai merkintää todisteena.",
+      "suggestion": "Liitä kuva tai lisää merkintä, jotta valmistuminen voidaan tarkistaa."
+    },
+    "geo_incomplete": {
+      "fail": "Vain leveysaste tai pituusaste on annettu.",
+      "suggestion": "Anna molemmat koordinaatit tai jätä sijainti tyhjäksi."
+    },
+    "plan_order": {
+      "fail": "Suunniteltu {pct} % jaksolle {period} on ristiriidassa jaksolle {other} suunnitellun {other_pct} %:n kanssa; kumulatiivinen suunnitelma ei koskaan laske.",
+      "suggestion": "Korjaa suunnitellut prosentit niin, että ne nousevat jaksosta toiseen."
+    }
   }
 }

@@ -167,6 +167,10 @@ class TaskResponse(BaseModel):
         default=0,
         description="Number of incomplete predecessor tasks (computed from depends_on chain).",
     )
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
 
 class TaskBimLinkRequest(BaseModel):
