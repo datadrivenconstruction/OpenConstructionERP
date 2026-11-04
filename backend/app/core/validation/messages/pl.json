@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Przegrana oferta {bid} nie ma ceny zwycięskiej",
+      "suggestion": "Wpisz cenę zwycięską, aby zmierzyć różnicę"
+    },
+    "won_matches_price": {
+      "fail": "Wygrana oferta {bid}: cena zwycięska {winning} różni się od naszej ceny {ours}",
+      "suggestion": "Przy wygranej ofercie cena zwycięska jest naszą ceną; popraw jedną z nich"
+    },
+    "second_above_winner": {
+      "fail": "Oferta {bid}: druga cena {second} jest niższa od ceny zwycięskiej {winning}",
+      "suggestion": "Druga cena nie może być niższa niż cena zwycięzcy; sprawdź obie"
+    },
+    "competitors_recorded": {
+      "fail": "Rozstrzygnięta oferta {bid} nie ma liczby konkurentów",
+      "suggestion": "Wpisz, ilu innych oferentów wzięło udział"
+    },
+    "lost_reason_recorded": {
+      "fail": "Przegrana oferta {bid} nie ma powodu",
+      "suggestion": "Wybierz główny powód, aby kolejna oferta mogła się z niego uczyć"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Wagi sumują się do {total}, a nie do 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kryterium {criterion} nie zostało ocenione."
+    },
+    "override_has_reason": {
+      "fail": "Decyzja różni się od rekomendacji; podaj powód."
+    },
+    "low_rating_has_note": {
+      "fail": "Kryterium {criterion} ma ocenę 1 bez uwagi."
+    },
+    "criteria": {
+      "capacity": "Zdolności",
+      "client": "Klient",
+      "competition": "Konkurencja",
+      "margin": "Marża",
+      "risk": "Ryzyko"
+    }
   }
 }

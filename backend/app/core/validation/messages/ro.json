@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Oferta pierdută {bid} nu are preț câștigător",
+      "suggestion": "Introduceți prețul câștigător pentru a măsura diferența"
+    },
+    "won_matches_price": {
+      "fail": "Oferta câștigată {bid}: prețul câștigător {winning} diferă de prețul nostru {ours}",
+      "suggestion": "La o ofertă câștigată prețul câștigător este al nostru; corectați unul dintre ele"
+    },
+    "second_above_winner": {
+      "fail": "Oferta {bid}: al doilea preț {second} este sub prețul câștigător {winning}",
+      "suggestion": "Al doilea preț nu poate fi mai mic decât al câștigătorului; verificați-le pe ambele"
+    },
+    "competitors_recorded": {
+      "fail": "Oferta decisă {bid} nu are numărul de concurenți",
+      "suggestion": "Introduceți câți alți ofertanți au participat"
+    },
+    "lost_reason_recorded": {
+      "fail": "Oferta pierdută {bid} nu are motiv",
+      "suggestion": "Alegeți motivul principal pentru ca oferta următoare să învețe din el"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Ponderile însumează {total}, nu 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Criteriul {criterion} nu este evaluat."
+    },
+    "override_has_reason": {
+      "fail": "Decizia diferă de recomandare; indicați motivul."
+    },
+    "low_rating_has_note": {
+      "fail": "Criteriul {criterion} are nota 1 fără observație."
+    },
+    "criteria": {
+      "capacity": "Capacitate",
+      "client": "Client",
+      "competition": "Concurență",
+      "margin": "Marjă",
+      "risk": "Risc"
+    }
   }
 }

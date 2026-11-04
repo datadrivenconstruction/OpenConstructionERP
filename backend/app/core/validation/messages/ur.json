@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "ہاری ہوئی بولی {bid} میں جیتنے والی قیمت نہیں ہے",
+      "suggestion": "فرق ناپنے کے لیے جیتنے والی قیمت درج کریں"
+    },
+    "won_matches_price": {
+      "fail": "جیتی ہوئی بولی {bid}: جیتنے والی قیمت {winning} ہماری قیمت {ours} سے مختلف ہے",
+      "suggestion": "جیتی ہوئی بولی میں جیتنے والی قیمت ہماری اپنی ہوتی ہے؛ ان میں سے ایک درست کریں"
+    },
+    "second_above_winner": {
+      "fail": "بولی {bid}: دوسری قیمت {second} جیتنے والی قیمت {winning} سے کم ہے",
+      "suggestion": "دوسری قیمت جیتنے والے سے کم نہیں ہو سکتی؛ دونوں جانچیں"
+    },
+    "competitors_recorded": {
+      "fail": "طے شدہ بولی {bid} میں حریفوں کی تعداد نہیں ہے",
+      "suggestion": "درج کریں کہ کتنے دوسرے بولی دہندگان نے حصہ لیا"
+    },
+    "lost_reason_recorded": {
+      "fail": "ہاری ہوئی بولی {bid} میں وجہ نہیں ہے",
+      "suggestion": "بنیادی وجہ چنیں تاکہ اگلی بولی اس سے سیکھ سکے"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "وزن کا مجموعہ {total} ہے، 100 نہیں۔"
+    },
+    "all_criteria_rated": {
+      "fail": "معیار {criterion} کی درجہ بندی نہیں کی گئی۔"
+    },
+    "override_has_reason": {
+      "fail": "فیصلہ سفارش سے مختلف ہے؛ وجہ درج کریں۔"
+    },
+    "low_rating_has_note": {
+      "fail": "معیار {criterion} کو 1 درجہ دیا گیا ہے مگر نوٹ نہیں ہے۔"
+    },
+    "criteria": {
+      "capacity": "صلاحیت",
+      "client": "کلائنٹ",
+      "competition": "مقابلہ",
+      "margin": "منافع کا مارجن",
+      "risk": "خطرہ"
+    }
   }
 }

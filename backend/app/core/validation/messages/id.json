@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Penawaran kalah {bid} tidak memiliki harga pemenang",
+      "suggestion": "Isi harga pemenang untuk mengukur selisih"
+    },
+    "won_matches_price": {
+      "fail": "Penawaran menang {bid}: harga pemenang {winning} berbeda dari harga kami {ours}",
+      "suggestion": "Pada penawaran menang, harga pemenang adalah harga kami; perbaiki salah satunya"
+    },
+    "second_above_winner": {
+      "fail": "Penawaran {bid}: harga kedua {second} di bawah harga pemenang {winning}",
+      "suggestion": "Harga kedua tidak boleh lebih rendah dari harga pemenang; periksa keduanya"
+    },
+    "competitors_recorded": {
+      "fail": "Penawaran yang telah diputuskan {bid} tidak memiliki jumlah pesaing",
+      "suggestion": "Isi berapa peserta lain yang ikut"
+    },
+    "lost_reason_recorded": {
+      "fail": "Penawaran kalah {bid} tidak memiliki alasan",
+      "suggestion": "Pilih alasan utama agar penawaran berikutnya dapat belajar darinya"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Bobot berjumlah {total}, bukan 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriteria {criterion} belum dinilai."
+    },
+    "override_has_reason": {
+      "fail": "Keputusan berbeda dari rekomendasi; berikan alasan."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriteria {criterion} bernilai 1 tanpa catatan."
+    },
+    "criteria": {
+      "capacity": "Kapasitas",
+      "client": "Klien",
+      "competition": "Persaingan",
+      "margin": "Margin",
+      "risk": "Risiko"
+    }
   }
 }

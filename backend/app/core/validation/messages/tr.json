@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Kaybedilen {bid} teklifinde kazanan fiyat yok",
+      "suggestion": "Farkı ölçmek için kazanan fiyatı girin"
+    },
+    "won_matches_price": {
+      "fail": "Kazanılan {bid} teklifi: kazanan fiyat {winning}, bizim fiyatımız {ours} ile farklı",
+      "suggestion": "Kazanılan teklifte kazanan fiyat bizimkidir; ikisinden birini düzeltin"
+    },
+    "second_above_winner": {
+      "fail": "{bid} teklifi: ikinci fiyat {second}, kazanan fiyat {winning} değerinin altında",
+      "suggestion": "İkinci fiyat kazananınkinden düşük olamaz; ikisini de kontrol edin"
+    },
+    "competitors_recorded": {
+      "fail": "Sonuçlanan {bid} teklifinde rakip sayısı yok",
+      "suggestion": "Kaç başka teklif verenin katıldığını girin"
+    },
+    "lost_reason_recorded": {
+      "fail": "Kaybedilen {bid} teklifinde neden yok",
+      "suggestion": "Sonraki teklifin ondan ders alabilmesi için ana nedeni seçin"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Ağırlıkların toplamı 100 değil, {total}."
+    },
+    "all_criteria_rated": {
+      "fail": "{criterion} ölçütü puanlanmamış."
+    },
+    "override_has_reason": {
+      "fail": "Karar öneriden farklı; bir gerekçe girin."
+    },
+    "low_rating_has_note": {
+      "fail": "{criterion} ölçütü 1 puanla notsuz değerlendirilmiş."
+    },
+    "criteria": {
+      "capacity": "Kapasite",
+      "client": "Müşteri",
+      "competition": "Rekabet",
+      "margin": "Kâr marjı",
+      "risk": "Risk"
+    }
   }
 }

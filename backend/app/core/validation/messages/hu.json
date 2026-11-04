@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Az elvesztett {bid} ajánlatnál nincs nyertes ár",
+      "suggestion": "Adja meg a nyertes árat a különbség méréséhez"
+    },
+    "won_matches_price": {
+      "fail": "Megnyert {bid} ajánlat: a nyertes ár ({winning}) eltér a saját árunktól ({ours})",
+      "suggestion": "Megnyert ajánlatnál a nyertes ár a miénk; javítsa valamelyiket"
+    },
+    "second_above_winner": {
+      "fail": "{bid} ajánlat: a második ár ({second}) alacsonyabb a nyertes árnál ({winning})",
+      "suggestion": "A második ár nem lehet alacsonyabb a nyertesénél; ellenőrizze mindkettőt"
+    },
+    "competitors_recorded": {
+      "fail": "A lezárt {bid} ajánlatnál nincs versenytársak száma",
+      "suggestion": "Adja meg, hány másik ajánlattevő vett részt"
+    },
+    "lost_reason_recorded": {
+      "fail": "Az elvesztett {bid} ajánlatnál nincs indok",
+      "suggestion": "Válassza ki a fő okot, hogy a következő ajánlat tanulhasson belőle"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "A súlyok összege {total}, nem 100."
+    },
+    "all_criteria_rated": {
+      "fail": "A(z) {criterion} szempont nincs értékelve."
+    },
+    "override_has_reason": {
+      "fail": "A döntés eltér az ajánlástól; adjon meg indoklást."
+    },
+    "low_rating_has_note": {
+      "fail": "A(z) {criterion} szempont 1-es értékelést kapott megjegyzés nélkül."
+    },
+    "criteria": {
+      "capacity": "Kapacitás",
+      "client": "Ügyfél",
+      "competition": "Verseny",
+      "margin": "Árrés",
+      "risk": "Kockázat"
+    }
   }
 }

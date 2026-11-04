@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Hồ sơ thầu thua {bid} chưa có giá trúng thầu",
+      "suggestion": "Nhập giá trúng thầu để đo chênh lệch"
+    },
+    "won_matches_price": {
+      "fail": "Hồ sơ thầu thắng {bid}: giá trúng thầu {winning} khác giá của chúng ta {ours}",
+      "suggestion": "Ở hồ sơ thầu thắng, giá trúng thầu là giá của chúng ta; hãy sửa một trong hai"
+    },
+    "second_above_winner": {
+      "fail": "Hồ sơ thầu {bid}: giá thứ hai {second} thấp hơn giá trúng thầu {winning}",
+      "suggestion": "Giá thứ hai không thể thấp hơn giá của người thắng; hãy kiểm tra cả hai"
+    },
+    "competitors_recorded": {
+      "fail": "Hồ sơ thầu đã có kết quả {bid} chưa có số đối thủ",
+      "suggestion": "Nhập số nhà thầu khác đã tham gia"
+    },
+    "lost_reason_recorded": {
+      "fail": "Hồ sơ thầu thua {bid} chưa có lý do",
+      "suggestion": "Chọn lý do chính để hồ sơ thầu sau rút kinh nghiệm"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Tổng trọng số là {total}, không phải 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Tiêu chí {criterion} chưa được chấm điểm."
+    },
+    "override_has_reason": {
+      "fail": "Quyết định khác với khuyến nghị; hãy nêu lý do."
+    },
+    "low_rating_has_note": {
+      "fail": "Tiêu chí {criterion} được chấm 1 điểm nhưng không có ghi chú."
+    },
+    "criteria": {
+      "capacity": "Năng lực",
+      "client": "Khách hàng",
+      "competition": "Cạnh tranh",
+      "margin": "Biên lợi nhuận",
+      "risk": "Rủi ro"
+    }
   }
 }

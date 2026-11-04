@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Prohraná nabídka {bid} nemá vítěznou cenu",
+      "suggestion": "Zadejte vítěznou cenu, aby šlo změřit rozdíl"
+    },
+    "won_matches_price": {
+      "fail": "Vyhraná nabídka {bid}: vítězná cena {winning} se liší od naší ceny {ours}",
+      "suggestion": "U vyhrané nabídky je vítězná cena naše; opravte jednu z nich"
+    },
+    "second_above_winner": {
+      "fail": "Nabídka {bid}: druhá cena {second} je nižší než vítězná cena {winning}",
+      "suggestion": "Druhá cena nemůže být nižší než cena vítěze; zkontrolujte obě"
+    },
+    "competitors_recorded": {
+      "fail": "Rozhodnutá nabídka {bid} nemá počet konkurentů",
+      "suggestion": "Zadejte, kolik dalších uchazečů se zúčastnilo"
+    },
+    "lost_reason_recorded": {
+      "fail": "Prohraná nabídka {bid} nemá důvod",
+      "suggestion": "Vyberte hlavní důvod, aby se z něj příští nabídka mohla poučit"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Váhy dávají součet {total}, ne 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kritérium {criterion} není ohodnoceno."
+    },
+    "override_has_reason": {
+      "fail": "Rozhodnutí se liší od doporučení; uveďte důvod."
+    },
+    "low_rating_has_note": {
+      "fail": "Kritérium {criterion} má hodnocení 1 bez poznámky."
+    },
+    "criteria": {
+      "capacity": "Kapacita",
+      "client": "Klient",
+      "competition": "Konkurence",
+      "margin": "Marže",
+      "risk": "Riziko"
+    }
   }
 }

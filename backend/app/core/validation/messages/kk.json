@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Ұтылған {bid} ұсынысында жеңімпаз баға жоқ",
+      "suggestion": "Айырманы өлшеу үшін жеңімпаз бағаны енгізіңіз"
+    },
+    "won_matches_price": {
+      "fail": "Жеңген {bid} ұсынысы: жеңімпаз баға {winning} біздің {ours} бағамыздан өзгеше",
+      "suggestion": "Жеңген ұсыныста жеңімпаз баға — біздің баға; екеуінің бірін түзетіңіз"
+    },
+    "second_above_winner": {
+      "fail": "{bid} ұсынысы: екінші баға {second} жеңімпаз бағадан {winning} төмен",
+      "suggestion": "Екінші баға жеңімпаздың бағасынан төмен болмайды; екеуін де тексеріңіз"
+    },
+    "competitors_recorded": {
+      "fail": "Шешілген {bid} ұсынысында бәсекелестер саны жоқ",
+      "suggestion": "Қатысқан басқа қатысушылар санын енгізіңіз"
+    },
+    "lost_reason_recorded": {
+      "fail": "Ұтылған {bid} ұсынысында себеп жоқ",
+      "suggestion": "Келесі ұсыныс одан сабақ алуы үшін негізгі себепті таңдаңыз"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Салмақтардың қосындысы 100 емес, {total}."
+    },
+    "all_criteria_rated": {
+      "fail": "{criterion} өлшемі бағаланбаған."
+    },
+    "override_has_reason": {
+      "fail": "Шешім ұсыныстан өзгеше; себебін көрсетіңіз."
+    },
+    "low_rating_has_note": {
+      "fail": "{criterion} өлшемі 1 деп бағаланған, ескертпесі жоқ."
+    },
+    "criteria": {
+      "capacity": "Қуат",
+      "client": "Тапсырыс беруші",
+      "competition": "Бәсеке",
+      "margin": "Маржа",
+      "risk": "Тәуекел"
+    }
   }
 }

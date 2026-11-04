@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Yutqazilgan {bid} taklifida g‘olib narx yo‘q",
+      "suggestion": "Farqni o‘lchash uchun g‘olib narxni kiriting"
+    },
+    "won_matches_price": {
+      "fail": "Yutilgan {bid} taklifi: g‘olib narx {winning} bizning {ours} narximizdan farq qiladi",
+      "suggestion": "Yutilgan taklifda g‘olib narx — bizning narx; ikkalasidan birini tuzating"
+    },
+    "second_above_winner": {
+      "fail": "{bid} taklifi: ikkinchi narx {second} g‘olib narxdan {winning} past",
+      "suggestion": "Ikkinchi narx g‘olibnikidan past bo‘lishi mumkin emas; ikkalasini ham tekshiring"
+    },
+    "competitors_recorded": {
+      "fail": "Hal bo‘lgan {bid} taklifida raqobatchilar soni yo‘q",
+      "suggestion": "Qatnashgan boshqa ishtirokchilar sonini kiriting"
+    },
+    "lost_reason_recorded": {
+      "fail": "Yutqazilgan {bid} taklifida sabab yo‘q",
+      "suggestion": "Keyingi taklif undan saboq olishi uchun asosiy sababni tanlang"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Og‘irliklar yig‘indisi 100 emas, {total}."
+    },
+    "all_criteria_rated": {
+      "fail": "{criterion} mezoni baholanmagan."
+    },
+    "override_has_reason": {
+      "fail": "Qaror tavsiyadan farq qiladi; sababini kiriting."
+    },
+    "low_rating_has_note": {
+      "fail": "{criterion} mezoni 1 ball bilan baholangan, izoh yo‘q."
+    },
+    "criteria": {
+      "capacity": "Imkoniyat",
+      "client": "Buyurtmachi",
+      "competition": "Raqobat",
+      "margin": "Marja",
+      "risk": "Xavf"
+    }
   }
 }

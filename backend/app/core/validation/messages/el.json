@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Η χαμένη προσφορά {bid} δεν έχει τιμή νικητή",
+      "suggestion": "Καταχωρίστε την τιμή του νικητή για να μετρηθεί η διαφορά"
+    },
+    "won_matches_price": {
+      "fail": "Κερδισμένη προσφορά {bid}: η τιμή νικητή {winning} διαφέρει από τη δική μας τιμή {ours}",
+      "suggestion": "Σε κερδισμένη προσφορά η τιμή νικητή είναι η δική μας· διορθώστε τη μία από τις δύο"
+    },
+    "second_above_winner": {
+      "fail": "Προσφορά {bid}: η δεύτερη τιμή {second} είναι χαμηλότερη από την τιμή νικητή {winning}",
+      "suggestion": "Η δεύτερη τιμή δεν μπορεί να είναι χαμηλότερη από του νικητή· ελέγξτε και τις δύο"
+    },
+    "competitors_recorded": {
+      "fail": "Η κριθείσα προσφορά {bid} δεν έχει αριθμό ανταγωνιστών",
+      "suggestion": "Καταχωρίστε πόσοι άλλοι προσφέροντες συμμετείχαν"
+    },
+    "lost_reason_recorded": {
+      "fail": "Η χαμένη προσφορά {bid} δεν έχει αιτία",
+      "suggestion": "Επιλέξτε την κύρια αιτία ώστε η επόμενη προσφορά να μάθει από αυτήν"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Τα βάρη αθροίζουν {total}, όχι 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Το κριτήριο {criterion} δεν έχει βαθμολογηθεί."
+    },
+    "override_has_reason": {
+      "fail": "Η απόφαση διαφέρει από τη σύσταση· δώστε αιτιολογία."
+    },
+    "low_rating_has_note": {
+      "fail": "Το κριτήριο {criterion} έχει βαθμό 1 χωρίς σημείωση."
+    },
+    "criteria": {
+      "capacity": "Δυναμικότητα",
+      "client": "Πελάτης",
+      "competition": "Ανταγωνισμός",
+      "margin": "Περιθώριο",
+      "risk": "Ρίσκο"
+    }
   }
 }

@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "हारी हुई बोली {bid} में जीतने वाली कीमत नहीं है",
+      "suggestion": "अंतर मापने के लिए जीतने वाली कीमत दर्ज करें"
+    },
+    "won_matches_price": {
+      "fail": "जीती हुई बोली {bid}: जीतने वाली कीमत {winning} हमारी कीमत {ours} से अलग है",
+      "suggestion": "जीती हुई बोली में जीतने वाली कीमत हमारी अपनी होती है; दोनों में से एक सुधारें"
+    },
+    "second_above_winner": {
+      "fail": "बोली {bid}: दूसरी कीमत {second} जीतने वाली कीमत {winning} से कम है",
+      "suggestion": "दूसरी कीमत विजेता से कम नहीं हो सकती; दोनों जाँचें"
+    },
+    "competitors_recorded": {
+      "fail": "तय हो चुकी बोली {bid} में प्रतिस्पर्धियों की संख्या नहीं है",
+      "suggestion": "दर्ज करें कि कितने अन्य बोलीदाताओं ने भाग लिया"
+    },
+    "lost_reason_recorded": {
+      "fail": "हारी हुई बोली {bid} में कारण नहीं है",
+      "suggestion": "मुख्य कारण चुनें ताकि अगली बोली उससे सीख सके"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "भार का योग {total} है, 100 नहीं।"
+    },
+    "all_criteria_rated": {
+      "fail": "मानदंड {criterion} को रेटिंग नहीं दी गई है।"
+    },
+    "override_has_reason": {
+      "fail": "निर्णय सिफ़ारिश से अलग है; कारण दर्ज करें।"
+    },
+    "low_rating_has_note": {
+      "fail": "मानदंड {criterion} की रेटिंग 1 है, पर कोई टिप्पणी नहीं है।"
+    },
+    "criteria": {
+      "capacity": "क्षमता",
+      "client": "ग्राहक",
+      "competition": "प्रतिस्पर्धा",
+      "margin": "मार्जिन",
+      "risk": "जोखिम"
+    }
   }
 }

@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "A proposta perdida {bid} não tem preço vencedor",
+      "suggestion": "Introduza o preço vencedor para medir a diferença"
+    },
+    "won_matches_price": {
+      "fail": "Proposta ganha {bid}: o preço vencedor {winning} difere do nosso preço {ours}",
+      "suggestion": "Numa proposta ganha o preço vencedor é o nosso; corrija um dos dois"
+    },
+    "second_above_winner": {
+      "fail": "Proposta {bid}: o segundo preço {second} é inferior ao preço vencedor {winning}",
+      "suggestion": "O segundo preço não pode ser inferior ao do vencedor; verifique ambos"
+    },
+    "competitors_recorded": {
+      "fail": "A proposta decidida {bid} não tem número de concorrentes",
+      "suggestion": "Introduza quantos outros concorrentes participaram"
+    },
+    "lost_reason_recorded": {
+      "fail": "A proposta perdida {bid} não tem motivo",
+      "suggestion": "Escolha o motivo principal para que a próxima proposta aprenda com ele"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Os pesos somam {total}, não 100."
+    },
+    "all_criteria_rated": {
+      "fail": "O critério {criterion} não foi avaliado."
+    },
+    "override_has_reason": {
+      "fail": "A decisão difere da recomendação; indique o motivo."
+    },
+    "low_rating_has_note": {
+      "fail": "O critério {criterion} tem avaliação 1 sem nota."
+    },
+    "criteria": {
+      "capacity": "Capacidade",
+      "client": "Cliente",
+      "competition": "Concorrência",
+      "margin": "Margem",
+      "risk": "Risco"
+    }
   }
 }

@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Загубената оферта {bid} няма печеливша цена",
+      "suggestion": "Въведете печелившата цена, за да се измери разликата"
+    },
+    "won_matches_price": {
+      "fail": "Спечелена оферта {bid}: печелившата цена {winning} се различава от нашата цена {ours}",
+      "suggestion": "При спечелена оферта печелившата цена е нашата; коригирайте едната от двете"
+    },
+    "second_above_winner": {
+      "fail": "Оферта {bid}: втората цена {second} е под печелившата цена {winning}",
+      "suggestion": "Втората цена не може да е по-ниска от тази на победителя; проверете и двете"
+    },
+    "competitors_recorded": {
+      "fail": "Решената оферта {bid} няма брой конкуренти",
+      "suggestion": "Въведете колко други участници са взели участие"
+    },
+    "lost_reason_recorded": {
+      "fail": "Загубената оферта {bid} няма причина",
+      "suggestion": "Изберете основната причина, за да може следващата оферта да се поучи от нея"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Теглата са общо {total}, а не 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Критерият {criterion} не е оценен."
+    },
+    "override_has_reason": {
+      "fail": "Решението се различава от препоръката; посочете причина."
+    },
+    "low_rating_has_note": {
+      "fail": "Критерият {criterion} е оценен с 1 без бележка."
+    },
+    "criteria": {
+      "capacity": "Капацитет",
+      "client": "Клиент",
+      "competition": "Конкуренция",
+      "margin": "Марж",
+      "risk": "Риск"
+    }
   }
 }

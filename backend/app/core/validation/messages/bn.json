@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "হারা দরপত্র {bid}-এ বিজয়ী দাম নেই",
+      "suggestion": "ব্যবধান মাপতে বিজয়ী দাম লিখুন"
+    },
+    "won_matches_price": {
+      "fail": "জেতা দরপত্র {bid}: বিজয়ী দাম {winning} আমাদের দাম {ours} থেকে আলাদা",
+      "suggestion": "জেতা দরপত্রে বিজয়ী দাম আমাদেরই; দুটির একটি সংশোধন করুন"
+    },
+    "second_above_winner": {
+      "fail": "দরপত্র {bid}: দ্বিতীয় দাম {second} বিজয়ী দাম {winning}-এর চেয়ে কম",
+      "suggestion": "দ্বিতীয় দাম বিজয়ীর দামের চেয়ে কম হতে পারে না; দুটিই পরীক্ষা করুন"
+    },
+    "competitors_recorded": {
+      "fail": "নিষ্পত্তি হওয়া দরপত্র {bid}-এ প্রতিযোগীর সংখ্যা নেই",
+      "suggestion": "কতজন অন্য দরদাতা অংশ নিয়েছে তা লিখুন"
+    },
+    "lost_reason_recorded": {
+      "fail": "হারা দরপত্র {bid}-এ কারণ নেই",
+      "suggestion": "প্রধান কারণটি বেছে নিন, যাতে পরের দরপত্র তা থেকে শিখতে পারে"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "ওজনের যোগফল {total}, ১০০ নয়।"
+    },
+    "all_criteria_rated": {
+      "fail": "মানদণ্ড {criterion} রেট করা হয়নি।"
+    },
+    "override_has_reason": {
+      "fail": "সিদ্ধান্তটি সুপারিশ থেকে ভিন্ন; কারণ লিখুন।"
+    },
+    "low_rating_has_note": {
+      "fail": "মানদণ্ড {criterion} এর রেটিং ১, কিন্তু কোনো নোট নেই।"
+    },
+    "criteria": {
+      "capacity": "সক্ষমতা",
+      "client": "ক্লায়েন্ট",
+      "competition": "প্রতিযোগিতা",
+      "margin": "মার্জিন",
+      "risk": "ঝুঁকি"
+    }
   }
 }

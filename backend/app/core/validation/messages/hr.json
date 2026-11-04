@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Izgubljena ponuda {bid} nema pobjedničku cijenu",
+      "suggestion": "Unesite pobjedničku cijenu da biste izmjerili razliku"
+    },
+    "won_matches_price": {
+      "fail": "Dobivena ponuda {bid}: pobjednička cijena {winning} razlikuje se od naše cijene {ours}",
+      "suggestion": "Kod dobivene ponude pobjednička cijena je naša; ispravite jednu od njih"
+    },
+    "second_above_winner": {
+      "fail": "Ponuda {bid}: druga cijena {second} niža je od pobjedničke cijene {winning}",
+      "suggestion": "Druga cijena ne može biti niža od cijene pobjednika; provjerite obje"
+    },
+    "competitors_recorded": {
+      "fail": "Odlučena ponuda {bid} nema broj konkurenata",
+      "suggestion": "Unesite koliko je drugih ponuditelja sudjelovalo"
+    },
+    "lost_reason_recorded": {
+      "fail": "Izgubljena ponuda {bid} nema razlog",
+      "suggestion": "Odaberite glavni razlog kako bi iz njega mogla učiti sljedeća ponuda"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Težine zbrajaju {total}, a ne 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriterij {criterion} nije ocijenjen."
+    },
+    "override_has_reason": {
+      "fail": "Odluka se razlikuje od preporuke; navedite razlog."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriterij {criterion} ocijenjen je s 1 bez bilješke."
+    },
+    "criteria": {
+      "capacity": "Kapacitet",
+      "client": "Naručitelj",
+      "competition": "Konkurencija",
+      "margin": "Marža",
+      "risk": "Rizik"
+    }
   }
 }
