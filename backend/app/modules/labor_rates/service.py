@@ -500,6 +500,17 @@ class LaborRateService:
         """
         crew_id = data.crew_id or uuid.uuid4()
 
+        if data.crew_id is not None:
+            # A crew id held by another owner is not ours to write into; answer as
+            # for a missing crew so ids cannot be probed.
+            foreign = await self.session.execute(
+                select(CrewMember.id)
+                .where(CrewMember.crew_id == crew_id, CrewMember.owner_id.is_distinct_from(owner_id))
+                .limit(1)
+            )
+            if foreign.first() is not None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crew not found")
+
         # Replace: drop the crew's existing members for this owner, then insert.
         await self.session.execute(
             delete(CrewMember).where(CrewMember.crew_id == crew_id, CrewMember.owner_id == owner_id)
@@ -546,9 +557,10 @@ class LaborRateService:
 
     async def delete_crew(self, crew_id: uuid.UUID, owner_id: uuid.UUID | None) -> int:
         """Delete every member of a crew, returning how many rows were removed."""
-        result = await self.session.execute(
-            delete(CrewMember).where(CrewMember.crew_id == crew_id, CrewMember.owner_id == owner_id)
-        )
+        stmt = delete(CrewMember).where(CrewMember.crew_id == crew_id)
+        if owner_id is not None:  # None is the admin's unscoped view, not "owned by nobody"
+            stmt = stmt.where(CrewMember.owner_id == owner_id)
+        result = await self.session.execute(stmt)
         await self.session.flush()
         return int(result.rowcount or 0)
 
