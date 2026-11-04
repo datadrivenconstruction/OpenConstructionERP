@@ -659,7 +659,7 @@ class CDEService:
                     file_size_int = 0
                 doc = Document(
                     project_id=container.project_id,
-                    name=file_name,
+                    name=file_name[:255],  # Document.name is String(255)
                     description=(f"CDE rev {revision_code} - {container.container_code}"),
                     category="cde",
                     file_size=file_size_int,
