@@ -53,3 +53,18 @@ async def test_rule_boundary(days: int, fails: bool) -> None:
 def test_messages_exist_in_locale(locale: str) -> None:
     assert is_key_present("field_diary.offline_op_fresh.fail", locale)
     assert is_key_present("field_diary.offline_op_fresh.suggestion", locale)
+
+
+@pytest.mark.parametrize(
+    ("value", "code"),
+    [
+        (None, "captured_at_missing"),
+        ("  ", "captured_at_missing"),
+        ("nope", "captured_at_unreadable"),
+        ("2026-11-01T08:00:00Z", None),
+    ],
+)
+def test_capture_time_warning(value: str | None, code: str | None) -> None:
+    from app.modules.field_diary.capture_age import capture_time_warning
+
+    assert capture_time_warning(value) == code

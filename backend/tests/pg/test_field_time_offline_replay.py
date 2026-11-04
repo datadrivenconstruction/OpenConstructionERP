@@ -552,7 +552,7 @@ async def test_a_key_already_spent_by_another_module_is_refused(pg_session) -> N
     assert await _count_timesheets(pg_session, project_id) == 0
 
 
-async def test_a_key_from_another_project_cannot_reach_this_ones_day(pg_session) -> None:
+async def test_a_key_from_another_project_is_a_separate_op_and_cannot_reach_this_ones_day(pg_session) -> None:
     """The key selects the row, so the key has to be scoped, not just the payload.
 
     The endpoint checks that the caller may reach the project named in the
@@ -568,20 +568,21 @@ async def test_a_key_from_another_project_cannot_reach_this_ones_day(pg_session)
     original = await service.record_offline_entry(_entry(project_a, resource_a, key), str(user_a))
     assert original.outcome == OUTCOME_CREATED
 
-    # The same key, sent with someone else's project.
-    with pytest.raises(HTTPException) as caught:
-        await service.record_offline_entry(
-            _entry(project_b, resource_a, key, hours="99"),
-            str(user_b),
-        )
-    assert caught.value.status_code == 404
+    # The same key sent for another project is a different op there: it neither
+    # reaches project A's day nor is blocked by it.
+    other = await service.record_offline_entry(
+        _entry(project_b, resource_a, key, hours="99"),
+        str(user_b),
+    )
+    assert other.outcome == OUTCOME_CREATED
+    assert other.timesheet is not None and original.timesheet is not None
+    assert other.timesheet.id != original.timesheet.id
+    assert other.timesheet.project_id == project_b
 
-    with pytest.raises(HTTPException) as caught_withdraw:
-        await service.withdraw_offline_entry(
-            OfflineEntryWithdraw(entry_key=key, project_id=project_b),
-            str(user_b),
-        )
-    assert caught_withdraw.value.status_code == 404
+    await service.withdraw_offline_entry(
+        OfflineEntryWithdraw(entry_key=key, project_id=project_b),
+        str(user_b),
+    )
 
     # The first project's day is untouched: still there, still eight hours.
     assert original.timesheet is not None

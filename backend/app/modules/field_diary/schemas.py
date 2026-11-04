@@ -319,6 +319,8 @@ class FieldCaptureResponse(BaseModel):
     http_status: int
     # Machine-readable cause when status is "rejected"; the queue panel shows it.
     reason_code: str | None = None
+    # Set on an applied op whose capture time was missing or unreadable (judged as captured now).
+    warning_code: str | None = None
 
 
 class FieldSyncOpItem(FieldCapture):

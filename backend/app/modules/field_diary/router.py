@@ -680,6 +680,7 @@ async def field_roster(
 async def capture_punch(
     payload: FieldPunchCreate,
     session: SessionDep,
+    response: Response,
     field_session=Depends(_require_field_module_grant),
 ) -> FieldCaptureResponse:
     """Create a punch item from a field capture, scoped to the session project.
@@ -687,14 +688,17 @@ async def capture_punch(
     Idempotent on ``client_op_id``: a replayed op returns the original punch id
     (HTTP 200) instead of creating a second row.
     """
-    svc = FieldSyncService(session)
-    return await svc.capture_punch(field_session, payload)
+    result = await FieldSyncService(session).capture_punch(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
 
 
 @router.post("/capture/inspection/", response_model=FieldCaptureResponse, status_code=201)
 async def capture_inspection(
     payload: FieldInspectionCreate,
     session: SessionDep,
+    response: Response,
     field_session=Depends(_require_field_module_grant),
 ) -> FieldCaptureResponse:
     """Create an inspection from a field capture, scoped to the session project.
@@ -702,8 +706,10 @@ async def capture_inspection(
     Idempotent on ``client_op_id``. The created inspection feeds the existing
     desktop ``create-defect`` / ``create-ncr`` bridges with no new bridge code.
     """
-    svc = FieldSyncService(session)
-    return await svc.capture_inspection(field_session, payload)
+    result = await FieldSyncService(session).capture_inspection(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
 
 
 @router.post("/capture/ncr/", response_model=FieldCaptureResponse, status_code=201)
@@ -800,6 +806,7 @@ async def list_schedule_activities(
 async def capture_schedule_progress(
     payload: FieldScheduleProgressCreate,
     session: SessionDep,
+    response: Response,
     field_session=Depends(_require_field_module_grant),
 ) -> FieldCaptureResponse:
     """Apply a field-captured progress update to a schedule activity (T3.4).
@@ -808,8 +815,10 @@ async def capture_schedule_progress(
     cross-project ``activity_id`` resolves to 404). Idempotent on
     ``client_op_id``: a replayed op returns the original activity id (HTTP 200).
     """
-    svc = FieldSyncService(session)
-    return await svc.capture_schedule_progress(field_session, payload)
+    result = await FieldSyncService(session).capture_schedule_progress(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
 
 
 @router.post("/capture/photo/", response_model=FieldCaptureResponse, status_code=201)
