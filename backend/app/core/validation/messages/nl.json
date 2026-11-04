@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Post {ordinal}: {count} meting(en) zijn overgenomen uit een eerdere tekeningrevisie en nog niet bevestigd",
       "suggestion": "Controleer elke overgenomen meting op de nieuwe revisie en bevestig die, of meet opnieuw"
+    },
+    "low_confidence_pending": {
+      "fail": "Post {ordinal}: {count} overgenomen meting(en) zijn met lage betrouwbaarheid op de nieuwe revisie geplaatst en wachten op beoordeling",
+      "suggestion": "Open de beoordeling van overgenomen metingen, controleer elke meting met lage betrouwbaarheid op de nieuwe tekening en bevestig of meet opnieuw"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "Over {code} is besloten; het kan niet meer worden gewijzigd of verwijderd.",
       "suggestion": "Voer een nieuwe verschuiving of budgetwijziging in die het corrigeert."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Slechts {coverage}% van het budget zit op elementen die aan taken zijn gekoppeld (limiet {limit}%); de rest kan niet naast het model worden getoond.",
+        "suggestion": "Koppel meer elementen aan taken met kosten of controleer de EAC-koppelregels."
+      }
     }
   },
   "money": {

@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Hạng mục {ordinal}: {count} phép đo được chuyển từ phiên bản bản vẽ trước và chưa được xác nhận",
       "suggestion": "Kiểm tra từng phép đo được chuyển trên phiên bản mới rồi xác nhận, hoặc đo lại"
+    },
+    "low_confidence_pending": {
+      "fail": "Hạng mục {ordinal}: {count} số đo được chuyển sang đã được đặt trên bản sửa đổi mới với độ tin cậy thấp và đang chờ xem xét",
+      "suggestion": "Mở phần xem xét chuyển số đo, kiểm tra từng số đo có độ tin cậy thấp trên bản vẽ mới, sau đó xác nhận hoặc đo lại"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} đã có quyết định và không thể sửa hay xóa nữa.",
       "suggestion": "Hãy nhập một lần điều chuyển hoặc điều chỉnh ngân sách mới để sửa lại."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Chỉ {coverage}% ngân sách nằm trên các phần tử được liên kết với công việc (giới hạn {limit}%); phần còn lại không thể hiển thị cạnh mô hình.",
+        "suggestion": "Liên kết thêm phần tử với các công việc đã gán chi phí, hoặc kiểm tra quy tắc liên kết EAC."
+      }
     }
   },
   "money": {

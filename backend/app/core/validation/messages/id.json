@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Item {ordinal}: {count} pengukuran dibawa dari revisi gambar sebelumnya dan belum dikonfirmasi",
       "suggestion": "Periksa setiap pengukuran yang dibawa pada revisi baru lalu konfirmasi, atau ukur ulang"
+    },
+    "low_confidence_pending": {
+      "fail": "Item {ordinal}: {count} pengukuran yang dibawa ditempatkan pada revisi baru dengan tingkat keyakinan rendah dan menunggu peninjauan",
+      "suggestion": "Buka peninjauan pembawaan, periksa setiap pengukuran berkeyakinan rendah pada lembar baru, lalu konfirmasi atau ukur ulang"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} sudah diputuskan dan tidak dapat diubah atau dihapus lagi.",
       "suggestion": "Buat pemindahan atau perubahan anggaran baru yang mengoreksinya."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Hanya {coverage}% anggaran yang berada pada elemen yang terhubung ke tugas (batas {limit}%); sisanya tidak dapat ditampilkan di samping model.",
+        "suggestion": "Hubungkan lebih banyak elemen ke tugas yang memuat biaya, atau periksa aturan tautan EAC."
+      }
     }
   },
   "money": {

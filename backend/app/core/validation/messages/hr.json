@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Stavka {ordinal}: {count} mjerenja preneseno je iz ranije revizije nacrta i još nije potvrđeno",
       "suggestion": "Provjerite svako preneseno mjerenje na novoj reviziji i potvrdite ga ili ponovno izmjerite"
+    },
+    "low_confidence_pending": {
+      "fail": "Stavka {ordinal}: {count} prenesenih izmjera postavljeno je na novu reviziju s niskom pouzdanošću i čeka pregled",
+      "suggestion": "Otvorite pregled prenesenih izmjera, provjerite svaku izmjeru niske pouzdanosti na novom nacrtu, a zatim je potvrdite ili ponovno izmjerite"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} je odlučen i više se ne može mijenjati ni brisati.",
       "suggestion": "Unesite novi prijenos ili izmjenu proračuna koja ga ispravlja."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Samo {coverage} % proračuna nalazi se na elementima povezanima sa zadacima (granica {limit} %); ostatak se ne može prikazati uz model.",
+        "suggestion": "Povežite više elemenata sa zadacima s troškovima ili provjerite EAC pravila povezivanja."
+      }
     }
   },
   "money": {

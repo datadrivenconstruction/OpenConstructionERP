@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Voce {ordinal}: {count} misura/e riportate da una revisione precedente del disegno non sono ancora confermate",
       "suggestion": "Controlli ogni misura riportata sulla nuova revisione e la confermi, oppure la misuri di nuovo"
+    },
+    "low_confidence_pending": {
+      "fail": "Voce {ordinal}: {count} misurazione/i riportata/e è/sono stata/e collocata/e sulla nuova revisione con bassa affidabilità e attende/ono verifica",
+      "suggestion": "Aprire la revisione dei riporti, controllare ogni misurazione a bassa affidabilità sul nuovo elaborato, quindi confermarla o rimisurarla"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} è stato deciso e non può più essere modificato o eliminato.",
       "suggestion": "Inserisci un nuovo trasferimento o una variazione di budget che lo corregga."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Solo il {coverage}% del budget è su elementi collegati ad attività (limite {limit}%); il resto non può essere mostrato accanto al modello.",
+        "suggestion": "Collegare più elementi ad attività con costi assegnati oppure controllare le regole di collegamento EAC."
+      }
     }
   },
   "money": {

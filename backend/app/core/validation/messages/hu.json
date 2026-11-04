@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "{ordinal}. tétel: {count} mérés egy korábbi rajzváltozatból került át, és még nincs megerősítve",
       "suggestion": "Ellenőrizze az áthozott méréseket az új változaton, és erősítse meg őket, vagy mérje újra"
+    },
+    "low_confidence_pending": {
+      "fail": "{ordinal}. tétel: {count} átvett felmérés alacsony megbízhatósággal került az új revízióra, és ellenőrzésre vár",
+      "suggestion": "Nyissa meg az átvett felmérések ellenőrzését, vizsgálja meg az új rajzon az alacsony megbízhatóságú felméréseket, majd erősítse meg vagy mérje újra őket"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} el van döntve, és már nem módosítható vagy törölhető.",
       "suggestion": "Rögzítsen új átcsoportosítást vagy költségvetés-módosítást, amely kijavítja."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "A költségvetésnek csak {coverage}%-a esik feladatokhoz kapcsolt elemekre (határ: {limit}%); a többi nem jeleníthető meg a modell mellett.",
+        "suggestion": "Kapcsoljon több elemet költségterhelt feladatokhoz, vagy ellenőrizze az EAC kapcsolási szabályait."
+      }
     }
   },
   "money": {

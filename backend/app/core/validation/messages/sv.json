@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Post {ordinal}: {count} mätning(ar) fördes över från en tidigare ritningsrevision och är ännu inte bekräftade",
       "suggestion": "Kontrollera varje överförd mätning på den nya revisionen och bekräfta den, eller mät om"
+    },
+    "low_confidence_pending": {
+      "fail": "Post {ordinal}: {count} överförda mätningar placerades på den nya revisionen med låg säkerhet och väntar på granskning",
+      "suggestion": "Öppna granskningen av överförda mätningar, kontrollera varje mätning med låg säkerhet på den nya ritningen och bekräfta eller mät om"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} har beslutats och kan inte längre ändras eller tas bort.",
       "suggestion": "Registrera en ny överföring eller budgetändring som rättar den."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Endast {coverage} % av budgeten ligger på element kopplade till aktiviteter (gräns {limit} %); resten kan inte visas bredvid modellen.",
+        "suggestion": "Koppla fler element till aktiviteter med kostnader, eller kontrollera EAC-kopplingsreglerna."
+      }
     }
   },
   "money": {

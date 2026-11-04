@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "项目 {ordinal}：有 {count} 项测量值从早期图纸版本沿用而来，尚未确认",
       "suggestion": "请在新版本上检查每个沿用的测量值，并确认或重新测量"
+    },
+    "low_confidence_pending": {
+      "fail": "条目 {ordinal}：{count} 项结转的测量以较低置信度放置在新版本上，等待审核",
+      "suggestion": "打开结转审核，逐项检查新图纸上置信度较低的测量，然后确认或重新测量"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} 已有决定，不能再修改或删除。",
       "suggestion": "请录入一笔新的调拨或预算变更来更正。"
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "仅有 {coverage}% 的预算位于已关联任务的构件上（上限 {limit}%）；其余部分无法与模型并排显示。",
+        "suggestion": "将更多构件关联到带成本的任务，或检查 EAC 关联规则。"
+      }
     }
   },
   "money": {

@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "항목 {ordinal}: 측정값 {count}개가 이전 도면 개정에서 이월되었으며 아직 확인되지 않았습니다",
       "suggestion": "새 개정에서 이월된 각 측정값을 확인하여 승인하거나 다시 측정하세요"
+    },
+    "low_confidence_pending": {
+      "fail": "항목 {ordinal}: 이월된 수량 {count}건이 낮은 신뢰도로 새 개정판에 배치되어 검토를 기다리고 있습니다",
+      "suggestion": "이월 검토를 열어 새 도면에서 신뢰도가 낮은 수량을 하나씩 확인한 뒤 승인하거나 다시 측정하세요"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code}은(는) 결정이 끝나 더 이상 변경하거나 삭제할 수 없습니다.",
       "suggestion": "이를 바로잡는 새 이체나 예산 변경을 입력하세요."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "예산의 {coverage}%만 작업에 연결된 요소에 있습니다(한도 {limit}%). 나머지는 모델 옆에 표시할 수 없습니다.",
+        "suggestion": "비용이 배정된 작업에 더 많은 요소를 연결하거나 EAC 연결 규칙을 확인하세요."
+      }
     }
   },
   "money": {

@@ -1446,6 +1446,10 @@
     "carried_unconfirmed": {
       "fail": "Partida {ordinal}: {count} medición(es) se trasladaron de una revisión anterior del plano y aún no están confirmadas",
       "suggestion": "Revise cada medición trasladada en la nueva revisión y confírmela, o vuelva a medirla"
+    },
+    "low_confidence_pending": {
+      "fail": "Partida {ordinal}: {count} medición(es) trasladada(s) se colocaron en la nueva revisión con baja confianza y esperan revisión",
+      "suggestion": "Abra la revisión de traslados, compruebe cada medición de baja confianza en el plano nuevo y luego confírmela o vuelva a medirla"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} ya está resuelto y no se puede modificar ni eliminar.",
       "suggestion": "Introduzca un nuevo traspaso o cambio de presupuesto que lo corrija."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Solo el {coverage} % del presupuesto está en elementos vinculados a tareas (límite {limit} %); el resto no puede mostrarse junto al modelo.",
+        "suggestion": "Vincule más elementos a tareas con costes asignados o revise las reglas de vinculación EAC."
+      }
     }
   },
   "money": {

@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Item {ordinal}: {count} sukat ang dinala mula sa naunang rebisyon ng drowing at hindi pa nakukumpirma",
       "suggestion": "Suriin ang bawat dinalang sukat sa bagong rebisyon at kumpirmahin ito, o sukatin muli"
+    },
+    "low_confidence_pending": {
+      "fail": "Item {ordinal}: {count} inilipat na sukat ang inilagay sa bagong rebisyon na may mababang kumpiyansa at naghihintay ng pagsusuri",
+      "suggestion": "Buksan ang pagsusuri ng mga inilipat na sukat, suriin ang bawat sukat na mababa ang kumpiyansa sa bagong sheet, pagkatapos ay kumpirmahin o sukatin muli"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "Napagdesisyunan na ang {code} at hindi na ito mababago o mabubura.",
       "suggestion": "Maglagay ng bagong paglilipat o pagbabago sa budget na magwawasto rito."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "{coverage}% lamang ng badyet ang nasa mga elementong naka-link sa mga gawain (limitasyon {limit}%); ang natitira ay hindi maipapakita sa tabi ng modelo.",
+        "suggestion": "Mag-link ng mas maraming elemento sa mga gawaing may nakalagak na gastos, o suriin ang mga patakaran sa link ng EAC."
+      }
     }
   },
   "money": {

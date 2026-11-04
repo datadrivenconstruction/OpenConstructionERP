@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Positsioon {ordinal}: {count} mõõtmist kanti üle varasemast joonise redaktsioonist ja neid pole veel kinnitatud",
       "suggestion": "Kontrollige iga ülekantud mõõtmist uuel redaktsioonil ja kinnitage see või mõõtke uuesti"
+    },
+    "low_confidence_pending": {
+      "fail": "Positsioon {ordinal}: {count} üle toodud mõõtmist paigutati uuele redaktsioonile madala usaldusväärsusega ja need ootavad ülevaatust",
+      "suggestion": "Avage üle toodud mõõtmiste ülevaatus, kontrollige uuel lehel iga madala usaldusväärsusega mõõtmist ning kinnitage see või mõõtke uuesti"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} on otsustatud ning seda ei saa enam muuta ega kustutada.",
       "suggestion": "Sisesta uus ümbertõstmine või eelarve muudatus, mis seda parandab."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Ainult {coverage}% eelarvest asub ülesannetega seotud elementidel (piir {limit}%); ülejäänut ei saa mudeli kõrval näidata.",
+        "suggestion": "Siduge rohkem elemente kuludega koormatud ülesannetega või kontrollige EAC sidumisreegleid."
+      }
     }
   },
   "money": {

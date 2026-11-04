@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Poziția {ordinal}: {count} măsurători au fost preluate dintr-o revizie anterioară a desenului și nu sunt încă confirmate",
       "suggestion": "Verificați fiecare măsurătoare preluată pe revizia nouă și confirmați-o sau remăsurați-o"
+    },
+    "low_confidence_pending": {
+      "fail": "Poziția {ordinal}: {count} măsurători preluate au fost plasate pe noua revizie cu încredere scăzută și așteaptă verificarea",
+      "suggestion": "Deschideți verificarea măsurătorilor preluate, controlați fiecare măsurătoare cu încredere scăzută pe noul desen, apoi confirmați-o sau remăsurați-o"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "Pentru {code} s-a luat o decizie și nu mai poate fi modificat sau șters.",
       "suggestion": "Introduceți un nou transfer sau o modificare de buget care să îl corecteze."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Doar {coverage}% din buget se află pe elemente legate de sarcini (limită {limit}%); restul nu poate fi afișat lângă model.",
+        "suggestion": "Legați mai multe elemente de sarcini cu costuri sau verificați regulile de legare EAC."
+      }
     }
   },
   "money": {

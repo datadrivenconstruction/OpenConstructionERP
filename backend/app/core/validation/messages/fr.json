@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Poste {ordinal} : {count} mesure(s) reprise(s) d'un indice de plan antérieur ne sont pas encore confirmées",
       "suggestion": "Vérifiez chaque mesure reprise sur le nouvel indice et confirmez-la, ou mesurez-la à nouveau"
+    },
+    "low_confidence_pending": {
+      "fail": "Poste {ordinal} : {count} métré(s) reporté(s) ont été placés sur la nouvelle révision avec une faible confiance et attendent une vérification",
+      "suggestion": "Ouvrez la revue des reports, vérifiez chaque métré à faible confiance sur le nouveau plan, puis confirmez-le ou mesurez-le à nouveau"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} a fait l'objet d'une décision et ne peut plus être modifié ni supprimé.",
       "suggestion": "Saisissez un nouveau transfert ou une modification de budget qui le corrige."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Seuls {coverage} % du budget reposent sur des éléments liés à des tâches (limite {limit} %) ; le reste ne peut pas être affiché à côté de la maquette.",
+        "suggestion": "Liez davantage d'éléments à des tâches chargées en coûts, ou vérifiez les règles de liaison EAC."
+      }
     }
   },
   "money": {
