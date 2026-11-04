@@ -1644,5 +1644,27 @@
       "suggestion": "Check the coordinate system of the export, or the project anchor.",
       "fail": "The orthophoto lies {distance_km} km from the project anchor."
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Lost bid {bid} has no winning price",
+      "suggestion": "Enter the winning price to measure the gap"
+    },
+    "won_matches_price": {
+      "fail": "Won bid {bid}: winning price {winning} differs from our price {ours}",
+      "suggestion": "On a won bid the winning price is our own; correct one of them"
+    },
+    "second_above_winner": {
+      "fail": "Bid {bid}: second price {second} is below the winning price {winning}",
+      "suggestion": "The second price cannot be lower than the winner; check both"
+    },
+    "competitors_recorded": {
+      "fail": "Decided bid {bid} has no competitor count",
+      "suggestion": "Enter how many other bidders took part"
+    },
+    "lost_reason_recorded": {
+      "fail": "Lost bid {bid} has no reason",
+      "suggestion": "Pick the main reason so the next bid can learn from it"
+    }
   }
 }

@@ -124,6 +124,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'AI Chat': 'nav.erp_chat',
   // Commercial
   'CRM': 'nav.crm',
+  'Bid outcomes': 'winloss.title',
   'Contracts': 'nav.contracts',
   'Subcontractors': 'nav.subcontractors',
   'Bid Management': 'nav.bid_management',

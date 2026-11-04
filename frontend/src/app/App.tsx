@@ -653,6 +653,7 @@ const PropertyDevDashboardFullView = lazy(() =>
 const BidManagementPage = lazy(() =>
   import('@/features/bid-management').then((m) => ({ default: m.BidManagementPage }))
 );
+const WinLossPage = lazy(() => import('@/features/win-loss').then((m) => ({ default: m.WinLossPage })));
 const VariationsPage = lazy(() =>
   import('@/features/variations').then((m) => ({ default: m.VariationsPage }))
 );
@@ -1836,6 +1837,7 @@ export default function App() {
         <Route path="/bid-management" element={<P title="Bid Management"><BidManagementPage /></P>} />
         <Route path="/projects/:projectId/bid-management" element={<P title="Bid Management"><BidManagementPage /></P>} />
         <Route path="/crm" element={<P title="CRM"><CRMPage /></P>} />
+        <Route path="/win-loss" element={<P title="Bid outcomes"><WinLossPage /></P>} />
         <Route path="/property-dev" element={<P title="Property Development"><PropertyDevPage /></P>} />
         <Route path="/property-dev/developments/:devId/geo" element={<P title="Development map"><DevelopmentGeoPage /></P>} />
         <Route path="/property-dev/developments/:devId/pricing" element={<P title="Pricing Engine"><PropertyDevPricingEnginePage /></P>} />
