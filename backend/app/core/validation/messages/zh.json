@@ -1707,5 +1707,35 @@
       "fail": "{code} 已有决定，不能再修改或删除。",
       "suggestion": "请录入一笔新的调拨或预算变更来更正。"
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "{label}合计 {stated} 与其明细之和 {expected} 不一致。",
+      "suggestion": "请根据明细重新计算合计，或更正有误的明细。"
+    },
+    "value_in_range": {
+      "fail": "{field} 的值 {value} 超出允许范围 {low} 至 {high}。",
+      "suggestion": "请检查数字及其单位；常见原因是小数点位置错误。"
+    },
+    "currency_present": {
+      "fail": "未填写币种。",
+      "suggestion": "在依赖金额之前，请先设置记录的币种。"
+    },
+    "currency_consistent": {
+      "fail": "记录中混用了多种币种（{currencies}）。",
+      "suggestion": "请全程使用同一币种，或先换算金额。"
+    },
+    "reference_present": {
+      "fail": "缺少必需的引用 {field}。",
+      "suggestion": "请将记录关联到其项目、合同或相关方。"
+    },
+    "status_transition": {
+      "fail": "状态不能从 {from_status} 变为 {to_status}。",
+      "suggestion": "请遵循流程顺序；如需退回，请先重新打开记录。"
+    },
+    "dates_ordered": {
+      "fail": "日期 {earlier} 与 {later} 顺序错误或超出期间。",
+      "suggestion": "请修正日期，使较早的日期在前，且每个条目都落在期间内。"
+    }
   }
 }

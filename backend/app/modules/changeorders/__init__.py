@@ -14,3 +14,6 @@ async def on_startup() -> None:
 
     register_changeorder_permissions()
     register_changeorder_event_subscribers()
+    from app.modules.changeorders.validators import register_changeorders_validation_rules
+
+    register_changeorders_validation_rules()

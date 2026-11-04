@@ -1707,5 +1707,35 @@
       "fail": "{code} sudah diputuskan dan tidak dapat diubah atau dihapus lagi.",
       "suggestion": "Buat pemindahan atau perubahan anggaran baru yang mengoreksinya."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Total {label} {stated} tidak sama dengan jumlah barisnya {expected}.",
+      "suggestion": "Hitung ulang total dari barisnya atau perbaiki baris yang salah."
+    },
+    "value_in_range": {
+      "fail": "Nilai {value} untuk {field} berada di luar rentang yang diizinkan {low} sampai {high}.",
+      "suggestion": "Periksa angka dan satuannya; penyebab biasanya titik desimal yang bergeser."
+    },
+    "currency_present": {
+      "fail": "Mata uang tidak dicantumkan.",
+      "suggestion": "Tetapkan mata uang catatan sebelum mengandalkan jumlahnya."
+    },
+    "currency_consistent": {
+      "fail": "Catatan mencampur mata uang ({currencies}).",
+      "suggestion": "Gunakan satu mata uang di seluruh catatan atau konversikan jumlahnya terlebih dahulu."
+    },
+    "reference_present": {
+      "fail": "Referensi wajib {field} tidak ada.",
+      "suggestion": "Kaitkan catatan dengan proyek, kontrak, atau pihaknya."
+    },
+    "status_transition": {
+      "fail": "Status tidak dapat berubah dari {from_status} ke {to_status}.",
+      "suggestion": "Ikuti urutan alur kerja; buka kembali catatan terlebih dahulu jika harus mundur."
+    },
+    "dates_ordered": {
+      "fail": "Tanggal {earlier} dan {later} tidak berurutan atau di luar periode.",
+      "suggestion": "Perbaiki tanggal agar yang lebih awal datang lebih dulu dan setiap entri berada dalam periode."
+    }
   }
 }

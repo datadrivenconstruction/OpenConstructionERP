@@ -1707,5 +1707,35 @@
       "fail": "{code} ya está resuelto y no se puede modificar ni eliminar.",
       "suggestion": "Introduzca un nuevo traspaso o cambio de presupuesto que lo corrija."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "El total {label} {stated} no coincide con la suma de sus líneas {expected}.",
+      "suggestion": "Recalcule el total a partir de sus líneas o corrija la línea errónea."
+    },
+    "value_in_range": {
+      "fail": "El valor {value} de {field} está fuera del rango permitido de {low} a {high}.",
+      "suggestion": "Compruebe la cifra y su unidad; lo habitual es una coma decimal mal colocada."
+    },
+    "currency_present": {
+      "fail": "No se indica ninguna moneda.",
+      "suggestion": "Defina la moneda del registro antes de fiarse de sus importes."
+    },
+    "currency_consistent": {
+      "fail": "El registro mezcla monedas ({currencies}).",
+      "suggestion": "Use una sola moneda en todo el registro o convierta antes los importes."
+    },
+    "reference_present": {
+      "fail": "Falta la referencia obligatoria {field}.",
+      "suggestion": "Vincule el registro a su proyecto, contrato o parte."
+    },
+    "status_transition": {
+      "fail": "El estado no puede pasar de {from_status} a {to_status}.",
+      "suggestion": "Siga el orden del flujo; reabra antes el registro si debe retroceder."
+    },
+    "dates_ordered": {
+      "fail": "Las fechas {earlier} y {later} están desordenadas o fuera del periodo.",
+      "suggestion": "Corrija las fechas para que la anterior vaya primero y cada entrada quede dentro del periodo."
+    }
   }
 }

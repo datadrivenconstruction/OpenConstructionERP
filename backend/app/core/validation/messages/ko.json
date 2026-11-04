@@ -1707,5 +1707,35 @@
       "fail": "{code}은(는) 결정이 끝나 더 이상 변경하거나 삭제할 수 없습니다.",
       "suggestion": "이를 바로잡는 새 이체나 예산 변경을 입력하세요."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "{label} 합계 {stated}이(가) 항목 합계 {expected}와(과) 일치하지 않습니다.",
+      "suggestion": "항목으로 합계를 다시 계산하거나 잘못된 항목을 수정하세요."
+    },
+    "value_in_range": {
+      "fail": "{field}의 값 {value}이(가) 허용 범위 {low} ~ {high}를 벗어났습니다.",
+      "suggestion": "숫자와 단위를 확인하세요. 소수점 위치가 틀린 경우가 흔한 원인입니다."
+    },
+    "currency_present": {
+      "fail": "통화가 지정되지 않았습니다.",
+      "suggestion": "금액을 신뢰하기 전에 레코드의 통화를 설정하세요."
+    },
+    "currency_consistent": {
+      "fail": "레코드에 통화가 섞여 있습니다 ({currencies}).",
+      "suggestion": "전체에서 한 가지 통화를 사용하거나 먼저 금액을 환산하세요."
+    },
+    "reference_present": {
+      "fail": "필수 참조 {field}이(가) 없습니다.",
+      "suggestion": "레코드를 해당 프로젝트, 계약 또는 당사자에 연결하세요."
+    },
+    "status_transition": {
+      "fail": "상태를 {from_status}에서 {to_status}(으)로 변경할 수 없습니다.",
+      "suggestion": "워크플로 순서를 따르세요. 되돌려야 하면 먼저 레코드를 다시 여세요."
+    },
+    "dates_ordered": {
+      "fail": "날짜 {earlier}와(과) {later}의 순서가 맞지 않거나 기간을 벗어났습니다.",
+      "suggestion": "빠른 날짜가 먼저 오고 모든 항목이 기간 안에 들어오도록 날짜를 수정하세요."
+    }
   }
 }

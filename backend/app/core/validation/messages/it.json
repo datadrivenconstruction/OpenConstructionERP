@@ -1707,5 +1707,35 @@
       "fail": "{code} è stato deciso e non può più essere modificato o eliminato.",
       "suggestion": "Inserisci un nuovo trasferimento o una variazione di budget che lo corregga."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Il totale {label} {stated} non corrisponde alla somma delle sue righe {expected}.",
+      "suggestion": "Ricalcoli il totale dalle righe oppure corregga la riga errata."
+    },
+    "value_in_range": {
+      "fail": "Il valore {value} di {field} è fuori dall'intervallo consentito da {low} a {high}.",
+      "suggestion": "Controlli la cifra e la sua unità; di solito la causa è una virgola decimale fuori posto."
+    },
+    "currency_present": {
+      "fail": "Nessuna valuta indicata.",
+      "suggestion": "Imposti la valuta del record prima di fare affidamento sui suoi importi."
+    },
+    "currency_consistent": {
+      "fail": "Il record mescola valute ({currencies}).",
+      "suggestion": "Usi un'unica valuta ovunque oppure converta prima gli importi."
+    },
+    "reference_present": {
+      "fail": "Manca il riferimento obbligatorio {field}.",
+      "suggestion": "Colleghi il record al suo progetto, contratto o parte."
+    },
+    "status_transition": {
+      "fail": "Lo stato non può passare da {from_status} a {to_status}.",
+      "suggestion": "Segua l'ordine del flusso; riapra prima il record se deve tornare indietro."
+    },
+    "dates_ordered": {
+      "fail": "Le date {earlier} e {later} sono in ordine errato o fuori dal periodo.",
+      "suggestion": "Corregga le date in modo che la prima venga per prima e ogni voce rientri nel periodo."
+    }
   }
 }
