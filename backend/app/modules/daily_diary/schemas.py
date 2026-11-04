@@ -149,10 +149,10 @@ class WeatherRecordCreate(BaseModel):
     project_id: UUID
     captured_at: datetime
     source: str = Field(default="manual", pattern=_WEATHER_SOURCE_RE)
-    temperature_c: Decimal | None = None
+    temperature_c: Decimal | None = Field(default=None, ge=-100, le=100)
     humidity_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    wind_speed_kmh: Decimal | None = Field(default=None, ge=0)
-    precipitation_mm: Decimal | None = Field(default=None, ge=0)
+    wind_speed_kmh: Decimal | None = Field(default=None, ge=0, le=1000)
+    precipitation_mm: Decimal | None = Field(default=None, ge=0, le=9999)
     conditions_code: str | None = Field(default=None, max_length=32)
     conditions_text: str | None = Field(default=None, max_length=255)
     sunrise: str | None = Field(default=None, max_length=40)
@@ -169,10 +169,10 @@ class WeatherRecordUpdate(BaseModel):
 
     captured_at: datetime | None = None
     source: str | None = Field(default=None, pattern=_WEATHER_SOURCE_RE)
-    temperature_c: Decimal | None = None
+    temperature_c: Decimal | None = Field(default=None, ge=-100, le=100)
     humidity_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    wind_speed_kmh: Decimal | None = Field(default=None, ge=0)
-    precipitation_mm: Decimal | None = Field(default=None, ge=0)
+    wind_speed_kmh: Decimal | None = Field(default=None, ge=0, le=1000)
+    precipitation_mm: Decimal | None = Field(default=None, ge=0, le=9999)
     conditions_code: str | None = Field(default=None, max_length=32)
     conditions_text: str | None = Field(default=None, max_length=255)
     sunrise: str | None = Field(default=None, max_length=40)
@@ -765,9 +765,9 @@ class ProductivityFactorRequest(BaseModel):
 
     trade: str = Field(..., min_length=1, max_length=64)
     rain_hours: int = Field(default=0, ge=0, le=24)
-    precipitation_mm: float | None = Field(default=None, ge=0)
-    temperature_c: float | None = None
-    wind_speed_kmh: float | None = Field(default=None, ge=0)
+    precipitation_mm: float | None = Field(default=None, ge=0, le=9999)
+    temperature_c: float | None = Field(default=None, ge=-100, le=100)
+    wind_speed_kmh: float | None = Field(default=None, ge=0, le=1000)
     working_hours: int = Field(default=8, ge=1, le=24)
 
 

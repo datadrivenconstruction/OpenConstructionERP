@@ -336,3 +336,16 @@ async def test_export_pdf_without_reportlab_survives_a_non_latin_1_item(
         f"{label}: the title should reach the page as one Latin-1 byte per character, "
         "substituted where it cannot be represented"
     )
+
+
+def test_pin_to_sheet_rejects_ids_longer_than_the_column() -> None:
+    """document_id is String(36); a longer id used to reach the DB and answer 500."""
+    import pytest
+    from pydantic import ValidationError
+
+    from app.modules.punchlist.schemas import PinToSheetRequest
+
+    for field in ("sheet_id", "document_id"):
+        with pytest.raises(ValidationError):
+            PinToSheetRequest(**{field: "x" * 37}, page=1, location_x=0.5, location_y=0.5)
+    PinToSheetRequest(sheet_id="x" * 36, page=1, location_x=0.5, location_y=0.5)
