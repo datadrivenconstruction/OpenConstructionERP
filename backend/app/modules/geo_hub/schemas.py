@@ -943,7 +943,7 @@ class SurveyCaptureResponse(BaseModel):
 
 
 class SurveyObservationUpsert(BaseModel):
-    observed_pct: Decimal5_2 = Field(..., ge=0, le=100, decimal_places=2)
+    observed_pct: Decimal5_2 = Field(..., ge=0, le=100)
     note: str = Field(default="", max_length=4000)
 
 

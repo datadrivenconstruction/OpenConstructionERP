@@ -10,7 +10,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.decimal_types import Decimal8_2, Decimal10_1, Decimal12_2, Decimal14_3
+from app.core.decimal_types import Decimal8_2, Decimal10_1, Decimal12_2, Decimal12_4, Decimal14_3
 from app.modules.rebar_schedule.abs_format import SUPER_GROUPS
 
 _GROUP_PATTERN = "^(" + "|".join(SUPER_GROUPS) + ")$"
@@ -139,7 +139,7 @@ class AbsPreviewShape(BaseModel):
     position: str | None = None
     length_mm: Decimal12_2 | None = None
     quantity: int | None = None
-    weight_kg: Decimal14_3 | None = None
+    weight_kg: Decimal12_4 | None = None
     diameter_mm: Decimal8_2 | None = None
     steel_grade: str | None = None
     checksum_ok: bool
