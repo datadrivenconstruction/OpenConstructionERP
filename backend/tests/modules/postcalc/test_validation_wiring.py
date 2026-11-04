@@ -89,12 +89,19 @@ async def test_blocking_rule_rejects_with_its_code(session, monkeypatch) -> None
     assert "postcalc.rollup_matches_lines" in {r["rule_id"] for r in detail["results"]}
 
 
-async def test_blank_reference_blocks(session, monkeypatch) -> None:
+async def test_blank_line_reference_warns_not_blocks(session, monkeypatch) -> None:
     pid = await _project(session)
     _stub(monkeypatch, compute_project_postcalc([_line("")], currency="EUR"))
-    with pytest.raises(HTTPException) as exc:
-        await PostCalcService(session).generate_checked(pid)
-    assert "postcalc.references_present" in {r["rule_id"] for r in exc.value.detail["results"]}
+    _, warnings = await PostCalcService(session).generate_checked(pid)
+    assert "postcalc.references_present" in {w["rule_id"] for w in warnings}
+
+
+async def test_project_without_currency_warns_not_blocks(session, monkeypatch) -> None:
+    pid = await _project(session)
+    line = {**_line("01.001"), "currency": ""}
+    _stub(monkeypatch, compute_project_postcalc([line], currency=""))
+    _, warnings = await PostCalcService(session).generate_checked(pid)
+    assert "postcalc.currency_consistent" in {w["rule_id"] for w in warnings}
 
 
 async def test_implausible_factor_is_a_warning_not_a_block(session, monkeypatch) -> None:
