@@ -97,9 +97,9 @@ def _payload(gr_id: uuid.UUID, project: uuid.UUID, item: uuid.UUID, **line) -> d
 
 
 async def test_claim_effect_is_a_unique_insert(session: AsyncSession) -> None:
-    assert await claim_effect(session, "k1", "x") is True
-    assert await claim_effect(session, "k1", "x") is False
-    assert await claim_effect(session, "k2", "x") is True
+    assert await claim_effect(session, "k1", "x")
+    assert await claim_effect(session, "k1", "x") is None
+    assert await claim_effect(session, "k2", "x")
 
 
 async def test_replayed_event_moves_stock_once(session: AsyncSession) -> None:
