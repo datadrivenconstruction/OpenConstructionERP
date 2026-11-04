@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wallet } from 'lucide-react';
-import { Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
+import { Badge, Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
 import { RuleResultsList } from '@/shared/ui/RuleResultsList';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -127,6 +127,11 @@ export function TelematicsTab() {
                         <td className="py-2 pr-3">
                           <div className="font-medium text-content-primary">{m.code}</div>
                           <div className="text-xs text-content-tertiary">{m.name}</div>
+                          {(m.counter_reset_days ?? 0) > 0 && (
+                            <Badge variant="warning" size="sm">
+                              {t('equipment.telematics.counter_reset', { defaultValue: 'Counter restarted' })}
+                            </Badge>
+                          )}
                         </td>
                         <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.worked_hours, 1)}</td>
                         <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.idle_hours, 1)}</td>

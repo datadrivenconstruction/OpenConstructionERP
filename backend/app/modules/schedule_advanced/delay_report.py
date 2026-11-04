@@ -119,6 +119,15 @@ def _attr_dict(a: Any) -> dict[str, int]:
     }
 
 
+def _concurrency(result: dict[str, Any]) -> dict[str, Any]:
+    """Concurrent employer/contractor delay in one place, for a plain-words note in the exhibit."""
+    if result.get("windows"):
+        days = sum(int(w.get("concurrent_days") or 0) for w in result["windows"])
+    else:
+        days = int((result.get("attribution") or {}).get("concurrent_days") or 0)
+    return {"present": days > 0, "days": days, "apportionment": result.get("apportionment")}
+
+
 def run_analysis(
     method: str,
     *,
@@ -252,4 +261,5 @@ def run_analysis(
             }
         )
 
+    result["concurrency"] = _concurrency(result)
     return result

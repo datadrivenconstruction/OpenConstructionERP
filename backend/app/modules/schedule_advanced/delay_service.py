@@ -173,6 +173,8 @@ class DelayAnalysisService:
                 DelayWindow(
                     analysis_id=analysis.id,
                     sequence_order=int(w.get("sequence_order", 0)),
+                    window_start=w.get("window_start"),
+                    window_end=w.get("window_end"),
                     finish_at_open=int(w.get("finish_at_open", 0)),
                     finish_at_close=int(w.get("finish_at_close", 0)),
                     gross_slip_days=int(w.get("gross_slip_days", 0)),

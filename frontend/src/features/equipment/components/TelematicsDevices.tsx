@@ -155,6 +155,11 @@ export function TelematicsDevices() {
                       ? t('equipment.telematics.device_active', { defaultValue: 'Active' })
                       : t('equipment.telematics.device_revoked', { defaultValue: 'Revoked' })}
                   </Badge>
+                  {d.active && d.silent_hours != null && (
+                    <Badge variant="warning" size="sm">
+                      {t('equipment.telematics.device_silent', { defaultValue: 'No signal for over a day' })}
+                    </Badge>
+                  )}
                   <span className="ml-auto text-xs text-content-tertiary">
                     {d.last_seen_at ? (
                       <>

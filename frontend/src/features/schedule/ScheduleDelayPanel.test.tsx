@@ -19,6 +19,7 @@ vi.mock('@/features/schedule-advanced/api', () => ({
   addDelayEvent: vi.fn(),
   autoDelayFragnet: vi.fn(),
   computeDelayAnalysis: vi.fn(),
+  fetchDelayValidation: vi.fn(),
   issueDelayAnalysis: vi.fn(),
   raiseEotClaim: vi.fn(),
 }));
@@ -28,6 +29,7 @@ import {
   getDelayAnalysis,
   createDelayAnalysis,
   computeDelayAnalysis,
+  fetchDelayValidation,
 } from '@/features/schedule-advanced/api';
 import { ScheduleDelayPanel } from './ScheduleDelayPanel';
 
@@ -129,6 +131,7 @@ function renderPanel() {
 describe('ScheduleDelayPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (fetchDelayValidation as any).mockResolvedValue({ results: [], failed: 0 });
   });
 
   it('renders the analyses list and the create form', async () => {
@@ -205,5 +208,59 @@ describe('ScheduleDelayPanel', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /retry|try again/i })).toBeInTheDocument();
     });
+  });
+
+  it('cuts windows by snapshot by default and sends the chosen cut on compute', async () => {
+    (listDelayAnalyses as any).mockResolvedValue(LIST);
+    (getDelayAnalysis as any).mockResolvedValue(DRAFT_DETAIL);
+    (computeDelayAnalysis as any).mockResolvedValue(COMPUTED_DETAIL);
+    renderPanel();
+    fireEvent.click(await screen.findByText(/Window 3/));
+    const cut = (await screen.findByTestId('delay-window-mode')) as HTMLSelectElement;
+    expect(cut.value).toBe('snapshot');
+    fireEvent.change(cut, { target: { value: 'month' } });
+    fireEvent.click(screen.getByRole('button', { name: /run analysis/i }));
+    await waitFor(() => {
+      expect(computeDelayAnalysis).toHaveBeenCalledWith('d1', undefined, 'month');
+    });
+  });
+
+  it('says in plain words when delay was concurrent and flags a window without a snapshot', async () => {
+    (listDelayAnalyses as any).mockResolvedValue(LIST);
+    (getDelayAnalysis as any).mockResolvedValue({
+      ...COMPUTED_DETAIL,
+      result_json: { concurrency: { present: true, days: 3 }, windows: [{ no_snapshot: true }] },
+    });
+    renderPanel();
+    fireEvent.click(await screen.findByText(/Window 3/));
+    const note = await screen.findByTestId('delay-concurrent-note');
+    expect(note.textContent).toMatch(/same time/i);
+    expect(note.textContent).toMatch(/3/);
+    expect((await screen.findByTestId('delay-windows')).textContent).toMatch(/No schedule snapshot/);
+    expect(screen.getByText(/not an expert opinion/i)).toBeInTheDocument();
+  });
+
+  it('lists the failed checks above the result', async () => {
+    (listDelayAnalyses as any).mockResolvedValue(LIST);
+    (getDelayAnalysis as any).mockResolvedValue(COMPUTED_DETAIL);
+    (fetchDelayValidation as any).mockResolvedValue({
+      failed: 1,
+      results: [
+        {
+          rule_id: 'delay_analysis.fragnet_cycle',
+          passed: false,
+          severity: 'error',
+          message: 'The fragnet of event D-1 creates a logic loop, so the schedule cannot be calculated',
+          element_ref: 'e1',
+          details: { message_key: 'schedule.delay.rules.fragnet_cycle', event: 'D-1' },
+        },
+        { rule_id: 'delay_analysis.no_baseline', passed: true, severity: 'warning', message: 'OK', element_ref: 'd1', details: {} },
+      ],
+    });
+    renderPanel();
+    fireEvent.click(await screen.findByText(/Window 3/));
+    const box = await screen.findByTestId('delay-checks');
+    expect(box.textContent).toMatch(/logic loop/);
+    expect(box.querySelectorAll('li')).toHaveLength(1);
   });
 });
