@@ -57,6 +57,7 @@ class BidOutcomeUpdate(BaseModel):
     competitor_count: int | None = Field(default=None, ge=0, le=500)
     lost_reason: LostReason | None = None
     notes: str | None = None
+    version: int | None = None
 
     _currency_upper = field_validator("currency")(_upper)
 
@@ -90,6 +91,7 @@ class BidOutcomeResponse(BaseModel):
     competitor_count: int | None
     lost_reason: str | None
     notes: str
+    version: int = 1
     size_band: str = ""
     left_on_table: Decimal | None = None
     left_on_table_pct: Decimal | None = None

@@ -17,7 +17,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "vles12_lessons_learned"
-down_revision: str | Sequence[str] | None = "vdee9_schedule_constraint_names"
+down_revision: str | Sequence[str] | None = "vbid12"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

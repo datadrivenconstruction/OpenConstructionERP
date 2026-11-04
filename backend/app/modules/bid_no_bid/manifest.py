@@ -16,7 +16,7 @@ manifest = ModuleManifest(
     ),
     author="OpenConstructionERP Core Team",
     category="business",
-    depends=["oe_projects", "oe_tendering"],
+    depends=["oe_projects", "oe_tendering", "oe_win_loss"],
     optional_depends=["oe_crm"],
     auto_install=True,
     enabled=True,

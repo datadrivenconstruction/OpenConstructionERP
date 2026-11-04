@@ -3,7 +3,8 @@
 """Bid / no-bid ORM models.
 
 Tables:
-    oe_bid_no_bid_scorecard - one scorecard per tender: weights, ratings, threshold, decision and outcome.
+    oe_bid_no_bid_scorecard - one scorecard per tender: weights, ratings, threshold and decision.
+    The bid outcome is not stored here: it lives in ``oe_win_loss_entry`` (linked by ``tender_id``).
     oe_bid_no_bid_event     - the audit trail: every change with who and when.
 
 ``tender_id`` and ``opportunity_id`` are soft links (no foreign key) like the other registers.
@@ -36,8 +37,6 @@ class BidNoBidScorecard(Base):
     decision_reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     decided_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    outcome: Mapped[str] = mapped_column(String(12), nullable=False, default="", server_default="")
-    outcome_note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 

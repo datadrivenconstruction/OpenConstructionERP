@@ -61,6 +61,7 @@ class DecideRequest(BaseModel):
 class OutcomeRequest(BaseModel):
     outcome: Literal["", "won", "lost", "withdrawn"]
     note: str = Field(default="", max_length=2000)
+    version: int | None = None
 
 
 class FindingOut(BaseModel):

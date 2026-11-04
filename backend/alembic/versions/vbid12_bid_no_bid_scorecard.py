@@ -17,7 +17,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vbid12"
-down_revision: str | Sequence[str] | None = "vdee9_schedule_constraint_names"
+down_revision: str | Sequence[str] | None = "vwin12"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -49,8 +49,6 @@ def upgrade() -> None:
             sa.Column("decision_reason", sa.Text(), nullable=False, server_default=""),
             sa.Column("decided_by", sa.String(36), nullable=True),
             sa.Column("decided_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column("outcome", sa.String(12), nullable=False, server_default=""),
-            sa.Column("outcome_note", sa.Text(), nullable=False, server_default=""),
             sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
             sa.Column("created_by", sa.String(36), nullable=True),
         )

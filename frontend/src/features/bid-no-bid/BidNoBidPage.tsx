@@ -88,7 +88,7 @@ export function BidNoBidPage() {
   const setOutcome = async (outcome: string) => {
     if (!card) return;
     try {
-      done(await api.outcome(card.id, outcome, outcomeNote));
+      done(await api.outcome(card.id, outcome, outcomeNote, card.version));
     } catch (err) {
       fail(err);
     }
