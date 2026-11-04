@@ -15,6 +15,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.core.decimal_types import Decimal5_2, Decimal8_2, Decimal12_1, Decimal12_4, FiniteDecimal
+
 JobKind = Literal["linear", "sheet"]
 JobStatus = Literal["draft", "optimised", "applied"]
 
@@ -37,8 +39,8 @@ class PieceIn(BaseModel):
 
     ref: str = Field(..., min_length=1, max_length=64)
     label: str = Field(default="", max_length=255)
-    length_mm: Decimal = Field(..., gt=0, le=_MAX_MM)
-    width_mm: Decimal | None = Field(default=None, gt=0, le=_MAX_MM)
+    length_mm: Decimal12_1 = Field(..., gt=0, le=_MAX_MM)
+    width_mm: Decimal12_1 | None = Field(default=None, gt=0, le=_MAX_MM)
     quantity: int = Field(default=1, ge=1, le=100000)
     rotatable: bool = True
     source_ref: str | None = Field(default=None, max_length=255)
@@ -64,9 +66,9 @@ class StockIn(BaseModel):
 
     ref: str = Field(..., min_length=1, max_length=64)
     label: str = Field(default="", max_length=255)
-    length_mm: Decimal = Field(..., gt=0, le=_MAX_MM)
-    width_mm: Decimal | None = Field(default=None, gt=0, le=_MAX_MM)
-    unit_cost: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("100000000"))
+    length_mm: Decimal12_1 = Field(..., gt=0, le=_MAX_MM)
+    width_mm: Decimal12_1 | None = Field(default=None, gt=0, le=_MAX_MM)
+    unit_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0, le=Decimal("100000000"))
     available: int | None = Field(default=None, ge=0, le=1000000)
     is_offcut: bool = False
     inventory_item_id: uuid.UUID | None = None
@@ -97,11 +99,11 @@ class JobBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     kind: JobKind = "linear"
     material: str = Field(default="", max_length=120)
-    kerf_mm: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("100"))
-    trim_mm: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("10000"))
-    min_offcut_mm: Decimal = Field(default=Decimal("0"), ge=0, le=_MAX_MM)
-    yield_threshold_pct: Decimal = Field(default=Decimal("85"), ge=0, le=100)
-    unit_mass_kg: Decimal | None = Field(default=None, gt=0, le=Decimal("100000"))
+    kerf_mm: Decimal8_2 = Field(default=Decimal("0"), ge=0, le=Decimal("100"))
+    trim_mm: Decimal8_2 = Field(default=Decimal("0"), ge=0, le=Decimal("10000"))
+    min_offcut_mm: Decimal12_1 = Field(default=Decimal("0"), ge=0, le=_MAX_MM)
+    yield_threshold_pct: Decimal5_2 = Field(default=Decimal("85"), ge=0, le=100)
+    unit_mass_kg: Decimal12_4 | None = Field(default=None, gt=0, le=Decimal("100000"))
     currency: str = Field(default="", max_length=10)
     boq_position_id: uuid.UUID | None = None
     procurement_req_item_id: uuid.UUID | None = None
@@ -130,11 +132,11 @@ class JobUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     material: str | None = Field(default=None, max_length=120)
-    kerf_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("100"))
-    trim_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("10000"))
-    min_offcut_mm: Decimal | None = Field(default=None, ge=0, le=_MAX_MM)
-    yield_threshold_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    unit_mass_kg: Decimal | None = Field(default=None, gt=0, le=Decimal("100000"))
+    kerf_mm: Decimal8_2 | None = Field(default=None, ge=0, le=Decimal("100"))
+    trim_mm: Decimal8_2 | None = Field(default=None, ge=0, le=Decimal("10000"))
+    min_offcut_mm: Decimal12_1 | None = Field(default=None, ge=0, le=_MAX_MM)
+    yield_threshold_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
+    unit_mass_kg: Decimal12_4 | None = Field(default=None, gt=0, le=Decimal("100000"))
     currency: str | None = Field(default=None, max_length=10)
     boq_position_id: uuid.UUID | None = None
     procurement_req_item_id: uuid.UUID | None = None
@@ -225,7 +227,7 @@ class RebarImportRequest(BaseModel):
     """Pull pieces from a stored bending schedule, one bar diameter per job."""
 
     import_id: uuid.UUID
-    diameter_mm: Decimal = Field(..., gt=0, le=Decimal("100"))
+    diameter_mm: FiniteDecimal = Field(..., gt=0, le=Decimal("100"))
     replace: bool = True
 
 
@@ -241,8 +243,8 @@ class BoqImportRequest(BaseModel):
     """Split a BOQ line's quantity into pieces of a known size."""
 
     position_id: uuid.UUID
-    piece_length_mm: Decimal = Field(..., gt=0, le=_MAX_MM)
-    piece_width_mm: Decimal | None = Field(default=None, gt=0, le=_MAX_MM)
+    piece_length_mm: FiniteDecimal = Field(..., gt=0, le=_MAX_MM)
+    piece_width_mm: FiniteDecimal | None = Field(default=None, gt=0, le=_MAX_MM)
     replace: bool = True
 
 

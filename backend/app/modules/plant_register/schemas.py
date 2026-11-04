@@ -15,6 +15,8 @@ from typing import Any, ClassVar, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 _CODE = r"^[A-Za-z0-9][A-Za-z0-9_.\-/]*$"
 
 
@@ -396,7 +398,7 @@ class PaperOption(_In):
     cost: Decimal | None = Field(default=None, max_digits=18, decimal_places=2, ge=0)
     currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
     risk_ref: str | None = Field(default=None, max_length=255)
-    scores: dict[str, Decimal] = Field(default_factory=dict)
+    scores: dict[str, FiniteDecimal] = Field(default_factory=dict)
 
     _cost = field_validator("cost", mode="before")(_no_float)
 
@@ -411,7 +413,7 @@ class PaperOption(_In):
 class PaperCriterion(_In):
     code: str = Field(min_length=1, max_length=64)
     title: str = Field(default="", max_length=255)
-    weight: Decimal = Decimal(1)
+    weight: FiniteDecimal = Decimal(1)
 
     _w = field_validator("weight", mode="before")(_no_float)
 

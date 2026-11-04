@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.core.decimal_types import Decimal6_2, Decimal10_7
+
 
 class NCRCreate(BaseModel):
     """Create a new NCR."""
@@ -40,9 +42,9 @@ class NCRCreate(BaseModel):
     # Optional WGS84 position. Supplying both puts the NCR on the project map;
     # supplying neither leaves it exactly as NCRs behaved before. One without
     # the other is not a position and is rejected by the model validator below.
-    location_lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    location_lon: Decimal | None = Field(default=None, ge=-180, le=180)
-    location_accuracy_m: Decimal | None = Field(default=None, ge=0)
+    location_lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    location_lon: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
+    location_accuracy_m: Decimal6_2 | None = Field(default=None, ge=0)
     linked_inspection_id: str | None = Field(default=None, max_length=36)
     # Soft link to a contract package (id or code); scopes this report for package acceptance.
     package_ref: str | None = Field(default=None, max_length=64)
@@ -96,9 +98,9 @@ class NCRUpdate(BaseModel):
     # latitude, and refusing it would be wrong. The pair rule is enforced in
     # ``NCRService.update_ncr`` against the merged result, which is the only
     # place that can see both halves. Sending both as null clears the position.
-    location_lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    location_lon: Decimal | None = Field(default=None, ge=-180, le=180)
-    location_accuracy_m: Decimal | None = Field(default=None, ge=0)
+    location_lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    location_lon: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
+    location_accuracy_m: Decimal6_2 | None = Field(default=None, ge=0)
     linked_inspection_id: str | None = Field(default=None, max_length=36)
     # Soft link to a contract package (id or code); scopes this report for package acceptance.
     package_ref: str | None = Field(default=None, max_length=64)
