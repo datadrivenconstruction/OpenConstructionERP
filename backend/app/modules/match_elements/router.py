@@ -74,8 +74,13 @@ router = APIRouter(tags=["match_elements"])
 # large photos out of the MatchSession.metadata_ JSON column so session
 # listing pagination stays fast; the ImageSourceAdapter reads the file
 # back lazily on iter_elements. Mirrors the takeoff module's
-# ``_TAKEOFF_DOCUMENTS_DIR`` convention.
-_MATCH_IMAGES_DIR: Path = Path.home() / ".openestimator" / "match_images"
+# ``_TAKEOFF_DOCUMENTS_DIR`` convention. Resolved per call so it follows the
+# operator data dir (``OE_DATA_DIR``) onto a container's persistent volume.
+def _match_images_dir() -> Path:
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir
+
+    return home_state_dir(LEGACY_HOME_ROOT, "match_images")
+
 
 # Per-image upload cap. Vision-LLM providers reject payloads well above
 # this, and a 10 MB photo already exceeds the resolution any model uses
@@ -512,8 +517,9 @@ async def create_session_from_image(
     image_id = uuid.uuid4()
     ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[mime]
     try:
-        _MATCH_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-        file_path = _MATCH_IMAGES_DIR / f"{image_id}{ext}"
+        images_dir = _match_images_dir()
+        images_dir.mkdir(parents=True, exist_ok=True)
+        file_path = images_dir / f"{image_id}{ext}"
         file_path.write_bytes(content)
     except OSError as exc:
         raise HTTPException(

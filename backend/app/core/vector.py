@@ -550,7 +550,9 @@ def _get_vector_dir() -> Path:
     if settings.vector_data_dir:
         p = Path(settings.vector_data_dir)
     else:
-        p = Path.home() / ".openestimator" / "data" / "vectors"
+        from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir_or_legacy
+
+        p = home_state_dir_or_legacy(LEGACY_HOME_ROOT, "data", "vectors")
     p.mkdir(parents=True, exist_ok=True)
     return p
 

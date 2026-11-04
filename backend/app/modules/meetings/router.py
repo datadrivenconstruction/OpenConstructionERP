@@ -20,6 +20,7 @@ import logging
 import re
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -62,6 +63,17 @@ router = APIRouter(tags=["meetings"])
 # Minutes-from-audio routes go first: their fixed segments must win over /{meeting_id}.
 router.include_router(audio_router)
 logger = logging.getLogger(__name__)
+
+
+def _transcript_upload_dir(project_id: uuid.UUID) -> Path:
+    """Directory a cross-linked meeting transcript is written to.
+
+    Below the operator data dir (``OE_DATA_DIR``) when one is set, so a container
+    keeps transcripts on its volume; otherwise ``~/.openestimator/uploads/<project>``.
+    """
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir
+
+    return home_state_dir(LEGACY_HOME_ROOT, "uploads", str(project_id))
 
 
 def _get_service(session: SessionDep) -> MeetingService:
@@ -1128,11 +1140,9 @@ async def import_meeting_summary(
     # here MUST NOT break the meeting create - the transcript file is
     # already on disk and the meeting itself is persisted.
     try:
-        from pathlib import Path as _Path
-
         from app.modules.documents.models import Document
 
-        upload_dir = _Path.home() / ".openestimator" / "uploads" / str(project_id)
+        upload_dir = _transcript_upload_dir(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
         file_uuid = uuid.uuid4().hex[:12]
         safe_name = re.sub(r"[^\w.\-]", "_", file.filename or "transcript")

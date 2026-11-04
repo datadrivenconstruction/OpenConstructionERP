@@ -282,8 +282,34 @@ def host_packages(key: str | None = None) -> dict[str, ConverterPackage]:
 
 
 def install_dir_name(fmt: str, key: str) -> str:
-    """Folder under ``~/.openestimator/converters`` a package of ``key`` is unpacked into."""
+    """Folder under :func:`converter_install_root` a package of ``key`` is unpacked into."""
     return f"{fmt}_windows" if key == WINDOWS_KEY else f"{fmt}_{key}"
+
+
+def converter_install_root() -> Path:
+    """Where the auto-installer unpacks converters.
+
+    ``$OE_DATA_DIR/converters`` when an operator data dir is set, so a container
+    keeps its converters on the mounted volume; otherwise ``~/.openestimator/converters``.
+    """
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir
+
+    return home_state_dir(LEGACY_HOME_ROOT, "converters")
+
+
+def converter_install_roots() -> list[Path]:
+    """Install roots to search, the current one first.
+
+    The legacy ``~/.openestimator/converters`` follows when it differs, so a
+    converter installed before the operator data dir was honoured is still found.
+    """
+    from app.core.home_state import LEGACY_HOME_ROOT, legacy_home_dir
+
+    roots = [converter_install_root()]
+    legacy = legacy_home_dir(LEGACY_HOME_ROOT, "converters")
+    if legacy != roots[0]:
+        roots.append(legacy)
+    return roots
 
 
 def all_packages() -> list[ConverterPackage]:

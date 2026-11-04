@@ -65,6 +65,7 @@ from app.core.converter_source import (
     PACKAGES,
     WINDOWS_KEY,
     ConverterPackage,
+    converter_install_root,
     host_packages,
     host_platform_key,
     install_dir_name,
@@ -428,7 +429,7 @@ _DDC_TAG = resolve_converter_tag()
 
 
 _CONVERTER_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "converters"
-_CONVERTER_INSTALL_DIR = Path.home() / ".openestimator" / "converters"
+_CONVERTER_INSTALL_DIR = converter_install_root()
 
 _META_BY_ID: dict[str, dict[str, Any]] = {m["id"]: m for m in _CONVERTER_META}
 

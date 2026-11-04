@@ -28,8 +28,8 @@ Resolution order
 
 1. Explicit ``cwicr_parquet_root`` setting in :class:`AppSettings`.
 2. ``CWICR_PARQUET_ROOT`` environment variable.
-3. ``~/.openestimator/cwicr/`` (consistent with the embedded Qdrant
-   default).
+3. ``$OE_DATA_DIR/cwicr/`` when an operator data dir is set, else
+   ``~/.openestimator/cwicr/`` (consistent with the embedded Qdrant default).
 
 The module is import-safe even when ``polars`` is missing - heavy
 imports happen on first call so a fresh install without the
@@ -65,12 +65,12 @@ def _resolve_root() -> Path:
     """
 
     s = get_settings()
-    raw = (
-        getattr(s, "cwicr_parquet_root", "")
-        or os.environ.get("CWICR_PARQUET_ROOT", "")
-        or os.path.expanduser("~/.openestimator/cwicr")
-    )
-    return Path(raw)
+    raw = getattr(s, "cwicr_parquet_root", "") or os.environ.get("CWICR_PARQUET_ROOT", "")
+    if raw:
+        return Path(raw)
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir_or_legacy
+
+    return home_state_dir_or_legacy(LEGACY_HOME_ROOT, "cwicr")
 
 
 @lru_cache(maxsize=64)

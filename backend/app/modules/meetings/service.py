@@ -1525,9 +1525,11 @@ def _signature_dir() -> Path:
     base = os.environ.get(_SIGNATURE_DIR_ENV)
     if base:
         return Path(base)
-    # Default to <home>/.openestimator/meetings/signatures (matches the
-    # uploads scheme in router.py's transcript cross-link).
-    return Path.home() / ".openestimator" / "meetings" / "signatures"
+    # Default to <data dir or home/.openestimator>/meetings/signatures (matches
+    # the uploads scheme in router.py's transcript cross-link).
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir
+
+    return home_state_dir(LEGACY_HOME_ROOT, "meetings", "signatures")
 
 
 async def _save_signature_image(

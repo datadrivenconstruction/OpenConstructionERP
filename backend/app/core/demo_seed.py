@@ -28,13 +28,15 @@ import logging
 import os
 from pathlib import Path
 
+from app.core.home_state import HOME_ROOT, legacy_home_dir
+
 logger = logging.getLogger(__name__)
 
 #: File name of the persisted choice, relative to the data dir.
 CHOICE_FILENAME = "demo_seed_choice.json"
 
 #: Default data dir - must match ``app.cli.DEFAULT_DATA_DIR``.
-DEFAULT_DATA_DIR = Path.home() / ".openestimate"
+DEFAULT_DATA_DIR = legacy_home_dir(HOME_ROOT)
 
 
 def resolve_data_dir() -> Path:

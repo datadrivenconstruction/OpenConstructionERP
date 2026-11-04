@@ -5036,6 +5036,15 @@ def create_app() -> FastAPI:
 
         # Load all modules (triggers module on_startup hooks)
         _section("Modules")
+        # State an earlier version wrote under the home directory (inside the
+        # image layer of a container) is copied once onto the operator data dir
+        # before anything reads module states or installed modules.
+        try:
+            from app.core.home_state import migrate_legacy_home_state
+
+            migrate_legacy_home_state()
+        except Exception:
+            logger.warning("Legacy home-state migration failed", exc_info=True)
         # Modules installed at runtime live in the instance's data directory,
         # not in the source tree, so the import system has to be told about
         # that directory before anything discovers or imports a module. A
