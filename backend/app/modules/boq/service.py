@@ -24,7 +24,7 @@ import uuid
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Context, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Final, Literal, NamedTuple
 
@@ -71,11 +71,13 @@ from app.core.validation.messages import translate
 
 _SNAPSHOT_RATE_TOLERANCE = Decimal("0.005")
 _SNAPSHOT_RATE_QUANTUM = Decimal("0.0001")
+# Default context (28 digits) makes quantize raise on rates above ~1e24.
+_SNAPSHOT_RATE_CONTEXT = Context(prec=80, rounding=ROUND_HALF_EVEN)
 
 
 def _snapshot_rate(value: object) -> float:
     """Unit rate for a variant snapshot: exact Decimal, 4dp half-even, float only for the JSON edge."""
-    return float(_to_decimal(value).quantize(_SNAPSHOT_RATE_QUANTUM, rounding=ROUND_HALF_EVEN))
+    return float(_to_decimal(value).quantize(_SNAPSHOT_RATE_QUANTUM, context=_SNAPSHOT_RATE_CONTEXT))
 
 
 def _snapshot_rate_unchanged(stored: object, new_rate: float) -> bool:
