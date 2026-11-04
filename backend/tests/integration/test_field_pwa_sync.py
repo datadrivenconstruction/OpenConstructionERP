@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import AsyncIterator
 
 os.environ["EXPOSE_DEV_AUTH_SECRETS"] = "true"  # request-magic-link returns dev_token/dev_pin
@@ -154,7 +155,7 @@ async def test_capture_punch_is_idempotent(app_and_client) -> None:
     op_id = str(uuid.uuid4())
     payload = {
         "client_op_id": op_id,
-        "captured_at": "2026-06-05T09:00:00",
+        "captured_at": (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
         "lat": 52.52,
         "lon": 13.405,
         "title": "Cracked tile in lobby",
@@ -198,7 +199,7 @@ async def test_capture_inspection_is_idempotent(app_and_client) -> None:
     op_id = str(uuid.uuid4())
     payload = {
         "client_op_id": op_id,
-        "captured_at": "2026-06-05T10:00:00",
+        "captured_at": (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
         "lat": 48.137,
         "lon": 11.575,
         "inspection_type": "quality",

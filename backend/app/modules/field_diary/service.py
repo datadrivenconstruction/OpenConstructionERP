@@ -604,7 +604,7 @@ class FieldDiaryService:
         # device-generated ``client_op_id``; absent for direct online callers.
         client_op_id = data.client_op_id
         if client_op_id:
-            seen = await self.ledger_repo.get_by_client_op_id(client_op_id)
+            seen = await self.ledger_repo.get_by_client_op_id(client_op_id, entry.project_id)
             if seen is not None and seen.result_id is not None:
                 existing = await self.activity_repo.get_by_id(seen.result_id)
                 if existing is not None:
@@ -654,7 +654,7 @@ class FieldDiaryService:
         """
         from sqlalchemy.exc import IntegrityError
 
-        if await self.ledger_repo.get_by_client_op_id(client_op_id) is not None:
+        if await self.ledger_repo.get_by_client_op_id(client_op_id, project_id) is not None:
             return
         try:
             # Wrap ONLY the ledger insert in a SAVEPOINT so a duplicate-race
@@ -702,7 +702,7 @@ class FieldDiaryService:
         # Short-circuit a known replayed op BEFORE touching the entry, so a
         # second drain does not even resolve / create the entry again.
         if data.client_op_id:
-            seen = await self.ledger_repo.get_by_client_op_id(data.client_op_id)
+            seen = await self.ledger_repo.get_by_client_op_id(data.client_op_id, project_id)
             if seen is not None and seen.result_id is not None:
                 existing = await self.activity_repo.get_by_id(seen.result_id)
                 if existing is not None:
@@ -945,13 +945,14 @@ class FieldSyncService:
         self,
         client_op_id: str,
         expected_type: str,
+        project_id: uuid.UUID,
     ) -> uuid.UUID | None:
         """Return the prior downstream id for a known op, or ``None`` if new.
 
         ``None`` is also returned when the ledger row exists but the downstream
         row was since deleted, so the caller re-creates and re-points the ledger.
         """
-        seen = await self.ledger_repo.get_by_client_op_id(client_op_id)
+        seen = await self.ledger_repo.get_by_client_op_id(client_op_id, project_id)
         if seen is None or seen.result_id is None:
             return None
         if seen.result_type != expected_type:
@@ -975,7 +976,7 @@ class FieldSyncService:
 
         project_id = field_session.project_id
 
-        prior = await self._seen_result(data.client_op_id, "punchlist_item")
+        prior = await self._seen_result(data.client_op_id, "punchlist_item", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -985,6 +986,11 @@ class FieldSyncService:
                 result_id=prior,
                 http_status=200,
             )
+        stale = await self._stale_rejection(
+            data, target_module="punchlist", target_kind="punch_item", project_id=project_id
+        )
+        if stale is not None:
+            return stale
 
         repo = PunchListRepository(self.session)
         item = PunchItem(
@@ -1015,6 +1021,7 @@ class FieldSyncService:
             target_kind="punch_item",
             result_id=item.id,
             http_status=201,
+            warning_code=self._capture_warning(data),
         )
 
     async def capture_inspection(
@@ -1028,7 +1035,7 @@ class FieldSyncService:
 
         project_id = field_session.project_id
 
-        prior = await self._seen_result(data.client_op_id, "inspection")
+        prior = await self._seen_result(data.client_op_id, "inspection", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -1038,6 +1045,11 @@ class FieldSyncService:
                 result_id=prior,
                 http_status=200,
             )
+        stale = await self._stale_rejection(
+            data, target_module="inspections", target_kind="inspection", project_id=project_id
+        )
+        if stale is not None:
+            return stale
 
         repo = InspectionRepository(self.session)
         inspection = QualityInspection(
@@ -1068,6 +1080,7 @@ class FieldSyncService:
             target_kind="inspection",
             result_id=inspection.id,
             http_status=201,
+            warning_code=self._capture_warning(data),
         )
 
     async def capture_schedule_progress(
@@ -1095,7 +1108,7 @@ class FieldSyncService:
         from app.modules.schedule.service import ScheduleService
 
         # 1. Idempotent replay short-circuit (returns the prior activity id).
-        prior = await self._seen_result(data.client_op_id, "schedule_activity_progress")
+        prior = await self._seen_result(data.client_op_id, "schedule_activity_progress", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -1105,6 +1118,11 @@ class FieldSyncService:
                 result_id=prior,
                 http_status=200,
             )
+        stale = await self._stale_rejection(
+            data, target_module="schedule", target_kind="schedule_progress", project_id=field_session.project_id
+        )
+        if stale is not None:
+            return stale
 
         # 2. IDOR guard (critical). Resolve activity -> schedule -> project_id
         #    and require it to equal the session's pinned project. A cross-project
@@ -1220,6 +1238,7 @@ class FieldSyncService:
             target_kind="schedule_progress",
             result_id=data.activity_id,
             http_status=201,
+            warning_code=self._capture_warning(data),
         )
 
     async def _stale_rejection(
@@ -1266,7 +1285,7 @@ class FieldSyncService:
         from app.modules.ncr.service import NCRService
 
         project_id = field_session.project_id
-        prior = await self._seen_result(data.client_op_id, "ncr")
+        prior = await self._seen_result(data.client_op_id, "ncr", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -1308,6 +1327,7 @@ class FieldSyncService:
             target_kind="ncr",
             result_id=ncr.id,
             http_status=201,
+            warning_code=self._capture_warning(data),
         )
 
     async def capture_safety_observation(
@@ -1318,7 +1338,7 @@ class FieldSyncService:
         from app.modules.safety.service import SafetyService
 
         project_id = field_session.project_id
-        prior = await self._seen_result(data.client_op_id, "safety_observation")
+        prior = await self._seen_result(data.client_op_id, "safety_observation", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -1359,6 +1379,7 @@ class FieldSyncService:
             target_kind="safety_observation",
             result_id=obs.id,
             http_status=201,
+            warning_code=self._capture_warning(data),
         )
 
     async def capture_haul_ticket(
@@ -1369,7 +1390,7 @@ class FieldSyncService:
         from app.modules.haul_tickets.service import HaulTicketService
 
         project_id = field_session.project_id
-        prior = await self._seen_result(data.client_op_id, "haul_ticket")
+        prior = await self._seen_result(data.client_op_id, "haul_ticket", field_session.project_id)
         if prior is not None:
             return FieldCaptureResponse(
                 client_op_id=data.client_op_id,
@@ -1408,7 +1429,15 @@ class FieldSyncService:
             target_kind="haul_ticket",
             result_id=row.id,
             http_status=201 if created else 200,
+            warning_code=self._capture_warning(data) if created else None,
         )
+
+    @staticmethod
+    def _capture_warning(data: FieldCapture) -> str | None:
+        """Warning code when the capture time is missing or unreadable (the op is then judged as captured now)."""
+        from app.modules.field_diary.capture_age import capture_time_warning
+
+        return capture_time_warning(data.captured_at)
 
     @staticmethod
     def _capture_metadata(data: FieldCapture) -> dict[str, Any]:
@@ -1421,6 +1450,9 @@ class FieldSyncService:
             value = getattr(data, key, None)
             if value is not None:
                 block[key] = value
+        warning = FieldSyncService._capture_warning(data)
+        if warning:
+            block["captured_at_warning"] = warning
         return {"field_capture": block}
 
     async def list_ops(

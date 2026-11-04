@@ -383,7 +383,7 @@ class FieldSyncLedger(Base):
     duplicate logged hours, duplicate payroll labour.
 
     Each row records the outcome of one applied op keyed on ``client_op_id``
-    (globally unique - a UUID minted on the device). On a replay of a known id
+    (a UUID minted on the device, unique within a project). On a replay of a known id
     the service short-circuits and returns the stored result, so draining the
     queue any number of times is a no-op after the first success. This is the
     durable half of the dedup guarantee the frontend queue's ``clientOpId``
@@ -391,14 +391,16 @@ class FieldSyncLedger(Base):
 
     The ledger is scoped to ``(project_id, user_id)`` for auditing and so a
     future "pending sync review" surface can list a worker's replayed ops, but
-    the uniqueness that enforces idempotency is on ``client_op_id`` alone.
+    the uniqueness that enforces idempotency is on ``(project_id, client_op_id)``,
+    so an id replayed against another project is a separate op.
     """
 
     __tablename__ = "oe_field_sync_ledger"
     __table_args__ = (
         UniqueConstraint(
+            "project_id",
             "client_op_id",
-            name="uq_oe_field_sync_ledger_client_op_id",
+            name="uq_oe_field_sync_ledger_project_op",
         ),
         Index(
             "ix_oe_field_sync_ledger_project_user",
