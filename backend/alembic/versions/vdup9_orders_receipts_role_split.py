@@ -54,10 +54,12 @@ def upgrade() -> None:
             sa.Column("id", sa.String(36), primary_key=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-            sa.Column("key", sa.String(200), nullable=False),
-            sa.Column("effect", sa.String(100), nullable=False, server_default=""),
+            sa.Column("event_key", sa.String(200), nullable=False),
+            sa.Column("effect", sa.String(120), nullable=False),
+            sa.Column("event_name", sa.String(200), nullable=True),
+            sa.Column("record_id", sa.String(36), nullable=True),
+            sa.UniqueConstraint("event_key", "effect", name="uq_oe_event_effect_key_effect"),
         )
-        op.create_index("ix_oe_event_effect_key", _EFFECT, ["key"], unique=True)
 
     have = _columns(_ITEM)
     if "catalog_item_id" not in have:

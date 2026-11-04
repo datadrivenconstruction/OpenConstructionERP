@@ -115,7 +115,7 @@ _GR_ITEM = _t(
     sa.Column("batch_lot", sa.String(100)),
     sa.Column("serial_numbers", sa.JSON),
 )
-_EFFECT = _t("oe_event_effect", sa.Column("key", sa.String(200)), sa.Column("effect", sa.String(100)))
+_EFFECT = _t("oe_event_effect", sa.Column("event_key", sa.String(200)), sa.Column("effect", sa.String(120)))
 _REPORT = _t(
     REPORT_TABLE,
     sa.Column("project_id", sa.String(36)),
@@ -528,7 +528,7 @@ def _insert_receipt(conn: sa.Connection, legacy_id: str, plan: dict[str, Any], n
         # at the copy.
         conn.execute(
             sa.insert(_EFFECT).values(
-                id=str(uuid.uuid4()), key=f"gr:{new_id}:posted", effect="supplier_catalogs.stock_in"
+                id=str(uuid.uuid4()), event_key=f"gr:{new_id}:posted", effect="supplier_catalogs.stock_in"
             )
         )
         conn.execute(
@@ -554,7 +554,7 @@ def revert_all(conn: sa.Connection) -> None:
     if sa.inspect(conn).has_table("oe_event_effect"):
         conn.execute(
             sa.text(
-                "DELETE FROM oe_event_effect WHERE key IN "
+                "DELETE FROM oe_event_effect WHERE event_key IN "
                 "(SELECT 'gr:' || migrated_to_id || '\\:posted' FROM oe_supplier_catalogs_gr "
                 "WHERE migrated_to_id IS NOT NULL)"
             )
