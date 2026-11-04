@@ -139,7 +139,7 @@ async def test_forty_then_sixty_bills_forty_then_twenty_and_the_certificate_agre
     # "Prior claims" is what the earlier claims certified, net of retention.
     assert april.prior_claims_total == Decimal("36000")
 
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     [row] = application["lines"]
     assert row["previous_value"] == Decimal("40000.00")
     assert row["this_period_value"] == Decimal("20000.00")
@@ -175,14 +175,14 @@ async def test_an_earlier_claim_regenerated_later_counts_only_what_came_before_i
     assert row.period_completed_value == Decimal("40000")
     assert march.prior_claims_total == Decimal("0")
 
-    application = await svc.build_aia_application(march.id)
+    application = await svc.build_form_application("aia-application", march.id)
     assert application["lines"][0]["previous_value"] == Decimal("0.00")
     assert application["summary"]["previous_certificates_total"] == Decimal("0.00")
     assert application["summary"]["current_payment_due"] == march.net_due == Decimal("36000")
 
     # And April, which went out counting March, still reads March, and only
     # March, as previous.
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     assert application["lines"][0]["previous_value"] == Decimal("40000.00")
     assert application["summary"]["previous_certificates_total"] == Decimal("36000.00")
 

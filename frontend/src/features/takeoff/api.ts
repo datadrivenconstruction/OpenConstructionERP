@@ -346,8 +346,33 @@ export interface CarryOverResult {
   already_carried: number;
   skipped_unreviewed: number;
   skipped_page_missing: number;
+  /** Measurements whose proposed landing was too uncertain to copy: measure them again. */
+  remeasure_ids?: string[];
   scale_checks: Record<string, number>;
   revision_link: 'register' | 'unlinked' | string;
+}
+
+export interface CarryAlignOptions {
+  /** `auto` matches sheets by number/title and fits the geometry; `none` keeps page and pixels. */
+  align?: 'none' | 'auto';
+  /** Human override of the sheet match, old page -> new page. */
+  pageMap?: Record<number, number>;
+  /** Carry only these measurements of the old revision. */
+  measurementIds?: string[];
+}
+
+export interface CarryPreviewResult {
+  revision_link: string;
+  pages: { old: number; new: number | null; score: number; method: 'title' | 'index' | 'manual' | string }[];
+  transform: { scale?: number; dx?: number; dy?: number; residual?: number; ok?: boolean };
+  items: {
+    measurement_id: string;
+    page_old: number;
+    page_new: number | null;
+    confidence: number;
+    band: 'high' | 'review' | 'remeasure' | string;
+    points_after: { x: number; y: number }[];
+  }[];
 }
 
 export interface ConfirmCarriedResult {
@@ -648,11 +673,34 @@ export const takeoffApi = {
 
   /** Carry the confirmed measurements of the old revision onto the new one,
    *  same coordinates, scale re-checked, each flagged "carried, needs review". */
-  carryOver: (projectId: string, fromDocumentId: string, toDocumentId: string) =>
+  carryOver: (
+    projectId: string,
+    fromDocumentId: string,
+    toDocumentId: string,
+    options?: CarryAlignOptions,
+  ) =>
     apiPost<CarryOverResult>('/v1/takeoff/measurements/carry-over/', {
       project_id: projectId,
       from_document_id: fromDocumentId,
       to_document_id: toDocumentId,
+      ...(options?.align ? { align: options.align } : {}),
+      ...(options?.pageMap ? { page_map: options.pageMap } : {}),
+      ...(options?.measurementIds ? { measurement_ids: options.measurementIds } : {}),
+    }),
+
+  /** Where each measurement would land on the new revision, with a confidence. Writes nothing. */
+  previewCarryOver: (
+    projectId: string,
+    fromDocumentId: string,
+    toDocumentId: string,
+    pageMap?: Record<number, number>,
+  ) =>
+    apiPost<CarryPreviewResult>('/v1/takeoff/measurements/carry-over/preview/', {
+      project_id: projectId,
+      from_document_id: fromDocumentId,
+      to_document_id: toDocumentId,
+      align: 'auto',
+      ...(pageMap ? { page_map: pageMap } : {}),
     }),
 
   /** Confirm carried measurements after checking them on the new sheet. */

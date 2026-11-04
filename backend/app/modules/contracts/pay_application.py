@@ -1,20 +1,21 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AIA G702/G703 payment-application support (US/CA/AU only).
+"""Schedule-of-values payment-application math, the same in every market.
 
-The AIA G702 (Application and Certificate for Payment) and G703
-(Continuation Sheet) are the standard progress-billing documents used in the
-United States and, by close adoption, Canada and Australia. They are NOT used
-in DACH (DIN/Abschlagsrechnung), the UK (JCT interim certificate) or most other
-markets, so this layer is country-gated: it only renders for projects whose
-country resolves to US, CA or AU.
+A progress claim read against the contract's schedule of values gives a
+summary (contract sum to date, work completed, retention, previous
+certificates, amount due) and a continuation sheet (one row per schedule
+line with previous / this period / stored / total / balance / retention).
+Which printed form carries those figures is a market's business: forms
+register through :mod:`app.modules.contracts.pay_application_forms` from the
+regional pack that owns them. The builder names keep the column letters
+(``g702`` summary, ``g703`` continuation) the regional forms print.
 
 This module is deliberately additive on top of the existing progress-claim
 engine (``ContractsService``/``ProgressClaim``/``ProgressClaimLine``). It does
 NOT duplicate the claim FSM, the retention math or the finance invoice bridge.
-What it adds is the AIA presentation layer:
+What it adds is:
 
-* the gate (:func:`is_aia_eligible`),
 * the G703 continuation-line math (:func:`build_g703_line`),
 * the single-row sheet for a contract billed without a schedule of values
   (:func:`build_cost_of_work_row`),
@@ -39,59 +40,6 @@ from app.core.currency_registry import money_quantum
 
 DEC_ZERO = Decimal("0")
 DEC_HUNDRED = Decimal("100")
-
-#: ISO 3166-1 alpha-2 codes whose projects may use AIA G702/G703.
-AIA_COUNTRY_CODES: frozenset[str] = frozenset({"US", "CA", "AU"})
-
-#: Full-name aliases (project.address["country"] stores display names like
-#: "United States"). Mapped to the alpha-2 code so either representation gates
-#: correctly. Lower-cased keys; lookup lower-cases the input.
-_AIA_COUNTRY_ALIASES: dict[str, str] = {
-    "us": "US",
-    "usa": "US",
-    "u.s.": "US",
-    "u.s.a.": "US",
-    "united states": "US",
-    "united states of america": "US",
-    "ca": "CA",
-    "can": "CA",
-    "canada": "CA",
-    "au": "AU",
-    "aus": "AU",
-    "australia": "AU",
-}
-
-
-def normalise_country(value: str | None) -> str | None:
-    """Map a country code or display name to its ISO alpha-2 code.
-
-    Accepts an alpha-2 code (``"US"``), a three-letter code (``"USA"``) or a
-    display name (``"United States"``). Returns the alpha-2 code, or ``None``
-    when the input is empty or unrecognised.
-    """
-    if not value:
-        return None
-    raw = value.strip()
-    if not raw:
-        return None
-    upper = raw.upper()
-    if len(upper) == 2 and upper.isalpha():
-        return upper
-    return _AIA_COUNTRY_ALIASES.get(raw.lower())
-
-
-def is_aia_eligible(country_code: str | None, address: Any = None) -> bool:
-    """Return True when a project may use AIA G702/G703.
-
-    Gating is purely a function of the project country. The project's
-    ``country_code`` column is checked first; when it is empty or not a clean
-    alpha-2 we fall back to ``address["country"]`` (a display name). A project
-    is eligible only when the resolved country is one of US, CA, AU.
-    """
-    resolved = normalise_country(country_code)
-    if resolved is None and isinstance(address, dict):
-        resolved = normalise_country(address.get("country"))
-    return resolved in AIA_COUNTRY_CODES
 
 
 def _dec(value: Any) -> Decimal:

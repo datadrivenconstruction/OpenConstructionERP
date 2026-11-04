@@ -38,6 +38,7 @@ import { SideDrawer, MoneyDisplay, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   takeoffApi,
+  type CarryAlignOptions,
   type TakeoffDocumentResponse,
   type TakeoffCompareResponse,
   type TakeoffMeasurementDiffRow,
@@ -182,7 +183,10 @@ export function PdfCompareDrawer({
     queryClient.invalidateQueries({ queryKey: ['takeoff-compare', projectId, fromId, toId] });
 
   const carryMutation = useMutation({
-    mutationFn: () => takeoffApi.carryOver(projectId, fromId, toId),
+    mutationFn: (opts?: CarryAlignOptions) =>
+      opts
+        ? takeoffApi.carryOver(projectId, fromId, toId, opts)
+        : takeoffApi.carryOver(projectId, fromId, toId),
     onSuccess: (r) => {
       refreshCompare();
       const rescaled = (r.scale_checks.changed ?? 0) + (r.scale_checks.unverified ?? 0);
@@ -204,6 +208,12 @@ export function PdfCompareDrawer({
               ? t('takeoff_compare.carry_scale_hint', {
                   defaultValue: '{{n}} sit on a sheet with a different or missing scale: check them first.',
                   n: rescaled,
+                })
+              : '',
+            (r.remeasure_ids?.length ?? 0) > 0
+              ? t('takeoff_compare.carry_remeasure', {
+                  defaultValue: '{{n}} could not be placed with enough confidence: measure them again.',
+                  n: r.remeasure_ids?.length ?? 0,
                 })
               : '',
             r.revision_link !== 'register'
@@ -421,7 +431,10 @@ export function PdfCompareDrawer({
                 <CarryOverPanel
                   canCarry={canCompare && (diff.summary.from_measurement_total ?? 0) > 0}
                   carrying={carryMutation.isPending}
-                  onCarry={() => carryMutation.mutate()}
+                  onCarry={(opts) => carryMutation.mutate(opts)}
+                  projectId={projectId}
+                  fromId={fromId}
+                  toId={toId}
                   pendingCount={pendingIds.length}
                   confirming={confirmMutation.isPending}
                   onConfirmAll={() => confirmMutation.mutate(pendingIds)}
@@ -458,6 +471,9 @@ function CarryOverPanel({
   canCarry,
   carrying,
   onCarry,
+  projectId,
+  fromId,
+  toId,
   pendingCount,
   confirming,
   onConfirmAll,
@@ -466,7 +482,10 @@ function CarryOverPanel({
 }: {
   canCarry: boolean;
   carrying: boolean;
-  onCarry: () => void;
+  onCarry: (opts?: CarryAlignOptions) => void;
+  projectId: string;
+  fromId: string;
+  toId: string;
   pendingCount: number;
   confirming: boolean;
   onConfirmAll: () => void;
@@ -487,7 +506,7 @@ function CarryOverPanel({
       </p>
       <button
         type="button"
-        onClick={onCarry}
+        onClick={() => onCarry()}
         disabled={!canCarry || carrying}
         data-testid="takeoff-carry-over"
         className="mt-2 inline-flex items-center gap-2 rounded-md border border-oe-blue px-3 py-1.5 text-xs font-semibold text-oe-blue transition hover:bg-oe-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
@@ -495,6 +514,13 @@ function CarryOverPanel({
         {carrying ? <Loader2 size={14} className="animate-spin" /> : <CopyPlus size={14} />}
         {t('takeoff_compare.carry_action', { defaultValue: 'Carry measurements' })}
       </button>
+      <CarryAlignment
+        enabled={canCarry && !carrying}
+        projectId={projectId}
+        fromId={fromId}
+        toId={toId}
+        onCarry={onCarry}
+      />
       {pendingCount > 0 && (
         <div
           className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-2"
@@ -525,6 +551,150 @@ function CarryOverPanel({
             >
               <CheckCheck size={13} />
               {t('takeoff_compare.carry_confirm_all', { defaultValue: 'Confirm all after review' })}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Sheet match + alignment preview (writes nothing until accepted) ────── */
+
+const BAND_CLASS: Record<string, string> = {
+  high: 'bg-emerald-500/10 text-emerald-600',
+  review: 'bg-amber-500/10 text-amber-600',
+  remeasure: 'bg-red-500/10 text-red-500',
+};
+
+function CarryAlignment({
+  enabled,
+  projectId,
+  fromId,
+  toId,
+  onCarry,
+}: {
+  enabled: boolean;
+  projectId: string;
+  fromId: string;
+  toId: string;
+  onCarry: (opts?: CarryAlignOptions) => void;
+}) {
+  const { t } = useTranslation();
+  const [pageMap, setPageMap] = useState<Record<number, number>>({});
+  const previewMutation = useMutation({
+    mutationFn: (map?: Record<number, number>) =>
+      takeoffApi.previewCarryOver(projectId, fromId, toId, map),
+  });
+  const preview = previewMutation.data;
+  const counts = { high: 0, review: 0, remeasure: 0 } as Record<string, number>;
+  for (const it of preview?.items ?? []) counts[it.band] = (counts[it.band] ?? 0) + 1;
+  const highIds = (preview?.items ?? []).filter((i) => i.band === 'high').map((i) => i.measurement_id);
+  const newPages = (preview?.pages ?? []).map((p) => p.new).filter((n): n is number => n != null);
+  const pageOptions = Array.from(new Set([...newPages, ...Object.values(pageMap)])).sort((a, b) => a - b);
+
+  return (
+    <div className="mt-3 border-t border-border-light pt-3" data-testid="takeoff-carry-align">
+      <p className="text-[11px] text-content-secondary">
+        {t('takeoff_compare.carry_align_hint', {
+          defaultValue:
+            'Sheets moved or inserted? Match the pages by sheet number and title first, and see how sure each placement is before anything is copied.',
+        })}
+      </p>
+      <button
+        type="button"
+        onClick={() => previewMutation.mutate(Object.keys(pageMap).length ? pageMap : undefined)}
+        disabled={!enabled || previewMutation.isPending}
+        data-testid="takeoff-carry-preview"
+        className="mt-2 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-content-primary transition hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {previewMutation.isPending && <Loader2 size={14} className="animate-spin" />}
+        {t('takeoff_compare.carry_match_pages', { defaultValue: 'Match pages' })}
+      </button>
+      {preview && (
+        <div className="mt-2" data-testid="takeoff-carry-preview-result">
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr className="text-left text-content-tertiary">
+                <th className="py-1 font-medium">
+                  {t('takeoff_compare.carry_page_old', { defaultValue: 'Old page' })}
+                </th>
+                <th className="py-1 font-medium">
+                  {t('takeoff_compare.carry_page_new', { defaultValue: 'New page' })}
+                </th>
+                <th className="py-1 text-right font-medium">
+                  {t('takeoff_compare.carry_page_score', { defaultValue: 'Match' })}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {preview.pages.map((p) => (
+                <tr key={p.old} className="border-t border-border-light">
+                  <td className="py-1 tabular-nums">{p.old}</td>
+                  <td className="py-1">
+                    <select
+                      aria-label={t('takeoff_compare.carry_page_override', {
+                        defaultValue: 'New page for old page {{n}}',
+                        n: p.old,
+                      })}
+                      value={pageMap[p.old] ?? p.new ?? ''}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        setPageMap((m) => (v ? { ...m, [p.old]: v } : m));
+                      }}
+                      className="rounded border border-border bg-surface-primary px-1 py-0.5 text-[11px]"
+                    >
+                      {p.new == null && !pageMap[p.old] && <option value="">-</option>}
+                      {pageOptions.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-1 text-right tabular-nums text-content-secondary">
+                    {p.new == null ? '-' : `${Math.round(p.score * 100)}% (${p.method})`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {(['high', 'review', 'remeasure'] as const).map((band) => (
+              <span
+                key={band}
+                className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${BAND_CLASS[band]}`}
+              >
+                {t(`takeoff_compare.carry_band_${band}`, { defaultValue: band })}: {counts[band] ?? 0}
+              </span>
+            ))}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => previewMutation.mutate(Object.keys(pageMap).length ? pageMap : undefined)}
+              disabled={previewMutation.isPending || Object.keys(pageMap).length === 0}
+              className="rounded-md border border-border px-2.5 py-1 text-[11px] font-semibold disabled:opacity-50"
+            >
+              {t('takeoff_compare.carry_recheck', { defaultValue: 'Re-check with my pages' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => onCarry({ align: 'auto', pageMap, measurementIds: highIds })}
+              disabled={!enabled || highIds.length === 0}
+              data-testid="takeoff-carry-accept-high"
+              className="rounded-md border border-oe-blue px-2.5 py-1 text-[11px] font-semibold text-oe-blue disabled:opacity-50"
+            >
+              {t('takeoff_compare.carry_accept_high', { defaultValue: 'Carry high confidence only' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => onCarry({ align: 'auto', pageMap })}
+              disabled={!enabled}
+              data-testid="takeoff-carry-accept-all"
+              className="rounded-md bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white disabled:opacity-50"
+            >
+              {t('takeoff_compare.carry_accept_matched', { defaultValue: 'Carry matched, review each' })}
             </button>
           </div>
         </div>

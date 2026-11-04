@@ -1446,6 +1446,10 @@
     "carried_unconfirmed": {
       "fail": "Position {ordinal}: {count} Aufmaß(e) wurden aus einem früheren Planindex übernommen und sind noch nicht bestätigt",
       "suggestion": "Jedes übernommene Aufmaß auf dem neuen Index prüfen und bestätigen oder neu messen"
+    },
+    "low_confidence_pending": {
+      "fail": "Position {ordinal}: {count} übernommene(s) Aufmaß(e) liegen mit geringer Sicherheit auf dem neuen Index und warten auf Prüfung",
+      "suggestion": "Die Übernahme-Prüfung öffnen, jedes unsichere Aufmaß auf dem neuen Plan kontrollieren und bestätigen oder neu messen"
     }
   },
   "offline_sync": {
@@ -1700,6 +1704,14 @@
     "approved_immutable": {
       "fail": "{code} ist entschieden und kann nicht mehr geändert oder gelöscht werden.",
       "suggestion": "Erfassen Sie eine neue Umbuchung oder Budgetänderung, die sie korrigiert."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Nur {coverage} % des Budgets liegen auf Elementen, die mit Vorgängen verknüpft sind (Grenze {limit} %); der Rest lässt sich nicht am Modell zeigen.",
+        "suggestion": "Mehr Elemente mit kostenbehafteten Vorgängen verknüpfen oder die EAC-Verknüpfungsregeln prüfen."
+      }
     }
   }
 }

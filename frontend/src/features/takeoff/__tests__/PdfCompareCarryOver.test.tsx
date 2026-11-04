@@ -20,6 +20,7 @@ vi.mock('../api', () => ({
     compare: vi.fn(),
     createVariation: vi.fn(),
     carryOver: vi.fn(),
+    previewCarryOver: vi.fn(),
     confirmCarried: vi.fn(),
   },
 }));
@@ -126,5 +127,40 @@ describe('PdfCompareDrawer - carry measurements to a new revision', () => {
     expect(row.textContent).toContain('+2');
     fireEvent.click(screen.getByTestId('takeoff-carry-confirm-all'));
     await waitFor(() => expect(takeoffApi.confirmCarried).toHaveBeenCalledWith('p1', ['m-new'], false));
+  });
+
+  it('previews the page match first, then carries only what the user accepts', async () => {
+    takeoffApi.compare.mockResolvedValue(diff(false));
+    takeoffApi.previewCarryOver.mockResolvedValue({
+      revision_link: 'register',
+      pages: [{ old: 1, new: 2, score: 1, method: 'title' }],
+      transform: { ok: false },
+      items: [
+        { measurement_id: 'm-hi', page_old: 1, page_new: 2, confidence: 0.9, band: 'high', points_after: [] },
+        { measurement_id: 'm-rev', page_old: 1, page_new: 2, confidence: 0.7, band: 'review', points_after: [] },
+      ],
+    });
+    takeoffApi.carryOver.mockResolvedValue({
+      carried: 1,
+      carried_ids: ['x'],
+      already_carried: 0,
+      skipped_unreviewed: 0,
+      skipped_page_missing: 0,
+      scale_checks: {},
+      revision_link: 'register',
+    });
+    renderDrawer();
+    const preview = await screen.findByTestId('takeoff-carry-preview');
+    await waitFor(() => expect(preview).not.toBeDisabled());
+    fireEvent.click(preview);
+    expect(takeoffApi.carryOver).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByTestId('takeoff-carry-accept-high'));
+    await waitFor(() =>
+      expect(takeoffApi.carryOver).toHaveBeenCalledWith('p1', 'doc-a', 'doc-b', {
+        align: 'auto',
+        pageMap: {},
+        measurementIds: ['m-hi'],
+      }),
+    );
   });
 });

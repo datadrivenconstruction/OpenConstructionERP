@@ -3661,7 +3661,7 @@ class ContractsService:
         they are facts about the contract rather than about the form: a German
         cost-plus job holds retention on the work done to date exactly as an
         American one does, and only the sheet that prints it is country gated.
-        Reading them back off :meth:`build_aia_application`, which refuses a
+        Reading them back off :meth:`build_form_application`, which refuses a
         project outside the US, Canada and Australia, made certifying a claim
         fail with a 404 everywhere else. This answers for every country.
 
@@ -3681,7 +3681,7 @@ class ContractsService:
         carries, which :func:`build_g703` takes as ``prior_without_schedule``
         and this method does not pass, so what is frozen here measures the
         schedule alone. That is deliberate rather than pending: the residual
-        belongs in line 5 once, and :meth:`build_aia_application` assembles
+        belongs in line 5 once, and :meth:`build_form_application` assembles
         it there from this figure plus that row. Passing it here as well
         would count it twice. The consequence to know is that on such a
         contract the stored figure is smaller than the line 4 the sheet
@@ -3694,7 +3694,7 @@ class ContractsService:
         Returns:
             ``(completed_stored_to_date, retention_held_to_date)``, at the currency minor unit.
         """
-        from app.modules.contracts.aia import (  # noqa: PLC0415
+        from app.modules.contracts.pay_application import (  # noqa: PLC0415
             bills_without_schedule,
             build_g703,
             sheet_sov_lines,
@@ -3838,7 +3838,7 @@ class ContractsService:
         and the gate that runs on submission, so the report a user reads is
         the check that blocks them.
         """
-        from app.modules.contracts.aia import build_g703_line  # noqa: PLC0415
+        from app.modules.contracts.pay_application import build_g703_line  # noqa: PLC0415
 
         contract = await self.get_contract(claim.contract_id)
         ordered = await self.claim_repo.ordered_for_contract(contract.id)
@@ -6908,7 +6908,7 @@ class ContractsService:
             "total_held_before": str(held),
         }
 
-    # ── Lien waivers (US compliance) ────────────────────────────────────
+    # ── Lien waivers (market law supplied by regional packs) ──────────────
 
     async def attach_lien_waiver(
         self,
@@ -6965,6 +6965,9 @@ class ContractsService:
             "attached_at": _dt.now(UTC).isoformat(),
             "attached_by": actor_id,
         }
+        statutory = await self._statutory_waiver_form(claim, record["jurisdiction"], record["waiver_type"])
+        if statutory is not None:
+            record["statutory_form"] = statutory
         waivers.append(record)
         meta["lien_waivers"] = waivers
         await self.claim_repo.update_fields(claim_id, metadata_=meta)
@@ -6982,6 +6985,18 @@ class ContractsService:
             source_module="contracts",
         )
         return record
+
+    async def _statutory_waiver_form(self, claim: Any, jurisdiction: str, waiver_type: str) -> dict[str, Any] | None:
+        """The waiver form the law of the claim's market prescribes, from the pack that owns that law."""
+        from app.modules.contracts.pay_application_forms import lien_waiver_rules_for  # noqa: PLC0415
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        contract = await self.session.get(Contract, claim.contract_id)
+        project = await self.session.get(Project, contract.project_id) if contract is not None else None
+        if project is None:
+            return None
+        rules = lien_waiver_rules_for(getattr(project, "country_code", None), getattr(project, "address", None))
+        return rules.statutory_form(jurisdiction, waiver_type) if rules is not None else None
 
     async def list_lien_waivers(self, claim_id: uuid.UUID) -> list[dict[str, Any]]:
         claim = await self.claim_repo.get_by_id(claim_id)
@@ -7200,49 +7215,49 @@ class ContractsService:
             ],
         }
 
-    # ── AIA G702/G703 (US/CA/AU only) ────────────────────────────────────
+    # ── Regional payment-application forms (supplied by packs) ───────────
 
-    async def assert_contract_aia_eligible(self, contract: Contract) -> Any:
-        """Raise 404 unless the contract's project is AIA-eligible.
+    async def assert_contract_form_eligible(self, contract: Contract, form_slug: str) -> Any:
+        """Raise 404 unless a pack supplies ``form_slug`` and the contract's project may use it.
 
-        AIA G702/G703 is country-gated to US/CA/AU. A non-eligible project must
-        behave as if the AIA endpoints do not exist, so we raise 404 (not 403)
-        to avoid leaking that the feature exists for other tenants. Returns the
-        loaded ``Project`` for callers that need its country/currency.
+        A project outside the form's market must behave as if the form does
+        not exist, so the answer is 404 (not 403). Returns the loaded
+        ``Project`` for callers that need its country/currency.
         """
-        from app.modules.contracts.aia import is_aia_eligible  # noqa: PLC0415
+        from app.modules.contracts.pay_application_forms import get_form  # noqa: PLC0415
         from app.modules.projects.models import Project  # noqa: PLC0415
 
+        form = get_form(form_slug)
         project = await self.session.get(Project, contract.project_id)
-        eligible = project is not None and is_aia_eligible(
-            getattr(project, "country_code", None),
-            getattr(project, "address", None),
+        eligible = (
+            form is not None
+            and project is not None
+            and form.is_eligible(getattr(project, "country_code", None), getattr(project, "address", None))
         )
         if not eligible:
-            raise HTTPException(
-                status_code=404,
-                detail="AIA payment applications are only available for US/CA/AU projects",
-            )
+            raise HTTPException(status_code=404, detail="Payment-application form not available for this project")
         return project
 
-    async def build_aia_application(self, claim_id: uuid.UUID, *, locale: str | None = None) -> dict[str, Any]:
-        """Return the regional AIA view, retaining its US/CA/AU eligibility gate."""
-        return await self._build_payment_application(claim_id, locale=locale, require_aia=True)
+    async def build_form_application(
+        self, form_slug: str, claim_id: uuid.UUID, *, locale: str | None = None
+    ) -> dict[str, Any]:
+        """The payment-application figures for a regional form, behind that form's project gate."""
+        return await self._build_payment_application(claim_id, locale=locale, require_form=form_slug)
 
     async def build_payment_application(self, claim_id: uuid.UUID, *, locale: str | None = None) -> dict[str, Any]:
         """Return shared claim figures for any country, without selecting a legal form."""
-        return await self._build_payment_application(claim_id, locale=locale, require_aia=False)
+        return await self._build_payment_application(claim_id, locale=locale, require_form=None)
 
     async def _build_payment_application(
-        self, claim_id: uuid.UUID, *, locale: str | None, require_aia: bool
+        self, claim_id: uuid.UUID, *, locale: str | None, require_form: str | None
     ) -> dict[str, Any]:
         """Assemble shared summary and continuation figures for one claim.
 
         Reuses the existing SoV lines (``ContractLine``) and the claim's lines
         (``ProgressClaimLine``); does not recompute the claim FSM or retention
         accrual. Retainage uses the claim's retention snapshot when
-        the engine has worked it out, else the contract's flat rate. The AIA
-        entry point additionally requires regional eligibility. Single-currency by construction
+        the engine has worked it out, else the contract's flat rate. A regional
+        form entry point additionally requires that form's project gate. Single-currency by construction
         (the claim inherits the contract currency); no currency is ever blended.
 
         ``locale`` is the language the application is read in, and the one
@@ -7253,7 +7268,8 @@ class ContractsService:
         passes ``"en"`` and the row reads in the same language as the rest of
         the page.
         """
-        from app.modules.contracts.aia import (  # noqa: PLC0415
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+        from app.modules.contracts.pay_application import (  # noqa: PLC0415
             apply_retention_snapshot,
             bills_without_schedule,
             build_cost_of_work_row,
@@ -7261,7 +7277,6 @@ class ContractsService:
             build_g703,
             sheet_sov_lines,
         )
-        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
 
         claim = await self.claim_repo.get_by_id(claim_id)
         if claim is None:
@@ -7271,8 +7286,8 @@ class ContractsService:
             )
         contract = await self.get_contract(claim.contract_id)
         currency = claim.currency or contract.currency or ""
-        if require_aia:
-            await self.assert_contract_aia_eligible(contract)
+        if require_form:
+            await self.assert_contract_form_eligible(contract, require_form)
 
         contract_lines = await self.line_repo.list_for_contract(contract.id)
         claim_lines = await self.claim_line_repo.list_for_claim(claim_id)
@@ -7308,7 +7323,7 @@ class ContractsService:
         prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         if bills_without_schedule(claim, claim_lines):
             # The claim's own figures go on a single cost-of-work row. What
-            # makes a claim this shape is decided once, in aia.py, because
+            # makes a claim this shape is decided once, in pay_application.py, because
             # certification freezes the same two figures the sheet prints.
             held = (
                 Decimal(str(claim.retention_held_to_date))
@@ -7363,7 +7378,7 @@ class ContractsService:
                     prior_claims=prior_claims,
                 )
             # Which lines the sheet lists, roll-up parents excluded, is decided
-            # once in aia.py so this and the certification freeze cannot drift.
+            # once in pay_application.py so this and the certification freeze cannot drift.
             sov_lines = sheet_sov_lines(contract_lines, by_contract_line, prior_by_line)
             g703 = build_g703(
                 sov_lines,
@@ -7482,7 +7497,7 @@ class ContractsService:
         The claims counted as previous are the payment application's own
         (:meth:`ProgressClaimRepository.prior_claims`).
         """
-        from app.modules.contracts.aia import bills_without_schedule, sheet_sov_lines  # noqa: PLC0415
+        from app.modules.contracts.pay_application import bills_without_schedule, sheet_sov_lines  # noqa: PLC0415
         from app.modules.contracts.sov_adjustments import is_measured_contract  # noqa: PLC0415
         from app.modules.projects.models import Project  # noqa: PLC0415
 
@@ -7492,7 +7507,7 @@ class ContractsService:
         currency = claim.currency or contract.currency or getattr(project, "currency", "") or ""
         flavour = "unit_price" if is_measured_contract(contract) else "lump_sum"
 
-        application = await self._build_payment_application(claim.id, locale=language, require_aia=False)
+        application = await self._build_payment_application(claim.id, locale=language, require_form=None)
         rows: list[dict[str, Any]] = list(application["lines"])
         contract_lines = await self.line_repo.list_for_contract(contract.id)
         claim_lines = await self.claim_line_repo.list_for_claim(claim.id)
@@ -9446,7 +9461,7 @@ def compute_sov_status(
     Retention is read from the claims rather than recomputed. Each claim line
     carries ``retention_to_date``, what its claim certified to date on that
     SoV line, which is the figure the payment application printed;
-    :mod:`~app.modules.contracts.aia` already prefers it the same way. The
+    :mod:`~app.modules.contracts.pay_application` already prefers it the same way. The
     figure is cumulative, so the rollup is the latest counted claim's and
     never a sum. Where no claim recorded one, and only there, the contract's
     flat rate is applied to what has been billed, which is what this did for

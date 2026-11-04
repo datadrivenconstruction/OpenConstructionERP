@@ -25,7 +25,7 @@ import pytest
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import mm
 
-import app.modules.contracts.aia_pdf as aia_pdf
+import app.modules.us_pack.aia_pdf as aia_pdf
 from app.core import pdf_reader
 from app.core.paper_size import PAPER_SIZES
 

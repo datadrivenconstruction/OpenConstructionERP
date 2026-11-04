@@ -156,7 +156,7 @@ async def test_a_line_corrected_by_hand_moves_the_claim_it_belongs_to(session) -
         AutoGenerateClaimRequest(completion={str(world.a.id): Decimal("60"), str(world.b.id): Decimal("60")}),
     )
     assert april.prior_claims_total == Decimal("41400")
-    application = await svc.build_aia_application(april.id)
+    application = await svc.build_form_application("aia-application", april.id)
     assert application["summary"]["previous_certificates_total"] == Decimal("41400.00")
     assert application["summary"]["current_payment_due"] == april.net_due
 
