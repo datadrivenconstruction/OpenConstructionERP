@@ -252,9 +252,9 @@ class TestParsing:
 
     def test_out_of_bounds_room_vertex_is_dropped(self) -> None:
         bad = _good_response()
-        bad["rooms"][0]["polygon"][0] = [1.5, 0.1]  # x > 1 -> NormPoint rejects
+        bad["rooms"][0]["polygon"][0] = [1.5, 0.1]  # past the page edge, not a pixel or percent answer
         result, dropped = self._parse(bad)
-        assert "room:schema" in dropped
+        assert "room:out_of_page" in dropped
         assert len(result.rooms) == 0
 
     def test_nan_coordinate_is_dropped(self) -> None:
@@ -276,7 +276,7 @@ class TestParsing:
         resp["rooms"].append({"name": "Bad", "polygon": [[2.0, 2.0]], "confidence": 0.9})
         result, dropped = self._parse(resp)
         assert len(result.rooms) == 1  # the good one survived
-        assert "room:schema" in dropped
+        assert "room:out_of_page" in dropped
 
     def test_absurd_scale_is_dropped_to_none(self) -> None:
         resp = _good_response()
