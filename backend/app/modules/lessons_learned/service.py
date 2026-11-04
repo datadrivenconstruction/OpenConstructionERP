@@ -83,6 +83,8 @@ class LessonService:
 
     async def confirm(self, lesson: Lesson, user_id: str) -> LessonResponse:
         """Confirm a lesson so other projects see it. Validation errors block it."""
+        if lesson.status == "confirmed":
+            return await self._out(lesson)
         snap = _snapshot(lesson) | {"status": "confirmed"}
         failed = await evaluate(snap, target_id=str(lesson.id))
         blocking = [r for r in failed if r.severity.value == "error"]
