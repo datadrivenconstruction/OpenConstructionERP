@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { WideModal } from '@/shared/ui/WideModal';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import {
@@ -410,6 +411,11 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
   );
 }
 
+function amountText(v: string | undefined): string {
+  const n = Number(v);
+  return Number.isFinite(n) ? new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) : (v ?? '-');
+}
+
 /* ── Detail modal ──────────────────────────────────────────────────────── */
 
 function CaptureDetail({
@@ -453,6 +459,7 @@ function CaptureDetail({
   const [rejectReason, setRejectReason] = useState('');
   const [queryNote, setQueryNote] = useState('');
   const [ackMatch, setAckMatch] = useState(false);
+  const [confirmApprove, setConfirmApprove] = useState(false);
 
   // Seed the local form once the capture loads or changes identity.
   const seededFor = useRef<string | null>(null);
@@ -630,7 +637,8 @@ function CaptureDetail({
         )}
         {status === 'coded' && (
           <Button
-            onClick={() => actionMut.mutate({ path: 'approve', body: { acknowledge_match: ackMatch } })}
+            onClick={() => setConfirmApprove(true)}
+            data-testid="inbox-approve"
             disabled={actionMut.isPending || (mismatch && !ackMatch)}
           >
             <CheckCircle2 size={15} />
@@ -652,6 +660,7 @@ function CaptureDetail({
   );
 
   return (
+    <>
     <WideModal
       open
       onClose={onClose}
@@ -1016,6 +1025,27 @@ function CaptureDetail({
         </div>
       )}
     </WideModal>
+    <ConfirmDialog
+      open={confirmApprove}
+      variant="warning"
+      title={t('finance.inbox.approve_confirm_title', { defaultValue: 'Approve this invoice?' })}
+      message={t('finance.inbox.approve_confirm_message', {
+        defaultValue: 'Approve invoice {{number}} from {{supplier}} for {{amount}} {{currency}}? Posting to the ledger is a separate step.',
+        number: capture?.invoice_number || '-',
+        supplier: capture?.supplier_name || '-',
+        amount: amountText(capture?.amount_gross),
+        currency: capture?.currency_code || '-',
+      })}
+      confirmLabel={t('finance.inbox.approve', { defaultValue: 'Approve' })}
+      cancelLabel={t('common.cancel', { defaultValue: 'Cancel' })}
+      loading={actionMut.isPending}
+      onCancel={() => setConfirmApprove(false)}
+      onConfirm={() => {
+        setConfirmApprove(false);
+        actionMut.mutate({ path: 'approve', body: { acknowledge_match: ackMatch } });
+      }}
+    />
+    </>
   );
 }
 

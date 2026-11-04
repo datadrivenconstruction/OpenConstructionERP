@@ -28,6 +28,7 @@ import {
   type LedgerStatus,
   type LedgerStep,
 } from './api';
+import { filterSortLedger, type LedgerSort, type LedgerStatusFilter } from './ledgerListView';
 
 type View = 'transfers' | 'modifications' | 'history';
 
@@ -85,6 +86,10 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
   const [rejecting, setRejecting] = useState<{ kind: LedgerKind; id: string } | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<LedgerStatusFilter>('all');
+  const [sort, setSort] = useState<LedgerSort>('newest');
+  const listOpts = { status: statusFilter, query, sort };
 
   const ledger = useQuery({
     queryKey: ['budget-ledger', projectId],
@@ -245,6 +250,51 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
     </li>
   );
 
+  const transfers = filterSortLedger(data?.transfers ?? [], listOpts, (tr) => tr.legs.map((l) => l.code).join(' '));
+  const modifications = filterSortLedger(data?.modifications ?? [], listOpts, (m) => `${m.line_code} ${m.approval_ref}`);
+  const fieldCls = 'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm';
+  const toolbar = (
+    <div className="flex flex-wrap items-center gap-2 px-4 pt-3" data-testid="ledger-toolbar">
+      <input
+        type="search"
+        className={`${fieldCls} min-w-0 flex-1`}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        aria-label={t('cost_control.ledger.filter_search', { defaultValue: 'Search by code, line or reason' })}
+        placeholder={t('cost_control.ledger.filter_search', { defaultValue: 'Search by code, line or reason' })}
+        data-testid="ledger-search"
+      />
+      <select
+        className={fieldCls}
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value as LedgerStatusFilter)}
+        aria-label={t('cost_control.ledger.filter_status', { defaultValue: 'Status' })}
+        data-testid="ledger-status-filter"
+      >
+        <option value="all">{t('cost_control.ledger.filter_all', { defaultValue: 'All statuses' })}</option>
+        {(['draft', 'submitted', 'approved', 'rejected'] as const).map((st) => (
+          <option key={st} value={st}>
+            {statusLabel(t, st)}
+          </option>
+        ))}
+      </select>
+      <select
+        className={fieldCls}
+        value={sort}
+        onChange={(e) => setSort(e.target.value as LedgerSort)}
+        aria-label={t('cost_control.ledger.sort_label', { defaultValue: 'Sort by' })}
+        data-testid="ledger-sort"
+      >
+        <option value="newest">{t('cost_control.ledger.sort_newest', { defaultValue: 'Newest first' })}</option>
+        <option value="oldest">{t('cost_control.ledger.sort_oldest', { defaultValue: 'Oldest first' })}</option>
+        <option value="amount_desc">{t('cost_control.ledger.sort_amount_desc', { defaultValue: 'Largest amount' })}</option>
+        <option value="amount_asc">{t('cost_control.ledger.sort_amount_asc', { defaultValue: 'Smallest amount' })}</option>
+        <option value="code">{t('cost_control.ledger.sort_code', { defaultValue: 'Code' })}</option>
+      </select>
+    </div>
+  );
+  const noMatch = <Empty text={t('cost_control.ledger.filter_none', { defaultValue: 'No entries match the filter.' })} />;
+
   const tabs: { id: View; label: string }[] = [
     { id: 'transfers', label: t('cost_control.ledger.tab_transfers', { defaultValue: 'Transfers' }) },
     { id: 'modifications', label: t('cost_control.ledger.tab_modifications', { defaultValue: 'Budget changes' }) },
@@ -321,7 +371,10 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         data!.transfers.length === 0 ? (
           <Empty text={t('cost_control.ledger.empty_transfers', { defaultValue: 'No budget has been moved yet.' })} />
         ) : (
-          <ul className="divide-y divide-border-light">{data!.transfers.map(transferRow)}</ul>
+          <>
+            {toolbar}
+            {transfers.length === 0 ? noMatch : <ul className="divide-y divide-border-light">{transfers.map(transferRow)}</ul>}
+          </>
         )
       ) : view === 'modifications' ? (
         data!.modifications.length === 0 ? (
@@ -329,7 +382,10 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
             text={t('cost_control.ledger.empty_modifications', { defaultValue: 'No owner budget changes yet.' })}
           />
         ) : (
-          <ul className="divide-y divide-border-light">{data!.modifications.map(modRow)}</ul>
+          <>
+            {toolbar}
+            {modifications.length === 0 ? noMatch : <ul className="divide-y divide-border-light">{modifications.map(modRow)}</ul>}
+          </>
         )
       ) : (
         <History data={data!} currency={currency} />
