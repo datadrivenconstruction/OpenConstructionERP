@@ -15,7 +15,7 @@ from app.core.validation.gate import run_gate
 from app.modules.correspondence.models import Correspondence
 from app.modules.correspondence.repository import CorrespondenceRepository
 from app.modules.correspondence.schemas import CorrespondenceCreate, CorrespondenceUpdate
-from app.modules.correspondence.validators import CORRESPONDENCE_RULE_SET, snapshot
+from app.modules.correspondence.validators import CORRESPONDENCE_RULE_SET, FIELDS as RULE_FIELDS, snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -183,12 +183,13 @@ class CorrespondenceService:
         if not fields:
             return correspondence
 
-        self.findings = await run_gate(
-            snapshot(correspondence, fields),
-            CORRESPONDENCE_RULE_SET,
-            target_type="correspondence",
-            target_id=str(correspondence_id),
-        )
+        if fields.keys() & set(RULE_FIELDS):
+            self.findings = await run_gate(
+                snapshot(correspondence, fields),
+                CORRESPONDENCE_RULE_SET,
+                target_type="correspondence",
+                target_id=str(correspondence_id),
+            )
         await self.repo.update_fields(correspondence_id, **fields)
         await self.session.refresh(correspondence)
         logger.info(
