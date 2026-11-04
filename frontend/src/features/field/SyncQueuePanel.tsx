@@ -37,11 +37,14 @@ import {
 } from 'lucide-react';
 import {
   summariseQueue,
+  sortForReview,
   formatRelativeTime,
   kindLabel,
   type SyncQueueItem,
 } from './syncQueueSummary';
 import type { useFieldSync } from './useFieldSync';
+import { KIND_FIELD_TIME, MAX_OP_AGE_DAYS, kindLabelKey, reasonKey } from './fieldKinds';
+import { StorageMeter } from './StorageMeter';
 
 /**
  * The slice of `useFieldSync` the panel needs. Declared structurally (not as the
@@ -51,7 +54,11 @@ import type { useFieldSync } from './useFieldSync';
 export type SyncQueuePanelState = Pick<
   ReturnType<typeof useFieldSync>,
   'online' | 'pendingOps' | 'syncing' | 'syncNow' | 'discard'
->;
+> &
+  Partial<Pick<ReturnType<typeof useFieldSync>, 'lastResults'>> & {
+    /** Crew-time ops from their own queue, listed beside the rest (display only). */
+    extraItems?: SyncQueueItem[];
+  };
 
 export interface SyncQueuePanelProps {
   state: SyncQueuePanelState;
@@ -62,7 +69,7 @@ export interface SyncQueuePanelProps {
 
 export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelProps) {
   const { t } = useTranslation();
-  const { online, pendingOps, syncing, syncNow, discard } = state;
+  const { online, pendingOps, syncing, syncNow, discard, lastResults, extraItems } = state;
 
   // Track in-flight dismissals so the row's button can disable while its async
   // discard resolves (the queue change event then drops the row entirely).
@@ -71,7 +78,14 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
   // `now` is captured once per render when not injected; relative times are
   // coarse (minutes/hours) so this does not need to tick.
   const clock = now ?? Date.now();
-  const summary = useMemo(() => summariseQueue(pendingOps), [pendingOps]);
+  const summary = useMemo(() => {
+    const base = summariseQueue(pendingOps);
+    if (!extraItems || extraItems.length === 0) return base;
+    const items = sortForReview([...base.items, ...extraItems]);
+    const failing = items.filter((i) => i.status === 'failing').length;
+    return { items, total: items.length, pending: items.length - failing, failing, isEmpty: false };
+  }, [pendingOps, extraItems]);
+  const refused = (lastResults ?? []).filter((r) => r.status === 'rejected');
 
   const onDismiss = async (clientOpId: string) => {
     setDismissing((prev) => new Set(prev).add(clientOpId));
@@ -141,6 +155,8 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
         </p>
       )}
 
+      <StorageMeter ops={pendingOps} now={clock} />
+
       {/* Sync-now action (whole-queue). */}
       <button
         type="button"
@@ -162,6 +178,25 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
             defaultValue: 'You are offline. These will sync automatically when you reconnect.',
           })}
         </p>
+      )}
+
+      {refused.length > 0 && (
+        <ul data-testid="sync-queue-refused" className="flex flex-col gap-1 rounded-xl border border-rose-200 bg-rose-50/60 p-3">
+          {refused.map((r) => {
+            const key = reasonKey(r.detail);
+            return (
+              <li key={r.clientOpId} className="text-xs text-rose-700">
+                <span className="font-medium">
+                  {t(kindLabelKey(r.kind) ?? `field.sync_queue.kind.${r.kind}`, { defaultValue: kindLabel(r.kind) })}
+                </span>
+                {': '}
+                {key
+                  ? t(key, { days: MAX_OP_AGE_DAYS, defaultValue: 'Too old to sync (over {{days}} days). Please enter it again.' })
+                  : (r.detail ?? t('offline_sync.problem_unknown', { defaultValue: 'Rejected by the server' }))}
+              </li>
+            );
+          })}
+        </ul>
       )}
 
       {/* Empty state. */}
@@ -234,7 +269,7 @@ function SyncQueueRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-medium text-slate-900">
-            {t(`field.sync_queue.kind.${row.kind}`, { defaultValue: kindLabel(row.kind) })}
+            {t(kindLabelKey(row.kind) ?? `field.sync_queue.kind.${row.kind}`, { defaultValue: kindLabel(row.kind) })}
           </p>
           <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
             {row.method}
@@ -258,7 +293,8 @@ function SyncQueueRow({
         </p>
       </div>
 
-      {/* Dismiss. */}
+      {/* Dismiss. Crew-time rows replay through their own queue and are not dismissed here. */}
+      {row.kind !== KIND_FIELD_TIME && (
       <button
         type="button"
         data-testid="sync-queue-dismiss"
@@ -270,6 +306,7 @@ function SyncQueueRow({
       >
         <Trash2 size={16} aria-hidden="true" />
       </button>
+      )}
     </li>
   );
 }

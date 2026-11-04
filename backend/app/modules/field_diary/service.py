@@ -25,6 +25,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.modules.field_diary.models import (
     DiaryActivity,
@@ -51,9 +52,12 @@ from app.modules.field_diary.schemas import (
     DiaryEntryUpdate,
     FieldCapture,
     FieldCaptureResponse,
+    FieldHaulTicketCreate,
     FieldInspectionCreate,
     FieldModuleGrantCreate,
+    FieldNcrCreate,
     FieldPunchCreate,
+    FieldSafetyObservationCreate,
     FieldScheduleProgressCreate,
 )
 
@@ -1209,6 +1213,192 @@ class FieldSyncService:
             target_kind="schedule_progress",
             result_id=data.activity_id,
             http_status=201,
+        )
+
+    async def _stale_rejection(
+        self,
+        data: FieldCapture,
+        *,
+        target_module: str,
+        target_kind: str,
+        project_id: uuid.UUID,
+    ) -> FieldCaptureResponse | None:
+        """Run the ``field_diary_capture`` rule set; a rejection response when the op is too old.
+
+        Nothing is written and no ledger row is recorded, so the person can
+        re-enter the capture and it will carry today's date.
+        """
+        from app.core.validation.engine import validation_engine
+        from app.modules.field_diary.capture_age import MAX_OP_AGE_DAYS, REASON_OP_TOO_OLD, op_age_days
+
+        report = await validation_engine.validate(
+            data={"captured_at": data.captured_at, "kind": target_kind, "max_age_days": MAX_OP_AGE_DAYS},
+            rule_sets=["field_diary_capture"],
+            target_type=target_kind,
+            target_id=data.client_op_id,
+            project_id=str(project_id),
+            metadata={"locale": get_locale()},
+        )
+        # The direct check is a backstop: with the rule set unregistered the engine
+        # passes silently, and a silent pass would replay a stale write.
+        age = op_age_days(data.captured_at)
+        if not report.has_errors and (age is None or age <= MAX_OP_AGE_DAYS):
+            return None
+        return FieldCaptureResponse(
+            client_op_id=data.client_op_id,
+            status="rejected",
+            target_module=target_module,
+            target_kind=target_kind,
+            http_status=422,
+            reason_code=REASON_OP_TOO_OLD,
+        )
+
+    async def capture_ncr(self, field_session: FieldSession, data: FieldNcrCreate) -> FieldCaptureResponse:
+        """Raise an NCR from a field capture, idempotently, through the NCR module's own service."""
+        from app.modules.ncr.schemas import NCRCreate
+        from app.modules.ncr.service import NCRService
+
+        project_id = field_session.project_id
+        prior = await self._seen_result(data.client_op_id, "ncr")
+        if prior is not None:
+            return FieldCaptureResponse(
+                client_op_id=data.client_op_id,
+                status="applied",
+                target_module="ncr",
+                target_kind="ncr",
+                result_id=prior,
+                http_status=200,
+            )
+        stale = await self._stale_rejection(data, target_module="ncr", target_kind="ncr", project_id=project_id)
+        if stale is not None:
+            return stale
+        has_position = data.lat is not None and data.lon is not None
+        create = NCRCreate(
+            project_id=project_id,
+            title=data.title,
+            description=data.description,
+            ncr_type=data.ncr_type,
+            severity=data.severity,
+            location_description=data.location_description,
+            location_lat=data.lat if has_position else None,
+            location_lon=data.lon if has_position else None,
+            location_accuracy_m=data.accuracy_m if has_position else None,
+            metadata=self._capture_metadata(data),
+        )
+        ncr = await NCRService(self.session).create_ncr(create, user_id=str(field_session.user_id))
+        await self.field_svc._record_op(
+            data.client_op_id,
+            project_id=project_id,
+            user_id=field_session.user_id,
+            op_kind="field.capture.ncr",
+            result_type="ncr",
+            result_id=ncr.id,
+        )
+        return FieldCaptureResponse(
+            client_op_id=data.client_op_id,
+            status="applied",
+            target_module="ncr",
+            target_kind="ncr",
+            result_id=ncr.id,
+            http_status=201,
+        )
+
+    async def capture_safety_observation(
+        self, field_session: FieldSession, data: FieldSafetyObservationCreate
+    ) -> FieldCaptureResponse:
+        """Raise a safety observation from a field capture, idempotently."""
+        from app.modules.safety.schemas import ObservationCreate
+        from app.modules.safety.service import SafetyService
+
+        project_id = field_session.project_id
+        prior = await self._seen_result(data.client_op_id, "safety_observation")
+        if prior is not None:
+            return FieldCaptureResponse(
+                client_op_id=data.client_op_id,
+                status="applied",
+                target_module="safety",
+                target_kind="safety_observation",
+                result_id=prior,
+                http_status=200,
+            )
+        stale = await self._stale_rejection(
+            data, target_module="safety", target_kind="safety_observation", project_id=project_id
+        )
+        if stale is not None:
+            return stale
+        create = ObservationCreate(
+            project_id=project_id,
+            observation_type=data.observation_type,
+            description=data.description,
+            location=data.location,
+            severity=data.severity,
+            likelihood=data.likelihood,
+            immediate_action=data.immediate_action,
+            metadata=self._capture_metadata(data),
+        )
+        obs = await SafetyService(self.session).create_observation(create, user_id=str(field_session.user_id))
+        await self.field_svc._record_op(
+            data.client_op_id,
+            project_id=project_id,
+            user_id=field_session.user_id,
+            op_kind="field.capture.safety_observation",
+            result_type="safety_observation",
+            result_id=obs.id,
+        )
+        return FieldCaptureResponse(
+            client_op_id=data.client_op_id,
+            status="applied",
+            target_module="safety",
+            target_kind="safety_observation",
+            result_id=obs.id,
+            http_status=201,
+        )
+
+    async def capture_haul_ticket(
+        self, field_session: FieldSession, data: FieldHaulTicketCreate
+    ) -> FieldCaptureResponse:
+        """Record a haul ticket from a field capture; the haul module computes weights and amounts."""
+        from app.modules.haul_tickets.schemas import TicketCreate
+        from app.modules.haul_tickets.service import HaulTicketService
+
+        project_id = field_session.project_id
+        prior = await self._seen_result(data.client_op_id, "haul_ticket")
+        if prior is not None:
+            return FieldCaptureResponse(
+                client_op_id=data.client_op_id,
+                status="applied",
+                target_module="haul_tickets",
+                target_kind="haul_ticket",
+                result_id=prior,
+                http_status=200,
+            )
+        stale = await self._stale_rejection(
+            data, target_module="haul_tickets", target_kind="haul_ticket", project_id=project_id
+        )
+        if stale is not None:
+            return stale
+        fields = data.model_dump(
+            exclude={"client_op_id", "captured_at", "lat", "lon", "accuracy_m", "device_hint"}, exclude_none=True
+        )
+        # The capture id doubles as the haul module's op id, so the row itself
+        # also refuses a duplicate if the ledger row were ever lost.
+        create = TicketCreate(project_id=project_id, client_op_id=data.client_op_id[:80], source="field", **fields)
+        row, created = await HaulTicketService(self.session).create(create, str(field_session.user_id))
+        await self.field_svc._record_op(
+            data.client_op_id,
+            project_id=project_id,
+            user_id=field_session.user_id,
+            op_kind="field.capture.haul_ticket",
+            result_type="haul_ticket",
+            result_id=row.id,
+        )
+        return FieldCaptureResponse(
+            client_op_id=data.client_op_id,
+            status="applied",
+            target_module="haul_tickets",
+            target_kind="haul_ticket",
+            result_id=row.id,
+            http_status=201 if created else 200,
         )
 
     @staticmethod

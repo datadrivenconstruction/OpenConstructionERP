@@ -44,7 +44,11 @@ import { OfflineStatusBadge } from './OfflineStatusBadge';
 import { SyncQueuePanel } from './SyncQueuePanel';
 import { readFieldSession } from './fieldApi';
 import { TodayTab, CaptureTab, CrewTab } from './FieldTabs';
-import { FieldRaiseIssueTab } from './FieldRaiseIssueTab';
+import { FieldReportTab } from './FieldReportTab';
+import { OfflineDownloadButton } from './OfflineDownloadButton';
+import { fieldTimeAsQueueItems } from './fieldKinds';
+import { getFieldTimeQueue } from '@/features/field-time/offlineQueue';
+import type { SyncQueueItem } from './syncQueueSummary';
 import { fieldGuide } from './fieldGuide';
 
 /**
@@ -193,6 +197,30 @@ export function FieldShellPage() {
   const { online, pending, pendingOps, syncing, syncNow, enqueue, discard, lastResults } =
     useFieldSync(getHeaders);
 
+  // Crew-time ops live in their own queue (desktop sign-in); list them with the rest.
+  const [timeItems, setTimeItems] = useState<SyncQueueItem[]>([]);
+  useEffect(() => {
+    let alive = true;
+    let queue: ReturnType<typeof getFieldTimeQueue>;
+    try {
+      queue = getFieldTimeQueue();
+    } catch {
+      return undefined;
+    }
+    const refresh = () => {
+      void queue
+        .pending()
+        .then((ops) => alive && setTimeItems(fieldTimeAsQueueItems(ops)))
+        .catch(() => undefined);
+    };
+    refresh();
+    const off = queue.onChange(refresh);
+    return () => {
+      alive = false;
+      off();
+    };
+  }, []);
+
   // Register the scoped field service worker so the shell + last-viewed data
   // load offline. Best-effort: a failure does not affect the IndexedDB queue.
   useEffect(() => {
@@ -219,7 +247,7 @@ export function FieldShellPage() {
         <div className="flex shrink-0 items-center gap-2">
           <OfflineStatusBadge
             online={online}
-            pending={pending}
+            pending={pending + timeItems.length}
             syncing={syncing}
             onSyncNow={() => {
               void syncNow();
@@ -235,7 +263,7 @@ export function FieldShellPage() {
         {tab === 'capture' && <CaptureTab session={session} enqueue={enqueue} />}
         {tab === 'crew' && <CrewTab session={session} enqueue={enqueue} />}
         {tab === 'issue' && (
-          <FieldRaiseIssueTab
+          <FieldReportTab
             session={session}
             enqueue={enqueue}
             pendingOps={pendingOps}
@@ -260,10 +288,13 @@ export function FieldShellPage() {
                   : t('field.sync_offline', { defaultValue: 'Offline - changes are saved and will sync.' })}
               </p>
             </div>
+            <div className="px-4 pb-4">
+              <OfflineDownloadButton session={session} />
+            </div>
             {/* Pending-sync review queue: lists offline captures awaiting replay
                 with per-item retry/dismiss. */}
             <SyncQueuePanel
-              state={{ online, pendingOps, syncing, syncNow, discard }}
+              state={{ online, pendingOps, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
               className="border-t border-slate-100"
             />
           </div>

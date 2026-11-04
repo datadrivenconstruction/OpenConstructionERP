@@ -1430,6 +1430,12 @@
       "suggestion": "Kontroller hver overført måling på den nye revision, og bekræft den, eller mål igen"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Denne registrering er {days} dage gammel, over grænsen på {limit} dage for synkronisering fra en enhed",
+      "suggestion": "Indtast den igen i appen online, så den får dagens dato"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Feltet '{field}' er ændret både på enheden og på serveren og har ingen løsning",

@@ -1430,6 +1430,12 @@
       "suggestion": "Kontrollige iga ülekantud mõõtmist uuel redaktsioonil ja kinnitage see või mõõtke uuesti"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "See kanne on {days} päeva vana, üle seadmest sünkroonimise {limit} päeva piiri",
+      "suggestion": "Sisesta see rakenduses uuesti võrgus olles, et sellel oleks tänane kuupäev"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Välja '{field}' muudeti nii seadmes kui ka serveris ja lahendust pole valitud",

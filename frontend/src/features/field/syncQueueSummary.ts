@@ -85,6 +85,10 @@ export function kindLabel(kind: string): string {
     'field.crew.punch': 'Crew punch',
     field_report: 'Field report',
     daily_diary: 'Daily diary',
+    'field.ncr': 'Non-conformance',
+    'field.safety_observation': 'Safety observation',
+    'field.haul_ticket': 'Haul ticket',
+    field_time: 'Crew time',
   };
   const hit = known[kind];
   if (hit) return hit;

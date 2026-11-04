@@ -1430,6 +1430,12 @@
       "suggestion": "Ellenőrizze az áthozott méréseket az új változaton, és erősítse meg őket, vagy mérje újra"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Ez a rögzítés {days} napos, ami meghaladja az eszközről történő szinkronizálás {limit} napos határát",
+      "suggestion": "Vigye fel újra az alkalmazásban online, hogy a mai dátumot kapja"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "A(z) '{field}' mezőt az eszközön és a kiszolgálón is módosították, és nincs kiválasztott megoldás",

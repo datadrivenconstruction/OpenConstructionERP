@@ -38,7 +38,16 @@ async function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
   if (res.ok) {
     let resultId: string | null = null;
     try {
-      const data = (await res.clone().json()) as { result_id?: string; id?: string } | null;
+      const data = (await res.clone().json()) as {
+        result_id?: string;
+        id?: string;
+        status?: string;
+        reason_code?: string;
+      } | null;
+      // A capture the server refused for a rule (too old, say) is a permanent no, not a success.
+      if (data?.status === 'rejected') {
+        return { kind: 'rejected', httpStatus: res.status, detail: data.reason_code ?? 'rejected' };
+      }
       resultId = data?.result_id ?? data?.id ?? null;
     } catch {
       /* empty / non-JSON body is fine */
@@ -57,8 +66,9 @@ async function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
 
 async function safeDetail(res: Response): Promise<string | undefined> {
   try {
-    const data = (await res.clone().json()) as { detail?: unknown } | null;
+    const data = (await res.clone().json()) as { detail?: unknown; reason_code?: unknown } | null;
     if (data && typeof data.detail === 'string') return data.detail;
+    if (data && typeof data.reason_code === 'string') return data.reason_code;
   } catch {
     /* ignore */
   }
