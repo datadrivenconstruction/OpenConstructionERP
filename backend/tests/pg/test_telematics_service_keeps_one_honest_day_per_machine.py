@@ -15,7 +15,7 @@ from sqlalchemy import func, select
 
 from app.modules.equipment.models import Equipment, EquipmentRental, TelemetryReading, UtilisationDay
 from app.modules.equipment.telematics import TelematicsSample
-from app.modules.equipment.telematics_service import TelematicsService
+from app.modules.equipment.telematics_service import TelematicsService, _prune_state
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
@@ -170,6 +170,7 @@ async def test_the_silent_alert_goes_out_once_a_day(pg_session) -> None:
 async def test_pruning_drops_old_raw_readings_and_keeps_the_day(pg_session) -> None:
     eq, _ = await _machine(pg_session)
     svc = TelematicsService(pg_session)
+    _prune_state[eq.id] = datetime.now(UTC)  # keep the ingest's own prune out of the way
     old_day = (datetime.now(UTC) - timedelta(days=200)).date()
     await svc.ingest([_s(eq.code, _at(6, old_day), "10"), _s(eq.code, _at(14, old_day), "16")], source="csv")
     await svc.ingest([_s(eq.code, datetime.now(UTC) - timedelta(hours=1), "400")], source="csv")

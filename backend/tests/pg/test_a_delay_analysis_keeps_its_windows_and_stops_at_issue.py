@@ -161,3 +161,36 @@ async def test_issue_freezes_and_a_live_eot_claim_holds_the_analysis(pg_session)
     await pg_session.delete(claim)
     await pg_session.flush()
     await svc.refuse_if_eot_claim_raised(analysis, doing="be deleted")  # claim gone: released
+
+
+async def test_validation_ties_each_fragnet_loop_to_its_own_event(pg_session) -> None:
+    from app.modules.schedule_advanced.router import validate_delay_analysis
+
+    project_id = await _project(pg_session)
+    sched_id, a_id, b_id = await _schedule(pg_session, project_id)
+    owner_id = (await pg_session.get(Project, project_id)).owner_id
+    svc = DelayAnalysisService(pg_session)
+    analysis = await svc.create_analysis(
+        project_id, DelayAnalysisCreate(name="EOT 2", method="windows", schedule_id=sched_id), None
+    )
+    looping = await svc.add_event(analysis.id, DelayEventCreate(title="Loop", code="D-LOOP"))
+    clean = await svc.add_event(analysis.id, DelayEventCreate(title="Clean", code="D-CLEAN"))
+    await svc.add_fragnet(
+        clean.id,
+        insert_mode="insert_parallel",
+        insert_at_activity_ref=str(b_id),
+        added_duration_days=0,
+        fragnet_activities=[{"id": "M", "duration": 2, "predecessors": [(str(b_id), "FS", 0)]}],
+        rewires=[],
+    )
+    await svc.add_fragnet(
+        looping.id,
+        insert_mode="insert_parallel",
+        insert_at_activity_ref=str(b_id),
+        added_duration_days=0,
+        fragnet_activities=[{"id": "N", "duration": 2, "predecessors": [(str(b_id), "FS", 0)]}],
+        rewires=[{"successor_id": str(a_id), "pred_id": "N", "op": "add"}],
+    )
+    out = await validate_delay_analysis(analysis.id, pg_session, owner_id, None)
+    cycle = {r["element_ref"]: r["passed"] for r in out["results"] if r["rule_id"].endswith("fragnet_cycle")}
+    assert cycle == {str(looping.id): False, str(clean.id): True}
