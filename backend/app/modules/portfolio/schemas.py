@@ -59,6 +59,8 @@ class NodeResponse(BaseModel):
     owner_id: UUID | None
     sort_order: int
     metadata: dict = Field(default_factory=dict, alias="metadata_")
+    # Non-blocking findings of the portfolio rule set for the write that produced this response.
+    validation_warnings: list[dict] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -129,6 +131,8 @@ class CrossLinkResponse(BaseModel):
     successor_activity_name: str | None = None
     dep_type: str
     lag_days: int
+    # Non-blocking findings of the portfolio rule set for the write that produced this response.
+    validation_warnings: list[dict] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
