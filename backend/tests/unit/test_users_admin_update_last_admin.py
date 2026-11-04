@@ -63,3 +63,20 @@ async def test_erased_account_cannot_be_patched():
     with pytest.raises(HTTPException) as e:
         await svc.update_profile(uuid.uuid4(), is_active=True)
     assert e.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_non_admin_cannot_promote_self_or_touch_admins():
+    from app.modules.users.router import update_user
+    from app.modules.users.schemas import UserAdminUpdate
+
+    svc = _svc(SimpleNamespace(id=uuid.uuid4(), role="manager"), others=3)
+
+    async def _get_user(_id):
+        return svc.user_repo.user
+
+    svc.get_user = _get_user
+    with pytest.raises(HTTPException) as e:
+        await update_user(uuid.uuid4(), UserAdminUpdate(role="admin"), "v", {"role": "manager"}, svc)
+    assert e.value.status_code == 403
+    assert svc.user_repo.updated == []
