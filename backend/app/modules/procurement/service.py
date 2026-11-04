@@ -1117,6 +1117,7 @@ class ProcurementService:
         project_id: uuid.UUID | None = None,
         po_status: str | None = None,
         vendor_contact_id: str | None = None,
+        search: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[PurchaseOrder], int]:
@@ -1125,6 +1126,7 @@ class ProcurementService:
             project_id=project_id,
             status=po_status,
             vendor_contact_id=vendor_contact_id,
+            search=search,
             limit=limit,
             offset=offset,
         )

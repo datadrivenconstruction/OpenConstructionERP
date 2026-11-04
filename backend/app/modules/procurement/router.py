@@ -198,6 +198,7 @@ async def list_purchase_orders(
     project_id: uuid.UUID = Query(...),
     status: str | None = Query(default=None),
     vendor_contact_id: str | None = Query(default=None),
+    search: str | None = Query(default=None, max_length=100),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     service: ProcurementService = Depends(_get_service),
@@ -208,6 +209,7 @@ async def list_purchase_orders(
         project_id=project_id,
         po_status=status,
         vendor_contact_id=vendor_contact_id,
+        search=search,
         offset=offset,
         limit=limit,
     )

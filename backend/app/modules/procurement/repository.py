@@ -73,10 +73,14 @@ class PurchaseOrderRepository:
         project_id: uuid.UUID | None = None,
         status: str | None = None,
         vendor_contact_id: str | None = None,
+        search: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[PurchaseOrder], int]:
         """List POs with filters and pagination.
+
+        ``search`` matches the PO number or the vendor's company, legal or person
+        name, case-insensitively.
 
         The PO list response (``POResponse``) never serialises
         ``goods_receipts``, but the relationship defaults to ``lazy="selectin"``
@@ -97,6 +101,27 @@ class PurchaseOrderRepository:
             base = base.where(PurchaseOrder.status == status)
         if vendor_contact_id is not None:
             base = base.where(PurchaseOrder.vendor_contact_id == vendor_contact_id)
+        needle = (search or "").strip()
+        if needle:
+            from sqlalchemy import String, cast, or_
+
+            from app.modules.contacts.models import Contact
+
+            like = "%" + needle.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+            vendor_ids = select(cast(Contact.id, String)).where(
+                or_(
+                    Contact.company_name.ilike(like, escape="\\"),
+                    Contact.legal_name.ilike(like, escape="\\"),
+                    Contact.first_name.ilike(like, escape="\\"),
+                    Contact.last_name.ilike(like, escape="\\"),
+                )
+            )
+            base = base.where(
+                or_(
+                    PurchaseOrder.po_number.ilike(like, escape="\\"),
+                    PurchaseOrder.vendor_contact_id.in_(vendor_ids),
+                )
+            )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
