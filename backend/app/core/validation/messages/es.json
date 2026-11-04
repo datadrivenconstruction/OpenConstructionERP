@@ -703,6 +703,14 @@
     "dates_match_source": {
       "fail": "{activity} termina {days} días desfasada respecto del fin del archivo importado ({source}).",
       "suggestion": "Compare las fechas recalculadas con el archivo de origen y luego acéptelas o restaure las fechas del origen."
+    },
+    "constraint_date_missing": {
+      "fail": "La actividad '{activity}' tiene la restricción {constraint} pero ninguna fecha de restricción, por lo que se ignora.",
+      "suggestion": "Introduzca la fecha de restricción o elimine la restricción."
+    },
+    "constraint_conflict": {
+      "fail": "La actividad '{activity}' está restringida por {constraint} al {date}, pero sus predecesoras solo la permiten {days} días después.",
+      "suggestion": "Mueva la fecha de restricción, acorte la cadena de predecesoras o acepte la holgura negativa."
     }
   },
   "sheet_completeness": {
@@ -1037,7 +1045,24 @@
     "baseline_not_found": "Línea base no encontrada",
     "fx_rate_set_locked": "Los tipos del BCE del {date} están bloqueados, por lo que esta actualización no los ha sobrescrito. Desbloquee primero ese conjunto de tipos si debe recibir la nueva publicación.",
     "boq_locked": "El BOQ está bloqueado y no se puede modificar. Cree una revisión para hacer cambios.",
-    "boq_link_owner_locked": "El código '{code}' está definido por una partida del BOQ bloqueado '{bill}', y vincularlo modificaría ese BOQ. Desbloquee primero ese BOQ o introduzca la partida con un código nuevo."
+    "boq_link_owner_locked": "El código '{code}' está definido por una partida del BOQ bloqueado '{bill}', y vincularlo modificaría ese BOQ. Desbloquee primero ese BOQ o introduzca la partida con un código nuevo.",
+    "boq_budget_nothing_budgetable": "No se encontraron partidas presupuestables en el presupuesto.",
+    "boq_fix_position_id_required": "position_id es obligatorio para esta corrección",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' debe ser una lista no vacía",
+    "boq_budget_requires_lock": "El presupuesto debe estar bloqueado antes de crear un presupuesto de costes. Bloquee primero la estimación.",
+    "boq_not_locked": "El presupuesto no está bloqueado.",
+    "boq_fix_unit_required": "Se requiere un parámetro 'unit' no vacío",
+    "project_access_denied": "No tiene acceso a este proyecto",
+    "boq_costmodel_budget_failed": "No se pudieron crear las líneas de presupuesto del modelo de costes. Puede que el módulo de modelo de costes no esté disponible.",
+    "boq_unlock_role": "Solo un administrador o gerente puede desbloquear un presupuesto.",
+    "boq_bulk_all_failed": "Los {count} elementos fallaron la validación. Primer error: {error}",
+    "boq_position_not_in_boq": "No se encontró la partida {position_id} en el presupuesto {boq_id}",
+    "boq_already_locked": "El presupuesto ya está bloqueado.",
+    "boq_budget_failed": "No se pudieron crear las líneas de presupuesto. Puede que el módulo de finanzas no esté disponible.",
+    "boq_bulk_items_required": "La lista 'items' es obligatoria y no debe estar vacía",
+    "boq_classification_unavailable": "Servicio de clasificación no disponible",
+    "boq_budget_no_positions": "El presupuesto no tiene partidas: nada que presupuestar.",
+    "boq_fix_unit_rate_required": "Se requiere un parámetro 'unit_rate' no negativo"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1417,6 +1442,10 @@
     "manual_ref_without_revision": {
       "fail": "Partida {ordinal}: el plano {drawing} se ha introducido sin revisión",
       "suggestion": "Añadir la revisión del plano a partir del cual se calculó la cantidad"
+    },
+    "carried_unconfirmed": {
+      "fail": "Partida {ordinal}: {count} medición(es) se trasladaron de una revisión anterior del plano y aún no están confirmadas",
+      "suggestion": "Revise cada medición trasladada en la nueva revisión y confírmela, o vuelva a medirla"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Calcule la nivelación para que el alcance faltante esté valorado antes de adjudicar"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "El paquete {package} está vinculado a la licitación del contrato principal {tender} y aún no está adjudicado, por lo que esa licitación no tiene contrato",
+      "suggestion": "Adjudique el paquete (crea el contrato) o desvincule la licitación para que redacte el suyo"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Competencia",
       "margin": "Margen",
       "risk": "Riesgo"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "La página {page} no tiene un número de plano legible",
+      "suggestion": "Introduzca el número de plano del cajetín; sin él, el plano no puede apilarse sobre revisiones anteriores"
+    },
+    "number_unique_in_set": {
+      "fail": "El plano {sheet} revisión {revision} aparece en las páginas {first_page} y {page} de la misma carga",
+      "suggestion": "Revise los cajetines de ambas páginas y corrija el número o la revisión de una de ellas"
+    },
+    "revision_not_lower": {
+      "fail": "El plano {sheet} está en la revisión {revision} pero el plano actual ya está en {current_revision}",
+      "suggestion": "Confirme la lectura solo si realmente es una emisión posterior; si no, corrija la revisión o descarte el plano"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "El plano {sheet} se leyó con confianza {confidence} y no está confirmado",
+      "suggestion": "Compare los campos con el cajetín y confírmelos o corríjalos"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Fila {row}: la celda ID de partida empieza con un carácter de fórmula y no se importó",
+      "suggestion": "Deje la columna ID de partida tal como se exportó, o vacíe la celda para añadir una partida nueva"
+    },
+    "unknown_id": {
+      "fail": "Fila {row}: el ID de partida no pertenece a este presupuesto, por lo que la fila se trató como una partida nueva",
+      "suggestion": "Vuelva a exportar el presupuesto antes de editarlo, o vacíe la celda ID de partida si la fila debe ser nueva"
+    },
+    "duplicate_id": {
+      "fail": "Fila {row}: el ID de partida lo usa una fila anterior, por lo que esta fila se trató como una partida nueva",
+      "suggestion": "Vacíe el ID de partida de las filas copiadas o elimine las copias"
+    },
+    "stale_row": {
+      "fail": "Fila {row}: la partida {ordinal} se modificó en la aplicación después de exportar esta hoja",
+      "suggestion": "Conserve el valor de la aplicación o elija el valor de Excel para esta fila y sobrescríbalo"
+    },
+    "locked_boq": {
+      "fail": "Este presupuesto está bloqueado, por lo que no se pueden aplicar los cambios de Excel",
+      "suggestion": "Desbloquee primero el presupuesto o guarde la hoja para más tarde"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Vuelva a ejecutar el análisis de riesgo de costes y aplique de nuevo la contingencia, o mantenga la línea y anote el motivo",
+      "fail": "La línea de contingencia \"{markup}\" se aplicó en P{percentile} el {applied_at}, pero su fuente ({source}) ha cambiado desde entonces"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Vuelva a ejecutar el análisis de riesgo de costes y aplique de nuevo la contingencia, o mantenga la línea y anote el motivo",
+      "fail": "La contingencia de riesgo \"{markup}\" asciende a {amount}, menos que la estimación P50 actual de {p50}"
+    },
+    "source": {
+      "positions": "totales de las líneas del presupuesto",
+      "register": "registro de riesgos"
+    },
+    "contingency_double_count": {
+      "suggestion": "Desactive una de las dos líneas o anote por qué se necesitan ambas",
+      "fail": "La línea de contingencia \"{markup}\" está activa junto a la contingencia de riesgo \"{risk_markup}\"; la misma incertidumbre puede estar reservada dos veces"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "La partida {ref} tiene {hours} h imputadas entre {date_from} y {date_to} pero ningún avance medido",
+      "suggestion": "Registre una medición o avance para la partida, o traslade las horas a la partida realmente trabajada"
+    },
+    "factor_implausible": {
+      "fail": "El factor de productividad {factor} de la partida {ref} está fuera de la banda plausible {low} a {high}",
+      "suggestion": "Revise las horas imputadas, la cantidad instalada y la unidad de la norma de estimación"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "La actividad {activity} ({project}) carga mano de obra pero no indica oficio, por lo que su demanda no se puede asignar a nadie",
+      "suggestion": "Indique un oficio en el recurso de mano de obra de la actividad"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "La respuesta guardada no cita ningún documento del proyecto, por lo que nada la respalda.",
+      "suggestion": "Pregunte de nuevo hasta que la respuesta cite un documento, o marque el texto como nota propia."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "El borrador del agente '{title}' lleva {days} días esperando revisión (límite {limit}).",
+      "suggestion": "Acepte o rechace el borrador, o desactive el agente si sus borradores no se usan."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Introduzca el día en que se sobrevoló la obra.",
+      "fail": "La fecha de captura {captured_on} está en el futuro."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Elija una actividad del cronograma de este proyecto.",
+      "fail": "La actividad no pertenece a este proyecto."
+    },
+    "georeferenced": {
+      "suggestion": "Exporte la ortofoto como GeoTIFF con su sistema de coordenadas.",
+      "fail": "La ortofoto no tiene sistema de coordenadas ni límites, por lo que no se puede ubicar en el globo."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Vuele más bajo o exporte a resolución completa para comprobar cantidades.",
+      "fail": "La distancia de muestreo del suelo es de {gsd_cm} cm por píxel, demasiado gruesa para comprobar cantidades."
+    },
+    "observed_pct_range": {
+      "suggestion": "Introduzca un porcentaje entre 0 y 100.",
+      "fail": "El avance observado {observed_pct} está fuera del rango de 0 a 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Revise la fecha del vuelo o las fechas de inicio y fin del proyecto.",
+      "fail": "La fecha de captura {captured_on} está a más de 30 días fuera de las fechas del proyecto."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Revise el sistema de coordenadas de la exportación o el ancla del proyecto.",
+      "fail": "La ortofoto está a {distance_km} km del ancla del proyecto."
     }
   }
 }

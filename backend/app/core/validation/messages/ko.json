@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity}의 종료일이 가져온 파일의 종료일({source})과 {days}일 차이 납니다.",
       "suggestion": "재계산된 일정을 원본 파일과 비교한 뒤 수락하거나 원본 일정을 복원하세요."
+    },
+    "constraint_date_missing": {
+      "fail": "작업 '{activity}'에 제약 {constraint}이(가) 있지만 제약 날짜가 없어 제약이 무시됩니다.",
+      "suggestion": "제약 날짜를 입력하거나 제약을 제거하세요."
+    },
+    "constraint_conflict": {
+      "fail": "작업 '{activity}'은(는) {constraint}에 의해 {date}로 제약되지만, 선행 작업은 {days}일 뒤에야 허용합니다.",
+      "suggestion": "제약 날짜를 옮기거나, 선행 작업 체인을 줄이거나, 음수 여유를 받아들이세요."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "기준 계획을 찾을 수 없습니다",
     "fx_rate_set_locked": "{date}의 ECB 환율이 잠겨 있어 이번 갱신에서 덮어쓰지 않았습니다. 새 공시를 반영해야 한다면 먼저 해당 환율 묶음의 잠금을 해제하세요.",
     "boq_locked": "내역서가 잠겨 있어 수정할 수 없습니다. 변경하려면 개정본을 만드세요.",
-    "boq_link_owner_locked": "코드 '{code}'는 잠긴 내역서 '{bill}'의 항목에서 정의되어 있으며, 연결하면 해당 내역서가 변경됩니다. 먼저 내역서의 잠금을 해제하거나 새 코드로 항목을 입력하세요."
+    "boq_link_owner_locked": "코드 '{code}'는 잠긴 내역서 '{bill}'의 항목에서 정의되어 있으며, 연결하면 해당 내역서가 변경됩니다. 먼저 내역서의 잠금을 해제하거나 새 코드로 항목을 입력하세요.",
+    "boq_budget_nothing_budgetable": "내역서에서 예산화할 수 있는 항목을 찾지 못했습니다.",
+    "boq_fix_position_id_required": "이 수정에는 position_id가 필요합니다",
+    "boq_fix_duplicates_required": "'duplicate_position_ids'는 비어 있지 않은 목록이어야 합니다",
+    "boq_budget_requires_lock": "예산을 만들기 전에 내역서를 잠가야 합니다. 먼저 견적을 잠그세요.",
+    "boq_not_locked": "내역서가 잠겨 있지 않습니다.",
+    "boq_fix_unit_required": "비어 있지 않은 'unit' 매개변수가 필요합니다",
+    "project_access_denied": "이 프로젝트에 접근할 권한이 없습니다",
+    "boq_costmodel_budget_failed": "비용 모델 예산 행을 만들지 못했습니다. 비용 모델 모듈을 사용할 수 없을 수 있습니다.",
+    "boq_unlock_role": "관리자 또는 매니저만 내역서의 잠금을 해제할 수 있습니다.",
+    "boq_bulk_all_failed": "{count}개 항목 모두 검증에 실패했습니다. 첫 번째 오류: {error}",
+    "boq_position_not_in_boq": "항목 {position_id}을(를) 내역서 {boq_id}에서 찾을 수 없습니다",
+    "boq_already_locked": "내역서가 이미 잠겨 있습니다.",
+    "boq_budget_failed": "예산 행을 만들지 못했습니다. 재무 모듈을 사용할 수 없을 수 있습니다.",
+    "boq_bulk_items_required": "'items' 목록은 필수이며 비어 있으면 안 됩니다",
+    "boq_classification_unavailable": "분류 서비스를 사용할 수 없습니다",
+    "boq_budget_no_positions": "내역서에 항목이 없습니다: 예산화할 것이 없습니다.",
+    "boq_fix_unit_rate_required": "음수가 아닌 'unit_rate' 매개변수가 필요합니다"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "항목 {ordinal}: 도면 {drawing}이(가) 리비전 없이 입력되었습니다",
       "suggestion": "수량의 단가 근거가 된 도면의 리비전을 추가하십시오"
+    },
+    "carried_unconfirmed": {
+      "fail": "항목 {ordinal}: 측정값 {count}개가 이전 도면 개정에서 이월되었으며 아직 확인되지 않았습니다",
+      "suggestion": "새 개정에서 이월된 각 측정값을 확인하여 승인하거나 다시 측정하세요"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "낙찰 전에 누락 범위가 가격에 반영되도록 평준화를 계산하세요"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "패키지 {package}은(는) 주계약 입찰 {tender}에 연결되어 있지만 아직 낙찰되지 않았으므로 해당 입찰에는 계약이 없습니다",
+      "suggestion": "패키지를 낙찰하거나(계약이 생성됩니다) 입찰 연결을 해제하여 자체 계약을 작성하게 하세요"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "경쟁",
       "margin": "마진",
       "risk": "리스크"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "{page}쪽에 읽을 수 있는 도면 번호가 없습니다",
+      "suggestion": "표제란에서 도면 번호를 입력하세요. 없으면 도면을 이전 개정판 위에 쌓을 수 없습니다"
+    },
+    "number_unique_in_set": {
+      "fail": "도면 {sheet} 개정 {revision}이(가) 같은 업로드의 {first_page}쪽과 {page}쪽에 나타납니다",
+      "suggestion": "두 쪽의 표제란을 확인하고 한쪽의 번호 또는 개정을 바로잡으세요"
+    },
+    "revision_not_lower": {
+      "fail": "도면 {sheet}은(는) 개정 {revision}이지만 현재 도면은 이미 {current_revision}입니다",
+      "suggestion": "정말 더 나중의 발행인 경우에만 읽기를 확인하세요. 아니면 개정을 바로잡거나 도면을 폐기하세요"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "도면 {sheet}은(는) 신뢰도 {confidence}로 읽혔으며 확인되지 않았습니다",
+      "suggestion": "항목을 표제란과 비교하여 확인하거나 수정하세요"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "{row}행: 항목 ID 셀이 수식 문자로 시작하여 가져오지 않았습니다",
+      "suggestion": "항목 ID 열은 내보낸 그대로 두거나, 새 항목을 추가하려면 셀을 비우세요"
+    },
+    "unknown_id": {
+      "fail": "{row}행: 항목 ID가 이 내역서에 속하지 않아 해당 행을 새 항목으로 처리했습니다",
+      "suggestion": "편집하기 전에 내역서를 다시 내보내거나, 행이 새 항목이어야 하면 항목 ID 셀을 비우세요"
+    },
+    "duplicate_id": {
+      "fail": "{row}행: 항목 ID가 앞의 행에서 사용 중이어서 이 행을 새 항목으로 처리했습니다",
+      "suggestion": "복사한 행의 항목 ID를 비우거나 복사본을 삭제하세요"
+    },
+    "stale_row": {
+      "fail": "{row}행: 이 시트를 내보낸 뒤 앱에서 항목 {ordinal}이(가) 변경되었습니다",
+      "suggestion": "앱의 값을 유지하거나, 덮어쓰려면 이 행의 Excel 값을 선택하세요"
+    },
+    "locked_boq": {
+      "fail": "이 내역서는 잠겨 있어 Excel의 변경 사항을 적용할 수 없습니다",
+      "suggestion": "먼저 내역서의 잠금을 해제하거나 시트를 나중을 위해 저장하세요"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "비용 리스크 분석을 다시 실행하여 예비비를 다시 적용하거나, 행을 유지하고 이유를 기록하세요",
+      "fail": "예비비 행 \"{markup}\"은(는) {applied_at}에 P{percentile}로 적용되었지만, 그 이후 원본({source})이 변경되었습니다"
+    },
+    "contingency_below_p50": {
+      "suggestion": "비용 리스크 분석을 다시 실행하여 예비비를 다시 적용하거나, 행을 유지하고 이유를 기록하세요",
+      "fail": "리스크 예비비 \"{markup}\"은(는) {amount}로, 현재 P50 추정치 {p50}보다 적습니다"
+    },
+    "source": {
+      "positions": "내역서 행 합계",
+      "register": "리스크 등록부"
+    },
+    "contingency_double_count": {
+      "suggestion": "두 행 중 하나를 비활성화하거나, 둘 다 필요한 이유를 기록하세요",
+      "fail": "예비비 행 \"{markup}\"이(가) 리스크 예비비 \"{risk_markup}\"과(와) 함께 활성화되어 있습니다. 같은 불확실성이 두 번 확보되었을 수 있습니다"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "항목 {ref}에 {date_from}부터 {date_to}까지 {hours}시간이 기록되었지만 측정된 진척이 없습니다",
+      "suggestion": "항목에 대한 측정 또는 진척을 기록하거나, 시간을 실제로 작업한 항목으로 옮기세요"
+    },
+    "factor_implausible": {
+      "fail": "항목 {ref}의 생산성 계수 {factor}이(가) 타당한 범위 {low}~{high}를 벗어났습니다",
+      "suggestion": "기록된 시간, 설치 물량, 견적 기준의 단위를 확인하세요"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "작업 {activity} ({project})은(는) 노무를 투입하지만 직종이 없어 그 수요를 누구와도 맞출 수 없습니다",
+      "suggestion": "작업의 노무 자원에 직종을 설정하세요"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "저장된 답변이 어떤 프로젝트 문서도 인용하지 않아 뒷받침하는 것이 없습니다.",
+      "suggestion": "답변이 문서를 인용할 때까지 다시 질문하거나, 텍스트를 직접 작성한 메모로 표시하세요."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "에이전트 초안 '{title}'이(가) {days}일 동안 검토를 기다렸습니다 (한도 {limit}).",
+      "suggestion": "초안을 수락 또는 거부하거나, 초안이 사용되지 않으면 에이전트를 끄세요."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "현장을 항공 촬영한 날짜를 입력하세요.",
+      "fail": "촬영 날짜 {captured_on}이(가) 미래입니다."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "이 프로젝트의 일정에서 작업을 선택하세요.",
+      "fail": "해당 작업은 이 프로젝트에 속하지 않습니다."
+    },
+    "georeferenced": {
+      "suggestion": "정사영상을 좌표계와 함께 GeoTIFF로 내보내세요.",
+      "fail": "정사영상에 좌표계 또는 경계가 없어 지구본에 배치할 수 없습니다."
+    },
+    "gsd_reasonable": {
+      "suggestion": "물량을 확인하려면 더 낮게 비행하거나 전체 해상도로 내보내세요.",
+      "fail": "지상 샘플 거리가 픽셀당 {gsd_cm}cm로, 물량을 확인하기에는 너무 거칩니다."
+    },
+    "observed_pct_range": {
+      "suggestion": "0에서 100 사이의 백분율을 입력하세요.",
+      "fail": "관측된 진척 {observed_pct}이(가) 0~100 범위를 벗어났습니다."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "비행 날짜 또는 프로젝트 시작일과 종료일을 확인하세요.",
+      "fail": "촬영 날짜 {captured_on}이(가) 프로젝트 기간에서 30일 넘게 벗어났습니다."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "내보내기의 좌표계 또는 프로젝트 앵커를 확인하세요.",
+      "fail": "정사영상이 프로젝트 앵커에서 {distance_km}km 떨어져 있습니다."
     }
   }
 }

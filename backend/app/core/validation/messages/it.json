@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} termina con uno scostamento di {days} giorni rispetto alla fine nel file importato ({source}).",
       "suggestion": "Confronta le date ricalcolate con il file di origine, poi accettale o ripristina le date originali."
+    },
+    "constraint_date_missing": {
+      "fail": "L'attività '{activity}' ha il vincolo {constraint} ma nessuna data di vincolo, quindi il vincolo viene ignorato.",
+      "suggestion": "Inserisca la data del vincolo oppure rimuova il vincolo."
+    },
+    "constraint_conflict": {
+      "fail": "L'attività '{activity}' è vincolata da {constraint} al {date}, ma le sue predecessori la consentono solo {days} giorni dopo.",
+      "suggestion": "Sposti la data del vincolo, accorci la catena delle predecessori o accetti lo scorrimento negativo."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Linea di base non trovata",
     "fx_rate_set_locked": "I cambi BCE del {date} sono bloccati, quindi questo aggiornamento non li ha sovrascritti. Sbloccare prima quel set di cambi se deve ricevere la nuova pubblicazione.",
     "boq_locked": "Il BOQ è bloccato e non può essere modificato. Creare una revisione per apportare modifiche.",
-    "boq_link_owner_locked": "Il codice '{code}' è definito da una riga nel computo bloccato '{bill}', e collegarlo modificherebbe quel computo. Sbloccare prima quel computo, oppure inserire la riga con un nuovo codice."
+    "boq_link_owner_locked": "Il codice '{code}' è definito da una riga nel computo bloccato '{bill}', e collegarlo modificherebbe quel computo. Sbloccare prima quel computo, oppure inserire la riga con un nuovo codice.",
+    "boq_budget_nothing_budgetable": "Nessuna voce preventivabile trovata nel computo.",
+    "boq_fix_position_id_required": "position_id è obbligatorio per questa correzione",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' deve essere un elenco non vuoto",
+    "boq_budget_requires_lock": "Il computo deve essere bloccato prima di creare un budget. Blocchi prima la stima.",
+    "boq_not_locked": "Il computo non è bloccato.",
+    "boq_fix_unit_required": "È richiesto un parametro 'unit' non vuoto",
+    "project_access_denied": "Non ha accesso a questo progetto",
+    "boq_costmodel_budget_failed": "Creazione delle righe di budget del modello dei costi non riuscita. Il modulo del modello dei costi potrebbe non essere disponibile.",
+    "boq_unlock_role": "Solo un amministratore o un responsabile può sbloccare un computo.",
+    "boq_bulk_all_failed": "Tutti i {count} elementi hanno fallito la convalida. Primo errore: {error}",
+    "boq_position_not_in_boq": "Voce {position_id} non trovata nel computo {boq_id}",
+    "boq_already_locked": "Il computo è già bloccato.",
+    "boq_budget_failed": "Creazione delle righe di budget non riuscita. Il modulo Finanza potrebbe non essere disponibile.",
+    "boq_bulk_items_required": "L'elenco 'items' è obbligatorio e non deve essere vuoto",
+    "boq_classification_unavailable": "Servizio di classificazione non disponibile",
+    "boq_budget_no_positions": "Il computo non ha voci: niente da preventivare.",
+    "boq_fix_unit_rate_required": "È richiesto un parametro 'unit_rate' non negativo"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Voce {ordinal}: il disegno {drawing} è inserito senza revisione",
       "suggestion": "Aggiungere la revisione del disegno da cui è stata prezzata la quantità"
+    },
+    "carried_unconfirmed": {
+      "fail": "Voce {ordinal}: {count} misura/e riportate da una revisione precedente del disegno non sono ancora confermate",
+      "suggestion": "Controlli ogni misura riportata sulla nuova revisione e la confermi, oppure la misuri di nuovo"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Calcolate il livellamento così che l'ambito mancante sia quotato prima dell'aggiudicazione"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Il pacchetto {package} è collegato alla gara del contratto principale {tender} e non è ancora aggiudicato, quindi quella gara non ha un contratto",
+      "suggestion": "Aggiudichi il pacchetto (crea il contratto) oppure scolleghi la gara perché prepari il proprio"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Concorrenza",
       "margin": "Margine",
       "risk": "Rischio"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "La pagina {page} non ha un numero di tavola leggibile",
+      "suggestion": "Inserisca il numero di tavola dal cartiglio; senza di esso la tavola non può essere sovrapposta alle revisioni precedenti"
+    },
+    "number_unique_in_set": {
+      "fail": "La tavola {sheet} revisione {revision} compare alle pagine {first_page} e {page} dello stesso caricamento",
+      "suggestion": "Controlli i cartigli di entrambe le pagine e corregga il numero o la revisione di una delle due"
+    },
+    "revision_not_lower": {
+      "fail": "La tavola {sheet} è alla revisione {revision} ma la tavola attuale è già alla {current_revision}",
+      "suggestion": "Confermi la lettura solo se è davvero un'emissione successiva; altrimenti corregga la revisione o scarti la tavola"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "La tavola {sheet} è stata letta con confidenza {confidence} e non è confermata",
+      "suggestion": "Confronti i campi con il cartiglio e li confermi o corregga"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Riga {row}: la cella ID voce inizia con un carattere di formula e non è stata importata",
+      "suggestion": "Lasci la colonna ID voce come esportata, oppure svuoti la cella per aggiungere una nuova voce"
+    },
+    "unknown_id": {
+      "fail": "Riga {row}: l'ID voce non appartiene a questo computo, quindi la riga è stata trattata come nuova voce",
+      "suggestion": "Esporti di nuovo il computo prima di modificarlo, oppure svuoti la cella ID voce se la riga deve essere nuova"
+    },
+    "duplicate_id": {
+      "fail": "Riga {row}: l'ID voce è usato da una riga precedente, quindi questa riga è stata trattata come nuova voce",
+      "suggestion": "Svuoti l'ID voce delle righe copiate oppure elimini le copie"
+    },
+    "stale_row": {
+      "fail": "Riga {row}: la voce {ordinal} è stata modificata nell'applicazione dopo l'esportazione di questo foglio",
+      "suggestion": "Mantenga il valore dell'applicazione, oppure scelga il valore di Excel per questa riga per sovrascriverlo"
+    },
+    "locked_boq": {
+      "fail": "Questo computo è bloccato, quindi le modifiche da Excel non possono essere applicate",
+      "suggestion": "Sblocchi prima il computo, oppure salvi il foglio per dopo"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Riesegua l'analisi del rischio di costo e applichi di nuovo l'accantonamento, oppure mantenga la riga e annoti il motivo",
+      "fail": "La riga di accantonamento \"{markup}\" è stata applicata a P{percentile} il {applied_at}, ma la sua fonte ({source}) è cambiata da allora"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Riesegua l'analisi del rischio di costo e applichi di nuovo l'accantonamento, oppure mantenga la riga e annoti il motivo",
+      "fail": "L'accantonamento per rischi \"{markup}\" ammonta a {amount}, meno della stima P50 attuale di {p50}"
+    },
+    "source": {
+      "positions": "totali delle righe del computo",
+      "register": "registro dei rischi"
+    },
+    "contingency_double_count": {
+      "suggestion": "Disattivi una delle due righe oppure annoti perché servono entrambe",
+      "fail": "La riga di accantonamento \"{markup}\" è attiva accanto all'accantonamento per rischi \"{risk_markup}\"; la stessa incertezza potrebbe essere riservata due volte"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "La voce {ref} ha {hours} h registrate tra il {date_from} e il {date_to} ma nessun avanzamento misurato",
+      "suggestion": "Registri una misura o un avanzamento per la voce, oppure sposti le ore sulla voce effettivamente lavorata"
+    },
+    "factor_implausible": {
+      "fail": "Il fattore di produttività {factor} della voce {ref} è fuori dalla fascia plausibile da {low} a {high}",
+      "suggestion": "Controlli le ore registrate, la quantità posata e l'unità della norma di stima"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "L'attività {activity} ({project}) carica manodopera ma non indica alcun mestiere, quindi la sua domanda non può essere assegnata a nessuno",
+      "suggestion": "Imposti un mestiere sulla risorsa manodopera dell'attività"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "La risposta salvata non cita alcun documento del progetto, quindi nulla la supporta.",
+      "suggestion": "Chieda di nuovo finché la risposta cita un documento, oppure contrassegni il testo come nota propria."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "La bozza dell'agente '{title}' attende la revisione da {days} giorni (limite {limit}).",
+      "suggestion": "Accetti o rifiuti la bozza, oppure disattivi l'agente se le sue bozze non vengono usate."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Inserisca il giorno in cui il cantiere è stato sorvolato.",
+      "fail": "La data di acquisizione {captured_on} è nel futuro."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Scelga un'attività dal cronoprogramma di questo progetto.",
+      "fail": "L'attività non appartiene a questo progetto."
+    },
+    "georeferenced": {
+      "suggestion": "Esporti l'ortofoto come GeoTIFF con il suo sistema di coordinate.",
+      "fail": "L'ortofoto non ha sistema di coordinate né limiti, quindi non può essere collocata sul globo."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Voli più basso oppure esporti a piena risoluzione per verificare le quantità.",
+      "fail": "La distanza di campionamento al suolo è di {gsd_cm} cm per pixel, troppo grossolana per verificare le quantità."
+    },
+    "observed_pct_range": {
+      "suggestion": "Inserisca una percentuale tra 0 e 100.",
+      "fail": "L'avanzamento osservato {observed_pct} è fuori dall'intervallo da 0 a 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Controlli la data del volo oppure le date di inizio e fine del progetto.",
+      "fail": "La data di acquisizione {captured_on} è oltre 30 giorni fuori dalle date del progetto."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Controlli il sistema di coordinate dell'esportazione oppure l'ancoraggio del progetto.",
+      "fail": "L'ortofoto si trova a {distance_km} km dall'ancoraggio del progetto."
     }
   }
 }

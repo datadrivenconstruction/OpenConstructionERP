@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} lõpeb {days} päeva kaugusel imporditud faili lõpust ({source}).",
       "suggestion": "Võrdle ümberarvutatud kuupäevi lähtefailiga, seejärel nõustu nendega või taasta allika kuupäevad."
+    },
+    "constraint_date_missing": {
+      "fail": "Tegevusel '{activity}' on piirang {constraint}, kuid piirangu kuupäeva pole, seega piirangut ignoreeritakse.",
+      "suggestion": "Sisestage piirangu kuupäev või eemaldage piirang."
+    },
+    "constraint_conflict": {
+      "fail": "Tegevust '{activity}' piirab {constraint} kuupäevaga {date}, kuid selle eelnevad tegevused võimaldavad seda alles {days} päeva hiljem.",
+      "suggestion": "Nihutage piirangu kuupäeva, lühendage eelnevate tegevuste ahelat või nõustuge negatiivse varuga."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Alusplaani ei leitud",
     "fx_rate_set_locked": "Kuupäeva {date} EKP kursid on lukustatud, seega ei kirjutanud värskendus neid üle. Avage esmalt selle kursikomplekti lukustus, kui see peab võtma uue avaldatud väärtuse.",
     "boq_locked": "Mahuloend on lukustatud ja seda ei saa muuta. Muudatusteks looge revisjon.",
-    "boq_link_owner_locked": "Koodi '{code}' määrab lukustatud mahuloendi '{bill}' rida ja sellega sidumine muudaks seda mahuloendit. Avage kõigepealt selle mahuloendi lukustus või sisestage rida uue koodiga."
+    "boq_link_owner_locked": "Koodi '{code}' määrab lukustatud mahuloendi '{bill}' rida ja sellega sidumine muudaks seda mahuloendit. Avage kõigepealt selle mahuloendi lukustus või sisestage rida uue koodiga.",
+    "boq_budget_nothing_budgetable": "Mahuloendist ei leitud eelarvestatavaid positsioone.",
+    "boq_fix_position_id_required": "Selle parandus jaoks on vaja position_id",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' peab olema mittetühi loend",
+    "boq_budget_requires_lock": "Mahuloend tuleb enne eelarve loomist lukustada. Lukustage esmalt hinnang.",
+    "boq_not_locked": "Mahuloend ei ole lukustatud.",
+    "boq_fix_unit_required": "Vajalik on mittetühi parameeter 'unit'",
+    "project_access_denied": "Teil puudub juurdepääs sellele projektile",
+    "boq_costmodel_budget_failed": "Kulumudeli eelarveridade loomine ebaõnnestus. Kulumudeli moodul ei pruugi olla saadaval.",
+    "boq_unlock_role": "Mahuloendi saab avada ainult administraator või juht.",
+    "boq_bulk_all_failed": "Kõik {count} kirjet ebaõnnestusid valideerimisel. Esimene viga: {error}",
+    "boq_position_not_in_boq": "Positsiooni {position_id} ei leitud mahuloendist {boq_id}",
+    "boq_already_locked": "Mahuloend on juba lukustatud.",
+    "boq_budget_failed": "Eelarveridade loomine ebaõnnestus. Rahanduse moodul ei pruugi olla saadaval.",
+    "boq_bulk_items_required": "Loend 'items' on kohustuslik ega tohi olla tühi",
+    "boq_classification_unavailable": "Klassifitseerimisteenus ei ole saadaval",
+    "boq_budget_no_positions": "Mahuloendis pole positsioone: pole mida eelarvestada.",
+    "boq_fix_unit_rate_required": "Vajalik on mittenegatiivne parameeter 'unit_rate'"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Positsioon {ordinal}: joonis {drawing} on sisestatud ilma revisjonita",
       "suggestion": "Lisage joonise revisjon, mille järgi kogus hinnastati"
+    },
+    "carried_unconfirmed": {
+      "fail": "Positsioon {ordinal}: {count} mõõtmist kanti üle varasemast joonise redaktsioonist ja neid pole veel kinnitatud",
+      "suggestion": "Kontrollige iga ülekantud mõõtmist uuel redaktsioonil ja kinnitage see või mõõtke uuesti"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Arvuta tasandus, et puuduv maht oleks enne hankeotsust hinnastatud"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Pakett {package} on seotud peamise lepingu hankega {tender} ja seda pole veel välja antud, seega sellel hankel pole lepingut",
+      "suggestion": "Andke pakett välja (see loob lepingu) või eraldage hange, et see koostaks oma lepingu"
     }
   },
   "bid_outcome": {
@@ -1540,7 +1569,123 @@
       "client": "Klient",
       "competition": "Konkurents",
       "margin": "Marginaal",
-      "risk": "Risk"
+      "risk": "Riskid"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Lehel {page} puudub loetav joonise number",
+      "suggestion": "Sisestage joonise number tiitliplokist; ilma selleta ei saa joonist varasematele redaktsioonidele asetada"
+    },
+    "number_unique_in_set": {
+      "fail": "Joonis {sheet} redaktsioon {revision} esineb lehtedel {first_page} ja {page} samas üleslaadimises",
+      "suggestion": "Kontrollige mõlema lehe tiitliplokke ja parandage ühe numbrit või redaktsiooni"
+    },
+    "revision_not_lower": {
+      "fail": "Joonis {sheet} on redaktsioonil {revision}, kuid praegune joonis on juba redaktsioonil {current_revision}",
+      "suggestion": "Kinnitage lugemine ainult siis, kui tegu on tõesti hilisema väljaandega; vastasel juhul parandage redaktsioon või jätke joonis kõrvale"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Joonis {sheet} loeti usaldusväärsusega {confidence} ja see ei ole kinnitatud",
+      "suggestion": "Võrrelge välju tiitliplokiga ning kinnitage või parandage need"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Rida {row}: positsiooni ID lahter algab valemimärgiga ja seda ei imporditud",
+      "suggestion": "Jätke positsiooni ID veerg eksporditud kujule või tühjendage lahter uue positsiooni lisamiseks"
+    },
+    "unknown_id": {
+      "fail": "Rida {row}: positsiooni ID ei kuulu sellesse mahuloendisse, seega käsitleti rida uue positsioonina",
+      "suggestion": "Eksportige mahuloend enne muutmist uuesti või tühjendage positsiooni ID lahter, kui rida peab olema uus"
+    },
+    "duplicate_id": {
+      "fail": "Rida {row}: positsiooni ID-d kasutab varasem rida, seega käsitleti seda rida uue positsioonina",
+      "suggestion": "Tühjendage kopeeritud ridade positsiooni ID või kustutage koopiad"
+    },
+    "stale_row": {
+      "fail": "Rida {row}: positsiooni {ordinal} muudeti rakenduses pärast selle lehe eksporti",
+      "suggestion": "Hoidke rakenduse väärtus või valige selle rea jaoks Exceli väärtus, et see üle kirjutada"
+    },
+    "locked_boq": {
+      "fail": "See mahuloend on lukustatud, seega ei saa Exceli muudatusi rakendada",
+      "suggestion": "Avage esmalt mahuloend või salvestage leht hilisemaks"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Käivitage kuluriski analüüs uuesti ja rakendage reserv uuesti või jätke rida alles ning märkige põhjus",
+      "fail": "Reservirida \"{markup}\" rakendati tasemel P{percentile} kuupäeval {applied_at}, kuid selle allikas ({source}) on sestpeale muutunud"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Käivitage kuluriski analüüs uuesti ja rakendage reserv uuesti või jätke rida alles ning märkige põhjus",
+      "fail": "Riskireserv \"{markup}\" on {amount}, vähem kui praegune P50 hinnang {p50}"
+    },
+    "source": {
+      "positions": "mahuloendi ridade summad",
+      "register": "riskiregister"
+    },
+    "contingency_double_count": {
+      "suggestion": "Lülitage üks kahest reast välja või märkige, miks mõlemat vaja on",
+      "fail": "Reservirida \"{markup}\" on aktiivne riskireservi \"{risk_markup}\" kõrval; sama ebakindlus võib olla reserveeritud kaks korda"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Positsioonil {ref} on perioodil {date_from} kuni {date_to} kirjendatud {hours} h, kuid mõõdetud edenemist pole",
+      "suggestion": "Registreerige positsioonile mõõtmine või edenemine või viige tunnid positsioonile, millel tegelikult töötati"
+    },
+    "factor_implausible": {
+      "fail": "Positsiooni {ref} tootlikkusetegur {factor} jääb usutavast vahemikust {low} kuni {high} välja",
+      "suggestion": "Kontrollige kirjendatud tunde, paigaldatud kogust ja hinnangunormi ühikut"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Tegevus {activity} ({project}) koormab tööjõudu, kuid ei nimeta ametit, seega ei saa selle vajadust kellegagi sobitada",
+      "suggestion": "Määrake tegevuse tööjõuressursile amet"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Salvestatud vastus ei viita ühelegi projekti dokumendile, seega pole seda midagi toetamas.",
+      "suggestion": "Küsige uuesti, kuni vastus viitab dokumendile, või märkige tekst oma märkmeks."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Agendi mustand '{title}' on ülevaatust oodanud {days} päeva (piir {limit}).",
+      "suggestion": "Nõustuge mustandiga või lükake see tagasi või lülitage agent välja, kui selle mustandeid ei kasutata."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Sisestage päev, millal ehitusplatsi kohal lennati.",
+      "fail": "Jäädvustuskuupäev {captured_on} on tulevikus."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Valige tegevus selle projekti ajakavast.",
+      "fail": "Tegevus ei kuulu sellesse projekti."
+    },
+    "georeferenced": {
+      "suggestion": "Eksportige ortofoto GeoTIFF-ina koos koordinaatsüsteemiga.",
+      "fail": "Ortofotol puudub koordinaatsüsteem või piirid, seega ei saa seda gloobusele paigutada."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Lendage madalamalt või eksportige täieraldusega, et koguseid kontrollida.",
+      "fail": "Maapinnalahutus on {gsd_cm} cm piksli kohta, liiga jäme koguste kontrollimiseks."
+    },
+    "observed_pct_range": {
+      "suggestion": "Sisestage protsent vahemikus 0 kuni 100.",
+      "fail": "Täheldatud edenemine {observed_pct} jääb vahemikust 0 kuni 100 välja."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Kontrollige lennukuupäeva või projekti algus- ja lõppkuupäevi.",
+      "fail": "Jäädvustuskuupäev {captured_on} jääb projekti kuupäevadest üle 30 päeva välja."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Kontrollige ekspordi koordinaatsüsteemi või projekti ankrupunkti.",
+      "fail": "Ortofoto asub projekti ankrupunktist {distance_km} km kaugusel."
     }
   }
 }

@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "Czynność {activity} kończy się {days} dni od zakończenia w zaimportowanym pliku ({source}).",
       "suggestion": "Porównaj przeliczone daty z plikiem źródłowym, a następnie zatwierdź je lub przywróć daty ze źródła."
+    },
+    "constraint_date_missing": {
+      "fail": "Czynność '{activity}' ma ograniczenie {constraint}, ale brak daty ograniczenia, więc ograniczenie jest ignorowane.",
+      "suggestion": "Wprowadź datę ograniczenia lub usuń ograniczenie."
+    },
+    "constraint_conflict": {
+      "fail": "Czynność '{activity}' jest ograniczona przez {constraint} do {date}, ale jej poprzedniki pozwalają na to dopiero {days} dni później.",
+      "suggestion": "Przesuń datę ograniczenia, skróć łańcuch poprzedników lub zaakceptuj ujemny zapas."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Nie znaleziono planu bazowego",
     "fx_rate_set_locked": "Kursy EBC z dnia {date} są zablokowane, więc to odświeżenie ich nie nadpisało. Najpierw odblokuj ten zestaw kursów, jeśli ma przyjąć nową publikację.",
     "boq_locked": "Przedmiar jest zablokowany i nie można go zmieniać. Utwórz rewizję, aby wprowadzić zmiany.",
-    "boq_link_owner_locked": "Kod „{code}” jest zdefiniowany przez pozycję w zablokowanym przedmiarze „{bill}”, a utworzenie powiązania z nim zmieniłoby ten przedmiar. Najpierw go odblokuj lub wprowadź pozycję pod nowym kodem."
+    "boq_link_owner_locked": "Kod „{code}” jest zdefiniowany przez pozycję w zablokowanym przedmiarze „{bill}”, a utworzenie powiązania z nim zmieniłoby ten przedmiar. Najpierw go odblokuj lub wprowadź pozycję pod nowym kodem.",
+    "boq_budget_nothing_budgetable": "Nie znaleziono pozycji nadających się do budżetowania w przedmiarze.",
+    "boq_fix_position_id_required": "position_id jest wymagane dla tej poprawki",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' musi być niepustą listą",
+    "boq_budget_requires_lock": "Przedmiar musi być zablokowany przed utworzeniem budżetu. Najpierw zablokuj kosztorys.",
+    "boq_not_locked": "Przedmiar nie jest zablokowany.",
+    "boq_fix_unit_required": "Wymagany jest niepusty parametr 'unit'",
+    "project_access_denied": "Nie masz dostępu do tego projektu",
+    "boq_costmodel_budget_failed": "Nie udało się utworzyć linii budżetu modelu kosztów. Moduł modelu kosztów może być niedostępny.",
+    "boq_unlock_role": "Tylko administrator lub kierownik może odblokować przedmiar.",
+    "boq_bulk_all_failed": "Wszystkie {count} elementy nie przeszły walidacji. Pierwszy błąd: {error}",
+    "boq_position_not_in_boq": "Nie znaleziono pozycji {position_id} w przedmiarze {boq_id}",
+    "boq_already_locked": "Przedmiar jest już zablokowany.",
+    "boq_budget_failed": "Nie udało się utworzyć linii budżetu. Moduł finansów może być niedostępny.",
+    "boq_bulk_items_required": "Lista 'items' jest wymagana i nie może być pusta",
+    "boq_classification_unavailable": "Usługa klasyfikacji niedostępna",
+    "boq_budget_no_positions": "Przedmiar nie ma pozycji: nie ma czego budżetować.",
+    "boq_fix_unit_rate_required": "Wymagany jest nieujemny parametr 'unit_rate'"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Pozycja {ordinal}: rysunek {drawing} wpisano bez rewizji",
       "suggestion": "Dodaj rewizję rysunku, na podstawie którego wyceniono ilość"
+    },
+    "carried_unconfirmed": {
+      "fail": "Pozycja {ordinal}: {count} pomiarów przeniesiono z wcześniejszej rewizji rysunku i nie są jeszcze potwierdzone",
+      "suggestion": "Sprawdź każdy przeniesiony pomiar na nowej rewizji i potwierdź go lub zmierz ponownie"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Oblicz wyrównanie, aby brakujący zakres był wyceniony przed udzieleniem zamówienia"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Pakiet {package} jest powiązany z przetargiem na kontrakt główny {tender} i nie został jeszcze udzielony, więc ten przetarg nie ma kontraktu",
+      "suggestion": "Udziel pakietu (powstanie kontrakt) lub odłącz przetarg, aby przygotował własny"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Konkurencja",
       "margin": "Marża",
       "risk": "Ryzyko"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Strona {page} nie ma czytelnego numeru arkusza",
+      "suggestion": "Wpisz numer arkusza z tabliczki rysunkowej; bez niego arkusza nie można nałożyć na wcześniejsze rewizje"
+    },
+    "number_unique_in_set": {
+      "fail": "Arkusz {sheet} rewizja {revision} występuje na stronach {first_page} i {page} tego samego przesłania",
+      "suggestion": "Sprawdź tabliczki obu stron i popraw numer lub rewizję jednej z nich"
+    },
+    "revision_not_lower": {
+      "fail": "Arkusz {sheet} ma rewizję {revision}, ale bieżący arkusz ma już {current_revision}",
+      "suggestion": "Potwierdź odczyt tylko wtedy, gdy to naprawdę późniejsze wydanie; w przeciwnym razie popraw rewizję lub odrzuć arkusz"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Arkusz {sheet} odczytano z pewnością {confidence} i nie został potwierdzony",
+      "suggestion": "Porównaj pola z tabliczką rysunkową i potwierdź je lub popraw"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Wiersz {row}: komórka ID pozycji zaczyna się od znaku formuły i nie została zaimportowana",
+      "suggestion": "Pozostaw kolumnę ID pozycji bez zmian lub wyczyść komórkę, aby dodać nową pozycję"
+    },
+    "unknown_id": {
+      "fail": "Wiersz {row}: ID pozycji nie należy do tego przedmiaru, więc wiersz potraktowano jako nową pozycję",
+      "suggestion": "Wyeksportuj przedmiar ponownie przed edycją lub wyczyść komórkę ID pozycji, jeśli wiersz ma być nowy"
+    },
+    "duplicate_id": {
+      "fail": "Wiersz {row}: ID pozycji jest używane przez wcześniejszy wiersz, więc ten wiersz potraktowano jako nową pozycję",
+      "suggestion": "Wyczyść ID pozycji skopiowanych wierszy lub usuń kopie"
+    },
+    "stale_row": {
+      "fail": "Wiersz {row}: pozycja {ordinal} została zmieniona w aplikacji po wyeksportowaniu tego arkusza",
+      "suggestion": "Zachowaj wartość z aplikacji lub wybierz wartość z Excela dla tego wiersza, aby ją nadpisać"
+    },
+    "locked_boq": {
+      "fail": "Ten przedmiar jest zablokowany, więc zmian z Excela nie można zastosować",
+      "suggestion": "Najpierw odblokuj przedmiar lub zapisz arkusz na później"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Uruchom ponownie analizę ryzyka kosztów i zastosuj rezerwę ponownie albo zachowaj linię i zapisz powód",
+      "fail": "Linia rezerwy \"{markup}\" została zastosowana na P{percentile} dnia {applied_at}, ale jej źródło ({source}) zmieniło się od tego czasu"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Uruchom ponownie analizę ryzyka kosztów i zastosuj rezerwę ponownie albo zachowaj linię i zapisz powód",
+      "fail": "Rezerwa na ryzyko \"{markup}\" wynosi {amount}, mniej niż bieżące oszacowanie P50 równe {p50}"
+    },
+    "source": {
+      "positions": "sumy linii przedmiaru",
+      "register": "rejestr ryzyk"
+    },
+    "contingency_double_count": {
+      "suggestion": "Wyłącz jedną z dwóch linii lub zapisz, dlaczego potrzebne są obie",
+      "fail": "Linia rezerwy \"{markup}\" jest aktywna obok rezerwy na ryzyko \"{risk_markup}\"; ta sama niepewność może być zarezerwowana dwukrotnie"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Pozycja {ref} ma {hours} h zaksięgowanych między {date_from} a {date_to}, ale brak zmierzonego postępu",
+      "suggestion": "Zapisz pomiar lub postęp dla pozycji albo przenieś godziny na pozycję, przy której faktycznie pracowano"
+    },
+    "factor_implausible": {
+      "fail": "Współczynnik wydajności {factor} pozycji {ref} jest poza wiarygodnym zakresem od {low} do {high}",
+      "suggestion": "Sprawdź zaksięgowane godziny, zamontowaną ilość i jednostkę normy kosztorysowej"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Czynność {activity} ({project}) obciąża robociznę, ale nie podaje zawodu, więc jej zapotrzebowania nie można do nikogo przypisać",
+      "suggestion": "Ustaw zawód w zasobie robocizny czynności"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Zapisana odpowiedź nie cytuje żadnego dokumentu projektu, więc nic jej nie potwierdza.",
+      "suggestion": "Zapytaj ponownie, aż odpowiedź zacytuje dokument, lub oznacz tekst jako własną notatkę."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Wersja robocza agenta '{title}' czeka na przegląd od {days} dni (limit {limit}).",
+      "suggestion": "Zaakceptuj lub odrzuć wersję roboczą albo wyłącz agenta, jeśli jego wersje robocze nie są używane."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Wpisz dzień, w którym wykonano nalot na plac budowy.",
+      "fail": "Data wykonania {captured_on} jest w przyszłości."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Wybierz czynność z harmonogramu tego projektu.",
+      "fail": "Czynność nie należy do tego projektu."
+    },
+    "georeferenced": {
+      "suggestion": "Wyeksportuj ortofotomapę jako GeoTIFF z jej układem współrzędnych.",
+      "fail": "Ortofotomapa nie ma układu współrzędnych ani granic, więc nie można jej umieścić na globie."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Leć niżej lub wyeksportuj w pełnej rozdzielczości, aby sprawdzić ilości.",
+      "fail": "Rozdzielczość terenowa wynosi {gsd_cm} cm na piksel, zbyt gruba do sprawdzania ilości."
+    },
+    "observed_pct_range": {
+      "suggestion": "Wpisz wartość procentową od 0 do 100.",
+      "fail": "Zaobserwowany postęp {observed_pct} jest poza zakresem od 0 do 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Sprawdź datę nalotu lub daty rozpoczęcia i zakończenia projektu.",
+      "fail": "Data wykonania {captured_on} wypada ponad 30 dni poza datami projektu."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Sprawdź układ współrzędnych eksportu lub punkt zakotwiczenia projektu.",
+      "fail": "Ortofotomapa leży {distance_km} km od punktu zakotwiczenia projektu."
     }
   }
 }

@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity}, içe aktarılan dosyadaki bitişten {days} gün farkla bitiyor ({source}).",
       "suggestion": "Yeniden hesaplanan tarihleri kaynak dosyayla karşılaştırın, ardından kabul edin veya kaynak tarihlerini geri yükleyin."
+    },
+    "constraint_date_missing": {
+      "fail": "'{activity}' faaliyetinin {constraint} kısıtı var ancak kısıt tarihi yok, bu nedenle kısıt yok sayılıyor.",
+      "suggestion": "Kısıt tarihini girin veya kısıtı kaldırın."
+    },
+    "constraint_conflict": {
+      "fail": "'{activity}' faaliyeti {constraint} ile {date} tarihine kısıtlı, ancak öncülleri buna ancak {days} gün sonra izin veriyor.",
+      "suggestion": "Kısıt tarihini kaydırın, öncül zincirini kısaltın veya negatif bolluğu kabul edin."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Baz plan bulunamadı",
     "fx_rate_set_locked": "{date} tarihli ECB kurları kilitli; bu yenileme üzerlerine yazmadı. Yeni yayını almaları gerekiyorsa önce bu kur setinin kilidini açın.",
     "boq_locked": "Keşif kilitli ve değiştirilemez. Değişiklik yapmak için revizyon oluşturun.",
-    "boq_link_owner_locked": "'{code}' kodu kilitli '{bill}' keşfindeki bir kalem tarafından tanımlanıyor; bu koda bağlanmak o keşfi değiştirir. Önce keşfin kilidini açın veya kalemi yeni bir kodla girin."
+    "boq_link_owner_locked": "'{code}' kodu kilitli '{bill}' keşfindeki bir kalem tarafından tanımlanıyor; bu koda bağlanmak o keşfi değiştirir. Önce keşfin kilidini açın veya kalemi yeni bir kodla girin.",
+    "boq_budget_nothing_budgetable": "Metraj cetvelinde bütçelenebilir poz bulunamadı.",
+    "boq_fix_position_id_required": "Bu düzeltme için position_id gereklidir",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' boş olmayan bir liste olmalıdır",
+    "boq_budget_requires_lock": "Bütçe oluşturmadan önce metraj cetveli kilitlenmelidir. Önce keşfi kilitleyin.",
+    "boq_not_locked": "Metraj cetveli kilitli değil.",
+    "boq_fix_unit_required": "Boş olmayan bir 'unit' parametresi gereklidir",
+    "project_access_denied": "Bu projeye erişiminiz yok",
+    "boq_costmodel_budget_failed": "Maliyet modeli bütçe satırları oluşturulamadı. Maliyet modeli modülü kullanılamıyor olabilir.",
+    "boq_unlock_role": "Bir metraj cetvelinin kilidini yalnızca yönetici veya müdür açabilir.",
+    "boq_bulk_all_failed": "{count} öğenin tümü doğrulamada başarısız oldu. İlk hata: {error}",
+    "boq_position_not_in_boq": "{position_id} pozu {boq_id} metraj cetvelinde bulunamadı",
+    "boq_already_locked": "Metraj cetveli zaten kilitli.",
+    "boq_budget_failed": "Bütçe satırları oluşturulamadı. Finans modülü kullanılamıyor olabilir.",
+    "boq_bulk_items_required": "'items' listesi zorunludur ve boş olmamalıdır",
+    "boq_classification_unavailable": "Sınıflandırma hizmeti kullanılamıyor",
+    "boq_budget_no_positions": "Metraj cetvelinde poz yok: bütçelenecek bir şey yok.",
+    "boq_fix_unit_rate_required": "Negatif olmayan bir 'unit_rate' parametresi gereklidir"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Kalem {ordinal}: {drawing} çizimi revizyonsuz girilmiş",
       "suggestion": "Miktarın birim fiyatlandığı çizimin revizyonunu ekleyin"
+    },
+    "carried_unconfirmed": {
+      "fail": "Poz {ordinal}: {count} ölçüm önceki bir çizim revizyonundan aktarıldı ve henüz onaylanmadı",
+      "suggestion": "Aktarılan her ölçümü yeni revizyonda kontrol edip onaylayın veya yeniden ölçün"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "İhaleden önce eksik kapsamın fiyatlandırılması için dengelemeyi hesaplayın"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "{package} paketi {tender} ana sözleşme ihalesine bağlı ve henüz verilmedi, bu nedenle o ihalenin sözleşmesi yok",
+      "suggestion": "Paketi verin (sözleşmeyi oluşturur) veya ihalenin kendi sözleşmesini hazırlaması için bağlantısını kaldırın"
     }
   },
   "bid_outcome": {
@@ -1540,7 +1569,123 @@
       "client": "Müşteri",
       "competition": "Rekabet",
       "margin": "Kâr marjı",
-      "risk": "Risk"
+      "risk": "Risk düzeyi"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "{page}. sayfada okunabilir bir pafta numarası yok",
+      "suggestion": "Pafta numarasını antetten girin; bu olmadan pafta önceki revizyonların üzerine istiflenemez"
+    },
+    "number_unique_in_set": {
+      "fail": "{sheet} paftası {revision} revizyonu aynı yüklemenin {first_page}. ve {page}. sayfalarında görünüyor",
+      "suggestion": "Her iki sayfanın antetlerini kontrol edin ve birinin numarasını veya revizyonunu düzeltin"
+    },
+    "revision_not_lower": {
+      "fail": "{sheet} paftası {revision} revizyonunda ancak mevcut pafta zaten {current_revision} revizyonunda",
+      "suggestion": "Okumayı yalnızca gerçekten sonraki bir yayınsa onaylayın; aksi halde revizyonu düzeltin veya paftayı atın"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "{sheet} paftası {confidence} güvenle okundu ve onaylanmadı",
+      "suggestion": "Alanları anteyle karşılaştırın ve onaylayın veya düzeltin"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Satır {row}: Poz Kimliği hücresi formül karakteriyle başlıyor ve içe aktarılmadı",
+      "suggestion": "Poz Kimliği sütununu dışa aktarıldığı gibi bırakın veya yeni poz eklemek için hücreyi boşaltın"
+    },
+    "unknown_id": {
+      "fail": "Satır {row}: Poz Kimliği bu cetvele ait değil, bu nedenle satır yeni poz olarak işlendi",
+      "suggestion": "Düzenlemeden önce cetveli yeniden dışa aktarın veya satır yeni olacaksa Poz Kimliği hücresini boşaltın"
+    },
+    "duplicate_id": {
+      "fail": "Satır {row}: Poz Kimliği önceki bir satırda kullanılıyor, bu nedenle bu satır yeni poz olarak işlendi",
+      "suggestion": "Kopyalanan satırların Poz Kimliğini boşaltın veya kopyaları silin"
+    },
+    "stale_row": {
+      "fail": "Satır {row}: {ordinal} pozu, bu sayfa dışa aktarıldıktan sonra uygulamada değiştirildi",
+      "suggestion": "Uygulamadaki değeri koruyun veya üzerine yazmak için bu satır için Excel değerini seçin"
+    },
+    "locked_boq": {
+      "fail": "Bu cetvel kilitli olduğundan Excel'deki değişiklikler uygulanamaz",
+      "suggestion": "Önce cetvelin kilidini açın veya sayfayı sonraya kaydedin"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Maliyet riski analizini yeniden çalıştırıp yedeği yeniden uygulayın veya satırı koruyup nedenini not edin",
+      "fail": "\"{markup}\" yedek satırı {applied_at} tarihinde P{percentile} düzeyinde uygulandı, ancak kaynağı ({source}) o zamandan beri değişti"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Maliyet riski analizini yeniden çalıştırıp yedeği yeniden uygulayın veya satırı koruyup nedenini not edin",
+      "fail": "\"{markup}\" risk yedeği {amount} tutarında, mevcut P50 tahmini olan {p50} değerinden az"
+    },
+    "source": {
+      "positions": "metraj cetveli satır toplamları",
+      "register": "risk kaydı"
+    },
+    "contingency_double_count": {
+      "suggestion": "İki satırdan birini devre dışı bırakın veya ikisinin de neden gerektiğini not edin",
+      "fail": "\"{markup}\" yedek satırı \"{risk_markup}\" risk yedeğinin yanında etkin; aynı belirsizlik iki kez ayrılmış olabilir"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "{ref} pozunda {date_from} ile {date_to} arasında {hours} sa kayıtlı ancak ölçülmüş ilerleme yok",
+      "suggestion": "Poz için bir ölçüm veya ilerleme kaydedin ya da saatleri gerçekten çalışılan poza taşıyın"
+    },
+    "factor_implausible": {
+      "fail": "{ref} pozunun {factor} verimlilik katsayısı makul {low} - {high} aralığının dışında",
+      "suggestion": "Kayıtlı saatleri, monte edilen miktarı ve keşif normunun birimini kontrol edin"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "{activity} ({project}) faaliyeti işçilik yüklüyor ancak meslek belirtmiyor, bu nedenle talebi kimseyle eşleştirilemez",
+      "suggestion": "Faaliyetin işçilik kaynağında bir meslek belirleyin"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Kayıtlı yanıt hiçbir proje belgesine atıf yapmıyor, bu yüzden onu destekleyen bir şey yok.",
+      "suggestion": "Yanıt bir belgeye atıf yapana kadar yeniden sorun veya metni kendi notunuz olarak işaretleyin."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "'{title}' ajan taslağı {days} gündür incelemede bekliyor (sınır {limit}).",
+      "suggestion": "Taslağı kabul edin veya reddedin ya da taslakları kullanılmıyorsa ajanı kapatın."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Sahanın uçuşla görüntülendiği günü girin.",
+      "fail": "Çekim tarihi {captured_on} gelecekte."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Bu projenin programından bir faaliyet seçin.",
+      "fail": "Faaliyet bu projeye ait değil."
+    },
+    "georeferenced": {
+      "suggestion": "Ortofotoyu koordinat sistemiyle birlikte GeoTIFF olarak dışa aktarın.",
+      "fail": "Ortofotonun koordinat sistemi veya sınırları yok, bu nedenle küreye yerleştirilemez."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Miktarları kontrol etmek için daha alçaktan uçun veya tam çözünürlükte dışa aktarın.",
+      "fail": "Yer örnekleme aralığı piksel başına {gsd_cm} cm, miktarları kontrol etmek için çok kaba."
+    },
+    "observed_pct_range": {
+      "suggestion": "0 ile 100 arasında bir yüzde girin.",
+      "fail": "Gözlenen ilerleme {observed_pct} 0 ile 100 aralığının dışında."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Uçuş tarihini veya projenin başlangıç ve bitiş tarihlerini kontrol edin.",
+      "fail": "Çekim tarihi {captured_on} proje tarihlerinin 30 günden fazla dışında."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Dışa aktarmanın koordinat sistemini veya proje çapasını kontrol edin.",
+      "fail": "Ortofoto proje çapasından {distance_km} km uzakta."
     }
   }
 }

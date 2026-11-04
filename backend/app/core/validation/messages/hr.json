@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} završava s odstupanjem od {days} dana u odnosu na završetak u uvezenoj datoteci ({source}).",
       "suggestion": "Usporedite ponovno izračunane datume s izvornom datotekom, zatim ih prihvatite ili vratite izvorne datume."
+    },
+    "constraint_date_missing": {
+      "fail": "Aktivnost '{activity}' ima ograničenje {constraint}, ali nema datum ograničenja pa se ograničenje zanemaruje.",
+      "suggestion": "Unesite datum ograničenja ili uklonite ograničenje."
+    },
+    "constraint_conflict": {
+      "fail": "Aktivnost '{activity}' ograničena je s {constraint} na {date}, ali je prethodnici dopuštaju tek {days} dana kasnije.",
+      "suggestion": "Pomaknite datum ograničenja, skratite lanac prethodnika ili prihvatite negativnu zalihu."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Polazni plan nije pronađen",
     "fx_rate_set_locked": "Tečajevi ESB-a za {date} su zaključani, pa ih ovo osvježavanje nije prebrisalo. Prvo otključajte taj skup tečajeva ako treba preuzeti novu objavu.",
     "boq_locked": "Troškovnik je zaključan i ne može se mijenjati. Izradite reviziju za promjene.",
-    "boq_link_owner_locked": "Šifru '{code}' definira stavka u zaključanom troškovniku '{bill}', a povezivanje s njom promijenilo bi taj troškovnik. Prvo ga otključajte ili unesite stavku pod novom šifrom."
+    "boq_link_owner_locked": "Šifru '{code}' definira stavka u zaključanom troškovniku '{bill}', a povezivanje s njom promijenilo bi taj troškovnik. Prvo ga otključajte ili unesite stavku pod novom šifrom.",
+    "boq_budget_nothing_budgetable": "U troškovniku nisu pronađene stavke koje se mogu budžetirati.",
+    "boq_fix_position_id_required": "position_id je obavezan za ovaj ispravak",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' mora biti neprazan popis",
+    "boq_budget_requires_lock": "Troškovnik mora biti zaključan prije izrade proračuna. Prvo zaključajte procjenu.",
+    "boq_not_locked": "Troškovnik nije zaključan.",
+    "boq_fix_unit_required": "Obavezan je neprazan parametar 'unit'",
+    "project_access_denied": "Nemate pristup ovom projektu",
+    "boq_costmodel_budget_failed": "Izrada proračunskih redaka modela troškova nije uspjela. Modul modela troškova možda nije dostupan.",
+    "boq_unlock_role": "Troškovnik može otključati samo administrator ili voditelj.",
+    "boq_bulk_all_failed": "Svih {count} stavki nije prošlo validaciju. Prva pogreška: {error}",
+    "boq_position_not_in_boq": "Stavka {position_id} nije pronađena u troškovniku {boq_id}",
+    "boq_already_locked": "Troškovnik je već zaključan.",
+    "boq_budget_failed": "Izrada proračunskih redaka nije uspjela. Financijski modul možda nije dostupan.",
+    "boq_bulk_items_required": "Popis 'items' je obavezan i ne smije biti prazan",
+    "boq_classification_unavailable": "Usluga klasifikacije nije dostupna",
+    "boq_budget_no_positions": "Troškovnik nema stavki: nema što budžetirati.",
+    "boq_fix_unit_rate_required": "Obavezan je nenegativan parametar 'unit_rate'"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Stavka {ordinal}: nacrt {drawing} unesen je bez revizije",
       "suggestion": "Dodajte reviziju nacrta na temelju kojeg je količina obračunata"
+    },
+    "carried_unconfirmed": {
+      "fail": "Stavka {ordinal}: {count} mjerenja preneseno je iz ranije revizije nacrta i još nije potvrđeno",
+      "suggestion": "Provjerite svako preneseno mjerenje na novoj reviziji i potvrdite ga ili ponovno izmjerite"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Izračunajte izjednačavanje kako bi opseg koji nedostaje bio procijenjen prije dodjele"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Paket {package} povezan je s natječajem glavnog ugovora {tender} i još nije dodijeljen pa taj natječaj nema ugovor",
+      "suggestion": "Dodijelite paket (time se stvara ugovor) ili odvojite natječaj kako bi izradio vlastiti"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Konkurencija",
       "margin": "Marža",
       "risk": "Rizik"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Stranica {page} nema čitljiv broj nacrta",
+      "suggestion": "Unesite broj nacrta iz zaglavlja; bez njega se nacrt ne može položiti preko ranijih revizija"
+    },
+    "number_unique_in_set": {
+      "fail": "Nacrt {sheet} revizija {revision} pojavljuje se na stranicama {first_page} i {page} istog učitavanja",
+      "suggestion": "Provjerite zaglavlja obiju stranica i ispravite broj ili reviziju jedne od njih"
+    },
+    "revision_not_lower": {
+      "fail": "Nacrt {sheet} je na reviziji {revision}, ali je trenutni nacrt već na {current_revision}",
+      "suggestion": "Potvrdite očitanje samo ako je doista novije izdanje; inače ispravite reviziju ili odbacite nacrt"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Nacrt {sheet} očitan je s pouzdanošću {confidence} i nije potvrđen",
+      "suggestion": "Usporedite polja sa zaglavljem te ih potvrdite ili ispravite"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Redak {row}: ćelija ID-a stavke počinje znakom formule i nije uvezena",
+      "suggestion": "Ostavite stupac ID-a stavke kako je izvezen ili očistite ćeliju za dodavanje nove stavke"
+    },
+    "unknown_id": {
+      "fail": "Redak {row}: ID stavke ne pripada ovom troškovniku pa je redak obrađen kao nova stavka",
+      "suggestion": "Ponovno izvezite troškovnik prije uređivanja ili očistite ćeliju ID-a stavke ako redak treba biti nov"
+    },
+    "duplicate_id": {
+      "fail": "Redak {row}: ID stavke koristi raniji redak pa je ovaj redak obrađen kao nova stavka",
+      "suggestion": "Očistite ID stavke u kopiranim retcima ili izbrišite kopije"
+    },
+    "stale_row": {
+      "fail": "Redak {row}: stavka {ordinal} promijenjena je u aplikaciji nakon izvoza ovog lista",
+      "suggestion": "Zadržite vrijednost iz aplikacije ili za ovaj redak odaberite vrijednost iz Excela kako biste je prepisali"
+    },
+    "locked_boq": {
+      "fail": "Ovaj troškovnik je zaključan pa se promjene iz Excela ne mogu primijeniti",
+      "suggestion": "Prvo otključajte troškovnik ili spremite list za kasnije"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Ponovno pokrenite analizu troškovnih rizika i ponovno primijenite pričuvu ili zadržite redak i zabilježite razlog",
+      "fail": "Redak pričuve \"{markup}\" primijenjen je na P{percentile} dana {applied_at}, ali se njegov izvor ({source}) od tada promijenio"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Ponovno pokrenite analizu troškovnih rizika i ponovno primijenite pričuvu ili zadržite redak i zabilježite razlog",
+      "fail": "Pričuva za rizike \"{markup}\" iznosi {amount}, manje od trenutne P50 procjene od {p50}"
+    },
+    "source": {
+      "positions": "zbrojevi redaka troškovnika",
+      "register": "registar rizika"
+    },
+    "contingency_double_count": {
+      "suggestion": "Deaktivirajte jedan od dva retka ili zabilježite zašto su potrebna oba",
+      "fail": "Redak pričuve \"{markup}\" aktivan je uz pričuvu za rizike \"{risk_markup}\"; ista nesigurnost možda je rezervirana dvaput"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Stavka {ref} ima {hours} h evidentiranih između {date_from} i {date_to}, ali nema izmjerenog napretka",
+      "suggestion": "Upišite mjerenje ili napredak za stavku ili premjestite sate na stavku na kojoj se stvarno radilo"
+    },
+    "factor_implausible": {
+      "fail": "Faktor produktivnosti {factor} stavke {ref} izvan je vjerojatnog raspona od {low} do {high}",
+      "suggestion": "Provjerite evidentirane sate, ugrađenu količinu i jedinicu norme procjene"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Aktivnost {activity} ({project}) opterećuje radnu snagu, ali ne navodi struku pa se njezina potražnja ne može nikome pridružiti",
+      "suggestion": "Postavite struku na resursu radne snage aktivnosti"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Spremljeni odgovor ne navodi nijedan dokument projekta pa ga ništa ne potkrepljuje.",
+      "suggestion": "Pitajte ponovno dok odgovor ne navede dokument ili označite tekst kao vlastitu bilješku."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Nacrt agenta '{title}' čeka pregled {days} dana (ograničenje {limit}).",
+      "suggestion": "Prihvatite ili odbijte nacrt ili isključite agenta ako se njegovi nacrti ne koriste."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Unesite dan kada je gradilište preletjeno.",
+      "fail": "Datum snimanja {captured_on} je u budućnosti."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Odaberite aktivnost iz plana ovog projekta.",
+      "fail": "Aktivnost ne pripada ovom projektu."
+    },
+    "georeferenced": {
+      "suggestion": "Izvezite ortofoto kao GeoTIFF s njegovim koordinatnim sustavom.",
+      "fail": "Ortofoto nema koordinatni sustav ni granice pa se ne može postaviti na globus."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Letite niže ili izvezite u punoj rezoluciji radi provjere količina.",
+      "fail": "Razlučivost na tlu je {gsd_cm} cm po pikselu, pregruba za provjeru količina."
+    },
+    "observed_pct_range": {
+      "suggestion": "Unesite postotak između 0 i 100.",
+      "fail": "Uočeni napredak {observed_pct} izvan je raspona od 0 do 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Provjerite datum leta ili datume početka i završetka projekta.",
+      "fail": "Datum snimanja {captured_on} više je od 30 dana izvan datuma projekta."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Provjerite koordinatni sustav izvoza ili sidro projekta.",
+      "fail": "Ortofoto se nalazi {distance_km} km od sidra projekta."
     }
   }
 }

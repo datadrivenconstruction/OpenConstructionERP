@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} מסתיימת {days} ימים הרחק מהסיום בקובץ המיובא ({source}).",
       "suggestion": "השוו את התאריכים המחושבים מחדש לקובץ המקור, ואז אשרו אותם או שחזרו את תאריכי המקור."
+    },
+    "constraint_date_missing": {
+      "fail": "לפעילות '{activity}' יש אילוץ {constraint} אך אין תאריך אילוץ, ולכן האילוץ מתעלם.",
+      "suggestion": "הזינו את תאריך האילוץ או הסירו את האילוץ."
+    },
+    "constraint_conflict": {
+      "fail": "הפעילות '{activity}' מוגבלת על ידי {constraint} ל-{date}, אך קודמיה מאפשרים זאת רק {days} ימים מאוחר יותר.",
+      "suggestion": "הזיזו את תאריך האילוץ, קצרו את שרשרת הקודמים או קבלו את הרפיון השלילי."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "תוכנית הבסיס לא נמצאה",
     "fx_rate_set_locked": "שערי ECB לתאריך {date} נעולים, ולכן הרענון לא דרס אותם. יש לפתוח תחילה את נעילת קבוצת השערים אם עליה לקבל את הפרסום החדש.",
     "boq_locked": "כתב הכמויות נעול ולא ניתן לשנותו. יש ליצור מהדורה חדשה כדי לבצע שינויים.",
-    "boq_link_owner_locked": "הקוד '{code}' מוגדר בשורה בכתב הכמויות הנעול '{bill}', וקישור אליו ישנה את כתב הכמויות הזה. יש לפתוח את נעילתו תחילה או להזין את השורה תחת קוד חדש."
+    "boq_link_owner_locked": "הקוד '{code}' מוגדר בשורה בכתב הכמויות הנעול '{bill}', וקישור אליו ישנה את כתב הכמויות הזה. יש לפתוח את נעילתו תחילה או להזין את השורה תחת קוד חדש.",
+    "boq_budget_nothing_budgetable": "לא נמצאו סעיפים הניתנים לתקצוב בכתב הכמויות.",
+    "boq_fix_position_id_required": "position_id נדרש לתיקון זה",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' חייב להיות רשימה לא ריקה",
+    "boq_budget_requires_lock": "יש לנעול את כתב הכמויות לפני יצירת תקציב. נעלו קודם את האומדן.",
+    "boq_not_locked": "כתב הכמויות אינו נעול.",
+    "boq_fix_unit_required": "נדרש פרמטר 'unit' לא ריק",
+    "project_access_denied": "אין לכם גישה לפרויקט זה",
+    "boq_costmodel_budget_failed": "יצירת שורות התקציב של מודל העלויות נכשלה. ייתכן שמודול מודל העלויות אינו זמין.",
+    "boq_unlock_role": "רק מנהל מערכת או מנהל יכול לשחרר נעילה של כתב כמויות.",
+    "boq_bulk_all_failed": "כל {count} הפריטים נכשלו באימות. השגיאה הראשונה: {error}",
+    "boq_position_not_in_boq": "סעיף {position_id} לא נמצא בכתב הכמויות {boq_id}",
+    "boq_already_locked": "כתב הכמויות כבר נעול.",
+    "boq_budget_failed": "יצירת שורות התקציב נכשלה. ייתכן שמודול הכספים אינו זמין.",
+    "boq_bulk_items_required": "הרשימה 'items' נדרשת ואסור שתהיה ריקה",
+    "boq_classification_unavailable": "שירות הסיווג אינו זמין",
+    "boq_budget_no_positions": "לכתב הכמויות אין סעיפים: אין מה לתקצב.",
+    "boq_fix_unit_rate_required": "נדרש פרמטר 'unit_rate' לא שלילי"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "סעיף {ordinal}: השרטוט {drawing} הוזן ללא רוויזיה",
       "suggestion": "הוסיפו את הרוויזיה של השרטוט שממנו תומחרה הכמות"
+    },
+    "carried_unconfirmed": {
+      "fail": "סעיף {ordinal}: {count} מדידות הועברו מגרסת תוכנית קודמת וטרם אושרו",
+      "suggestion": "בדקו כל מדידה שהועברה בגרסה החדשה ואשרו אותה, או מדדו מחדש"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "חשבו את הנרמול כדי שההיקף החסר יתומחר לפני ההענקה"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "החבילה {package} מקושרת למכרז החוזה הראשי {tender} ועדיין לא הוענקה, ולכן למכרז זה אין חוזה",
+      "suggestion": "הענקו את החבילה (היא יוצרת את החוזה) או נתקו את המכרז כדי שינסח חוזה משלו"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "תחרות",
       "margin": "שולי רווח",
       "risk": "סיכון"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "לעמוד {page} אין מספר גיליון קריא",
+      "suggestion": "הזינו את מספר הגיליון מתיבת הכותרת; בלעדיו אי אפשר להניח את הגיליון על גרסאות קודמות"
+    },
+    "number_unique_in_set": {
+      "fail": "גיליון {sheet} גרסה {revision} מופיע בעמודים {first_page} ו-{page} של אותה העלאה",
+      "suggestion": "בדקו את תיבות הכותרת של שני העמודים ותקנו את המספר או הגרסה של אחד מהם"
+    },
+    "revision_not_lower": {
+      "fail": "גיליון {sheet} בגרסה {revision} אך הגיליון הנוכחי כבר בגרסה {current_revision}",
+      "suggestion": "אשרו את הקריאה רק אם זו אכן הנפקה מאוחרת יותר; אחרת תקנו את הגרסה או השליכו את הגיליון"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "גיליון {sheet} נקרא ברמת ביטחון {confidence} ולא אושר",
+      "suggestion": "השוו את השדות לתיבת הכותרת ואשרו או תקנו אותם"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "שורה {row}: תא מזהה הסעיף מתחיל בתו נוסחה ולא יובא",
+      "suggestion": "השאירו את עמודת מזהה הסעיף כפי שיוצאה, או רוקנו את התא כדי להוסיף סעיף חדש"
+    },
+    "unknown_id": {
+      "fail": "שורה {row}: מזהה הסעיף אינו שייך לכתב כמויות זה, ולכן השורה טופלה כסעיף חדש",
+      "suggestion": "ייצאו את כתב הכמויות שוב לפני העריכה, או רוקנו את תא מזהה הסעיף אם השורה אמורה להיות חדשה"
+    },
+    "duplicate_id": {
+      "fail": "שורה {row}: מזהה הסעיף בשימוש בשורה קודמת, ולכן שורה זו טופלה כסעיף חדש",
+      "suggestion": "רוקנו את מזהה הסעיף בשורות שהועתקו, או מחקו את ההעתקים"
+    },
+    "stale_row": {
+      "fail": "שורה {row}: סעיף {ordinal} שונה ביישום לאחר שהגיליון יוצא",
+      "suggestion": "שמרו את הערך מהיישום, או בחרו את ערך Excel עבור שורה זו כדי לדרוס אותו"
+    },
+    "locked_boq": {
+      "fail": "כתב כמויות זה נעול, ולכן לא ניתן להחיל שינויים מ-Excel",
+      "suggestion": "שחררו קודם את נעילת כתב הכמויות, או שמרו את הגיליון לאחר כך"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "הריצו שוב את ניתוח סיכוני העלות והחילו את הרזרבה מחדש, או שמרו את השורה ורשמו מדוע",
+      "fail": "שורת הרזרבה \"{markup}\" הוחלה ב-P{percentile} בתאריך {applied_at}, אך המקור שלה ({source}) השתנה מאז"
+    },
+    "contingency_below_p50": {
+      "suggestion": "הריצו שוב את ניתוח סיכוני העלות והחילו את הרזרבה מחדש, או שמרו את השורה ורשמו מדוע",
+      "fail": "רזרבת הסיכון \"{markup}\" עומדת על {amount}, פחות מאומדן P50 הנוכחי של {p50}"
+    },
+    "source": {
+      "positions": "סכומי שורות כתב הכמויות",
+      "register": "מרשם הסיכונים"
+    },
+    "contingency_double_count": {
+      "suggestion": "בטלו את אחת משתי השורות, או רשמו מדוע שתיהן נדרשות",
+      "fail": "שורת הרזרבה \"{markup}\" פעילה לצד רזרבת הסיכון \"{risk_markup}\"; אותה אי-ודאות עלולה להיות שמורה פעמיים"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "בסעיף {ref} נרשמו {hours} שעות בין {date_from} ל-{date_to} אך אין התקדמות נמדדת",
+      "suggestion": "רשמו מדידה או התקדמות לסעיף, או העבירו את השעות לסעיף שבו עבדו בפועל"
+    },
+    "factor_implausible": {
+      "fail": "מקדם הפריון {factor} של סעיף {ref} מחוץ לטווח הסביר {low} עד {high}",
+      "suggestion": "בדקו את השעות שנרשמו, הכמות שהותקנה ויחידת נורמת האומדן"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "הפעילות {activity} ({project}) טוענת כוח אדם אך אינה מציינת מקצוע, ולכן אי אפשר להתאים את הביקוש שלה לאיש",
+      "suggestion": "הגדירו מקצוע במשאב כוח האדם של הפעילות"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "התשובה השמורה אינה מצטטת אף מסמך פרויקט, ולכן דבר אינו תומך בה.",
+      "suggestion": "שאלו שוב עד שהתשובה תצטט מסמך, או סמנו את הטקסט כהערה שלכם."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "טיוטת הסוכן '{title}' ממתינה לבדיקה {days} ימים (מגבלה {limit}).",
+      "suggestion": "אשרו או דחו את הטיוטה, או כבו את הסוכן אם הטיוטות שלו אינן בשימוש."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "הזינו את היום שבו הושטס באתר.",
+      "fail": "תאריך הצילום {captured_on} בעתיד."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "בחרו פעילות מלוח הזמנים של פרויקט זה.",
+      "fail": "הפעילות אינה שייכת לפרויקט זה."
+    },
+    "georeferenced": {
+      "suggestion": "ייצאו את האורתופוטו כ-GeoTIFF עם מערכת הקואורדינטות שלו.",
+      "fail": "לאורתופוטו אין מערכת קואורדינטות או גבולות, ולכן אי אפשר למקם אותו על הגלובוס."
+    },
+    "gsd_reasonable": {
+      "suggestion": "טוסו נמוך יותר או ייצאו ברזולוציה מלאה כדי לבדוק כמויות.",
+      "fail": "רזולוציית הקרקע היא {gsd_cm} ס\"מ לפיקסל, גסה מדי לבדיקת כמויות."
+    },
+    "observed_pct_range": {
+      "suggestion": "הזינו אחוז בין 0 ל-100.",
+      "fail": "ההתקדמות שנצפתה {observed_pct} מחוץ לטווח 0 עד 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "בדקו את תאריך הטיסה, או את תאריכי ההתחלה והסיום של הפרויקט.",
+      "fail": "תאריך הצילום {captured_on} מחוץ לתאריכי הפרויקט ביותר מ-30 יום."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "בדקו את מערכת הקואורדינטות של הייצוא, או את נקודת העוגן של הפרויקט.",
+      "fail": "האורתופוטו נמצא {distance_km} ק\"מ מנקודת העוגן של הפרויקט."
     }
   }
 }

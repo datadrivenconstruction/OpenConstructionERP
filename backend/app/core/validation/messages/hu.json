@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} befejezése {days} nappal tér el az importált fájlban szereplő befejezéstől ({source}).",
       "suggestion": "Hasonlítsa össze az újraszámolt dátumokat a forrásfájllal, majd fogadja el őket, vagy állítsa vissza a forrásdátumokat."
+    },
+    "constraint_date_missing": {
+      "fail": "A(z) '{activity}' tevékenységnek van {constraint} korlátozása, de nincs korlátozási dátuma, ezért a korlátozást figyelmen kívül hagyjuk.",
+      "suggestion": "Adja meg a korlátozás dátumát, vagy törölje a korlátozást."
+    },
+    "constraint_conflict": {
+      "fail": "A(z) '{activity}' tevékenységet a(z) {constraint} korlátozza erre a napra: {date}, de az elődök csak {days} nappal később teszik lehetővé.",
+      "suggestion": "Tolja el a korlátozás dátumát, rövidítse az elődláncot, vagy fogadja el a negatív tartalékot."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "A bázisterv nem található",
     "fx_rate_set_locked": "A(z) {date} napi EKB-árfolyamok zároltak, ezért ez a frissítés nem írta felül őket. Először oldja fel az árfolyamkészlet zárolását, ha az új közzétételt kell átvennie.",
     "boq_locked": "A költségvetés zárolt, ezért nem módosítható. A változtatáshoz hozzon létre revíziót.",
-    "boq_link_owner_locked": "A(z) „{code}” kódot a zárolt „{bill}” költségvetés egyik sora határozza meg, és a hozzákapcsolás módosítaná ezt a költségvetést. Először oldja fel a zárolást, vagy új kóddal rögzítse a sort."
+    "boq_link_owner_locked": "A(z) „{code}” kódot a zárolt „{bill}” költségvetés egyik sora határozza meg, és a hozzákapcsolás módosítaná ezt a költségvetést. Először oldja fel a zárolást, vagy új kóddal rögzítse a sort.",
+    "boq_budget_nothing_budgetable": "A költségvetési kiírásban nem található költségvetésbe vehető tétel.",
+    "boq_fix_position_id_required": "Ehhez a javításhoz a position_id kötelező",
+    "boq_fix_duplicates_required": "A 'duplicate_position_ids' nem lehet üres lista",
+    "boq_budget_requires_lock": "A költségvetési kiírást a költségvetés létrehozása előtt zárolni kell. Előbb zárolja a becslést.",
+    "boq_not_locked": "A költségvetési kiírás nincs zárolva.",
+    "boq_fix_unit_required": "Nem üres 'unit' paraméter szükséges",
+    "project_access_denied": "Nincs hozzáférése ehhez a projekthez",
+    "boq_costmodel_budget_failed": "Nem sikerült létrehozni a költségmodell költségvetési sorait. A költségmodell modul lehet, hogy nem érhető el.",
+    "boq_unlock_role": "Költségvetési kiírást csak rendszergazda vagy vezető oldhat fel.",
+    "boq_bulk_all_failed": "Mind a(z) {count} tétel megbukott az érvényesítésen. Első hiba: {error}",
+    "boq_position_not_in_boq": "A(z) {position_id} tétel nem található a(z) {boq_id} költségvetési kiírásban",
+    "boq_already_locked": "A költségvetési kiírás már zárolva van.",
+    "boq_budget_failed": "Nem sikerült létrehozni a költségvetési sorokat. A pénzügyi modul lehet, hogy nem érhető el.",
+    "boq_bulk_items_required": "Az 'items' lista kötelező, és nem lehet üres",
+    "boq_classification_unavailable": "Az osztályozási szolgáltatás nem érhető el",
+    "boq_budget_no_positions": "A költségvetési kiírásnak nincs tétele: nincs mit költségvetésbe venni.",
+    "boq_fix_unit_rate_required": "Nem negatív 'unit_rate' paraméter szükséges"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "{ordinal}. tétel: a(z) {drawing} rajz revízió nélkül lett megadva",
       "suggestion": "Adja meg annak a rajznak a revízióját, amelyből a mennyiséget árazták"
+    },
+    "carried_unconfirmed": {
+      "fail": "{ordinal}. tétel: {count} mérés egy korábbi rajzváltozatból került át, és még nincs megerősítve",
+      "suggestion": "Ellenőrizze az áthozott méréseket az új változaton, és erősítse meg őket, vagy mérje újra"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Számolja ki a kiegyenlítést, hogy a hiányzó tartalom az odaítélés előtt be legyen árazva"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "A(z) {package} csomag a(z) {tender} fő szerződéses tenderhez van kötve, és még nincs odaítélve, ezért annak a tendernek nincs szerződése",
+      "suggestion": "Ítélje oda a csomagot (ez létrehozza a szerződést), vagy válassza le a tendert, hogy saját szerződést készítsen"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Verseny",
       "margin": "Árrés",
       "risk": "Kockázat"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "A(z) {page}. oldalon nincs olvasható rajzszám",
+      "suggestion": "Adja meg a rajzszámot a címmezőből; nélküle a rajz nem rakható a korábbi változatok fölé"
+    },
+    "number_unique_in_set": {
+      "fail": "A(z) {sheet} rajz {revision} változata a(z) {first_page}. és {page}. oldalon is szerepel ugyanabban a feltöltésben",
+      "suggestion": "Ellenőrizze mindkét oldal címmezőjét, és javítsa az egyik számát vagy változatát"
+    },
+    "revision_not_lower": {
+      "fail": "A(z) {sheet} rajz a(z) {revision} változaton van, de a jelenlegi rajz már a(z) {current_revision} változaton",
+      "suggestion": "Csak akkor erősítse meg a beolvasást, ha valóban későbbi kiadásról van szó; különben javítsa a változatot, vagy dobja el a rajzot"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "A(z) {sheet} rajzot {confidence} megbízhatósággal olvastuk be, és nincs megerősítve",
+      "suggestion": "Hasonlítsa össze a mezőket a címmezővel, majd erősítse meg vagy javítsa őket"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "{row}. sor: a Tételazonosító cella képletjellel kezdődik, ezért nem lett importálva",
+      "suggestion": "Hagyja a Tételazonosító oszlopot úgy, ahogy exportálták, vagy törölje a cellát új tétel hozzáadásához"
+    },
+    "unknown_id": {
+      "fail": "{row}. sor: a Tételazonosító nem ehhez a kiíráshoz tartozik, ezért a sort új tételként kezeltük",
+      "suggestion": "Szerkesztés előtt exportálja újra a kiírást, vagy törölje a Tételazonosító cellát, ha a sor új kell legyen"
+    },
+    "duplicate_id": {
+      "fail": "{row}. sor: a Tételazonosítót egy korábbi sor használja, ezért ezt a sort új tételként kezeltük",
+      "suggestion": "Törölje a másolt sorok Tételazonosítóját, vagy törölje a másolatokat"
+    },
+    "stale_row": {
+      "fail": "{row}. sor: a(z) {ordinal} tételt az alkalmazásban módosították a lap exportálása után",
+      "suggestion": "Tartsa meg az alkalmazás értékét, vagy válassza ehhez a sorhoz az Excel-értéket a felülíráshoz"
+    },
+    "locked_boq": {
+      "fail": "Ez a kiírás zárolva van, ezért az Excel-módosítások nem alkalmazhatók",
+      "suggestion": "Előbb oldja fel a kiírást, vagy mentse el a lapot későbbre"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Futtassa újra a költségkockázat-elemzést, és alkalmazza újra a tartalékot, vagy tartsa meg a sort, és jegyezze fel az okot",
+      "fail": "A(z) \"{markup}\" tartaléksort P{percentile} szinten alkalmazták ekkor: {applied_at}, de a forrása ({source}) azóta megváltozott"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Futtassa újra a költségkockázat-elemzést, és alkalmazza újra a tartalékot, vagy tartsa meg a sort, és jegyezze fel az okot",
+      "fail": "A(z) \"{markup}\" kockázati tartalék összege {amount}, kevesebb a jelenlegi P50 becslésnél ({p50})"
+    },
+    "source": {
+      "positions": "a költségvetési kiírás sorösszegei",
+      "register": "kockázati nyilvántartás"
+    },
+    "contingency_double_count": {
+      "suggestion": "Kapcsolja ki a két sor egyikét, vagy jegyezze fel, miért kell mindkettő",
+      "fail": "A(z) \"{markup}\" tartaléksor aktív a(z) \"{risk_markup}\" kockázati tartalék mellett; ugyanaz a bizonytalanság kétszer lehet lefoglalva"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "A(z) {ref} tételen {hours} óra van könyvelve {date_from} és {date_to} között, de nincs mért előrehaladás",
+      "suggestion": "Rögzítsen mérést vagy előrehaladást a tételhez, vagy vigye át az órákat arra a tételre, amelyiken ténylegesen dolgoztak"
+    },
+    "factor_implausible": {
+      "fail": "A(z) {ref} tétel {factor} termelékenységi tényezője kívül esik a hihető {low} – {high} sávon",
+      "suggestion": "Ellenőrizze a könyvelt órákat, a beépített mennyiséget és a becslési norma mértékegységét"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "A(z) {activity} ({project}) tevékenység munkaerőt terhel, de nem nevez meg szakmát, ezért az igénye nem rendelhető senkihez",
+      "suggestion": "Adjon meg szakmát a tevékenység munkaerő-erőforrásán"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "A mentett válasz nem hivatkozik egyetlen projektdokumentumra sem, így semmi nem támasztja alá.",
+      "suggestion": "Kérdezzen újra, amíg a válasz dokumentumra nem hivatkozik, vagy jelölje a szöveget saját jegyzetnek."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "A(z) '{title}' ügynökvázlat {days} napja vár felülvizsgálatra (határ: {limit}).",
+      "suggestion": "Fogadja el vagy utasítsa el a vázlatot, vagy kapcsolja ki az ügynököt, ha a vázlatait nem használják."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Adja meg azt a napot, amikor a terület felett repültek.",
+      "fail": "A rögzítés dátuma ({captured_on}) a jövőben van."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Válasszon tevékenységet a projekt ütemtervéből.",
+      "fail": "A tevékenység nem tartozik ehhez a projekthez."
+    },
+    "georeferenced": {
+      "suggestion": "Exportálja az ortofotót GeoTIFF-ként a koordináta-rendszerével együtt.",
+      "fail": "Az ortofotónak nincs koordináta-rendszere vagy kiterjedése, ezért nem helyezhető el a földgömbön."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Repüljön alacsonyabban, vagy exportáljon teljes felbontásban a mennyiségek ellenőrzéséhez.",
+      "fail": "A talajfelbontás {gsd_cm} cm/képpont, túl durva a mennyiségek ellenőrzéséhez."
+    },
+    "observed_pct_range": {
+      "suggestion": "Adjon meg 0 és 100 közötti százalékot.",
+      "fail": "A megfigyelt előrehaladás ({observed_pct}) a 0–100 tartományon kívül esik."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Ellenőrizze a repülés dátumát vagy a projekt kezdő és záró dátumát.",
+      "fail": "A rögzítés dátuma ({captured_on}) több mint 30 nappal a projekt dátumain kívül esik."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Ellenőrizze az export koordináta-rendszerét vagy a projekt horgonypontját.",
+      "fail": "Az ortofotó {distance_km} km-re van a projekt horgonypontjától."
     }
   }
 }

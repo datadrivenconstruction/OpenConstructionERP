@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} tugashi import qilingan fayldagi tugashdan {days} kunga farq qiladi ({source}).",
       "suggestion": "Qayta hisoblangan sanalarni manba fayl bilan solishtiring, soʻng ularni qabul qiling yoki manba sanalarini tiklang."
+    },
+    "constraint_date_missing": {
+      "fail": "'{activity}' ishida {constraint} cheklovi bor, lekin cheklov sanasi yo'q, shuning uchun cheklov e'tiborga olinmaydi.",
+      "suggestion": "Cheklov sanasini kiriting yoki cheklovni olib tashlang."
+    },
+    "constraint_conflict": {
+      "fail": "'{activity}' ishi {constraint} bilan {date} sanasiga cheklangan, lekin undan oldingi ishlar buni faqat {days} kundan keyin ruxsat etadi.",
+      "suggestion": "Cheklov sanasini siljiting, oldingi ishlar zanjirini qisqartiring yoki manfiy zaxirani qabul qiling."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Bazaviy reja topilmadi",
     "fx_rate_set_locked": "{date} sanasi uchun ECB kurslari qulflangan, shu sababli bu yangilash ularni almashtirmadi. Agar ushbu kurslar toʻplamiga yangi eʼlon qilingan qiymatlar olinishi kerak boʻlsa, avval qulfini oching.",
     "boq_locked": "Ish hajmlari qaydnomasi qulflangan va uni oʻzgartirib boʻlmaydi. Oʻzgartirish uchun yangi tahrir yarating.",
-    "boq_link_owner_locked": "'{code}' kodi qulflangan '{bill}' qaydnomasidagi satrda belgilangan va unga bogʻlanish ushbu qaydnomani oʻzgartiradi. Avval qaydnomaning qulfini oching yoki satrni yangi kod bilan kiriting."
+    "boq_link_owner_locked": "'{code}' kodi qulflangan '{bill}' qaydnomasidagi satrda belgilangan va unga bogʻlanish ushbu qaydnomani oʻzgartiradi. Avval qaydnomaning qulfini oching yoki satrni yangi kod bilan kiriting.",
+    "boq_budget_nothing_budgetable": "Hajmlar qaydnomasida byudjetlanadigan pozitsiyalar topilmadi.",
+    "boq_fix_position_id_required": "Bu tuzatish uchun position_id kerak",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' bo'sh bo'lmagan ro'yxat bo'lishi kerak",
+    "boq_budget_requires_lock": "Byudjet yaratishdan oldin hajmlar qaydnomasini qulflash kerak. Avval smetani qulflang.",
+    "boq_not_locked": "Hajmlar qaydnomasi qulflanmagan.",
+    "boq_fix_unit_required": "Bo'sh bo'lmagan 'unit' parametri kerak",
+    "project_access_denied": "Sizda bu loyihaga kirish huquqi yo'q",
+    "boq_costmodel_budget_failed": "Xarajat modelining byudjet qatorlarini yaratib bo'lmadi. Xarajat modeli moduli mavjud bo'lmasligi mumkin.",
+    "boq_unlock_role": "Hajmlar qaydnomasining qulfini faqat administrator yoki menejer ocha oladi.",
+    "boq_bulk_all_failed": "Barcha {count} ta element tekshiruvdan o'tmadi. Birinchi xato: {error}",
+    "boq_position_not_in_boq": "{position_id} pozitsiyasi {boq_id} hajmlar qaydnomasida topilmadi",
+    "boq_already_locked": "Hajmlar qaydnomasi allaqachon qulflangan.",
+    "boq_budget_failed": "Byudjet qatorlarini yaratib bo'lmadi. Moliya moduli mavjud bo'lmasligi mumkin.",
+    "boq_bulk_items_required": "'items' ro'yxati majburiy va bo'sh bo'lmasligi kerak",
+    "boq_classification_unavailable": "Tasniflash xizmati mavjud emas",
+    "boq_budget_no_positions": "Hajmlar qaydnomasida pozitsiyalar yo'q: byudjetlaydigan narsa yo'q.",
+    "boq_fix_unit_rate_required": "Manfiy bo'lmagan 'unit_rate' parametri kerak"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "{ordinal}-pozitsiya: {drawing} chizmasi revizasiyasiz kiritilgan",
       "suggestion": "Miqdor narxlangan chizmaning revizasiyasini qo'shing"
+    },
+    "carried_unconfirmed": {
+      "fail": "{ordinal}-pozitsiya: {count} ta o'lchov oldingi chizma tahridan ko'chirilgan va hali tasdiqlanmagan",
+      "suggestion": "Yangi tahrirda ko'chirilgan har bir o'lchovni tekshirib tasdiqlang yoki qayta o'lchang"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Berishdan oldin yetishmayotgan hajm baholanishi uchun tenglashtirishni hisoblang"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "{package} paketi {tender} asosiy shartnoma tenderiga bog'langan va hali berilmagan, shuning uchun bu tenderning shartnomasi yo'q",
+      "suggestion": "Paketni bering (shartnoma yaratiladi) yoki tenderning bog'lanishini uzing, shunda u o'z shartnomasini tuzadi"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Raqobat",
       "margin": "Marja",
       "risk": "Xavf"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "{page}-sahifada o'qiladigan chizma raqami yo'q",
+      "suggestion": "Chizma raqamini shtampdan kiriting; usiz chizmani oldingi tahrirlar ustiga qo'yib bo'lmaydi"
+    },
+    "number_unique_in_set": {
+      "fail": "{sheet} chizmasining {revision} tahriri bir yuklashning {first_page} va {page}-sahifalarida uchraydi",
+      "suggestion": "Ikkala sahifaning shtamplarini tekshiring va birining raqamini yoki tahririni to'g'rilang"
+    },
+    "revision_not_lower": {
+      "fail": "{sheet} chizmasi {revision} tahrirda, lekin joriy chizma allaqachon {current_revision} tahrirda",
+      "suggestion": "O'qishni faqat bu haqiqatan keyingi chiqarilish bo'lsa tasdiqlang; aks holda tahrirni to'g'rilang yoki chizmani tashlang"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "{sheet} chizmasi {confidence} ishonchlilik bilan o'qildi va tasdiqlanmagan",
+      "suggestion": "Maydonlarni shtamp bilan solishtiring va tasdiqlang yoki to'g'rilang"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "{row}-qator: Pozitsiya ID katagi formula belgisidan boshlanadi va import qilinmadi",
+      "suggestion": "Pozitsiya ID ustunini eksport qilingandek qoldiring yoki yangi pozitsiya qo'shish uchun katakni tozalang"
+    },
+    "unknown_id": {
+      "fail": "{row}-qator: Pozitsiya ID bu qaydnomaga tegishli emas, shuning uchun qator yangi pozitsiya sifatida ishlandi",
+      "suggestion": "Tahrirlashdan oldin qaydnomani qayta eksport qiling yoki qator yangi bo'lishi kerak bo'lsa Pozitsiya ID katagini tozalang"
+    },
+    "duplicate_id": {
+      "fail": "{row}-qator: Pozitsiya ID ni oldingi qator ishlatmoqda, shuning uchun bu qator yangi pozitsiya sifatida ishlandi",
+      "suggestion": "Nusxalangan qatorlarning Pozitsiya ID sini tozalang yoki nusxalarni o'chiring"
+    },
+    "stale_row": {
+      "fail": "{row}-qator: bu varaq eksport qilingandan keyin ilovada {ordinal}-pozitsiya o'zgartirildi",
+      "suggestion": "Ilovadagi qiymatni saqlang yoki uni almashtirish uchun bu qator uchun Excel qiymatini tanlang"
+    },
+    "locked_boq": {
+      "fail": "Bu qaydnoma qulflangan, shuning uchun Excel o'zgarishlarini qo'llab bo'lmaydi",
+      "suggestion": "Avval qaydnoma qulfini oching yoki varaqni keyinroq uchun saqlang"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Xarajat xavfi tahlilini qayta ishga tushiring va zaxirani qayta qo'llang yoki qatorni saqlab, sababini yozing",
+      "fail": "\"{markup}\" zaxira qatori {applied_at} sanasida P{percentile} bo'yicha qo'llangan, lekin uning manbasi ({source}) o'shandan beri o'zgargan"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Xarajat xavfi tahlilini qayta ishga tushiring va zaxirani qayta qo'llang yoki qatorni saqlab, sababini yozing",
+      "fail": "\"{markup}\" xavf zaxirasi {amount} ni tashkil etadi, bu joriy P50 bahosidan ({p50}) kam"
+    },
+    "source": {
+      "positions": "hajmlar qaydnomasi qatorlari yig'indilari",
+      "register": "xavflar reyestri"
+    },
+    "contingency_double_count": {
+      "suggestion": "Ikki qatordan birini o'chiring yoki ikkalasi nega kerakligini yozing",
+      "fail": "\"{markup}\" zaxira qatori \"{risk_markup}\" xavf zaxirasi bilan birga faol; bir xil noaniqlik ikki marta zaxiralangan bo'lishi mumkin"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "{ref} pozitsiyasida {date_from} va {date_to} oralig'ida {hours} soat qayd etilgan, lekin o'lchangan progress yo'q",
+      "suggestion": "Pozitsiya uchun o'lchov yoki progress yozing yoki soatlarni haqiqatan ishlangan pozitsiyaga o'tkazing"
+    },
+    "factor_implausible": {
+      "fail": "{ref} pozitsiyasining unumdorlik koeffitsienti {factor} maqbul {low} – {high} oralig'idan tashqarida",
+      "suggestion": "Qayd etilgan soatlarni, o'rnatilgan hajmni va smeta normasi birligini tekshiring"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "{activity} ({project}) ishi ishchi kuchini yuklaydi, lekin kasbni ko'rsatmaydi, shuning uchun uning talabini hech kimga moslashtirib bo'lmaydi",
+      "suggestion": "Ishning ishchi kuchi resursiga kasb belgilang"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Saqlangan javob loyihaning birorta hujjatiga havola qilmaydi, shuning uchun uni hech narsa tasdiqlamaydi.",
+      "suggestion": "Javob hujjatga havola qilgunga qadar qayta so'rang yoki matnni o'z qaydingiz sifatida belgilang."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "'{title}' agent qoralamasi {days} kundan beri ko'rib chiqishni kutmoqda (chegara {limit}).",
+      "suggestion": "Qoralamani qabul qiling yoki rad eting, yoki uning qoralamalari ishlatilmasa, agentni o'chiring."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Obyekt ustidan uchilgan kunni kiriting.",
+      "fail": "Olingan sana {captured_on} kelajakda."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Ushbu loyiha jadvalidan ish tanlang.",
+      "fail": "Ish bu loyihaga tegishli emas."
+    },
+    "georeferenced": {
+      "suggestion": "Ortofotoni koordinatalar tizimi bilan GeoTIFF sifatida eksport qiling.",
+      "fail": "Ortofotoda koordinatalar tizimi yoki chegaralar yo'q, shuning uchun uni globusga joylashtirib bo'lmaydi."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Hajmlarni tekshirish uchun pastroq uching yoki to'liq ruxsatda eksport qiling.",
+      "fail": "Yer namunalash masofasi piksel uchun {gsd_cm} sm, hajmlarni tekshirish uchun juda qo'pol."
+    },
+    "observed_pct_range": {
+      "suggestion": "0 va 100 orasidagi foizni kiriting.",
+      "fail": "Kuzatilgan progress {observed_pct} 0–100 oralig'idan tashqarida."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Uchish sanasini yoki loyihaning boshlanish va tugash sanalarini tekshiring.",
+      "fail": "Olingan sana {captured_on} loyiha sanalaridan 30 kundan ortiq tashqarida."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Eksportning koordinatalar tizimini yoki loyiha langarini tekshiring.",
+      "fail": "Ortofoto loyiha langaridan {distance_km} km narida."
     }
   }
 }

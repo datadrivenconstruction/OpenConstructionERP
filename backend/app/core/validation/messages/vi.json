@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} kết thúc lệch {days} ngày so với ngày kết thúc trong tệp đã nhập ({source}).",
       "suggestion": "So sánh các ngày đã tính lại với tệp nguồn, rồi chấp nhận chúng hoặc khôi phục ngày theo nguồn."
+    },
+    "constraint_date_missing": {
+      "fail": "Hoạt động '{activity}' có ràng buộc {constraint} nhưng không có ngày ràng buộc, nên ràng buộc bị bỏ qua.",
+      "suggestion": "Nhập ngày ràng buộc hoặc xóa ràng buộc."
+    },
+    "constraint_conflict": {
+      "fail": "Hoạt động '{activity}' bị {constraint} ràng buộc vào {date}, nhưng các hoạt động đứng trước chỉ cho phép muộn hơn {days} ngày.",
+      "suggestion": "Dời ngày ràng buộc, rút ngắn chuỗi hoạt động đứng trước hoặc chấp nhận độ trễ âm."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Không tìm thấy kế hoạch cơ sở",
     "fx_rate_set_locked": "Tỷ giá ECB ngày {date} đã khóa nên lần làm mới này không ghi đè. Mở khóa bộ tỷ giá đó trước nếu cần nhận dữ liệu công bố mới.",
     "boq_locked": "Bảng khối lượng đã khóa và không thể sửa. Tạo bản sửa đổi để thay đổi.",
-    "boq_link_owner_locked": "Mã '{code}' được định nghĩa bởi một dòng trong bảng đã khóa '{bill}'; liên kết tới mã này sẽ thay đổi bảng đó. Mở khóa bảng trước hoặc nhập dòng với mã mới."
+    "boq_link_owner_locked": "Mã '{code}' được định nghĩa bởi một dòng trong bảng đã khóa '{bill}'; liên kết tới mã này sẽ thay đổi bảng đó. Mở khóa bảng trước hoặc nhập dòng với mã mới.",
+    "boq_budget_nothing_budgetable": "Không tìm thấy hạng mục nào có thể lập ngân sách trong bảng khối lượng.",
+    "boq_fix_position_id_required": "Cần position_id cho bản sửa này",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' phải là danh sách không rỗng",
+    "boq_budget_requires_lock": "Bảng khối lượng phải được khóa trước khi tạo ngân sách. Hãy khóa dự toán trước.",
+    "boq_not_locked": "Bảng khối lượng chưa được khóa.",
+    "boq_fix_unit_required": "Cần tham số 'unit' không rỗng",
+    "project_access_denied": "Bạn không có quyền truy cập dự án này",
+    "boq_costmodel_budget_failed": "Không tạo được các dòng ngân sách của mô hình chi phí. Mô-đun mô hình chi phí có thể không khả dụng.",
+    "boq_unlock_role": "Chỉ quản trị viên hoặc người quản lý mới mở khóa được bảng khối lượng.",
+    "boq_bulk_all_failed": "Cả {count} mục đều không qua kiểm tra hợp lệ. Lỗi đầu tiên: {error}",
+    "boq_position_not_in_boq": "Không tìm thấy hạng mục {position_id} trong bảng khối lượng {boq_id}",
+    "boq_already_locked": "Bảng khối lượng đã được khóa.",
+    "boq_budget_failed": "Không tạo được các dòng ngân sách. Mô-đun tài chính có thể không khả dụng.",
+    "boq_bulk_items_required": "Danh sách 'items' là bắt buộc và không được để trống",
+    "boq_classification_unavailable": "Dịch vụ phân loại không khả dụng",
+    "boq_budget_no_positions": "Bảng khối lượng không có hạng mục: không có gì để lập ngân sách.",
+    "boq_fix_unit_rate_required": "Cần tham số 'unit_rate' không âm"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Hạng mục {ordinal}: bản vẽ {drawing} được nhập mà không có bản sửa đổi",
       "suggestion": "Bổ sung bản sửa đổi của bản vẽ mà khối lượng đã được định giá theo"
+    },
+    "carried_unconfirmed": {
+      "fail": "Hạng mục {ordinal}: {count} phép đo được chuyển từ phiên bản bản vẽ trước và chưa được xác nhận",
+      "suggestion": "Kiểm tra từng phép đo được chuyển trên phiên bản mới rồi xác nhận, hoặc đo lại"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Tính cân bằng để phạm vi còn thiếu được định giá trước khi trao thầu"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Gói {package} được liên kết với gói thầu hợp đồng chính {tender} và chưa được trao, nên gói thầu đó chưa có hợp đồng",
+      "suggestion": "Hãy trao gói (việc này tạo hợp đồng) hoặc bỏ liên kết gói thầu để nó tự soạn hợp đồng"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Cạnh tranh",
       "margin": "Biên lợi nhuận",
       "risk": "Rủi ro"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Trang {page} không có số bản vẽ đọc được",
+      "suggestion": "Nhập số bản vẽ từ khung tên; không có nó thì không thể xếp bản vẽ lên các phiên bản trước"
+    },
+    "number_unique_in_set": {
+      "fail": "Bản vẽ {sheet} phiên bản {revision} xuất hiện ở trang {first_page} và {page} của cùng một lần tải lên",
+      "suggestion": "Kiểm tra khung tên của cả hai trang và sửa số hoặc phiên bản của một trong hai"
+    },
+    "revision_not_lower": {
+      "fail": "Bản vẽ {sheet} ở phiên bản {revision} nhưng bản vẽ hiện tại đã ở {current_revision}",
+      "suggestion": "Chỉ xác nhận kết quả đọc nếu đây thực sự là lần phát hành sau; nếu không hãy sửa phiên bản hoặc bỏ bản vẽ"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Bản vẽ {sheet} được đọc với độ tin cậy {confidence} và chưa được xác nhận",
+      "suggestion": "So sánh các trường với khung tên rồi xác nhận hoặc sửa"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Dòng {row}: ô ID hạng mục bắt đầu bằng ký tự công thức và không được nhập vào",
+      "suggestion": "Giữ nguyên cột ID hạng mục như khi xuất, hoặc xóa ô để thêm hạng mục mới"
+    },
+    "unknown_id": {
+      "fail": "Dòng {row}: ID hạng mục không thuộc bảng này nên dòng được xử lý như hạng mục mới",
+      "suggestion": "Xuất lại bảng trước khi chỉnh sửa, hoặc xóa ô ID hạng mục nếu dòng này là mới"
+    },
+    "duplicate_id": {
+      "fail": "Dòng {row}: ID hạng mục đã được dòng trước dùng nên dòng này được xử lý như hạng mục mới",
+      "suggestion": "Xóa ID hạng mục của các dòng sao chép hoặc xóa các bản sao"
+    },
+    "stale_row": {
+      "fail": "Dòng {row}: hạng mục {ordinal} đã bị thay đổi trong ứng dụng sau khi bảng này được xuất",
+      "suggestion": "Giữ giá trị trong ứng dụng, hoặc chọn giá trị Excel cho dòng này để ghi đè"
+    },
+    "locked_boq": {
+      "fail": "Bảng khối lượng này đã bị khóa nên không thể áp dụng thay đổi từ Excel",
+      "suggestion": "Mở khóa bảng trước, hoặc lưu bảng để dùng sau"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Chạy lại phân tích rủi ro chi phí và áp dụng lại dự phòng, hoặc giữ dòng và ghi chú lý do",
+      "fail": "Dòng dự phòng \"{markup}\" được áp dụng ở P{percentile} vào {applied_at}, nhưng nguồn của nó ({source}) đã thay đổi kể từ đó"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Chạy lại phân tích rủi ro chi phí và áp dụng lại dự phòng, hoặc giữ dòng và ghi chú lý do",
+      "fail": "Dự phòng rủi ro \"{markup}\" là {amount}, thấp hơn ước tính P50 hiện tại là {p50}"
+    },
+    "source": {
+      "positions": "tổng các dòng bảng khối lượng",
+      "register": "sổ đăng ký rủi ro"
+    },
+    "contingency_double_count": {
+      "suggestion": "Tắt một trong hai dòng, hoặc ghi chú vì sao cần cả hai",
+      "fail": "Dòng dự phòng \"{markup}\" đang bật cạnh dự phòng rủi ro \"{risk_markup}\"; cùng một sự bất định có thể bị dự trữ hai lần"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Hạng mục {ref} có {hours} giờ được ghi từ {date_from} đến {date_to} nhưng không có tiến độ đo được",
+      "suggestion": "Ghi một phép đo hoặc tiến độ cho hạng mục, hoặc chuyển số giờ sang hạng mục thực sự đã làm việc"
+    },
+    "factor_implausible": {
+      "fail": "Hệ số năng suất {factor} của hạng mục {ref} nằm ngoài khoảng hợp lý {low} đến {high}",
+      "suggestion": "Kiểm tra số giờ đã ghi, khối lượng đã lắp và đơn vị của định mức dự toán"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Hoạt động {activity} ({project}) nạp nhân công nhưng không nêu ngành nghề nên nhu cầu của nó không thể gán cho ai",
+      "suggestion": "Đặt ngành nghề trên tài nguyên nhân công của hoạt động"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Câu trả lời đã lưu không trích dẫn tài liệu dự án nào nên không có gì chứng minh nó.",
+      "suggestion": "Hỏi lại cho đến khi câu trả lời trích dẫn một tài liệu, hoặc đánh dấu văn bản là ghi chú của riêng bạn."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Bản nháp của tác nhân '{title}' đã chờ duyệt {days} ngày (giới hạn {limit}).",
+      "suggestion": "Chấp nhận hoặc từ chối bản nháp, hoặc tắt tác nhân nếu các bản nháp của nó không được dùng."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Nhập ngày đã bay khảo sát công trường.",
+      "fail": "Ngày chụp {captured_on} nằm trong tương lai."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Chọn một hoạt động từ tiến độ của dự án này.",
+      "fail": "Hoạt động không thuộc dự án này."
+    },
+    "georeferenced": {
+      "suggestion": "Xuất ảnh trực giao dưới dạng GeoTIFF cùng hệ tọa độ của nó.",
+      "fail": "Ảnh trực giao không có hệ tọa độ hoặc ranh giới nên không thể đặt lên quả địa cầu."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Bay thấp hơn hoặc xuất ở độ phân giải đầy đủ để kiểm tra khối lượng.",
+      "fail": "Khoảng lấy mẫu mặt đất là {gsd_cm} cm mỗi pixel, quá thô để kiểm tra khối lượng."
+    },
+    "observed_pct_range": {
+      "suggestion": "Nhập phần trăm từ 0 đến 100.",
+      "fail": "Tiến độ quan sát được {observed_pct} nằm ngoài khoảng 0 đến 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Kiểm tra ngày bay hoặc ngày bắt đầu và kết thúc của dự án.",
+      "fail": "Ngày chụp {captured_on} nằm ngoài ngày của dự án hơn 30 ngày."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Kiểm tra hệ tọa độ của bản xuất hoặc điểm neo của dự án.",
+      "fail": "Ảnh trực giao cách điểm neo của dự án {distance_km} km."
     }
   }
 }
