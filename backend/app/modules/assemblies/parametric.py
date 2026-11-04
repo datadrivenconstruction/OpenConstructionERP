@@ -88,9 +88,10 @@ def _to_decimal(value: Any) -> Decimal | None:
     if value is None or isinstance(value, bool):
         return None
     try:
-        return Decimal(str(value).strip())
+        dec = Decimal(str(value).strip())
     except (InvalidOperation, ValueError, TypeError):
         return None
+    return dec if dec.is_finite() else None
 
 
 def _kind(param: dict[str, Any]) -> str:

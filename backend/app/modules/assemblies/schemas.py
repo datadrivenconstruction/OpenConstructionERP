@@ -425,6 +425,14 @@ class AssemblyWithComponents(AssemblyResponse):
 # ── Action schemas ───────────────────────────────────────────────────────────
 
 
+def _check_parameter_values(v: dict[str, float]) -> dict[str, float]:
+    """Reject NaN / Infinity / out-of-range input-parameter overrides."""
+    for name, val in v.items():
+        if not math.isfinite(val) or abs(val) > _NUM_MAX:
+            raise ValueError(f"parameter '{name}' must be a finite number within +/-{_NUM_MAX:g}")
+    return v
+
+
 class ApplyToBOQRequest(BaseModel):
     """Request body for applying an assembly to a BOQ as a new position.
 
@@ -446,6 +454,8 @@ class ApplyToBOQRequest(BaseModel):
     # Empty = use each parameter's stored default. Component ``quantity_formula``
     # lines are then computed against the resolved parameter values.
     parameter_values: dict[str, float] = Field(default_factory=dict)
+
+    _finite_parameter_values = field_validator("parameter_values")(_check_parameter_values)
 
 
 # ── Parametric validation & expand preview (Issue #365) ──────────────────────
@@ -470,6 +480,8 @@ class ExpandPreviewRequest(BaseModel):
     """Request body for previewing an assembly expansion at given inputs."""
 
     parameter_values: dict[str, float] = Field(default_factory=dict)
+
+    _finite_parameter_values = field_validator("parameter_values")(_check_parameter_values)
 
 
 class ExpandLine(BaseModel):
