@@ -175,3 +175,77 @@ async def test_listing_hides_entries_of_projects_the_caller_cannot_reach() -> No
     scoped, open_ = seen
     assert "project_id IS NULL OR" in scoped and "project_id IN" in scoped
     assert "project_id IN" not in open_
+
+
+def _service_with_entry(version: int, *, update_error: Exception | None = None):
+    import uuid
+    from contextlib import asynccontextmanager
+
+    from app.modules.win_loss.service import WinLossService
+
+    entry = SimpleNamespace(id=uuid.uuid4(), project_id=None, version=version)
+    calls: list[dict] = []
+
+    class _Repo:
+        session = None
+
+        async def get_by_id(self, entry_id: object) -> SimpleNamespace:
+            return entry
+
+        async def update_fields(self, entry_id: object, **fields: object) -> None:
+            if update_error is not None:
+                raise update_error
+            calls.append(fields)
+
+    class _Session:
+        @asynccontextmanager
+        async def begin_nested(self):
+            yield
+
+        async def refresh(self, obj: object) -> None:
+            return None
+
+    service = WinLossService.__new__(WinLossService)
+    service.repo = _Repo()  # type: ignore[assignment]
+    service.repo.session = _Session()
+    service.session = service.repo.session  # type: ignore[assignment]
+    return service, entry, calls
+
+
+@pytest.mark.asyncio
+async def test_update_with_a_stale_version_answers_409_and_writes_nothing() -> None:
+    from fastapi import HTTPException
+
+    from app.modules.win_loss.schemas import BidOutcomeUpdate
+
+    service, entry, calls = _service_with_entry(version=3)
+    with pytest.raises(HTTPException) as caught:
+        await service.update(
+            entry.id, BidOutcomeUpdate(version=2, title="Renamed"), "00000000-0000-0000-0000-000000000001"
+        )
+    assert caught.value.status_code == 409
+    assert calls == []
+
+
+@pytest.mark.asyncio
+async def test_update_with_the_current_version_bumps_it() -> None:
+    from app.modules.win_loss.schemas import BidOutcomeUpdate
+
+    service, entry, calls = _service_with_entry(version=3)
+    await service.update(entry.id, BidOutcomeUpdate(version=3, title="Renamed"), "00000000-0000-0000-0000-000000000001")
+    assert calls == [{"title": "Renamed", "version": 4}]
+
+
+@pytest.mark.asyncio
+async def test_patching_a_tender_that_already_has_a_record_answers_409() -> None:
+    from fastapi import HTTPException
+    from sqlalchemy.exc import IntegrityError
+
+    from app.modules.win_loss.schemas import BidOutcomeUpdate
+
+    service, entry, _ = _service_with_entry(version=1, update_error=IntegrityError("stmt", {}, Exception("uq")))
+    with pytest.raises(HTTPException) as caught:
+        await service.update(
+            entry.id, BidOutcomeUpdate(version=1, title="Renamed"), "00000000-0000-0000-0000-000000000001"
+        )
+    assert caught.value.status_code == 409
