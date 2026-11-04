@@ -296,6 +296,8 @@ class CostItemResponse(BaseModel):
     catalog_id: UUID | None = None
     is_active: bool
     metadata: dict[str, Any] = Field(alias="metadata_")
+    # Non-blocking findings of the costs rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 

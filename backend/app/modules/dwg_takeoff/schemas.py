@@ -62,6 +62,8 @@ class DwgDrawingResponse(BaseModel):
     scale_denominator: float = 1.0
     scale_mode: str = "preset"
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Non-blocking findings of the dwg_takeoff rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_by: str = ""
     created_at: datetime
     updated_at: datetime
@@ -225,6 +227,8 @@ class DwgAnnotationResponse(BaseModel):
     linked_punch_item_id: str | None = None
     created_by: str = ""
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Non-blocking findings of the dwg_takeoff rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
