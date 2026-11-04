@@ -117,3 +117,35 @@ async def test_reserve_for_foreign_project_is_refused() -> None:
     with pytest.raises(HTTPException) as exc:
         await _svc_denying_foreign(foreign).reserve_stock(payload, user_id="u")
     assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_stocktake_below_reserved_clamps_reservation() -> None:
+    from decimal import Decimal
+
+    from app.modules.supplier_catalogs.schemas import StocktakeCount, StocktakePayload
+
+    class _Bal:
+        id = uuid.uuid4()
+        quantity_on_hand = Decimal("10")
+        quantity_reserved = Decimal("8")
+        unit_cost_avg = None
+        currency = None
+
+    updates: list[dict] = []
+
+    class _St:
+        async def get_or_create_balance(self, **kw):
+            return _Bal()
+
+        async def update_balance(self, _id, **kw):
+            updates.append(kw)
+
+        async def record_movement(self, mv):
+            return mv
+
+    svc = _svc_denying_foreign(uuid.uuid4())
+    svc.stock = _St()
+    payload = StocktakePayload(counts=[StocktakeCount(catalog_item_id=uuid.uuid4(), counted_qty=3)])
+    await svc.stocktake(uuid.uuid4(), payload, user_id="u")
+    assert updates[0]["quantity_reserved"] == Decimal("3")
