@@ -327,6 +327,11 @@ const BidDayPage = lazy(() =>
     default: m.BidDayPage,
   }))
 );
+const BidNoBidPage = lazy(() =>
+  import('@/features/bid-no-bid/BidNoBidPage').then((m) => ({
+    default: m.BidNoBidPage,
+  }))
+);
 const OwnerSchedulePage = lazy(() =>
   import('@/features/owner-schedule/OwnerSchedulePage').then((m) => ({
     default: m.OwnerSchedulePage,
@@ -1543,6 +1548,7 @@ export default function App() {
         <Route path="/funding" element={<P title="Public Funding"><FundingPage /></P>} />
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
         <Route path="/tendering/:tenderId/bid-day" element={<P title="Bid day"><BidDayPage /></P>} />
+        <Route path="/tendering/:tenderId/bid-no-bid" element={<P title="Bid / no-bid"><BidNoBidPage /></P>} />
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
         <Route path="/documents" element={<Navigate to="/files" replace />} />
