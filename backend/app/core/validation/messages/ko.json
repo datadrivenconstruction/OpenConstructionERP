@@ -1737,5 +1737,19 @@
       "fail": "날짜 {earlier}와(과) {later}의 순서가 맞지 않거나 기간을 벗어났습니다.",
       "suggestion": "빠른 날짜가 먼저 오고 모든 항목이 기간 안에 들어오도록 날짜를 수정하세요."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "상태는 {state}인데 {field}이(가) 없습니다.",
+      "suggestion": "누락된 항목을 입력하거나 레코드를 이전 상태로 되돌리세요."
+    },
+    "overdue": {
+      "fail": "기한이 {date}였지만 아직 {status} 상태입니다.",
+      "suggestion": "완료하거나 일정을 변경하고, 사유와 함께 종료하세요."
+    },
+    "result_contradicts_checklist": {
+      "fail": "결과는 {result}인데 체크리스트 {count}개 항목이 불합격입니다.",
+      "suggestion": "결과를 수정하거나 불합격 항목을 검토하세요."
+    }
   }
 }

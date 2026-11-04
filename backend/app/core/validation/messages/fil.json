@@ -1737,5 +1737,19 @@
       "fail": "Mali ang pagkakasunod ng mga petsang {earlier} at {later} o nasa labas ng panahon.",
       "suggestion": "Ayusin ang mga petsa upang mauna ang mas maaga at nasa loob ng panahon ang bawat entry."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Ang status ay {state} ngunit kulang ang {field}.",
+      "suggestion": "Punan ang kulang na field o ibalik ang tala sa naunang status."
+    },
+    "overdue": {
+      "fail": "Nananatiling {status} kahit ang due date ay {date}.",
+      "suggestion": "Tapusin o i-reschedule, o isara na may dahilan."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Ang resulta ay {result}, ngunit {count} item sa checklist ang bumagsak.",
+      "suggestion": "Itama ang resulta o suriin ang mga bumagsak na item."
+    }
   }
 }

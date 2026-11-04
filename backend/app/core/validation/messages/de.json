@@ -1749,5 +1749,19 @@
       "fail": "Die Daten {earlier} und {later} sind in falscher Reihenfolge oder liegen außerhalb des Zeitraums.",
       "suggestion": "Korrigieren Sie die Daten, sodass das frühere zuerst kommt und jeder Eintrag im Zeitraum liegt."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status ist {state}, aber {field} fehlt.",
+      "suggestion": "Fehlendes Feld ausfüllen oder den Datensatz auf einen früheren Status zurücksetzen."
+    },
+    "overdue": {
+      "fail": "Noch {status}, obwohl der Termin {date} war.",
+      "suggestion": "Abschließen oder neu terminieren bzw. mit Begründung schließen."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte sind fehlgeschlagen.",
+      "suggestion": "Ergebnis korrigieren oder die fehlgeschlagenen Prüfpunkte prüfen."
+    }
   }
 }

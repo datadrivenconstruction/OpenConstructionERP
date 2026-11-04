@@ -1737,5 +1737,19 @@
       "fail": "Les dates {earlier} et {later} sont dans le désordre ou hors de la période.",
       "suggestion": "Corrigez les dates pour que la plus ancienne vienne en premier et que chaque entrée soit dans la période."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Le statut est {state} mais {field} est manquant.",
+      "suggestion": "Renseignez le champ manquant ou ramenez l'enregistrement à un statut antérieur."
+    },
+    "overdue": {
+      "fail": "Toujours {status} alors que l'échéance était le {date}.",
+      "suggestion": "Terminez-le ou replanifiez-le, ou clôturez-le avec un motif."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Le résultat est {result}, mais {count} points de la liste de contrôle ont échoué.",
+      "suggestion": "Corrigez le résultat ou vérifiez les points échoués."
+    }
   }
 }

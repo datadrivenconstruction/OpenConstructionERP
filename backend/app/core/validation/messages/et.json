@@ -1737,5 +1737,19 @@
       "fail": "Kuupäevad {earlier} ja {later} on valesti järjestatud või perioodist väljas.",
       "suggestion": "Parandage kuupäevad nii, et varasem tuleb esimesena ja iga kirje jääb perioodi sisse."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Olek on {state}, kuid {field} puudub.",
+      "suggestion": "Täitke puuduv väli või viige kirje tagasi varasemasse olekusse."
+    },
+    "overdue": {
+      "fail": "Endiselt {status}, kuigi tähtaeg oli {date}.",
+      "suggestion": "Viige lõpule või planeerige ümber, või sulgege põhjendusega."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Tulemus on {result}, kuid {count} kontrollnimekirja punkti ebaõnnestus.",
+      "suggestion": "Parandage tulemus või vaadake läbi ebaõnnestunud punktid."
+    }
   }
 }

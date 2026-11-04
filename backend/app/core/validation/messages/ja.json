@@ -1737,5 +1737,19 @@
       "fail": "日付 {earlier} と {later} の順序が正しくないか、期間外です。",
       "suggestion": "早い日付が先になり、すべての項目が期間内に収まるよう日付を修正してください。"
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "ステータスは {state} ですが {field} が未入力です。",
+      "suggestion": "未入力の項目を入力するか、レコードを以前のステータスに戻してください。"
+    },
+    "overdue": {
+      "fail": "期限は {date} でしたが、まだ {status} です。",
+      "suggestion": "完了または再スケジュールするか、理由を付けてクローズしてください。"
+    },
+    "result_contradicts_checklist": {
+      "fail": "結果は {result} ですが、チェックリストの {count} 項目が不合格です。",
+      "suggestion": "結果を修正するか、不合格の項目を確認してください。"
+    }
   }
 }

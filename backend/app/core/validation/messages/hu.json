@@ -1737,5 +1737,19 @@
       "fail": "A(z) {earlier} és {later} dátum rossz sorrendben van, vagy az időszakon kívül esik.",
       "suggestion": "Javítsa a dátumokat úgy, hogy a korábbi legyen elöl, és minden tétel az időszakba essen."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Az állapot {state}, de a(z) {field} hiányzik.",
+      "suggestion": "Töltse ki a hiányzó mezőt, vagy állítsa vissza a rekordot korábbi állapotba."
+    },
+    "overdue": {
+      "fail": "Még mindig {status}, pedig a határidő {date} volt.",
+      "suggestion": "Fejezze be vagy ütemezze újra, vagy zárja le indoklással."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Az eredmény {result}, de {count} ellenőrzőlista-tétel megbukott.",
+      "suggestion": "Javítsa az eredményt, vagy vizsgálja át a megbukott tételeket."
+    }
   }
 }

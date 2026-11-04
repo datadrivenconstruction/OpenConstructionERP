@@ -1737,5 +1737,19 @@
       "fail": "日期 {earlier} 与 {later} 顺序错误或超出期间。",
       "suggestion": "请修正日期，使较早的日期在前，且每个条目都落在期间内。"
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "状态为 {state}，但缺少 {field}。",
+      "suggestion": "请填写缺失字段，或将记录退回到较早状态。"
+    },
+    "overdue": {
+      "fail": "截止日期为 {date}，但仍为 {status}。",
+      "suggestion": "请完成或重新安排，或说明原因后关闭。"
+    },
+    "result_contradicts_checklist": {
+      "fail": "结果为 {result}，但有 {count} 项检查清单未通过。",
+      "suggestion": "请更正结果，或复核未通过的检查项。"
+    }
   }
 }
