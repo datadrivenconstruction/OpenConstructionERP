@@ -73,6 +73,8 @@ class BasisBudgetTargetRule(EstimatingRule):
         target = b.get("budget_target")
         if not isinstance(target, dict) or not target:
             return [self.ok(ref)]
+        if blank(target.get("amount")):
+            return [self.ok(ref)]  # notes or currency entered first: a draft target without an amount yet
         amount = to_dec(target.get("amount"))
         if amount is None or not Decimal("0.01") <= amount <= MAX_SANE_AMOUNT:
             return [self.fail(context, "value_in_range", ref=ref, field="budget_target.amount", value=target.get("amount") or "", low="0.01", high=MAX_SANE_AMOUNT)]
