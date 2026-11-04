@@ -23,7 +23,8 @@
  * ≥48×48 px (WCAG 2.2 SC 2.5.8 AAA + Apple HIG + Material 3).
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { QueuedOp } from '@/shared/lib/offline';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
@@ -199,6 +200,7 @@ export function FieldShellPage() {
 
   // Crew-time ops live in their own queue (desktop sign-in); list them with the rest.
   const [timeItems, setTimeItems] = useState<SyncQueueItem[]>([]);
+  const [timeHeld, setTimeHeld] = useState<QueuedOp[]>([]);
   useEffect(() => {
     let alive = true;
     let queue: ReturnType<typeof getFieldTimeQueue>;
@@ -212,6 +214,10 @@ export function FieldShellPage() {
         .pending()
         .then((ops) => alive && setTimeItems(fieldTimeAsQueueItems(ops)))
         .catch(() => undefined);
+      void queue
+        .held()
+        .then((ops) => alive && setTimeHeld(ops))
+        .catch(() => undefined);
     };
     refresh();
     const off = queue.onChange(refresh);
@@ -220,6 +226,17 @@ export function FieldShellPage() {
       off();
     };
   }, []);
+
+  // Held captures of both queues are one list: export or discard covers them together.
+  const allHeld = useMemo(() => [...heldOps, ...timeHeld], [heldOps, timeHeld]);
+  const exportAllHeld = useCallback(async () => {
+    const [a, b] = await Promise.all([exportHeld(), getFieldTimeQueue().exportHeld()]);
+    return JSON.stringify({ field: JSON.parse(a), fieldTime: JSON.parse(b) }, null, 2);
+  }, [exportHeld]);
+  const discardAllHeld = useCallback(async () => {
+    await discardHeld();
+    await getFieldTimeQueue().discardHeld();
+  }, [discardHeld]);
 
   // Register the scoped field service worker so the shell + last-viewed data
   // load offline. Best-effort: a failure does not affect the IndexedDB queue.
@@ -294,7 +311,7 @@ export function FieldShellPage() {
             {/* Pending-sync review queue: lists offline captures awaiting replay
                 with per-item retry/dismiss. */}
             <SyncQueuePanel
-              state={{ online, pendingOps, heldOps, exportHeld, discardHeld, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
+              state={{ online, pendingOps, heldOps: allHeld, exportHeld: exportAllHeld, discardHeld: discardAllHeld, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
               className="border-t border-slate-100"
             />
           </div>
