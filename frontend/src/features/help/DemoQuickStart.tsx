@@ -42,7 +42,7 @@ export function DemoQuickStart() {
   const { demoMode, loaded, bySlug } = useDemoProjects();
   if (!demoMode) return null;
 
-  const roles = DEMO_PROFILES.map((p) => t(`${p.stem}.audience`)).join(', ');
+  const roles = fmtList(DEMO_PROFILES.map((p) => t(`${p.stem}.audience`)));
   const dataBody = [
     loaded
       ? t('howto.demo.data_projects', {

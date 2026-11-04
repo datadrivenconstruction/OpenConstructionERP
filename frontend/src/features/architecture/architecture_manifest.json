@@ -296385,10 +296385,10 @@
     },
     {
       "name": "help",
-      "ts_files": 28,
+      "ts_files": 30,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 28
+      "test_files": 1,
+      "total_files": 30
     },
     {
       "name": "hse-advanced",
@@ -298948,7 +298948,7 @@
     "total_schemas": 4399,
     "total_python_files": 3059,
     "frontend_features": 224,
-    "frontend_ts_files": 3917,
+    "frontend_ts_files": 3919,
     "frontend_backend_mapped": 200
   },
   "frontend_backend_mapping": {
