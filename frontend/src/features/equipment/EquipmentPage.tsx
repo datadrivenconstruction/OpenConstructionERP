@@ -2481,6 +2481,8 @@ interface EquipmentFormState {
   currency: string;
   useful_life_years: string;
   residual_value: string;
+  holding_cost_per_month: string;
+  market_hire_rate_per_day: string;
   hour_meter: string;
   odometer_km: string;
   location_lat: string;
@@ -2512,6 +2514,8 @@ function _toFormState(eq: Equipment | undefined): EquipmentFormState {
       ? String(eq.useful_life_years)
       : '',
     residual_value: numStr(eq?.residual_value),
+    holding_cost_per_month: numStr(eq?.holding_cost_per_month),
+    market_hire_rate_per_day: numStr(eq?.market_hire_rate_per_day),
     hour_meter: numStr(eq?.hour_meter),
     odometer_km: numStr(eq?.odometer_km),
     location_lat: numStr(eq?.location_lat),
@@ -2553,6 +2557,8 @@ function _toPayload(
     // the lat/lng inputs were inert. Now round-tripped.
     useful_life_years: toOptNum(form.useful_life_years),
     residual_value: toOptNum(form.residual_value),
+    holding_cost_per_month: toOptNum(form.holding_cost_per_month),
+    market_hire_rate_per_day: toOptNum(form.market_hire_rate_per_day),
     currency: toOptStr(form.currency),
     notes: toOptStr(form.notes),
     required_certificates: form.required_certificates,
@@ -2958,6 +2964,37 @@ function EquipmentFormModal({
                   className={inputCls}
                   placeholder="EUR"
                   maxLength={3}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>
+                  {t('equipment.holding_cost_per_month', {
+                    defaultValue: 'Holding cost per month',
+                  })}
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.holding_cost_per_month}
+                  onChange={(e) => set('holding_cost_per_month', e.target.value)}
+                  className={inputCls}
+                  title={t('equipment.holding_cost_hint', {
+                    defaultValue: 'Finance, insurance and storage; the monthly rent for rented or leased units',
+                  })}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>
+                  {t('equipment.market_hire_rate_per_day', {
+                    defaultValue: 'Market hire rate per day',
+                  })}
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.market_hire_rate_per_day}
+                  onChange={(e) => set('market_hire_rate_per_day', e.target.value)}
+                  className={inputCls}
                 />
               </div>
             </div>

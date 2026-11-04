@@ -132,6 +132,11 @@ class Equipment(Base):
         server_default="",
     )
 
+    # Cost board inputs: monthly holding cost beyond depreciation (monthly rent for
+    # rented/leased units) and the market hire rate per day for rent-or-return.
+    holding_cost_per_month: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    market_hire_rate_per_day: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+
     # Cost code the plant-hire allocation books against; engine class for the country minimum.
     cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
     emission_class: Mapped[str | None] = mapped_column(String(30), nullable=True)

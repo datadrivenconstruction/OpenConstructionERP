@@ -60,3 +60,22 @@ export function hoursShares(h: {
   if (total <= 0) return { worked: 0, idle: 0, off: 0 };
   return { worked: (worked / total) * 100, idle: (idle / total) * 100, off: (off / total) * 100 };
 }
+
+/** Tailwind classes for a cost board suggestion badge. */
+export function suggestionTone(suggestion: string): string {
+  switch (suggestion) {
+    case 'return':
+    case 'rent':
+      return 'bg-semantic-warning-bg text-semantic-warning';
+    case 'keep':
+      return 'bg-semantic-success-bg text-semantic-success';
+    default:
+      return 'bg-surface-secondary text-content-secondary';
+  }
+}
+
+/** Amount with its currency code; a missing amount shows a dash. */
+export function moneyWithCurrency(value: string | null | undefined, currency: string): string {
+  if (value == null) return '-';
+  return currency ? `${value} ${currency}` : value;
+}
