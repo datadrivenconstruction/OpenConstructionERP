@@ -1946,5 +1946,12 @@
       "fail": "未通过的测试没有记录所观察到情况的结果备注。"
     },
     "suggestion": "请记录处理结果或观察情况，并在关闭前完成预功能检查和功能测试。"
+  },
+  "site": {
+    "future_date": "日期 {field}（{value}）晚于当前时间。",
+    "contradiction": "{field}（{value}）与 {other_field}（{other_value}）相矛盾。",
+    "required_when": "当 {other_field} 为 {other_value} 时，必须填写 {field}。",
+    "limit_exceeded": "{field}（{value}）超出了 {limit_field} 规定的限值 {limit}。",
+    "suggestion": "请检查该记录，并在保存前更正错误的数值或日期。"
   }
 }

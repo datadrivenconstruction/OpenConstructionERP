@@ -1946,5 +1946,12 @@
       "fail": "Det underkända provet saknar anteckning om vad som observerats."
     },
     "suggestion": "Registrera åtgärden eller iakttagelsen och slutför förkontroller och funktionsprov före avslut."
+  },
+  "site": {
+    "future_date": "Datumet {field} ({value}) ligger i framtiden.",
+    "contradiction": "{field} ({value}) strider mot {other_field} ({other_value}).",
+    "required_when": "{field} måste anges när {other_field} är {other_value}.",
+    "limit_exceeded": "{field} ({value}) överskrider gränsen {limit} som anges av {limit_field}.",
+    "suggestion": "Kontrollera posten och rätta det felaktiga värdet eller datumet innan du sparar."
   }
 }

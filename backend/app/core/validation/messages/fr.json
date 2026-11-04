@@ -1946,5 +1946,12 @@
       "fail": "L'essai échoué n'a pas de commentaire décrivant ce qui a été constaté."
     },
     "suggestion": "Consignez la résolution ou le constat, et terminez les contrôles préalables et essais fonctionnels avant la clôture."
+  },
+  "site": {
+    "future_date": "La date {field} ({value}) est dans le futur.",
+    "contradiction": "{field} ({value}) contredit {other_field} ({other_value}).",
+    "required_when": "{field} doit être renseigné lorsque {other_field} vaut {other_value}.",
+    "limit_exceeded": "{field} ({value}) dépasse la limite {limit} fixée par {limit_field}.",
+    "suggestion": "Vérifiez la fiche et corrigez la valeur ou la date erronée avant d'enregistrer."
   }
 }

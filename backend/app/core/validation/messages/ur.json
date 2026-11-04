@@ -1946,5 +1946,12 @@
       "fail": "ناکام ٹیسٹ پر مشاہدے کی وضاحت والا نتیجہ نوٹ نہیں ہے۔"
     },
     "suggestion": "حل یا مشاہدہ درج کریں اور بند کرنے سے پہلے ابتدائی جانچیں اور فعلی ٹیسٹ مکمل کریں۔"
+  },
+  "site": {
+    "future_date": "تاریخ {field} ({value}) مستقبل میں ہے۔",
+    "contradiction": "{field} ({value}) اور {other_field} ({other_value}) میں تضاد ہے۔",
+    "required_when": "جب {other_field} کی قدر {other_value} ہو تو {field} درج کرنا ضروری ہے۔",
+    "limit_exceeded": "{field} ({value}) اس حد {limit} سے تجاوز کرتا ہے جو {limit_field} نے مقرر کی ہے۔",
+    "suggestion": "ریکارڈ کی جانچ کریں اور محفوظ کرنے سے پہلے غلط قدر یا تاریخ درست کریں۔"
   }
 }

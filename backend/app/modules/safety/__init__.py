@@ -14,3 +14,7 @@ async def on_startup() -> None:
 
     register_safety_permissions()
     register_subscribers()
+
+    from app.modules.safety.validators import register_safety_validation_rules
+
+    register_safety_validation_rules()

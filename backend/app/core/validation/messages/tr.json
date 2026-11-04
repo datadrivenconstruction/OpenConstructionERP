@@ -1946,5 +1946,12 @@
       "fail": "Başarısız testte gözlemlenenleri anlatan sonuç notu yok."
     },
     "suggestion": "Çözümü veya gözlemi kaydedin; kapatmadan önce ön kontrolleri ve işlevsel testleri tamamlayın."
+  },
+  "site": {
+    "future_date": "{field} tarihi ({value}) gelecektedir.",
+    "contradiction": "{field} ({value}), {other_field} ({other_value}) ile çelişiyor.",
+    "required_when": "{other_field} değeri {other_value} olduğunda {field} belirtilmelidir.",
+    "limit_exceeded": "{field} ({value}), {limit_field} tarafından belirlenen {limit} sınırını aşıyor.",
+    "suggestion": "Kaydı kontrol edin ve kaydetmeden önce hatalı değeri veya tarihi düzeltin."
   }
 }

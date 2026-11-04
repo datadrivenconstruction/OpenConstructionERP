@@ -1946,5 +1946,12 @@
       "fail": "विफल परीक्षण पर देखे गए का वर्णन करने वाला परिणाम नोट नहीं है।"
     },
     "suggestion": "समाधान या अवलोकन दर्ज करें, और बंद करने से पहले प्रारंभिक जाँचें व कार्यात्मक परीक्षण पूरे करें।"
+  },
+  "site": {
+    "future_date": "तारीख {field} ({value}) भविष्य में है।",
+    "contradiction": "{field} ({value}) और {other_field} ({other_value}) में विरोध है।",
+    "required_when": "जब {other_field} का मान {other_value} हो, तब {field} दर्ज करना आवश्यक है।",
+    "limit_exceeded": "{field} ({value}) उस सीमा {limit} से अधिक है जो {limit_field} ने तय की है।",
+    "suggestion": "रिकॉर्ड जाँचें और सहेजने से पहले गलत मान या तारीख ठीक करें।"
   }
 }

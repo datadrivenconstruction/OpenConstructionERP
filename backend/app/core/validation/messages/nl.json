@@ -1946,5 +1946,12 @@
       "fail": "De mislukte test heeft geen notitie met wat is waargenomen."
     },
     "suggestion": "Leg de oplossing of waarneming vast en rond voorcontroles en functionele testen af vóór afsluiting."
+  },
+  "site": {
+    "future_date": "De datum {field} ({value}) ligt in de toekomst.",
+    "contradiction": "{field} ({value}) is in strijd met {other_field} ({other_value}).",
+    "required_when": "{field} moet worden ingevuld wanneer {other_field} gelijk is aan {other_value}.",
+    "limit_exceeded": "{field} ({value}) overschrijdt de grens {limit} van {limit_field}.",
+    "suggestion": "Controleer het record en corrigeer de onjuiste waarde of datum voordat u opslaat."
   }
 }

@@ -1946,5 +1946,12 @@
       "fail": "Den dumpede prøve har ingen note om, hvad der blev konstateret."
     },
     "suggestion": "Registrer afhjælpningen eller iagttagelsen, og afslut forkontroller og funktionsprøver før lukning."
+  },
+  "site": {
+    "future_date": "Datoen {field} ({value}) ligger i fremtiden.",
+    "contradiction": "{field} ({value}) er i modstrid med {other_field} ({other_value}).",
+    "required_when": "{field} skal angives, når {other_field} er {other_value}.",
+    "limit_exceeded": "{field} ({value}) overskrider grænsen {limit} fastsat af {limit_field}.",
+    "suggestion": "Kontrollér posten, og ret den forkerte værdi eller dato, før du gemmer."
   }
 }

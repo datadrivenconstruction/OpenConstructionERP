@@ -1946,5 +1946,12 @@
       "fail": "Thử nghiệm không đạt chưa có ghi chú mô tả điều đã quan sát."
     },
     "suggestion": "Ghi nhận giải pháp hoặc quan sát, và hoàn tất kiểm tra sơ bộ cùng thử nghiệm chức năng trước khi đóng."
+  },
+  "site": {
+    "future_date": "Ngày {field} ({value}) nằm trong tương lai.",
+    "contradiction": "{field} ({value}) mâu thuẫn với {other_field} ({other_value}).",
+    "required_when": "Phải nhập {field} khi {other_field} là {other_value}.",
+    "limit_exceeded": "{field} ({value}) vượt quá giới hạn {limit} do {limit_field} quy định.",
+    "suggestion": "Kiểm tra bản ghi và sửa giá trị hoặc ngày sai trước khi lưu."
   }
 }

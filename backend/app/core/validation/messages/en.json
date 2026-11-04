@@ -1946,5 +1946,12 @@
       "fail": "The failed test has no result note describing what was observed."
     },
     "suggestion": "Record the resolution or observation, and complete the pre-functional checks and functional tests before closing out."
+  },
+  "site": {
+    "future_date": "The date {field} ({value}) lies in the future.",
+    "contradiction": "{field} ({value}) contradicts {other_field} ({other_value}).",
+    "required_when": "{field} must be stated when {other_field} is {other_value}.",
+    "limit_exceeded": "{field} ({value}) exceeds the limit {limit} set by {limit_field}.",
+    "suggestion": "Check the record and correct the figure or date that is wrong before saving."
   }
 }

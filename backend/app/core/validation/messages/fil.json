@@ -1946,5 +1946,12 @@
       "fail": "Ang bumagsak na pagsubok ay walang tala na naglalarawan ng naobserbahan."
     },
     "suggestion": "Itala ang solusyon o obserbasyon, at tapusin ang mga paunang pagsusuri at functional test bago isara."
+  },
+  "site": {
+    "future_date": "Ang petsang {field} ({value}) ay nasa hinaharap.",
+    "contradiction": "Ang {field} ({value}) ay sumasalungat sa {other_field} ({other_value}).",
+    "required_when": "Dapat tukuyin ang {field} kapag ang {other_field} ay {other_value}.",
+    "limit_exceeded": "Ang {field} ({value}) ay lumampas sa limitasyong {limit} na itinakda ng {limit_field}.",
+    "suggestion": "Suriin ang tala at itama ang maling halaga o petsa bago i-save."
   }
 }

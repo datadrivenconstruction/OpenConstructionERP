@@ -1946,5 +1946,12 @@
       "fail": "Läbikukkunud katsel puudub märkus tuvastatu kohta."
     },
     "suggestion": "Registreerige lahendus või tähelepanek ning lõpetage eelkontrollid ja funktsionaalkatsed enne sulgemist."
+  },
+  "site": {
+    "future_date": "Kuupäev {field} ({value}) on tulevikus.",
+    "contradiction": "{field} ({value}) on vastuolus väljaga {other_field} ({other_value}).",
+    "required_when": "Väli {field} tuleb täita, kui {other_field} on {other_value}.",
+    "limit_exceeded": "{field} ({value}) ületab piirmäära {limit}, mille määrab {limit_field}.",
+    "suggestion": "Kontrollige kirjet ja parandage enne salvestamist vigane väärtus või kuupäev."
   }
 }

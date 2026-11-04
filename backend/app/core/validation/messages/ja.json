@@ -1946,5 +1946,12 @@
       "fail": "不合格の試験に、確認内容を記した結果メモがありません。"
     },
     "suggestion": "是正内容または所見を記録し、完了前に事前点検と機能試験を終えてください。"
+  },
+  "site": {
+    "future_date": "日付 {field}（{value}）が未来になっています。",
+    "contradiction": "{field}（{value}）が {other_field}（{other_value}）と矛盾しています。",
+    "required_when": "{other_field} が {other_value} の場合は {field} の入力が必要です。",
+    "limit_exceeded": "{field}（{value}）が {limit_field} で定められた上限 {limit} を超えています。",
+    "suggestion": "記録を確認し、保存する前に誤った値または日付を修正してください。"
   }
 }

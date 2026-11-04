@@ -1946,5 +1946,12 @@
       "fail": "آزمون ناموفق یادداشتی درباره آنچه مشاهده شده ندارد."
     },
     "suggestion": "راه‌حل یا مشاهده را ثبت کنید و پیش از بستن، بررسی‌های مقدماتی و آزمون‌های عملکردی را کامل کنید."
+  },
+  "site": {
+    "future_date": "تاریخ {field} ({value}) در آینده است.",
+    "contradiction": "{field} ({value}) با {other_field} ({other_value}) در تناقض است.",
+    "required_when": "وقتی {other_field} برابر {other_value} است، باید {field} مشخص شود.",
+    "limit_exceeded": "{field} ({value}) از حد مجاز {limit} که {limit_field} تعیین کرده فراتر می‌رود.",
+    "suggestion": "رکورد را بررسی کنید و پیش از ذخیره، مقدار یا تاریخ نادرست را اصلاح کنید."
   }
 }

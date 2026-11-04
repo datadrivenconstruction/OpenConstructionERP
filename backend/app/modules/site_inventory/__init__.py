@@ -17,3 +17,7 @@ async def on_startup() -> None:
     from app.modules.site_inventory.permissions import register_site_inventory_permissions
 
     register_site_inventory_permissions()
+
+    from app.modules.site_inventory.validators import register_site_inventory_validation_rules
+
+    register_site_inventory_validation_rules()

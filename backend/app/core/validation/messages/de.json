@@ -1946,5 +1946,12 @@
       "fail": "Zur fehlgeschlagenen Prüfung fehlt ein Vermerk mit der festgestellten Abweichung."
     },
     "suggestion": "Behebung oder Feststellung dokumentieren und Vorprüfungen sowie Funktionsprüfungen vor dem Abschluss beenden."
+  },
+  "site": {
+    "future_date": "Das Datum {field} ({value}) liegt in der Zukunft.",
+    "contradiction": "{field} ({value}) widerspricht {other_field} ({other_value}).",
+    "required_when": "{field} muss angegeben werden, wenn {other_field} den Wert {other_value} hat.",
+    "limit_exceeded": "{field} ({value}) überschreitet den Grenzwert {limit} aus {limit_field}.",
+    "suggestion": "Prüfen Sie den Datensatz und korrigieren Sie vor dem Speichern die falsche Angabe oder das falsche Datum."
   }
 }

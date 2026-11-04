@@ -1946,5 +1946,12 @@
       "fail": "Uji yang gagal tidak memiliki catatan hasil yang menjelaskan apa yang teramati."
     },
     "suggestion": "Catat penyelesaian atau pengamatan, dan selesaikan pemeriksaan pendahuluan serta uji fungsi sebelum penutupan."
+  },
+  "site": {
+    "future_date": "Tanggal {field} ({value}) berada di masa depan.",
+    "contradiction": "{field} ({value}) bertentangan dengan {other_field} ({other_value}).",
+    "required_when": "{field} harus diisi bila {other_field} bernilai {other_value}.",
+    "limit_exceeded": "{field} ({value}) melebihi batas {limit} yang ditetapkan oleh {limit_field}.",
+    "suggestion": "Periksa catatan dan perbaiki nilai atau tanggal yang salah sebelum menyimpan."
   }
 }

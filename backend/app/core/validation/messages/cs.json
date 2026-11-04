@@ -1946,5 +1946,12 @@
       "fail": "Neúspěšná zkouška nemá poznámku popisující zjištěný stav."
     },
     "suggestion": "Zaznamenejte řešení nebo zjištění a před uzavřením dokončete předběžné kontroly a funkční zkoušky."
+  },
+  "site": {
+    "future_date": "Datum {field} ({value}) leží v budoucnosti.",
+    "contradiction": "{field} ({value}) je v rozporu s {other_field} ({other_value}).",
+    "required_when": "{field} je nutné uvést, pokud {other_field} je {other_value}.",
+    "limit_exceeded": "{field} ({value}) překračuje limit {limit} daný položkou {limit_field}.",
+    "suggestion": "Zkontrolujte záznam a před uložením opravte chybnou hodnotu nebo datum."
   }
 }

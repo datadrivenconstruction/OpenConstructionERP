@@ -1946,5 +1946,12 @@
       "fail": "Proba eșuată nu are o notă care să descrie constatarea."
     },
     "suggestion": "Consemnați rezolvarea sau constatarea și încheiați verificările prealabile și probele funcționale înainte de închidere."
+  },
+  "site": {
+    "future_date": "Data {field} ({value}) este în viitor.",
+    "contradiction": "{field} ({value}) contrazice {other_field} ({other_value}).",
+    "required_when": "{field} trebuie completat atunci când {other_field} este {other_value}.",
+    "limit_exceeded": "{field} ({value}) depășește limita {limit} stabilită de {limit_field}.",
+    "suggestion": "Verificați înregistrarea și corectați valoarea sau data greșită înainte de salvare."
   }
 }

@@ -1946,5 +1946,12 @@
       "fail": "O ensaio reprovado não tem nota a descrever o que foi observado."
     },
     "suggestion": "Registe a resolução ou a observação e conclua as verificações prévias e os ensaios funcionais antes do encerramento."
+  },
+  "site": {
+    "future_date": "A data {field} ({value}) está no futuro.",
+    "contradiction": "{field} ({value}) contradiz {other_field} ({other_value}).",
+    "required_when": "{field} deve ser informado quando {other_field} é {other_value}.",
+    "limit_exceeded": "{field} ({value}) excede o limite {limit} definido por {limit_field}.",
+    "suggestion": "Verifique o registo e corrija o valor ou a data incorretos antes de guardar."
   }
 }

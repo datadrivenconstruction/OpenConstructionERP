@@ -1946,5 +1946,12 @@
       "fail": "Oʻtmagan sinovda aniqlanganlar tavsiflangan natija izohi yoʻq."
     },
     "suggestion": "Yechim yoki kuzatuvni qayd eting va yopishdan oldin dastlabki tekshiruvlar va funksional sinovlarni yakunlang."
+  },
+  "site": {
+    "future_date": "{field} sanasi ({value}) kelajakda.",
+    "contradiction": "{field} ({value}) qiymati {other_field} ({other_value}) qiymatiga zid.",
+    "required_when": "{other_field} qiymati {other_value} boʻlganda {field} koʻrsatilishi shart.",
+    "limit_exceeded": "{field} ({value}) {limit_field} belgilagan {limit} chegarasidan oshib ketdi.",
+    "suggestion": "Yozuvni tekshiring va saqlashdan oldin notoʻgʻri qiymat yoki sanani tuzating."
   }
 }

@@ -1946,5 +1946,12 @@
       "fail": "La prova fallita non ha una nota che descriva quanto rilevato."
     },
     "suggestion": "Registrare la risoluzione o l'osservazione e completare le verifiche preliminari e le prove funzionali prima della chiusura."
+  },
+  "site": {
+    "future_date": "La data {field} ({value}) è nel futuro.",
+    "contradiction": "{field} ({value}) è in contraddizione con {other_field} ({other_value}).",
+    "required_when": "{field} deve essere indicato quando {other_field} è {other_value}.",
+    "limit_exceeded": "{field} ({value}) supera il limite {limit} stabilito da {limit_field}.",
+    "suggestion": "Controlli il record e corregga il valore o la data errati prima di salvare."
   }
 }
