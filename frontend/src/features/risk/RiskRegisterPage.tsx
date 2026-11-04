@@ -19,7 +19,7 @@ import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { UserSearchInput } from '@/shared/ui/UserSearchInput';
 import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
-import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { fmtPercent, fmtFixed, fmtCurrency } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { SeenOnBadge } from '@/features/lessons-learned/SeenOnBadge';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -29,7 +29,6 @@ import { ContingencyCard } from './ContingencyCard';
 import { riskGuide } from './riskGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildRiskInsights } from './riskInsights';
-import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 const RISK_TAB_IDS = ['register', 'montecarlo'] as const;
 type RiskTab = (typeof RISK_TAB_IDS)[number];
@@ -114,10 +113,9 @@ const IMPACT_LABEL_FALLBACK: Record<string, string> = {
 
 const selectCls = 'h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors pr-7 appearance-none cursor-pointer';
 
-function fmtCur(n: number, c = 'EUR') {
-  const s = /^[A-Z]{3}$/.test(c) ? c : 'EUR';
-  try { return new Intl.NumberFormat(getNumberLocale(), { style: 'currency', currency: s, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n); }
-  catch { return `${fmtFixed(n, 0)} ${s}`; }
+// A risk with no currency renders a bare number; labelling it EUR would be a guess.
+export function fmtCur(n: number, c = '') {
+  return fmtCurrency(n, c);
 }
 
 function matrixColor(prob: string, impact: string) {
@@ -349,7 +347,7 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
             </div>
             <div>
               <label htmlFor="risk-schedule-days" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
-              <input id="risk-schedule-days" type="number" min={0} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
+              <input id="risk-schedule-days" type="number" min={0} max={36500} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
             </div>
           </div>
           <div>
@@ -743,7 +741,7 @@ export function RiskRegisterPage() {
   // useModuleInsights. Declared before the detail-view early return below so
   // the hook order stays stable.
   const insights = useModuleInsights('risk', { defaultOpen: true });
-  const currency = project?.currency || summary?.currency || 'EUR';
+  const currency = project?.currency || summary?.currency || '';
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildRiskInsights(risks, currency, t),
     [risks, currency, t],

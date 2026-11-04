@@ -7,7 +7,18 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+
+
+def _real_calendar_date(value: str | None) -> str | None:
+    """Reject shapes like 2026-13-45 that satisfy the digit pattern but are no date."""
+    if value is not None:
+        try:
+            date.fromisoformat(value)
+        except ValueError as exc:
+            raise ValueError("incident_date must be a real calendar date (YYYY-MM-DD)") from exc
+    return value
+
 
 # ── Incident schemas ─────────────────────────────────────────────────────
 
@@ -44,7 +55,7 @@ class IncidentCreate(BaseModel):
         default=None,
         pattern=r"^(first_aid|medical|hospital|fatality)$",
     )
-    days_lost: int = Field(default=0, ge=0)
+    days_lost: int = Field(default=0, ge=0, le=36500)
     root_cause: str | None = Field(default=None, max_length=5000)
     corrective_actions: list[CorrectiveActionEntry] = Field(default_factory=list)
     reported_to_regulator: bool = False
@@ -57,6 +68,8 @@ class IncidentCreate(BaseModel):
     geo_lat: float | None = Field(default=None, ge=-90, le=90)
     geo_lon: float | None = Field(default=None, ge=-180, le=180)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    _check_incident_date = field_validator("incident_date")(_real_calendar_date)
 
 
 class IncidentUpdate(BaseModel):
@@ -81,7 +94,7 @@ class IncidentUpdate(BaseModel):
         default=None,
         pattern=r"^(first_aid|medical|hospital|fatality)$",
     )
-    days_lost: int | None = Field(default=None, ge=0)
+    days_lost: int | None = Field(default=None, ge=0, le=36500)
     root_cause: str | None = Field(default=None, max_length=5000)
     corrective_actions: list[CorrectiveActionEntry] | None = None
     reported_to_regulator: bool | None = None
@@ -92,6 +105,8 @@ class IncidentUpdate(BaseModel):
     geo_lat: float | None = Field(default=None, ge=-90, le=90)
     geo_lon: float | None = Field(default=None, ge=-180, le=180)
     metadata: dict[str, Any] | None = None
+
+    _check_incident_date = field_validator("incident_date")(_real_calendar_date)
 
 
 class IncidentResponse(BaseModel):
