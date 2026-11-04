@@ -425,7 +425,7 @@ def _plan_plugs(
             amount = parse_money(row.get("amount"))
             if amount is None:
                 continue
-            if amount == 0:
+            if amount <= 0:  # a free line or a credit is an answer, not a gap
                 zero_on_purpose.setdefault(bid_id, set()).add(line_id)
             previous = rows.get(line_id)
             base = previous[0] if previous and previous[1] not in GAP_STATUSES else Decimal("0")
