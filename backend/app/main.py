@@ -107,7 +107,7 @@ from app.core.self_upgrade import (
     runtime_upgrade_enabled,
     runtime_upgrade_refusal,
 )
-from app.dependencies import RequireRole, get_current_user_id, rls_request_context
+from app.dependencies import RequireRole, get_current_user_id, get_current_user_payload, rls_request_context
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -4104,6 +4104,7 @@ def create_app() -> FastAPI:
         demo_id: str,
         force: bool = False,
         _user_id: str = Depends(get_current_user_id),
+        _payload: dict[str, Any] = Depends(get_current_user_payload),
     ) -> dict[str, Any]:
         """Install a demo project with full BOQ, Schedule, Budget, and Tendering data.
 
@@ -4111,8 +4112,14 @@ def create_app() -> FastAPI:
         with ``already_installed=True`` unless ``force=True`` query param is set,
         in which case the old demo is deleted and recreated.
         """
+        from app.core.demo_marker import force_reinstall_allowed
         from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
         from app.database import async_session_factory
+
+        if not force_reinstall_allowed(_payload.get("role"), force):
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=403, detail="Only an administrator can reinstall a demo project")
 
         if demo_id not in DEMO_TEMPLATES:
             from fastapi import HTTPException
