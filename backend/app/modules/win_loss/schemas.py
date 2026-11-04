@@ -9,10 +9,14 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 Outcome = Literal["pending", "won", "lost", "withdrawn", "no_decision"]
 LostReason = Literal["price", "scope", "schedule", "relationship", "capacity", "other"]
+
+
+def _upper(value: str | None) -> str | None:
+    return value.strip().upper() if value is not None else None
 
 
 class BidOutcomeCreate(BaseModel):
@@ -33,6 +37,8 @@ class BidOutcomeCreate(BaseModel):
     lost_reason: LostReason | None = None
     notes: str = ""
 
+    _currency_upper = field_validator("currency")(_upper)
+
 
 class BidOutcomeUpdate(BaseModel):
     """Patch a ledger entry; only the sent fields change."""
@@ -51,6 +57,8 @@ class BidOutcomeUpdate(BaseModel):
     competitor_count: int | None = Field(default=None, ge=0, le=500)
     lost_reason: LostReason | None = None
     notes: str | None = None
+
+    _currency_upper = field_validator("currency")(_upper)
 
 
 class ValidationFinding(BaseModel):

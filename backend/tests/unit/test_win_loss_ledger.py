@@ -142,3 +142,36 @@ async def test_the_rule_set_reports_in_the_requested_language() -> None:
     clean = {**payload, "winning_price": "90", "competitor_count": 3, "lost_reason": "price"}
     ok = await engine.validate(data=clean, rule_sets=["bid_outcome"], target_type="bid_outcome")
     assert all(r.passed for r in ok.results)
+
+
+def test_currency_is_normalised_to_upper_case() -> None:
+    entry = BidOutcomeCreate(title="T", our_price=Decimal("1"), currency=" eur ")
+    assert entry.currency == "EUR"
+
+
+@pytest.mark.asyncio
+async def test_listing_hides_entries_of_projects_the_caller_cannot_reach() -> None:
+    import uuid
+
+    from app.modules.win_loss.repository import BidOutcomeRepository
+
+    seen: list[str] = []
+
+    class _Result:
+        def scalars(self) -> _Result:
+            return self
+
+        def all(self) -> list:
+            return []
+
+    class _Session:
+        async def execute(self, stmt: object) -> _Result:
+            seen.append(str(stmt))
+            return _Result()
+
+    repo = BidOutcomeRepository(_Session())  # type: ignore[arg-type]
+    await repo.list_all(project_ids={uuid.uuid4()})
+    await repo.list_all(project_ids=None)
+    scoped, open_ = seen
+    assert "project_id IS NULL OR" in scoped and "project_id IN" in scoped
+    assert "project_id IN" not in open_
