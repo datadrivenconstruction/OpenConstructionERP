@@ -88,7 +88,11 @@ def _to_response(item: object) -> NCRResponse:
         location_accuracy_m=item.location_accuracy_m,  # type: ignore[attr-defined]
         linked_inspection_id=item.linked_inspection_id,  # type: ignore[attr-defined]
         change_order_id=item.change_order_id,  # type: ignore[attr-defined]
+        due_date=item.due_date,  # type: ignore[attr-defined]
+        verified_by=item.verified_by,  # type: ignore[attr-defined]
+        verified_at=item.verified_at,  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", []),
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
@@ -169,7 +173,7 @@ async def update_ncr(
     """Update a non-conformance report."""
     existing = await service.get_ncr(ncr_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    ncr = await service.update_ncr(ncr_id, data)
+    ncr = await service.update_ncr(ncr_id, data, user_id=str(user_id) if user_id else None)
     return _to_response(ncr)
 
 
@@ -372,5 +376,5 @@ async def close_ncr(
     # mutating it (ncr.update is a global role, not project-scoped).
     ncr = await service.get_ncr(ncr_id)
     await verify_project_access(ncr.project_id, str(user_id), session)
-    ncr = await service.close_ncr(ncr_id)
+    ncr = await service.close_ncr(ncr_id, verified_by=str(user_id) if user_id else None)
     return _to_response(ncr)

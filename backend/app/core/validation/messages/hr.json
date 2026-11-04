@@ -1748,7 +1748,7 @@
       "suggestion": "Dovršite ili ponovno zakažite, ili zatvorite uz razlog."
     },
     "result_contradicts_checklist": {
-      "fail": "Rezultat je {result}, ali {count} stavki kontrolnog popisa nije prošlo.",
+      "fail": "Rezultat je {result}, ali nije prošlo stavki kontrolnog popisa: {count}.",
       "suggestion": "Ispravite rezultat ili pregledajte stavke koje nisu prošle."
     }
   }

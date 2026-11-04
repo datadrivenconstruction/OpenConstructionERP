@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠NCR Pydantic schemas - request/response models."""
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -49,6 +49,7 @@ class NCRCreate(BaseModel):
     # Soft link to a contract package (id or code); scopes this report for package acceptance.
     package_ref: str | None = Field(default=None, max_length=64)
     change_order_id: str | None = Field(default=None, max_length=36)
+    due_date: date | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -105,6 +106,7 @@ class NCRUpdate(BaseModel):
     # Soft link to a contract package (id or code); scopes this report for package acceptance.
     package_ref: str | None = Field(default=None, max_length=64)
     change_order_id: str | None = Field(default=None, max_length=36)
+    due_date: date | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -134,7 +136,12 @@ class NCRResponse(BaseModel):
     linked_inspection_id: str | None = None
     package_ref: str | None = None
     change_order_id: str | None = None
+    due_date: date | None = None
+    verified_by: str | None = None
+    verified_at: datetime | None = None
     created_by: str | None = None
+    # Non-blocking findings of the ncr rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

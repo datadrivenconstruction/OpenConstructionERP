@@ -1748,8 +1748,8 @@
       "suggestion": "Fejezze be vagy ütemezze újra, vagy zárja le indoklással."
     },
     "result_contradicts_checklist": {
-      "fail": "Az eredmény {result}, de {count} ellenőrzőlista-tétel megbukott.",
-      "suggestion": "Javítsa az eredményt, vagy vizsgálja át a megbukott tételeket."
+      "fail": "Az eredmény {result}, de {count} ellenőrzőlista-tétel nem felelt meg.",
+      "suggestion": "Javítsa az eredményt, vagy vizsgálja át a nem megfelelő tételeket."
     }
   }
 }

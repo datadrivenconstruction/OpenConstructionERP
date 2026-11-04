@@ -1748,8 +1748,8 @@
       "suggestion": "Rond het af of plan opnieuw in, of sluit het af met een reden."
     },
     "result_contradicts_checklist": {
-      "fail": "Het resultaat is {result}, maar {count} checklistpunten zijn mislukt.",
-      "suggestion": "Corrigeer het resultaat of controleer de mislukte punten."
+      "fail": "Het resultaat is {result}, maar {count} checklistpunten zijn afgekeurd.",
+      "suggestion": "Corrigeer het resultaat of controleer de afgekeurde punten."
     }
   }
 }

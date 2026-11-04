@@ -4,6 +4,7 @@
 
 import logging
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -12,10 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # event_bus stays importable here: tests/unit/test_ncr.py patches
 # app.modules.ncr.service.event_bus.publish.
 from app.core.events import event_bus, publish_after_commit  # noqa: F401
+from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
+from app.core.validation.engine import ValidationReport, validation_engine
+from app.core.validation.quality_rules import rule_errors_detail, warning_findings
 from app.modules.ncr.models import NCR
 from app.modules.ncr.repository import NCRRepository
 from app.modules.ncr.schemas import NCRCreate, NCRUpdate
+from app.modules.ncr.validators import NCR_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +92,44 @@ class NCRService:
             )
         return str(order_uuid)
 
+    async def _check_rules(
+        self, state: dict[str, Any], *, ncr_id: str, project_id: uuid.UUID, operation: str
+    ) -> ValidationReport:
+        """Run the ``ncr`` rule set over the record as it will be stored; ERROR findings answer 422.
+
+        WARNING findings do not block: the caller attaches them to the response.
+        """
+        report = await validation_engine.validate(
+            data={"ncr": {**state, "id": ncr_id}},
+            rule_sets=[NCR_RULE_SET],
+            target_type="ncr",
+            target_id=ncr_id,
+            project_id=str(project_id),
+            metadata={"locale": get_locale(), "operation": operation},
+        )
+        if report.has_errors:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=rule_errors_detail(
+                    report,
+                    f"This NCR cannot be saved ({operation}) until the errors listed below are corrected.",
+                ),
+            )
+        return report
+
+    @staticmethod
+    def _state_of(ncr: NCR) -> dict[str, Any]:
+        return {
+            "status": ncr.status,
+            "severity": ncr.severity,
+            "description": ncr.description,
+            "root_cause": ncr.root_cause,
+            "corrective_action": ncr.corrective_action,
+            "verified_by": ncr.verified_by,
+            "cost_impact": ncr.cost_impact,
+            "due_date": ncr.due_date,
+        }
+
     async def create_ncr(
         self,
         data: NCRCreate,
@@ -96,6 +139,17 @@ class NCRService:
         change_order_id = data.change_order_id or None
         if change_order_id:
             change_order_id = await self._check_change_order(data.project_id, change_order_id)
+        state = {
+            "status": data.status,
+            "severity": data.severity,
+            "description": data.description,
+            "root_cause": data.root_cause,
+            "corrective_action": data.corrective_action,
+            "verified_by": None,
+            "cost_impact": data.cost_impact,
+            "due_date": data.due_date,
+        }
+        report = await self._check_rules(state, ncr_id="", project_id=data.project_id, operation="create")
         ncr = NCR(
             project_id=data.project_id,
             title=data.title,
@@ -116,10 +170,12 @@ class NCRService:
             linked_inspection_id=data.linked_inspection_id,
             package_ref=data.package_ref,
             change_order_id=change_order_id,
+            due_date=data.due_date,
             created_by=user_id,
             metadata_=data.metadata,
         )
         ncr = await self.repo.create(ncr)
+        ncr.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         # The repository assigns ncr_number (with a collision retry) at insert
         # time, so read the committed value back for logging and notifications.
         ncr_number = ncr.ncr_number
@@ -243,6 +299,7 @@ class NCRService:
         self,
         ncr_id: uuid.UUID,
         data: NCRUpdate,
+        user_id: str | None = None,
     ) -> NCR:
         ncr = await self.get_ncr(ncr_id)
 
@@ -298,6 +355,14 @@ class NCRService:
         if not fields:
             return ncr
 
+        # Closing through a status patch is a verification too: the caller is the verifier.
+        if new_status == "closed" and user_id and not ncr.verified_by:
+            fields["verified_by"] = user_id
+            fields["verified_at"] = datetime.now(UTC)
+
+        state = {**self._state_of(ncr), **{k: v for k, v in fields.items() if k in self._state_of(ncr)}}
+        report = await self._check_rules(state, ncr_id=str(ncr_id), project_id=ncr.project_id, operation="update")
+
         await self.repo.update_fields(ncr_id, **fields)
         await self.session.refresh(ncr)
 
@@ -321,6 +386,7 @@ class NCRService:
                 logger.debug("FSM audit log skipped for NCR %s update", ncr_id)
 
         logger.info("NCR updated: %s (fields=%s)", ncr_id, list(fields.keys()))
+        ncr.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return ncr
 
     async def delete_ncr(self, ncr_id: uuid.UUID) -> None:
@@ -337,7 +403,7 @@ class NCRService:
         await self.repo.delete(ncr_id)
         logger.info("NCR deleted: %s", ncr_id)
 
-    async def close_ncr(self, ncr_id: uuid.UUID) -> NCR:
+    async def close_ncr(self, ncr_id: uuid.UUID, verified_by: str | None = None) -> NCR:
         """Close an NCR after verification.
 
         Closing requires a corrective action to be recorded.  When the NCR
@@ -372,8 +438,15 @@ class NCRService:
                 detail="Cannot close an NCR without a corrective action",
             )
 
+        verifier = verified_by or ncr.verified_by
+        state = {**self._state_of(ncr), "status": "closed", "verified_by": verifier}
+        report = await self._check_rules(state, ncr_id=str(ncr_id), project_id=ncr.project_id, operation="close")
+
         prior_status = ncr.status
-        await self.repo.update_fields(ncr_id, status="closed")
+        closing: dict[str, Any] = {"status": "closed"}
+        if verified_by:
+            closing.update(verified_by=verified_by, verified_at=datetime.now(UTC))
+        await self.repo.update_fields(ncr_id, **closing)
         await self.session.refresh(ncr)
 
         try:
@@ -394,6 +467,7 @@ class NCRService:
             logger.debug("FSM audit log skipped for NCR %s close", ncr_id)
 
         logger.info("NCR closed: %s", ncr_id)
+        ncr.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
 
         # Emit event for variation creation when cost impact exists. Deferred
         # to the commit: the change orders subscriber reads this NCR from its

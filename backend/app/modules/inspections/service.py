@@ -10,10 +10,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import publish_after_commit
+from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
+from app.core.validation.engine import ValidationReport, validation_engine
+from app.core.validation.quality_rules import rule_errors_detail, warning_findings
 from app.modules.inspections.models import QualityInspection
 from app.modules.inspections.repository import InspectionRepository
 from app.modules.inspections.schemas import InspectionCreate, InspectionUpdate
+from app.modules.inspections.validators import INSPECTIONS_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +73,41 @@ class InspectionService:
         self.session = session
         self.repo = InspectionRepository(session)
 
+    async def _check_rules(
+        self, state: dict[str, Any], *, inspection_id: str, project_id: uuid.UUID, operation: str
+    ) -> ValidationReport:
+        """Run the ``inspections`` rule set over the record as it will be stored; ERROR findings answer 422.
+
+        WARNING findings do not block: the caller attaches them to the response.
+        """
+        report = await validation_engine.validate(
+            data={"inspection": {**state, "id": inspection_id}},
+            rule_sets=[INSPECTIONS_RULE_SET],
+            target_type="inspection",
+            target_id=inspection_id,
+            project_id=str(project_id),
+            metadata={"locale": get_locale(), "operation": operation},
+        )
+        if report.has_errors:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=rule_errors_detail(
+                    report,
+                    f"This inspection cannot be saved ({operation}) until the errors listed below are corrected.",
+                ),
+            )
+        return report
+
+    @staticmethod
+    def _state_of(inspection: QualityInspection) -> dict[str, Any]:
+        return {
+            "status": inspection.status,
+            "result": inspection.result,
+            "inspector_id": inspection.inspector_id,
+            "inspection_date": inspection.inspection_date,
+            "checklist_data": inspection.checklist_data,
+        }
+
     async def create_inspection(
         self,
         data: InspectionCreate,
@@ -82,6 +121,18 @@ class InspectionService:
         if checklist:
             _validate_checklist_structure(checklist)
 
+        report = await self._check_rules(
+            {
+                "status": data.status,
+                "result": data.result,
+                "inspector_id": data.inspector_id,
+                "inspection_date": data.inspection_date,
+                "checklist_data": checklist,
+            },
+            inspection_id="",
+            project_id=data.project_id,
+            operation="create",
+        )
         inspection = QualityInspection(
             project_id=data.project_id,
             inspection_type=data.inspection_type,
@@ -98,6 +149,7 @@ class InspectionService:
             metadata_=data.metadata,
         )
         inspection = await self.repo.create(inspection)
+        inspection.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         # The repository assigns inspection_number (with a collision retry) at
         # insert time, so read the committed value back for logging.
         inspection_number = inspection.inspection_number
@@ -231,12 +283,18 @@ class InspectionService:
         if not fields:
             return inspection
 
+        state = {**self._state_of(inspection), **{k: v for k, v in fields.items() if k in self._state_of(inspection)}}
+        report = await self._check_rules(
+            state, inspection_id=str(inspection_id), project_id=inspection.project_id, operation="update"
+        )
+
         await self.repo.update_fields(inspection_id, **fields)
         await self.session.refresh(inspection)
         logger.info("Inspection updated: %s (fields=%s)", inspection_id, list(fields.keys()))
         after = (inspection.status, str(inspection.inspector_id or ""), inspection.inspection_date)
         if inspection.status == "scheduled" and after != before:
             self._announce_scheduled(inspection, user_id)
+        inspection.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return inspection
 
     async def delete_inspection(self, inspection_id: uuid.UUID) -> None:
@@ -310,12 +368,19 @@ class InspectionService:
                 ),
             )
 
+        report = await self._check_rules(
+            {**self._state_of(inspection), "status": "completed", "result": result},
+            inspection_id=str(inspection_id),
+            project_id=inspection.project_id,
+            operation="complete",
+        )
         await self.repo.update_fields(
             inspection_id,
             status="completed",
             result=result,
         )
         await self.session.refresh(inspection)
+        inspection.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Inspection completed: %s (result=%s)", inspection_id, result)
 
         # Emit event for failed/partial inspections -> punchlist creation flow
