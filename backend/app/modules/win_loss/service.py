@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.i18n import get_locale
 from app.core.validation.engine import validation_engine
+from app.dependencies import accessible_project_ids, verify_project_access
 from app.modules.win_loss.analytics import dominant_currency, price_gap, size_band, summarize
 from app.modules.win_loss.models import BidOutcome
 from app.modules.win_loss.repository import BidOutcomeRepository
@@ -40,6 +41,20 @@ class WinLossService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.repo = BidOutcomeRepository(session)
+        self.session = session
+
+    async def list_entries(
+        self, user_id: str, *, outcome: str | None = None, client: str | None = None, limit: int = 500
+    ) -> list[BidOutcome]:
+        ids = await accessible_project_ids(self.session, user_id)
+        return await self.repo.list_all(outcome=outcome, client=client, limit=limit, project_ids=ids)
+
+    async def get_for_user(self, entry_id: uuid.UUID, user_id: str) -> BidOutcome:
+        """Load an entry; one linked to a project needs access to that project."""
+        entry = await self.get(entry_id)
+        if entry.project_id is not None:
+            await verify_project_access(entry.project_id, user_id, self.session)
+        return entry
 
     async def validate(self, entry: BidOutcome) -> list[ValidationFinding]:
         """Run the ``bid_outcome`` rule set; a clean entry returns no warnings."""
@@ -77,24 +92,24 @@ class WinLossService:
         entry = BidOutcome(**data.model_dump(), created_by=uuid.UUID(str(user_id)))
         return await self.repo.create(entry)
 
-    async def update(self, entry_id: uuid.UUID, data: BidOutcomeUpdate) -> BidOutcome:
-        entry = await self.get(entry_id)
+    async def update(self, entry_id: uuid.UUID, data: BidOutcomeUpdate, user_id: str) -> BidOutcome:
+        entry = await self.get_for_user(entry_id, user_id)
         fields = data.model_dump(exclude_unset=True)
-        for required in ("title", "outcome", "our_price"):
+        for required in ("title", "outcome", "our_price", "currency", "client_name", "trade", "notes"):
             if required in fields and fields[required] is None:
                 del fields[required]
         await self.repo.update_fields(entry_id, **fields)
         await self.repo.session.refresh(entry)
         return entry
 
-    async def delete(self, entry_id: uuid.UUID) -> None:
-        await self.get(entry_id)
+    async def delete(self, entry_id: uuid.UUID, user_id: str) -> None:
+        await self.get_for_user(entry_id, user_id)
         await self.repo.delete(entry_id)
 
-    async def summary(self, currency: str | None) -> LedgerSummary:
+    async def summary(self, currency: str | None, user_id: str) -> LedgerSummary:
         """Hit rate and money left on the table, in one currency (the most used by default)."""
-        rows = await self.repo.list_all()
+        rows = await self.list_entries(user_id, limit=10000)
         currencies = sorted({r.currency or "" for r in rows})
-        chosen = currency if currency is not None else dominant_currency(rows)
+        chosen = currency.upper() if currency is not None else dominant_currency(rows)
         stats = summarize([r for r in rows if (r.currency or "") == chosen])
         return LedgerSummary(currency=chosen, currencies=currencies, **stats)
