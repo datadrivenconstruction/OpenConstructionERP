@@ -47,7 +47,8 @@ SILENT_AFTER = timedelta(hours=24)
 #: Raw readings older than this are pruned; the daily rollups are kept.
 RAW_RETENTION_DAYS = 90
 _PRUNE_EVERY = timedelta(hours=6)
-_last_prune: datetime | None = None
+#: Last ingest-triggered prune per machine, so a busy device does not prune on every call.
+_prune_state: dict[uuid.UUID, datetime] = {}
 
 EVENT_INGESTED = "equipment.telematics.ingested"
 EVENT_GEOFENCE_EXIT = "equipment.geofence.exited"
@@ -103,10 +104,19 @@ class TelematicsService:
         await self.session.flush()
         return device, token
 
-    async def list_devices(self, equipment_id: uuid.UUID | None = None) -> list[TelematicsDevice]:
+    @staticmethod
+    def _project_machines(project_id: uuid.UUID) -> Any:
+        """Subquery of machines hired to ``project_id`` (equipment itself carries no project)."""
+        return select(EquipmentRental.equipment_id).where(EquipmentRental.project_id == project_id)
+
+    async def list_devices(
+        self, equipment_id: uuid.UUID | None = None, project_id: uuid.UUID | None = None
+    ) -> list[TelematicsDevice]:
         stmt = select(TelematicsDevice).order_by(TelematicsDevice.created_at)
         if equipment_id is not None:
             stmt = stmt.where(TelematicsDevice.equipment_id == equipment_id)
+        if project_id is not None:
+            stmt = stmt.where(TelematicsDevice.equipment_id.in_(self._project_machines(project_id)))
         return list((await self.session.execute(stmt)).scalars())
 
     async def revoke_device(self, device_id: uuid.UUID) -> None:
@@ -201,7 +211,7 @@ class TelematicsService:
         if device is not None:
             device.last_seen_at = datetime.now(UTC)
         await self.session.flush()
-        await self._prune_if_due()
+        await self._prune_if_due({eq_id for eq_id, _ in touched})
         if accepted:
             event_bus.publish_detached(
                 EVENT_INGESTED,
@@ -212,24 +222,41 @@ class TelematicsService:
 
     # ── Retention ───────────────────────────────────────────────────────
 
-    async def prune_raw(self, keep_days: int = RAW_RETENTION_DAYS) -> int:
+    async def prune_raw(
+        self,
+        keep_days: int = RAW_RETENTION_DAYS,
+        *,
+        equipment_ids: set[uuid.UUID] | None = None,
+        project_id: uuid.UUID | None = None,
+    ) -> int:
         """Delete raw readings older than ``keep_days``; ``UtilisationDay`` rows stay.
+
+        Args:
+            keep_days: Retention in days (floor 7).
+            equipment_ids: Only these machines.
+            project_id: Only machines hired to this project.
 
         Returns:
             Number of readings removed.
         """
         cutoff = datetime.now(UTC) - timedelta(days=max(keep_days, 7))
-        result = await self.session.execute(delete(TelemetryReading).where(TelemetryReading.recorded_at < cutoff))
+        stmt = delete(TelemetryReading).where(TelemetryReading.recorded_at < cutoff)
+        if equipment_ids is not None:
+            stmt = stmt.where(TelemetryReading.equipment_id.in_(equipment_ids))
+        if project_id is not None:
+            stmt = stmt.where(TelemetryReading.equipment_id.in_(self._project_machines(project_id)))
+        result = await self.session.execute(stmt)
         return int(getattr(result, "rowcount", 0) or 0)
 
-    async def _prune_if_due(self) -> None:
-        global _last_prune
+    async def _prune_if_due(self, equipment_ids: set[uuid.UUID]) -> None:
+        """Prune the machines an ingest just touched, never the rest of the fleet."""
         now = datetime.now(UTC)
-        if _last_prune is not None and now - _last_prune < _PRUNE_EVERY:
+        due = {e for e in equipment_ids if e not in _prune_state or now - _prune_state[e] >= _PRUNE_EVERY}
+        if not due:
             return
-        _last_prune = now
         try:
-            removed = await self.prune_raw()
+            removed = await self.prune_raw(equipment_ids=due)
+            _prune_state.update(dict.fromkeys(due, now))
             if removed:
                 logger.info("telematics: pruned %d raw readings", removed)
         except Exception:
@@ -237,11 +264,13 @@ class TelematicsService:
 
     # ── Silent devices ──────────────────────────────────────────────────
 
-    async def silent_devices(self, now: datetime | None = None) -> list[dict[str, Any]]:
+    async def silent_devices(
+        self, now: datetime | None = None, project_id: uuid.UUID | None = None
+    ) -> list[dict[str, Any]]:
         """Active devices on a machine hired to a project that sent nothing for 24 h."""
         now = now or datetime.now(UTC)
         today = now.date()
-        devices = [d for d in await self.list_devices() if d.active]
+        devices = [d for d in await self.list_devices(project_id=project_id) if d.active]
         if not devices:
             return []
         eq_ids = {d.equipment_id for d in devices}
@@ -269,7 +298,7 @@ class TelematicsService:
         out: list[dict[str, Any]] = []
         for d in devices:
             rental = rentals.get(d.equipment_id)
-            if rental is None:
+            if rental is None or (project_id is not None and rental.project_id != project_id):
                 continue
             seen = [x for x in (latest.get(d.equipment_id), d.last_seen_at) if x is not None]
             last = max(_aware(x) for x in seen) if seen else _aware(d.created_at)
@@ -285,14 +314,16 @@ class TelematicsService:
                 )
         return out
 
-    async def notify_silent_devices(self, now: datetime | None = None) -> dict[str, int]:
+    async def notify_silent_devices(
+        self, now: datetime | None = None, project_id: uuid.UUID | None = None
+    ) -> dict[str, int]:
         """Tell each project owner about silent devices, once per machine per day."""
         from app.modules.notifications.models import Notification
         from app.modules.notifications.service import NotificationService
         from app.modules.projects.models import Project
 
         now = now or datetime.now(UTC)
-        silent = await self.silent_devices(now)
+        silent = await self.silent_devices(now, project_id)
         notified = 0
         for s in silent:
             project = await self.session.get(Project, s["project_id"])

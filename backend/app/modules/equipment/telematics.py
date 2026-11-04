@@ -35,6 +35,8 @@ _MILE_KM = Decimal("1.609344")
 _DAY_HOURS = Decimal("24")
 _ZERO = Decimal("0")
 _RESET_TOLERANCE = Decimal("1")
+#: Litres per hour no construction machine burns past; caps fuel counted after a counter restart.
+MAX_BURN_L_PER_H = Decimal("150")
 
 #: Columns of the CSV upload; only ``equipment`` and ``recorded_at`` are required.
 CSV_COLUMNS = (
@@ -348,12 +350,14 @@ def _clamp(v: Decimal, lo: Decimal, hi: Decimal) -> Decimal:
     return max(lo, min(hi, v))
 
 
-def _counter_delta(chain: list[dict[str, Any]], key: str, hours: bool = False) -> tuple[Decimal, bool]:
+def _counter_delta(
+    chain: list[dict[str, Any]], key: str, hours: bool = False, max_per_hour: Decimal | None = None
+) -> tuple[Decimal, bool]:
     """Growth of a cumulative counter along time-ordered rows, and whether it was reset.
 
     A value below its predecessor means the counter restarted (ECU swap, rollover):
     the new value is then the amount counted since the restart, never a negative delta.
-    For hour counters that amount cannot exceed the wall-clock time between the two readings.
+    That amount cannot exceed the wall-clock time between the two readings (times ``max_per_hour`` for a volume counter).
     """
     total = _ZERO
     reset = False
@@ -371,8 +375,9 @@ def _counter_delta(chain: list[dict[str, Any]], key: str, hours: bool = False) -
                 pass  # sensor jitter, not a restart
             else:
                 counted = cur
-                if hours and prev_at is not None:
-                    counted = min(cur, Decimal((row["recorded_at"] - prev_at).total_seconds()) / 3600)
+                if prev_at is not None and (hours or max_per_hour is not None):
+                    elapsed_h = Decimal((row["recorded_at"] - prev_at).total_seconds()) / 3600
+                    counted = min(cur, elapsed_h * (max_per_hour if max_per_hour is not None else 1))
                 total += counted
                 reset = True
         prev = cur
@@ -410,7 +415,8 @@ def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None
         idle = _clamp(_counter_delta(chain, "idle_hours", hours=True)[0], _ZERO, engine)
     fuel = None
     if last.get("fuel_used_l") is not None and base.get("fuel_used_l") is not None:
-        fuel = _counter_delta(chain, "fuel_used_l")[0]
+        fuel, fuel_reset = _counter_delta(chain, "fuel_used_l", max_per_hour=MAX_BURN_L_PER_H)
+        reset = reset or fuel_reset
     return DayUse(
         day=day,
         worked_hours=engine - idle,

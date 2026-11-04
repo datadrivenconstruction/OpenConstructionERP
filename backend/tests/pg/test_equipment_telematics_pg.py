@@ -241,3 +241,57 @@ async def test_demo_seed_gives_four_machines_one_overdue_and_allocated_days(sess
         if r["rule_id"] == "equipment_telematics.idle_threshold" and not r["passed"]
     ]
     assert idle == ["TLM-02"]
+
+
+async def test_device_list_and_silent_alerts_can_be_scoped_to_one_project(session) -> None:
+    p1, eq1, _ = await _site(session)
+    p2, eq2, _ = await _site(session)
+    service = TelematicsService(session)
+    d1, _t1 = await service.create_device(eq1.id)
+    d2, _t2 = await service.create_device(eq2.id)
+    long_ago = datetime.now(UTC) - timedelta(days=3)
+    for d in (d1, d2):
+        d.last_seen_at = long_ago
+    await session.flush()
+
+    assert {d.id for d in await service.list_devices(project_id=p1.id)} == {d1.id}
+    assert {s["device_id"] for s in await service.silent_devices(project_id=p2.id)} == {d2.id}
+    assert {d.id for d in await service.list_devices()} >= {d1.id, d2.id}
+
+
+async def test_ingest_prunes_only_the_machines_it_touched(session) -> None:
+    import app.modules.equipment.telematics_service as ts
+
+    _, eq1, _ = await _site(session)
+    _, eq2, _ = await _site(session)
+    old = datetime.now(UTC) - timedelta(days=200)
+    for eq in (eq1, eq2):
+        session.add(TelemetryReading(equipment_id=eq.id, recorded_at=old, hour_meter=Decimal("1")))
+    await session.flush()
+    ts._prune_state.clear()
+
+    await TelematicsService(session).ingest([_sample(8, "10", "1", "10")], source="rest", equipment_id=eq1.id)
+
+    def _old(eq):
+        return select(TelemetryReading).where(
+            TelemetryReading.equipment_id == eq.id, TelemetryReading.recorded_at < old + timedelta(days=1)
+        )
+
+    assert (await session.execute(_old(eq1))).first() is None
+    assert (await session.execute(_old(eq2))).first() is not None
+
+
+async def test_prune_can_be_scoped_to_one_project(session) -> None:
+    p1, eq1, _ = await _site(session)
+    _, eq2, _ = await _site(session)
+    old = datetime.now(UTC) - timedelta(days=200)
+    for eq in (eq1, eq2):
+        session.add(TelemetryReading(equipment_id=eq.id, recorded_at=old, hour_meter=Decimal("1")))
+    await session.flush()
+
+    assert await TelematicsService(session).prune_raw(project_id=p1.id) == 1
+    left = (
+        await session.execute(select(TelemetryReading).where(TelemetryReading.recorded_at < old + timedelta(days=1)))
+    ).scalars()
+    ids = {r.equipment_id for r in left}
+    assert eq2.id in ids and eq1.id not in ids
