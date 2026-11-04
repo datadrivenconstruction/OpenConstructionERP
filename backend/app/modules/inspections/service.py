@@ -117,6 +117,20 @@ class InspectionService:
             )
         return report
 
+    async def check_merge(self, inspection: QualityInspection, changes: dict[str, Any]) -> None:
+        """Run the rules over an offline merge before it is written; only errors the merge introduces block."""
+        if not changes:
+            return
+        prior = self._state_of(inspection)
+        state = {**prior, **{k: v for k, v in changes.items() if k in prior}}
+        await self._check_rules(
+            state,
+            inspection_id=str(inspection.id),
+            project_id=inspection.project_id,
+            operation="merge",
+            before=prior,
+        )
+
     @staticmethod
     def _state_of(inspection: QualityInspection) -> dict[str, Any]:
         return {

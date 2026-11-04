@@ -102,3 +102,55 @@ async def test_legacy_record_with_existing_violation_stays_editable(client, admi
         )
         assert updated.title == "Renamed"
         await session.rollback()
+
+
+async def _merge(client, header, insp: dict, fields: dict):
+    return await client.post(
+        f"/api/v1/inspections/{insp['id']}/merge/",
+        json={"base_version": insp["version"], "against_version": insp["version"], "fields": fields},
+        headers=header,
+    )
+
+
+@pytest.mark.asyncio
+async def test_offline_merge_runs_the_rules_and_blocks_a_new_error(client, admin_auth, project_id):
+    _, header = admin_auth
+    resp = await client.post(
+        "/api/v1/inspections/",
+        json={
+            "project_id": project_id,
+            "inspection_type": "concrete_pour",
+            "title": "Merge pour",
+            "result": "pass",
+            "checklist_data": [{"id": "1", "question": "Level?", "response": "pass"}],
+        },
+        headers=header,
+    )
+    assert resp.status_code == 201, resp.text
+    insp = resp.json()
+    bad = await _merge(
+        client, header, insp, {"checklist_data": [{"id": "1", "question": "Level?", "response": "fail"}]}
+    )
+    assert bad.status_code == 422, bad.text
+    assert "inspections.result_matches_checklist" in {e["rule_id"] for e in bad.json()["detail"]["errors"]}
+    ok = await _merge(client, header, insp, {"title": "Merge pour renamed"})
+    assert ok.status_code == 200, ok.text
+
+
+@pytest.mark.asyncio
+async def test_offline_merge_does_not_freeze_a_legacy_violation(client, admin_auth, project_id):
+    _, header = admin_auth
+    resp = await client.post(
+        "/api/v1/inspections/",
+        json={"project_id": project_id, "inspection_type": "concrete_pour", "title": "Legacy merge", "result": "pass"},
+        headers=header,
+    )
+    insp = resp.json()
+    async with async_session_factory() as session:
+        svc = InspectionService(session)
+        await svc.repo.update_fields(
+            uuid.UUID(insp["id"]), checklist_data=[{"id": "1", "question": "Level?", "response": "fail"}]
+        )
+        await session.commit()
+    ok = await _merge(client, header, insp, {"description": "edited offline"})
+    assert ok.status_code == 200, ok.text

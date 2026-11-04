@@ -17,6 +17,7 @@ from __future__ import annotations
 import logging
 import re
 import uuid
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -224,6 +225,7 @@ async def apply_merge(
     actor_id: str | None,
     project_id: uuid.UUID | str,
     current_payload: dict[str, Any],
+    guard: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
 ) -> tuple[int, list[MergedFieldOut]]:
     """Validate, apply, bump, audit and announce one merge.
 
@@ -235,6 +237,8 @@ async def apply_merge(
         actor_id: User performing the merge.
         project_id: Owning project, for the audit parent and the event.
         current_payload: The serialized current row, returned inside a 409.
+        guard: Optional async check run with the field values about to be
+            written (after conflicts are resolved, before anything is applied).
 
     Returns:
         The new version and the per-field outcome.
@@ -250,11 +254,18 @@ async def apply_merge(
     conflicts = detect_conflicts(spec, request, current)
     await _validate_complete(spec, obj, project_id, conflicts, request.resolutions)
 
+    chosen: dict[str, Any] = {}
+    for name in sorted(set(request.fields) | set(request.resolutions)):
+        side = request.resolutions.get(name, "mine")
+        chosen[name] = current[name] if side == "theirs" else request.fields[name]
+    if guard is not None:
+        await guard({k: v for k, v in chosen.items() if chosen[k] is not current[k]})
+
     merged: list[MergedFieldOut] = []
     for name in sorted(set(request.fields) | set(request.resolutions)):
         side = request.resolutions.get(name, "mine")
         old = current[name]
-        new = old if side == "theirs" else request.fields[name]
+        new = chosen[name]
         if side != "theirs":
             setattr(obj, name, new)
         merged.append(MergedFieldOut(field=name, side=side, old_value=old, new_value=new))
