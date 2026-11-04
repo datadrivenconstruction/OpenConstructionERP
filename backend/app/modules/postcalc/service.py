@@ -680,6 +680,34 @@ def compute_project_postcalc(
 # actuals and the KPI catalog cannot disagree about which hours count.
 
 
+def postcalc_rule_context(project_id: uuid.UUID, report: ProjectPostCalc) -> dict[str, Any]:
+    """The ``postcalc`` rule-set context for a computed report."""
+    return {
+        "project": {
+            "project_id": str(project_id),
+            "currency": report.currency,
+            "total_planned_hours": report.total_planned_hours,
+            "total_actual_hours": report.total_actual_hours,
+            "total_planned_labour_cost": report.total_planned_labour_cost,
+            "line_count": report.line_count,
+        },
+        "lines": [
+            {
+                "ref": line.ref,
+                "position_id": line.position_id or "",
+                "currency": line.currency,
+                "planned_quantity": line.planned_quantity,
+                "actual_quantity": line.actual_quantity,
+                "planned_hours": line.planned_hours,
+                "actual_hours": line.actual_hours,
+                "planned_labour_cost": line.planned_labour_cost,
+                "productivity_factor": line.productivity_factor,
+            }
+            for line in report.lines
+        ],
+    }
+
+
 class PostCalcService:
     """Assemble a live post-calculation report for a project.
 
@@ -752,6 +780,31 @@ class PostCalcService:
             tolerance=tolerance,
             min_confidence=min_confidence,
         )
+
+    async def generate_checked(
+        self,
+        project_id: uuid.UUID,
+        *,
+        tolerance: Decimal = DEFAULT_TOLERANCE,
+        min_confidence: Decimal = DEFAULT_MIN_CONFIDENCE,
+    ) -> tuple[ProjectPostCalc, list[dict[str, Any]]]:
+        """Build the report and run the ``postcalc`` rule set over it.
+
+        Rule errors raise a 422 (``postcalc_validation_failed``); warnings come back
+        with the report.
+        """
+        from app.core.validation.money_rules import enforce_rule_set
+        from app.modules.postcalc.validators import POSTCALC_RULE_SET
+
+        report = await self.generate(project_id, tolerance=tolerance, min_confidence=min_confidence)
+        warnings = await enforce_rule_set(
+            postcalc_rule_context(project_id, report),
+            rule_set=POSTCALC_RULE_SET,
+            target_type="postcalc",
+            target_id=str(project_id),
+            error_code="postcalc_validation_failed",
+        )
+        return report, warnings
 
     async def norm_outturn(
         self,
@@ -884,7 +937,7 @@ class PostCalcService:
         """Build the live report and render it as an auditable Markdown document."""
         from app.modules.postcalc.model import render_markdown
 
-        report = await self.generate(project_id, tolerance=tolerance, min_confidence=min_confidence)
+        report, _warnings = await self.generate_checked(project_id, tolerance=tolerance, min_confidence=min_confidence)
         return render_markdown(report)
 
     # ── Estimate side ────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from app.core.validation.engine import RuleResult, ValidationContext, rule_registry
+from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
 from app.core.validation.money_rules import (
     MAX_SANE_AMOUNT,
     MONEY_TOLERANCE,
@@ -106,6 +106,7 @@ class LineValuesInRangeRule(MoneyRule):
                         context,
                         "value_in_range",
                         ref=ref,
+                        severity=Severity.WARNING,
                         field="productivity_factor",
                         value=factor,
                         low=">0",

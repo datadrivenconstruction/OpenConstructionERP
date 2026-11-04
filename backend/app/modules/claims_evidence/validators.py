@@ -20,7 +20,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from app.core.validation.engine import RuleResult, ValidationContext, rule_registry
+from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
 from app.core.validation.money_rules import MoneyRule, blank, section, to_dec
 
 CLAIMS_EVIDENCE_RULE_SET = "claims_evidence"
@@ -102,6 +102,8 @@ class EvidenceReferencesRule(MoneyRule):
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         pack = section(context, "pack")
         ref = str(pack.get("subject_ref", ""))
+        if not pack:
+            return [self.ok(ref)]
         out = [
             self.fail(context, "reference_present", ref=ref, field=field)
             for field in ("subject_ref", "basis")
@@ -139,7 +141,12 @@ class EvidenceDatesOrderedRule(MoneyRule):
             if before or after:
                 out.append(
                     self.fail(
-                        context, "dates_ordered", ref=str(entry.get("ref_id", ref)), earlier=start or "", later=when
+                        context,
+                        "dates_ordered",
+                        ref=str(entry.get("ref_id", ref)),
+                        severity=Severity.WARNING,
+                        earlier=start or "",
+                        later=when,
                     )
                 )
         return out or [self.ok(ref)]
