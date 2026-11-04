@@ -165,7 +165,9 @@ def catch_injections(plan: Plan, resp: MockResponse, props: Proposals) -> list[t
             out.append((k, not (bad and props.scale_confidence >= MEDIUM)))
         elif k in ("room_duplicate_exact", "room_duplicate_shifted"):
             gt = next(r for r in plan.rooms if r.name == inj.payload["gt_name"])
-            hits = [r for r in props.rooms if pr.polygon_iou(r["points"], gt.inner_pt) >= MATCH_IOU]
+            # An error row (crossed ring) is blocked at accept, so it cannot double-count a room.
+            live = [r for r in props.rooms if r["verdict"] != "error"]
+            hits = [r for r in live if pr.polygon_iou(r["points"], gt.inner_pt) >= MATCH_IOU]
             out.append((k, len(hits) <= 1))
         elif k == "room_self_intersecting":
             pts = pr.norm_polygon_to_pdf_points(inj.payload["polygon_n"], plan.page_w, plan.page_h)
