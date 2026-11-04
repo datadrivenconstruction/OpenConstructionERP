@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Kaotatud pakkumisel {bid} puudub võitja hind",
+      "suggestion": "Sisestage võitja hind, et vahet mõõta"
+    },
+    "won_matches_price": {
+      "fail": "Võidetud pakkumine {bid}: võitja hind {winning} erineb meie hinnast {ours}",
+      "suggestion": "Võidetud pakkumisel on võitja hind meie enda hind; parandage üks neist"
+    },
+    "second_above_winner": {
+      "fail": "Pakkumine {bid}: teine hind {second} on võitja hinnast {winning} madalam",
+      "suggestion": "Teine hind ei saa olla võitja omast madalam; kontrollige mõlemat"
+    },
+    "competitors_recorded": {
+      "fail": "Otsustatud pakkumisel {bid} puudub konkurentide arv",
+      "suggestion": "Sisestage, mitu teist pakkujat osales"
+    },
+    "lost_reason_recorded": {
+      "fail": "Kaotatud pakkumisel {bid} puudub põhjus",
+      "suggestion": "Valige peamine põhjus, et järgmine pakkumine saaks sellest õppida"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Kaalude summa on {total}, mitte 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriteeriumi {criterion} pole hinnatud."
+    },
+    "override_has_reason": {
+      "fail": "Otsus erineb soovitusest; esitage põhjus."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriteeriumi {criterion} hinne on 1 ilma märkuseta."
+    },
+    "criteria": {
+      "capacity": "Võimsus",
+      "client": "Klient",
+      "competition": "Konkurents",
+      "margin": "Marginaal",
+      "risk": "Risk"
+    }
   }
 }

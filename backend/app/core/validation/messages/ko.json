@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "실주한 입찰 {bid}에 낙찰 가격이 없습니다",
+      "suggestion": "차이를 측정하려면 낙찰 가격을 입력하세요"
+    },
+    "won_matches_price": {
+      "fail": "수주한 입찰 {bid}: 낙찰 가격 {winning}이(가) 당사 가격 {ours}과(와) 다릅니다",
+      "suggestion": "수주한 입찰에서는 낙찰 가격이 당사 가격입니다. 둘 중 하나를 수정하세요"
+    },
+    "second_above_winner": {
+      "fail": "입찰 {bid}: 2위 가격 {second}이(가) 낙찰 가격 {winning}보다 낮습니다",
+      "suggestion": "2위 가격은 낙찰자보다 낮을 수 없습니다. 둘 다 확인하세요"
+    },
+    "competitors_recorded": {
+      "fail": "결과가 확정된 입찰 {bid}에 경쟁자 수가 없습니다",
+      "suggestion": "참여한 다른 입찰자 수를 입력하세요"
+    },
+    "lost_reason_recorded": {
+      "fail": "실주한 입찰 {bid}에 사유가 없습니다",
+      "suggestion": "다음 입찰에 활용할 수 있도록 주요 사유를 선택하세요"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "가중치 합계가 100이 아니라 {total}입니다."
+    },
+    "all_criteria_rated": {
+      "fail": "평가 항목 {criterion}에 점수가 없습니다."
+    },
+    "override_has_reason": {
+      "fail": "결정이 권고와 다릅니다. 사유를 입력하세요."
+    },
+    "low_rating_has_note": {
+      "fail": "평가 항목 {criterion}이(가) 1점인데 메모가 없습니다."
+    },
+    "criteria": {
+      "capacity": "수행 역량",
+      "client": "발주처",
+      "competition": "경쟁",
+      "margin": "마진",
+      "risk": "리스크"
+    }
   }
 }

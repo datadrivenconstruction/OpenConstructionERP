@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Tabt tilbud {bid} har ingen vinderpris",
+      "suggestion": "Angiv vinderprisen for at måle forskellen"
+    },
+    "won_matches_price": {
+      "fail": "Vundet tilbud {bid}: vinderprisen {winning} afviger fra vores pris {ours}",
+      "suggestion": "Ved et vundet tilbud er vinderprisen vores egen; ret den ene af dem"
+    },
+    "second_above_winner": {
+      "fail": "Tilbud {bid}: næstlaveste pris {second} ligger under vinderprisen {winning}",
+      "suggestion": "Den næstlaveste pris kan ikke være lavere end vinderens; kontrollér begge"
+    },
+    "competitors_recorded": {
+      "fail": "Afgjort tilbud {bid} har ikke noget antal konkurrenter",
+      "suggestion": "Angiv, hvor mange andre bydende der deltog"
+    },
+    "lost_reason_recorded": {
+      "fail": "Tabt tilbud {bid} har ingen begrundelse",
+      "suggestion": "Vælg hovedårsagen, så næste tilbud kan lære af den"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Vægtene summerer til {total}, ikke 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriteriet {criterion} er ikke bedømt."
+    },
+    "override_has_reason": {
+      "fail": "Beslutningen afviger fra anbefalingen; angiv en begrundelse."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriteriet {criterion} er bedømt til 1 uden note."
+    },
+    "criteria": {
+      "capacity": "Kapacitet",
+      "client": "Bygherre",
+      "competition": "Konkurrence",
+      "margin": "Avance",
+      "risk": "Risiko"
+    }
   }
 }

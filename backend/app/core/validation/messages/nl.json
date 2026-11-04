@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Verloren inschrijving {bid} heeft geen winnende prijs",
+      "suggestion": "Voer de winnende prijs in om het verschil te meten"
+    },
+    "won_matches_price": {
+      "fail": "Gewonnen inschrijving {bid}: winnende prijs {winning} wijkt af van onze prijs {ours}",
+      "suggestion": "Bij een gewonnen inschrijving is de winnende prijs de onze; corrigeer een van beide"
+    },
+    "second_above_winner": {
+      "fail": "Inschrijving {bid}: tweede prijs {second} ligt onder de winnende prijs {winning}",
+      "suggestion": "De tweede prijs kan niet lager zijn dan die van de winnaar; controleer beide"
+    },
+    "competitors_recorded": {
+      "fail": "Beslechte inschrijving {bid} heeft geen aantal concurrenten",
+      "suggestion": "Voer in hoeveel andere inschrijvers meededen"
+    },
+    "lost_reason_recorded": {
+      "fail": "Verloren inschrijving {bid} heeft geen reden",
+      "suggestion": "Kies de hoofdreden zodat de volgende inschrijving ervan kan leren"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "De wegingen tellen op tot {total}, niet 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Criterium {criterion} is niet beoordeeld."
+    },
+    "override_has_reason": {
+      "fail": "De beslissing wijkt af van het advies; geef een reden op."
+    },
+    "low_rating_has_note": {
+      "fail": "Criterium {criterion} is beoordeeld met 1 zonder toelichting."
+    },
+    "criteria": {
+      "capacity": "Capaciteit",
+      "client": "Opdrachtgever",
+      "competition": "Concurrentie",
+      "margin": "Marge",
+      "risk": "Risico"
+    }
   }
 }

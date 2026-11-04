@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "失标的投标 {bid} 没有中标价",
+      "suggestion": "请输入中标价以衡量差额"
+    },
+    "won_matches_price": {
+      "fail": "中标的投标 {bid}：中标价 {winning} 与我方报价 {ours} 不一致",
+      "suggestion": "中标的投标中，中标价即我方报价；请修正其中之一"
+    },
+    "second_above_winner": {
+      "fail": "投标 {bid}：第二名报价 {second} 低于中标价 {winning}",
+      "suggestion": "第二名报价不能低于中标方；请检查两者"
+    },
+    "competitors_recorded": {
+      "fail": "已有结果的投标 {bid} 没有竞争对手数",
+      "suggestion": "请输入参与的其他投标人数量"
+    },
+    "lost_reason_recorded": {
+      "fail": "失标的投标 {bid} 没有原因",
+      "suggestion": "请选择主要原因，以便下次投标从中吸取经验"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "权重之和为 {total}，不是 100。"
+    },
+    "all_criteria_rated": {
+      "fail": "评分项 {criterion} 尚未评分。"
+    },
+    "override_has_reason": {
+      "fail": "决定与建议不一致，请填写理由。"
+    },
+    "low_rating_has_note": {
+      "fail": "评分项 {criterion} 评为 1 分，但没有备注。"
+    },
+    "criteria": {
+      "capacity": "承接能力",
+      "client": "客户",
+      "competition": "竞争",
+      "margin": "利润率",
+      "risk": "风险"
+    }
   }
 }

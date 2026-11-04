@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Hävityllä tarjouksella {bid} ei ole voittajan hintaa",
+      "suggestion": "Syötä voittajan hinta eron mittaamiseksi"
+    },
+    "won_matches_price": {
+      "fail": "Voitettu tarjous {bid}: voittajan hinta {winning} poikkeaa omasta hinnastamme {ours}",
+      "suggestion": "Voitetussa tarjouksessa voittajan hinta on oma hintamme; korjaa jompikumpi"
+    },
+    "second_above_winner": {
+      "fail": "Tarjous {bid}: toiseksi paras hinta {second} on alle voittajan hinnan {winning}",
+      "suggestion": "Toiseksi paras hinta ei voi olla voittajan hintaa alempi; tarkista molemmat"
+    },
+    "competitors_recorded": {
+      "fail": "Ratkenneella tarjouksella {bid} ei ole kilpailijoiden määrää",
+      "suggestion": "Syötä, kuinka monta muuta tarjoajaa osallistui"
+    },
+    "lost_reason_recorded": {
+      "fail": "Hävityllä tarjouksella {bid} ei ole syytä",
+      "suggestion": "Valitse pääsyy, jotta seuraava tarjous voi oppia siitä"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Painojen summa on {total}, ei 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriteeriä {criterion} ei ole arvioitu."
+    },
+    "override_has_reason": {
+      "fail": "Päätös poikkeaa suosituksesta; anna perustelu."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriteerin {criterion} arvosana on 1 ilman huomautusta."
+    },
+    "criteria": {
+      "capacity": "Kapasiteetti",
+      "client": "Asiakas",
+      "competition": "Kilpailu",
+      "margin": "Kate",
+      "risk": "Riski"
+    }
   }
 }

@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Förlorat anbud {bid} saknar vinnande pris",
+      "suggestion": "Ange det vinnande priset för att mäta skillnaden"
+    },
+    "won_matches_price": {
+      "fail": "Vunnet anbud {bid}: vinnande pris {winning} avviker från vårt pris {ours}",
+      "suggestion": "Vid ett vunnet anbud är det vinnande priset vårt eget; rätta det ena av dem"
+    },
+    "second_above_winner": {
+      "fail": "Anbud {bid}: näst bästa pris {second} ligger under det vinnande priset {winning}",
+      "suggestion": "Näst bästa pris kan inte vara lägre än vinnarens; kontrollera båda"
+    },
+    "competitors_recorded": {
+      "fail": "Avgjort anbud {bid} saknar antal konkurrenter",
+      "suggestion": "Ange hur många andra anbudsgivare som deltog"
+    },
+    "lost_reason_recorded": {
+      "fail": "Förlorat anbud {bid} saknar orsak",
+      "suggestion": "Välj huvudorsaken så att nästa anbud kan lära av den"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Vikterna summerar till {total}, inte 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriteriet {criterion} är inte betygsatt."
+    },
+    "override_has_reason": {
+      "fail": "Beslutet avviker från rekommendationen; ange en orsak."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriteriet {criterion} har betyg 1 utan anteckning."
+    },
+    "criteria": {
+      "capacity": "Kapacitet",
+      "client": "Kund",
+      "competition": "Konkurrens",
+      "margin": "Marginal",
+      "risk": "Risk"
+    }
   }
 }

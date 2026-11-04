@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "להצעה שהפסידה {bid} אין מחיר זוכה",
+      "suggestion": "הזינו את מחיר הזוכה כדי למדוד את הפער"
+    },
+    "won_matches_price": {
+      "fail": "הצעה שזכתה {bid}: מחיר הזוכה {winning} שונה מהמחיר שלנו {ours}",
+      "suggestion": "בהצעה שזכתה מחיר הזוכה הוא שלנו; תקנו אחד מהם"
+    },
+    "second_above_winner": {
+      "fail": "הצעה {bid}: המחיר השני {second} נמוך ממחיר הזוכה {winning}",
+      "suggestion": "המחיר השני לא יכול להיות נמוך ממחיר הזוכה; בדקו את שניהם"
+    },
+    "competitors_recorded": {
+      "fail": "להצעה שהוכרעה {bid} אין מספר מתחרים",
+      "suggestion": "הזינו כמה מציעים אחרים השתתפו"
+    },
+    "lost_reason_recorded": {
+      "fail": "להצעה שהפסידה {bid} אין סיבה",
+      "suggestion": "בחרו את הסיבה העיקרית כדי שההצעה הבאה תלמד ממנה"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "סכום המשקלים הוא {total} ולא 100."
+    },
+    "all_criteria_rated": {
+      "fail": "הקריטריון {criterion} לא דורג."
+    },
+    "override_has_reason": {
+      "fail": "ההחלטה שונה מההמלצה; נא לציין סיבה."
+    },
+    "low_rating_has_note": {
+      "fail": "הקריטריון {criterion} קיבל דירוג 1 ללא הערה."
+    },
+    "criteria": {
+      "capacity": "יכולת",
+      "client": "לקוח",
+      "competition": "תחרות",
+      "margin": "שולי רווח",
+      "risk": "סיכון"
+    }
   }
 }

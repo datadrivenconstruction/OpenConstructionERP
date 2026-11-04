@@ -1614,5 +1614,26 @@
       "fail": "Verlorenes Angebot {bid} hat keinen Grund",
       "suggestion": "Hauptgrund wählen, damit das nächste Angebot daraus lernt"
     }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Die Gewichte ergeben {total}, nicht 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Kriterium {criterion} ist nicht bewertet."
+    },
+    "override_has_reason": {
+      "fail": "Die Entscheidung weicht von der Empfehlung ab; bitte eine Begründung angeben."
+    },
+    "low_rating_has_note": {
+      "fail": "Kriterium {criterion} ist mit 1 bewertet, aber ohne Notiz."
+    },
+    "criteria": {
+      "capacity": "Kapazität",
+      "client": "Auftraggeber",
+      "competition": "Wettbewerb",
+      "margin": "Marge",
+      "risk": "Risiko"
+    }
   }
 }

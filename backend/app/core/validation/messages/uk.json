@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Програна пропозиція {bid} не має переможної ціни",
+      "suggestion": "Введіть переможну ціну, щоб виміряти різницю"
+    },
+    "won_matches_price": {
+      "fail": "Виграна пропозиція {bid}: переможна ціна {winning} відрізняється від нашої ціни {ours}",
+      "suggestion": "У виграній пропозиції переможна ціна є нашою; виправте одну з двох"
+    },
+    "second_above_winner": {
+      "fail": "Пропозиція {bid}: друга ціна {second} нижча за переможну {winning}",
+      "suggestion": "Друга ціна не може бути нижчою за ціну переможця; перевірте обидві"
+    },
+    "competitors_recorded": {
+      "fail": "Вирішена пропозиція {bid} не має кількості конкурентів",
+      "suggestion": "Вкажіть, скільки інших учасників брали участь"
+    },
+    "lost_reason_recorded": {
+      "fail": "Програна пропозиція {bid} не має причини",
+      "suggestion": "Оберіть основну причину, щоб наступна пропозиція могла з неї навчитися"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Сума ваг дорівнює {total}, а не 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Критерій {criterion} не оцінено."
+    },
+    "override_has_reason": {
+      "fail": "Рішення відрізняється від рекомендації; вкажіть причину."
+    },
+    "low_rating_has_note": {
+      "fail": "Критерій {criterion} оцінено в 1 бал без пояснення."
+    },
+    "criteria": {
+      "capacity": "Потужності",
+      "client": "Замовник",
+      "competition": "Конкуренція",
+      "margin": "Маржа",
+      "risk": "Ризик"
+    }
   }
 }

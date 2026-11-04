@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Ang natalong bid {bid} ay walang presyo ng nanalo",
+      "suggestion": "Ilagay ang presyo ng nanalo para masukat ang agwat"
+    },
+    "won_matches_price": {
+      "fail": "Napanalunang bid {bid}: ang presyo ng nanalo na {winning} ay iba sa presyo namin na {ours}",
+      "suggestion": "Sa napanalunang bid, ang presyo ng nanalo ay ang sa amin; ayusin ang isa sa dalawa"
+    },
+    "second_above_winner": {
+      "fail": "Bid {bid}: ang pangalawang presyo na {second} ay mas mababa sa presyo ng nanalo na {winning}",
+      "suggestion": "Hindi maaaring mas mababa ang pangalawang presyo kaysa sa nanalo; suriin ang dalawa"
+    },
+    "competitors_recorded": {
+      "fail": "Ang napagpasyahang bid {bid} ay walang bilang ng kakumpitensya",
+      "suggestion": "Ilagay kung ilang ibang bidder ang sumali"
+    },
+    "lost_reason_recorded": {
+      "fail": "Ang natalong bid {bid} ay walang dahilan",
+      "suggestion": "Piliin ang pangunahing dahilan para matuto rito ang susunod na bid"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Ang kabuuan ng mga timbang ay {total}, hindi 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Hindi pa namarkahan ang pamantayang {criterion}."
+    },
+    "override_has_reason": {
+      "fail": "Iba ang desisyon sa rekomendasyon; magbigay ng dahilan."
+    },
+    "low_rating_has_note": {
+      "fail": "Ang pamantayang {criterion} ay may markang 1 na walang tala."
+    },
+    "criteria": {
+      "capacity": "Kakayahan",
+      "client": "Kliyente",
+      "competition": "Kumpetisyon",
+      "margin": "Margin",
+      "risk": "Panganib"
+    }
   }
 }

@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Жеңилген {bid} сунушунда жеңүүчү баа жок",
+      "suggestion": "Айырманы өлчөө үчүн жеңүүчү бааны киргизиңиз"
+    },
+    "won_matches_price": {
+      "fail": "Утулган {bid} сунушу: жеңүүчү баа {winning} биздин {ours} баабыздан айырмаланат",
+      "suggestion": "Утулган сунушта жеңүүчү баа — биздин баа; экөөнүн бирин оңдоңуз"
+    },
+    "second_above_winner": {
+      "fail": "{bid} сунушу: экинчи баа {second} жеңүүчү баадан {winning} төмөн",
+      "suggestion": "Экинчи баа жеңүүчүнүн баасынан төмөн болбойт; экөөнү тең текшериңиз"
+    },
+    "competitors_recorded": {
+      "fail": "Чечилген {bid} сунушунда атаандаштардын саны жок",
+      "suggestion": "Катышкан башка катышуучулардын санын киргизиңиз"
+    },
+    "lost_reason_recorded": {
+      "fail": "Жеңилген {bid} сунушунда себеп жок",
+      "suggestion": "Кийинки сунуш андан сабак алышы үчүн негизги себепти тандаңыз"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Салмактардын суммасы 100 эмес, {total}."
+    },
+    "all_criteria_rated": {
+      "fail": "{criterion} критерийи баалана элек."
+    },
+    "override_has_reason": {
+      "fail": "Чечим сунуштан айырмаланат; себебин көрсөтүңүз."
+    },
+    "low_rating_has_note": {
+      "fail": "{criterion} критерийи 1 деп бааланган, эскертүүсү жок."
+    },
+    "criteria": {
+      "capacity": "Кубаттуулук",
+      "client": "Заказчы",
+      "competition": "Атаандаштык",
+      "margin": "Маржа",
+      "risk": "Тобокелдик"
+    }
   }
 }

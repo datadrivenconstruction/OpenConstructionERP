@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "العطاء الخاسر {bid} ليس له سعر فائز",
+      "suggestion": "أدخل السعر الفائز لقياس الفارق"
+    },
+    "won_matches_price": {
+      "fail": "العطاء الفائز {bid}: السعر الفائز {winning} يختلف عن سعرنا {ours}",
+      "suggestion": "في العطاء الفائز يكون السعر الفائز هو سعرنا؛ صحّح أحدهما"
+    },
+    "second_above_winner": {
+      "fail": "العطاء {bid}: السعر الثاني {second} أقل من السعر الفائز {winning}",
+      "suggestion": "لا يمكن أن يكون السعر الثاني أقل من سعر الفائز؛ تحقق من الاثنين"
+    },
+    "competitors_recorded": {
+      "fail": "العطاء المحسوم {bid} ليس له عدد منافسين",
+      "suggestion": "أدخل عدد مقدمي العطاءات الآخرين الذين شاركوا"
+    },
+    "lost_reason_recorded": {
+      "fail": "العطاء الخاسر {bid} ليس له سبب",
+      "suggestion": "اختر السبب الرئيسي ليتعلم منه العطاء التالي"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "مجموع الأوزان {total} وليس 100."
+    },
+    "all_criteria_rated": {
+      "fail": "المعيار {criterion} غير مُقيَّم."
+    },
+    "override_has_reason": {
+      "fail": "القرار يختلف عن التوصية؛ يرجى ذكر السبب."
+    },
+    "low_rating_has_note": {
+      "fail": "المعيار {criterion} حاصل على تقييم 1 دون ملاحظة."
+    },
+    "criteria": {
+      "capacity": "القدرة",
+      "client": "العميل",
+      "competition": "المنافسة",
+      "margin": "هامش الربح",
+      "risk": "المخاطر"
+    }
   }
 }

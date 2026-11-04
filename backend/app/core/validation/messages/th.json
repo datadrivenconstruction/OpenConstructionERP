@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "การเสนอราคาที่แพ้ {bid} ไม่มีราคาผู้ชนะ",
+      "suggestion": "กรอกราคาผู้ชนะเพื่อวัดส่วนต่าง"
+    },
+    "won_matches_price": {
+      "fail": "การเสนอราคาที่ชนะ {bid}: ราคาผู้ชนะ {winning} ต่างจากราคาของเรา {ours}",
+      "suggestion": "ในการเสนอราคาที่ชนะ ราคาผู้ชนะคือราคาของเราเอง โปรดแก้ไขหนึ่งในสองค่า"
+    },
+    "second_above_winner": {
+      "fail": "การเสนอราคา {bid}: ราคาอันดับสอง {second} ต่ำกว่าราคาผู้ชนะ {winning}",
+      "suggestion": "ราคาอันดับสองต้องไม่ต่ำกว่าราคาผู้ชนะ โปรดตรวจสอบทั้งสองค่า"
+    },
+    "competitors_recorded": {
+      "fail": "การเสนอราคาที่ตัดสินแล้ว {bid} ไม่มีจำนวนคู่แข่ง",
+      "suggestion": "กรอกจำนวนผู้เสนอราคารายอื่นที่เข้าร่วม"
+    },
+    "lost_reason_recorded": {
+      "fail": "การเสนอราคาที่แพ้ {bid} ไม่มีเหตุผล",
+      "suggestion": "เลือกเหตุผลหลักเพื่อให้การเสนอราคาครั้งต่อไปเรียนรู้จากสิ่งนี้"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "ผลรวมของน้ำหนักคือ {total} ไม่ใช่ 100"
+    },
+    "all_criteria_rated": {
+      "fail": "เกณฑ์ {criterion} ยังไม่ได้ให้คะแนน"
+    },
+    "override_has_reason": {
+      "fail": "การตัดสินใจต่างจากข้อเสนอแนะ โปรดระบุเหตุผล"
+    },
+    "low_rating_has_note": {
+      "fail": "เกณฑ์ {criterion} ได้คะแนน 1 โดยไม่มีหมายเหตุ"
+    },
+    "criteria": {
+      "capacity": "ขีดความสามารถ",
+      "client": "ลูกค้า",
+      "competition": "การแข่งขัน",
+      "margin": "อัตรากำไร",
+      "risk": "ความเสี่ยง"
+    }
   }
 }

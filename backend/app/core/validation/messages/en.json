@@ -1666,5 +1666,26 @@
       "fail": "Lost bid {bid} has no reason",
       "suggestion": "Pick the main reason so the next bid can learn from it"
     }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "Weights add up to {total}, not 100."
+    },
+    "all_criteria_rated": {
+      "fail": "Criterion {criterion} is not rated."
+    },
+    "override_has_reason": {
+      "fail": "The decision differs from the recommendation; give a reason."
+    },
+    "low_rating_has_note": {
+      "fail": "Criterion {criterion} is rated 1 without a note."
+    },
+    "criteria": {
+      "capacity": "Capacity",
+      "client": "Client",
+      "competition": "Competition",
+      "margin": "Margin",
+      "risk": "Risk"
+    }
   }
 }

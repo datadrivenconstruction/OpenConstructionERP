@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "失注した入札 {bid} に落札価格がありません",
+      "suggestion": "差額を測るため落札価格を入力してください"
+    },
+    "won_matches_price": {
+      "fail": "受注した入札 {bid}: 落札価格 {winning} が当社価格 {ours} と異なります",
+      "suggestion": "受注した入札では落札価格は当社の価格です。どちらかを修正してください"
+    },
+    "second_above_winner": {
+      "fail": "入札 {bid}: 2位の価格 {second} が落札価格 {winning} を下回っています",
+      "suggestion": "2位の価格は落札者より低くできません。両方を確認してください"
+    },
+    "competitors_recorded": {
+      "fail": "結果が出た入札 {bid} に競合数がありません",
+      "suggestion": "参加した他の入札者の数を入力してください"
+    },
+    "lost_reason_recorded": {
+      "fail": "失注した入札 {bid} に理由がありません",
+      "suggestion": "次の入札に生かせるよう主な理由を選んでください"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "重みの合計が100ではなく{total}です。"
+    },
+    "all_criteria_rated": {
+      "fail": "評価項目「{criterion}」が未評価です。"
+    },
+    "override_has_reason": {
+      "fail": "決定が推奨と異なります。理由を入力してください。"
+    },
+    "low_rating_has_note": {
+      "fail": "評価項目「{criterion}」が1点で、メモがありません。"
+    },
+    "criteria": {
+      "capacity": "対応能力",
+      "client": "発注者",
+      "competition": "競合",
+      "margin": "利益率",
+      "risk": "リスク"
+    }
   }
 }

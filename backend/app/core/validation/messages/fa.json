@@ -1499,5 +1499,48 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "پیشنهاد باخته {bid} قیمت برنده ندارد",
+      "suggestion": "برای سنجش اختلاف، قیمت برنده را وارد کنید"
+    },
+    "won_matches_price": {
+      "fail": "پیشنهاد برده {bid}: قیمت برنده {winning} با قیمت ما {ours} فرق دارد",
+      "suggestion": "در پیشنهاد برده، قیمت برنده همان قیمت ماست؛ یکی از دو مقدار را اصلاح کنید"
+    },
+    "second_above_winner": {
+      "fail": "پیشنهاد {bid}: قیمت دوم {second} کمتر از قیمت برنده {winning} است",
+      "suggestion": "قیمت دوم نمی‌تواند از قیمت برنده کمتر باشد؛ هر دو را بررسی کنید"
+    },
+    "competitors_recorded": {
+      "fail": "پیشنهاد قطعی‌شده {bid} تعداد رقبا ندارد",
+      "suggestion": "وارد کنید چند پیشنهاددهنده دیگر شرکت کرده‌اند"
+    },
+    "lost_reason_recorded": {
+      "fail": "پیشنهاد باخته {bid} دلیل ندارد",
+      "suggestion": "دلیل اصلی را انتخاب کنید تا پیشنهاد بعدی از آن درس بگیرد"
+    }
+  },
+  "bid_no_bid": {
+    "weights_sum_100": {
+      "fail": "مجموع وزن‌ها {total} است، نه ۱۰۰."
+    },
+    "all_criteria_rated": {
+      "fail": "معیار {criterion} امتیازدهی نشده است."
+    },
+    "override_has_reason": {
+      "fail": "تصمیم با توصیه تفاوت دارد؛ دلیل را بنویسید."
+    },
+    "low_rating_has_note": {
+      "fail": "معیار {criterion} امتیاز ۱ دارد و یادداشتی ندارد."
+    },
+    "criteria": {
+      "capacity": "ظرفیت",
+      "client": "کارفرما",
+      "competition": "رقابت",
+      "margin": "حاشیه سود",
+      "risk": "ریسک"
+    }
   }
 }
