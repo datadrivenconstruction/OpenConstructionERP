@@ -7,7 +7,7 @@ second row. The key is now ``(project_id, client_op_id)``. Inspector-guarded so 
 database the runtime already built from the models is a no-op.
 
 Revision ID: vfsl01_field_sync_ledger_project
-Revises: vap01_inbox_po_match
+Revises: vtel01_util_counter_reset
 Create Date: 2026-11-04
 """
 
@@ -17,7 +17,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "vfsl01_field_sync_ledger_project"
-down_revision = "vap01_inbox_po_match"
+down_revision = "vtel01_util_counter_reset"
 branch_labels = None
 depends_on = None
 
