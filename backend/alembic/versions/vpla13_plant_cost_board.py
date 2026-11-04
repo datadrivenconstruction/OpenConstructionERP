@@ -27,13 +27,32 @@ depends_on: str | Sequence[str] | None = None
 _TABLE = "oe_equipment_equipment"
 
 
+def _columns() -> set[str] | None:
+    insp = sa.inspect(op.get_bind())
+    if _TABLE not in insp.get_table_names():
+        return None
+    return {c["name"] for c in insp.get_columns(_TABLE)}
+
+
 def upgrade() -> None:
+    have = _columns()
+    if have is None:
+        return
+    new = [c for c in ("holding_cost_per_month", "market_hire_rate_per_day") if c not in have]
+    if not new:
+        return
     with op.batch_alter_table(_TABLE) as batch:
-        batch.add_column(sa.Column("holding_cost_per_month", sa.Numeric(18, 4), nullable=True))
-        batch.add_column(sa.Column("market_hire_rate_per_day", sa.Numeric(18, 4), nullable=True))
+        for name in new:
+            batch.add_column(sa.Column(name, sa.Numeric(18, 4), nullable=True))
 
 
 def downgrade() -> None:
+    have = _columns()
+    if have is None:
+        return
+    drop = [c for c in ("market_hire_rate_per_day", "holding_cost_per_month") if c in have]
+    if not drop:
+        return
     with op.batch_alter_table(_TABLE) as batch:
-        batch.drop_column("market_hire_rate_per_day")
-        batch.drop_column("holding_cost_per_month")
+        for name in drop:
+            batch.drop_column(name)
