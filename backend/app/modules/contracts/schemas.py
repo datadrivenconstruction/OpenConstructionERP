@@ -866,21 +866,21 @@ class ProgressClaimListResponse(BaseModel):
 class ProgressClaimLineCreate(BaseModel):
     progress_claim_id: UUID
     contract_line_id: UUID
-    period_completed_qty: Decimal = Field(default=Decimal("0"))
-    period_completed_value: Decimal = Field(default=Decimal("0"))
+    period_completed_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_value: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     period_completed_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    cumulative_completed_value: Decimal = Field(default=Decimal("0"))
-    assessed_qty: Decimal = Field(default=Decimal("0"))
-    certified_qty: Decimal = Field(default=Decimal("0"))
+    cumulative_completed_value: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    assessed_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    certified_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class ProgressClaimLineUpdate(BaseModel):
-    period_completed_qty: Decimal | None = None
-    period_completed_value: Decimal | None = None
+    period_completed_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_value: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     period_completed_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    cumulative_completed_value: Decimal | None = None
-    assessed_qty: Decimal | None = None
-    certified_qty: Decimal | None = None
+    cumulative_completed_value: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    assessed_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    certified_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class ProgressClaimLineResponse(BaseModel):
