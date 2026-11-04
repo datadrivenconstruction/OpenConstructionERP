@@ -130,7 +130,11 @@ class PostcalcCurrencyRule(MoneyRule):
         ref = str(project.get("project_id", ""))
         if not any(to_dec(line.get("planned_labour_cost")) for line in lines):
             return [self.ok(ref)]
-        found = self.currency_findings(context, ref, currency_of(project), [currency_of(line) for line in lines])
+        header = currency_of(project)
+        if not header:
+            # Projects are created without a currency; the report is still readable, so this warns.
+            return [self.fail(context, "currency_present", ref=ref, severity=Severity.WARNING)]
+        found = self.currency_findings(context, ref, header, [currency_of(line) for line in lines])
         return found or [self.ok(ref)]
 
 
@@ -149,7 +153,14 @@ class PostcalcReferencesRule(MoneyRule):
         if blank(project.get("project_id")):
             out.append(self.fail(context, "reference_present", ref=ref, field="project_id"))
         out += [
-            self.fail(context, "reference_present", ref=str(line.get("position_id", "")), field="ref")
+            # A draft position may have no ordinal yet: flag it, do not hide the whole report.
+            self.fail(
+                context,
+                "reference_present",
+                ref=str(line.get("position_id", "")),
+                severity=Severity.WARNING,
+                field="ref",
+            )
             for line in rows(context, "lines")
             if blank(line.get("ref"))
         ]
