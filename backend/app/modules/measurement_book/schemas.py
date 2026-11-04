@@ -11,6 +11,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal18_4, FiniteDecimal
+
 CheckStatus = Literal["unchecked", "checked", "disputed"]
 
 _Dim = Decimal | None
@@ -44,7 +46,7 @@ class EntryUpdate(EntryBase):
 
 class EntryCheck(BaseModel):
     status: CheckStatus
-    check_quantity: Decimal | None = None
+    check_quantity: Decimal18_4 | None = None
     checked_by: str | None = Field(default=None, max_length=255)
 
 
@@ -91,7 +93,7 @@ class RunningBill(BaseModel):
     project_id: uuid.UUID
     currency: str
     lines: list[PositionSummary]
-    total_value: Decimal
+    total_value: FiniteDecimal
     unchecked_count: int
     can_certify: bool
 

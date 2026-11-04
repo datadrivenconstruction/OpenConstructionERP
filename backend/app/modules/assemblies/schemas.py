@@ -18,6 +18,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py::_serialise_money - money
@@ -118,7 +120,7 @@ class AssemblyParameter(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=64)
     kind: Literal["input", "calculated", "constant"] = "input"
-    value: Decimal | None = Field(default=None, le=_NUM_MAX, ge=-_NUM_MAX)
+    value: FiniteDecimal | None = Field(default=None, le=_NUM_MAX, ge=-_NUM_MAX)
     formula: str | None = Field(default=None, max_length=512)
     unit: str = Field(default="", max_length=32)
     description: str = Field(default="", max_length=255)
@@ -184,8 +186,8 @@ class ComponentCreate(BaseModel):
     quantity_formula: str | None = Field(default=None, max_length=512)
     unit: str = Field(..., min_length=1, max_length=20)
     # v3 §10 - money is Decimal-in / Decimal-as-string out.
-    unit_cost: Decimal = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
-    unit_rate: Decimal | None = Field(default=None, ge=0, le=_NUM_MAX, exclude=True)
+    unit_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
+    unit_rate: FiniteDecimal | None = Field(default=None, ge=0, le=_NUM_MAX, exclude=True)
     resource_type: str | None = Field(default=None, max_length=20)
     metadata: dict[str, Any] | None = None
 
@@ -225,7 +227,7 @@ class ComponentUpdate(BaseModel):
     # string to clear it back to the static quantity.
     quantity_formula: str | None = Field(default=None, max_length=512)
     unit: str | None = Field(default=None, min_length=1, max_length=20)
-    unit_cost: Decimal | None = Field(default=None, ge=0, le=_NUM_MAX)
+    unit_cost: FiniteDecimal | None = Field(default=None, ge=0, le=_NUM_MAX)
     resource_type: str | None = Field(default=None, max_length=20)
     sort_order: int | None = None
     metadata: dict[str, Any] | None = None
@@ -647,7 +649,7 @@ class AppliedComponent(BaseModel):
     factor: float = 0.0
     scaled_quantity: float = 0.0
     unit: str
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     total: float = 0.0
     currency: str = ""
     converted_to_target: bool = False
@@ -671,7 +673,7 @@ class CurrencySubtotal(BaseModel):
     """
 
     currency: str = ""
-    amount: Decimal = Decimal("0")
+    amount: FiniteDecimal = Decimal("0")
     component_count: int = 0
     is_target: bool = False
 

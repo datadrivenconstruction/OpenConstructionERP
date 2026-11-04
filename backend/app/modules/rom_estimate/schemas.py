@@ -22,6 +22,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── Decimal-as-string serialisation (mirrors boq / costmodel schemas) ────────
 def _serialise_money(v: Decimal | None) -> str | None:
@@ -62,13 +64,13 @@ class RomEstimateRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     building_type: str = Field(..., max_length=60, description="Building-type key, e.g. 'office'.")
-    gross_floor_area: Decimal = Field(..., gt=0, description="Gross floor area in 'gfa_unit'.")
+    gross_floor_area: FiniteDecimal = Field(..., gt=0, description="Gross floor area in 'gfa_unit'.")
     quality: str = Field(default="standard", max_length=40, description="Quality-level key.")
     region: str = Field(default="global", max_length=60, description="Region key (worldwide default 'global').")
     gfa_unit: str = Field(default="m2", max_length=20, description="Unit of 'gross_floor_area', e.g. m2 or ft2.")
     currency: str = Field(default="", max_length=10, description="Optional ISO currency label carried to the result.")
     name: str = Field(default="", max_length=255, description="Optional label used when the estimate is saved.")
-    base_rate_per_m2_override: Decimal | None = Field(
+    base_rate_per_m2_override: FiniteDecimal | None = Field(
         default=None,
         description=(
             "Optional base cost per m2, expressed in 'currency', that replaces the "
@@ -113,9 +115,9 @@ class RomElementBreakdown(BaseModel):
 
     key: str = Field(description="Stable element key, e.g. 'services'.")
     label: str = Field(description="Default human label, e.g. 'Building services (MEP)'.")
-    cost_share_pct: Decimal = Field(description="Share of the total for this element, as a percentage.")
-    rate_per_m2: Decimal = Field(description="Quality- and region-adjusted cost per m2 for this element.")
-    amount: Decimal = Field(description="Element total money (breakdown amounts sum to the headline total).")
+    cost_share_pct: FiniteDecimal = Field(description="Share of the total for this element, as a percentage.")
+    rate_per_m2: FiniteDecimal = Field(description="Quality- and region-adjusted cost per m2 for this element.")
+    amount: FiniteDecimal = Field(description="Element total money (breakdown amounts sum to the headline total).")
 
     @field_serializer("cost_share_pct", "rate_per_m2", "amount", when_used="json")
     def _ser(self, v: Decimal) -> str | None:
@@ -132,10 +134,10 @@ class RomAccuracyBand(BaseModel):
 
     estimate_class: str = Field(description="Estimate class key, e.g. 'order_of_magnitude'.")
     estimate_class_label: str = Field(description="Default human label for the estimate class.")
-    low_pct: Decimal = Field(description="Lower bound as a signed percentage of the total (e.g. -25).")
-    high_pct: Decimal = Field(description="Upper bound as a signed percentage of the total (e.g. +40).")
-    low_amount: Decimal = Field(description="Lower-bound money (total adjusted by low_pct).")
-    high_amount: Decimal = Field(description="Upper-bound money (total adjusted by high_pct).")
+    low_pct: FiniteDecimal = Field(description="Lower bound as a signed percentage of the total (e.g. -25).")
+    high_pct: FiniteDecimal = Field(description="Upper bound as a signed percentage of the total (e.g. +40).")
+    low_amount: FiniteDecimal = Field(description="Lower-bound money (total adjusted by low_pct).")
+    high_amount: FiniteDecimal = Field(description="Upper-bound money (total adjusted by high_pct).")
     localized: bool = Field(description="True when a non-default region factor was applied.")
     note: str = Field(default="", description="Plain-language explanation of the band.")
 
@@ -188,9 +190,9 @@ class RomBuildingTypeOption(BaseModel):
 
     key: str
     label: str
-    base_rate_per_m2: Decimal
-    accuracy_low_pct: Decimal
-    accuracy_high_pct: Decimal
+    base_rate_per_m2: FiniteDecimal
+    accuracy_low_pct: FiniteDecimal
+    accuracy_high_pct: FiniteDecimal
 
     @field_serializer("base_rate_per_m2", "accuracy_low_pct", "accuracy_high_pct", when_used="json")
     def _ser(self, v: Decimal) -> str | None:
@@ -202,7 +204,7 @@ class RomFactorOption(BaseModel):
 
     key: str
     label: str
-    factor: Decimal
+    factor: FiniteDecimal
 
     @field_serializer("factor", when_used="json")
     def _ser(self, v: Decimal) -> str | None:
@@ -244,15 +246,15 @@ class RomEstimateRecord(BaseModel):
     quality: str
     region: str
     currency: str = ""
-    gross_floor_area: Decimal = Decimal("0")
+    gross_floor_area: FiniteDecimal = Decimal("0")
     gfa_unit: str = "m2"
-    cost_per_m2: Decimal = Decimal("0")
-    total: Decimal = Decimal("0")
+    cost_per_m2: FiniteDecimal = Decimal("0")
+    total: FiniteDecimal = Decimal("0")
     estimate_class: str = ""
-    accuracy_low_pct: Decimal = Decimal("0")
-    accuracy_high_pct: Decimal = Decimal("0")
-    accuracy_low_amount: Decimal = Decimal("0")
-    accuracy_high_amount: Decimal = Decimal("0")
+    accuracy_low_pct: FiniteDecimal = Decimal("0")
+    accuracy_high_pct: FiniteDecimal = Decimal("0")
+    accuracy_low_amount: FiniteDecimal = Decimal("0")
+    accuracy_high_amount: FiniteDecimal = Decimal("0")
     elements: list[RomElementBreakdown] = Field(default_factory=list)
     created_at: datetime | None = None
     created_by: UUID | None = None
@@ -294,19 +296,19 @@ class RomReconciliation(BaseModel):
 
     project_id: UUID
     status: str = Field(description="Reconciliation band: no_baseline | on_track | over | under.")
-    conceptual_total: Decimal | None = Field(
+    conceptual_total: FiniteDecimal | None = Field(
         default=None, description="Most-recent saved conceptual total, or null when none is stored."
     )
-    detailed_total: Decimal = Field(
+    detailed_total: FiniteDecimal = Field(
         default=Decimal("0"), description="Sum of the project's BOQ grand totals in the base currency."
     )
-    variance_amount: Decimal | None = Field(
+    variance_amount: FiniteDecimal | None = Field(
         default=None, description="detailed_total - conceptual_total, or null with no baseline."
     )
-    variance_pct: Decimal | None = Field(
+    variance_pct: FiniteDecimal | None = Field(
         default=None, description="Variance as a signed percent of the conceptual total, or null."
     )
-    tolerance_pct: Decimal = Field(
+    tolerance_pct: FiniteDecimal = Field(
         default=Decimal("10"), description="On-track tolerance band (absolute percent) used for the status."
     )
     currency: str = Field(default="", description="Currency the reconciliation is expressed in (BOQ base currency).")

@@ -24,6 +24,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py - money fields are stored /
@@ -53,9 +55,9 @@ class CatalogResourceCreate(BaseModel):
     category: str = Field(..., min_length=1, max_length=100)
     unit: str = Field(..., min_length=1, max_length=20)
     # v3 §10 - money is Decimal-in / Decimal-as-string out.
-    base_price: Decimal = Field(..., ge=0)
-    min_price: Decimal = Field(default=Decimal("0"), ge=0)
-    max_price: Decimal = Field(default=Decimal("0"), ge=0)
+    base_price: FiniteDecimal = Field(..., ge=0)
+    min_price: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    max_price: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="EUR", max_length=10)
     source: str = Field(default="manual", max_length=50)
     region: str | None = Field(default=None, max_length=50)
@@ -184,8 +186,8 @@ class CatalogSearchQuery(BaseModel):
     unit: str | None = Field(default=None, description="Filter by unit")
     # v3 §10 - money is Decimal-in / Decimal-as-string out. Query params
     # arrive as strings via FastAPI; Pydantic v2 coerces to Decimal.
-    min_price: Decimal | None = Field(default=None, ge=0)
-    max_price: Decimal | None = Field(default=None, ge=0)
+    min_price: FiniteDecimal | None = Field(default=None, ge=0)
+    max_price: FiniteDecimal | None = Field(default=None, ge=0)
     limit: int = Field(default=50, ge=1, le=500)
     offset: int = Field(default=0, ge=0)
 

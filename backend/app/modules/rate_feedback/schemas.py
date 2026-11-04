@@ -10,6 +10,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 
 class ProposalResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -53,7 +55,7 @@ class ProposalResponse(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    tolerance: Decimal = Field(default=Decimal("0.05"), ge=0, le=1)
+    tolerance: FiniteDecimal = Field(default=Decimal("0.05"), ge=0, le=1)
     min_projects: int = Field(default=1, ge=1, le=50)
 
 
@@ -67,7 +69,7 @@ class RefreshResponse(BaseModel):
 class ConfirmRequest(BaseModel):
     """``rate`` lets the estimator keep a figure of their own instead of the suggestion."""
 
-    rate: Decimal | None = Field(default=None, gt=0, lt=Decimal("100000000000"), decimal_places=4)
+    rate: FiniteDecimal | None = Field(default=None, gt=0, lt=Decimal("100000000000"), decimal_places=4)
     apply_hours: bool = True
     note: str | None = Field(default=None, max_length=1000)
 

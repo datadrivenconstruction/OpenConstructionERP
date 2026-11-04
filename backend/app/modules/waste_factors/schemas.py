@@ -15,6 +15,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal8_4, FiniteDecimal
 from app.modules.waste_factors.waste_math import quantize_qty
 
 # A stored factor is a multiplier >= 1; the upper bound is a fat-finger guard
@@ -39,7 +40,7 @@ class WasteFactorCreate(BaseModel):
 
     category: str = Field(..., min_length=1, max_length=120)
     label: str = Field(default="", max_length=200)
-    factor: Decimal = _FACTOR
+    factor: Decimal8_4 = _FACTOR
     note: str | None = None
     tenant_id: UUID | None = None
 
@@ -51,7 +52,7 @@ class WasteFactorUpdate(BaseModel):
 
     category: str | None = Field(default=None, min_length=1, max_length=120)
     label: str | None = Field(default=None, max_length=200)
-    factor: Decimal | None = Field(default=None, ge=1, le=10)
+    factor: Decimal8_4 | None = Field(default=None, ge=1, le=10)
     note: str | None = None
 
 
@@ -91,7 +92,7 @@ class ApplyLineInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     category: str = Field(..., min_length=1, max_length=120)
-    net_qty: Decimal = Field(..., ge=0)
+    net_qty: FiniteDecimal = Field(..., ge=0)
 
 
 class ApplyRequest(BaseModel):

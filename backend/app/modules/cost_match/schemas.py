@@ -21,6 +21,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal6_4, FiniteDecimal
 from app.modules.cost_match.models import (
     DECISION_KINDS,
     DECISION_STATES,
@@ -64,7 +65,7 @@ class MatchLineInput(BaseModel):
 
     description: str = Field(default="", max_length=4000)
     unit: str = Field(default="", max_length=40)
-    quantity: Decimal | None = Field(default=None, ge=0)
+    quantity: FiniteDecimal | None = Field(default=None, ge=0)
     # The subcontractor's own item code, if their bill carried one. Used to
     # widen retrieval (a code hit is pulled into the candidate pool) but never
     # to decide a tier on its own - a code that matches with a description
@@ -127,9 +128,9 @@ class MatchCandidate(BaseModel):
     code: str = ""
     description: str = ""
     unit: str = ""
-    rate: Decimal | None = None
+    rate: FiniteDecimal | None = None
     currency: str = ""
-    confidence: Decimal = Decimal("0")
+    confidence: Decimal6_4 = Decimal("0")
     band: str = ""
     reason_codes: list[str] = Field(default_factory=list)
 
