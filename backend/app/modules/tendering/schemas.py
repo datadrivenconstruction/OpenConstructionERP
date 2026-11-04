@@ -37,6 +37,21 @@ def _serialise_money(v: Decimal | None) -> str | None:
     return format(v, "f")
 
 
+def _finite_total(v: str | None) -> str | None:
+    if v is None:
+        return None
+    v = v.strip()
+    if not v:
+        return "0"
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError) as exc:
+        raise ValueError("total_amount must be a number") from exc
+    if not d.is_finite() or d < 0 or d.adjusted() > 24:
+        raise ValueError("total_amount must be a finite non-negative number")
+    return v
+
+
 # ── Package schemas ──────────────────────────────────────────────────────────
 
 
@@ -116,9 +131,9 @@ class BidLineItem(BaseModel):
     position_id: str | None = None
     description: str = ""
     unit: str = ""
-    quantity: float = 0.0
-    unit_rate: Decimal = Decimal("0")
-    total: float = 0.0
+    quantity: float = Field(default=0.0, allow_inf_nan=False)
+    unit_rate: Decimal = Field(default=Decimal("0"), allow_inf_nan=False, max_digits=24)
+    total: float = Field(default=0.0, allow_inf_nan=False)
 
     @field_serializer("unit_rate", when_used="json")
     def _ser_unit_rate(self, v: Decimal) -> str | None:
@@ -136,9 +151,14 @@ class BidCreate(BaseModel):
     currency: str = Field(default="EUR", max_length=10)
     submitted_at: str | None = Field(default=None, max_length=20)
     status: str = Field(default="pending", pattern=r"^(pending|submitted|accepted|rejected)$")
-    notes: str = ""
-    line_items: list[BidLineItem] = Field(default_factory=list)
+    notes: str = Field(default="", max_length=10000)
+    line_items: list[BidLineItem] = Field(default_factory=list, max_length=50000)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("total_amount")
+    @classmethod
+    def _check_total(cls, v: str) -> str:
+        return _finite_total(v) or "0"
 
     @field_validator("contact_email")
     @classmethod
@@ -158,13 +178,18 @@ class BidUpdate(BaseModel):
 
     company_name: str | None = Field(default=None, min_length=1, max_length=255)
     contact_email: str | None = None
-    total_amount: str | None = None
+    total_amount: str | None = Field(default=None, max_length=50)
     currency: str | None = None
     submitted_at: str | None = None
     status: str | None = Field(default=None, pattern=r"^(pending|submitted|accepted|rejected)$")
-    notes: str | None = None
-    line_items: list[BidLineItem] | None = None
+    notes: str | None = Field(default=None, max_length=10000)
+    line_items: list[BidLineItem] | None = Field(default=None, max_length=50000)
     metadata: dict[str, Any] | None = None
+
+    @field_validator("total_amount")
+    @classmethod
+    def _check_total(cls, v: str | None) -> str | None:
+        return _finite_total(v)
 
     @field_validator("contact_email")
     @classmethod
