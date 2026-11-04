@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "{ordinal}-pozitsiya: {count} ta o'lchov oldingi chizma tahridan ko'chirilgan va hali tasdiqlanmagan",
       "suggestion": "Yangi tahrirda ko'chirilgan har bir o'lchovni tekshirib tasdiqlang yoki qayta o'lchang"
+    },
+    "low_confidence_pending": {
+      "fail": "{ordinal}-pozitsiya: koʻchirilgan {count} ta oʻlchov yangi tahrirga past ishonchlilik bilan joylashtirildi va koʻrib chiqishni kutmoqda",
+      "suggestion": "Koʻchirishni koʻrib chiqishni oching, yangi varaqdagi past ishonchli har bir oʻlchovni tekshiring, soʻng tasdiqlang yoki qayta oʻlchang"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} bo'yicha qaror qabul qilingan, uni endi o'zgartirib yoki o'chirib bo'lmaydi.",
       "suggestion": "Uni tuzatadigan yangi o'tkazma yoki byudjet o'zgarishini kiriting."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Byudjetning atigi {coverage}% vazifalarga bogʻlangan elementlarda (chegara {limit}%); qolganini model yonida koʻrsatib boʻlmaydi.",
+        "suggestion": "Koʻproq elementni xarajatli vazifalarga bogʻlang yoki EAC bogʻlash qoidalarini tekshiring."
+      }
     }
   },
   "money": {

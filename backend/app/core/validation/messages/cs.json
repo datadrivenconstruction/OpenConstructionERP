@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Položka {ordinal}: {count} měření bylo převzato z dřívější revize výkresu a dosud není potvrzeno",
       "suggestion": "Zkontrolujte každé převzaté měření na nové revizi a potvrďte je, nebo je změřte znovu"
+    },
+    "low_confidence_pending": {
+      "fail": "Položka {ordinal}: {count} převzatých měření bylo umístěno na novou revizi s nízkou spolehlivostí a čeká na kontrolu",
+      "suggestion": "Otevřete kontrolu převzatých měření, zkontrolujte každé měření s nízkou spolehlivostí na novém výkresu a poté je potvrďte nebo znovu změřte"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} je rozhodnut a už ho nelze měnit ani mazat.",
       "suggestion": "Zadejte nový přesun nebo změnu rozpočtu, která ho opraví."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Pouze {coverage} % rozpočtu leží na prvcích propojených s úkoly (limit {limit} %); zbytek nelze zobrazit vedle modelu.",
+        "suggestion": "Propojte více prvků s úkoly s nákladovým zatížením nebo zkontrolujte pravidla propojení EAC."
+      }
     }
   },
   "money": {

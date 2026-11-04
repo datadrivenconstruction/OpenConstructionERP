@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Post {ordinal}: {count} måling(er) ble overført fra en tidligere tegningsrevisjon og er ikke bekreftet ennå",
       "suggestion": "Kontroller hver overførte måling på den nye revisjonen og bekreft den, eller mål på nytt"
+    },
+    "low_confidence_pending": {
+      "fail": "Post {ordinal}: {count} overførte oppmåling(er) er plassert på den nye revisjonen med lav sikkerhet og venter på gjennomgang",
+      "suggestion": "Åpne gjennomgangen av overførte oppmålinger, kontroller hver oppmåling med lav sikkerhet på det nye tegningsarket, og bekreft eller mål på nytt"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} er avgjort og kan ikke lenger endres eller slettes.",
       "suggestion": "Registrer en ny overføring eller budsjettendring som retter den opp."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Bare {coverage} % av budsjettet ligger på elementer knyttet til oppgaver (grense {limit} %); resten kan ikke vises ved siden av modellen.",
+        "suggestion": "Knytt flere elementer til oppgaver med kostnader, eller kontroller EAC-koblingsreglene."
+      }
     }
   },
   "money": {

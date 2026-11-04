@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Poz {ordinal}: {count} ölçüm önceki bir çizim revizyonundan aktarıldı ve henüz onaylanmadı",
       "suggestion": "Aktarılan her ölçümü yeni revizyonda kontrol edip onaylayın veya yeniden ölçün"
+    },
+    "low_confidence_pending": {
+      "fail": "Kalem {ordinal}: devredilen {count} metraj yeni revizyona düşük güvenle yerleştirildi ve incelenmeyi bekliyor",
+      "suggestion": "Devir incelemesini açın, yeni paftada düşük güvenli her metrajı kontrol edin, ardından onaylayın veya yeniden ölçün"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "{code} hakkında karar verildi; artık değiştirilemez veya silinemez.",
       "suggestion": "Bunu düzeltecek yeni bir aktarım veya bütçe değişikliği girin."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Bütçenin yalnızca %{coverage} kadarı görevlere bağlı öğelerde (sınır %{limit}); geri kalanı modelin yanında gösterilemez.",
+        "suggestion": "Daha fazla öğeyi maliyet yüklü görevlere bağlayın veya EAC bağlantı kurallarını kontrol edin."
+      }
     }
   },
   "money": {

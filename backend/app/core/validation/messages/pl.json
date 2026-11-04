@@ -1428,6 +1428,10 @@
     "carried_unconfirmed": {
       "fail": "Pozycja {ordinal}: {count} pomiarów przeniesiono z wcześniejszej rewizji rysunku i nie są jeszcze potwierdzone",
       "suggestion": "Sprawdź każdy przeniesiony pomiar na nowej rewizji i potwierdź go lub zmierz ponownie"
+    },
+    "low_confidence_pending": {
+      "fail": "Pozycja {ordinal}: {count} przeniesionych obmiarów umieszczono na nowej rewizji z niską pewnością i oczekują one na przegląd",
+      "suggestion": "Otwórz przegląd przeniesień, sprawdź każdy obmiar o niskiej pewności na nowym rysunku, a następnie potwierdź go lub zmierz ponownie"
     }
   },
   "field_diary": {
@@ -1706,6 +1710,14 @@
     "approved_immutable": {
       "fail": "Dla {code} zapadła decyzja i nie można jej już zmieniać ani usuwać.",
       "suggestion": "Wprowadź nowe przesunięcie lub zmianę budżetu, która ją skoryguje."
+    }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Tylko {coverage}% budżetu znajduje się na elementach powiązanych z zadaniami (limit {limit}%); reszty nie można pokazać obok modelu.",
+        "suggestion": "Powiąż więcej elementów z zadaniami z przypisanymi kosztami lub sprawdź reguły powiązań EAC."
+      }
     }
   },
   "money": {
