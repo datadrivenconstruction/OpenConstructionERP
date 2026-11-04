@@ -26,7 +26,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Connection, Engine, make_url
 from sqlalchemy.pool import NullPool
 
-from app.core.event_effect import EventEffect
+from app.core.event_effects import EventEffect
 from app.database import Base
 from app.modules.procurement.models import GoodsReceipt, GoodsReceiptItem, PurchaseOrder, PurchaseOrderItem
 from app.modules.supplier_catalogs import legacy_migration as lm

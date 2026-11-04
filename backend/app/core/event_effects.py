@@ -39,7 +39,7 @@ class EventEffect(Base):
     __table_args__ = (UniqueConstraint("event_key", "effect", name="uq_oe_event_effect_key_effect"),)
 
     event_key: Mapped[str] = mapped_column(String(200), nullable=False)
-    effect: Mapped[str] = mapped_column(String(120), nullable=False)
+    effect: Mapped[str] = mapped_column(String(120), nullable=False, default="", server_default="")
     event_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     record_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
@@ -62,7 +62,7 @@ def rfq_award_key(award_id: object) -> str:
 async def claim_effect(
     session: AsyncSession,
     event_key: str,
-    effect: str,
+    effect: str = "",
     *,
     event_name: str | None = None,
 ) -> EventEffect | None:
