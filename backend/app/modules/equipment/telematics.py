@@ -348,15 +348,17 @@ def _clamp(v: Decimal, lo: Decimal, hi: Decimal) -> Decimal:
     return max(lo, min(hi, v))
 
 
-def _counter_delta(chain: list[dict[str, Any]], key: str) -> tuple[Decimal, bool]:
+def _counter_delta(chain: list[dict[str, Any]], key: str, hours: bool = False) -> tuple[Decimal, bool]:
     """Growth of a cumulative counter along time-ordered rows, and whether it was reset.
 
     A value below its predecessor means the counter restarted (ECU swap, rollover):
     the new value is then the amount counted since the restart, never a negative delta.
+    For hour counters that amount cannot exceed the wall-clock time between the two readings.
     """
     total = _ZERO
     reset = False
     prev: Decimal | None = None
+    prev_at: datetime | None = None
     for row in chain:
         raw = row.get(key)
         if raw is None:
@@ -368,9 +370,13 @@ def _counter_delta(chain: list[dict[str, Any]], key: str) -> tuple[Decimal, bool
             elif prev - cur < _RESET_TOLERANCE:
                 pass  # sensor jitter, not a restart
             else:
-                total += cur
+                counted = cur
+                if hours and prev_at is not None:
+                    counted = min(cur, Decimal((row["recorded_at"] - prev_at).total_seconds()) / 3600)
+                total += counted
                 reset = True
         prev = cur
+        prev_at = row["recorded_at"]
     return total, reset
 
 
@@ -397,11 +403,11 @@ def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None
     base = before[-1] if before else inside[0]
     last = inside[-1]
     chain = [base, *[r for r in inside if r is not base]]
-    engine, reset = _counter_delta(chain, "engine_hours")
+    engine, reset = _counter_delta(chain, "engine_hours", hours=True)
     engine = _clamp(engine, _ZERO, _DAY_HOURS)
     idle = _ZERO
     if last.get("idle_hours") is not None and base.get("idle_hours") is not None:
-        idle = _clamp(_counter_delta(chain, "idle_hours")[0], _ZERO, engine)
+        idle = _clamp(_counter_delta(chain, "idle_hours", hours=True)[0], _ZERO, engine)
     fuel = None
     if last.get("fuel_used_l") is not None and base.get("fuel_used_l") is not None:
         fuel = _counter_delta(chain, "fuel_used_l")[0]
