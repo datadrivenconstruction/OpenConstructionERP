@@ -11,6 +11,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, PlainSerializer
 
+from app.core.decimal_types import FiniteDecimal
+
 # Money and rates are exchanged as strings on the wire so JSON's float bridge
 # never silently rounds a precision-critical value (same convention as
 # ``app.modules.costs.schemas.DecimalMoney``). Inputs accept any JSON number or
@@ -55,7 +57,7 @@ class RateProvenance(BaseModel):
 class ConvertRequest(BaseModel):
     """Request body for ``POST /api/v1/fx/convert/``."""
 
-    amount: Decimal = Field(..., description="Amount to convert. Accepts a JSON number or a numeric string.")
+    amount: FiniteDecimal = Field(..., description="Amount to convert. Accepts a JSON number or a numeric string.")
     from_currency: str = Field(..., min_length=3, max_length=3, description="ISO 4217 source currency (e.g. EUR).")
     to_currency: str = Field(..., min_length=3, max_length=3, description="ISO 4217 target currency (e.g. TRY).")
     mode: Literal["market", "ppp"] = Field(
@@ -169,7 +171,7 @@ class RateSetCreateRequest(BaseModel):
         description="ISO 4217 base the rates are quoted against.",
     )
     rate_date: date = Field(..., description="Date the rates are effective for.")
-    rates: dict[str, Decimal] = Field(
+    rates: dict[str, FiniteDecimal] = Field(
         ...,
         min_length=1,
         description="Map of ISO 4217 currency code to units of that currency per 1 base.",
@@ -247,8 +249,10 @@ class RevaluationLineRequest(BaseModel):
     """One figure to revalue, in its own currency, at two points in time."""
 
     currency: str = Field(..., min_length=3, max_length=3, description="ISO 4217 currency the figure is held in.")
-    baseline_amount: Decimal = Field(..., description="The amount when the baseline was set.")
-    current_amount: Decimal = Field(..., description="The amount now. Equal to the baseline when only rates moved.")
+    baseline_amount: FiniteDecimal = Field(..., description="The amount when the baseline was set.")
+    current_amount: FiniteDecimal = Field(
+        ..., description="The amount now. Equal to the baseline when only rates moved."
+    )
     ref: str = Field(default="", max_length=100, description="Your identifier for the line (package, order, WBS).")
     description: str = Field(default="", max_length=300)
 

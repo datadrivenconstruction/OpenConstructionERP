@@ -16,6 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
 from app.modules.price_breakdown import ResourceKind, kind_i18n_key
 from app.modules.resource_summary.aggregate import (
     BuyListItem,
@@ -45,8 +46,8 @@ class ResourceStatementLine(BaseModel):
     kind_i18n_key: str
     name: str
     unit: str
-    quantity: Decimal
-    cost: Decimal
+    quantity: FiniteDecimal
+    cost: FiniteDecimal
     position_count: int
 
     @field_serializer("quantity", when_used="json")
@@ -77,9 +78,9 @@ class ResourceStatementGroup(BaseModel):
     kind_i18n_key: str
     label: str
     line_count: int
-    total_cost: Decimal
+    total_cost: FiniteDecimal
     # Labour only: the hours a buyer reads as one figure. ``None`` for other kinds.
-    total_hours: Decimal | None = None
+    total_hours: FiniteDecimal | None = None
     lines: list[ResourceStatementLine] = Field(default_factory=list)
 
     @field_serializer("total_cost", when_used="json")
@@ -154,7 +155,7 @@ class MaterialBuyListSource(BaseModel):
 
     position_id: str
     resource_key: str
-    quantity: Decimal
+    quantity: FiniteDecimal
     unit: str
     code: str = ""
     catalog_item_id: str | None = None
@@ -170,8 +171,8 @@ class MaterialBuyListSource(BaseModel):
     # ``unit`` only (other units are never added in), and what is left of
     # ``quantity``. Negative remaining means more is held than the BOQ now
     # needs. Both null when coverage could not be read.
-    covered_quantity: Decimal | None = None
-    remaining_quantity: Decimal | None = None
+    covered_quantity: FiniteDecimal | None = None
+    remaining_quantity: FiniteDecimal | None = None
 
     @field_serializer("quantity", "covered_quantity", "remaining_quantity", when_used="json")
     def _ser_quantity(self, v: Decimal | None) -> str | None:
@@ -189,14 +190,14 @@ class MaterialBuyListItem(BaseModel):
 
     name: str
     unit: str
-    quantity: Decimal
-    cost: Decimal
+    quantity: FiniteDecimal
+    cost: FiniteDecimal
     position_count: int
     currency: str
     # Sum of the sources' covered and remaining quantities; null when coverage
     # could not be read.
-    covered_quantity: Decimal | None = None
-    remaining_quantity: Decimal | None = None
+    covered_quantity: FiniteDecimal | None = None
+    remaining_quantity: FiniteDecimal | None = None
     sources: list[MaterialBuyListSource] = Field(default_factory=list)
 
     @field_serializer("quantity", when_used="json")

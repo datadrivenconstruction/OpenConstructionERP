@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal20_6, FiniteDecimal
 from app.modules.bi_dashboards.kpi_spec import KPI_SCOPES as _KPI_SCOPES
 
 # ── Canonical enumerations ─────────────────────────────────────────────
@@ -119,7 +120,7 @@ class KPIDefinitionCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
     unit: str = "ratio"
-    target_default: Decimal | None = None
+    target_default: Decimal20_6 | None = None
     aggregation: str = "last"
     category: str = "operational"
     project_id: UUID | None = None
@@ -402,7 +403,7 @@ class AlertRuleCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     kpi_code: str = Field(..., min_length=1, max_length=64)
     condition: str = "below"
-    threshold_value: Decimal = Decimal("0")
+    threshold_value: Decimal20_6 = Decimal("0")
     threshold_unit: str | None = None
     severity: str = "warning"
     scope_project_id: UUID | None = None
@@ -416,7 +417,7 @@ class AlertRuleCreate(BaseModel):
 class AlertRuleUpdate(BaseModel):
     name: str | None = None
     condition: str | None = None
-    threshold_value: Decimal | None = None
+    threshold_value: Decimal20_6 | None = None
     threshold_unit: str | None = None
     severity: str | None = None
     scope_project_id: UUID | None = None
@@ -486,7 +487,7 @@ class SavedFilterRead(BaseModel):
 class KPIHistoryPoint(BaseModel):
     period_start: date
     period_end: date
-    value: Decimal
+    value: Decimal20_6
     unit: str
     source_record_count: int = 0
 
@@ -744,22 +745,22 @@ class PerformanceBenchmarkRequest(CostIndexOptions, BenchmarkCohort):
 
 class PerformanceProjectRow(BaseModel):
     project_id: UUID
-    value: Decimal | None
-    numerator: Decimal | None = None
-    denominator: Decimal | None = None
+    value: Decimal20_6 | None
+    numerator: FiniteDecimal | None = None
+    denominator: FiniteDecimal | None = None
     records: int = 0
     unavailable_reason: str | None = None
     #: Units this project's rows were converted from to land in the group.
     converted_from: list[str] = Field(default_factory=list)
     #: ``(value - headline) / headline``, unset when either is missing or the
     #: headline is zero.
-    variance: Decimal | None = None
+    variance: FiniteDecimal | None = None
     #: Currencies restated into the reporting currency, the value before the
     #: rate, its currency and the rate itself.
     converted_from_currency: list[str] = Field(default_factory=list)
-    original_value: Decimal | None = None
+    original_value: FiniteDecimal | None = None
     original_currency: str | None = None
-    fx_rate: Decimal | None = None
+    fx_rate: FiniteDecimal | None = None
     #: How a cost index moved this project's money, when one was asked for:
     #: the series, the months the money was in, the month it was brought to,
     #: the factor, the months the series lacks (which excluded the reading),
@@ -767,11 +768,11 @@ class PerformanceProjectRow(BaseModel):
     index_series: str | None = None
     index_base_periods: list[str] = Field(default_factory=list)
     index_target_period: str | None = None
-    index_factor: Decimal | None = None
+    index_factor: FiniteDecimal | None = None
     index_missing_periods: list[str] = Field(default_factory=list)
     location_region: str | None = None
-    location_factor: Decimal | None = None
-    unadjusted_value: Decimal | None = None
+    location_factor: FiniteDecimal | None = None
+    unadjusted_value: FiniteDecimal | None = None
 
 
 class PerformanceCostIndex(BaseModel):
@@ -785,7 +786,7 @@ class PerformanceCostIndex(BaseModel):
     series_name: str | None = None
     target_period: str | None = None
     target_region: str | None = None
-    target_region_factor: Decimal | None = None
+    target_region_factor: FiniteDecimal | None = None
     applicable: bool = True
 
 
@@ -793,22 +794,22 @@ class PerformanceBenchmarkFigures(BaseModel):
     #: Ratio of the summed numerators to the summed denominators for a ratio
     #: or weighted average; record-weighted mean for an average; ``None``
     #: with a reason for a sum, count, min or max.
-    weighted: Decimal | None
+    weighted: FiniteDecimal | None
     weighted_unavailable_reason: str | None = None
     #: Arithmetic mean of the per-project values: every project counts once.
-    mean: Decimal | None = None
-    median: Decimal | None
-    p25: Decimal | None
-    p75: Decimal | None
-    min: Decimal | None
-    max: Decimal | None
+    mean: FiniteDecimal | None = None
+    median: FiniteDecimal | None
+    p25: FiniteDecimal | None
+    p75: FiniteDecimal | None
+    min: FiniteDecimal | None
+    max: FiniteDecimal | None
     #: Served from ten projects with a value up, unset below.
-    p10: Decimal | None = None
-    p90: Decimal | None = None
+    p10: FiniteDecimal | None = None
+    p90: FiniteDecimal | None = None
     #: Sample standard deviation and coefficient of variation of the
     #: per-project values.
-    stddev: Decimal | None = None
-    cv: Decimal | None = None
+    stddev: FiniteDecimal | None = None
+    cv: FiniteDecimal | None = None
 
 
 class PerformanceEvidence(BaseModel):
@@ -823,7 +824,7 @@ class PerformanceConversion(BaseModel):
 
     from_unit: str
     to_unit: str
-    factor: Decimal
+    factor: FiniteDecimal
 
 
 class PerformanceCurrencyConversion(BaseModel):
@@ -831,7 +832,7 @@ class PerformanceCurrencyConversion(BaseModel):
 
     from_currency: str
     to_currency: str
-    rate: Decimal
+    rate: FiniteDecimal
     as_of: date | None = None
     source: str = ""
 
@@ -843,7 +844,7 @@ class PerformanceGroup(BaseModel):
     benchmark: PerformanceBenchmarkFigures
     evidence: PerformanceEvidence
     #: Projects with a value in this group over projects selected.
-    coverage: Decimal
+    coverage: FiniteDecimal
     conversions: list[PerformanceConversion] = Field(default_factory=list)
     currency_conversions: list[PerformanceCurrencyConversion] = Field(default_factory=list)
     #: What the values are in, such as ``h/m2`` or ``EUR/m2``; unset for a count.
@@ -854,7 +855,7 @@ class PerformanceGroup(BaseModel):
     #: statistic can differ from the one asked for when that one does not
     #: exist for the KPI (a sum has no weighted figure); the label follows
     #: what was delivered.
-    headline: Decimal | None = None
+    headline: FiniteDecimal | None = None
     headline_statistic: str = "weighted"
     #: False when the group misses ``min_projects`` or ``min_records``; the
     #: figures are still served, but are not to be read as a benchmark.
@@ -1206,12 +1207,12 @@ class PerformanceDrillRecord(BaseModel):
     ref: str = ""
     description: str = ""
     dimensions: dict[str, str | None] = Field(default_factory=dict)
-    numerator: Decimal | None = None
-    denominator: Decimal | None = None
-    counted_numerator: Decimal | None = None
-    counted_denominator: Decimal | None = None
+    numerator: FiniteDecimal | None = None
+    denominator: FiniteDecimal | None = None
+    counted_numerator: FiniteDecimal | None = None
+    counted_denominator: FiniteDecimal | None = None
     #: The cost index and location factor this record's money moved by.
-    index_factor: Decimal | None = None
+    index_factor: FiniteDecimal | None = None
 
 
 class PerformanceDrilldownResponse(BaseModel):
@@ -1265,16 +1266,16 @@ class PerformancePositionContextItem(BaseModel):
     classification_code: str | None = None
     unit: str | None = None
     currency: str | None = None
-    estimate: Decimal | None = None
-    value: Decimal | None = None
+    estimate: FiniteDecimal | None = None
+    value: Decimal20_6 | None = None
     value_unit: str | None = None
-    headline: Decimal | None = None
+    headline: FiniteDecimal | None = None
     statistic: str | None = None
-    median: Decimal | None = None
-    p25: Decimal | None = None
-    p75: Decimal | None = None
-    variance: Decimal | None = None
-    percentile_rank: Decimal | None = None
+    median: FiniteDecimal | None = None
+    p25: FiniteDecimal | None = None
+    p75: FiniteDecimal | None = None
+    variance: FiniteDecimal | None = None
+    percentile_rank: FiniteDecimal | None = None
     band: str | None = None
     confidence: str | None = None
     projects: int = 0

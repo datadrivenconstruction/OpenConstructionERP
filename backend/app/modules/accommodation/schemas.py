@@ -18,6 +18,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.core.decimal_types import Decimal10_7, Decimal18_2
+
 # ── Enum patterns (regex, not Literal - adding a new value stays a single
 #    line change and never needs a DB migration) ─────────────────────────
 
@@ -45,8 +47,8 @@ class AccommodationCreate(BaseModel):
     name: str = Field(default="", max_length=255)
     kind: str = Field(default="worker_camp", pattern=_KIND_PATTERN)
     address: str | None = None
-    geo_lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    geo_lon: Decimal | None = Field(default=None, ge=-180, le=180)
+    geo_lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    geo_lon: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
     bim_model_id: UUID | None = None
     property_dev_block_id: UUID | None = None
     capacity_total: int = Field(default=0, ge=0)
@@ -62,8 +64,8 @@ class AccommodationUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=255)
     kind: str | None = Field(default=None, pattern=_KIND_PATTERN)
     address: str | None = None
-    geo_lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    geo_lon: Decimal | None = Field(default=None, ge=-180, le=180)
+    geo_lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    geo_lon: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
     bim_model_id: UUID | None = None
     property_dev_block_id: UUID | None = None
     capacity_total: int | None = Field(default=None, ge=0)
@@ -117,7 +119,7 @@ class RoomCreate(BaseModel):
     label: str = Field(..., min_length=1, max_length=120)
     capacity: int = Field(default=1, ge=1)
     bim_element_id: str | None = Field(default=None, max_length=120)
-    base_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    base_rate: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     base_rate_currency: str = Field(default="", pattern=_CURRENCY_PATTERN)
     status: str = Field(default="available", pattern=_ROOM_STATUS_PATTERN)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -137,7 +139,7 @@ class RoomUpdate(BaseModel):
     label: str | None = Field(default=None, min_length=1, max_length=120)
     capacity: int | None = Field(default=None, ge=1)
     bim_element_id: str | None = Field(default=None, max_length=120)
-    base_rate: Decimal | None = Field(default=None, ge=0)
+    base_rate: Decimal18_2 | None = Field(default=None, ge=0)
     base_rate_currency: str | None = Field(default=None, pattern=_CURRENCY_PATTERN)
     status: str | None = Field(default=None, pattern=_ROOM_STATUS_PATTERN)
     metadata: dict[str, Any] | None = None
@@ -270,7 +272,7 @@ class ChargeCreate(BaseModel):
 
     kind: str = Field(default="extra", pattern=_CHARGE_KIND_PATTERN)
     description: str | None = None
-    amount: Decimal = Field(..., ge=0)
+    amount: Decimal18_2 = Field(..., ge=0)
     currency: str = Field(default="", pattern=_CURRENCY_PATTERN)
     period_start: date | None = None
     period_end: date | None = None
@@ -297,7 +299,7 @@ class ChargeUpdate(BaseModel):
 
     kind: str | None = Field(default=None, pattern=_CHARGE_KIND_PATTERN)
     description: str | None = None
-    amount: Decimal | None = Field(default=None, ge=0)
+    amount: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, pattern=_CURRENCY_PATTERN)
     period_start: date | None = None
     period_end: date | None = None

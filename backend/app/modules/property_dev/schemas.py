@@ -12,6 +12,17 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
+from app.core.decimal_types import (
+    Decimal4_2,
+    Decimal5_2,
+    Decimal6_3,
+    Decimal10_2,
+    Decimal10_7,
+    Decimal14_2,
+    Decimal15_2,
+    Decimal18_2,
+    FiniteDecimal,
+)
 from app.core.provenance import Provenance
 
 # ── R7 money serialization helper ───────────────────────────────────────
@@ -85,10 +96,10 @@ class DevelopmentCreate(BaseModel):
     dev_type: str = Field(default="residential", pattern=_DEV_TYPE_PATTERN)
     location_address: str | None = None
     country_code: str | None = Field(default=None, pattern=_COUNTRY_CODE_PATTERN)
-    latitude: Decimal | None = Field(default=None, ge=-90, le=90)
-    longitude: Decimal | None = Field(default=None, ge=-180, le=180)
+    latitude: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    longitude: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
     total_plots: int = Field(default=0, ge=0)
-    total_area_m2: Decimal = Field(default=Decimal("0"), ge=0)
+    total_area_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     total_floors: int = Field(default=0, ge=0)
     sales_phase: str = Field(
         default="planning",
@@ -100,7 +111,7 @@ class DevelopmentCreate(BaseModel):
     marketing_brief: str | None = None
     status: str = Field(default="active", pattern=r"^(active|paused|completed)$")
     units: str = Field(default="metric", pattern=r"^(metric|imperial)$")
-    sales_target_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    sales_target_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
     developer_name: str | None = Field(default=None, max_length=255)
     architect_name: str | None = Field(default=None, max_length=255)
@@ -121,10 +132,10 @@ class DevelopmentUpdate(BaseModel):
     dev_type: str | None = Field(default=None, pattern=_DEV_TYPE_PATTERN)
     location_address: str | None = None
     country_code: str | None = Field(default=None, pattern=_COUNTRY_CODE_PATTERN)
-    latitude: Decimal | None = Field(default=None, ge=-90, le=90)
-    longitude: Decimal | None = Field(default=None, ge=-180, le=180)
+    latitude: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    longitude: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
     total_plots: int | None = Field(default=None, ge=0)
-    total_area_m2: Decimal | None = Field(default=None, ge=0)
+    total_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
     total_floors: int | None = Field(default=None, ge=0)
     sales_phase: str | None = Field(default=None, pattern=r"^(planning|launch|sales|handover|closed)$")
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -133,7 +144,7 @@ class DevelopmentUpdate(BaseModel):
     marketing_brief: str | None = None
     status: str | None = Field(default=None, pattern=r"^(active|paused|completed)$")
     units: str | None = Field(default=None, pattern=r"^(metric|imperial)$")
-    sales_target_amount: Decimal | None = Field(default=None, ge=0)
+    sales_target_amount: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
     developer_name: str | None = Field(default=None, max_length=255)
     architect_name: str | None = Field(default=None, max_length=255)
@@ -201,10 +212,10 @@ class HouseTypeCreate(BaseModel):
     name: str = Field(default="", max_length=255)
     bedrooms: int = Field(default=0, ge=0)
     bathrooms: int = Field(default=0, ge=0)
-    total_area_m2: Decimal = Field(default=Decimal("0"), ge=0)
-    footprint_m2: Decimal = Field(default=Decimal("0"), ge=0)
+    total_area_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
+    footprint_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     levels: int = Field(default=1, ge=1)
-    base_price: Decimal = Field(default=Decimal("0"), ge=0)
+    base_price: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
     bim_model_ref: str | None = Field(default=None, max_length=120)
     thumbnail_url: str | None = Field(default=None, max_length=1024)
@@ -220,10 +231,10 @@ class HouseTypeUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=255)
     bedrooms: int | None = Field(default=None, ge=0)
     bathrooms: int | None = Field(default=None, ge=0)
-    total_area_m2: Decimal | None = Field(default=None, ge=0)
-    footprint_m2: Decimal | None = Field(default=None, ge=0)
+    total_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    footprint_m2: Decimal18_2 | None = Field(default=None, ge=0)
     levels: int | None = Field(default=None, ge=1)
-    base_price: Decimal | None = Field(default=None, ge=0)
+    base_price: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
     bim_model_ref: str | None = Field(default=None, max_length=120)
     thumbnail_url: str | None = Field(default=None, max_length=1024)
@@ -272,7 +283,7 @@ class HouseTypeVariantCreate(BaseModel):
     house_type_id: UUID
     code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(default="", max_length=255)
-    modifier_pct: Decimal = Field(default=Decimal("0"))
+    modifier_pct: Decimal5_2 = Field(default=Decimal("0"))
     description: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -283,7 +294,7 @@ class HouseTypeVariantUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, max_length=255)
-    modifier_pct: Decimal | None = None
+    modifier_pct: Decimal5_2 | None = None
     description: str | None = None
     metadata: dict[str, Any] | None = None
 
@@ -322,22 +333,22 @@ class PlotCreate(BaseModel):
     position_on_floor: str | None = Field(default=None, max_length=40)
     orientation: str | None = Field(default=None, max_length=16)
     view_type: str | None = Field(default=None, max_length=40)
-    area_m2: Decimal = Field(default=Decimal("0"), ge=0)
-    garden_area_m2: Decimal | None = Field(default=None, ge=0)
-    balcony_area_m2: Decimal | None = Field(default=None, ge=0)
-    storage_area_m2: Decimal | None = Field(default=None, ge=0)
+    area_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
+    garden_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    balcony_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    storage_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
     bedrooms: int = Field(default=0, ge=0, le=20)
     bathrooms: int = Field(default=0, ge=0, le=20)
     parking_spaces: int = Field(default=0, ge=0, le=20)
-    sun_exposure_hours: Decimal | None = Field(default=None, ge=0, le=24)
-    price_base: Decimal = Field(default=Decimal("0"), ge=0)
+    sun_exposure_hours: Decimal4_2 | None = Field(default=None, ge=0, le=24)
+    price_base: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
     status: str = Field(
         default="planned",
         pattern=r"^(planned|reserved|under_construction|ready|sold|handed_over|held|blocked)$",
     )
     reservation_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    construction_status_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    construction_status_percent: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -354,23 +365,23 @@ class PlotUpdate(BaseModel):
     position_on_floor: str | None = Field(default=None, max_length=40)
     orientation: str | None = Field(default=None, max_length=16)
     view_type: str | None = Field(default=None, max_length=40)
-    area_m2: Decimal | None = Field(default=None, ge=0)
-    garden_area_m2: Decimal | None = Field(default=None, ge=0)
-    balcony_area_m2: Decimal | None = Field(default=None, ge=0)
-    storage_area_m2: Decimal | None = Field(default=None, ge=0)
+    area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    garden_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    balcony_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
+    storage_area_m2: Decimal18_2 | None = Field(default=None, ge=0)
     bedrooms: int | None = Field(default=None, ge=0, le=20)
     bathrooms: int | None = Field(default=None, ge=0, le=20)
     parking_spaces: int | None = Field(default=None, ge=0, le=20)
-    sun_exposure_hours: Decimal | None = Field(default=None, ge=0, le=24)
-    price_base: Decimal | None = Field(default=None, ge=0)
-    computed_price: Decimal | None = Field(default=None, ge=0)
+    sun_exposure_hours: Decimal4_2 | None = Field(default=None, ge=0, le=24)
+    price_base: Decimal18_2 | None = Field(default=None, ge=0)
+    computed_price: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
     status: str | None = Field(
         default=None,
         pattern=r"^(planned|reserved|under_construction|ready|sold|handed_over|held|blocked)$",
     )
     reservation_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    construction_status_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    construction_status_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     metadata: dict[str, Any] | None = None
 
 
@@ -516,7 +527,7 @@ class BuyerOptionCreate(BaseModel):
     code: str = Field(..., min_length=1, max_length=80)
     name: str = Field(default="", max_length=255)
     sku: str | None = Field(default=None, max_length=120)
-    price_delta: Decimal = Field(default=Decimal("0"))
+    price_delta: Decimal18_2 = Field(default=Decimal("0"))
     currency: str = Field(default="", max_length=8)
     lead_time_days: int = Field(default=0, ge=0)
     supplier_name: str | None = Field(default=None, max_length=255)
@@ -533,7 +544,7 @@ class BuyerOptionUpdate(BaseModel):
 
     name: str | None = Field(default=None, max_length=255)
     sku: str | None = Field(default=None, max_length=120)
-    price_delta: Decimal | None = None
+    price_delta: Decimal18_2 | None = None
     currency: str | None = Field(default=None, max_length=8)
     lead_time_days: int | None = Field(default=None, ge=0)
     supplier_name: str | None = Field(default=None, max_length=255)
@@ -590,7 +601,7 @@ class BuyerCreate(BaseModel):
         default="lead",
         pattern=r"^(lead|reserved|contracted|completed|cancelled)$",
     )
-    contract_value: Decimal = Field(default=Decimal("0"), ge=0)
+    contract_value: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -610,7 +621,7 @@ class BuyerUpdate(BaseModel):
         default=None,
         pattern=r"^(lead|reserved|contracted|completed|cancelled)$",
     )
-    contract_value: Decimal | None = Field(default=None, ge=0)
+    contract_value: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
     contract_signed_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     deposit_paid_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -618,7 +629,7 @@ class BuyerUpdate(BaseModel):
     # Optional financial / jurisdiction fields exposed so the edit flow
     # introduced in task #134 can adjust them post-contract without
     # forcing the user back through ``POST /buyers/{id}/contract``.
-    deposit_amount: Decimal | None = Field(default=None, ge=0)
+    deposit_amount: Decimal18_2 | None = Field(default=None, ge=0)
     jurisdiction: str | None = Field(default=None, max_length=8)
     metadata: dict[str, Any] | None = None
 
@@ -672,12 +683,12 @@ class BuyerContractRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    contract_value: Decimal = Field(..., ge=0)
+    contract_value: Decimal18_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=1, max_length=8)
     contract_signed_at: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     deposit_paid_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     freeze_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    deposit_amount: Decimal | None = Field(default=None, ge=0)
+    deposit_amount: Decimal18_2 | None = Field(default=None, ge=0)
     jurisdiction: str | None = Field(default=None, max_length=8)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -767,7 +778,7 @@ class BuyerSelectionItemCreate(BaseModel):
 
     option_id: UUID
     quantity: int = Field(default=1, ge=1)
-    unit_price_snapshot: Decimal | None = Field(default=None, ge=0)
+    unit_price_snapshot: Decimal18_2 | None = Field(default=None, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -877,7 +888,7 @@ class SnagCreate(BaseModel):
     description: str = Field(..., min_length=1)
     status: str = Field(default="open", pattern=r"^(open|in_progress|fixed|wont_fix)$")
     reported_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    cost_impact: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    cost_impact: Decimal18_2 = Field(default=Decimal("0"), ge=Decimal("0"))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -893,7 +904,7 @@ class SnagUpdate(BaseModel):
     status: str | None = Field(default=None, pattern=r"^(open|in_progress|fixed|wont_fix)$")
     fixed_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     fix_notes: str | None = None
-    cost_impact: Decimal | None = Field(default=None, ge=Decimal("0"))
+    cost_impact: Decimal18_2 | None = Field(default=None, ge=Decimal("0"))
     metadata: dict[str, Any] | None = None
 
 
@@ -1054,13 +1065,13 @@ class DevelopmentDashboard(BaseModel):
     # development (0 otherwise); ``contracted_value_by_currency`` carries
     # the honest per-currency breakdown so consumers never blend
     # different currencies into one figure.
-    contracted_value: Decimal = Decimal("0")
+    contracted_value: FiniteDecimal = Decimal("0")
     contracted_value_by_currency: dict[str, str] = Field(default_factory=dict)
     open_snags: int = 0
     open_warranty_claims: int = 0
     completed_handovers: int = 0
     scheduled_handovers: int = 0
-    sell_through_percent: Decimal = Decimal("0")
+    sell_through_percent: FiniteDecimal = Decimal("0")
 
 
 # ── Handover docs ───────────────────────────────────────────────────────
@@ -1138,7 +1149,7 @@ class SalesKanbanBuyerCard(BaseModel):
     plot_id: UUID | None = None
     plot_number: str | None = None
     status: str
-    contract_value: Decimal = Decimal("0")
+    contract_value: Decimal18_2 = Decimal("0")
     currency: str = ""
     contract_signed_at: str | None = None
     freeze_deadline: str | None = None
@@ -1164,7 +1175,7 @@ class SalesKanbanColumn(BaseModel):
     status: str
     buyers: list[SalesKanbanBuyerCard] = Field(default_factory=list)
     count: int = 0
-    total_value: Decimal = Decimal("0")
+    total_value: Decimal15_2 = Decimal("0")
     # True when this column blends more than one distinct currency; the
     # UI should read the breakdown rather than showing one headline.
     mixed_currency: bool = False
@@ -1301,7 +1312,7 @@ class LeadCreate(BaseModel):
     development_id: UUID | None = None
     tenant_id: UUID | None = None
     source: str = Field(default="other", pattern=_LEAD_SOURCE_PATTERN)
-    lead_score: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    lead_score: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     assigned_agent_user_id: UUID | None = None
     status: str = Field(default="new", pattern=_LEAD_STATUS_PATTERN)
     nurture_stage: str | None = None
@@ -1309,8 +1320,8 @@ class LeadCreate(BaseModel):
     email: str = Field(default="", max_length=255)
     phone: str | None = Field(default=None, max_length=40)
     language: str = Field(default="en", max_length=10)
-    budget_min: Decimal | None = Field(default=None, ge=0)
-    budget_max: Decimal | None = Field(default=None, ge=0)
+    budget_min: Decimal15_2 | None = Field(default=None, ge=0)
+    budget_max: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str = Field(default="", max_length=8)
     preferred_house_type_id: UUID | None = None
     notes: str | None = None
@@ -1329,7 +1340,7 @@ class LeadUpdate(BaseModel):
 
     development_id: UUID | None = None
     source: str | None = Field(default=None, pattern=_LEAD_SOURCE_PATTERN)
-    lead_score: Decimal | None = Field(default=None, ge=0, le=100)
+    lead_score: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     assigned_agent_user_id: UUID | None = None
     status: str | None = Field(default=None, pattern=_LEAD_STATUS_PATTERN)
     nurture_stage: str | None = None
@@ -1337,8 +1348,8 @@ class LeadUpdate(BaseModel):
     email: str | None = Field(default=None, max_length=255)
     phone: str | None = Field(default=None, max_length=40)
     language: str | None = Field(default=None, max_length=10)
-    budget_min: Decimal | None = Field(default=None, ge=0)
-    budget_max: Decimal | None = Field(default=None, ge=0)
+    budget_min: Decimal15_2 | None = Field(default=None, ge=0)
+    budget_max: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
     preferred_house_type_id: UUID | None = None
     notes: str | None = None
@@ -1397,7 +1408,7 @@ class LeadConvertToReservationRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     plot_id: UUID
-    deposit_amount: Decimal = Field(..., ge=0)
+    deposit_amount: Decimal18_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     cooling_off_days: int = Field(default=7, ge=0, le=90)
     expires_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -1426,7 +1437,7 @@ class ReservationCreate(BaseModel):
     tenant_id: UUID | None = None
     # Auto-generated when omitted - see ``next_reservation_number``.
     reservation_number: str | None = Field(default=None, pattern=_RESERVATION_NUMBER_PATTERN)
-    deposit_amount: Decimal = Field(..., ge=0)
+    deposit_amount: Decimal18_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     cooling_off_days: int = Field(default=7, ge=0, le=90)
     expires_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -1490,7 +1501,7 @@ class ReservationConvertToSpaRequest(BaseModel):
     signing_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     governing_law: str = Field(default="", max_length=16)
     language: str = Field(default="en", max_length=10)
-    total_value: Decimal = Field(..., ge=0)
+    total_value: Decimal15_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     total_price_breakdown: dict[str, Any] = Field(default_factory=dict)
     terms_version: str = Field(default="", max_length=80)
@@ -1518,7 +1529,7 @@ class SalesContractCreate(BaseModel):
     governing_law: str = Field(default="", max_length=16)
     language: str = Field(default="en", max_length=10)
     total_price_breakdown: dict[str, Any] = Field(default_factory=dict)
-    total_value: Decimal = Field(default=Decimal("0"), ge=0)
+    total_value: Decimal15_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     e_sign_envelope_id: str | None = Field(default=None, max_length=255)
     parent_contract_id: UUID | None = None
@@ -1541,7 +1552,7 @@ class SalesContractUpdate(BaseModel):
     governing_law: str | None = Field(default=None, max_length=16)
     language: str | None = Field(default=None, max_length=10)
     total_price_breakdown: dict[str, Any] | None = None
-    total_value: Decimal | None = Field(default=None, ge=0)
+    total_value: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     e_sign_envelope_id: str | None = Field(default=None, max_length=255)
     terms_version: str | None = Field(default=None, max_length=80)
@@ -1613,8 +1624,8 @@ class PaymentScheduleCreate(BaseModel):
     sales_contract_id: UUID
     tenant_id: UUID | None = None
     currency: str = Field(..., min_length=3, max_length=3)
-    total_amount: Decimal = Field(..., ge=0)
-    late_fee_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    total_amount: Decimal15_2 = Field(..., ge=0)
+    late_fee_pct: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     grace_period_days: int = Field(default=0, ge=0, le=365)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -1629,7 +1640,7 @@ class PaymentScheduleUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    late_fee_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    late_fee_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     grace_period_days: int | None = Field(default=None, ge=0, le=365)
     metadata: dict[str, Any] | None = None
 
@@ -1671,7 +1682,7 @@ class InstalmentCreate(BaseModel):
     milestone_label: str = Field(default="", max_length=255)
     milestone_event: str = Field(default="", max_length=80)
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    amount: Decimal = Field(..., ge=0)
+    amount: Decimal15_2 = Field(..., ge=0)
     invoice_ref: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -1684,7 +1695,7 @@ class InstalmentUpdate(BaseModel):
     milestone_label: str | None = Field(default=None, max_length=255)
     milestone_event: str | None = Field(default=None, max_length=80)
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    amount: Decimal | None = Field(default=None, ge=0)
+    amount: Decimal15_2 | None = Field(default=None, ge=0)
     invoice_ref: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] | None = None
 
@@ -1727,7 +1738,7 @@ class InstalmentMarkPaidRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    amount: Decimal = Field(..., gt=0)
+    amount: Decimal15_2 = Field(..., gt=0)
     paid_at: datetime | None = None
     invoice_ref: str | None = Field(default=None, max_length=255)
 
@@ -1750,7 +1761,7 @@ class ContractPartyCreate(BaseModel):
 
     sales_contract_id: UUID
     buyer_id: UUID
-    ownership_pct: Decimal = Field(..., ge=0, le=100)
+    ownership_pct: Decimal5_2 = Field(..., ge=0, le=100)
     party_role: str = Field(default="primary", pattern=_PARTY_ROLE_PATTERN)
     signing_order: int = Field(default=0, ge=0)
     signature_ref: str | None = Field(default=None, max_length=255)
@@ -1771,7 +1782,7 @@ class ContractPartyUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    ownership_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    ownership_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     party_role: str | None = Field(default=None, pattern=_PARTY_ROLE_PATTERN)
     signing_order: int | None = Field(default=None, ge=0)
     signed_at: datetime | None = None
@@ -1990,7 +2001,7 @@ class BrokerCreate(BaseModel):
     jurisdiction: str = Field(default="", max_length=16)
     contact_email: str = Field(default="", max_length=255)
     contact_phone: str | None = Field(default=None, max_length=40)
-    default_commission_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    default_commission_pct: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     kyc_status: str = Field(default="pending", pattern=r"^(pending|verified|expired|rejected)$")
     active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -2006,7 +2017,7 @@ class BrokerUpdate(BaseModel):
     jurisdiction: str | None = Field(default=None, max_length=16)
     contact_email: str | None = Field(default=None, max_length=255)
     contact_phone: str | None = Field(default=None, max_length=40)
-    default_commission_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    default_commission_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     kyc_status: str | None = Field(default=None, pattern=r"^(pending|verified|expired|rejected)$")
     active: bool | None = None
     metadata: dict[str, Any] | None = None
@@ -2092,7 +2103,7 @@ class FlatCommissionStructure(BaseModel):
     """Single fixed amount in a given currency."""
 
     type: Literal["flat"] = "flat"
-    amount: Decimal = Field(..., ge=0)
+    amount: Decimal15_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
 
 
@@ -2100,14 +2111,14 @@ class PercentCommissionStructure(BaseModel):
     """Single percentage of the base amount."""
 
     type: Literal["percent"] = "percent"
-    pct: Decimal = Field(..., ge=0, le=100)
+    pct: FiniteDecimal = Field(..., ge=0, le=100)
 
 
 class LadderTier(BaseModel):
     """One tier in a ladder commission structure."""
 
-    threshold: Decimal = Field(..., ge=0)
-    pct: Decimal = Field(..., ge=0, le=100)
+    threshold: FiniteDecimal = Field(..., ge=0)
+    pct: FiniteDecimal = Field(..., ge=0, le=100)
 
 
 class LadderCommissionStructure(BaseModel):
@@ -2143,7 +2154,7 @@ class CommissionAgreementCreate(BaseModel):
         default="net30",
         pattern=r"^(immediate|net30|net60|per_milestone)$",
     )
-    withholding_tax_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    withholding_tax_pct: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     currency: str = Field(..., min_length=3, max_length=8)
     effective_from: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -2214,7 +2225,7 @@ class CommissionAgreementUpdate(BaseModel):
         pattern=r"^(lead_qualified|reservation_paid|spa_signed|handover_complete)$",
     )
     payout_terms: str | None = Field(default=None, pattern=r"^(immediate|net30|net60|per_milestone)$")
-    withholding_tax_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    withholding_tax_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     currency: str | None = Field(default=None, min_length=3, max_length=8)
     effective_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -2409,7 +2420,7 @@ class EscrowTransactionCreate(BaseModel):
 
     escrow_account_id: UUID
     direction: str = Field(..., pattern=r"^(debit|credit)$")
-    amount: Decimal
+    amount: Decimal15_2
     currency: str = Field(..., min_length=3, max_length=8)
     source_type: str = Field(
         ...,
@@ -2501,7 +2512,7 @@ class PriceMatrixRule(BaseModel):
         pattern=(r"^(floor|view|orientation|corner|launch_discount|phase_escalator)$"),
     )
     condition: dict[str, Any] = Field(default_factory=dict)
-    multiplier: Decimal = Field(..., gt=0)
+    multiplier: FiniteDecimal = Field(..., gt=0)
 
 
 class PriceMatrixCreate(BaseModel):
@@ -2511,7 +2522,7 @@ class PriceMatrixCreate(BaseModel):
 
     development_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
-    base_price_per_m2: Decimal = Field(..., ge=0)
+    base_price_per_m2: Decimal15_2 = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=8)
     effective_from: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -2532,7 +2543,7 @@ class PriceMatrixUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    base_price_per_m2: Decimal | None = Field(default=None, ge=0)
+    base_price_per_m2: Decimal15_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=8)
     effective_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -2644,7 +2655,7 @@ class TaxQuoteLineItem(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     line: str
-    amount: Decimal
+    amount: Decimal15_2
 
     # R8: money fields as plain-decimal strings.
     @field_serializer("amount", when_used="json")
@@ -2704,16 +2715,16 @@ class ContractTaxQuote(BaseModel):
     vat_rate_effective_from: date | None = None
     region_subcode: str | None = None
     currency: str = ""
-    net: Decimal = Decimal("0")
-    vat: Decimal = Decimal("0")
-    stamp_duty: Decimal = Decimal("0")
+    net: FiniteDecimal = Decimal("0")
+    vat: FiniteDecimal = Decimal("0")
+    stamp_duty: FiniteDecimal = Decimal("0")
     stamp_duty_effective_from: date | None = None
-    transfer_fee: Decimal = Decimal("0")
-    registration_fee: Decimal = Decimal("0")
-    absd: Decimal = Decimal("0")
-    late_interest: Decimal = Decimal("0")
-    subtotal_taxes: Decimal = Decimal("0")
-    grand_total: Decimal = Decimal("0")
+    transfer_fee: FiniteDecimal = Decimal("0")
+    registration_fee: FiniteDecimal = Decimal("0")
+    absd: FiniteDecimal = Decimal("0")
+    late_interest: FiniteDecimal = Decimal("0")
+    subtotal_taxes: FiniteDecimal = Decimal("0")
+    grand_total: FiniteDecimal = Decimal("0")
     breakdown: list[TaxQuoteLineItem] = Field(default_factory=list)
 
     # R8: every money field as a plain-decimal string.
@@ -2853,8 +2864,8 @@ class HeatmapUnit(BaseModel):
     plot_id: str
     plot_number: str
     status: str
-    area_m2: Decimal = Decimal("0")
-    price_base: Decimal = Decimal("0")
+    area_m2: Decimal18_2 = Decimal("0")
+    price_base: Decimal18_2 = Decimal("0")
     currency: str = ""
     level_in_block: int | None = None
     position_on_floor: str | None = None
@@ -2904,7 +2915,7 @@ class CurrencyAmount(BaseModel):
     """One currency / amount pair (multi-currency aware totals)."""
 
     currency: str = ""
-    amount: Decimal = Decimal("0")
+    amount: Decimal15_2 = Decimal("0")
 
     # R8: money fields as plain-decimal strings.
     @field_serializer("amount", when_used="json")
@@ -2918,7 +2929,7 @@ class SalesVelocityBucket(BaseModel):
 
     period: str
     units: int = 0
-    area_m2: Decimal = Decimal("0")
+    area_m2: Decimal18_2 = Decimal("0")
     revenue: list[CurrencyAmount] = Field(default_factory=list)
 
     # R8: money fields as plain-decimal strings.
@@ -2930,7 +2941,7 @@ class SalesVelocityBucket(BaseModel):
 
 class SalesVelocityTotals(BaseModel):
     units: int = 0
-    area_m2: Decimal = Decimal("0")
+    area_m2: Decimal18_2 = Decimal("0")
     revenue: list[CurrencyAmount] = Field(default_factory=list)
 
     # R8: money fields as plain-decimal strings.
@@ -2985,7 +2996,7 @@ class InventoryAgeingPlot(BaseModel):
     days_on_market: int = 0
     block_id: str | None = None
     house_type_id: str | None = None
-    price_base: Decimal = Decimal("0")
+    price_base: Decimal18_2 = Decimal("0")
     currency: str = ""
 
     # R8: money fields as plain-decimal strings.
@@ -3018,7 +3029,7 @@ class FunnelStage(BaseModel):
     code: str
     label: str
     count: int = 0
-    drop_pct: Decimal = Decimal("0")
+    drop_pct: FiniteDecimal = Decimal("0")
 
     # R8: percent fields as plain-decimal strings.
     @field_serializer("drop_pct", when_used="json")
@@ -3029,7 +3040,7 @@ class FunnelStage(BaseModel):
 
 class FunnelTotals(BaseModel):
     leads: int = 0
-    conversion_pct: Decimal = Decimal("0")
+    conversion_pct: FiniteDecimal = Decimal("0")
 
     # R8: percent fields as plain-decimal strings.
     @field_serializer("conversion_pct", when_used="json")
@@ -3095,10 +3106,10 @@ class CohortRetentionRow(BaseModel):
     cohort_month: str = ""
     total: int = 0
     still_active: int = 0
-    retention_pct_d30: Decimal = Decimal("0")
-    retention_pct_d60: Decimal = Decimal("0")
-    retention_pct_d90: Decimal = Decimal("0")
-    retention_pct_d180: Decimal = Decimal("0")
+    retention_pct_d30: FiniteDecimal = Decimal("0")
+    retention_pct_d60: FiniteDecimal = Decimal("0")
+    retention_pct_d90: FiniteDecimal = Decimal("0")
+    retention_pct_d180: FiniteDecimal = Decimal("0")
 
     @field_serializer(
         "retention_pct_d30",
@@ -3136,9 +3147,9 @@ class StageDistribution(BaseModel):
 
     stage: str = ""
     sample_size: int = 0
-    mean_days: Decimal = Decimal("0")
-    p50_days: Decimal = Decimal("0")
-    p90_days: Decimal = Decimal("0")
+    mean_days: FiniteDecimal = Decimal("0")
+    p50_days: FiniteDecimal = Decimal("0")
+    p90_days: FiniteDecimal = Decimal("0")
     buckets: list[StageHistogramBucket] = Field(default_factory=list)
 
     @field_serializer(
@@ -3168,11 +3179,11 @@ class LeadSourceRow(BaseModel):
     leads: int = 0
     reservations: int = 0
     sales: int = 0
-    conversion_to_reservation_pct: Decimal = Decimal("0")
-    conversion_to_sale_pct: Decimal = Decimal("0")
+    conversion_to_reservation_pct: FiniteDecimal = Decimal("0")
+    conversion_to_sale_pct: FiniteDecimal = Decimal("0")
     revenue: list[CurrencyAmount] = Field(default_factory=list)
-    total_source_cost: Decimal = Decimal("0")
-    cpa: Decimal | None = None
+    total_source_cost: FiniteDecimal = Decimal("0")
+    cpa: FiniteDecimal | None = None
     cpa_currency: str = ""
 
     @field_serializer(
@@ -3213,8 +3224,8 @@ class ConversionFunnelStep(BaseModel):
     code: str = ""
     label: str = ""
     count: int = 0
-    drop_pct: Decimal = Decimal("0")
-    conversion_from_top_pct: Decimal = Decimal("0")
+    drop_pct: FiniteDecimal = Decimal("0")
+    conversion_from_top_pct: FiniteDecimal = Decimal("0")
 
     @field_serializer(
         "drop_pct",
@@ -3250,7 +3261,7 @@ class BrokerLeaderboardRow(BaseModel):
     leads_assigned: int = 0
     reservations_closed: int = 0
     sales_closed: int = 0
-    conversion_rate_pct: Decimal = Decimal("0")
+    conversion_rate_pct: FiniteDecimal = Decimal("0")
     gmv: list[CurrencyAmount] = Field(default_factory=list)
     commission_earned: list[CurrencyAmount] = Field(default_factory=list)
 
@@ -3355,13 +3366,13 @@ class PropertyDevHouseTypeCreate(BaseModel):
     code: str = Field(..., min_length=1, max_length=40, pattern=r"^[A-Z0-9_]+$")
     name: str = Field(..., min_length=1, max_length=120)
     description: str | None = None
-    area_typical_m2: Decimal | None = Field(default=None, ge=0)
+    area_typical_m2: Decimal10_2 | None = Field(default=None, ge=0)
     floors_typical: int | None = Field(default=None, ge=0, le=200)
     typical_bedrooms: int | None = Field(default=None, ge=0, le=50)
     typical_bathrooms: int | None = Field(default=None, ge=0, le=50)
     parking_spots: int | None = Field(default=None, ge=0, le=10)
-    typical_price_min: Decimal | None = Field(default=None, ge=0)
-    typical_price_max: Decimal | None = Field(default=None, ge=0)
+    typical_price_min: Decimal14_2 | None = Field(default=None, ge=0)
+    typical_price_max: Decimal14_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
     construction_type: str | None = Field(default=None, max_length=20)
     energy_class: str | None = Field(default=None, max_length=10)
@@ -3381,7 +3392,7 @@ class PropertyDevHouseTypeUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=120)
     description: str | None = None
-    area_typical_m2: Decimal | None = Field(default=None, ge=0)
+    area_typical_m2: Decimal10_2 | None = Field(default=None, ge=0)
     floors_typical: int | None = Field(default=None, ge=0, le=200)
     country_code: str | None = Field(
         default=None,
@@ -3393,8 +3404,8 @@ class PropertyDevHouseTypeUpdate(BaseModel):
     typical_bedrooms: int | None = Field(default=None, ge=0, le=50)
     typical_bathrooms: int | None = Field(default=None, ge=0, le=50)
     parking_spots: int | None = Field(default=None, ge=0, le=10)
-    typical_price_min: Decimal | None = Field(default=None, ge=0)
-    typical_price_max: Decimal | None = Field(default=None, ge=0)
+    typical_price_min: Decimal14_2 | None = Field(default=None, ge=0)
+    typical_price_max: Decimal14_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
     construction_type: str | None = Field(default=None, max_length=20)
     energy_class: str | None = Field(default=None, max_length=10)
@@ -3522,8 +3533,8 @@ class PricingRuleCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     rule_type: str = Field(..., pattern=_RULE_TYPE_PATTERN)
     condition_json: dict[str, Any] = Field(default_factory=dict)
-    adjustment_pct: Decimal = Field(default=Decimal("0"))
-    adjustment_fixed: Decimal | None = None
+    adjustment_pct: Decimal6_3 = Field(default=Decimal("0"))
+    adjustment_fixed: Decimal18_2 | None = None
     priority: int = Field(default=100, ge=0, le=10000)
     active: bool = True
     effective_from: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
@@ -3544,8 +3555,8 @@ class PricingRuleUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     rule_type: str | None = Field(default=None, pattern=_RULE_TYPE_PATTERN)
     condition_json: dict[str, Any] | None = None
-    adjustment_pct: Decimal | None = None
-    adjustment_fixed: Decimal | None = None
+    adjustment_pct: Decimal6_3 | None = None
+    adjustment_fixed: Decimal18_2 | None = None
     priority: int | None = Field(default=None, ge=0, le=10000)
     active: bool | None = None
     effective_from: str | None = Field(default=None, pattern=r"^(\d{4}-\d{2}-\d{2})?$")
@@ -3580,8 +3591,8 @@ class InventoryMapPlot(BaseModel):
     plot_type: str | None = None
     block_code: str | None = None
     floor: int | None = None
-    base_price: Decimal = Decimal("0")
-    area_m2: Decimal = Decimal("0")
+    base_price: Decimal18_2 = Decimal("0")
+    area_m2: Decimal18_2 = Decimal("0")
     currency: str = ""
     bedrooms: int = 0
     bathrooms: int = 0
@@ -3825,7 +3836,7 @@ class PriceListEntryInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     plot_id: UUID
-    base_price: Decimal = Field(..., ge=0)
+    base_price: Decimal18_2 = Field(..., ge=0)
 
 
 class PriceListEntryResponse(BaseModel):
