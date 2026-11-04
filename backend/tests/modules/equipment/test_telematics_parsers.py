@@ -239,3 +239,16 @@ def test_silent_device_rule_only_judges_hired_machines_with_a_device() -> None:
     ]
     res = [r for r in asyncio.run(run_rules({"machines": machines})) if r["rule_id"].endswith("device_silent")]
     assert {r["element_ref"]: r["passed"] for r in res} == {"a": False, "b": True}
+
+
+def test_restart_to_a_high_counter_cannot_exceed_the_time_between_readings() -> None:
+    from datetime import date
+
+    rows = [
+        _cum("2026-10-02T06:00:00+00:00", "1000"),
+        _cum("2026-10-02T08:00:00+00:00", "600"),
+    ]
+    use = daily_utilisation(rows, date(2026, 10, 2))
+    assert use is not None
+    assert use.counter_reset is True
+    assert use.worked_hours + use.idle_hours <= Decimal("2")

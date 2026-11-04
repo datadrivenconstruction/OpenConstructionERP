@@ -2806,7 +2806,9 @@ async def validate_delay_analysis(
     ends = [d for d in (_parse_date(a.end_date) for a in act_rows) if d is not None]
     last_workday = workday_index(min(starts), max(ends)) if starts and ends else None
     events = []
-    for ev, spec in zip(await svc.list_events(analysis.id), await svc.build_event_specs(analysis.id), strict=False):
+    specs = {sp["id"]: sp for sp in await svc.build_event_specs(analysis.id)}
+    for ev in await svc.list_events(analysis.id):
+        spec = specs.get(str(ev.id), {"fragnets": []})
         lo, hi = ev.start_workday, ev.end_workday
         outside = None
         if last_workday is not None and (lo is not None or hi is not None):
