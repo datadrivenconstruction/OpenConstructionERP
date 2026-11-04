@@ -35,6 +35,9 @@ def _serialize_money_string(value: Any) -> str | None:
     return format(value, "f")
 
 
+# Largest magnitude the NUMERIC(18,2) money columns hold, with headroom.
+_MONEY_LIMIT = Decimal(10**15)
+
 # Status / category patterns
 _NOTICE_STATUS = r"^(issued|acknowledged|responded|closed)$"
 _NOTICE_RECIPIENT = r"^(owner|contractor|architect|engineer|consultant)$"
@@ -150,7 +153,7 @@ class VariationRequestCreate(BaseModel):
     requested_at: str | None = Field(default=None, max_length=40)
     classification: str = Field(default="scope_change", pattern=_VR_CLASSIFICATION)
     urgency: str = Field(default="med", pattern=_VR_URGENCY)
-    estimated_cost_impact: Decimal = Decimal("0")
+    estimated_cost_impact: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     estimated_schedule_days: int = Field(default=0, ge=-3650, le=3650)
     currency: str = Field(default="", max_length=10)
     status: str = Field(default="draft", pattern=_VR_STATUS)
@@ -175,7 +178,7 @@ class VariationRequestUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=20000)
     classification: str | None = Field(default=None, pattern=_VR_CLASSIFICATION)
     urgency: str | None = Field(default=None, pattern=_VR_URGENCY)
-    estimated_cost_impact: Decimal | None = None
+    estimated_cost_impact: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     estimated_schedule_days: int | None = Field(default=None, ge=-3650, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, pattern=_VR_STATUS)
@@ -476,7 +479,7 @@ class VariationOrderCreate(BaseModel):
     project_id: UUID
     variation_request_id: UUID | None = None
     title: str = Field(default="", max_length=500)
-    final_cost_impact: Decimal = Decimal("0")
+    final_cost_impact: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     final_schedule_days: int = Field(default=0, ge=-3650, le=3650)
     currency: str = Field(default="", max_length=10)
     agreed_at: str | None = Field(default=None, max_length=40)
@@ -496,7 +499,7 @@ class VariationOrderUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, max_length=500)
-    final_cost_impact: Decimal | None = None
+    final_cost_impact: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     final_schedule_days: int | None = Field(default=None, ge=-3650, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     agreed_at: str | None = Field(default=None, max_length=40)
@@ -844,20 +847,20 @@ class DisruptionClaimCreate(BaseModel):
     claim_period_end: str | None = Field(default=None, max_length=20)
     description: str = Field(default="", max_length=20000)
     root_cause: str = Field(default="", max_length=10000)
-    cost_amount: Decimal = Decimal("0")
+    cost_amount: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     schedule_days: int = Field(default=0, ge=0, le=3650)
     currency: str = Field(default="", max_length=10)
     evidence_refs: list[str] = Field(default_factory=list)
     status: str = Field(default="draft", pattern=_DISRUPTION_STATUS)
     notes: str = Field(default="", max_length=10000)
     # AICPA measured-mile fields - units per hour.
-    baseline_productivity: Decimal | None = Field(default=None, ge=0)
-    impacted_productivity: Decimal | None = Field(default=None, ge=0)
+    baseline_productivity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
+    impacted_productivity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
     unit_of_measure: str = Field(default="", max_length=30)
     # If both productivities are set + measured_quantity, the service
     # will derive labour_hours_lost automatically.
-    measured_quantity: Decimal | None = Field(default=None, ge=0)
-    labour_hours_lost: Decimal | None = Field(default=None, ge=0)
+    measured_quantity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
+    labour_hours_lost: Decimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
 
 
 class DisruptionClaimUpdate(BaseModel):
@@ -865,13 +868,13 @@ class DisruptionClaimUpdate(BaseModel):
 
     description: str | None = Field(default=None, max_length=20000)
     root_cause: str | None = Field(default=None, max_length=10000)
-    cost_amount: Decimal | None = None
+    cost_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     schedule_days: int | None = Field(default=None, ge=0, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     evidence_refs: list[str] | None = None
     status: str | None = Field(default=None, pattern=_DISRUPTION_STATUS)
     decision_at: str | None = Field(default=None, max_length=40)
-    decided_amount: Decimal | None = None
+    decided_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     notes: str | None = Field(default=None, max_length=10000)
 
 
