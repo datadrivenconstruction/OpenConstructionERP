@@ -192,3 +192,8 @@ async def restore_demo_id(session: AsyncSession, demo_id: str) -> None:
     from app.modules.projects.models import DemoProjectTombstone
 
     await session.execute(delete(DemoProjectTombstone).where(DemoProjectTombstone.demo_id == demo_id))
+
+
+def force_reinstall_allowed(role: str | None, force: bool) -> bool:
+    """A forced reinstall deletes the shared demo project, so only an admin may ask for it."""
+    return not force or str(role or "").lower() == "admin"
