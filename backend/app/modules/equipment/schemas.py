@@ -128,6 +128,8 @@ class EquipmentCreate(BaseModel):
     notes: str | None = None
     cost_code: str = Field(default="", max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
+    holding_cost_per_month: Decimal | None = Field(default=None, ge=0)
+    market_hire_rate_per_day: Decimal | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
 
     @field_validator("required_certificates")
@@ -165,6 +167,8 @@ class EquipmentUpdate(BaseModel):
     notes: str | None = None
     cost_code: str | None = Field(default=None, max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
+    holding_cost_per_month: Decimal | None = Field(default=None, ge=0)
+    market_hire_rate_per_day: Decimal | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
 
     @field_validator("required_certificates")
@@ -202,6 +206,8 @@ class EquipmentResponse(BaseModel):
     notes: str | None = None
     cost_code: str = ""
     emission_class: str | None = None
+    holding_cost_per_month: Decimal | None = None
+    market_hire_rate_per_day: Decimal | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

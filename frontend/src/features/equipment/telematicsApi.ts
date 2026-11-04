@@ -124,3 +124,38 @@ export async function importTelematics(kind: ImportKind, file: File): Promise<Im
   if (!res.ok) throw new ApiError(res.status, res.statusText, payload);
   return payload as ImportResult;
 }
+
+export type CostSuggestion = 'keep' | 'return' | 'rent' | 'review' | 'no_data';
+
+export interface CostBoardMachine {
+  equipment_id: string;
+  code: string;
+  name: string;
+  ownership: string;
+  currency: string;
+  owning_cost: string;
+  operating_cost: string;
+  total_cost: string;
+  used_hours: string;
+  billed_hours: string;
+  idle_pct: string | null;
+  utilisation_pct: string | null;
+  cost_per_used_hour: string | null;
+  market_hour_rate: string | null;
+  recovery_pct: string | null;
+  suggestion: CostSuggestion;
+  reason: string;
+}
+
+export interface CostBoard {
+  date_from: string;
+  date_to: string;
+  machines: CostBoardMachine[];
+  totals_by_currency: Record<string, { owning_cost: string; operating_cost: string; total_cost: string; hire_cost: string }>;
+  results: RuleResult[];
+  failed: number;
+}
+
+export function fetchCostBoard(dateFrom: string, dateTo: string): Promise<CostBoard> {
+  return apiGet<CostBoard>(`/v1/equipment/telematics/cost-board/?date_from=${dateFrom}&date_to=${dateTo}`);
+}

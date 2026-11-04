@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // Telematics formatting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helper tests.
 import { describe, expect, it } from 'vitest';
-import { barWidth, hoursShares, idleTone, importKindFor, lastDaysWindow, toNumber } from './telematicsFormat';
+import { barWidth, hoursShares, idleTone, importKindFor, lastDaysWindow, moneyWithCurrency, suggestionTone, toNumber } from './telematicsFormat';
 
 describe('lastDaysWindow', () => {
   it('covers 14 calendar days ending today, inclusive', () => {
@@ -41,5 +41,19 @@ describe('numbers', () => {
     expect(s.worked).toBeCloseTo(60);
     expect(s.idle).toBeCloseTo(20);
     expect(hoursShares({ worked_hours: '0', idle_hours: '0', off_hours: '0' })).toEqual({ worked: 0, idle: 0, off: 0 });
+  });
+});
+
+describe('cost board helpers', () => {
+  it('flags return and rent as a warning, keep as success', () => {
+    expect(suggestionTone('return')).toContain('warning');
+    expect(suggestionTone('rent')).toContain('warning');
+    expect(suggestionTone('keep')).toContain('success');
+    expect(suggestionTone('no_data')).toContain('secondary');
+  });
+  it('shows a dash for a missing amount and appends the currency otherwise', () => {
+    expect(moneyWithCurrency(null, 'EUR')).toBe('-');
+    expect(moneyWithCurrency('33.00', 'EUR')).toBe('33.00 EUR');
+    expect(moneyWithCurrency('33.00', '')).toBe('33.00');
   });
 });
