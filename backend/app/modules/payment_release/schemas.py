@@ -13,6 +13,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import FiniteDecimal
 from app.modules.contracts.retention import CANONICAL_RELEASE_EVENTS, canonical_release_event
 from app.modules.payment_release.release_math import DISCOUNT_SCOPES, INVOICE_KINDS, INVOICE_MODES, RETENTION_BASES
 
@@ -224,7 +225,7 @@ class RetentionPostingCreate(BaseModel):
     retention_kind: RetentionKind = "interim"
     event: ReleaseEventName
     event_on: date | None = None
-    amount: Annotated[Decimal, Field(gt=0, max_digits=18, decimal_places=2)]
+    amount: Annotated[FiniteDecimal, Field(gt=0, max_digits=18, decimal_places=2)]
     posted_on: date
     document_ref: str | None = Field(default=None, max_length=255)
     note: str | None = Field(default=None, max_length=4000)

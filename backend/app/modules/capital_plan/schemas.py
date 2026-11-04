@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 ItemStatus = Literal["proposed", "funded", "deferred"]
 _YEAR = {"ge": 1900, "le": 2200}
 
@@ -132,7 +134,7 @@ class ItemCreate(_In):
     start_year: int = Field(..., **_YEAR)
     duration_years: int = Field(default=1, ge=1, le=30)
     total_cost: Decimal = Field(default=Decimal("0"), ge=0, max_digits=18, decimal_places=2)
-    phasing: list[Decimal] | None = Field(default=None, max_length=30)
+    phasing: list[FiniteDecimal] | None = Field(default=None, max_length=30)
     status: ItemStatus = "proposed"
     score: int | None = Field(default=None, ge=0, le=100)
 
@@ -146,7 +148,7 @@ class ItemPatch(_In):
     start_year: int | None = Field(default=None, **_YEAR)
     duration_years: int | None = Field(default=None, ge=1, le=30)
     total_cost: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=2)
-    phasing: list[Decimal] | None = Field(default=None, max_length=30)
+    phasing: list[FiniteDecimal] | None = Field(default=None, max_length=30)
     status: ItemStatus | None = None
     score: int | None = Field(default=None, ge=0, le=100)
 
@@ -189,16 +191,16 @@ class Finding(BaseModel):
 
 class YearRow(BaseModel):
     year: int
-    demand: Decimal
-    envelope: Decimal
-    gap: Decimal
-    cumulative_gap: Decimal
+    demand: FiniteDecimal
+    envelope: FiniteDecimal
+    gap: FiniteDecimal
+    cumulative_gap: FiniteDecimal
 
 
 class ItemSpend(BaseModel):
     id: str
-    spend: dict[str, Decimal]
-    outside_horizon: Decimal
+    spend: dict[str, FiniteDecimal]
+    outside_horizon: FiniteDecimal
 
 
 class SummaryResponse(BaseModel):
@@ -230,12 +232,12 @@ class ImportResponse(BaseModel):
 
 class CompareYear(BaseModel):
     year: int
-    demand_a: Decimal
-    demand_b: Decimal
-    delta_demand: Decimal
-    gap_a: Decimal
-    gap_b: Decimal
-    delta_gap: Decimal
+    demand_a: FiniteDecimal
+    demand_b: FiniteDecimal
+    delta_demand: FiniteDecimal
+    gap_a: FiniteDecimal
+    gap_b: FiniteDecimal
+    delta_gap: FiniteDecimal
 
 
 class ChangedItem(BaseModel):

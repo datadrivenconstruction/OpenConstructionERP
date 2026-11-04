@@ -25,6 +25,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
+from app.core.decimal_types import Decimal6_3, Decimal18_2
+
 DayBasisLiteral = Literal["calendar", "business"]
 DateBasisLiteral = Literal["application_date", "period_end", "due_date"]
 NoNoticeEffectLiteral = Literal[
@@ -170,8 +172,8 @@ class RegimeSeedRow(BaseModel):
     no_notice_effect: NoNoticeEffectLiteral
     interest_basis: InterestBasisLiteral
     interest_reference_rate: str = ""
-    interest_margin_percent: Decimal | None = None
-    interest_fixed_percent: Decimal | None = None
+    interest_margin_percent: Decimal6_3 | None = None
+    interest_fixed_percent: Decimal6_3 | None = None
     interest_statute: str = ""
     notes: str = ""
 
@@ -426,7 +428,7 @@ class NotifiedSum(BaseModel):
     it survives - which is the sentence that decides adjudications.
     """
 
-    amount: Decimal | None = None
+    amount: Decimal18_2 | None = None
     currency: str = ""
     source: str = "undetermined"
     explanation: str = ""

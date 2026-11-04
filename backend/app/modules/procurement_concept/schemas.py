@@ -16,6 +16,7 @@ from typing import Any, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal5_2, Decimal6_2, FiniteDecimal
 from app.modules.procurement_concept.catalogue import CODE_PATTERN, parse_amount
 
 # NUMERIC(18, 2): sixteen integer digits and two decimals.
@@ -87,7 +88,7 @@ class ConceptSet(_In):
     client_type: str | None = Field(default=None, pattern=CODE_PATTERN, max_length=20)
     # Absent on create = take module 3's owner capability (public_client), else False.
     public_client: bool | None = None
-    vat_rate_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    vat_rate_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     # A gate code of the project, or "" to use the gate the governance catalogue tags. Manage permission.
     release_gate_code: str | None = Field(default=None, max_length=64)
     governance_document_id: uuid.UUID | None = None
@@ -129,7 +130,7 @@ class PackagePut(_In):
     advance_reason: str | None = Field(default=None, max_length=4000)
     advance_release_kind: Literal["gate_decision", "condition", "commitment"] | None = None
     advance_release_id: uuid.UUID | None = None
-    estimated_value: Decimal | None = None
+    estimated_value: FiniteDecimal | None = None
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     # The BOQ section whose positions become the scope lines of the execution vehicle. It is the only cost
     # reference the module reads, so it is the only one it accepts.
@@ -142,7 +143,7 @@ class PackagePut(_In):
     framework_agreement_id: uuid.UUID | None = None
     evaluation_method: Literal["lowest_price", "best_value"] | None = None
     # Award criteria and their weights in percent, e.g. {"price": "60", "quality": "40"}; empty or summing to 100.
-    evaluation_weights: dict[str, Decimal] | None = Field(default=None, max_length=20)
+    evaluation_weights: dict[str, FiniteDecimal] | None = Field(default=None, max_length=20)
     need_date: date | None = None
     # A milestone of the project's schedule (for example one of the framework schedule) that owns the need date.
     need_activity_id: uuid.UUID | None = None
@@ -212,7 +213,7 @@ class ProfileConfirmIn(_In):
 
 class ProfileCriterion(_In):
     code: str = Field(min_length=1, max_length=64)
-    weight: Decimal = Field(default=Decimal("0"), le=100)
+    weight: FiniteDecimal = Field(default=Decimal("0"), le=100)
 
     @field_validator("weight", mode="before")
     @classmethod
@@ -227,7 +228,7 @@ class ProfileIn(_In):
     name: str = Field(default="", max_length=255)
     criteria: list[ProfileCriterion] = Field(default_factory=list, max_length=60)
     # Scores run from 0 to 100, so the pass mark does too.
-    pass_mark: Decimal = Field(default=Decimal("0"), le=100)
+    pass_mark: Decimal6_2 = Field(default=Decimal("0"), le=100)
     validity_months: int = Field(default=12, ge=1, le=120)
 
     @field_validator("pass_mark", mode="before")
@@ -272,7 +273,7 @@ class ScoreIn(_In):
 
     criterion_code: str = Field(min_length=1, max_length=64)
     passed: bool | None = None
-    score: Decimal | None = Field(default=None, ge=0, le=100)
+    score: Decimal6_2 | None = Field(default=None, ge=0, le=100)
     evidence: list[EvidenceRef] = Field(default_factory=list, max_length=20)
     note: str = Field(default="", max_length=2000)
 
@@ -291,7 +292,7 @@ class ReferenceIn(_In):
 
     project_name: str = Field(min_length=1, max_length=255)
     client: str = Field(default="", max_length=255)
-    value: Decimal | None = None
+    value: FiniteDecimal | None = None
     currency: str = Field(default="", max_length=3)
     year: int | None = Field(default=None, ge=1900, le=2100)
     role: str = Field(default="", max_length=120)
@@ -383,7 +384,7 @@ class FrameworkIn(_In):
         default_factory=list
     )
     lots: list[FrameworkLot] = Field(default_factory=list, max_length=50)
-    max_value: Decimal
+    max_value: FiniteDecimal
     currency: str = Field(min_length=3, max_length=3)
     start_date: date
     end_date: date
@@ -411,7 +412,7 @@ class FrameworkPatch(_In):
     scope: str | None = Field(default=None, max_length=8000)
     package_kinds: list[Literal["design", "works", "supply", "supply_and_install", "services"]] | None = None
     lots: list[FrameworkLot] | None = Field(default=None, max_length=50)
-    max_value: Decimal | None = None
+    max_value: FiniteDecimal | None = None
     end_date: date | None = None
     call_off_mode: Literal["direct", "mini_competition"] | None = None
     source_procedure_ref: str | None = Field(default=None, max_length=255)

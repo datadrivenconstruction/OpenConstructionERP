@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_serializer, field_validator
 
+from app.core.decimal_types import Decimal6_3, FiniteDecimal
+
 # ── Money serialization helper ──────────────────────────────────────────
 #
 # Pydantic v2 serializes ``Decimal`` to a JSON *number*, which JavaScript
@@ -72,12 +74,12 @@ class ProgrammeBase(BaseModel):
     country: str = Field(default="", max_length=2)
     region_code: str = Field(default="", max_length=20)
     instrument: str = Field(default="grant", pattern=_INSTRUMENT)
-    funding_rate_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    min_amount: Decimal = Field(default=Decimal("0"), ge=0)
-    max_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    funding_rate_percent: Decimal6_3 = Field(default=Decimal("0"), ge=0, le=100)
+    min_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    max_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="EUR", max_length=3)
-    own_share_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    aid_intensity_cap_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    own_share_percent: Decimal6_3 = Field(default=Decimal("0"), ge=0, le=100)
+    aid_intensity_cap_percent: Decimal6_3 = Field(default=Decimal("0"), ge=0, le=100)
     de_minimis: bool = False
     cumulative: bool = True
     requires_application_before_start: bool = True
@@ -111,12 +113,12 @@ class ProgrammeUpdate(BaseModel):
     authority_level: str | None = Field(default=None, pattern=_AUTHORITY_LEVEL)
     region_code: str | None = Field(default=None, max_length=20)
     instrument: str | None = Field(default=None, pattern=_INSTRUMENT)
-    funding_rate_percent: Decimal | None = Field(default=None, ge=0, le=100)
-    min_amount: Decimal | None = Field(default=None, ge=0)
-    max_amount: Decimal | None = Field(default=None, ge=0)
+    funding_rate_percent: Decimal6_3 | None = Field(default=None, ge=0, le=100)
+    min_amount: FiniteDecimal | None = Field(default=None, ge=0)
+    max_amount: FiniteDecimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
-    own_share_percent: Decimal | None = Field(default=None, ge=0, le=100)
-    aid_intensity_cap_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    own_share_percent: Decimal6_3 | None = Field(default=None, ge=0, le=100)
+    aid_intensity_cap_percent: Decimal6_3 | None = Field(default=None, ge=0, le=100)
     de_minimis: bool | None = None
     cumulative: bool | None = None
     requires_application_before_start: bool | None = None
@@ -162,9 +164,9 @@ class ApplicationBase(BaseModel):
     title: str = Field(default="", max_length=500)
     applicant_name: str = Field(default="", max_length=255)
     applicant_type: str = Field(default="", max_length=60)
-    eligible_cost_base: Decimal = Field(default=Decimal("0"), ge=0)
-    requested_amount: Decimal = Field(default=Decimal("0"), ge=0)
-    own_share_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    eligible_cost_base: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    requested_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    own_share_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="EUR", max_length=3)
     submitted_on: str = Field(default="", max_length=40)
     decision_expected_on: str = Field(default="", max_length=40)
@@ -193,7 +195,7 @@ class ReceiptRecord(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     received_on: str = Field(min_length=10, max_length=40)
-    amount_received: Decimal | None = Field(default=None, ge=0)
+    amount_received: FiniteDecimal | None = Field(default=None, ge=0)
 
 
 class ApplicationUpdate(BaseModel):
@@ -205,9 +207,9 @@ class ApplicationUpdate(BaseModel):
     applicant_name: str | None = Field(default=None, max_length=255)
     applicant_type: str | None = Field(default=None, max_length=60)
     status: str | None = Field(default=None, pattern=_APPLICATION_STATUS)
-    eligible_cost_base: Decimal | None = Field(default=None, ge=0)
-    requested_amount: Decimal | None = Field(default=None, ge=0)
-    own_share_amount: Decimal | None = Field(default=None, ge=0)
+    eligible_cost_base: FiniteDecimal | None = Field(default=None, ge=0)
+    requested_amount: FiniteDecimal | None = Field(default=None, ge=0)
+    own_share_amount: FiniteDecimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     submitted_on: str | None = Field(default=None, max_length=40)
     decision_expected_on: str | None = Field(default=None, max_length=40)
@@ -233,7 +235,7 @@ class AwardRecord(BaseModel):
     approved: bool
     decided_on: str = Field(default="", max_length=40)
     award_reference: str = Field(default="", max_length=120)
-    approved_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    approved_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     award_period_start: str = Field(default="", max_length=40)
     award_period_end: str = Field(default="", max_length=40)
     conditions: str = ""
@@ -282,7 +284,7 @@ class DisbursementBase(BaseModel):
     period_from: str = Field(default="", max_length=40)
     period_to: str = Field(default="", max_length=40)
     requested_on: str = Field(default="", max_length=40)
-    amount_requested: Decimal = Field(default=Decimal("0"), ge=0)
+    amount_requested: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     invoice_ids: list[UUID] = Field(default_factory=list)
     notes: str = ""
 
@@ -302,9 +304,9 @@ class DisbursementUpdate(BaseModel):
     requested_on: str | None = Field(default=None, max_length=40)
     approved_on: str | None = Field(default=None, max_length=40)
     received_on: str | None = Field(default=None, max_length=40)
-    amount_requested: Decimal | None = Field(default=None, ge=0)
-    amount_approved: Decimal | None = Field(default=None, ge=0)
-    amount_received: Decimal | None = Field(default=None, ge=0)
+    amount_requested: FiniteDecimal | None = Field(default=None, ge=0)
+    amount_approved: FiniteDecimal | None = Field(default=None, ge=0)
+    amount_received: FiniteDecimal | None = Field(default=None, ge=0)
     status: str | None = Field(default=None, pattern=_DISBURSEMENT_STATUS)
     invoice_ids: list[UUID] | None = None
     notes: str | None = None
@@ -343,9 +345,9 @@ class ProofOfUseBase(BaseModel):
     kind: str = Field(default="final", pattern=_PROOF_KIND)
     due_on: str = Field(default="", max_length=40)
     narrative_report: str = ""
-    total_eligible_spent: Decimal = Field(default=Decimal("0"), ge=0)
-    total_funding_used: Decimal = Field(default=Decimal("0"), ge=0)
-    total_own_share: Decimal = Field(default=Decimal("0"), ge=0)
+    total_eligible_spent: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    total_funding_used: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    total_own_share: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     voucher_count: int = Field(default=0, ge=0)
 
 
@@ -364,9 +366,9 @@ class ProofOfUseUpdate(BaseModel):
     accepted_on: str | None = Field(default=None, max_length=40)
     status: str | None = Field(default=None, pattern=_PROOF_STATUS)
     narrative_report: str | None = None
-    total_eligible_spent: Decimal | None = Field(default=None, ge=0)
-    total_funding_used: Decimal | None = Field(default=None, ge=0)
-    total_own_share: Decimal | None = Field(default=None, ge=0)
+    total_eligible_spent: FiniteDecimal | None = Field(default=None, ge=0)
+    total_funding_used: FiniteDecimal | None = Field(default=None, ge=0)
+    total_own_share: FiniteDecimal | None = Field(default=None, ge=0)
     voucher_count: int | None = Field(default=None, ge=0)
     findings: str | None = None
 
@@ -521,8 +523,8 @@ class CostAllocationBase(BaseModel):
 
     cost_group: str = Field(default="", max_length=40)
     description: str = Field(default="", max_length=500)
-    amount: Decimal = Field(default=Decimal("0"), ge=0)
-    eligible_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
+    eligible_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     eligibility: str = Field(default="undecided", pattern=_ELIGIBILITY)
     reason: str = ""
     source_kind: str = Field(default="manual", pattern=_ALLOCATION_SOURCE)
@@ -540,8 +542,8 @@ class CostAllocationUpdate(BaseModel):
 
     cost_group: str | None = Field(default=None, max_length=40)
     description: str | None = Field(default=None, max_length=500)
-    amount: Decimal | None = Field(default=None, ge=0)
-    eligible_amount: Decimal | None = Field(default=None, ge=0)
+    amount: FiniteDecimal | None = Field(default=None, ge=0)
+    eligible_amount: FiniteDecimal | None = Field(default=None, ge=0)
     eligibility: str | None = Field(default=None, pattern=_ELIGIBILITY)
     reason: str | None = None
     source_kind: str | None = Field(default=None, pattern=_ALLOCATION_SOURCE)

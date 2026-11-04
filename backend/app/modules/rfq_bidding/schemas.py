@@ -15,6 +15,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import Decimal5_2, Decimal18_4, Decimal18_6, Decimal18_8, FiniteDecimal
 from app.modules.rfq_bidding.constants import (
     ADJUSTMENT_KINDS,
     ADJUSTMENT_SOURCES,
@@ -181,7 +182,7 @@ class RFQCreate(BaseModel):
     status: str = Field(default="draft", max_length=50)
     issued_to_contacts: list[str] = Field(default_factory=list, max_length=500)
     evaluation_method: str = Field(default="lowest_price", max_length=30)
-    technical_weight: Decimal = Field(default=Decimal("0"))
+    technical_weight: Decimal5_2 = Field(default=Decimal("0"))
     require_full_scope: bool = True
     lines: list["RFQLineCreate"] = Field(default_factory=list, max_length=2_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -220,7 +221,7 @@ class RFQUpdate(BaseModel):
     status: str | None = Field(default=None, max_length=50)
     issued_to_contacts: list[str] | None = Field(default=None, max_length=500)
     evaluation_method: str | None = Field(default=None, max_length=30)
-    technical_weight: Decimal | None = None
+    technical_weight: Decimal5_2 | None = None
     require_full_scope: bool | None = None
     metadata: dict[str, Any] | None = None
 
@@ -254,7 +255,7 @@ class RFQLineCreate(BaseModel):
     code: str | None = Field(default=None, max_length=50)
     description: str = Field(..., min_length=1, max_length=5_000)
     unit: str = Field(..., min_length=1, max_length=20)
-    quantity: Decimal = Field(default=Decimal("0"))
+    quantity: Decimal18_4 = Field(default=Decimal("0"))
     is_optional: bool = False
     cost_line_id: UUID | None = None
     notes: str | None = Field(default=None, max_length=5_000)
@@ -280,7 +281,7 @@ class RFQLineUpdate(BaseModel):
     code: str | None = Field(default=None, max_length=50)
     description: str | None = Field(default=None, min_length=1, max_length=5_000)
     unit: str | None = Field(default=None, min_length=1, max_length=20)
-    quantity: Decimal | None = None
+    quantity: Decimal18_4 | None = None
     is_optional: bool | None = None
     cost_line_id: UUID | None = None
     notes: str | None = Field(default=None, max_length=5_000)
@@ -335,10 +336,10 @@ class BidLineCreate(BaseModel):
     rfq_line_id: UUID | None = None
     description: str | None = Field(default=None, max_length=5_000)
     unit: str = Field(default="", max_length=20)
-    quantity: Decimal = Field(default=Decimal("0"))
-    unit_rate: Decimal = Field(default=Decimal("0"))
-    amount: Decimal | None = None
-    unit_conversion_factor: Decimal | None = None
+    quantity: Decimal18_4 = Field(default=Decimal("0"))
+    unit_rate: FiniteDecimal = Field(default=Decimal("0"))
+    amount: FiniteDecimal | None = None
+    unit_conversion_factor: Decimal18_6 | None = None
     is_excluded: bool = False
     notes: str | None = Field(default=None, max_length=5_000)
 
@@ -399,7 +400,7 @@ class BidAdjustmentCreate(BaseModel):
 
     kind: str = Field(..., max_length=40)
     description: str | None = Field(default=None, max_length=5_000)
-    amount: Decimal = Field(default=Decimal("0"))
+    amount: FiniteDecimal = Field(default=Decimal("0"))
     currency_code: str | None = Field(default=None, max_length=10)
     included_in_bid: bool = False
     source: str = Field(default="bidder", max_length=20)
@@ -556,7 +557,7 @@ class BidCreate(BaseModel):
     # The rate this quote is to be compared at, in units of the RFQ currency
     # per one unit of the quote's currency. Required only when the currencies
     # differ; the comparison never invents one.
-    exchange_rate: Decimal | None = None
+    exchange_rate: Decimal18_8 | None = None
     exchange_rate_date: str | None = Field(default=None, max_length=20)
     exchange_rate_source: str | None = Field(default=None, max_length=60)
     # Supplied when the buyer records a quote that arrived after the deadline.

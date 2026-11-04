@@ -27,6 +27,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # Mirrors backend/app/modules/boq/schemas.py::_serialise_money - money fields
 # are stored and accepted as ``Decimal`` but emitted as plain decimal strings
@@ -64,7 +66,7 @@ class RateBand(BaseModel):
 
     code: str = Field(min_length=1, max_length=32)
     label: str = Field(default="", max_length=160)
-    rate_pct: Decimal = Field(ge=Decimal("0"), le=Decimal("100"))
+    rate_pct: FiniteDecimal = Field(ge=Decimal("0"), le=Decimal("100"))
     requires_verification: bool = False
 
     @field_serializer("rate_pct", when_used="json")
@@ -91,7 +93,7 @@ class _RegimeBody(BaseModel):
     materials_excluded: bool = True
     vat_excluded: bool = True
     verification_validity_months: int = Field(default=0, ge=0, le=600)
-    threshold_amount: Decimal | None = Field(default=None, ge=Decimal("0"))
+    threshold_amount: FiniteDecimal | None = Field(default=None, ge=Decimal("0"))
     notes: str = Field(default="", max_length=2000)
     is_active: bool = True
 
@@ -227,9 +229,9 @@ class DeductionPreviewRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     regime_id: UUID
-    gross_amount: Decimal = Field(ge=Decimal("0"))
-    qualifying_materials: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    vat_amount: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    gross_amount: FiniteDecimal = Field(ge=Decimal("0"))
+    qualifying_materials: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    vat_amount: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
     currency_code: str = Field(min_length=3, max_length=3)
     band_code: str = Field(default="", max_length=32)
     party_status_id: UUID | None = None
@@ -291,15 +293,15 @@ class _DeductionBody(BaseModel):
     payment_reference: str = Field(default="", max_length=128)
     period_start: date
     period_end: date
-    gross_amount: Decimal = Field(ge=Decimal("0"))
-    qualifying_materials: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    vat_amount: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    gross_amount: FiniteDecimal = Field(ge=Decimal("0"))
+    qualifying_materials: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    vat_amount: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
     # Omit both and the service computes them from the regime. Supply them and
     # they are stored as given - which is the case the validation rules exist
     # for, because an imported figure has already been decided elsewhere.
-    taxable_base: Decimal | None = Field(default=None, ge=Decimal("0"))
-    tax_withheld: Decimal | None = Field(default=None, ge=Decimal("0"))
-    rate_pct: Decimal | None = Field(default=None, ge=Decimal("0"), le=Decimal("100"))
+    taxable_base: FiniteDecimal | None = Field(default=None, ge=Decimal("0"))
+    tax_withheld: FiniteDecimal | None = Field(default=None, ge=Decimal("0"))
+    rate_pct: FiniteDecimal | None = Field(default=None, ge=Decimal("0"), le=Decimal("100"))
     band_code: str = Field(default="", max_length=32)
     currency_code: str = Field(min_length=3, max_length=3)
     status: DeductionStatusLiteral = "draft"
@@ -394,8 +396,8 @@ class _ReverseChargeBody(BaseModel):
     buyer_accounts_for_vat: bool = False
     legal_reference: str = Field(default="", max_length=200)
     invoice_wording: str = Field(default="", max_length=1000)
-    net_amount: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    vat_amount: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    net_amount: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    vat_amount: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
     currency_code: str = Field(min_length=3, max_length=3)
     status: ReverseChargeStatusLiteral = "draft"
     notes: str = Field(default="", max_length=2000)
@@ -538,19 +540,19 @@ class StatutoryInputsBody(BaseModel):
     currency_code: str = Field(min_length=3, max_length=3)
     document_date: date
     # May be negative: a credit note mirrors the document it corrects.
-    net_amount: Decimal
-    vat_rate_pct: Decimal | None = Field(ge=Decimal("0"), le=Decimal("100"))
+    net_amount: FiniteDecimal
+    vat_rate_pct: FiniteDecimal | None = Field(ge=Decimal("0"), le=Decimal("100"))
     # ``null`` means nobody has said, which holds a withholding that depends
     # on it. It is not "no".
     buyer_is_designated: bool | None = None
-    work_value_incl_vat: Decimal | None = Field(default=None, ge=Decimal("0"))
+    work_value_incl_vat: FiniteDecimal | None = Field(default=None, ge=Decimal("0"))
     # The person's own words for what that value is the value of (this
     # subcontract, or the main work). Stored beside the figure, never read.
     work_value_note: str = Field(default="", max_length=500)
     # Stamp duty is charged on its own base. Either the base is entered, or a
     # person states that it is the net amount. With neither, a selected stamp
     # duty is held for ``stamp_duty_base_unknown``.
-    stamp_duty_base: Decimal | None = None
+    stamp_duty_base: FiniteDecimal | None = None
     stamp_duty_base_same_as_net: bool = False
     vat_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
     income_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
@@ -607,7 +609,7 @@ class StatutoryOverrideRequest(BaseModel):
 
     project_id: UUID
     kind: StatutoryOverridableLiteral
-    amount: Decimal
+    amount: FiniteDecimal
     reason: str = Field(min_length=1, max_length=1000)
 
     @field_validator("kind", mode="before")
