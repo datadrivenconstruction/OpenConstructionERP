@@ -1707,5 +1707,35 @@
       "fail": "{code} el van döntve, és már nem módosítható vagy törölhető.",
       "suggestion": "Rögzítsen új átcsoportosítást vagy költségvetés-módosítást, amely kijavítja."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "A(z) {label} összege ({stated}) nem egyezik a sorok összegével ({expected}).",
+      "suggestion": "Számolja újra az összeget a sorokból, vagy javítsa a hibás sort."
+    },
+    "value_in_range": {
+      "fail": "A(z) {field} értéke ({value}) kívül esik a megengedett {low} és {high} közötti tartományon.",
+      "suggestion": "Ellenőrizze a számot és a mértékegységet; általában elcsúszott tizedesvessző az ok."
+    },
+    "currency_present": {
+      "fail": "Nincs pénznem megadva.",
+      "suggestion": "Állítsa be a rekord pénznemét, mielőtt megbízna az összegekben."
+    },
+    "currency_consistent": {
+      "fail": "A rekord keveri a pénznemeket ({currencies}).",
+      "suggestion": "Használjon végig egy pénznemet, vagy előbb váltsa át az összegeket."
+    },
+    "reference_present": {
+      "fail": "A kötelező hivatkozás hiányzik: {field}.",
+      "suggestion": "Kapcsolja a rekordot a projekthez, szerződéshez vagy félhez."
+    },
+    "status_transition": {
+      "fail": "Az állapot nem változhat {from_status} állapotról {to_status} állapotra.",
+      "suggestion": "Tartsa be a munkafolyamat sorrendjét; ha vissza kell lépni, előbb nyissa újra a rekordot."
+    },
+    "dates_ordered": {
+      "fail": "A(z) {earlier} és {later} dátum rossz sorrendben van, vagy az időszakon kívül esik.",
+      "suggestion": "Javítsa a dátumokat úgy, hogy a korábbi legyen elöl, és minden tétel az időszakba essen."
+    }
   }
 }

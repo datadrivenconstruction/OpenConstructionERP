@@ -16,3 +16,6 @@ async def on_startup() -> None:
     from app.modules.postcalc.permissions import register_postcalc_permissions
 
     register_postcalc_permissions()
+    from app.modules.postcalc.validators import register_postcalc_validation_rules
+
+    register_postcalc_validation_rules()

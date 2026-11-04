@@ -1707,5 +1707,35 @@
       "fail": "{code} on otsustatud ning seda ei saa enam muuta ega kustutada.",
       "suggestion": "Sisesta uus ümbertõstmine või eelarve muudatus, mis seda parandab."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Kogusumma {label} {stated} ei vasta ridade summale {expected}.",
+      "suggestion": "Arvutage kogusumma ridadest uuesti või parandage vigane rida."
+    },
+    "value_in_range": {
+      "fail": "Välja {field} väärtus {value} on lubatud vahemikust {low} kuni {high} väljas.",
+      "suggestion": "Kontrollige arvu ja ühikut; tavaliselt on põhjus valesse kohta sattunud koma."
+    },
+    "currency_present": {
+      "fail": "Valuutat pole märgitud.",
+      "suggestion": "Määrake kirje valuuta enne, kui summadele loodate."
+    },
+    "currency_consistent": {
+      "fail": "Kirje segab valuutasid ({currencies}).",
+      "suggestion": "Kasutage kõikjal ühte valuutat või teisendage summad enne."
+    },
+    "reference_present": {
+      "fail": "Kohustuslik viide {field} puudub.",
+      "suggestion": "Siduge kirje projekti, lepingu või osapoolega."
+    },
+    "status_transition": {
+      "fail": "Olekut ei saa muuta olekust {from_status} olekusse {to_status}.",
+      "suggestion": "Järgige töövoo järjekorda; avage kirje enne uuesti, kui see peab tagasi minema."
+    },
+    "dates_ordered": {
+      "fail": "Kuupäevad {earlier} ja {later} on valesti järjestatud või perioodist väljas.",
+      "suggestion": "Parandage kuupäevad nii, et varasem tuleb esimesena ja iga kirje jääb perioodi sisse."
+    }
   }
 }

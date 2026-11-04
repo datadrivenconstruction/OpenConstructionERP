@@ -1707,5 +1707,35 @@
       "fail": "Over {code} is besloten; het kan niet meer worden gewijzigd of verwijderd.",
       "suggestion": "Voer een nieuwe verschuiving of budgetwijziging in die het corrigeert."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Het totaal {label} {stated} komt niet overeen met de som van de regels {expected}.",
+      "suggestion": "Bereken het totaal opnieuw uit de regels of corrigeer de foute regel."
+    },
+    "value_in_range": {
+      "fail": "De waarde {value} van {field} ligt buiten het toegestane bereik {low} tot {high}.",
+      "suggestion": "Controleer het getal en de eenheid; meestal staat er een komma op de verkeerde plek."
+    },
+    "currency_present": {
+      "fail": "Er is geen valuta opgegeven.",
+      "suggestion": "Stel de valuta van het record in voordat u op de bedragen vertrouwt."
+    },
+    "currency_consistent": {
+      "fail": "Het record mengt valuta's ({currencies}).",
+      "suggestion": "Gebruik overal één valuta of reken de bedragen eerst om."
+    },
+    "reference_present": {
+      "fail": "De verplichte verwijzing {field} ontbreekt.",
+      "suggestion": "Koppel het record aan het project, contract of de partij."
+    },
+    "status_transition": {
+      "fail": "De status kan niet van {from_status} naar {to_status} wijzigen.",
+      "suggestion": "Volg de volgorde van de werkstroom; heropen het record eerst als het terug moet."
+    },
+    "dates_ordered": {
+      "fail": "De data {earlier} en {later} staan in de verkeerde volgorde of buiten de periode.",
+      "suggestion": "Corrigeer de data zodat de vroegste eerst komt en elke invoer binnen de periode valt."
+    }
   }
 }

@@ -1719,5 +1719,35 @@
         "suggestion": "Mehr Elemente mit kostenbehafteten Vorgängen verknüpfen oder die EAC-Verknüpfungsregeln prüfen."
       }
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Die Summe {label} {stated} stimmt nicht mit der Summe ihrer Positionen {expected} überein.",
+      "suggestion": "Berechnen Sie die Summe aus den Positionen neu oder korrigieren Sie die fehlerhafte Position."
+    },
+    "value_in_range": {
+      "fail": "Der Wert {value} von {field} liegt außerhalb des zulässigen Bereichs {low} bis {high}.",
+      "suggestion": "Prüfen Sie Zahl und Einheit; meist ist ein verrutschtes Komma die Ursache."
+    },
+    "currency_present": {
+      "fail": "Es ist keine Währung angegeben.",
+      "suggestion": "Legen Sie die Währung des Datensatzes fest, bevor Sie sich auf die Beträge verlassen."
+    },
+    "currency_consistent": {
+      "fail": "Der Datensatz mischt Währungen ({currencies}).",
+      "suggestion": "Verwenden Sie durchgehend eine Währung oder rechnen Sie die Beträge zuerst um."
+    },
+    "reference_present": {
+      "fail": "Der erforderliche Bezug {field} fehlt.",
+      "suggestion": "Verknüpfen Sie den Datensatz mit Projekt, Vertrag oder Partei."
+    },
+    "status_transition": {
+      "fail": "Der Status kann nicht von {from_status} zu {to_status} wechseln.",
+      "suggestion": "Halten Sie die Reihenfolge des Ablaufs ein; öffnen Sie den Datensatz zuerst wieder, wenn er zurück muss."
+    },
+    "dates_ordered": {
+      "fail": "Die Daten {earlier} und {later} sind in falscher Reihenfolge oder liegen außerhalb des Zeitraums.",
+      "suggestion": "Korrigieren Sie die Daten, sodass das frühere zuerst kommt und jeder Eintrag im Zeitraum liegt."
+    }
   }
 }

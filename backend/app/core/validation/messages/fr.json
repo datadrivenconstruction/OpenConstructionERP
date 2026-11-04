@@ -1707,5 +1707,35 @@
       "fail": "{code} a fait l'objet d'une décision et ne peut plus être modifié ni supprimé.",
       "suggestion": "Saisissez un nouveau transfert ou une modification de budget qui le corrige."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Le total {label} {stated} ne correspond pas à la somme de ses lignes {expected}.",
+      "suggestion": "Recalculez le total à partir de ses lignes ou corrigez la ligne erronée."
+    },
+    "value_in_range": {
+      "fail": "La valeur {value} de {field} est hors de la plage autorisée de {low} à {high}.",
+      "suggestion": "Vérifiez le chiffre et son unité ; une virgule mal placée est la cause habituelle."
+    },
+    "currency_present": {
+      "fail": "Aucune devise n'est indiquée.",
+      "suggestion": "Définissez la devise de l'enregistrement avant de vous fier à ses montants."
+    },
+    "currency_consistent": {
+      "fail": "L'enregistrement mélange des devises ({currencies}).",
+      "suggestion": "Utilisez une seule devise partout, ou convertissez d'abord les montants."
+    },
+    "reference_present": {
+      "fail": "La référence obligatoire {field} est absente.",
+      "suggestion": "Rattachez l'enregistrement à son projet, son contrat ou sa partie."
+    },
+    "status_transition": {
+      "fail": "Le statut ne peut pas passer de {from_status} à {to_status}.",
+      "suggestion": "Respectez l'ordre du processus ; rouvrez d'abord l'enregistrement s'il doit revenir en arrière."
+    },
+    "dates_ordered": {
+      "fail": "Les dates {earlier} et {later} sont dans le désordre ou hors de la période.",
+      "suggestion": "Corrigez les dates pour que la plus ancienne vienne en premier et que chaque entrée soit dans la période."
+    }
   }
 }

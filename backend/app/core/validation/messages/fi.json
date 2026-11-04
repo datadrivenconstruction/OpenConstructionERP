@@ -1707,5 +1707,35 @@
       "fail": "{code} on päätetty, eikä sitä voi enää muuttaa tai poistaa.",
       "suggestion": "Tee uusi siirto tai budjettimuutos, joka korjaa sen."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Summa {label} {stated} ei vastaa rivien summaa {expected}.",
+      "suggestion": "Laske summa uudelleen riveistä tai korjaa virheellinen rivi."
+    },
+    "value_in_range": {
+      "fail": "Kentän {field} arvo {value} on sallitun alueen {low}-{high} ulkopuolella.",
+      "suggestion": "Tarkista luku ja yksikkö; yleensä syynä on väärään paikkaan osunut desimaalipilkku."
+    },
+    "currency_present": {
+      "fail": "Valuuttaa ei ole annettu.",
+      "suggestion": "Aseta tietueen valuutta, ennen kuin luotat sen summiin."
+    },
+    "currency_consistent": {
+      "fail": "Tietue sekoittaa valuuttoja ({currencies}).",
+      "suggestion": "Käytä yhtä valuuttaa koko tietueessa tai muunna summat ensin."
+    },
+    "reference_present": {
+      "fail": "Pakollinen viite {field} puuttuu.",
+      "suggestion": "Liitä tietue hankkeeseensa, sopimukseensa tai osapuoleensa."
+    },
+    "status_transition": {
+      "fail": "Tilaa ei voi vaihtaa tilasta {from_status} tilaan {to_status}.",
+      "suggestion": "Noudata työnkulun järjestystä; avaa tietue ensin uudelleen, jos sen pitää palata."
+    },
+    "dates_ordered": {
+      "fail": "Päivämäärät {earlier} ja {later} ovat väärässä järjestyksessä tai jakson ulkopuolella.",
+      "suggestion": "Korjaa päivämäärät niin, että aiempi tulee ensin ja jokainen merkintä on jaksolla."
+    }
   }
 }

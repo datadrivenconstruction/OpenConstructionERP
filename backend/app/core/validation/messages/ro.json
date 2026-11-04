@@ -1707,5 +1707,35 @@
       "fail": "Pentru {code} s-a luat o decizie și nu mai poate fi modificat sau șters.",
       "suggestion": "Introduceți un nou transfer sau o modificare de buget care să îl corecteze."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Totalul {label} {stated} nu corespunde cu suma liniilor sale {expected}.",
+      "suggestion": "Recalculați totalul din linii sau corectați linia greșită."
+    },
+    "value_in_range": {
+      "fail": "Valoarea {value} a câmpului {field} este în afara intervalului permis {low} - {high}.",
+      "suggestion": "Verificați cifra și unitatea; de obicei cauza este o virgulă zecimală mutată."
+    },
+    "currency_present": {
+      "fail": "Nu este indicată nicio monedă.",
+      "suggestion": "Stabiliți moneda înregistrării înainte de a vă baza pe sume."
+    },
+    "currency_consistent": {
+      "fail": "Înregistrarea amestecă monede ({currencies}).",
+      "suggestion": "Folosiți o singură monedă peste tot sau convertiți mai întâi sumele."
+    },
+    "reference_present": {
+      "fail": "Lipsește referința obligatorie {field}.",
+      "suggestion": "Asociați înregistrarea cu proiectul, contractul sau partea sa."
+    },
+    "status_transition": {
+      "fail": "Starea nu poate trece de la {from_status} la {to_status}.",
+      "suggestion": "Respectați ordinea fluxului; redeschideți mai întâi înregistrarea dacă trebuie să se întoarcă."
+    },
+    "dates_ordered": {
+      "fail": "Datele {earlier} și {later} sunt în ordine greșită sau în afara perioadei.",
+      "suggestion": "Corectați datele astfel încât cea mai veche să fie prima și fiecare intrare să se încadreze în perioadă."
+    }
   }
 }

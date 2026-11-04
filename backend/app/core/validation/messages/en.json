@@ -1719,5 +1719,35 @@
         "suggestion": "Link more elements to cost-loaded tasks, or check the EAC link rules."
       }
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "The {label} total {stated} does not match the sum of its lines {expected}.",
+      "suggestion": "Recalculate the total from its lines, or correct the line that is wrong."
+    },
+    "value_in_range": {
+      "fail": "The value {value} of {field} is outside the allowed range {low} to {high}.",
+      "suggestion": "Check the figure and its unit; a misplaced decimal point is the usual cause."
+    },
+    "currency_present": {
+      "fail": "No currency is stated.",
+      "suggestion": "Set the currency of the record before relying on its amounts."
+    },
+    "currency_consistent": {
+      "fail": "The record mixes currencies ({currencies}).",
+      "suggestion": "Use one currency throughout, or convert the amounts first."
+    },
+    "reference_present": {
+      "fail": "The required reference {field} is missing.",
+      "suggestion": "Link the record to its project, contract or party."
+    },
+    "status_transition": {
+      "fail": "The status cannot change from {from_status} to {to_status}.",
+      "suggestion": "Follow the workflow order; reopen the record first if it must go back."
+    },
+    "dates_ordered": {
+      "fail": "The dates {earlier} and {later} are out of order or outside the period.",
+      "suggestion": "Correct the dates so the earlier one comes first and every entry falls inside the period."
+    }
   }
 }
