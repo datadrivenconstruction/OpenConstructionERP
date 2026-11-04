@@ -1760,8 +1760,8 @@
       "suggestion": "Abschließen oder neu terminieren bzw. mit Begründung schließen."
     },
     "result_contradicts_checklist": {
-      "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte sind fehlgeschlagen.",
-      "suggestion": "Ergebnis korrigieren oder die fehlgeschlagenen Prüfpunkte prüfen."
+      "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte wurden nicht bestanden.",
+      "suggestion": "Ergebnis korrigieren oder die nicht bestandenen Prüfpunkte kontrollieren."
     }
   }
 }

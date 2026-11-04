@@ -1748,8 +1748,8 @@
       "suggestion": "Finalizați sau reprogramați, ori închideți cu un motiv."
     },
     "result_contradicts_checklist": {
-      "fail": "Rezultatul este {result}, dar {count} puncte din lista de verificare au eșuat.",
-      "suggestion": "Corectați rezultatul sau revizuiți punctele eșuate."
+      "fail": "Rezultatul este {result}, dar {count} puncte din lista de verificare nu sunt conforme.",
+      "suggestion": "Corectați rezultatul sau revizuiți punctele neconforme."
     }
   }
 }

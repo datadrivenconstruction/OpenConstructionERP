@@ -1748,8 +1748,8 @@
       "suggestion": "Tamamlayın ya da yeniden planlayın veya gerekçeyle kapatın."
     },
     "result_contradicts_checklist": {
-      "fail": "Sonuç {result}, ancak {count} kontrol listesi maddesi başarısız oldu.",
-      "suggestion": "Sonucu düzeltin veya başarısız maddeleri inceleyin."
+      "fail": "Sonuç {result}, ancak kontrol listesindeki {count} madde uygun bulunmadı.",
+      "suggestion": "Sonucu düzeltin veya uygun bulunmayan maddeleri inceleyin."
     }
   }
 }

@@ -1748,8 +1748,8 @@
       "suggestion": "Terminez-le ou replanifiez-le, ou clôturez-le avec un motif."
     },
     "result_contradicts_checklist": {
-      "fail": "Le résultat est {result}, mais {count} points de la liste de contrôle ont échoué.",
-      "suggestion": "Corrigez le résultat ou vérifiez les points échoués."
+      "fail": "Le résultat est {result}, mais {count} points de la liste de contrôle sont non conformes.",
+      "suggestion": "Corrigez le résultat ou vérifiez les points non conformes."
     }
   }
 }

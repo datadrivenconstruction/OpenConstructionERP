@@ -1748,8 +1748,8 @@
       "suggestion": "Conclua ou reagende, ou encerre com um motivo."
     },
     "result_contradicts_checklist": {
-      "fail": "O resultado é {result}, mas {count} itens da lista de verificação falharam.",
-      "suggestion": "Corrija o resultado ou reveja os itens que falharam."
+      "fail": "O resultado é {result}, mas {count} itens da lista de verificação foram reprovados.",
+      "suggestion": "Corrija o resultado ou reveja os itens reprovados."
     }
   }
 }

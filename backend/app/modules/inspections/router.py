@@ -104,6 +104,7 @@ def _to_response(item: object, names: dict[str, str] | None = None) -> Inspectio
         checklist_data=item.checklist_data or [],  # type: ignore[attr-defined]
         version=getattr(item, "version", None) or 1,
         created_by=item.created_by,  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", []),
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]

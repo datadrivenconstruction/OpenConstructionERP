@@ -1748,8 +1748,8 @@
       "suggestion": "Complételo o reprograme la fecha, o ciérrelo indicando el motivo."
     },
     "result_contradicts_checklist": {
-      "fail": "El resultado es {result}, pero {count} puntos de la lista de control fallaron.",
-      "suggestion": "Corrija el resultado o revise los puntos fallidos."
+      "fail": "El resultado es {result}, pero {count} puntos de la lista de control no cumplen.",
+      "suggestion": "Corrija el resultado o revise los puntos que no cumplen."
     }
   }
 }

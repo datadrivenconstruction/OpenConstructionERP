@@ -1748,7 +1748,7 @@
       "suggestion": "Dokončete nebo přeplánujte, případně uzavřete s uvedením důvodu."
     },
     "result_contradicts_checklist": {
-      "fail": "Výsledek je {result}, ale {count} bodů kontrolního seznamu nevyhovělo.",
+      "fail": "Výsledek je {result}, ale nevyhovělo bodů kontrolního seznamu: {count}.",
       "suggestion": "Opravte výsledek nebo zkontrolujte nevyhovující body."
     }
   }

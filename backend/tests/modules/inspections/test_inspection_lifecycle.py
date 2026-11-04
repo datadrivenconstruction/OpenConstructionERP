@@ -35,8 +35,8 @@ async def test_create_defaults_and_number(client, admin_auth, project_id):
 
 @pytest.mark.asyncio
 async def test_walk_scheduled_to_completed(client, admin_auth, project_id):
-    _, header = admin_auth
-    insp = await _create(client, header, project_id)
+    uid, header = admin_auth
+    insp = await _create(client, header, project_id, inspector_id=uid)
     r = await _patch(client, header, insp["id"], status="in_progress")
     assert r.status_code == 200, r.text
     done = await client.post(f"{BASE}{insp['id']}/complete/", json={"result": "pass"}, headers=header)
@@ -47,8 +47,8 @@ async def test_walk_scheduled_to_completed(client, admin_auth, project_id):
 
 @pytest.mark.asyncio
 async def test_completed_is_terminal(client, admin_auth, project_id):
-    _, header = admin_auth
-    insp = await _create(client, header, project_id)
+    uid, header = admin_auth
+    insp = await _create(client, header, project_id, inspector_id=uid)
     assert (
         await client.post(f"{BASE}{insp['id']}/complete/", json={"result": "pass"}, headers=header)
     ).status_code == 200

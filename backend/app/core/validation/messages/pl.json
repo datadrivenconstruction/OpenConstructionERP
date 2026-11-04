@@ -1748,7 +1748,7 @@
       "suggestion": "Zakończ lub zmień termin albo zamknij z podaniem powodu."
     },
     "result_contradicts_checklist": {
-      "fail": "Wynik to {result}, ale {count} pozycji listy kontrolnej nie przeszło.",
+      "fail": "Wynik to {result}, ale niezaliczonych pozycji listy kontrolnej: {count}.",
       "suggestion": "Popraw wynik lub sprawdź niezaliczone pozycje."
     }
   }

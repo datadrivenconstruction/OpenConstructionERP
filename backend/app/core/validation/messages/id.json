@@ -1748,8 +1748,8 @@
       "suggestion": "Selesaikan atau jadwalkan ulang, atau tutup dengan alasan."
     },
     "result_contradicts_checklist": {
-      "fail": "Hasilnya {result}, tetapi {count} butir daftar periksa gagal.",
-      "suggestion": "Perbaiki hasilnya atau tinjau butir yang gagal."
+      "fail": "Hasilnya {result}, tetapi {count} butir daftar periksa tidak lulus.",
+      "suggestion": "Perbaiki hasilnya atau tinjau butir yang tidak lulus."
     }
   }
 }
