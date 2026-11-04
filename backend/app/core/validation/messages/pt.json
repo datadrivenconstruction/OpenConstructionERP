@@ -1430,6 +1430,12 @@
       "suggestion": "Verifique cada medição transitada na nova revisão e confirme-a, ou meça-a de novo"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Este registo tem {days} dias, acima do limite de {limit} dias para sincronizar a partir de um dispositivo",
+      "suggestion": "Introduza novamente na aplicação com ligação para que fique com a data de hoje"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "O campo '{field}' foi alterado no dispositivo e no servidor e não tem resolução",

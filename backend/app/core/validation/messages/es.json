@@ -1448,6 +1448,12 @@
       "suggestion": "Revise cada medición trasladada en la nueva revisión y confírmela, o vuelva a medirla"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Este registro tiene {days} días, por encima del límite de {limit} días para sincronizar desde un dispositivo",
+      "suggestion": "Vuelva a introducirlo en la aplicación con conexión para que lleve la fecha de hoy"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "El campo '{field}' se cambió tanto en el dispositivo como en el servidor y no tiene resolución",

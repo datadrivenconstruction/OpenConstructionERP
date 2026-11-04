@@ -1430,6 +1430,12 @@
       "suggestion": "Aktarılan her ölçümü yeni revizyonda kontrol edip onaylayın veya yeniden ölçün"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Bu kayıt {days} günlük, cihazdan eşitleme sınırı olan {limit} günü aşıyor",
+      "suggestion": "Bugünün tarihini taşıması için çevrimiçiyken uygulamada yeniden girin"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "'{field}' alanı hem cihazda hem sunucuda değiştirildi ve bir çözüm seçilmedi",

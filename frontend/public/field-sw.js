@@ -16,9 +16,10 @@
  * Two cache lanes:
  *   - oe-field-shell    precache of the app shell entry, served as the offline
  *                       navigation fallback so a cold `/field` open works.
- *   - oe-field-data     runtime NetworkFirst for `/api/v1/field-diary/*` GETs
- *                       (e.g. the Today screen) so the last-viewed data is
- *                       available offline. Mutations bypass the SW entirely.
+ *   - oe-field-data     runtime NetworkFirst for field-diary, punch list,
+ *                       inspections and NCR GETs (e.g. the Today screen and the
+ *                       offline pack) so the last-viewed lists are available
+ *                       offline. Mutations bypass the SW entirely.
  */
 
 /* eslint-disable no-restricted-globals */
@@ -63,8 +64,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Lists a site manager opens first. Reads only; the SW never sees a mutation.
+const FIELD_LIST_PREFIXES = [
+  '/api/v1/field-diary/',
+  '/api/v1/field/',
+  '/api/v1/punchlist/',
+  '/api/v1/inspections/',
+  '/api/v1/ncr/',
+];
+
 function isFieldDataRequest(url) {
-  return url.pathname.startsWith('/api/v1/field-diary/') || url.pathname.startsWith('/api/v1/field/');
+  return FIELD_LIST_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
 }
 
 self.addEventListener('fetch', (event) => {

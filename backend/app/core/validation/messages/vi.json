@@ -1430,6 +1430,12 @@
       "suggestion": "Kiểm tra từng phép đo được chuyển trên phiên bản mới rồi xác nhận, hoặc đo lại"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Bản ghi này đã {days} ngày tuổi, vượt giới hạn {limit} ngày để đồng bộ từ thiết bị",
+      "suggestion": "Hãy nhập lại trong ứng dụng khi có mạng để mang ngày hôm nay"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Trường '{field}' đã bị thay đổi cả trên thiết bị lẫn trên máy chủ và chưa có cách giải quyết",

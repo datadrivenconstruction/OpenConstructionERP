@@ -1430,6 +1430,12 @@
       "suggestion": "Provjerite svako preneseno mjerenje na novoj reviziji i potvrdite ga ili ponovno izmjerite"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Ovaj je zapis star {days} dana, više od ograničenja od {limit} dana za sinkronizaciju s uređaja",
+      "suggestion": "Unesite ga ponovno u aplikaciji na mreži kako bi nosio današnji datum"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Polje '{field}' promijenjeno je i na uređaju i na poslužitelju i nema odabrano rješenje",

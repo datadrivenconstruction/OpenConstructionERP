@@ -1430,6 +1430,12 @@
       "suggestion": "Sprawdź każdy przeniesiony pomiar na nowej rewizji i potwierdź go lub zmierz ponownie"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Ten wpis ma {days} dni, więcej niż limit {limit} dni synchronizacji z urządzenia",
+      "suggestion": "Wprowadź go ponownie w aplikacji online, aby miał dzisiejszą datę"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Pole '{field}' zmieniono zarówno na urządzeniu, jak i na serwerze i nie wybrano rozwiązania",

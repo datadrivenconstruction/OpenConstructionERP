@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.core.decimal_types import Decimal6_2, FiniteDecimal
+from app.core.decimal_types import Decimal6_2, Decimal12_3, FiniteDecimal
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
@@ -264,6 +264,46 @@ class FieldScheduleProgressCreate(FieldCapture):
     actual_finish: str | None = Field(default=None, max_length=40)
 
 
+class FieldNcrCreate(FieldCapture):
+    """A non-conformance report raised from the field; the same enums as the NCR module."""
+
+    title: str = Field(..., min_length=1, max_length=500)
+    description: str = Field(..., min_length=1, max_length=10_000)
+    ncr_type: str = Field(default="workmanship", pattern=r"^(material|workmanship|design|documentation|safety)$")
+    severity: str = Field(default="minor", pattern=r"^(critical|major|minor|observation)$")
+    location_description: str | None = Field(default=None, max_length=500)
+
+
+class FieldSafetyObservationCreate(FieldCapture):
+    """A safety observation raised from the field; risk is severity x likelihood as on the desktop."""
+
+    observation_type: str = Field(..., pattern=r"^(positive|unsafe_act|unsafe_condition|near_miss)$")
+    description: str = Field(..., min_length=1, max_length=10_000)
+    location: str | None = Field(default=None, max_length=500)
+    severity: int = Field(default=1, ge=1, le=5)
+    likelihood: int = Field(default=1, ge=1, le=5)
+    immediate_action: str | None = Field(default=None, max_length=5000)
+
+
+class FieldHaulTicketCreate(FieldCapture):
+    """A haul ticket or delivery receipt filled in at the gate. Weights are tonnes, not money."""
+
+    haul_type: Literal["earthworks", "aggregates", "concrete", "asphalt", "waste", "other"] = "other"
+    direction: Literal["inbound", "outbound", "internal"] = "inbound"
+    ticket_number: str = Field(default="", max_length=60)
+    material_name: str = Field(default="", max_length=255)
+    unit: Literal["t", "m3", "load"] = "t"
+    net_t: Decimal12_3 | None = Field(default=None, ge=0)
+    volume_m3: Decimal12_3 | None = Field(default=None, ge=0)
+    loads: int | None = Field(default=None, ge=0, le=1000)
+    origin: str = Field(default="", max_length=255)
+    destination: str = Field(default="", max_length=255)
+    plate: str = Field(default="", max_length=30)
+    driver_name: str = Field(default="", max_length=255)
+    receiver_name: str = Field(default="", max_length=255)
+    notes: str = Field(default="", max_length=4000)
+
+
 class FieldCaptureResponse(BaseModel):
     """Per-op outcome returned to the client (and stored in the ledger).
 
@@ -277,6 +317,8 @@ class FieldCaptureResponse(BaseModel):
     target_kind: str
     result_id: uuid.UUID | None = None
     http_status: int
+    # Machine-readable cause when status is "rejected"; the queue panel shows it.
+    reason_code: str | None = None
 
 
 class FieldSyncOpItem(FieldCapture):
@@ -284,7 +326,7 @@ class FieldSyncOpItem(FieldCapture):
     routed ``target_kind`` so the server can dispatch it.
     """
 
-    target_kind: Literal["punch_item", "inspection", "schedule_progress"]
+    target_kind: Literal["punch_item", "inspection", "schedule_progress", "ncr", "safety_observation", "haul_ticket"]
     # The op-specific payload (a FieldPunchCreate / FieldInspectionCreate /
     # FieldScheduleProgressCreate body minus the capture envelope, which is
     # carried on this item directly).
@@ -318,6 +360,23 @@ class FieldTodayResponse(BaseModel):
     top_punch: list[dict[str, Any]] = Field(default_factory=list)
     open_inspection_count: int = 0
     server_time: str
+
+
+class FieldOfflinePackResponse(BaseModel):
+    """Everything a site manager needs on screen with no signal, in one round trip.
+
+    Open punch items and today's checklists are the lists a person opens first
+    on arrival; ``server_time`` lets the phone judge the age of what it stored
+    against the server clock rather than its own.
+    """
+
+    project_id: uuid.UUID
+    server_time: str
+    punch_items: list[dict[str, Any]] = Field(default_factory=list)
+    inspections: list[dict[str, Any]] = Field(default_factory=list)
+    roster: list[dict[str, Any]] = Field(default_factory=list)
+    punch_truncated: bool = False
+    inspections_truncated: bool = False
 
 
 class FieldCrewMemberResponse(BaseModel):

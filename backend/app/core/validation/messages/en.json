@@ -1466,6 +1466,12 @@
       "suggestion": "Check each carried measurement on the new revision and confirm it, or re-measure it"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "This capture is {days} days old, past the {limit}-day limit for syncing from a device",
+      "suggestion": "Enter it again in the app while online so it carries today's date"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Field '{field}' was changed on both the device and the server and has no resolution",

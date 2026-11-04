@@ -1430,6 +1430,12 @@
       "suggestion": "Controleer elke overgenomen meting op de nieuwe revisie en bevestig die, of meet opnieuw"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Deze registratie is {days} dagen oud, boven de limiet van {limit} dagen voor synchronisatie vanaf een apparaat",
+      "suggestion": "Voer het opnieuw in de app in terwijl u online bent, zodat het de datum van vandaag krijgt"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Het veld '{field}' is zowel op het apparaat als op de server gewijzigd en heeft geen oplossing",

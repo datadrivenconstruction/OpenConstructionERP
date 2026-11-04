@@ -1430,6 +1430,12 @@
       "suggestion": "Zkontrolujte každé převzaté měření na nové revizi a potvrďte je, nebo je změřte znovu"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Tento záznam je starý {days} dní, což přesahuje limit {limit} dní pro synchronizaci ze zařízení",
+      "suggestion": "Zadejte jej znovu v aplikaci online, aby nesl dnešní datum"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Pole '{field}' bylo změněno na zařízení i na serveru a nemá zvolené řešení",

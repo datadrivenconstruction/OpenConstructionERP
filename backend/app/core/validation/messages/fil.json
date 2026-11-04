@@ -1430,6 +1430,12 @@
       "suggestion": "Suriin ang bawat dinalang sukat sa bagong rebisyon at kumpirmahin ito, o sukatin muli"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Ang tala na ito ay {days} araw na, lampas sa limitasyong {limit} araw para sa pag-sync mula sa device",
+      "suggestion": "Ilagay muli sa app habang online para dala nito ang petsa ngayon"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Ang field na '{field}' ay binago sa device at sa server at walang napiling resolusyon",
