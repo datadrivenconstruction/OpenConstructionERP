@@ -25,3 +25,7 @@ async def on_startup() -> None:
     from app.modules.daily_diary.clock_headcount import register_clock_headcount
 
     register_clock_headcount()
+
+    from app.modules.daily_diary.validators import register_daily_diary_validation_rules
+
+    register_daily_diary_validation_rules()

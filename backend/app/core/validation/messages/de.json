@@ -1749,5 +1749,12 @@
       "fail": "Die Daten {earlier} und {later} sind in falscher Reihenfolge oder liegen außerhalb des Zeitraums.",
       "suggestion": "Korrigieren Sie die Daten, sodass das frühere zuerst kommt und jeder Eintrag im Zeitraum liegt."
     }
+  },
+  "site": {
+    "future_date": "Das Datum {field} ({value}) liegt in der Zukunft.",
+    "contradiction": "{field} ({value}) widerspricht {other_field} ({other_value}).",
+    "required_when": "{field} muss angegeben werden, wenn {other_field} den Wert {other_value} hat.",
+    "limit_exceeded": "{field} ({value}) überschreitet den Grenzwert {limit} aus {limit_field}.",
+    "suggestion": "Prüfen Sie den Datensatz und korrigieren Sie vor dem Speichern die falsche Angabe oder das falsche Datum."
   }
 }

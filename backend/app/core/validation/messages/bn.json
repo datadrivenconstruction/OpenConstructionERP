@@ -1737,5 +1737,12 @@
       "fail": "তারিখ {earlier} ও {later} ভুল ক্রমে আছে অথবা সময়কালের বাইরে।",
       "suggestion": "তারিখগুলি এমনভাবে ঠিক করুন যেন আগেরটি প্রথমে আসে এবং প্রতিটি এন্ট্রি সময়কালের মধ্যে থাকে।"
     }
+  },
+  "site": {
+    "future_date": "তারিখ {field} ({value}) ভবিষ্যতে রয়েছে।",
+    "contradiction": "{field} ({value}) এবং {other_field} ({other_value}) পরস্পরবিরোধী।",
+    "required_when": "{other_field} যখন {other_value}, তখন {field} উল্লেখ করতে হবে।",
+    "limit_exceeded": "{field} ({value}) সীমা {limit} ছাড়িয়ে গেছে, যা {limit_field} নির্ধারণ করেছে।",
+    "suggestion": "রেকর্ডটি যাচাই করুন এবং সংরক্ষণের আগে ভুল মান বা তারিখ সংশোধন করুন।"
   }
 }

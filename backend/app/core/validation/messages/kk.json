@@ -1737,5 +1737,12 @@
       "fail": "{earlier} және {later} күндері дұрыс ретпен емес немесе кезеңнен тыс.",
       "suggestion": "Күндерді ертерек күн бірінші тұратындай және әр жазба кезеңге түсетіндей түзетіңіз."
     }
+  },
+  "site": {
+    "future_date": "{field} күні ({value}) болашақта.",
+    "contradiction": "{field} ({value}) мәні {other_field} ({other_value}) мәніне қайшы келеді.",
+    "required_when": "{other_field} мәні {other_value} болғанда {field} көрсетілуі керек.",
+    "limit_exceeded": "{field} ({value}) {limit_field} белгілеген {limit} шегінен асып кетті.",
+    "suggestion": "Жазбаны тексеріп, сақтау алдында қате мәнді немесе күнді түзетіңіз."
   }
 }

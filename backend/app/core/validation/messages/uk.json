@@ -1737,5 +1737,12 @@
       "fail": "Дати {earlier} і {later} йдуть не по порядку або виходять за період.",
       "suggestion": "Виправте дати: рання має йти першою, а кожен запис має потрапляти в період."
     }
+  },
+  "site": {
+    "future_date": "Дата {field} ({value}) припадає на майбутнє.",
+    "contradiction": "{field} ({value}) суперечить {other_field} ({other_value}).",
+    "required_when": "{field} потрібно вказати, якщо {other_field} дорівнює {other_value}.",
+    "limit_exceeded": "{field} ({value}) перевищує межу {limit}, задану {limit_field}.",
+    "suggestion": "Перевірте запис і перед збереженням виправте хибне значення або дату."
   }
 }

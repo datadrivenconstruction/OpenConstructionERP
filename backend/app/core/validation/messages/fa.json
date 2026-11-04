@@ -1737,5 +1737,12 @@
       "fail": "تاریخ‌های {earlier} و {later} ترتیب درستی ندارند یا خارج از دوره‌اند.",
       "suggestion": "تاریخ‌ها را طوری اصلاح کنید که تاریخ زودتر اول بیاید و هر ورودی در دوره قرار گیرد."
     }
+  },
+  "site": {
+    "future_date": "تاریخ {field} ({value}) در آینده است.",
+    "contradiction": "{field} ({value}) با {other_field} ({other_value}) در تناقض است.",
+    "required_when": "وقتی {other_field} برابر {other_value} است، باید {field} مشخص شود.",
+    "limit_exceeded": "{field} ({value}) از حد مجاز {limit} که {limit_field} تعیین کرده فراتر می‌رود.",
+    "suggestion": "رکورد را بررسی کنید و پیش از ذخیره، مقدار یا تاریخ نادرست را اصلاح کنید."
   }
 }

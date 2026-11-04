@@ -1737,5 +1737,12 @@
       "fail": "Các ngày {earlier} và {later} sai thứ tự hoặc nằm ngoài giai đoạn.",
       "suggestion": "Sửa các ngày để ngày sớm hơn đứng trước và mỗi mục nằm trong giai đoạn."
     }
+  },
+  "site": {
+    "future_date": "Ngày {field} ({value}) nằm trong tương lai.",
+    "contradiction": "{field} ({value}) mâu thuẫn với {other_field} ({other_value}).",
+    "required_when": "Phải nhập {field} khi {other_field} là {other_value}.",
+    "limit_exceeded": "{field} ({value}) vượt quá giới hạn {limit} do {limit_field} quy định.",
+    "suggestion": "Kiểm tra bản ghi và sửa giá trị hoặc ngày sai trước khi lưu."
   }
 }

@@ -1737,5 +1737,12 @@
       "fail": "Kuupäevad {earlier} ja {later} on valesti järjestatud või perioodist väljas.",
       "suggestion": "Parandage kuupäevad nii, et varasem tuleb esimesena ja iga kirje jääb perioodi sisse."
     }
+  },
+  "site": {
+    "future_date": "Kuupäev {field} ({value}) on tulevikus.",
+    "contradiction": "{field} ({value}) on vastuolus väljaga {other_field} ({other_value}).",
+    "required_when": "Väli {field} tuleb täita, kui {other_field} on {other_value}.",
+    "limit_exceeded": "{field} ({value}) ületab piirmäära {limit}, mille määrab {limit_field}.",
+    "suggestion": "Kontrollige kirjet ja parandage enne salvestamist vigane väärtus või kuupäev."
   }
 }

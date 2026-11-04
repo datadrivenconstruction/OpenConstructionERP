@@ -503,6 +503,24 @@ class DailyDiaryService:
         self.drone_repo = DroneSurveyRepository(session)
         self.reality_repo = RealityCaptureRepository(session)
         self.signature_repo = DiaryArchiveSignatureRepository(session)
+        self.last_warnings: list[Any] = []
+
+    async def _check(self, key: str, record: dict[str, Any], project_id: Any = None) -> None:
+        """Run the ``daily_diary`` rule set on one record; errors raise a coded 422, warnings are logged."""
+        from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
+        from app.modules.daily_diary.validators import (  # noqa: PLC0415
+            DAILY_DIARY_RULE_SET,
+            register_daily_diary_validation_rules,
+        )
+
+        self.last_warnings = await check_site_rules(
+            DAILY_DIARY_RULE_SET,
+            register_daily_diary_validation_rules,
+            {key: record},
+            target_type=f"daily_diary_{key}",
+            target_id=str(record.get("id", "")),
+            project_id=project_id,
+        )
 
     # ── Diary CRUD ───────────────────────────────────────────────────────
 
@@ -538,6 +556,11 @@ class DailyDiaryService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(f"Daily diary for project {data.project_id} on {data.diary_date} already exists"),
             )
+        await self._check(
+            "diary",
+            {"labour_count": data.labour_count, "equipment_count": data.equipment_count},
+            data.project_id,
+        )
         diary = DailyDiary(
             project_id=data.project_id,
             diary_date=data.diary_date,
@@ -600,6 +623,16 @@ class DailyDiaryService:
             fields["metadata_"] = fields.pop("metadata")
         if not fields:
             return diary
+        if "labour_count" in fields or "equipment_count" in fields:
+            await self._check(
+                "diary",
+                {
+                    "id": diary_id,
+                    "labour_count": fields.get("labour_count", diary.labour_count),
+                    "equipment_count": fields.get("equipment_count", diary.equipment_count),
+                },
+                diary.project_id,
+            )
         await self.diary_repo.update_fields(diary_id, **fields)
         await self.session.refresh(diary)
         return diary
@@ -867,6 +900,11 @@ class DailyDiaryService:
     # ── Weather ──────────────────────────────────────────────────────────
 
     async def create_weather(self, data: WeatherRecordCreate) -> WeatherRecord:
+        await self._check(
+            "weather",
+            data.model_dump(include={"source", "captured_at", "sunrise", "sunset"}),
+            data.project_id,
+        )
         record = WeatherRecord(
             project_id=data.project_id,
             captured_at=data.captured_at,
@@ -912,10 +950,22 @@ class DailyDiaryService:
         return record  # type: ignore[return-value]
 
     async def update_weather(self, weather_id: uuid.UUID, data: WeatherRecordUpdate) -> WeatherRecord:
-        await self.get_weather(weather_id)
+        current = await self.get_weather(weather_id)
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+        if any(name in fields for name in ("source", "captured_at", "sunrise", "sunset")):
+            await self._check(
+                "weather",
+                {
+                    "id": weather_id,
+                    **{
+                        name: fields.get(name, getattr(current, name, None))
+                        for name in ("source", "captured_at", "sunrise", "sunset")
+                    },
+                },
+                current.project_id,
+            )
         if fields:
             await self.weather_repo.update_fields(weather_id, **fields)
         return await self.get_weather(weather_id)
@@ -933,6 +983,11 @@ class DailyDiaryService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=_entry_signed_immutable_detail(data.diary_id, diary.status),
             )
+        await self._check(
+            "entry",
+            {"entry_time": data.entry_time, "diary_date": diary.diary_date},
+            diary.project_id,
+        )
         entry = DiaryEntry(
             diary_id=data.diary_id,
             entry_type=data.entry_type,
@@ -1174,6 +1229,7 @@ class DailyDiaryService:
     # ── Drone surveys ────────────────────────────────────────────────────
 
     async def attach_drone_survey(self, data: DroneSurveyCreate) -> DroneSurvey:
+        await self._check("survey", {"flown_at": data.flown_at}, data.project_id)
         survey = DroneSurvey(
             project_id=data.project_id,
             flown_at=data.flown_at,
@@ -1219,6 +1275,8 @@ class DailyDiaryService:
                         "elevation_max_m (would conflict with stored value)"
                     ),
                 )
+        if "flown_at" in fields:
+            await self._check("survey", {"id": survey_id, "flown_at": fields["flown_at"]}, survey.project_id)
         if fields:
             await self.drone_repo.update_fields(survey_id, **fields)
         return await self.drone_repo.get_by_id(survey_id)  # type: ignore[return-value]

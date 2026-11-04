@@ -1737,5 +1737,12 @@
       "fail": "Datumi {earlier} i {later} nisu u ispravnom redoslijedu ili su izvan razdoblja.",
       "suggestion": "Ispravite datume tako da raniji dođe prvi i da svaki unos bude unutar razdoblja."
     }
+  },
+  "site": {
+    "future_date": "Datum {field} ({value}) nalazi se u budućnosti.",
+    "contradiction": "{field} ({value}) proturječi polju {other_field} ({other_value}).",
+    "required_when": "{field} treba navesti kada je {other_field} {other_value}.",
+    "limit_exceeded": "{field} ({value}) premašuje granicu {limit} koju određuje {limit_field}.",
+    "suggestion": "Provjerite zapis i prije spremanja ispravite pogrešnu vrijednost ili datum."
   }
 }

@@ -237,8 +237,26 @@ class SafetyService:
         self.session = session
         self.incident_repo = IncidentRepository(session)
         self.observation_repo = ObservationRepository(session)
+        self.last_warnings: list[Any] = []
 
     # ── Incidents ─────────────────────────────────────────────────────────
+
+    async def _check_incident(self, record: dict[str, Any]) -> None:
+        """Run the ``safety`` rule set on the incident as it would be stored.
+
+        Errors raise a coded 422; warnings are logged and kept on ``last_warnings``.
+        """
+        from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
+        from app.modules.safety.validators import SAFETY_RULE_SET, register_safety_validation_rules  # noqa: PLC0415
+
+        self.last_warnings = await check_site_rules(
+            SAFETY_RULE_SET,
+            register_safety_validation_rules,
+            {"incident": record},
+            target_type="safety_incident",
+            target_id=str(record.get("id", "")),
+            project_id=record.get("project_id"),
+        )
 
     async def create_incident(
         self,
@@ -246,6 +264,23 @@ class SafetyService:
         user_id: str | None = None,
     ) -> SafetyIncident:
         """Create a new safety incident."""
+        await self._check_incident(
+            {
+                "project_id": data.project_id,
+                **data.model_dump(
+                    include={
+                        "incident_date",
+                        "incident_type",
+                        "severity",
+                        "treatment_type",
+                        "days_lost",
+                        "root_cause",
+                        "reported_to_regulator",
+                        "status",
+                    }
+                ),
+            }
+        )
         corrective_actions = [entry.model_dump() for entry in data.corrective_actions]
 
         incident = SafetyIncident(
@@ -381,6 +416,25 @@ class SafetyService:
         if not fields:
             return incident
 
+        merged = {
+            name: fields.get(name, getattr(incident, name, None))
+            for name in (
+                "incident_date",
+                "incident_type",
+                "severity",
+                "treatment_type",
+                "days_lost",
+                "root_cause",
+                "reported_to_regulator",
+                "status",
+            )
+        }
+        # A patch that does not touch the date must not be refused because an
+        # old record carries a date the rule would now reject.
+        if "incident_date" not in fields:
+            merged["incident_date"] = None
+        if any(name in fields for name in merged):
+            await self._check_incident({"id": incident_id, "project_id": incident.project_id, **merged})
         await self.incident_repo.update_fields(incident_id, **fields)
         await self.session.refresh(incident)
         logger.info("Safety incident updated: %s", incident_id)

@@ -1737,5 +1737,12 @@
       "fail": "Tanggal {earlier} dan {later} tidak berurutan atau di luar periode.",
       "suggestion": "Perbaiki tanggal agar yang lebih awal datang lebih dulu dan setiap entri berada dalam periode."
     }
+  },
+  "site": {
+    "future_date": "Tanggal {field} ({value}) berada di masa depan.",
+    "contradiction": "{field} ({value}) bertentangan dengan {other_field} ({other_value}).",
+    "required_when": "{field} harus diisi bila {other_field} bernilai {other_value}.",
+    "limit_exceeded": "{field} ({value}) melebihi batas {limit} yang ditetapkan oleh {limit_field}.",
+    "suggestion": "Periksa catatan dan perbaiki nilai atau tanggal yang salah sebelum menyimpan."
   }
 }

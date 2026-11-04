@@ -1737,5 +1737,12 @@
       "fail": "A(z) {earlier} és {later} dátum rossz sorrendben van, vagy az időszakon kívül esik.",
       "suggestion": "Javítsa a dátumokat úgy, hogy a korábbi legyen elöl, és minden tétel az időszakba essen."
     }
+  },
+  "site": {
+    "future_date": "A(z) {field} dátuma ({value}) a jövőben van.",
+    "contradiction": "A(z) {field} ({value}) ellentmond a(z) {other_field} ({other_value}) értéknek.",
+    "required_when": "A(z) {field} megadása kötelező, ha a(z) {other_field} értéke {other_value}.",
+    "limit_exceeded": "A(z) {field} ({value}) meghaladja a(z) {limit_field} által megszabott {limit} határértéket.",
+    "suggestion": "Ellenőrizze a rekordot, és mentés előtt javítsa a hibás értéket vagy dátumot."
   }
 }

@@ -1737,5 +1737,12 @@
       "fail": "De data {earlier} en {later} staan in de verkeerde volgorde of buiten de periode.",
       "suggestion": "Corrigeer de data zodat de vroegste eerst komt en elke invoer binnen de periode valt."
     }
+  },
+  "site": {
+    "future_date": "De datum {field} ({value}) ligt in de toekomst.",
+    "contradiction": "{field} ({value}) is in strijd met {other_field} ({other_value}).",
+    "required_when": "{field} moet worden ingevuld wanneer {other_field} gelijk is aan {other_value}.",
+    "limit_exceeded": "{field} ({value}) overschrijdt de grens {limit} van {limit_field}.",
+    "suggestion": "Controleer het record en corrigeer de onjuiste waarde of datum voordat u opslaat."
   }
 }

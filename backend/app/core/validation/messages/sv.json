@@ -1737,5 +1737,12 @@
       "fail": "Datumen {earlier} och {later} är i fel ordning eller utanför perioden.",
       "suggestion": "Rätta datumen så att det tidigare kommer först och varje post ligger inom perioden."
     }
+  },
+  "site": {
+    "future_date": "Datumet {field} ({value}) ligger i framtiden.",
+    "contradiction": "{field} ({value}) strider mot {other_field} ({other_value}).",
+    "required_when": "{field} måste anges när {other_field} är {other_value}.",
+    "limit_exceeded": "{field} ({value}) överskrider gränsen {limit} som anges av {limit_field}.",
+    "suggestion": "Kontrollera posten och rätta det felaktiga värdet eller datumet innan du sparar."
   }
 }

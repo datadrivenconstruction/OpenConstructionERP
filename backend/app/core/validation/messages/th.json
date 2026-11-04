@@ -1737,5 +1737,12 @@
       "fail": "วันที่ {earlier} และ {later} เรียงลำดับผิดหรืออยู่นอกช่วงเวลา",
       "suggestion": "แก้ไขวันที่ให้วันที่เร็วกว่ามาก่อน และให้ทุกรายการอยู่ในช่วงเวลา"
     }
+  },
+  "site": {
+    "future_date": "วันที่ {field} ({value}) อยู่ในอนาคต",
+    "contradiction": "{field} ({value}) ขัดแย้งกับ {other_field} ({other_value})",
+    "required_when": "ต้องระบุ {field} เมื่อ {other_field} เป็น {other_value}",
+    "limit_exceeded": "{field} ({value}) เกินขีดจำกัด {limit} ที่กำหนดโดย {limit_field}",
+    "suggestion": "ตรวจสอบรายการและแก้ไขค่าหรือวันที่ที่ผิดก่อนบันทึก"
   }
 }

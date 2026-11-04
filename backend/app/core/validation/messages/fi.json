@@ -1737,5 +1737,12 @@
       "fail": "Päivämäärät {earlier} ja {later} ovat väärässä järjestyksessä tai jakson ulkopuolella.",
       "suggestion": "Korjaa päivämäärät niin, että aiempi tulee ensin ja jokainen merkintä on jaksolla."
     }
+  },
+  "site": {
+    "future_date": "Päivämäärä {field} ({value}) on tulevaisuudessa.",
+    "contradiction": "{field} ({value}) on ristiriidassa kentän {other_field} ({other_value}) kanssa.",
+    "required_when": "Kenttä {field} on täytettävä, kun {other_field} on {other_value}.",
+    "limit_exceeded": "{field} ({value}) ylittää rajan {limit}, jonka asettaa {limit_field}.",
+    "suggestion": "Tarkista tietue ja korjaa virheellinen arvo tai päivämäärä ennen tallennusta."
   }
 }

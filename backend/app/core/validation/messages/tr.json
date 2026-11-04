@@ -1737,5 +1737,12 @@
       "fail": "{earlier} ve {later} tarihleri yanlış sırada veya dönemin dışında.",
       "suggestion": "Tarihleri, erken olan önce gelecek ve her giriş dönemin içinde kalacak şekilde düzeltin."
     }
+  },
+  "site": {
+    "future_date": "{field} tarihi ({value}) gelecektedir.",
+    "contradiction": "{field} ({value}), {other_field} ({other_value}) ile çelişiyor.",
+    "required_when": "{other_field} değeri {other_value} olduğunda {field} belirtilmelidir.",
+    "limit_exceeded": "{field} ({value}), {limit_field} tarafından belirlenen {limit} sınırını aşıyor.",
+    "suggestion": "Kaydı kontrol edin ve kaydetmeden önce hatalı değeri veya tarihi düzeltin."
   }
 }

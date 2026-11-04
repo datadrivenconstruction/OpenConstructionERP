@@ -1737,5 +1737,12 @@
       "fail": "التاريخان {earlier} و{later} غير مرتبين أو خارج الفترة.",
       "suggestion": "صحّح التواريخ بحيث يأتي الأسبق أولاً ويقع كل إدخال داخل الفترة."
     }
+  },
+  "site": {
+    "future_date": "التاريخ {field} ({value}) يقع في المستقبل.",
+    "contradiction": "{field} ({value}) يتعارض مع {other_field} ({other_value}).",
+    "required_when": "يجب تحديد {field} عندما تكون قيمة {other_field} هي {other_value}.",
+    "limit_exceeded": "{field} ({value}) يتجاوز الحد {limit} المحدد في {limit_field}.",
+    "suggestion": "راجع السجل وصحح القيمة أو التاريخ الخاطئ قبل الحفظ."
   }
 }

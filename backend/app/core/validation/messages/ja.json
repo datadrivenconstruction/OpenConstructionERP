@@ -1737,5 +1737,12 @@
       "fail": "日付 {earlier} と {later} の順序が正しくないか、期間外です。",
       "suggestion": "早い日付が先になり、すべての項目が期間内に収まるよう日付を修正してください。"
     }
+  },
+  "site": {
+    "future_date": "日付 {field}（{value}）が未来になっています。",
+    "contradiction": "{field}（{value}）が {other_field}（{other_value}）と矛盾しています。",
+    "required_when": "{other_field} が {other_value} の場合は {field} の入力が必要です。",
+    "limit_exceeded": "{field}（{value}）が {limit_field} で定められた上限 {limit} を超えています。",
+    "suggestion": "記録を確認し、保存する前に誤った値または日付を修正してください。"
   }
 }

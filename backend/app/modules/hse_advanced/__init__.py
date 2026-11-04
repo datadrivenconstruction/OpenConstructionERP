@@ -15,3 +15,7 @@ async def on_startup() -> None:
 
     register_hse_advanced_permissions()
     register_subscribers()
+
+    from app.modules.hse_advanced.validators import register_hse_validation_rules
+
+    register_hse_validation_rules()

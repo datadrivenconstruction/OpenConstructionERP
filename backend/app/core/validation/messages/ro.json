@@ -1737,5 +1737,12 @@
       "fail": "Datele {earlier} și {later} sunt în ordine greșită sau în afara perioadei.",
       "suggestion": "Corectați datele astfel încât cea mai veche să fie prima și fiecare intrare să se încadreze în perioadă."
     }
+  },
+  "site": {
+    "future_date": "Data {field} ({value}) este în viitor.",
+    "contradiction": "{field} ({value}) contrazice {other_field} ({other_value}).",
+    "required_when": "{field} trebuie completat atunci când {other_field} este {other_value}.",
+    "limit_exceeded": "{field} ({value}) depășește limita {limit} stabilită de {limit_field}.",
+    "suggestion": "Verificați înregistrarea și corectați valoarea sau data greșită înainte de salvare."
   }
 }

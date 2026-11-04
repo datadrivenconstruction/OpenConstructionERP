@@ -1737,5 +1737,12 @@
       "fail": "日期 {earlier} 与 {later} 顺序错误或超出期间。",
       "suggestion": "请修正日期，使较早的日期在前，且每个条目都落在期间内。"
     }
+  },
+  "site": {
+    "future_date": "日期 {field}（{value}）晚于当前时间。",
+    "contradiction": "{field}（{value}）与 {other_field}（{other_value}）相矛盾。",
+    "required_when": "当 {other_field} 为 {other_value} 时，必须填写 {field}。",
+    "limit_exceeded": "{field}（{value}）超出了 {limit_field} 规定的限值 {limit}。",
+    "suggestion": "请检查该记录，并在保存前更正错误的数值或日期。"
   }
 }

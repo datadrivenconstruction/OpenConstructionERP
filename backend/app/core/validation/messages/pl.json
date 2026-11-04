@@ -1737,5 +1737,12 @@
       "fail": "Daty {earlier} i {later} są w złej kolejności lub poza okresem.",
       "suggestion": "Popraw daty tak, aby wcześniejsza była pierwsza, a każdy wpis mieścił się w okresie."
     }
+  },
+  "site": {
+    "future_date": "Data {field} ({value}) leży w przyszłości.",
+    "contradiction": "{field} ({value}) jest sprzeczne z {other_field} ({other_value}).",
+    "required_when": "Pole {field} należy wypełnić, gdy {other_field} ma wartość {other_value}.",
+    "limit_exceeded": "{field} ({value}) przekracza limit {limit} wynikający z {limit_field}.",
+    "suggestion": "Sprawdź zapis i przed zapisaniem popraw błędną wartość lub datę."
   }
 }

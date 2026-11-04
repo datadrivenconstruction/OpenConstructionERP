@@ -1737,5 +1737,12 @@
       "fail": "날짜 {earlier}와(과) {later}의 순서가 맞지 않거나 기간을 벗어났습니다.",
       "suggestion": "빠른 날짜가 먼저 오고 모든 항목이 기간 안에 들어오도록 날짜를 수정하세요."
     }
+  },
+  "site": {
+    "future_date": "날짜 {field}({value})가 미래입니다.",
+    "contradiction": "{field}({value})이(가) {other_field}({other_value})와 모순됩니다.",
+    "required_when": "{other_field}이(가) {other_value}인 경우 {field}을(를) 입력해야 합니다.",
+    "limit_exceeded": "{field}({value})이(가) {limit_field}에서 정한 한도 {limit}을(를) 초과합니다.",
+    "suggestion": "기록을 확인하고 저장하기 전에 잘못된 값이나 날짜를 수정하십시오."
   }
 }

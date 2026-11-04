@@ -670,6 +670,21 @@ class HSEAdvancedService:
         self.capa_repo = CAPARepository(session)
         self.cert_repo = CertificationRepository(session)
         self.jsa_template_repo = JSATemplateRepository(session)
+        self.last_warnings: list[Any] = []
+
+    async def _check(self, key: str, record: dict[str, Any], project_id: Any = None) -> None:
+        """Run the ``hse_advanced`` rule set on one record; errors raise a coded 422, warnings are logged."""
+        from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
+        from app.modules.hse_advanced.validators import HSE_RULE_SET, register_hse_validation_rules  # noqa: PLC0415
+
+        self.last_warnings = await check_site_rules(
+            HSE_RULE_SET,
+            register_hse_validation_rules,
+            {key: record},
+            target_type=f"hse_{key}",
+            target_id=str(record.get("id", "")),
+            project_id=project_id,
+        )
 
     # ── Investigation ─────────────────────────────────────────────────────
 
@@ -950,6 +965,11 @@ class HSEAdvancedService:
     async def request_permit(self, data: PermitCreate, user_id: str | None = None) -> PermitToWork:
         if data.work_end <= data.work_start:
             raise HTTPException(422, "work_end must be after work_start")
+        await self._check(
+            "permit",
+            data.model_dump(include={"permit_type", "work_start", "work_end"}),
+            data.project_id,
+        )
         obj = PermitToWork(
             project_id=data.project_id,
             permit_number=data.permit_number,
@@ -1007,6 +1027,12 @@ class HSEAdvancedService:
         new_end = fields.get("work_end", obj.work_end)
         if new_start is not None and new_end is not None and new_end <= new_start:
             raise HTTPException(422, "work_end must be after work_start")
+        if "work_start" in fields or "work_end" in fields:
+            await self._check(
+                "permit",
+                {"id": item_id, "permit_type": obj.permit_type, "work_start": new_start, "work_end": new_end},
+                obj.project_id,
+            )
         if fields:
             await self.permit_repo.update_fields(item_id, **fields)
             await self.session.refresh(obj)
@@ -1207,6 +1233,7 @@ class HSEAdvancedService:
         data: ToolboxTalkCreate,
         user_id: str | None = None,
     ) -> ToolboxTalk:
+        await self._check("talk", {"conducted_at": data.conducted_at}, data.project_id)
         talk = ToolboxTalk(
             project_id=data.project_id,
             topic_code=data.topic_code,
@@ -1298,6 +1325,7 @@ class HSEAdvancedService:
     # ── PPE ──────────────────────────────────────────────────────────────
 
     async def issue_ppe(self, data: PPEIssueCreate) -> PPEIssue:
+        await self._check("ppe", data.model_dump(include={"issued_at", "returned_at", "valid_until"}))
         obj = PPEIssue(**data.model_dump())
         return await self.ppe_repo.create(obj)
 
@@ -1310,6 +1338,16 @@ class HSEAdvancedService:
     async def update_ppe_issue(self, item_id: uuid.UUID, data: PPEIssueUpdate) -> PPEIssue:
         obj = await self.get_ppe_issue(item_id)
         fields = data.model_dump(exclude_unset=True)
+        if "returned_at" in fields or "valid_until" in fields:
+            await self._check(
+                "ppe",
+                {
+                    "id": item_id,
+                    "issued_at": obj.issued_at,
+                    "returned_at": fields.get("returned_at", obj.returned_at),
+                    "valid_until": fields.get("valid_until", obj.valid_until),
+                },
+            )
         if fields:
             await self.ppe_repo.update_fields(item_id, **fields)
             await self.session.refresh(obj)
@@ -1513,6 +1551,7 @@ class HSEAdvancedService:
     # ── CAPA ─────────────────────────────────────────────────────────────
 
     async def create_capa(self, data: CAPACreate, user_id: str | None = None) -> CorrectiveAction:
+        await self._check("capa", {"target_date": data.target_date}, data.project_id)
         obj = CorrectiveAction(
             project_id=data.project_id,
             source_type=data.source_type,
@@ -1693,6 +1732,7 @@ class HSEAdvancedService:
     # ── Certifications ──────────────────────────────────────────────────
 
     async def create_certification(self, data: CertificationCreate) -> SafetyCertification:
+        await self._check("certification", data.model_dump(include={"issue_date", "valid_until"}))
         obj = SafetyCertification(**data.model_dump())
         return await self.cert_repo.create(obj)
 
@@ -1705,6 +1745,11 @@ class HSEAdvancedService:
     async def update_certification(self, item_id: uuid.UUID, data: CertificationUpdate) -> SafetyCertification:
         obj = await self.get_certification(item_id)
         fields = data.model_dump(exclude_unset=True)
+        if "valid_until" in fields:
+            await self._check(
+                "certification",
+                {"id": item_id, "issue_date": obj.issue_date, "valid_until": fields["valid_until"]},
+            )
         if fields:
             await self.cert_repo.update_fields(item_id, **fields)
             await self.session.refresh(obj)

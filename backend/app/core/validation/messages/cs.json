@@ -1737,5 +1737,12 @@
       "fail": "Data {earlier} a {later} jsou v nesprávném pořadí nebo mimo období.",
       "suggestion": "Opravte data tak, aby dřívější šlo první a každý záznam spadal do období."
     }
+  },
+  "site": {
+    "future_date": "Datum {field} ({value}) leží v budoucnosti.",
+    "contradiction": "{field} ({value}) je v rozporu s {other_field} ({other_value}).",
+    "required_when": "{field} je nutné uvést, pokud {other_field} je {other_value}.",
+    "limit_exceeded": "{field} ({value}) překračuje limit {limit} daný položkou {limit_field}.",
+    "suggestion": "Zkontrolujte záznam a před uložením opravte chybnou hodnotu nebo datum."
   }
 }
