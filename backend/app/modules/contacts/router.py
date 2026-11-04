@@ -797,13 +797,15 @@ async def import_contacts_file(
             # Replace the message with the exception class name and log a
             # PII-stripped row dict instead.
             err_kind = type(exc).__name__
-            errors.append(
-                {
-                    "row": row_idx,
-                    "error": f"Row rejected ({err_kind})",
-                    "data": _redact_row_for_log(row),
-                }
-            )
+            entry = {
+                "row": row_idx,
+                "error": f"Row rejected ({err_kind})",
+                "data": _redact_row_for_log(row),
+            }
+            detail = getattr(exc, "detail", None)
+            if isinstance(detail, dict) and detail.get("error") == "contact_rules_failed":
+                entry["rules"] = [e["rule_id"] for e in detail.get("errors", [])]
+            errors.append(entry)
             logger.warning(
                 "Contact import error at row %d: %s (fields=%s)",
                 row_idx,

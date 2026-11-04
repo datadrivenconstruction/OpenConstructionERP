@@ -14,3 +14,6 @@ async def on_startup() -> None:
     from app.modules.crm.permissions import register_crm_permissions
 
     register_crm_permissions()
+    from app.modules.crm.validators import register_crm_validation_rules
+
+    register_crm_validation_rules()
