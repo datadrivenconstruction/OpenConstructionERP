@@ -1737,5 +1737,19 @@
       "fail": "{earlier} ve {later} tarihleri yanlış sırada veya dönemin dışında.",
       "suggestion": "Tarihleri, erken olan önce gelecek ve her giriş dönemin içinde kalacak şekilde düzeltin."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Durum {state} ancak {field} eksik.",
+      "suggestion": "Eksik alanı doldurun veya kaydı önceki bir duruma döndürün."
+    },
+    "overdue": {
+      "fail": "Son tarih {date} olmasına rağmen hâlâ {status}.",
+      "suggestion": "Tamamlayın ya da yeniden planlayın veya gerekçeyle kapatın."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Sonuç {result}, ancak {count} kontrol listesi maddesi başarısız oldu.",
+      "suggestion": "Sonucu düzeltin veya başarısız maddeleri inceleyin."
+    }
   }
 }

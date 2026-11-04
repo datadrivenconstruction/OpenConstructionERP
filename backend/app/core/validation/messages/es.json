@@ -1737,5 +1737,19 @@
       "fail": "Las fechas {earlier} y {later} están desordenadas o fuera del periodo.",
       "suggestion": "Corrija las fechas para que la anterior vaya primero y cada entrada quede dentro del periodo."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "El estado es {state} pero falta {field}.",
+      "suggestion": "Complete el campo que falta o devuelva el registro a un estado anterior."
+    },
+    "overdue": {
+      "fail": "Sigue {status} aunque vencía el {date}.",
+      "suggestion": "Complételo o reprograme la fecha, o ciérrelo indicando el motivo."
+    },
+    "result_contradicts_checklist": {
+      "fail": "El resultado es {result}, pero {count} puntos de la lista de control fallaron.",
+      "suggestion": "Corrija el resultado o revise los puntos fallidos."
+    }
   }
 }

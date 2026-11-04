@@ -1737,5 +1737,19 @@
       "fail": "Datoerne {earlier} og {later} er i forkert rækkefølge eller uden for perioden.",
       "suggestion": "Ret datoerne, så den tidligste kommer først, og hver post ligger inden for perioden."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status er {state}, men {field} mangler.",
+      "suggestion": "Udfyld det manglende felt, eller sæt posten tilbage til en tidligere status."
+    },
+    "overdue": {
+      "fail": "Stadig {status}, selvom fristen var {date}.",
+      "suggestion": "Afslut eller omplanlæg, eller luk med en begrundelse."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Resultatet er {result}, men {count} tjeklistepunkter fejlede.",
+      "suggestion": "Ret resultatet, eller gennemgå de fejlede punkter."
+    }
   }
 }

@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.inspections.permissions import register_inspections_permissions
 
     register_inspections_permissions()
+    from app.modules.inspections.validators import register_inspections_validation_rules
+
+    register_inspections_validation_rules()

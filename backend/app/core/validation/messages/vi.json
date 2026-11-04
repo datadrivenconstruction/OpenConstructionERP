@@ -1737,5 +1737,19 @@
       "fail": "Các ngày {earlier} và {later} sai thứ tự hoặc nằm ngoài giai đoạn.",
       "suggestion": "Sửa các ngày để ngày sớm hơn đứng trước và mỗi mục nằm trong giai đoạn."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Trạng thái là {state} nhưng thiếu {field}.",
+      "suggestion": "Điền trường còn thiếu hoặc đưa bản ghi về trạng thái trước đó."
+    },
+    "overdue": {
+      "fail": "Vẫn là {status} dù hạn là {date}.",
+      "suggestion": "Hoàn thành hoặc lên lịch lại, hoặc đóng kèm lý do."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Kết quả là {result} nhưng {count} mục trong danh sách kiểm tra không đạt.",
+      "suggestion": "Sửa kết quả hoặc xem lại các mục không đạt."
+    }
   }
 }

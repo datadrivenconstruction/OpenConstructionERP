@@ -1737,5 +1737,19 @@
       "fail": "Data {earlier} a {later} jsou v nesprávném pořadí nebo mimo období.",
       "suggestion": "Opravte data tak, aby dřívější šlo první a každý záznam spadal do období."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Stav je {state}, ale chybí {field}.",
+      "suggestion": "Doplňte chybějící pole nebo vraťte záznam do dřívějšího stavu."
+    },
+    "overdue": {
+      "fail": "Stále {status}, ačkoli termín byl {date}.",
+      "suggestion": "Dokončete nebo přeplánujte, případně uzavřete s uvedením důvodu."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Výsledek je {result}, ale {count} bodů kontrolního seznamu nevyhovělo.",
+      "suggestion": "Opravte výsledek nebo zkontrolujte nevyhovující body."
+    }
   }
 }
