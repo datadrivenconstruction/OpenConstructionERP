@@ -19,7 +19,7 @@ import pytest_asyncio
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.event_effect import EventEffect, claim_effect
+from app.core.event_effects import EventEffect, claim_effect
 from app.database import Base
 from app.modules.supplier_catalogs.events import apply_goods_receipt_posted
 from app.modules.supplier_catalogs.models import CatalogItem, StockBalance, StockMovement, Warehouse

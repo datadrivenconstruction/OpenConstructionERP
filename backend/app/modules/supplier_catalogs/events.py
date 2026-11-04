@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.event_effect import claim_effect
+from app.core.event_effects import claim_effect
 from app.core.events import Event, event_bus
 
 VENDOR_CREATED = "supplier_catalogs.vendor.created"

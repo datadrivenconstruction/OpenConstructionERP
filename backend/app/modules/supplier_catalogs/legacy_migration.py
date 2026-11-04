@@ -115,7 +115,15 @@ _GR_ITEM = _t(
     sa.Column("batch_lot", sa.String(100)),
     sa.Column("serial_numbers", sa.JSON),
 )
-_EFFECT = _t("oe_event_effect", sa.Column("key", sa.String(200)), sa.Column("effect", sa.String(100)))
+_EFFECT_TABLE = "oe_event_effect"
+
+
+def _effect_key_column(conn: sa.Connection) -> str:
+    """Name of the claim-key column: ``key`` before vev01_event_effect, ``event_key`` after."""
+    cols = {c["name"] for c in sa.inspect(conn).get_columns(_EFFECT_TABLE)}
+    return "event_key" if "event_key" in cols else "key"
+
+
 _REPORT = _t(
     REPORT_TABLE,
     sa.Column("project_id", sa.String(36)),
@@ -527,9 +535,10 @@ def _insert_receipt(conn: sa.Connection, legacy_id: str, plan: dict[str, Any], n
         # key so the subscriber never books it again, and point the ledger rows
         # at the copy.
         conn.execute(
-            sa.insert(_EFFECT).values(
-                id=str(uuid.uuid4()), key=f"gr:{new_id}:posted", effect="supplier_catalogs.stock_in"
-            )
+            sa.text(
+                f"INSERT INTO oe_event_effect (id, {_effect_key_column(conn)}, effect) VALUES (:id, :key, :effect)"
+            ),
+            {"id": str(uuid.uuid4()), "key": f"gr:{new_id}:posted", "effect": "supplier_catalogs.stock_in"},
         )
         conn.execute(
             sa.text(
@@ -551,10 +560,10 @@ def revert_all(conn: sa.Connection) -> None:
             "FROM oe_supplier_catalogs_gr g WHERE m.reference_type = 'gr' AND m.reference_id = g.migrated_to_id"
         )
     )
-    if sa.inspect(conn).has_table("oe_event_effect"):
+    if sa.inspect(conn).has_table(_EFFECT_TABLE):
         conn.execute(
             sa.text(
-                "DELETE FROM oe_event_effect WHERE key IN "
+                f"DELETE FROM oe_event_effect WHERE {_effect_key_column(conn)} IN "
                 "(SELECT 'gr:' || migrated_to_id || '\\:posted' FROM oe_supplier_catalogs_gr "
                 "WHERE migrated_to_id IS NOT NULL)"
             )
