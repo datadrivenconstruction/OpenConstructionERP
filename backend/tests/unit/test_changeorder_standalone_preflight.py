@@ -28,6 +28,9 @@ class _Repo:
     async def get_by_id(self, row_id: uuid.UUID) -> Any:
         return self.rows.get(row_id)
 
+    async def get_statuses(self, order_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+        return {i: self.rows[i].status for i in order_ids if i in self.rows}
+
 
 def _vo(code: str, status: str = "issued", co_id: uuid.UUID | None = None) -> Any:
     return SimpleNamespace(
