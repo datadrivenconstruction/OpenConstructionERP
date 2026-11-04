@@ -66,14 +66,15 @@ class QualityRule(MoneyRule):
         )
 
 
-def rule_errors_detail(report: Any, message: str) -> dict[str, Any]:
+def rule_errors_detail(report: Any, message: str, errors: Any = None) -> dict[str, Any]:
     """The 422 body a gated quality write answers with (same shape as procurement)."""
+    errors = report.errors if errors is None else errors
     return {
         "message": message,
         "report": report.summary(),
         "errors": [
             {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
-            for r in report.errors
+            for r in errors
         ],
     }
 

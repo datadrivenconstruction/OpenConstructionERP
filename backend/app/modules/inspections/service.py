@@ -73,14 +73,10 @@ class InspectionService:
         self.session = session
         self.repo = InspectionRepository(session)
 
-    async def _check_rules(
-        self, state: dict[str, Any], *, inspection_id: str, project_id: uuid.UUID, operation: str
+    async def _run(
+        self, state: dict[str, Any], inspection_id: str, project_id: uuid.UUID, operation: str
     ) -> ValidationReport:
-        """Run the ``inspections`` rule set over the record as it will be stored; ERROR findings answer 422.
-
-        WARNING findings do not block: the caller attaches them to the response.
-        """
-        report = await validation_engine.validate(
+        return await validation_engine.validate(
             data={"inspection": {**state, "id": inspection_id}},
             rule_sets=[INSPECTIONS_RULE_SET],
             target_type="inspection",
@@ -88,12 +84,35 @@ class InspectionService:
             project_id=str(project_id),
             metadata={"locale": get_locale(), "operation": operation},
         )
-        if report.has_errors:
+
+    async def _check_rules(
+        self,
+        state: dict[str, Any],
+        *,
+        inspection_id: str,
+        project_id: uuid.UUID,
+        operation: str,
+        before: dict[str, Any] | None = None,
+    ) -> ValidationReport:
+        """Run the ``inspections`` rule set over the record as it will be stored; ERROR findings answer 422.
+
+        WARNING findings do not block: the caller attaches them to the response.
+        """
+        report = await self._run(state, inspection_id, project_id, operation)
+        blocking = list(report.errors)
+        if blocking and before is not None:
+            # A record saved before these rules existed is not frozen: only errors the edit introduces block.
+            legacy = {
+                (r.rule_id, r.message) for r in (await self._run(before, inspection_id, project_id, operation)).errors
+            }
+            blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+        if blocking:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=rule_errors_detail(
                     report,
                     f"This inspection cannot be saved ({operation}) until the errors listed below are corrected.",
+                    blocking,
                 ),
             )
         return report
@@ -283,9 +302,14 @@ class InspectionService:
         if not fields:
             return inspection
 
-        state = {**self._state_of(inspection), **{k: v for k, v in fields.items() if k in self._state_of(inspection)}}
+        prior = self._state_of(inspection)
+        state = {**prior, **{k: v for k, v in fields.items() if k in prior}}
         report = await self._check_rules(
-            state, inspection_id=str(inspection_id), project_id=inspection.project_id, operation="update"
+            state,
+            inspection_id=str(inspection_id),
+            project_id=inspection.project_id,
+            operation="update",
+            before=prior,
         )
 
         await self.repo.update_fields(inspection_id, **fields)
