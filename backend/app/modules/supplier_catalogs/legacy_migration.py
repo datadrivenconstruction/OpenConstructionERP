@@ -551,13 +551,14 @@ def revert_all(conn: sa.Connection) -> None:
             "FROM oe_supplier_catalogs_gr g WHERE m.reference_type = 'gr' AND m.reference_id = g.migrated_to_id"
         )
     )
-    conn.execute(
-        sa.text(
-            "DELETE FROM oe_event_effect WHERE key IN "
-            "(SELECT 'gr:' || migrated_to_id || '\\:posted' FROM oe_supplier_catalogs_gr "
-            "WHERE migrated_to_id IS NOT NULL)"
+    if sa.inspect(conn).has_table("oe_event_effect"):
+        conn.execute(
+            sa.text(
+                "DELETE FROM oe_event_effect WHERE key IN "
+                "(SELECT 'gr:' || migrated_to_id || '\\:posted' FROM oe_supplier_catalogs_gr "
+                "WHERE migrated_to_id IS NOT NULL)"
+            )
         )
-    )
     conn.execute(sa.text("UPDATE oe_supplier_catalogs_gr SET migrated_to_id = NULL"))
     conn.execute(sa.text("UPDATE oe_supplier_catalogs_po SET migrated_to_id = NULL"))
     conn.execute(sa.delete(_GR).where(_GR.c.legacy_source == LEGACY_SOURCE))
