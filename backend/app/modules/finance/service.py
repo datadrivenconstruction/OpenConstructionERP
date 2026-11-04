@@ -1038,6 +1038,10 @@ class FinanceService:
                         f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
                     ),
                 )
+            # The PATCH route must not be a way around the dedicated approve/pay
+            # endpoints: the same procurement release rules gate it.
+            if new_status != invoice.status and new_status in ("approved", "sent", "paid"):
+                await self._check_payment_release(invoice)
 
         # An approved, sent, paid or cancelled invoice keeps its figures, its
         # parties and its lines. The status can still move along the table
@@ -1779,6 +1783,24 @@ class FinanceService:
 
     # ── Payments ─────────────────────────────────────────────────────────────
 
+    @staticmethod
+    def _check_replay_matches(existing: Any, invoice_id: uuid.UUID) -> None:
+        """Refuse an idempotency key that already belongs to another invoice's payment."""
+        if str(getattr(existing, "invoice_id", invoice_id)) != str(invoice_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This idempotency_key was already used for a payment on a different invoice.",
+            )
+
+    @staticmethod
+    def _check_payable_state(invoice: Invoice, *, is_refund: bool) -> None:
+        """Cash cannot be booked against a cancelled invoice; only a refund may still touch it."""
+        if not is_refund and invoice.status == "cancelled":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot record a payment on a cancelled invoice. Reopen it first.",
+            )
+
     async def create_payment(
         self,
         data: PaymentCreate,
@@ -1809,9 +1831,11 @@ class FinanceService:
         if data.idempotency_key:
             existing = await self.payments_repo.get_by_idempotency_key(data.idempotency_key)
             if existing is not None:
+                self._check_replay_matches(existing, data.invoice_id)
                 return existing
 
         invoice = await self.get_invoice(data.invoice_id)  # 404 check
+        self._check_payable_state(invoice, is_refund=bool(data.is_refund))
 
         # ── 4. Withholding belongs to the record-payment path ─────────────────
         if _safe_decimal(data.withholding_amount) != Decimal("0") or data.withholding_release_date:
@@ -2412,9 +2436,11 @@ class FinanceService:
         if data.idempotency_key:
             existing = await self.payments_repo.get_by_idempotency_key(data.idempotency_key)
             if existing is not None:
+                self._check_replay_matches(existing, invoice_id)
                 return existing
 
         invoice = await self.get_invoice(invoice_id)  # 404 check
+        self._check_payable_state(invoice, is_refund=False)
 
         # FX never-blend: the withholding math below runs entirely in the
         # invoice currency (gross derives from the invoice total). Stamping the
