@@ -42,3 +42,13 @@ def test_bulk_entry_list_is_capped() -> None:
     adapter.validate_python([item] * 500)
     with pytest.raises(ValidationError):
         adapter.validate_python([item] * 501)
+
+
+@pytest.mark.parametrize("kw", [{"accuracy_mm": "1e9"}, {"point_count_estimate": 3_000_000_000}])
+def test_reality_capture_values_stay_inside_their_columns(kw: dict) -> None:
+    from app.modules.daily_diary.schemas import RealityCaptureCreate, RealityCaptureUpdate
+
+    with pytest.raises(ValidationError):
+        RealityCaptureCreate(project_id=uuid.uuid4(), captured_at=datetime.now(UTC), file_url="x", **kw)
+    with pytest.raises(ValidationError):
+        RealityCaptureUpdate(**kw)
