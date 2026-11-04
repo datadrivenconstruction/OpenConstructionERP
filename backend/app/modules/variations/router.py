@@ -9,7 +9,7 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.dependencies import (
@@ -478,7 +478,13 @@ async def convert_vr_to_vo(
     # (and a mirrored ChangeOrder), so it is symmetric with approval - gate
     # high-value conversions behind variations.approve_high_value too. Use the
     # effective committed amount (body override else the source VR estimate).
-    effective_amount = body.final_cost_impact if body.final_cost_impact is not None else vr.estimated_cost_impact
+    if body.final_cost_impact is not None:
+        effective_amount = body.final_cost_impact
+    elif getattr(vr, "agreed_cost_impact", None) is not None:
+        # The figure recorded at approval is what was agreed, not the headline estimate.
+        effective_amount = vr.agreed_cost_impact
+    else:
+        effective_amount = vr.estimated_cost_impact
     ensure_high_value_authorised(
         effective_amount,
         payload=user_payload,
@@ -686,11 +692,23 @@ async def list_variation_orders(
 async def create_variation_order(
     data: VariationOrderCreate,
     user_id: CurrentUserId,
+    user_payload: CurrentUserPayload,
     session: SessionDep,
     _perm: None = Depends(RequirePermission("variations.create")),
     service: VariationsService = Depends(_get_service),
 ) -> VariationOrderResponse:
     await verify_project_access(data.project_id, user_id, session)
+    if data.status != "issued":
+        raise HTTPException(
+            status_code=422,
+            detail="A new variation order starts as issued; use the start, complete or void action.",
+        )
+    # Same high-value tier as editing the figure or promoting a request.
+    ensure_high_value_authorised(
+        data.final_cost_impact,
+        payload=user_payload,
+        threshold=await project_high_value_threshold(session, data.project_id, data.currency),
+    )
     vo = await service.create_order(data, user_id=user_id)
     return VariationOrderResponse.model_validate(vo)
 
