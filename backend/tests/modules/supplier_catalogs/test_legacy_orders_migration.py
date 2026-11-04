@@ -218,7 +218,7 @@ def test_copy_maps_the_order_and_its_posted_receipt(db: Db) -> None:
             .one()
         )
         mv_ref = conn.execute(text("SELECT reference_id FROM oe_supplier_catalogs_stock_movement")).scalar_one()
-        claimed = conn.execute(text("SELECT key FROM oe_event_effect")).scalars().all()
+        claimed = conn.execute(text("SELECT event_key FROM oe_event_effect")).scalars().all()
         back = conn.execute(
             text("SELECT migrated_to_id FROM oe_supplier_catalogs_po WHERE id = :i"), {"i": ids["po"]}
         ).scalar_one()
