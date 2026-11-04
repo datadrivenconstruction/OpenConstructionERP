@@ -21,6 +21,7 @@ async def test_unknown_or_different_project_reaches_global_hooks_only(project_id
     result = SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [scoped, global_hook]))
     service = WebhookService(SimpleNamespace(execute=AsyncMock(return_value=result)))
     service._deliver = AsyncMock()  # No HTTP/DNS, even when the old filter leaks.
+    service._owner_reaches = AsyncMock(return_value=True)
 
     count = await service.dispatch_event("ncr.created", {"test": True}, project_id=project_id)
 
@@ -37,8 +38,36 @@ async def test_matching_project_reaches_its_scoped_and_global_hooks(project_id):
     result = SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [scoped, global_hook, other, wrong_event]))
     service = WebhookService(SimpleNamespace(execute=AsyncMock(return_value=result)))
     service._deliver = AsyncMock()
+    service._owner_reaches = AsyncMock(return_value=True)
 
     count = await service.dispatch_event("ncr.created", {"test": True}, project_id=project_id)
 
     assert count == 2
     assert [call.args[0] for call in service._deliver.await_args_list] == [scoped, global_hook]
+
+
+async def test_owner_without_project_access_gets_no_event_even_on_a_global_hook(monkeypatch):
+    mine = SimpleNamespace(project_id=None, events=["*"], user_id=UUID(int=1))
+    admin = SimpleNamespace(project_id=None, events=["*"], user_id=UUID(int=2))
+    result = SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [mine, admin]))
+    service = WebhookService(SimpleNamespace(execute=AsyncMock(return_value=result)))
+    service._deliver = AsyncMock()
+
+    async def fake_ids(_session, user_id, **_kw):
+        return None if user_id == str(UUID(int=2)) else {OTHER}
+
+    monkeypatch.setattr("app.dependencies.accessible_project_ids", fake_ids)
+
+    count = await service.dispatch_event("ncr.created", {"x": 1}, project_id=str(PROJECT))
+
+    assert count == 1
+    service._deliver.assert_awaited_once_with(admin, "ncr.created", {"x": 1})
+
+
+async def test_event_without_a_project_still_reaches_global_hooks(monkeypatch):
+    mine = SimpleNamespace(project_id=None, events=["*"], user_id=UUID(int=1))
+    result = SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [mine]))
+    service = WebhookService(SimpleNamespace(execute=AsyncMock(return_value=result)))
+    service._deliver = AsyncMock()
+
+    assert await service.dispatch_event("system.ping", {}, project_id=None) == 1

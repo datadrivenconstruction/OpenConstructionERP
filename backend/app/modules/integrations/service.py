@@ -233,10 +233,42 @@ class WebhookService:
                 continue
             matched.append(hook)
 
+        # An endpoint is its owner's eyes: it may only carry events of projects
+        # the owner can open themselves, global ("*") endpoints included.
+        reach: dict[str, set[UUID] | None] = {}
+        visible = []
+        for hook in matched:
+            if await self._owner_reaches(hook, project_id, reach):
+                visible.append(hook)
+        matched = visible
+
         for hook in matched:
             await self._deliver(hook, event_type, payload)
 
         return len(matched)
+
+    async def _owner_reaches(
+        self,
+        hook: WebhookEndpoint,
+        project_id: Any,
+        reach: dict[str, set[UUID] | None],
+    ) -> bool:
+        """Whether the endpoint owner may see an event of ``project_id``.
+
+        Events that name no valid project are not project data and stay open
+        to every subscriber. ``reach`` caches the owner's project set per call.
+        """
+        from app.dependencies import accessible_project_ids
+
+        try:
+            pid = UUID(str(project_id))
+        except (ValueError, TypeError):
+            return True
+        owner = str(hook.user_id)
+        if owner not in reach:
+            reach[owner] = await accessible_project_ids(self.session, owner)
+        allowed = reach[owner]
+        return allowed is None or pid in allowed
 
     async def deliver_to(
         self,

@@ -552,6 +552,10 @@ async def create_webhook(
     Every delivery is signed. When `secret` is omitted the server generates a
     32-byte one; it is returned in `signing_secret` in this response only.
     """
+    if body.project_id is not None:
+        from app.dependencies import verify_project_access
+
+        await verify_project_access(body.project_id, str(user_id), svc.session)
     webhook = await svc.create_webhook(body.model_dump(), user_id)
     base = WebhookResponse.model_validate(webhook)
     return WebhookCreatedResponse(**base.model_dump(), signing_secret=webhook.secret or "")
