@@ -166,3 +166,23 @@ async def test_a_failed_result_without_a_note_is_recorded_with_a_warning(session
     item = await svc.set_item_result(pre_item.id, ItemResultRequest(status="fail"))
     assert item.status == "fail"
     assert [f["code"] for f in svc.findings] == ["commissioning.failed_test_needs_note"]
+
+
+async def test_create_paths_cannot_skip_the_result_and_status_rules(session) -> None:
+    svc, system, pre_item, _fun = await _system_with_items(session)
+    with pytest.raises(HTTPException) as exc:
+        await svc.create_system(SystemCreate(project_id=system.project_id, name="AHU-2", status="tests_complete"))
+    assert exc.value.detail["code"] == "commissioning.tests_complete_requires_passed_tests"
+
+    await svc.set_item_result(pre_item.id, ItemResultRequest(status="fail", result_note="Wrong rotation"))
+    fun = await svc.create_checklist(system.id, ChecklistCreate(kind="functional", title="Pressure"))
+    with pytest.raises(HTTPException) as exc:
+        await svc.create_item(fun.id, ItemCreate(description="Held", status="pass"))
+    assert exc.value.detail["code"] == "commissioning.functional_after_prefunctional"
+
+
+async def test_editing_an_unrelated_issue_field_is_not_blocked_by_an_old_gap(session) -> None:
+    svc, system, _pre, _fun = await _system_with_items(session)
+    issue = await svc.create_issue(system.id, IssueCreate(description="Leak", severity="critical"))
+    updated = await svc.update_issue(issue.id, IssueUpdate(description="Leak at flange"))
+    assert updated.description == "Leak at flange"

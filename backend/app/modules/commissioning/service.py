@@ -86,6 +86,13 @@ class CommissioningService:
     async def create_system(self, data: SystemCreate, user_id: str | None = None) -> CxSystem:
         """Create a new commissionable system."""
         await self._check_plant_item(data.project_id, data.plant_item_id)
+        if data.status == "tests_complete":
+            # A new system has no functional tests yet, so it cannot start out as tests complete.
+            self.findings = await run_gate(
+                {"system": {"status": "tests_complete", "can_commission": False}},
+                COMMISSIONING_RULE_SET,
+                target_type="cx_system",
+            )
         system = CxSystem(
             project_id=data.project_id,
             plant_item_id=data.plant_item_id,
@@ -392,7 +399,9 @@ class CommissioningService:
         user_id: str | None = None,
     ) -> CxChecklistItem:
         """Create an item under a checklist."""
-        await self.get_checklist(checklist_id)
+        checklist = await self.get_checklist(checklist_id)
+        if data.status in ("pass", "fail"):
+            await self._gate_result(uuid.uuid4(), checklist.kind, checklist.system_id, data.status, data.result_note)
         verified_at = datetime.now(UTC).isoformat() if data.status in ("pass", "fail", "na") else None
         item = CxChecklistItem(
             checklist_id=checklist_id,
@@ -585,19 +594,20 @@ class CommissioningService:
                 merge_metadata(getattr(issue, "metadata_", None), incoming) if isinstance(incoming, dict) else incoming
             )
         new_status = fields.get("status")
-        self.findings = await run_gate(
-            {
-                "issue": {
-                    "id": str(issue_id),
-                    "severity": fields.get("severity", issue.severity),
-                    "status": fields.get("status", issue.status),
-                    "resolution": fields.get("resolution", issue.resolution),
-                }
-            },
-            COMMISSIONING_RULE_SET,
-            target_type="cx_issue",
-            target_id=str(issue_id),
-        )
+        if fields.keys() & {"severity", "status", "resolution"}:
+            self.findings = await run_gate(
+                {
+                    "issue": {
+                        "id": str(issue_id),
+                        "severity": fields.get("severity", issue.severity),
+                        "status": fields.get("status", issue.status),
+                        "resolution": fields.get("resolution", issue.resolution),
+                    }
+                },
+                COMMISSIONING_RULE_SET,
+                target_type="cx_issue",
+                target_id=str(issue_id),
+            )
         if new_status == "closed" and prior_status != "closed":
             fields["closed_at"] = datetime.now(UTC).isoformat()
             fields["closed_by"] = user_id
