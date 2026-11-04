@@ -2045,5 +2045,71 @@
       "suggestion": "Yalnızca tam adetleri sayın ve değeri düzeltin.",
       "fail": "{value} adedi bir tam sayı değil."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kişinin adı yok: ne firma, ne yasal unvan, ne ad, ne soyad.",
+      "suggestion": "Firma adını veya kişinin adını girin."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' geçerli bir tarih değil.",
+      "suggestion": "YYYY-AA-GG biçimini kullanın, örneğin 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "'{value}' ödeme vadesi, 0 ile {max} arasında tam sayı bir gün değil.",
+      "suggestion": "Ödeme vadesini gün olarak girin, örneğin 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Ön yeterlik onaylı, ancak {date} tarihinde sona erdi.",
+      "suggestion": "Ön yeterliği yenileyin veya durumunu süresi doldu olarak ayarlayın."
+    },
+    "vat_country_mismatch": {
+      "fail": "{vat} vergi numarası {prefix} ile başlıyor, ancak ülke {country}.",
+      "suggestion": "Vergi numarasını ve kişinin ülkesini kontrol edin."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Fırsatın değeri {value} ama para birimi yok.",
+      "suggestion": "Tahmini değerin para birimini seçin."
+    },
+    "date_invalid": {
+      "fail": "Beklenen kapanış tarihi {value} gerçek bir tarih değil.",
+      "suggestion": "YYYY-AA-GG biçiminde geçerli bir tarih girin."
+    },
+    "close_date_passed": {
+      "fail": "Fırsat hâlâ açık, ancak beklenen kapanış tarihi {date} geçti.",
+      "suggestion": "Kapanış tarihini güncelleyin veya fırsatı kazanıldı ya da kaybedildi olarak işaretleyin."
+    },
+    "won_without_value": {
+      "fail": "Fırsat kazanıldı ancak değeri yok; proje bütçesi sıfırdan başlardı.",
+      "suggestion": "Verilen sözleşmenin değerini girin."
+    },
+    "owner_missing": {
+      "fail": "Açık fırsatın sorumlusu yok.",
+      "suggestion": "Teklif için sorumlu kişiyi atayın."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "{code} kodu aynı üst öğenin altındaki başka bir düğümde zaten kullanılıyor.",
+      "suggestion": "Bu düğüm için başka bir kod kullanın."
+    },
+    "level_order": {
+      "fail": "{child} türündeki bir düğüm {parent} altında olamaz.",
+      "suggestion": "Düğümü taşıyın veya türünü değiştirin: portföy programları, program da alt programları içerir."
+    },
+    "link_endpoints": {
+      "fail": "Programlar arası bağlantı, iki farklı programdaki iki farklı faaliyeti birleştirmelidir.",
+      "suggestion": "Farklı programlardan faaliyetler seçin; tek bir program içinde olağan bağımlılık kullanın."
+    },
+    "link_repeats": {
+      "fail": "Bu iki faaliyet zaten bir yönde ya da diğerinde bağlı; bağlantı kendini tekrar eder veya döngü kapatır.",
+      "suggestion": "Önce mevcut bağlantıyı kaldırın veya başka faaliyetler seçin."
+    },
+    "lag_extreme": {
+      "fail": "İki proje arasındaki {days} günlük gecikme alışılmadık derecede uzun.",
+      "suggestion": "Birimi kontrol edin: gecikme gün olarak girilir."
+    }
   }
 }

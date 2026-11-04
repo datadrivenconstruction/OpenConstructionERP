@@ -20,6 +20,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.core.events import event_bus, publish_after_commit
+from app.core.validation.quality_rules import gate_keyed_rule_set, warning_findings
 from app.modules.crm.models import (
     Account,
     CrmActivity,
@@ -38,6 +39,7 @@ from app.modules.crm.repository import (
     StageHistoryRepository,
     WinLossReasonRepository,
 )
+from app.modules.crm.validators import CRM_RULE_SET
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -617,6 +619,33 @@ class CrmService:
         self.forecast_repo = ForecastRepository(session)
         self.reason_repo = WinLossReasonRepository(session)
 
+    # ── Opportunity rules ────────────────────────────────────────────────
+
+    @staticmethod
+    def _opp_state(source: Any, **over: Any) -> dict[str, Any]:
+        """The fields the ``crm`` rules read, from a model or schema, with overrides applied."""
+        names = ("status", "estimated_value", "currency", "expected_close_date", "owner_user_id")
+        state = {n: getattr(source, n, None) for n in names}
+        state.update(over)
+        return state
+
+    @staticmethod
+    async def _check_opp_rules(
+        state: dict[str, Any], *, opportunity_id: str, operation: str, before: dict[str, Any] | None = None
+    ) -> Any:
+        """Run the ``crm`` rule set over the deal as it will be stored; ERROR findings answer 422."""
+        return await gate_keyed_rule_set(
+            state,
+            rule_set=CRM_RULE_SET,
+            key="opportunity",
+            target_type="opportunity",
+            target_id=opportunity_id,
+            operation=operation,
+            subject="opportunity",
+            error_code="crm_rules_failed",
+            before=before,
+        )
+
     # ── Accounts ─────────────────────────────────────────────────────────
 
     async def create_account(self, data: AccountCreate, user_id: str | None = None) -> Account:
@@ -965,6 +994,11 @@ class CrmService:
                 detail="Invalid account_id for new opportunity",
             )
 
+        report = await self._check_opp_rules(
+            self._opp_state(payload, status="open", owner_user_id=lead.assigned_to),
+            opportunity_id="",
+            operation="convert_lead",
+        )
         opp = Opportunity(
             account_id=payload.account_id,
             title=payload.title,
@@ -998,6 +1032,7 @@ class CrmService:
         # identity map, and `opp` is returned to the router for serialization.
         await self.session.refresh(lead)
         await self.session.refresh(opp)
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
 
         # Initial stage history entry
         await self.history_repo.create(
@@ -1043,6 +1078,7 @@ class CrmService:
                 detail="Invalid account_id for new opportunity",
             )
 
+        report = await self._check_opp_rules(self._opp_state(data), opportunity_id="", operation="create")
         opp = Opportunity(
             account_id=data.account_id,
             title=data.title,
@@ -1072,6 +1108,7 @@ class CrmService:
                 changed_by=_to_uuid_or_none(user_id),
             )
         )
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("CRM opportunity created: %s", opp.id)
         return opp
 
@@ -1130,9 +1167,17 @@ class CrmService:
             prob = fields.get("probability_percent", opp.probability_percent)
             fields["weighted_value"] = compute_weighted_value(value, prob)
 
+        before = self._opp_state(opp)
+        report = await self._check_opp_rules(
+            {**before, **{k: v for k, v in fields.items() if k in before}},
+            opportunity_id=str(opportunity_id),
+            operation="update",
+            before=before,
+        )
         if fields:
             await self.opportunity_repo.update_fields(opportunity_id, **fields)
             await self.session.refresh(opp)
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return opp
 
     async def delete_opportunity(self, opportunity_id: uuid.UUID) -> None:
@@ -1192,6 +1237,10 @@ class CrmService:
             prev_change_ts = None
         duration = int(datetime.now(UTC).timestamp()) - prev_change_ts if prev_change_ts is not None else None
 
+        before = self._opp_state(opp)
+        report = await self._check_opp_rules(
+            before, opportunity_id=str(opportunity_id), operation="stage_change", before=before
+        )
         now_iso = datetime.now(UTC).isoformat()
         fields: dict[str, Any] = {
             "stage_id": to_stage_id,
@@ -1211,6 +1260,7 @@ class CrmService:
             )
         )
         await self.session.refresh(opp)
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
 
         event_bus.publish_detached(
             "crm.opportunity.stage_changed",
@@ -1254,6 +1304,10 @@ class CrmService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(f"Reason '{win_reason_code}' is not flagged as a win reason in the catalogue"),
                 )
+        before = self._opp_state(opp)
+        report = await self._check_opp_rules(
+            {**before, "status": "won"}, opportunity_id=str(opportunity_id), operation="win", before=before
+        )
         won_at_iso = won_at or datetime.now(UTC).date().isoformat()
         fields: dict[str, Any] = {
             "status": "won",
@@ -1263,6 +1317,7 @@ class CrmService:
         }
         await self.opportunity_repo.update_fields(opportunity_id, **fields)
         await self.session.refresh(opp)
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
 
         payload = convert_opportunity_to_project_payload(opp)
         # Deferred to the commit: the won-opportunity bridge inserts
@@ -1309,6 +1364,10 @@ class CrmService:
                 detail=f"Reason '{lost_reason_code}' is not a loss reason",
             )
 
+        before = self._opp_state(opp)
+        report = await self._check_opp_rules(
+            {**before, "status": "lost"}, opportunity_id=str(opportunity_id), operation="lose", before=before
+        )
         lost_at_iso = lost_at or datetime.now(UTC).date().isoformat()
         await self.opportunity_repo.update_fields(
             opportunity_id,
@@ -1319,6 +1378,7 @@ class CrmService:
             weighted_value=Decimal("0"),
         )
         await self.session.refresh(opp)
+        opp.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         event_bus.publish_detached(
             "crm.opportunity.lost",
             data={

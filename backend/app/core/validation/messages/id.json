@@ -2045,5 +2045,71 @@
       "suggestion": "Hitung hanya unit utuh dan perbaiki nilainya.",
       "fail": "Hitungan {value} bukan bilangan bulat."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontak tidak punya nama: tanpa perusahaan, nama hukum, nama depan, maupun nama belakang.",
+      "suggestion": "Masukkan nama perusahaan atau nama orang."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' bukan tanggal yang valid.",
+      "suggestion": "Gunakan format YYYY-MM-DD, misalnya 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Termin pembayaran '{value}' bukan bilangan bulat hari antara 0 dan {max}.",
+      "suggestion": "Masukkan termin pembayaran dalam hari, misalnya 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prakualifikasi disetujui, tetapi berakhir pada {date}.",
+      "suggestion": "Perbarui prakualifikasi atau ubah statusnya menjadi kedaluwarsa."
+    },
+    "vat_country_mismatch": {
+      "fail": "Nomor NPWP/PPN {vat} diawali {prefix}, tetapi negaranya {country}.",
+      "suggestion": "Periksa nomor pajak dan negara kontak."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Peluang bernilai {value} tetapi tanpa mata uang.",
+      "suggestion": "Pilih mata uang nilai perkiraan."
+    },
+    "date_invalid": {
+      "fail": "Tanggal penutupan yang diharapkan {value} bukan tanggal yang nyata.",
+      "suggestion": "Masukkan tanggal yang valid dengan format YYYY-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Peluang masih terbuka, tetapi tanggal penutupan yang diharapkan {date} sudah lewat.",
+      "suggestion": "Perbarui tanggal penutupan atau tandai peluang sebagai menang atau kalah."
+    },
+    "won_without_value": {
+      "fail": "Peluang dimenangkan tetapi tanpa nilai; anggaran proyek akan dimulai dari nol.",
+      "suggestion": "Masukkan nilai kontrak yang diberikan."
+    },
+    "owner_missing": {
+      "fail": "Peluang yang terbuka tidak punya penanggung jawab.",
+      "suggestion": "Tetapkan orang yang bertanggung jawab atas penawaran."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Kode {code} sudah dipakai node lain di bawah induk yang sama.",
+      "suggestion": "Gunakan kode lain untuk node ini."
+    },
+    "level_order": {
+      "fail": "Node bertipe {child} tidak dapat berada di bawah {parent}.",
+      "suggestion": "Pindahkan node atau ubah tipenya: portofolio berisi program dan program berisi subprogram."
+    },
+    "link_endpoints": {
+      "fail": "Tautan antar jadwal harus menghubungkan dua aktivitas berbeda di dua jadwal berbeda.",
+      "suggestion": "Pilih aktivitas dari jadwal yang berbeda; dalam satu jadwal gunakan dependensi biasa."
+    },
+    "link_repeats": {
+      "fail": "Kedua aktivitas ini sudah ditautkan, ke satu arah atau arah lain; tautan akan berulang atau menutup putaran.",
+      "suggestion": "Hapus tautan yang ada terlebih dahulu atau pilih aktivitas lain."
+    },
+    "lag_extreme": {
+      "fail": "Jeda {days} hari antara dua proyek luar biasa panjang.",
+      "suggestion": "Periksa satuan: jeda dimasukkan dalam hari."
+    }
   }
 }

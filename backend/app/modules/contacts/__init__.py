@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.contacts.permissions import register_contacts_permissions
 
     register_contacts_permissions()
+    from app.modules.contacts.validators import register_contacts_validation_rules
+
+    register_contacts_validation_rules()

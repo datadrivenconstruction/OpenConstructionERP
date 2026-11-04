@@ -2045,5 +2045,71 @@
       "suggestion": "Ne comptez que des éléments entiers et corrigez la valeur.",
       "fail": "Un comptage de {value} n'est pas un nombre entier."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Le contact n'a pas de nom : ni société, ni raison sociale, ni prénom, ni nom.",
+      "suggestion": "Saisissez le nom de la société ou de la personne."
+    },
+    "date_invalid": {
+      "fail": "{field} « {value} » n'est pas une date valide.",
+      "suggestion": "Utilisez le format AAAA-MM-JJ, par exemple 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Le délai de paiement « {value} » n'est pas un nombre entier de jours compris entre 0 et {max}.",
+      "suggestion": "Saisissez le délai de paiement en jours, par exemple 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "La préqualification est approuvée, mais elle a expiré le {date}.",
+      "suggestion": "Renouvelez la préqualification ou passez son statut à expiré."
+    },
+    "vat_country_mismatch": {
+      "fail": "Le numéro de TVA {vat} commence par {prefix}, mais le pays est {country}.",
+      "suggestion": "Vérifiez le numéro de TVA et le pays du contact."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "L'affaire est estimée à {value} mais n'a pas de devise.",
+      "suggestion": "Choisissez la devise du montant estimé."
+    },
+    "date_invalid": {
+      "fail": "La date de clôture prévue {value} n'est pas une date réelle.",
+      "suggestion": "Saisissez une date valide au format AAAA-MM-JJ."
+    },
+    "close_date_passed": {
+      "fail": "L'affaire est encore ouverte, mais sa date de clôture prévue {date} est dépassée.",
+      "suggestion": "Mettez à jour la date de clôture ou marquez l'affaire comme gagnée ou perdue."
+    },
+    "won_without_value": {
+      "fail": "L'affaire est gagnée mais n'a pas de montant ; le budget du projet commencerait à zéro.",
+      "suggestion": "Saisissez le montant du marché attribué."
+    },
+    "owner_missing": {
+      "fail": "L'affaire ouverte n'a pas de responsable.",
+      "suggestion": "Désignez la personne responsable de l'offre."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Le code {code} est déjà utilisé par un autre nœud sous le même parent.",
+      "suggestion": "Utilisez un autre code pour ce nœud."
+    },
+    "level_order": {
+      "fail": "Un nœud de type {child} ne peut pas se placer sous {parent}.",
+      "suggestion": "Déplacez le nœud ou changez son type : un portefeuille contient des programmes, un programme contient des sous-programmes."
+    },
+    "link_endpoints": {
+      "fail": "Un lien entre plannings doit relier deux tâches différentes dans deux plannings différents.",
+      "suggestion": "Choisissez des tâches de plannings différents ; dans un même planning, utilisez une dépendance ordinaire."
+    },
+    "link_repeats": {
+      "fail": "Ces deux tâches sont déjà liées, dans un sens ou dans l'autre ; ce lien serait un doublon ou fermerait une boucle.",
+      "suggestion": "Supprimez d'abord le lien existant ou choisissez d'autres tâches."
+    },
+    "lag_extreme": {
+      "fail": "Un décalage de {days} jours entre deux projets est anormalement long.",
+      "suggestion": "Vérifiez l'unité : le décalage se saisit en jours."
+    }
   }
 }

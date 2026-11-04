@@ -18,9 +18,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import gate_keyed_rule_set, warning_findings
 from app.modules.contacts.models import Contact
 from app.modules.contacts.repository import ContactRepository
 from app.modules.contacts.schemas import ContactCreate, ContactUpdate
+from app.modules.contacts.validators import CONTACTS_RULE_SET
 
 logger = logging.getLogger(__name__)
 _logger_audit = logging.getLogger(__name__ + ".audit")
@@ -94,6 +96,25 @@ def _validate_email_format(email: str | None) -> None:
         )
 
 
+_RULE_FIELDS = (
+    "contact_type",
+    "first_name",
+    "last_name",
+    "company_name",
+    "legal_name",
+    "vat_number",
+    "country_code",
+    "prequalification_status",
+    "qualified_until",
+    "payment_terms_days",
+)
+
+
+def _rule_state(source: object) -> dict:
+    """The fields the ``contacts`` rules read, from a model, a schema or a dict of overrides."""
+    return {f: getattr(source, f, None) for f in _RULE_FIELDS}
+
+
 class ContactService:
     """Business logic for contact operations."""
 
@@ -124,6 +145,8 @@ class ContactService:
                     status_code=status.HTTP_409_CONFLICT,
                     detail=(f"A contact with email '{normalised_email}' already exists (id={existing.id})."),
                 )
+
+        report = await self._check_rules(_rule_state(data), contact_id="", operation="create")
 
         contact = Contact(
             contact_type=data.contact_type,
@@ -189,8 +212,24 @@ class ContactService:
             details={"label": label, "contact_type": data.contact_type},
         )
 
+        contact.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Contact created: %s (%s)", label, data.contact_type)
         return contact
+
+    @staticmethod
+    async def _check_rules(state: dict, *, contact_id: str, operation: str, before: dict | None = None):  # noqa: ANN205
+        """Run the ``contacts`` rule set over the record as it will be stored; ERROR findings answer 422."""
+        return await gate_keyed_rule_set(
+            state,
+            rule_set=CONTACTS_RULE_SET,
+            key="contact",
+            target_type="contact",
+            target_id=contact_id,
+            operation=operation,
+            subject="contact",
+            error_code="contact_rules_failed",
+            before=before,
+        )
 
     # ── Read ──────────────────────────────────────────────────────────────
 
@@ -321,6 +360,14 @@ class ContactService:
         if not fields:
             return contact
 
+        before = _rule_state(contact)
+        report = await self._check_rules(
+            {**before, **{k: v for k, v in fields.items() if k in _RULE_FIELDS}},
+            contact_id=str(contact_id),
+            operation="update",
+            before=before,
+        )
+
         try:
             await self.repo.update(contact_id, **fields)
         except IntegrityError:
@@ -345,6 +392,7 @@ class ContactService:
             details={"updated_fields": list(fields.keys())},
         )
 
+        updated.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Contact updated: %s (fields=%s)", contact_id, list(fields.keys()))
         return updated
 

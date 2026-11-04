@@ -2045,5 +2045,71 @@
       "suggestion": "Tel alleen hele stuks en corrigeer de waarde.",
       "fail": "Een telling van {value} is geen geheel getal."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Het contact heeft geen naam: geen bedrijf, geen juridische naam, geen voornaam of achternaam.",
+      "suggestion": "Voer de bedrijfsnaam of de naam van de persoon in."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' is geen geldige datum.",
+      "suggestion": "Gebruik het formaat JJJJ-MM-DD, bijvoorbeeld 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "De betalingstermijn '{value}' is geen geheel aantal dagen tussen 0 en {max}.",
+      "suggestion": "Voer de betalingstermijn in dagen in, bijvoorbeeld 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "De prekwalificatie is goedgekeurd, maar verliep op {date}.",
+      "suggestion": "Verleng de prekwalificatie of zet de status op verlopen."
+    },
+    "vat_country_mismatch": {
+      "fail": "Btw-nummer {vat} begint met {prefix}, maar het land is {country}.",
+      "suggestion": "Controleer het btw-nummer en het land van het contact."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "De kans heeft een waarde van {value} maar geen valuta.",
+      "suggestion": "Kies de valuta van de geschatte waarde."
+    },
+    "date_invalid": {
+      "fail": "De verwachte sluitingsdatum {value} is geen echte datum.",
+      "suggestion": "Voer een geldige datum in het formaat JJJJ-MM-DD in."
+    },
+    "close_date_passed": {
+      "fail": "De kans staat nog open, maar de verwachte sluitingsdatum {date} is verstreken.",
+      "suggestion": "Werk de sluitingsdatum bij of markeer de kans als gewonnen of verloren."
+    },
+    "won_without_value": {
+      "fail": "De kans is gewonnen maar heeft geen waarde; het projectbudget zou bij nul beginnen.",
+      "suggestion": "Voer de waarde van het gegunde contract in."
+    },
+    "owner_missing": {
+      "fail": "De open kans heeft geen eigenaar.",
+      "suggestion": "Wijs de verantwoordelijke voor de offerte toe."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "De code {code} wordt al gebruikt door een ander knooppunt onder dezelfde bovenliggende.",
+      "suggestion": "Gebruik een andere code voor dit knooppunt."
+    },
+    "level_order": {
+      "fail": "Een knooppunt van het type {child} kan niet onder {parent} staan.",
+      "suggestion": "Verplaats het knooppunt of wijzig het type: een portfolio bevat programma's en een programma bevat subprogramma's."
+    },
+    "link_endpoints": {
+      "fail": "Een koppeling tussen planningen moet twee verschillende activiteiten in twee verschillende planningen verbinden.",
+      "suggestion": "Kies activiteiten uit verschillende planningen; binnen één planning gebruikt u een gewone afhankelijkheid."
+    },
+    "link_repeats": {
+      "fail": "Deze twee activiteiten zijn al gekoppeld, in de ene of de andere richting; de koppeling zou zich herhalen of een lus sluiten.",
+      "suggestion": "Verwijder eerst de bestaande koppeling of kies andere activiteiten."
+    },
+    "lag_extreme": {
+      "fail": "Een tijdsverschuiving van {days} dagen tussen twee projecten is ongewoon lang.",
+      "suggestion": "Controleer de eenheid: de verschuiving wordt in dagen ingevoerd."
+    }
   }
 }

@@ -2045,5 +2045,71 @@
       "suggestion": "Lugege ainult terveid ühikuid ja parandage väärtus.",
       "fail": "Arv {value} ei ole täisarv."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontaktil puudub nimi: pole ettevõtet, juriidilist nime, eesnime ega perekonnanime.",
+      "suggestion": "Sisestage ettevõtte nimi või isiku nimi."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' ei ole kehtiv kuupäev.",
+      "suggestion": "Kasutage vormingut AAAA-KK-PP, näiteks 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Maksetähtaeg '{value}' ei ole täisarv päevi vahemikus 0 kuni {max}.",
+      "suggestion": "Sisestage maksetähtaeg päevades, näiteks 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Eelkvalifitseerimine on kinnitatud, kuid aegus {date}.",
+      "suggestion": "Pikendage eelkvalifitseerimist või määrake selle olekuks aegunud."
+    },
+    "vat_country_mismatch": {
+      "fail": "KM-number {vat} algab {prefix}, kuid riik on {country}.",
+      "suggestion": "Kontrollige KM-numbrit ja kontakti riiki."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Müügivõimaluse väärtus on {value}, kuid valuuta puudub.",
+      "suggestion": "Valige hinnangulise väärtuse valuuta."
+    },
+    "date_invalid": {
+      "fail": "Oodatav sulgemiskuupäev {value} ei ole olemasolev kuupäev.",
+      "suggestion": "Sisestage kehtiv kuupäev vormingus AAAA-KK-PP."
+    },
+    "close_date_passed": {
+      "fail": "Müügivõimalus on veel avatud, kuid oodatav sulgemiskuupäev {date} on möödas.",
+      "suggestion": "Uuendage sulgemiskuupäeva või märkige võimalus võidetuks või kaotatuks."
+    },
+    "won_without_value": {
+      "fail": "Müügivõimalus on võidetud, kuid väärtus puudub; projekti eelarve algaks nullist.",
+      "suggestion": "Sisestage sõlmitud lepingu väärtus."
+    },
+    "owner_missing": {
+      "fail": "Avatud müügivõimalusel puudub vastutaja.",
+      "suggestion": "Määrake pakkumise eest vastutav isik."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Koodi {code} kasutab juba teine sõlm sama ülemsõlme all.",
+      "suggestion": "Kasutage sellele sõlmele teist koodi."
+    },
+    "level_order": {
+      "fail": "Tüüpi {child} sõlm ei saa olla tüübi {parent} all.",
+      "suggestion": "Teisaldage sõlm või muutke selle tüüpi: portfell sisaldab programme ja programm alamprogramme."
+    },
+    "link_endpoints": {
+      "fail": "Ajakavadevaheline seos peab ühendama kaks erinevat tegevust kahes erinevas ajakavas.",
+      "suggestion": "Valige tegevused eri ajakavadest; ühe ajakava sees kasutage tavalist sõltuvust."
+    },
+    "link_repeats": {
+      "fail": "Need kaks tegevust on juba seotud, ühes või teises suunas; seos kordaks end või sulgeks tsükli.",
+      "suggestion": "Eemaldage kõigepealt olemasolev seos või valige muud tegevused."
+    },
+    "lag_extreme": {
+      "fail": "{days} päeva pikkune viide kahe projekti vahel on ebatavaliselt pikk.",
+      "suggestion": "Kontrollige ühikut: viide sisestatakse päevades."
+    }
   }
 }

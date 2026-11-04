@@ -2045,5 +2045,71 @@
       "suggestion": "Contare solo elementi interi e correggere il valore.",
       "fail": "Un conteggio di {value} non è un numero intero."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Il contatto non ha un nome: né azienda, né ragione sociale, né nome né cognome.",
+      "suggestion": "Inserire il nome dell'azienda o della persona."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' non è una data valida.",
+      "suggestion": "Usare il formato AAAA-MM-GG, ad esempio 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Il termine di pagamento '{value}' non è un numero intero di giorni tra 0 e {max}.",
+      "suggestion": "Inserire il termine di pagamento in giorni, ad esempio 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "La prequalifica è approvata, ma è scaduta il {date}.",
+      "suggestion": "Rinnovare la prequalifica o impostarne lo stato su scaduta."
+    },
+    "vat_country_mismatch": {
+      "fail": "La partita IVA {vat} inizia con {prefix}, ma il paese è {country}.",
+      "suggestion": "Verificare la partita IVA e il paese del contatto."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "L'opportunità vale {value} ma non ha una valuta.",
+      "suggestion": "Scegliere la valuta del valore stimato."
+    },
+    "date_invalid": {
+      "fail": "La data di chiusura prevista {value} non è una data reale.",
+      "suggestion": "Inserire una data valida nel formato AAAA-MM-GG."
+    },
+    "close_date_passed": {
+      "fail": "L'opportunità è ancora aperta, ma la data di chiusura prevista {date} è passata.",
+      "suggestion": "Aggiornare la data di chiusura o segnare l'opportunità come vinta o persa."
+    },
+    "won_without_value": {
+      "fail": "L'opportunità è vinta ma non ha valore; il budget del progetto partirebbe da zero.",
+      "suggestion": "Inserire il valore del contratto aggiudicato."
+    },
+    "owner_missing": {
+      "fail": "L'opportunità aperta non ha un responsabile.",
+      "suggestion": "Assegnare la persona responsabile dell'offerta."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Il codice {code} è già usato da un altro nodo sotto lo stesso padre.",
+      "suggestion": "Usare un altro codice per questo nodo."
+    },
+    "level_order": {
+      "fail": "Un nodo di tipo {child} non può stare sotto {parent}.",
+      "suggestion": "Spostare il nodo o cambiarne il tipo: un portafoglio contiene programmi e un programma contiene sottoprogrammi."
+    },
+    "link_endpoints": {
+      "fail": "Un collegamento tra cronoprogrammi deve unire due attività diverse di due cronoprogrammi diversi.",
+      "suggestion": "Scegliere attività di cronoprogrammi diversi; all'interno di un cronoprogramma usare una normale dipendenza."
+    },
+    "link_repeats": {
+      "fail": "Queste due attività sono già collegate, in un verso o nell'altro; il collegamento si ripeterebbe o chiuderebbe un ciclo.",
+      "suggestion": "Rimuovere prima il collegamento esistente o scegliere altre attività."
+    },
+    "lag_extreme": {
+      "fail": "Uno sfasamento di {days} giorni tra due progetti è insolitamente lungo.",
+      "suggestion": "Verificare l'unità: lo sfasamento si inserisce in giorni."
+    }
   }
 }

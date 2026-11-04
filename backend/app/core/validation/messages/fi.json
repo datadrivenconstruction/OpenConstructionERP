@@ -2045,5 +2045,71 @@
       "suggestion": "Laske vain kokonaisia kappaleita ja korjaa arvo.",
       "fail": "Lukumäärä {value} ei ole kokonaisluku."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Yhteystiedolla ei ole nimeä: ei yritystä, ei virallista nimeä, ei etu- eikä sukunimeä.",
+      "suggestion": "Anna yrityksen nimi tai henkilön nimi."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' ei ole kelvollinen päivämäärä.",
+      "suggestion": "Käytä muotoa VVVV-KK-PP, esimerkiksi 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Maksuehto '{value}' ei ole kokonaislukumäärä päiviä välillä 0–{max}.",
+      "suggestion": "Anna maksuaika päivinä, esimerkiksi 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Esiluokitus on hyväksytty, mutta se päättyi {date}.",
+      "suggestion": "Uusi esiluokitus tai aseta sen tilaksi vanhentunut."
+    },
+    "vat_country_mismatch": {
+      "fail": "ALV-tunnus {vat} alkaa {prefix}, mutta maa on {country}.",
+      "suggestion": "Tarkista ALV-tunnus ja yhteystiedon maa."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Myyntimahdollisuuden arvo on {value}, mutta valuuttaa ei ole.",
+      "suggestion": "Valitse arvioidun arvon valuutta."
+    },
+    "date_invalid": {
+      "fail": "Odotettu sulkemispäivä {value} ei ole todellinen päivämäärä.",
+      "suggestion": "Anna kelvollinen päivämäärä muodossa VVVV-KK-PP."
+    },
+    "close_date_passed": {
+      "fail": "Myyntimahdollisuus on yhä avoin, mutta odotettu sulkemispäivä {date} on ohi.",
+      "suggestion": "Päivitä sulkemispäivä tai merkitse mahdollisuus voitetuksi tai hävityksi."
+    },
+    "won_without_value": {
+      "fail": "Myyntimahdollisuus on voitettu, mutta sillä ei ole arvoa; hankkeen budjetti alkaisi nollasta.",
+      "suggestion": "Anna myönnetyn sopimuksen arvo."
+    },
+    "owner_missing": {
+      "fail": "Avoimella myyntimahdollisuudella ei ole vastuuhenkilöä.",
+      "suggestion": "Nimeä tarjouksesta vastaava henkilö."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Koodia {code} käyttää jo toinen solmu saman ylätason alla.",
+      "suggestion": "Käytä tälle solmulle eri koodia."
+    },
+    "level_order": {
+      "fail": "Tyyppiä {child} oleva solmu ei voi olla tyypin {parent} alla.",
+      "suggestion": "Siirrä solmu tai muuta sen tyyppiä: salkku sisältää ohjelmia ja ohjelma aliohjelmia."
+    },
+    "link_endpoints": {
+      "fail": "Aikataulujen välisen linkin on yhdistettävä kaksi eri tehtävää kahdessa eri aikataulussa.",
+      "suggestion": "Valitse tehtävät eri aikatauluista; yhden aikataulun sisällä käytä tavallista riippuvuutta."
+    },
+    "link_repeats": {
+      "fail": "Nämä kaksi tehtävää on jo linkitetty, jompaankumpaan suuntaan; linkki toistuisi tai sulkisi silmukan.",
+      "suggestion": "Poista ensin nykyinen linkki tai valitse muut tehtävät."
+    },
+    "lag_extreme": {
+      "fail": "{days} päivän viive kahden hankkeen välillä on poikkeuksellisen pitkä.",
+      "suggestion": "Tarkista yksikkö: viive annetaan päivinä."
+    }
   }
 }

@@ -2045,5 +2045,71 @@
       "suggestion": "Nur ganze Stücke zählen und den Wert korrigieren.",
       "fail": "Eine Anzahl von {value} ist keine ganze Zahl."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Der Kontakt hat keinen Namen: weder Firma, Firmenname, Vorname noch Nachname.",
+      "suggestion": "Firmennamen oder Namen der Person eintragen."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' ist kein gültiges Datum.",
+      "suggestion": "Format JJJJ-MM-TT verwenden, zum Beispiel 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Die Zahlungsfrist '{value}' ist keine ganze Zahl von Tagen zwischen 0 und {max}.",
+      "suggestion": "Zahlungsfrist in Tagen eintragen, zum Beispiel 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Die Präqualifikation ist freigegeben, ist aber am {date} abgelaufen.",
+      "suggestion": "Präqualifikation erneuern oder den Status auf abgelaufen setzen."
+    },
+    "vat_country_mismatch": {
+      "fail": "Die USt-IdNr. {vat} beginnt mit {prefix}, das Land ist aber {country}.",
+      "suggestion": "USt-IdNr. und Land des Kontakts prüfen."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Die Chance hat einen Wert von {value}, aber keine Währung.",
+      "suggestion": "Währung des geschätzten Werts wählen."
+    },
+    "date_invalid": {
+      "fail": "Der erwartete Abschlusstermin {value} ist kein reales Datum.",
+      "suggestion": "Ein gültiges Datum im Format JJJJ-MM-TT eintragen."
+    },
+    "close_date_passed": {
+      "fail": "Die Chance ist noch offen, der erwartete Abschlusstermin {date} ist aber verstrichen.",
+      "suggestion": "Abschlusstermin aktualisieren oder die Chance als gewonnen oder verloren markieren."
+    },
+    "won_without_value": {
+      "fail": "Die Chance ist gewonnen, hat aber keinen Wert; das Projektbudget würde bei null beginnen.",
+      "suggestion": "Den vergebenen Auftragswert eintragen."
+    },
+    "owner_missing": {
+      "fail": "Die offene Chance hat keinen Verantwortlichen.",
+      "suggestion": "Die für das Angebot verantwortliche Person zuweisen."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Der Code {code} wird bereits von einem anderen Knoten unter demselben übergeordneten Knoten verwendet.",
+      "suggestion": "Einen anderen Code für diesen Knoten verwenden."
+    },
+    "level_order": {
+      "fail": "Ein Knoten vom Typ {child} kann nicht unter {parent} stehen.",
+      "suggestion": "Knoten verschieben oder Typ ändern: ein Portfolio enthält Programme, ein Programm enthält Unterprogramme."
+    },
+    "link_endpoints": {
+      "fail": "Eine Verknüpfung zwischen Terminplänen muss zwei verschiedene Vorgänge in zwei verschiedenen Terminplänen verbinden.",
+      "suggestion": "Vorgänge aus verschiedenen Terminplänen wählen; innerhalb eines Terminplans eine normale Abhängigkeit verwenden."
+    },
+    "link_repeats": {
+      "fail": "Diese beiden Vorgänge sind bereits verknüpft, in der einen oder anderen Richtung; die Verknüpfung würde sich wiederholen oder eine Schleife schließen.",
+      "suggestion": "Zuerst die bestehende Verknüpfung entfernen oder andere Vorgänge wählen."
+    },
+    "lag_extreme": {
+      "fail": "Ein Zeitabstand von {days} Tagen zwischen zwei Projekten ist ungewöhnlich lang.",
+      "suggestion": "Einheit prüfen: der Zeitabstand wird in Tagen eingegeben."
+    }
   }
 }

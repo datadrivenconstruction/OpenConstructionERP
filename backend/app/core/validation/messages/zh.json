@@ -2045,5 +2045,71 @@
       "suggestion": "只统计完整的个数，并更正数值。",
       "fail": "计数{value}不是整数。"
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "联系人没有名称：没有公司名、法定名称、名或姓。",
+      "suggestion": "请输入公司名称或个人姓名。"
+    },
+    "date_invalid": {
+      "fail": "{field}“{value}”不是有效日期。",
+      "suggestion": "请使用 YYYY-MM-DD 格式，例如 2027-03-31。"
+    },
+    "payment_terms_invalid": {
+      "fail": "付款期限“{value}”不是 0 到 {max} 之间的整数天数。",
+      "suggestion": "请以天数输入付款期限，例如 30。"
+    },
+    "prequalification_lapsed": {
+      "fail": "资格预审已批准，但已于 {date} 到期。",
+      "suggestion": "请续期资格预审，或将其状态设为已过期。"
+    },
+    "vat_country_mismatch": {
+      "fail": "税号 {vat} 以 {prefix} 开头，但国家为 {country}。",
+      "suggestion": "请核对税号和联系人所在国家。"
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "该商机金额为 {value}，但未填写币种。",
+      "suggestion": "请选择预估金额的币种。"
+    },
+    "date_invalid": {
+      "fail": "预计成交日期 {value} 不是真实存在的日期。",
+      "suggestion": "请按 YYYY-MM-DD 格式输入有效日期。"
+    },
+    "close_date_passed": {
+      "fail": "该商机仍为进行中，但预计成交日期 {date} 已过。",
+      "suggestion": "请更新成交日期，或将商机标记为赢单或输单。"
+    },
+    "won_without_value": {
+      "fail": "该商机已赢单但没有金额，项目预算将从零开始。",
+      "suggestion": "请输入中标合同金额。"
+    },
+    "owner_missing": {
+      "fail": "进行中的商机没有负责人。",
+      "suggestion": "请指定投标负责人。"
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "编码 {code} 已被同一上级下的其他节点使用。",
+      "suggestion": "请为该节点使用其他编码。"
+    },
+    "level_order": {
+      "fail": "{child} 类型的节点不能放在 {parent} 之下。",
+      "suggestion": "请移动节点或更改其类型：项目组合包含项目集，项目集包含子项目集。"
+    },
+    "link_endpoints": {
+      "fail": "进度计划之间的链接必须连接两个不同进度计划中的两项不同工作。",
+      "suggestion": "请选择来自不同进度计划的工作；同一进度计划内请使用普通逻辑关系。"
+    },
+    "link_repeats": {
+      "fail": "这两项工作已在某一方向上链接，该链接会重复或形成回路。",
+      "suggestion": "请先删除现有链接，或选择其他工作。"
+    },
+    "lag_extreme": {
+      "fail": "两个项目之间 {days} 天的滞后异常长。",
+      "suggestion": "请检查单位：滞后以天为单位输入。"
+    }
   }
 }

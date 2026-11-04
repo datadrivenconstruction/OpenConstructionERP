@@ -2045,5 +2045,71 @@
       "suggestion": "Bilangin lang ang buong piraso at itama ang halaga.",
       "fail": "Ang bilang na {value} ay hindi buong numero."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Walang pangalan ang contact: walang kumpanya, legal na pangalan, unang pangalan, o apelyido.",
+      "suggestion": "Ilagay ang pangalan ng kumpanya o ng tao."
+    },
+    "date_invalid": {
+      "fail": "Ang {field} na '{value}' ay hindi wastong petsa.",
+      "suggestion": "Gamitin ang format na YYYY-MM-DD, halimbawa 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Ang termino ng bayad na '{value}' ay hindi buong bilang ng araw mula 0 hanggang {max}.",
+      "suggestion": "Ilagay ang panahon ng bayad sa araw, halimbawa 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Aprubado ang prequalification, ngunit nag-expire ito noong {date}.",
+      "suggestion": "I-renew ang prequalification o gawing expired ang status nito."
+    },
+    "vat_country_mismatch": {
+      "fail": "Ang VAT number na {vat} ay nagsisimula sa {prefix}, ngunit ang bansa ay {country}.",
+      "suggestion": "Suriin ang VAT number at ang bansa ng contact."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Ang oportunidad ay may halagang {value} ngunit walang currency.",
+      "suggestion": "Piliin ang currency ng tinatayang halaga."
+    },
+    "date_invalid": {
+      "fail": "Ang inaasahang petsa ng pagsasara na {value} ay hindi totoong petsa.",
+      "suggestion": "Maglagay ng wastong petsa sa format na YYYY-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Bukas pa ang oportunidad, ngunit lumipas na ang inaasahang petsa ng pagsasara na {date}.",
+      "suggestion": "I-update ang petsa ng pagsasara o markahan ang oportunidad bilang panalo o talo."
+    },
+    "won_without_value": {
+      "fail": "Panalo ang oportunidad ngunit walang halaga; magsisimula sa zero ang badyet ng proyekto.",
+      "suggestion": "Ilagay ang halaga ng iginawad na kontrata."
+    },
+    "owner_missing": {
+      "fail": "Walang may-ari ang bukas na oportunidad.",
+      "suggestion": "Italaga ang taong responsable sa bid."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Ang code na {code} ay gamit na ng ibang node sa ilalim ng parehong magulang.",
+      "suggestion": "Gumamit ng ibang code para sa node na ito."
+    },
+    "level_order": {
+      "fail": "Ang node na uri ng {child} ay hindi maaaring nasa ilalim ng {parent}.",
+      "suggestion": "Ilipat ang node o baguhin ang uri nito: ang portfolio ay may mga programa at ang programa ay may mga subprograma."
+    },
+    "link_endpoints": {
+      "fail": "Dapat pagdugtungin ng link sa pagitan ng mga iskedyul ang dalawang magkaibang aktibidad sa dalawang magkaibang iskedyul.",
+      "suggestion": "Pumili ng mga aktibidad mula sa magkaibang iskedyul; sa loob ng isang iskedyul, gumamit ng karaniwang dependency."
+    },
+    "link_repeats": {
+      "fail": "Magkaugnay na ang dalawang aktibidad na ito sa isang direksyon o sa kabila; mauulit ang link o magsasara ng loop.",
+      "suggestion": "Alisin muna ang kasalukuyang link o pumili ng ibang aktibidad."
+    },
+    "lag_extreme": {
+      "fail": "Hindi karaniwang mahaba ang lag na {days} araw sa pagitan ng dalawang proyekto.",
+      "suggestion": "Suriin ang unit: ang lag ay inilalagay sa araw."
+    }
   }
 }

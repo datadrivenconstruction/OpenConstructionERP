@@ -2045,5 +2045,71 @@
       "suggestion": "Faqat butun donalarni sanang va qiymatni tuzating.",
       "fail": "{value} soni butun son emas."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontaktning nomi yoʻq: kompaniya ham, yuridik nomi ham, ismi ham, familiyasi ham koʻrsatilmagan.",
+      "suggestion": "Kompaniya nomini yoki shaxs ismini kiriting."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' yaroqli sana emas.",
+      "suggestion": "YYYY-MM-DD formatidan foydalaning, masalan 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Toʻlov muddati '{value}' 0 dan {max} gacha boʻlgan butun kun soni emas.",
+      "suggestion": "Toʻlov muddatini kunlarda kiriting, masalan 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Dastlabki saralash tasdiqlangan, ammo {date} kuni muddati tugagan.",
+      "suggestion": "Dastlabki saralashni yangilang yoki holatini muddati tugagan deb belgilang."
+    },
+    "vat_country_mismatch": {
+      "fail": "QQS raqami {vat} {prefix} bilan boshlanadi, lekin davlat {country}.",
+      "suggestion": "QQS raqamini va kontakt davlatini tekshiring."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Imkoniyat qiymati {value}, lekin valyuta yoʻq.",
+      "suggestion": "Taxminiy qiymat valyutasini tanlang."
+    },
+    "date_invalid": {
+      "fail": "Kutilayotgan yopilish sanasi {value} haqiqiy sana emas.",
+      "suggestion": "Yaroqli sanani YYYY-MM-DD formatida kiriting."
+    },
+    "close_date_passed": {
+      "fail": "Imkoniyat hali ochiq, ammo kutilayotgan yopilish sanasi {date} oʻtib ketgan.",
+      "suggestion": "Yopilish sanasini yangilang yoki imkoniyatni yutilgan yoki yutqazilgan deb belgilang."
+    },
+    "won_without_value": {
+      "fail": "Imkoniyat yutilgan, lekin qiymati yoʻq; loyiha byudjeti noldan boshlanardi.",
+      "suggestion": "Berilgan shartnoma qiymatini kiriting."
+    },
+    "owner_missing": {
+      "fail": "Ochiq imkoniyatning javobgari yoʻq.",
+      "suggestion": "Taklif uchun javobgar shaxsni tayinlang."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "{code} kodi xuddi shu ota-tugun ostidagi boshqa tugunda allaqachon ishlatilgan.",
+      "suggestion": "Bu tugun uchun boshqa koddan foydalaning."
+    },
+    "level_order": {
+      "fail": "{child} turidagi tugun {parent} ostida turolmaydi.",
+      "suggestion": "Tugunni koʻchiring yoki turini oʻzgartiring: portfel dasturlarni, dastur esa quyi dasturlarni oʻz ichiga oladi."
+    },
+    "link_endpoints": {
+      "fail": "Jadvallar orasidagi bogʻlanish ikki xil jadvaldagi ikki xil ishni bogʻlashi kerak.",
+      "suggestion": "Ishlarni turli jadvallardan tanlang; bitta jadval ichida oddiy bogʻliqlikdan foydalaning."
+    },
+    "link_repeats": {
+      "fail": "Bu ikki ish allaqachon u yoki bu yoʻnalishda bogʻlangan; bogʻlanish takrorlanardi yoki sikl hosil qilardi.",
+      "suggestion": "Avval mavjud bogʻlanishni olib tashlang yoki boshqa ishlarni tanlang."
+    },
+    "lag_extreme": {
+      "fail": "Ikki loyiha orasidagi {days} kunlik kechikish odatdagidan uzun.",
+      "suggestion": "Birlikni tekshiring: kechikish kunlarda kiritiladi."
+    }
   }
 }

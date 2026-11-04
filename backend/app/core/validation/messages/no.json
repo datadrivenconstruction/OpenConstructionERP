@@ -2045,5 +2045,71 @@
       "suggestion": "Tell bare hele stykker, og rett verdien.",
       "fail": "Et antall på {value} er ikke et helt tall."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakten har ikke noe navn: ingen bedrift, intet juridisk navn, intet fornavn eller etternavn.",
+      "suggestion": "Oppgi bedriftsnavnet eller personens navn."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' er ikke en gyldig dato.",
+      "suggestion": "Bruk formatet ÅÅÅÅ-MM-DD, for eksempel 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Betalingsbetingelsen '{value}' er ikke et helt antall dager mellom 0 og {max}.",
+      "suggestion": "Oppgi betalingsfristen i dager, for eksempel 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prekvalifiseringen er godkjent, men utløp {date}.",
+      "suggestion": "Forny prekvalifiseringen eller sett statusen til utløpt."
+    },
+    "vat_country_mismatch": {
+      "fail": "MVA-nummeret {vat} begynner med {prefix}, men landet er {country}.",
+      "suggestion": "Kontroller MVA-nummeret og kontaktens land."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Salgsmuligheten har en verdi på {value}, men ingen valuta.",
+      "suggestion": "Velg valuta for den anslåtte verdien."
+    },
+    "date_invalid": {
+      "fail": "Den forventede avslutningsdatoen {value} er ikke en ekte dato.",
+      "suggestion": "Oppgi en gyldig dato i formatet ÅÅÅÅ-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Salgsmuligheten er fortsatt åpen, men den forventede avslutningsdatoen {date} er passert.",
+      "suggestion": "Oppdater avslutningsdatoen, eller marker salgsmuligheten som vunnet eller tapt."
+    },
+    "won_without_value": {
+      "fail": "Salgsmuligheten er vunnet, men har ingen verdi; prosjektbudsjettet ville startet på null.",
+      "suggestion": "Oppgi verdien av den tildelte kontrakten."
+    },
+    "owner_missing": {
+      "fail": "Den åpne salgsmuligheten har ingen ansvarlig.",
+      "suggestion": "Tildel personen som er ansvarlig for tilbudet."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Koden {code} brukes allerede av en annen node under samme overordnede.",
+      "suggestion": "Bruk en annen kode for denne noden."
+    },
+    "level_order": {
+      "fail": "En node av typen {child} kan ikke ligge under {parent}.",
+      "suggestion": "Flytt noden eller endre typen: en portefølje inneholder programmer, og et program inneholder underprogrammer."
+    },
+    "link_endpoints": {
+      "fail": "En kobling mellom fremdriftsplaner må forbinde to forskjellige aktiviteter i to forskjellige planer.",
+      "suggestion": "Velg aktiviteter fra forskjellige planer; innenfor én plan brukes en vanlig avhengighet."
+    },
+    "link_repeats": {
+      "fail": "De to aktivitetene er allerede koblet, i den ene eller andre retningen; koblingen ville gjentatt seg eller lukket en løkke.",
+      "suggestion": "Fjern den eksisterende koblingen først, eller velg andre aktiviteter."
+    },
+    "lag_extreme": {
+      "fail": "En tidsforskyvning på {days} dager mellom to prosjekter er uvanlig lang.",
+      "suggestion": "Kontroller enheten: forskyvningen oppgis i dager."
+    }
   }
 }

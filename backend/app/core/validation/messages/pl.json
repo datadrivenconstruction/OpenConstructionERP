@@ -2045,5 +2045,71 @@
       "suggestion": "Licz tylko całe sztuki i popraw wartość.",
       "fail": "Liczba {value} nie jest liczbą całkowitą."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakt nie ma nazwy: brak firmy, nazwy prawnej, imienia i nazwiska.",
+      "suggestion": "Wpisz nazwę firmy lub imię i nazwisko osoby."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' nie jest prawidłową datą.",
+      "suggestion": "Użyj formatu RRRR-MM-DD, na przykład 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Termin płatności '{value}' nie jest całkowitą liczbą dni od 0 do {max}.",
+      "suggestion": "Wpisz termin płatności w dniach, na przykład 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prekwalifikacja jest zatwierdzona, ale wygasła {date}.",
+      "suggestion": "Odnów prekwalifikację lub ustaw jej status na wygasła."
+    },
+    "vat_country_mismatch": {
+      "fail": "Numer VAT {vat} zaczyna się od {prefix}, a kraj to {country}.",
+      "suggestion": "Sprawdź numer VAT i kraj kontaktu."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Szansa ma wartość {value}, ale nie ma waluty.",
+      "suggestion": "Wybierz walutę szacowanej wartości."
+    },
+    "date_invalid": {
+      "fail": "Oczekiwana data zamknięcia {value} nie jest prawdziwą datą.",
+      "suggestion": "Wpisz prawidłową datę w formacie RRRR-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Szansa jest nadal otwarta, ale oczekiwana data zamknięcia {date} minęła.",
+      "suggestion": "Zaktualizuj datę zamknięcia lub oznacz szansę jako wygraną lub przegraną."
+    },
+    "won_without_value": {
+      "fail": "Szansa jest wygrana, ale nie ma wartości; budżet projektu zaczynałby się od zera.",
+      "suggestion": "Wpisz wartość udzielonego kontraktu."
+    },
+    "owner_missing": {
+      "fail": "Otwarta szansa nie ma opiekuna.",
+      "suggestion": "Przypisz osobę odpowiedzialną za ofertę."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Kod {code} jest już używany przez inny węzeł pod tym samym nadrzędnym.",
+      "suggestion": "Użyj innego kodu dla tego węzła."
+    },
+    "level_order": {
+      "fail": "Węzeł typu {child} nie może znajdować się pod {parent}.",
+      "suggestion": "Przenieś węzeł lub zmień jego typ: portfel zawiera programy, a program zawiera podprogramy."
+    },
+    "link_endpoints": {
+      "fail": "Powiązanie między harmonogramami musi łączyć dwie różne czynności w dwóch różnych harmonogramach.",
+      "suggestion": "Wybierz czynności z różnych harmonogramów; w obrębie jednego harmonogramu użyj zwykłej zależności."
+    },
+    "link_repeats": {
+      "fail": "Te dwie czynności są już powiązane, w jedną lub drugą stronę; powiązanie powtórzyłoby się lub zamknęło pętlę.",
+      "suggestion": "Najpierw usuń istniejące powiązanie lub wybierz inne czynności."
+    },
+    "lag_extreme": {
+      "fail": "Opóźnienie {days} dni między dwoma projektami jest niezwykle długie.",
+      "suggestion": "Sprawdź jednostkę: opóźnienie wpisuje się w dniach."
+    }
   }
 }

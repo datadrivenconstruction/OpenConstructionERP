@@ -224,6 +224,9 @@ class ContactResponse(BaseModel):
     # extension fields that don't justify a real column.
     custom_properties: dict[str, Any] = Field(default_factory=dict)
 
+    # Non-blocking findings of the contacts rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
+
     created_at: datetime
     updated_at: datetime
 

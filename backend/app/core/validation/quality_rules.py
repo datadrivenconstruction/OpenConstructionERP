@@ -42,7 +42,10 @@ def today_of(context: ValidationContext) -> date:
 
 
 class QualityRule(MoneyRule):
-    """Base for the quality-module rules: result building from a message section (``quality`` by default)."""
+    """Base for the quality-module rules: result building from the ``quality`` message section.
+
+    Modules with their own wording set ``message_section`` to their section in the bundle.
+    """
 
     message_section = "quality"
 
@@ -91,6 +94,7 @@ async def gate_rule_set(
     subject: str,
     before: dict[str, Any] | None = None,
     warnings_only: bool = False,
+    error: str = "quality_rules_failed",
 ) -> ValidationReport:
     """Run ``rule_set`` over ``data`` at a write point; ERROR findings answer the shared coded 422.
 
@@ -116,7 +120,38 @@ async def gate_rule_set(
         raise_rule_failure(
             report,
             blocking,
-            error="quality_rules_failed",
+            error=error,
             message=f"This {subject} cannot be saved ({operation}) until the errors listed below are corrected.",
         )
     return report
+
+
+async def gate_keyed_rule_set(
+    state: dict[str, Any],
+    *,
+    rule_set: str,
+    key: str,
+    target_type: str,
+    target_id: str,
+    operation: str,
+    subject: str,
+    error_code: str,
+    before: dict[str, Any] | None = None,
+    project_id: str | None = None,
+) -> ValidationReport:
+    """``gate_rule_set`` for a record the rules read under ``data[key]`` (with its ``id`` set)."""
+
+    def wrap(record: dict[str, Any]) -> dict[str, Any]:
+        return {key: {**record, "id": target_id}}
+
+    return await gate_rule_set(
+        rule_set=rule_set,
+        data=wrap(state),
+        before=wrap(before) if before is not None else None,
+        target_type=target_type,
+        target_id=target_id,
+        project_id=project_id,
+        operation=operation,
+        subject=subject,
+        error=error_code,
+    )

@@ -2045,5 +2045,71 @@
       "suggestion": "온전한 개수만 세고 값을 고치십시오.",
       "fail": "수량 {value}은(는) 정수가 아닙니다."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "연락처에 이름이 없습니다. 회사명, 법인명, 이름, 성이 모두 없습니다.",
+      "suggestion": "회사명 또는 개인 이름을 입력하세요."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}'은(는) 유효한 날짜가 아닙니다.",
+      "suggestion": "YYYY-MM-DD 형식을 사용하세요(예: 2027-03-31)."
+    },
+    "payment_terms_invalid": {
+      "fail": "지급 조건 '{value}'은(는) 0에서 {max} 사이의 정수 일수가 아닙니다.",
+      "suggestion": "지급 기간을 일 단위로 입력하세요(예: 30)."
+    },
+    "prequalification_lapsed": {
+      "fail": "사전 적격 심사가 승인되었지만 {date}에 만료되었습니다.",
+      "suggestion": "사전 적격 심사를 갱신하거나 상태를 만료로 설정하세요."
+    },
+    "vat_country_mismatch": {
+      "fail": "사업자 번호 {vat}은(는) {prefix}(으)로 시작하지만 국가는 {country}입니다.",
+      "suggestion": "사업자 번호와 연락처의 국가를 확인하세요."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "영업 기회의 금액은 {value}이지만 통화가 없습니다.",
+      "suggestion": "예상 금액의 통화를 선택하세요."
+    },
+    "date_invalid": {
+      "fail": "예상 마감일 {value}은(는) 실제 존재하는 날짜가 아닙니다.",
+      "suggestion": "YYYY-MM-DD 형식으로 유효한 날짜를 입력하세요."
+    },
+    "close_date_passed": {
+      "fail": "영업 기회가 아직 열려 있지만 예상 마감일 {date}이(가) 지났습니다.",
+      "suggestion": "마감일을 갱신하거나 영업 기회를 수주 또는 실주로 표시하세요."
+    },
+    "won_without_value": {
+      "fail": "영업 기회가 수주되었지만 금액이 없어 프로젝트 예산이 0에서 시작하게 됩니다.",
+      "suggestion": "수주한 계약 금액을 입력하세요."
+    },
+    "owner_missing": {
+      "fail": "열려 있는 영업 기회에 담당자가 없습니다.",
+      "suggestion": "입찰 담당자를 지정하세요."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "코드 {code}은(는) 같은 상위 항목 아래의 다른 노드에서 이미 사용 중입니다.",
+      "suggestion": "이 노드에는 다른 코드를 사용하세요."
+    },
+    "level_order": {
+      "fail": "{child} 유형의 노드는 {parent} 아래에 둘 수 없습니다.",
+      "suggestion": "노드를 이동하거나 유형을 변경하세요. 포트폴리오는 프로그램을, 프로그램은 하위 프로그램을 포함합니다."
+    },
+    "link_endpoints": {
+      "fail": "일정 간 링크는 서로 다른 두 일정의 서로 다른 두 작업을 연결해야 합니다.",
+      "suggestion": "서로 다른 일정의 작업을 선택하세요. 한 일정 안에서는 일반 선후 관계를 사용하세요."
+    },
+    "link_repeats": {
+      "fail": "이 두 작업은 이미 어느 한 방향으로 연결되어 있어 링크가 중복되거나 순환을 만듭니다.",
+      "suggestion": "기존 링크를 먼저 삭제하거나 다른 작업을 선택하세요."
+    },
+    "lag_extreme": {
+      "fail": "두 프로젝트 간 {days}일의 지연은 비정상적으로 깁니다.",
+      "suggestion": "단위를 확인하세요. 지연은 일 단위로 입력합니다."
+    }
   }
 }

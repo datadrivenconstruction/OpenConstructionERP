@@ -311,6 +311,8 @@ class OpportunityResponse(BaseModel):
     primary_contact_id: UUID | None
     project_id: UUID | None
     competitor_names: list[str]
+    # Non-blocking findings of the crm rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
