@@ -24,7 +24,13 @@ from sqlalchemy import select
 from app.core.validation.gate import run_gate
 from app.modules.temporary_works import register
 from app.modules.temporary_works.models import TemporaryWorksItem, TemporaryWorksPermit
-from app.modules.temporary_works.validators import TEMPORARY_WORKS_RULE_SET, item_snapshot, permit_snapshot
+from app.modules.temporary_works.validators import (
+    ITEM_FIELDS,
+    PERMIT_FIELDS,
+    TEMPORARY_WORKS_RULE_SET,
+    item_snapshot,
+    permit_snapshot,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -176,9 +182,13 @@ class TemporaryWorksService:
         new_reference = data.get("reference")
         if new_reference is not None and new_reference != item.reference:
             await self._require_unique_reference(project_id, new_reference, exclude_item_id=item_id)
-        self.findings = await run_gate(
-            item_snapshot(item, data), TEMPORARY_WORKS_RULE_SET, target_type="temporary_works", target_id=str(item_id)
-        )
+        if data.keys() & set(ITEM_FIELDS):
+            self.findings = await run_gate(
+                item_snapshot(item, data),
+                TEMPORARY_WORKS_RULE_SET,
+                target_type="temporary_works",
+                target_id=str(item_id),
+            )
         for key, value in data.items():
             setattr(item, key, value)
         await self.session.flush()
@@ -280,12 +290,13 @@ class TemporaryWorksService:
         """Patch (or close) a permit; only provided fields are changed."""
         permit = await self.require_permit(project_id, permit_id)
         data = payload.model_dump(exclude_unset=True)
-        self.findings = await run_gate(
-            permit_snapshot(permit, data),
-            TEMPORARY_WORKS_RULE_SET,
-            target_type="temporary_works_permit",
-            target_id=str(permit_id),
-        )
+        if data.keys() & set(PERMIT_FIELDS):
+            self.findings = await run_gate(
+                permit_snapshot(permit, data),
+                TEMPORARY_WORKS_RULE_SET,
+                target_type="temporary_works_permit",
+                target_id=str(permit_id),
+            )
         for key, value in data.items():
             setattr(permit, key, value)
         await self.session.flush()
