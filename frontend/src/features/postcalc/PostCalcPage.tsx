@@ -71,10 +71,11 @@ import {
 import { kindLabel, statusLabel } from './labels';
 import { buildPostCalcInsights } from './postcalcInsights';
 import { QuantityCheckPanel } from './QuantityCheckPanel';
+import { RateFeedbackPanel } from './RateFeedbackPanel';
 
 /* -- Small helpers --------------------------------------------------------- */
 
-type TabId = 'positions' | 'resources' | 'feedback' | 'quantities';
+type TabId = 'positions' | 'resources' | 'feedback' | 'quantities' | 'rates';
 type SortId = 'ref' | 'money' | 'factor';
 type FilterId = 'all' | 'compared' | 'deviating';
 
@@ -713,7 +714,8 @@ export function PostCalcPage() {
   const [activeTab, setActiveTab] = useState<TabId>('positions');
   const [downloading, setDownloading] = useState(false);
 
-  const isQuantityTab = activeTab === 'quantities';
+  // Both own a query of their own, so the productivity report neither loads nor blocks them.
+  const isQuantityTab = activeTab === 'quantities' || activeTab === 'rates';
   const query = useQuery({
     queryKey: ['postcalc', 'productivity', projectId],
     queryFn: () => fetchProductivity(projectId),
@@ -765,6 +767,12 @@ export function PostCalcPage() {
       label: t('postcalc.qc.tab', { defaultValue: 'Quantity check' }),
       icon: <Ruler size={15} />,
     },
+    {
+      // Company-wide: closed projects against the cost database, not this project.
+      id: 'rates' as const,
+      label: t('postcalc.rf.tab'),
+      icon: <TrendingUp size={15} />,
+    },
   ];
 
   return (
@@ -801,9 +809,15 @@ export function PostCalcPage() {
           variant="underline"
         />
 
-        {isQuantityTab && (
+        {activeTab === 'quantities' && (
           <div role="tabpanel">
             <QuantityCheckPanel projectId={projectId} />
+          </div>
+        )}
+
+        {activeTab === 'rates' && (
+          <div role="tabpanel">
+            <RateFeedbackPanel />
           </div>
         )}
 
