@@ -213,6 +213,15 @@ class InspectionService:
                     ),
                 )
 
+        # Completion records the outcome and raises the follow-up events, so it
+        # only goes through complete_inspection; a bare status patch would close
+        # the inspection with no result and no punch-list or closeout signal.
+        if new_status == "completed" and inspection.status != "completed":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Complete an inspection with its result (pass, fail or partial), not by editing the status.",
+            )
+
         if "checklist_data" in fields and fields["checklist_data"] is not None:
             fields["checklist_data"] = [
                 entry.model_dump() if hasattr(entry, "model_dump") else entry for entry in fields["checklist_data"]

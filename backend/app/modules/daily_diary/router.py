@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi import APIRouter, Body, Depends, Header, Query, Response
 from fastapi.responses import StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
@@ -592,6 +592,9 @@ async def list_entries(
     )
 
 
+_BULK_ENTRIES_MAX = 500
+
+
 @router.post(
     "/diaries/{diary_id}/entries/bulk",
     response_model=list[DiaryEntryResponse],
@@ -599,7 +602,7 @@ async def list_entries(
 )
 async def bulk_create_entries(
     diary_id: uuid.UUID,
-    payloads: list[DiaryEntryBulkCreate],
+    payloads: Annotated[list[DiaryEntryBulkCreate], Body(max_length=_BULK_ENTRIES_MAX)],
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("daily_diary.create")),
