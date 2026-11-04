@@ -115,7 +115,10 @@ async def accessible_projects(
         except (ValueError, TypeError):
             return []
         stmt = stmt.where((Project.owner_id == uid) | Project.id.in_(member_project_ids_subquery(uid)))
-    if requested_ids:
+    if requested_ids is not None:
+        # An explicit but unusable filter must narrow to nothing, never widen to all.
+        if not requested_ids:
+            return []
         stmt = stmt.where(Project.id.in_(requested_ids))
     rows = await session.execute(stmt)
     return list(rows.scalars().all())

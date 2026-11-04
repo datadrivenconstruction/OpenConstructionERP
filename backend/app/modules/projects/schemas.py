@@ -235,6 +235,8 @@ def _validate_money(value: str | None, field_name: str) -> str | None:
         amount = Decimal(cleaned)
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"{field_name}: '{value}' is not a valid number") from exc
+    if not amount.is_finite():
+        raise ValueError(f"{field_name}: '{value}' is not a valid number")
     if amount < 0:
         raise ValueError(f"{field_name} must be >= 0 (got {value})")
     return cleaned
@@ -258,6 +260,8 @@ def _validate_percentage(value: str | None, field_name: str) -> str | None:
         pct = Decimal(cleaned)
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"{field_name}: '{value}' is not a valid number") from exc
+    if not pct.is_finite():
+        raise ValueError(f"{field_name}: '{value}' is not a valid number")
     if pct < 0 or pct > 100:
         raise ValueError(f"{field_name} must be between 0 and 100 (got {value})")
     return cleaned
