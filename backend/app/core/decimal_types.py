@@ -2,8 +2,9 @@
 
 A bare ``Decimal`` field accepts ``NaN``, ``Infinity`` and ``1e400``, and a value wider than
 its ``NUMERIC(p, s)`` column fails at flush with a 500. ``finite_decimal(p, s)`` rejects
-all of these at validation time (422). Only the integer part is bounded: extra fractional
-digits are left to the column to round, as before.
+all of these at validation time (422). Extra fractional digits are not an error: the value is
+rounded half-up to the column scale on input, so clients that send 1.125 for a scale-2 column
+are accepted and the stored value is what the response shows.
 
 Usage::
 
@@ -16,7 +17,7 @@ Usage::
 
 from __future__ import annotations
 
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal, localcontext
 from functools import cache
 from typing import Annotated
 
@@ -77,6 +78,7 @@ def finite_decimal(
     *,
     non_negative: bool = False,
     positive: bool = False,
+    quantize: bool = True,
 ) -> type[Decimal]:
     """Build a Decimal type that is finite and fits ``NUMERIC(max_digits, decimal_places)``.
 
@@ -85,6 +87,7 @@ def finite_decimal(
         decimal_places: Fractional digits of the target column (scale).
         non_negative: Also require ``>= 0``.
         positive: Also require ``> 0`` (wins over ``non_negative``).
+        quantize: Round half-up to ``decimal_places`` (off for the column-less generic type).
 
     Returns:
         An ``Annotated[Decimal, ...]`` usable as a field annotation, alone or in a union.
@@ -92,14 +95,21 @@ def finite_decimal(
     if max_digits <= 0 or not 0 <= decimal_places <= max_digits:
         raise ValueError("need 0 <= decimal_places <= max_digits and max_digits > 0")
     limit = Decimal(10) ** (max_digits - decimal_places)
+    step = Decimal(1).scaleb(-decimal_places)
 
     def _check(value: Decimal) -> Decimal:
+        if not -limit < value < limit:
+            raise ValueError(f"must be below {limit} in absolute value")
+        if quantize and -value.as_tuple().exponent > decimal_places:
+            with localcontext() as ctx:
+                ctx.prec = max_digits + 8
+                value = value.quantize(step, rounding=ROUND_HALF_UP)
+            if not -limit < value < limit:
+                raise ValueError(f"must be below {limit} in absolute value")
         if positive and value <= 0:
             raise ValueError("must be greater than 0")
         if non_negative and not positive and value < 0:
             raise ValueError("must be greater than or equal to 0")
-        if not -limit < value < limit:
-            raise ValueError(f"must be below {limit} in absolute value")
         return value
 
     # Range is checked in an after-validator, not via gt/lt: a field-level Field(gt=...)
@@ -108,7 +118,7 @@ def finite_decimal(
 
 
 # Generic bound for fields with no matching column (|v| < 1e22).
-FiniteDecimal = finite_decimal(28, 6)
+FiniteDecimal = finite_decimal(28, 6, quantize=False)
 
 # One alias per NUMERIC(p, s) shape used by module models.
 Decimal4_2 = finite_decimal(4, 2)

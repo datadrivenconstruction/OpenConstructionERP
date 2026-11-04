@@ -54,3 +54,41 @@ def test_no_unbounded_decimal_in_request_schemas():
         "Unbounded Decimal fields; annotate with app.core.decimal_types (e.g. Decimal18_2) "
         "or add to ALLOWED with a reason:\n" + "\n".join(found)
     )
+
+
+SIGNED_NAME = re.compile(r"(variance|delta|adjustment|credit|difference|correction|overrun|balance)")
+
+
+def test_signed_fields_are_not_constrained_non_negative():
+    """Credits, adjustments, variances and deltas may legitimately be negative."""
+    found: list[str] = []
+    for path in sorted(MODULES.glob("*/schemas.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
+            for stmt in cls.body:
+                if not (isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name)):
+                    continue
+                if not SIGNED_NAME.search(stmt.target.id) or "Decimal" not in ast.unparse(stmt.annotation):
+                    continue
+                if isinstance(stmt.value, ast.Call):
+                    kw = {k.arg: k.value for k in stmt.value.keywords if k.arg}
+                    low = [kw[k] for k in ("ge", "gt") if k in kw]
+                    if any(isinstance(v, ast.Constant) and v.value == 0 for v in low):
+                        found.append(f"{path.parent.name}.{cls.name}.{stmt.target.id}")
+    assert not found, "signed-looking Decimal fields constrained >= 0:\n" + "\n".join(found)
+
+
+def test_real_schema_fields_round_extra_decimals_instead_of_rejecting():
+    import importlib
+
+    cases = [
+        ("supplier_catalogs", "CatalogEntryCreate", "unit_price", "12.345678", "12.3457"),
+        ("geo_hub", "SurveyObservationUpsert", "observed_pct", "55.555", "55.56"),
+        ("rebar_schedule", "AbsPreviewShape", "weight_kg", "1.23456", "1.2346"),
+    ]
+    for mod, cls, field, raw, expected in cases:
+        schemas = importlib.import_module(f"app.modules.{mod}.schemas")
+        model = getattr(schemas, cls)
+        done = model.__pydantic_validator__.validate_assignment(model.model_construct(), field, raw)
+        got = getattr(done[0] if isinstance(done, tuple) else done, field)
+        assert str(got) == expected, f"{mod}.{cls}.{field}"
