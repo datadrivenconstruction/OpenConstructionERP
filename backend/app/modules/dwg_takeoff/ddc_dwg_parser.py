@@ -683,6 +683,10 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                 for v in verts[1:]:
                     if v != deduped[-1]:
                         deduped.append(v)
+                # A ring drawn back onto its start is closed even without the flag.
+                if len(deduped) >= 4 and deduped[0] == deduped[-1]:
+                    deduped.pop()
+                    closed = True
 
                 points = [{"x": v[0], "y": v[1]} for v in deduped]
                 entities.append(

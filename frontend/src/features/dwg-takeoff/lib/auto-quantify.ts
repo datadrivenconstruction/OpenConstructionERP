@@ -115,7 +115,8 @@ export function measureEntity(e: DxfEntity): EntityMeasure {
     case 'HATCH':
       // A hatch is a filled region - areal even when ``closed`` is unset.
       if (e.vertices && e.vertices.length >= 3) {
-        m.area = calculateArea(e.vertices);
+        const holes = (e.holes ?? []).reduce((sum, h) => sum + (h.length >= 3 ? calculateArea(h) : 0), 0);
+        m.area = Math.max(0, calculateArea(e.vertices) - holes);
         m.measured = true;
       }
       break;

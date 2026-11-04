@@ -3975,16 +3975,25 @@ class TakeoffService:
         # ── validate ───────────────────────────────────────────────────────
         await self.plan_read_repo.update_fields(run_id, status="validating")
         parsed = extract_json(raw_response)
-        result, dropped = _pr.parse_plan_read_response(
+        # The deterministic belt: coordinate repair, schema checks, scale from
+        # the sheet, rings snapped onto drawn walls, evidence-based confidence.
+        try:
+            vector = _pr.extract_vector_layer(content, run.page)
+        except Exception:
+            logger.warning("plan_read run %s vector layer unavailable", run_id, exc_info=True)
+            vector = None
+        result, refinement, repairs = _pr.check_plan_read(
             parsed,
             page=run.page,
             page_width_pt=page_w_pt,
             page_height_pt=page_h_pt,
+            image_px=(page_w_pt * dpi / 72.0, page_h_pt * dpi / 72.0),
+            vector=vector,
+            calibrated_ratio=run.scale_pixels_per_unit,
+            image_png=png,
         )
-
-        scale_ratio, scale_drop = _pr.resolve_scale_ratio(run.scale_pixels_per_unit, result.scale, page_w_pt, page_h_pt)
-        if scale_drop:
-            dropped.append(scale_drop)
+        dropped = refinement.dropped
+        scale_ratio = refinement.scale.ratio
 
         proposals = self._build_plan_read_proposals(
             run=run,
@@ -3993,6 +4002,7 @@ class TakeoffService:
             page_h_pt=page_h_pt,
             scale_ratio=scale_ratio,
             user_id=user_id,
+            refinement=refinement,
         )
         if proposals:
             for proposal in proposals:
@@ -4007,6 +4017,13 @@ class TakeoffService:
             "symbols_proposed": len(result.symbols),
             "scale_detected": result.scale is not None,
             "scale_ratio_px_per_unit": scale_ratio,
+            "scale_source": refinement.scale.source,
+            "scale_confidence": refinement.scale.confidence,
+            "scale_flags": refinement.scale.flags,
+            "coordinate_repairs": repairs,
+            "rooms_kept": len(refinement.rooms),
+            "symbols_kept": len(refinement.symbols),
+            "vector_layer": vector is not None and vector.has_walls(),
             "image_dpi": dpi,
         }
         await self.plan_read_repo.update_fields(
@@ -4030,8 +4047,13 @@ class TakeoffService:
         page_h_pt: float,
         scale_ratio: float | None,
         user_id: str,
+        refinement: Any = None,
     ) -> list[TakeoffMeasurement]:
         """Turn a validated ``PlanReadResult`` into ``proposed`` measurements.
+
+        With ``refinement`` (the belt's ``PlanRefinement``) the refined rings,
+        merged symbols, evidence-based confidences and the sheet's scale are
+        proposed; without it the model's validated answer is used as is.
 
         Rooms become ``area`` proposals whose value is the SERVER's shoelace
         recompute (never the model's claimed area). A self-intersecting room is
@@ -4045,6 +4067,11 @@ class TakeoffService:
         from app.modules.takeoff.schemas import (
             TAKEOFF_CONFIDENCE_MEDIUM_THRESHOLD,
         )
+
+        if refinement is not None:
+            return self._refined_plan_read_proposals(
+                run=run, refinement=refinement, page_w_pt=page_w_pt, page_h_pt=page_h_pt, user_id=user_id
+            )
 
         # Which scale survived decides the provenance stamp.
         # ``resolve_scale_ratio`` hands back the user's calibration untouched
@@ -4119,6 +4146,89 @@ class TakeoffService:
                     confidence=round(symbol.confidence, 2),
                     review_status="proposed",
                     metadata_={**run_meta_base, "element_class": symbol.element_class, "verdict": "ok"},
+                    created_by=user_id,
+                )
+            )
+        return out
+
+    def _refined_plan_read_proposals(
+        self,
+        *,
+        run: AiTakeoffRun,
+        refinement: Any,
+        page_w_pt: float,
+        page_h_pt: float,
+        user_id: str,
+    ) -> list[TakeoffMeasurement]:
+        """Proposals from the belt's output: refined rings and merged symbols."""
+        from app.modules.takeoff import plan_read as _pr
+
+        ratio = refinement.scale.ratio
+        scale_source = refinement.scale.source if ratio else None
+        base = {
+            "ai_takeoff_run_id": str(run.id),
+            "page_width_pt": page_w_pt,
+            "page_height_pt": page_h_pt,
+            "scale_confidence": refinement.scale.confidence,
+        }
+        out: list[TakeoffMeasurement] = []
+        for room in refinement.rooms:
+            meta = {
+                **base,
+                "room_name": room.name,
+                "self_intersects": "room:self_intersects" in room.flags,
+                "verdict": room.verdict,
+                "flags": room.flags,
+                "model_confidence": room.model_confidence,
+                "wall_support": room.wall_support,
+                "snapped_to_walls": room.snapped,
+                "area_label_m2": room.area_label_m2,
+                "perimeter_m": _pr.polygon_perimeter(room.points) / ratio if ratio else None,
+            }
+            out.append(
+                TakeoffMeasurement(
+                    project_id=run.project_id,
+                    document_id=run.document_id,
+                    page=run.page,
+                    type="area",
+                    group_name="AI plan read",
+                    group_color="#8B5CF6",
+                    annotation=room.name or None,
+                    points=[{"x": p[0], "y": p[1]} for p in room.points],
+                    measurement_value=_pr.shoelace_area(room.points) / (ratio * ratio) if ratio else None,
+                    measurement_unit="m2",
+                    scale_pixels_per_unit=ratio,
+                    scale_source=scale_source,
+                    source="ai_plan_read",
+                    confidence=room.confidence,
+                    review_status="proposed",
+                    metadata_=meta,
+                    created_by=user_id,
+                )
+            )
+        for symbol in refinement.symbols:
+            out.append(
+                TakeoffMeasurement(
+                    project_id=run.project_id,
+                    document_id=run.document_id,
+                    page=run.page,
+                    type="count",
+                    group_name="AI plan read",
+                    group_color="#8B5CF6",
+                    annotation=symbol.element_class or None,
+                    points=[{"x": p[0], "y": p[1]} for p in symbol.centers],
+                    measurement_value=float(len(symbol.centers)),
+                    count_value=len(symbol.centers),
+                    measurement_unit="pcs",
+                    source="ai_plan_read",
+                    confidence=symbol.confidence,
+                    review_status="proposed",
+                    metadata_={
+                        **base,
+                        "element_class": symbol.element_class,
+                        "verdict": "warning" if symbol.flags else "ok",
+                        "flags": symbol.flags,
+                    },
                     created_by=user_id,
                 )
             )
@@ -4218,4 +4328,4 @@ class TakeoffService:
 # the real token count from the provider replaces it after the call.
 _PLAN_READ_PREFLIGHT_TOKENS = 4000
 # Output is geometry and short labels, not prose - a small cap keeps cost down.
-_PLAN_READ_MAX_TOKENS = 2048
+_PLAN_READ_MAX_TOKENS = 4096

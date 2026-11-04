@@ -4326,7 +4326,10 @@ async def analyze_document(
         parsed = []
 
     # 7. Convert to the AnalysisResult format expected by frontend
+    from app.modules.takeoff.text_analyze import check_items
+
     elements: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
     categories: dict[str, dict[str, Any]] = {}
 
     # Audit AI3 - validate numeric fields. The LLM occasionally hallucinates
@@ -4387,15 +4390,33 @@ async def analyze_document(
             raw_unit=raw_unit,
         )
 
-        element = {
-            "id": f"ai_{idx + 1}",
-            "category": category,
-            "description": description,
-            "quantity": round(quantity, 2),
-            "unit": unit,
-            "confidence": confidence,
-        }
-        elements.append(element)
+        candidates.append(
+            {
+                "description": description,
+                "quantity": quantity,
+                "unit": unit,
+                "category": category,
+                "confidence": confidence,
+            }
+        )
+
+    # Ground every quantity in the source text, merge repeats, normalise units;
+    # an item whose quantity the text does not contain stays below medium.
+    for idx, row in enumerate(check_items(candidates, extracted_text)):
+        category, unit, quantity = row.category, row.unit, row.quantity
+        elements.append(
+            {
+                "id": f"ai_{idx + 1}",
+                "category": category,
+                "description": row.description,
+                "quantity": round(quantity, 2),
+                "unit": unit,
+                "confidence": row.confidence,
+                "grounded": row.grounded,
+                "flags": row.flags,
+                "evidence": row.evidence,
+            }
+        )
 
         # Build category summary, keyed PER (category, unit). Rows in one
         # category routinely carry different units (m, m², pcs); summing

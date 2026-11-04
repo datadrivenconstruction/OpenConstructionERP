@@ -92,6 +92,8 @@ export interface DxfEntity {
   end?: { x: number; y: number };
   /** Polyline / hatch boundary vertices */
   vertices?: { x: number; y: number }[];
+  /** Hatch islands (shafts, openings) inside the boundary; their area is not filled */
+  holes?: { x: number; y: number }[][];
   /** Arc / circle radius */
   radius?: number;
   /** Ellipse major radius */

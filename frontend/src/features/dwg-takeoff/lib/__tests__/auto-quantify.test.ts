@@ -66,6 +66,25 @@ describe('quantifyByLayer', () => {
     expect(row!.available).toContain('count');
   });
 
+  it('subtracts hatch holes (shafts, openings) from the hatched area', () => {
+    const sq = (x: number, y: number, s: number) => [
+      { x, y },
+      { x: x + s, y },
+      { x: x + s, y: y + s },
+      { x, y: y + s },
+    ];
+    const hatch: DxfEntity = {
+      id: 'h1',
+      type: 'HATCH',
+      layer: 'SLAB',
+      color: '#fff',
+      vertices: sq(0, 0, 10),
+      holes: [sq(2, 2, 2), sq(6, 6, 1)],
+    };
+    const [row] = quantifyByLayer([hatch]);
+    expect(row!.area).toBeCloseTo(100 - 4 - 1, 6);
+  });
+
   it('picks LENGTH for line-only layers', () => {
     const [row] = quantifyByLayer([line('l1', 'PIPE', 3), line('l2', 'PIPE', 7)]);
     expect(row!.primary).toBe('length');
