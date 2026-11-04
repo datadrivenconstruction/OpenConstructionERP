@@ -207,4 +207,23 @@ describe('BudgetLedgerPanel', () => {
     expect((screen.getByRole('button', { name: 'Save as draft' }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText('Choose two different cost lines.')).toBeTruthy();
   });
+  it('filters by status and text and sorts by amount', async () => {
+    renderPanel(true, true);
+    await screen.findByTestId('transfer-BT-001');
+    const order = () => screen.getAllByTestId(/^transfer-BT/).map((el) => el.getAttribute('data-testid'));
+
+    fireEvent.change(screen.getByTestId('ledger-sort'), { target: { value: 'amount_desc' } });
+    expect(order()).toEqual(['transfer-BT-001', 'transfer-BT-002']);
+    fireEvent.change(screen.getByTestId('ledger-sort'), { target: { value: 'amount_asc' } });
+    expect(order()).toEqual(['transfer-BT-002', 'transfer-BT-001']);
+
+    fireEvent.change(screen.getByTestId('ledger-status-filter'), { target: { value: 'submitted' } });
+    expect(order()).toEqual(['transfer-BT-002']);
+
+    fireEvent.change(screen.getByTestId('ledger-status-filter'), { target: { value: 'all' } });
+    fireEvent.change(screen.getByTestId('ledger-search'), { target: { value: 'walls' } });
+    expect(order()).toEqual(['transfer-BT-001']);
+    fireEvent.change(screen.getByTestId('ledger-search'), { target: { value: 'nothing here' } });
+    expect(screen.getByText('No entries match the filter.')).toBeTruthy();
+  });
 });
