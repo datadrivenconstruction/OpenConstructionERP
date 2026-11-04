@@ -37,7 +37,7 @@ from app.modules.rate_feedback.validators import RateFeedbackError, check_confir
 logger = logging.getLogger(__name__)
 
 CLOSED_STATUSES = ("completed", "archived")
-HOURS_KEY = "labor_hours_per_unit"
+HOURS_KEY = "labor_hours"  # the numeric key the cost browser reads
 HISTORY_KEY = "rate_feedback_history"
 _HISTORY_CAP = 20
 _Q4 = Decimal("0.0001")
@@ -202,7 +202,7 @@ class RateFeedbackService:
         item.price_as_of = date.today()
         meta = dict(item.metadata_ or {})
         if req.apply_hours and proposal.observed_hours_per_unit is not None:
-            meta[HOURS_KEY] = format(proposal.observed_hours_per_unit, "f")
+            meta[HOURS_KEY] = float(proposal.observed_hours_per_unit.quantize(Decimal("0.01")))
         history = list(meta.get(HISTORY_KEY, []))[-(_HISTORY_CAP - 1) :]
         history.append(
             {
