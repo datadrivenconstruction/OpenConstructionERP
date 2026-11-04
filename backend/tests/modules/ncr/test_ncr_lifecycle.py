@@ -47,12 +47,15 @@ async def test_full_happy_path_to_closed(client, admin_auth, project_id):
     _, header = admin_auth
     ncr = await _create(client, header, project_id)
     for nxt in ("under_review", "corrective_action", "verification"):
-        r = await _patch(client, header, ncr["id"], status=nxt, corrective_action="Grout and re-inspect")
+        r = await _patch(
+            client, header, ncr["id"], status=nxt, corrective_action="Grout and re-inspect", root_cause="Poor vibration"
+        )
         assert r.status_code == 200, r.text
         assert r.json()["status"] == nxt
     closed = await client.post(f"{BASE}{ncr['id']}/close/", headers=header)
     assert closed.status_code == 200, closed.text
     assert closed.json()["status"] == "closed"
+    assert closed.json()["verified_by"] and closed.json()["verified_at"]
 
 
 @pytest.mark.asyncio

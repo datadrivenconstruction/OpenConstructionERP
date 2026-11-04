@@ -1748,8 +1748,8 @@
       "suggestion": "Viimeistele tai aikatauluta uudelleen tai sulje perustelun kanssa."
     },
     "result_contradicts_checklist": {
-      "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa epäonnistui.",
-      "suggestion": "Korjaa tulos tai tarkista epäonnistuneet kohdat."
+      "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa hylättiin.",
+      "suggestion": "Korjaa tulos tai tarkista hylätyt kohdat."
     }
   }
 }

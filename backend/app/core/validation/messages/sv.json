@@ -1748,8 +1748,8 @@
       "suggestion": "Slutför eller planera om, eller stäng med en orsak."
     },
     "result_contradicts_checklist": {
-      "fail": "Resultatet är {result}, men {count} checklistpunkter misslyckades.",
-      "suggestion": "Rätta resultatet eller granska de misslyckade punkterna."
+      "fail": "Resultatet är {result}, men {count} checklistpunkter underkändes.",
+      "suggestion": "Rätta resultatet eller granska de underkända punkterna."
     }
   }
 }

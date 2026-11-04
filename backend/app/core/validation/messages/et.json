@@ -1748,8 +1748,8 @@
       "suggestion": "Viige lõpule või planeerige ümber, või sulgege põhjendusega."
     },
     "result_contradicts_checklist": {
-      "fail": "Tulemus on {result}, kuid {count} kontrollnimekirja punkti ebaõnnestus.",
-      "suggestion": "Parandage tulemus või vaadake läbi ebaõnnestunud punktid."
+      "fail": "Tulemus on {result}, kuid {count} kontrollnimekirja punkti ei vastanud nõuetele.",
+      "suggestion": "Parandage tulemus või vaadake läbi mittevastavad punktid."
     }
   }
 }

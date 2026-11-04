@@ -64,3 +64,23 @@ class QualityRule(MoneyRule):
             suggestion=translate(f"quality.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
+
+
+def rule_errors_detail(report: Any, message: str) -> dict[str, Any]:
+    """The 422 body a gated quality write answers with (same shape as procurement)."""
+    return {
+        "message": message,
+        "report": report.summary(),
+        "errors": [
+            {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
+            for r in report.errors
+        ],
+    }
+
+
+def warning_findings(report: Any) -> list[dict[str, Any]]:
+    """Non-blocking findings, in the shape a response carries them."""
+    return [
+        {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
+        for r in report.warnings
+    ]

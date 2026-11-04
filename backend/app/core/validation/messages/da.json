@@ -1748,8 +1748,8 @@
       "suggestion": "Afslut eller omplanlæg, eller luk med en begrundelse."
     },
     "result_contradicts_checklist": {
-      "fail": "Resultatet er {result}, men {count} tjeklistepunkter fejlede.",
-      "suggestion": "Ret resultatet, eller gennemgå de fejlede punkter."
+      "fail": "Resultatet er {result}, men {count} tjeklistepunkter er ikke bestået.",
+      "suggestion": "Ret resultatet, eller gennemgå de punkter, der ikke er bestået."
     }
   }
 }

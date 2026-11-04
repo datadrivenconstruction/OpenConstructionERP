@@ -7,9 +7,10 @@ Tables:
 """
 
 import uuid
+from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -66,6 +67,11 @@ class NCR(Base):
     # auto-creation is idempotent on the same clash. Nullable + no
     # server_default: absent means "not clash-sourced".
     clash_result_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    # Date the corrective action is owed by; NULL means none was set.
+    due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # Who verified the fix and when, stamped when the NCR is closed.
+    verified_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

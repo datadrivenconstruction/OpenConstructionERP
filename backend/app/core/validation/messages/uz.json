@@ -1740,16 +1740,16 @@
   },
   "quality": {
     "field_required_for_state": {
-      "fail": "Holati {state}, lekin {field} yo'q.",
-      "suggestion": "Yetishmayotgan maydonni to'ldiring yoki yozuvni oldingi holatga qaytaring."
+      "fail": "Holati {state}, lekin {field} yoʻq.",
+      "suggestion": "Yetishmayotgan maydonni toʻldiring yoki yozuvni oldingi holatga qaytaring."
     },
     "overdue": {
       "fail": "Muddati {date} edi, lekin hali ham {status}.",
       "suggestion": "Yakunlang yoki qayta rejalashtiring, yoki sababi bilan yoping."
     },
     "result_contradicts_checklist": {
-      "fail": "Natija {result}, lekin tekshiruv ro'yxatining {count} bandi o'tmadi.",
-      "suggestion": "Natijani to'g'rilang yoki o'tmagan bandlarni ko'rib chiqing."
+      "fail": "Natija {result}, lekin tekshiruv roʻyxatining {count} bandi oʻtmadi.",
+      "suggestion": "Natijani toʻgʻrilang yoki oʻtmagan bandlarni koʻrib chiqing."
     }
   }
 }
