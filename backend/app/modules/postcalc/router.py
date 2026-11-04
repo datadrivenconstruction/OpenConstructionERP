@@ -91,8 +91,8 @@ async def get_productivity(
             headers={"Content-Disposition": f'inline; filename="postcalc-{project_id}.md"'},
         )
 
-    report = await service.generate(project_id, tolerance=tol, min_confidence=conf)
-    return report.to_dict()
+    report, warnings = await service.generate_checked(project_id, tolerance=tol, min_confidence=conf)
+    return {**report.to_dict(), "warnings": warnings}
 
 
 @router.get(

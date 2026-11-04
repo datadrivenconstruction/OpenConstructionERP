@@ -248,3 +248,51 @@ async def enforce_money_rules(
             },
         )
     return [_finding(r) for r in report.warnings]
+
+
+async def enforce_rule_set(
+    data: dict[str, Any],
+    *,
+    rule_set: str,
+    target_type: str,
+    target_id: str,
+    error_code: str,
+) -> list[dict[str, Any]]:
+    """Run one rule set at a write point: errors raise a coded 422, warnings are returned.
+
+    The 422 detail has the same shape as the contracts compliance gate
+    (``error``, ``message``, ``rule_sets``, ``status``, ``results``).
+    """
+    from fastapi import HTTPException, status  # noqa: PLC0415
+
+    from app.core.i18n import get_locale  # noqa: PLC0415
+    from app.core.validation.engine import validation_engine  # noqa: PLC0415
+
+    report = await validation_engine.validate(
+        data=data,
+        rule_sets=[rule_set],
+        target_type=target_type,
+        target_id=target_id,
+        metadata={"locale": get_locale()},
+    )
+    if rule_set in report.unsupported_rule_sets:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"The '{rule_set}' validation rules are not loaded on this deployment.",
+        )
+    if report.errors:
+        heads = "; ".join(r.message for r in report.errors[:3])
+        more = len(report.errors) - 3
+        if more > 0:
+            heads = f"{heads} (and {more} more)"
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "error": error_code,
+                "message": heads,
+                "rule_sets": report.rule_sets_applied,
+                "status": report.status.value,
+                "results": [_finding(r) for r in report.errors + report.warnings],
+            },
+        )
+    return [_finding(r) for r in report.warnings]
