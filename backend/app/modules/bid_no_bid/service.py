@@ -254,14 +254,22 @@ class BidNoBidService:
                 entry = await self._entry(card.tender_id)
                 if entry is None:
                     raise
-                entry.outcome, entry.notes, entry.version = outcome, note, entry.version + 1
+                self._apply_outcome(entry, outcome, note)
         else:
-            entry.outcome, entry.notes, entry.version = outcome, note, entry.version + 1
+            self._apply_outcome(entry, outcome, note)
         card.version += 1
         await self.repo.save(card)
         await self._log(
             card, user_id, "outcome", f"Outcome: {body.outcome or 'cleared'}", outcome=body.outcome, note=note
         )
+
+    @staticmethod
+    def _apply_outcome(entry: BidOutcome, outcome: str, note: str) -> None:
+        # The ledger note is shared with the ledger page: an empty scorecard note must not erase it.
+        entry.outcome = outcome
+        if note:
+            entry.notes = note
+        entry.version += 1
 
     # ── win-loss ledger ──────────────────────────────────────────────────
 

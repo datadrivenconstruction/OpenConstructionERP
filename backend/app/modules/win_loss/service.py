@@ -111,7 +111,11 @@ class WinLossService:
             if required in fields and fields[required] is None:
                 del fields[required]
         fields["version"] = entry.version + 1
-        await self.repo.update_fields(entry_id, **fields)
+        try:
+            async with self.session.begin_nested():
+                await self.repo.update_fields(entry_id, **fields)
+        except IntegrityError as exc:
+            raise HTTPException(status_code=409, detail="This tender already has an outcome record") from exc
         await self.repo.session.refresh(entry)
         return entry
 
