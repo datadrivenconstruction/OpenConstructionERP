@@ -1786,7 +1786,7 @@ def _in_base(
     factor = resource_fx_factor(own, base, fx_rates)
     if factor is None:
         return own, None
-    return own or base, amount * Decimal(str(factor))
+    return own or base, amount * factor
 
 
 def _aware(value: datetime) -> datetime:
