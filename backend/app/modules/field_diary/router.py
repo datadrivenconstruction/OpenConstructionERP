@@ -44,6 +44,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.field_diary.queue_owner import check_queue_owner
 from app.modules.field_diary.schemas import (
     MAX_ATTACHMENT_BYTES,
     DiaryActivityCreate,
@@ -144,12 +145,14 @@ async def _require_field_module_grant(
     request: Request,
     session: SessionDep,
     field_session=Depends(require_field_session),
+    x_queue_owner: Annotated[str | None, Header(alias="X-Queue-Owner")] = None,
 ):
     """Gate every diary endpoint on the dedicated module-grant table.
 
     Reads ``project_id`` from the live session (NOT from the URL -
     sessions are pinned to one project, no IDOR window).
     """
+    check_queue_owner(field_session.user_id, x_queue_owner)
     svc = FieldDiaryService(session)
     ok = await svc.check_module_grant(
         field_session.user_id,

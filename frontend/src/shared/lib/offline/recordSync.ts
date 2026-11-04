@@ -16,6 +16,7 @@
  */
 
 import { apiGet, fetchWithAuth } from '@/shared/lib/api';
+import { authOwner } from './authOwner';
 import { isOnline } from './connectivity';
 import {
   MutationQueue,
@@ -286,7 +287,7 @@ export function getRecordQueue(): MutationQueue {
   if (!queue) {
     const storage =
       typeof indexedDB !== 'undefined' ? createIndexedDbQueueStorage(QUEUE_DB) : createMemoryQueueStorage();
-    queue = new MutationQueue(storage, createRecordSender(), { backoff: true });
+    queue = new MutationQueue(storage, createRecordSender(), { backoff: true, owner: authOwner, ownerKey: 'record' });
     queue.onChange(() => {
       void refreshSyncCounts();
       notifyRecordsChanged();

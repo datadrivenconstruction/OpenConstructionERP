@@ -194,7 +194,7 @@ export function FieldShellPage() {
 
   // Stable headers provider so the queue sender is constructed once.
   const getHeaders = useCallback(() => fieldAuthHeaders(), []);
-  const { online, pending, pendingOps, syncing, syncNow, enqueue, discard, lastResults } =
+  const { online, pending, pendingOps, heldOps, exportHeld, discardHeld, syncing, syncNow, enqueue, discard, lastResults } =
     useFieldSync(getHeaders);
 
   // Crew-time ops live in their own queue (desktop sign-in); list them with the rest.
@@ -294,7 +294,7 @@ export function FieldShellPage() {
             {/* Pending-sync review queue: lists offline captures awaiting replay
                 with per-item retry/dismiss. */}
             <SyncQueuePanel
-              state={{ online, pendingOps, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
+              state={{ online, pendingOps, heldOps, exportHeld, discardHeld, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
               className="border-t border-slate-100"
             />
           </div>

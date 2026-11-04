@@ -34,6 +34,8 @@ import {
   Clock,
   Trash2,
   CheckCircle2,
+  Lock,
+  Download,
 } from 'lucide-react';
 import {
   summariseQueue,
@@ -45,6 +47,7 @@ import {
 import type { useFieldSync } from './useFieldSync';
 import { KIND_FIELD_TIME, MAX_OP_AGE_DAYS, kindLabelKey, reasonKey } from './fieldKinds';
 import { StorageMeter } from './StorageMeter';
+import type { QueuedOp } from '@/shared/lib/offline';
 
 /**
  * The slice of `useFieldSync` the panel needs. Declared structurally (not as the
@@ -55,7 +58,7 @@ export type SyncQueuePanelState = Pick<
   ReturnType<typeof useFieldSync>,
   'online' | 'pendingOps' | 'syncing' | 'syncNow' | 'discard'
 > &
-  Partial<Pick<ReturnType<typeof useFieldSync>, 'lastResults'>> & {
+  Partial<Pick<ReturnType<typeof useFieldSync>, 'lastResults' | 'heldOps' | 'exportHeld' | 'discardHeld'>> & {
     /** Crew-time ops from their own queue, listed beside the rest (display only). */
     extraItems?: SyncQueueItem[];
   };
@@ -69,7 +72,8 @@ export interface SyncQueuePanelProps {
 
 export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelProps) {
   const { t } = useTranslation();
-  const { online, pendingOps, syncing, syncNow, discard, lastResults, extraItems } = state;
+  const { online, pendingOps, syncing, syncNow, discard, lastResults, extraItems, heldOps, exportHeld, discardHeld } =
+    state;
 
   // Track in-flight dismissals so the row's button can disable while its async
   // discard resolves (the queue change event then drops the row entirely).
@@ -199,6 +203,10 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
         </ul>
       )}
 
+      {heldOps && heldOps.length > 0 && (
+        <HeldSection ops={heldOps} exportHeld={exportHeld} discardHeld={discardHeld} />
+      )}
+
       {/* Empty state. */}
       {summary.isEmpty ? (
         <div
@@ -229,6 +237,121 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
         </ul>
       )}
     </section>
+  );
+}
+
+/* ── Captures of other users ───────────────────────────────────────────── */
+
+function HeldSection({
+  ops,
+  exportHeld,
+  discardHeld,
+}: {
+  ops: QueuedOp[];
+  exportHeld?: () => Promise<string>;
+  discardHeld?: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [confirming, setConfirming] = useState(false);
+  const who = new Map<string, number>();
+  for (const op of ops) {
+    const name = op.owner?.label || op.owner?.userId || '';
+    who.set(name, (who.get(name) ?? 0) + 1);
+  }
+
+  const onExport = async () => {
+    if (!exportHeld) return;
+    const url = URL.createObjectURL(new Blob([await exportHeld()], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pending-captures.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div data-testid="sync-queue-held" className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+      <p className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+        <Lock size={16} aria-hidden="true" />
+        {t('field.sync_queue.held_title', { defaultValue: 'Captures of other users' })}
+      </p>
+      <ul className="flex flex-col gap-0.5">
+        {[...who.entries()].map(([name, count]) => (
+          <li key={name} data-testid="sync-queue-held-owner" className="text-xs text-amber-800">
+            {name
+              ? t('field.sync_queue.held_waiting', {
+                  defaultValue: '{{n}} waiting for {{name}} to sign in',
+                  n: count,
+                  name,
+                })
+              : t('field.sync_queue.held_unknown', {
+                  defaultValue: '{{n}} from an earlier session, owner unknown',
+                  n: count,
+                })}
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-amber-800">
+        {t('field.sync_queue.held_hint', {
+          defaultValue: 'They are never sent under your sign-in. Export them or discard them on this device.',
+        })}
+      </p>
+      {confirming ? (
+        <div className="flex flex-col gap-2" data-testid="sync-queue-held-confirm">
+          <p className="text-xs font-medium text-rose-700">
+            {t('field.sync_queue.held_confirm', {
+              defaultValue: 'Discard {{n}} captures of other users? This cannot be undone.',
+              n: ops.length,
+            })}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              data-testid="sync-queue-held-discard-yes"
+              onClick={() => {
+                setConfirming(false);
+                void discardHeld?.();
+              }}
+              className="flex h-11 flex-1 items-center justify-center rounded-xl bg-rose-600 px-3 text-sm font-semibold text-white"
+            >
+              {t('field.sync_queue.held_discard', { defaultValue: 'Discard' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-3 text-sm font-semibold text-slate-700"
+            >
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          {exportHeld && (
+            <button
+              type="button"
+              data-testid="sync-queue-held-export"
+              onClick={() => void onExport()}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 text-sm font-semibold text-amber-900"
+            >
+              <Download size={16} aria-hidden="true" />
+              {t('field.sync_queue.held_export', { defaultValue: 'Export' })}
+            </button>
+          )}
+          {discardHeld && (
+            <button
+              type="button"
+              data-testid="sync-queue-held-discard"
+              onClick={() => setConfirming(true)}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-rose-300 px-3 text-sm font-semibold text-rose-700"
+            >
+              <Trash2 size={16} aria-hidden="true" />
+              {t('field.sync_queue.held_discard', { defaultValue: 'Discard' })}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

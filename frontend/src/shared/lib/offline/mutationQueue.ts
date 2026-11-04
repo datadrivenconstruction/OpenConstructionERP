@@ -58,6 +58,17 @@ export interface MergeConflictInfo {
   detectedAt: number;
 }
 
+/** Who captured an op. Only the same user's token may replay it. */
+export interface QueueOwner {
+  userId: string;
+  tenantId?: string | null;
+  /** Name or email, shown to the next person on the device. */
+  label?: string | null;
+}
+
+/** Owner given to items that predate stamping and could not be attributed. */
+export const LEGACY_OWNER: QueueOwner = { userId: '' };
+
 /** A mutation captured while offline, awaiting replay. */
 export interface QueuedOp {
   /** Monotonic enqueue sequence; the FIFO sort key. Assigned by the queue. */
@@ -82,6 +93,8 @@ export interface QueuedOp {
   conflict?: MergeConflictInfo;
   /** Free-form routing data for the sender (record key, entity, photo id...). */
   meta?: Record<string, unknown>;
+  /** The user who captured it. Absent only on items from before stamping. */
+  owner?: QueueOwner;
 }
 
 /** What a drain run reports back to the caller per op. */
@@ -122,6 +135,32 @@ export interface QueueStorage {
 }
 
 /* ── Pure helpers ──────────────────────────────────────────────────────── */
+
+/** Same user, and the same tenant when both sides name one. */
+export function sameOwner(a: QueueOwner | undefined, b: QueueOwner | null): boolean {
+  if (!a || !b || !a.userId || !b.userId) return false;
+  if (a.userId !== b.userId) return false;
+  return !(a.tenantId && b.tenantId && a.tenantId !== b.tenantId);
+}
+
+function localLastUser(key: string): LastUserStore {
+  return {
+    get: () => {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set: (id) => {
+      try {
+        localStorage.setItem(key, id);
+      } catch {
+        /* storage blocked: legacy items are then held, the safe side */
+      }
+    },
+  };
+}
 
 function recordKeyOf(op: QueuedOp): string | null {
   const k = op.meta?.recordKey;
@@ -308,7 +347,23 @@ export function computeBackoffDelay(
   return Math.round(raw * (0.5 + random() * 0.5));
 }
 
+/** Remembers which user used the queue last, across reloads. */
+export interface LastUserStore {
+  get(): string | null;
+  set(userId: string): void;
+}
+
 export interface MutationQueueOptions {
+  /**
+   * The signed-in user, read live. When given, every op is stamped with it at
+   * enqueue and only that user's ops are replayed; others stay held. Without
+   * it the queue behaves as a single-user queue.
+   */
+  owner?: () => QueueOwner | null;
+  /** Names this queue's last-user entry in localStorage. */
+  ownerKey?: string;
+  /** Seam for tests. */
+  lastUser?: LastUserStore;
   /** Enable exponential backoff for transient failures. Off by default. */
   backoff?: boolean | BackoffOptions;
   /** Clock and randomness seams for tests. */
@@ -332,6 +387,8 @@ export class MutationQueue {
   private readonly backoff: Required<BackoffOptions> | null;
   private readonly now: () => number;
   private readonly random: () => number;
+  private readonly getOwner: (() => QueueOwner | null) | null;
+  private readonly lastUser: LastUserStore;
   private seqCounter = 0;
   private draining = false;
   private readonly changeListeners = new Set<() => void>();
@@ -344,6 +401,8 @@ export class MutationQueue {
     this.backoff = options.backoff
       ? { ...DEFAULT_BACKOFF, ...(options.backoff === true ? {} : options.backoff) }
       : null;
+    this.getOwner = options.owner ?? null;
+    this.lastUser = options.lastUser ?? localLastUser(`oe_queue_last_user:${options.ownerKey ?? 'default'}`);
     this.now = options.now ?? Date.now;
     this.random = options.random ?? Math.random;
   }
@@ -366,9 +425,51 @@ export class MutationQueue {
     return ops.length;
   }
 
-  /** All pending ops in FIFO order (for a "pending sync" review list). */
+  /** The signed-in user's pending ops in FIFO order (for a "pending sync" review list). */
   async pending(): Promise<QueuedOp[]> {
-    return sortByFifo(await this.storage.getAll());
+    const all = sortByFifo(await this.storage.getAll());
+    if (!this.getOwner) return all;
+    const cur = this.getOwner();
+    return all.filter((o) => sameOwner(o.owner, cur));
+  }
+
+  /** Ops captured by someone else (or unattributable): kept, never replayed. */
+  async held(): Promise<QueuedOp[]> {
+    if (!this.getOwner) return [];
+    const cur = this.getOwner();
+    return sortByFifo((await this.storage.getAll()).filter((o) => !sameOwner(o.owner, cur)));
+  }
+
+  /** The held ops as a JSON document the device owner can save before discarding. */
+  async exportHeld(): Promise<string> {
+    return JSON.stringify({ exportedAt: new Date(this.now()).toISOString(), ops: await this.held() }, null, 2);
+  }
+
+  /** Drop held ops for good. The caller asks the person to confirm first. */
+  async discardHeld(): Promise<number> {
+    const held = await this.held();
+    for (const op of held) await this.storage.remove(op.clientOpId);
+    if (held.length > 0) this.notify();
+    return held.length;
+  }
+
+  /**
+   * Attribute ops from before stamping. They go to the current user only when
+   * that user also used this queue last time; otherwise they are fixed as held,
+   * so a later sign-in by the original user cannot pick them up by accident.
+   * Then remember the current user.
+   */
+  private async settleSession(): Promise<QueueOwner | null> {
+    if (!this.getOwner) return null;
+    const cur = this.getOwner();
+    if (!cur || !cur.userId) return null;
+    const legacy = (await this.storage.getAll()).filter((o) => !o.owner);
+    if (legacy.length > 0) {
+      const owner = this.lastUser.get() === cur.userId ? cur : LEGACY_OWNER;
+      for (const op of legacy) await this.storage.put({ ...op, owner });
+    }
+    this.lastUser.set(cur.userId);
+    return cur;
   }
 
   /**
@@ -378,6 +479,10 @@ export class MutationQueue {
    */
   async enqueue(input: EnqueueInput): Promise<QueuedOp> {
     const clientOpId = input.clientOpId ?? newClientOpId();
+    const owner = (this.getOwner ? await this.settleSession() : null);
+    if (this.getOwner && !owner) {
+      throw new Error('Cannot queue a capture without a signed-in user');
+    }
     const existing = await this.findByClientOpId(clientOpId);
     if (existing) {
       // Dedup: a re-enqueue of the same op is a no-op, returning the original.
@@ -393,6 +498,7 @@ export class MutationQueue {
       queuedAt: Date.now(),
       retries: 0,
       ...(input.meta ? { meta: input.meta } : {}),
+      ...(owner ? { owner } : {}),
     };
     await this.storage.put(op);
     this.notify();
@@ -416,7 +522,12 @@ export class MutationQueue {
     if (this.draining) return summary;
     this.draining = true;
     try {
-      const all = sortByFifo(await this.storage.getAll());
+      const owner = (this.getOwner ? await this.settleSession() : null);
+      // No signed-in user, no replay: a token must never carry another's items.
+      if (this.getOwner && !owner) return summary;
+      const all = sortByFifo(await this.storage.getAll()).filter(
+        (o) => !this.getOwner || sameOwner(o.owner, owner),
+      );
       const now = this.now();
       const blocked = new Set<string>();
       const due: QueuedOp[] = [];
@@ -436,6 +547,8 @@ export class MutationQueue {
       for (const op of due.slice(0, this.maxPerDrain)) {
         const key = recordKeyOf(op);
         if (key && blocked.has(key)) continue;
+        // The person may have signed out or switched while earlier ops were in flight.
+        if (this.getOwner && !sameOwner(op.owner, this.getOwner())) break;
         const result = await this.replayOne(op);
         summary.results.push(result);
         summary[result.status] += 1;

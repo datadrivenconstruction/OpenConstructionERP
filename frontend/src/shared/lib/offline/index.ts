@@ -24,6 +24,10 @@ export {
 export {
   MutationQueue,
   sortByFifo,
+  sameOwner,
+  LEGACY_OWNER,
+  type QueueOwner,
+  type LastUserStore,
   newClientOpId,
   createMemoryQueueStorage,
   createIndexedDbQueueStorage,
@@ -47,6 +51,7 @@ export {
   createFieldSender,
   pickQueueStorage,
   resetFieldQueueForTests,
+  fieldSessionOwner,
   type FieldHeadersProvider,
 } from './fieldQueue';
 
