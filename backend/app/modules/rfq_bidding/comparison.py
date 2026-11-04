@@ -74,6 +74,8 @@ REASON_UNIT_NOT_CONVERTIBLE = "unit_not_convertible"
 REASON_SCOPE_NOT_COVERED = "scope_not_covered"
 REASON_TOTAL_NOT_POSITIVE = "normalised_total_not_positive"
 REASON_TECHNICAL_SCORE_MISSING = "technical_score_missing"
+REASON_LUMP_SUM_NEEDS_CLARIFICATION = "lump_sum_exceeds_lines_needs_clarification"
+REASON_SCOPE_UNCONFIRMED = "lump_sum_scope_unconfirmed"
 
 # ── Things worth saying about a quote that still ranks ───────────────────────
 
@@ -398,10 +400,15 @@ def _plan_plugs(
         for line in required
         if _text(line.get("id"))
     ]
+    # An estimate rate carries no conversion: one stated in another currency is
+    # refused rather than read as basis money. No stated currency means basis.
     rates = {
         _text(line.get("id")): rate
         for line in required
-        if _text(line.get("id")) and (rate := parse_money(line.get("estimate_rate"))) is not None and rate > 0
+        if _text(line.get("id"))
+        and _text(line.get("estimate_currency")).upper() in ("", basis_currency)
+        and (rate := parse_money(line.get("estimate_rate"))) is not None
+        and rate > 0
     }
     priced: dict[str, dict[str, tuple[Decimal, str]]] = {}
     zero_on_purpose: dict[str, set[str]] = {}
@@ -529,6 +536,14 @@ def _compare_one(
 
     plugs = plugs or []
     apply_plugs = not require_full_scope
+    if apply_plugs and plugs and line_total is not None and headline is not None:
+        if headline - line_total > LINE_TOTAL_TOLERANCE:
+            # The lump sum may already cover the unlisted items: a plug on top
+            # would count them twice, so the estimator is asked instead.
+            reasons.append(REASON_LUMP_SUM_NEEDS_CLARIFICATION)
+            plugs = []
+    if apply_plugs and line_total is None and uncovered and not bool(bid.get("scope_confirmed")):
+        reasons.append(REASON_SCOPE_UNCONFIRMED)
     plug_total = sum((Decimal(row["amount"]) for row in plugs), Decimal("0"))
     if apply_plugs and any(row["source"] == "none" for row in plugs):
         notes.append(NOTE_GAP_NOT_PLUGGABLE)
