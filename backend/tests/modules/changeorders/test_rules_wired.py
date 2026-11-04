@@ -125,3 +125,14 @@ async def test_warning_passes_and_is_reported_on_create_and_submit(session, advi
     submitted = await svc.submit_order(order.id, str(uuid.uuid4()))
     assert submitted.status == "submitted"
     assert [w["severity"] for w in submitted.validation_warnings] == ["warning"]
+
+
+@pytest.mark.asyncio
+async def test_reject_is_not_blocked_by_drifted_stored_money(session):
+    pid = await _project(session)
+    svc = ChangeOrderService(session)
+    order = await svc.create_order(ChangeOrderCreate(project_id=pid, title="Legacy"))
+    await svc.submit_order(order.id, str(uuid.uuid4()))
+    await svc.repo.update_fields(order.id, cost_impact="500", currency="")
+    rejected = await svc.reject_order(order.id, str(uuid.uuid4()))
+    assert rejected.status == "rejected"

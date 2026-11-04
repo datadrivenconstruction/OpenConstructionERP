@@ -2424,8 +2424,7 @@ class ChangeOrderService:
             )
         await self._assert_not_self_approval(order, user_id, "reject")
         self._validate_transition(order.status, "rejected")
-        warnings = await self._gate_order(order, "rejected", target_status="rejected")
-        order.validation_warnings = warnings  # type: ignore[attr-defined]
+        # No money moves on a rejection, so stored-data drift must never trap an order in review.
         # Snapshot pre-transition state for the audit row.
         from_status = order.status
         code_snapshot = order.code
