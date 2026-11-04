@@ -652,7 +652,7 @@ class InvoiceCaptureService:
         posted = uncoded = 0
         errors: list[str] = []
         for idx, (_line, cost_line_id, amount) in enumerate(cost_lines):
-            if amount <= 0:
+            if amount == 0:
                 continue
             ref = f"{row.id}:{idx}"
             base_amount, missing = _convert_to_base({currency: amount}, base_currency=base, fx_rates_map=fx_map)
@@ -832,6 +832,7 @@ class InvoiceCaptureService:
                 currency_code=row.currency_code or "",
             )
         )
+        findings.extend(logic.negative_line_findings(row.line_items or []))
         match = logic.match_report_findings(match_results)
         findings.extend(match)
         if enforce_match_ack:

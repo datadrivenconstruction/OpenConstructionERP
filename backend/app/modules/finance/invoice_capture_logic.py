@@ -430,6 +430,22 @@ def validate_amounts(net: Decimal, tax: Decimal, gross: Decimal) -> list[Finding
     return findings
 
 
+def negative_line_findings(line_items: list[dict]) -> list[Finding]:
+    """A negative line (discount, credit) is legitimate but must be seen: flag it as a warning, never drop it."""
+    out: list[Finding] = []
+    for idx, li in enumerate(line_items, start=1):
+        if to_decimal(li.get("amount")) < 0:
+            out.append(
+                Finding(
+                    "warning",
+                    "negative_line",
+                    f"Line {idx} is a negative amount ({money_str(li.get('amount'))}): a discount or credit.",
+                    f"line_items[{idx}]",
+                )
+            )
+    return out
+
+
 def validate_booking_complete(
     *,
     expense_account: str | None,

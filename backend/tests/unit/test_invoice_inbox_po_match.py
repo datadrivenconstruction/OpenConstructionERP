@@ -462,3 +462,37 @@ async def test_mismatch_blocks_approval_until_acknowledged(monkeypatch: pytest.M
 
 def test_module_exposes_the_service() -> None:
     assert svc_mod.InvoiceCaptureService is InvoiceCaptureService
+
+
+def test_negative_lines_are_flagged_not_dropped() -> None:
+    from app.modules.finance import invoice_capture_logic as logic
+
+    found = logic.negative_line_findings([{"amount": "100.00"}, {"amount": "-10.00"}])
+    assert [(f.severity, f.code) for f in found] == [("warning", "negative_line")]
+    assert logic.negative_line_findings([{"amount": "5"}, {}]) == []
+
+
+@pytest.mark.asyncio
+async def test_a_negative_line_posts_as_a_credit_actual(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[dict] = []
+
+    class _Spine:
+        def __init__(self, _session: Any) -> None: ...
+
+        async def post_actual_to_budget_line(self, **kw: Any) -> None:
+            calls.append(kw)
+
+    class _Repo:
+        def __init__(self, _session: Any) -> None: ...
+
+        async def get_by_id(self, _id: Any) -> Any:
+            return SimpleNamespace(currency="EUR", fx_rates=None, metadata_={})
+
+    monkeypatch.setattr("app.modules.costmodel.service.CostSpineService", _Spine)
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _Repo)
+    row = _row()
+    result = await _service(_FakeSession())._post_actuals(
+        row, uuid.uuid4(), row.project_id, [(0, None, Decimal("100")), (1, None, Decimal("-10"))]
+    )
+    assert result["posted"] == 2
+    assert sum(Decimal(c["amount_base"]) for c in calls) == Decimal("90.00")

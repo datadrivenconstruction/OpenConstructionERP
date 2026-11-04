@@ -15,6 +15,7 @@ from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.validation.engine import ValidationContext, rule_registry
@@ -40,6 +41,7 @@ from app.modules.costmodel.models import CostLine
 ZERO = Decimal("0")
 Q = Decimal("0.01")
 FINAL = ("approved", "rejected")
+CODE_RETRIES = 5
 
 # action -> (statuses it may start from, status it ends in)
 STEPS: dict[str, tuple[tuple[str, ...], str]] = {
@@ -142,10 +144,23 @@ class BudgetLedgerService:
 
     # ── helpers ───────────────────────────────────────────────────────────
 
-    async def _next_code(self, model: Any, prefix: str, project_id: uuid.UUID) -> str:
+    async def _next_code(self, model: Any, prefix: str, project_id: uuid.UUID, skip: int = 0) -> str:
         rows = await self.session.execute(select(model.code).where(model.project_id == project_id))
         used = [int(c.rsplit("-", 1)[-1]) for (c,) in rows.all() if c.rsplit("-", 1)[-1].isdigit()]
-        return f"{prefix}-{max(used, default=0) + 1:03d}"
+        return f"{prefix}-{max(used, default=0) + 1 + skip:03d}"
+
+    async def _add_coded(self, model: Any, prefix: str, project_id: uuid.UUID, **fields: Any) -> Any:
+        """Insert a row under the next free code; a concurrent writer taking it first makes us take the next one."""
+        for attempt in range(CODE_RETRIES):
+            row = model(project_id=project_id, code=await self._next_code(model, prefix, project_id, attempt), **fields)
+            try:
+                async with self.session.begin_nested():
+                    self.session.add(row)
+                    await self.session.flush()
+            except IntegrityError:
+                continue
+            return row
+        raise HTTPException(status.HTTP_409_CONFLICT, detail="Could not allocate a free entry code, try again")
 
     def _audit(
         self,
@@ -244,16 +259,15 @@ class BudgetLedgerService:
     ) -> TransferOut:
         legs = [(g.cost_line_id, g.amount.quantize(Q)) for g in body.legs]
         await self._refuse_on_errors(await self._payload(project_id, "transfer", "create", legs), project_id, locale)
-        transfer = BudgetTransfer(
-            project_id=project_id,
-            code=await self._next_code(BudgetTransfer, "BT", project_id),
+        transfer = await self._add_coded(
+            BudgetTransfer,
+            "BT",
+            project_id,
             reason=body.reason.strip(),
             requested_by=user_id,
             status="draft",
             decision_note="",
         )
-        self.session.add(transfer)
-        await self.session.flush()
         for line_id, amount in legs:
             self.session.add(BudgetTransferLeg(transfer_id=transfer.id, cost_line_id=line_id, amount=amount))
         self._audit(project_id, "transfer", transfer.id, "create", "", "draft", user_id)
@@ -299,9 +313,10 @@ class BudgetLedgerService:
         amount = _no_zero(body.amount)
         payload = await self._payload(project_id, "modification", "create", [(body.cost_line_id, amount)])
         await self._refuse_on_errors(payload, project_id, locale)
-        mod = BudgetModification(
-            project_id=project_id,
-            code=await self._next_code(BudgetModification, "BM", project_id),
+        mod = await self._add_coded(
+            BudgetModification,
+            "BM",
+            project_id,
             cost_line_id=body.cost_line_id,
             amount=amount,
             reason=body.reason.strip(),
@@ -310,8 +325,6 @@ class BudgetLedgerService:
             status="draft",
             decision_note="",
         )
-        self.session.add(mod)
-        await self.session.flush()
         self._audit(project_id, "modification", mod.id, "create", "", "draft", user_id)
         await self.session.flush()
         return self._mod_out(mod, await self._codes(project_id))

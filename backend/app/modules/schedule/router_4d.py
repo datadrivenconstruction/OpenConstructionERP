@@ -237,6 +237,20 @@ async def _verify_schedule_access(session: SessionDep, schedule_id: uuid.UUID, u
     return schedule
 
 
+async def _verify_model_in_project(session: SessionDep, schedule: Schedule, model_version_id: uuid.UUID | None) -> None:
+    """404 unless the BIM model belongs to the schedule's project (no cross-project element leak)."""
+    if model_version_id is None:
+        return
+    from app.modules.bim_hub.models import BIMModel
+
+    model = await session.get(BIMModel, model_version_id)
+    if model is None or model.project_id != schedule.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model {model_version_id} not found",
+        )
+
+
 async def _verify_task_access(session: SessionDep, task_id: uuid.UUID, user_id: str) -> Activity:
     """Load an activity and verify the caller owns its schedule's project.
 
@@ -394,7 +408,8 @@ async def get_snapshot(
     model_version_id: uuid.UUID | None = Query(default=None),
 ) -> SnapshotResponse:
     """Return ``{element_id: status}`` for every linked element on ``as_of_date``."""
-    await _verify_schedule_access(session, schedule_id, user_id)
+    schedule = await _verify_schedule_access(session, schedule_id, user_id)
+    await _verify_model_in_project(session, schedule, model_version_id)
     target = _parse_as_of(as_of_date)
     service = ScheduleSnapshotService(session)
     statuses = await service.snapshot(schedule_id, target, model_version_id)
@@ -421,7 +436,8 @@ async def get_snapshot_cost(
     """Return PV/EV/AC/BAC at ``as_of_date`` and the cost carried by each linked element."""
     from app.modules.schedule.snapshot_cost import COVERAGE_LOW_PCT
 
-    await _verify_schedule_access(session, schedule_id, user_id)
+    schedule = await _verify_schedule_access(session, schedule_id, user_id)
+    await _verify_model_in_project(session, schedule, model_version_id)
     target = _parse_as_of(as_of_date)
     data = await ScheduleSnapshotService(session).cost_snapshot(schedule_id, target, model_version_id)
 
