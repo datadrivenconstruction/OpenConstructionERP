@@ -43,6 +43,22 @@ def _clock(value: Any) -> time | None:
         return None
 
 
+def _is_before_rise(sunrise: Any, sunset: Any) -> bool:
+    """True when the stated sunset is not after the sunrise.
+
+    Full datetimes are compared as instants, so a UTC-stamped day that wraps midnight
+    (Australia, Asia) is not misjudged. Bare times are compared as written, and a sunset
+    before 03:00 is read as after midnight (summer at high latitudes), not as an error.
+    """
+    rise_at, set_at = parse_instant(sunrise), parse_instant(sunset)
+    if rise_at is not None and set_at is not None and "T" in str(sunrise) and "T" in str(sunset):
+        return rise_at >= set_at
+    rise, sset = _clock(sunrise), _clock(sunset)
+    if rise is None or sset is None:
+        return False
+    return rise >= sset and sset >= time(3, 0)
+
+
 class WeatherSunOrderRule(SiteRule):
     """The sun rises before it sets."""
 
@@ -54,8 +70,7 @@ class WeatherSunOrderRule(SiteRule):
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         w = section(context, "weather")
         ref = str(w.get("id", ""))
-        rise, sset = _clock(w.get("sunrise")), _clock(w.get("sunset"))
-        if rise is not None and sset is not None and rise >= sset:
+        if _is_before_rise(w.get("sunrise"), w.get("sunset")):
             return [self.fail(context, "dates_ordered", ref=ref, earlier=w.get("sunrise"), later=w.get("sunset"))]
         return [self.ok(ref)]
 
