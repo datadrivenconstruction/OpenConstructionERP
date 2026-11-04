@@ -92,6 +92,18 @@ def _retention_until_iso(years: int = logic.DEFAULT_RETENTION_YEARS) -> str:
     return f"{now.year + years:04d}-{now.month:02d}-{day:02d}"
 
 
+def _po_err(status_code: int, code: str, message: str, **params: object) -> HTTPException:
+    """An HTTP error whose ``detail`` carries a translatable key (``api_errors.invoice_capture_<code>``)."""
+    return HTTPException(
+        status_code,
+        detail={
+            "code": f"invoice_capture_{code}",
+            "message": message,
+            "params": params,
+        },
+    )
+
+
 class InvoiceCaptureService:
     """Business logic for the invoice-approval DMS inbox."""
 
@@ -913,15 +925,19 @@ class InvoiceCaptureService:
         if purchase_order_id is not None:
             procurement = self._procurement(self.session)
             if procurement is None:
-                raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Procurement is not installed.")
+                raise _po_err(
+                    status.HTTP_422_UNPROCESSABLE_CONTENT, "procurement_missing", "Procurement is not installed."
+                )
             po = await procurement.get_po(purchase_order_id)
             if po.project_id != row.project_id:
                 # Same answer as a missing order, so another project's order ids cannot be probed.
-                raise HTTPException(status.HTTP_404_NOT_FOUND, "Purchase order not found")
+                raise _po_err(status.HTTP_404_NOT_FOUND, "po_not_found", "Purchase order not found")
             if po.status not in logic.BILLABLE_PO_STATUSES:
-                raise HTTPException(
+                raise _po_err(
                     status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    "po_not_billable",
                     f"Order {po.po_number} is '{po.status}'; only an issued order can be invoiced.",
+                    po_number=po.po_number,
                 )
             row.purchase_order_id = po.id
             row.po_reference = po.po_number
@@ -977,9 +993,10 @@ class InvoiceCaptureService:
 
     def _guard_editable(self, row: CapturedInvoice) -> None:
         if row.status in {"approved", "posted"}:
-            raise HTTPException(
+            raise _po_err(
                 status.HTTP_409_CONFLICT,
-                f"A {row.status} invoice is read-only. Move it back to draft first.",
+                "invoice_read_only",
+                "An approved or posted invoice is read-only. Move it back to draft first.",
             )
 
     def _require_transition(self, row: CapturedInvoice, target: str) -> None:

@@ -74,10 +74,22 @@ def _detail(results: list[Any]) -> list[dict[str, str]]:
     ]
 
 
+def _err(status_code: int, code: str, message: str, **params: Any) -> HTTPException:
+    """An HTTP error whose ``detail`` carries a translatable key (``api_errors.budget_ledger_<code>``)."""
+    return HTTPException(
+        status_code,
+        detail={
+            "code": f"budget_ledger_{code}",
+            "message": message,
+            "params": params,
+        },
+    )
+
+
 def _no_zero(amount: Decimal) -> Decimal:
     amount = amount.quantize(Q)
     if amount == 0:
-        raise HTTPException(422, detail="The amount must not be zero")
+        raise _err(422, "amount_zero", "The amount must not be zero")
     return amount
 
 
@@ -121,7 +133,7 @@ class BudgetLedgerService:
             planned[k] = planned.get(k, ZERO) + v
         codes = await self._codes(project_id)
         if any(str(i) not in codes for i, _ in legs):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Cost line not found in this project")
+            raise _err(status.HTTP_404_NOT_FOUND, "cost_line_not_found", "Cost line not found in this project")
         return {
             "kind": kind,
             "action": action,
@@ -174,7 +186,7 @@ class BudgetLedgerService:
     async def _get(self, model: Any, project_id: uuid.UUID, entry_id: uuid.UUID) -> Any:
         row = await self.session.get(model, entry_id)
         if row is None or row.project_id != project_id:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Entry not found")
+            raise _err(status.HTTP_404_NOT_FOUND, "entry_not_found", "Entry not found")
         return row
 
     async def _legs(self, transfer_id: uuid.UUID) -> list[BudgetTransferLeg]:
@@ -190,7 +202,7 @@ class BudgetLedgerService:
         payload = {"kind": kind, "action": action, "guard": True, "status": entry.status, "code": entry.code}
         await self._refuse_on_errors(payload, entry.project_id, locale)
         if entry.status != "draft":
-            raise HTTPException(status.HTTP_409_CONFLICT, detail="Only a draft can be changed")
+            raise _err(status.HTTP_409_CONFLICT, "draft_only", "Only a draft can be changed")
 
     async def _step(
         self,
@@ -207,9 +219,13 @@ class BudgetLedgerService:
         entry = await self._get(model, project_id, entry_id)
         await self._guard_final(kind, entry, locale)
         if entry.status not in allowed:
-            raise HTTPException(status.HTTP_409_CONFLICT, detail=f"Cannot {action} an entry that is {entry.status}")
+            raise _err(
+                status.HTTP_409_CONFLICT,
+                "step_not_allowed",
+                "This entry cannot be moved to that step from its current status",
+            )
         if action == "reject" and not note.strip():
-            raise HTTPException(422, detail="A rejection needs a reason")
+            raise _err(422, "reject_reason_required", "A rejection needs a reason")
         if action in ("submit", "approve"):
             if kind == "transfer":
                 legs = [(g.cost_line_id, g.amount) for g in await self._legs(entry.id)]

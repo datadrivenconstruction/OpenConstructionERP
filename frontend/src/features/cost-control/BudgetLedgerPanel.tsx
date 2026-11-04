@@ -10,7 +10,9 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { Badge, Button, Skeleton } from '@/shared/ui';
+import { Badge, Button, ConfirmDialog, Skeleton } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
+import { parseMoneyInput } from '@/shared/lib/parseDecimal';
 import type { BadgeVariant } from '@/shared/ui';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -74,7 +76,8 @@ interface Props {
 }
 
 export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { confirm, ...confirmProps } = useConfirm();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [view, setView] = useState<View>('transfers');
@@ -124,6 +127,29 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
   const pending = (data?.pending_transfers ?? 0) + (data?.pending_modifications ?? 0);
   const busy = step.isPending || remove.isPending;
 
+  const approve = async (kind: LedgerKind, id: string) => {
+    const ok = await confirm({
+      title: t('cost_control.ledger.confirm_approve_title', { defaultValue: 'Approve this entry?' }),
+      message: t('cost_control.ledger.confirm_approve_message', {
+        defaultValue: 'Once approved, the entry changes the revised budget and can no longer be edited or deleted.',
+      }),
+      confirmLabel: t('cost_control.ledger.approve', { defaultValue: 'Approve' }),
+      variant: 'warning',
+    });
+    if (ok) step.mutate({ kind, id, step: 'approve' });
+  };
+  const discard = async (kind: LedgerKind, id: string) => {
+    const ok = await confirm({
+      title: t('cost_control.ledger.confirm_delete_title', { defaultValue: 'Delete this draft?' }),
+      message: t('cost_control.ledger.confirm_delete_message', {
+        defaultValue: 'The draft is removed. This cannot be undone.',
+      }),
+      confirmLabel: t('cost_control.ledger.delete', { defaultValue: 'Delete' }),
+      variant: 'danger',
+    });
+    if (ok) remove.mutate({ kind, id });
+  };
+
   const actions = (kind: LedgerKind, id: string, status: LedgerStatus) => (
     <div className="flex shrink-0 flex-wrap items-center gap-2">
       {status === 'draft' && canEdit && (
@@ -131,14 +157,14 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
           <Button size="sm" disabled={busy} onClick={() => step.mutate({ kind, id, step: 'submit' })}>
             {t('cost_control.ledger.submit', { defaultValue: 'Submit' })}
           </Button>
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => remove.mutate({ kind, id })}>
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => void discard(kind, id)}>
             {t('cost_control.ledger.delete', { defaultValue: 'Delete' })}
           </Button>
         </>
       )}
       {status === 'submitted' && canManage && (
         <>
-          <Button size="sm" disabled={busy} onClick={() => step.mutate({ kind, id, step: 'approve' })}>
+          <Button size="sm" disabled={busy} onClick={() => void approve(kind, id)}>
             {t('cost_control.ledger.approve', { defaultValue: 'Approve' })}
           </Button>
           <Button size="sm" variant="ghost" disabled={busy} onClick={() => setRejecting({ kind, id })}>
@@ -161,6 +187,7 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         />
         <Button
           size="sm"
+          loading={step.isPending}
           disabled={busy || !note.trim()}
           onClick={() => step.mutate({ kind, id, step: 'reject', note })}
         >
@@ -253,16 +280,18 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         })}
       </p>
 
+      <ConfirmDialog {...confirmProps} />
+
       {error && (
         <p role="alert" className="mx-4 mt-2 rounded-md bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
           {error}
         </p>
       )}
       {form === 'transfer' && (
-        <TransferForm projectId={projectId} onDone={created} onCancel={() => setForm(null)} onError={fail} />
+        <TransferForm projectId={projectId} currency={currency} onDone={created} onCancel={() => setForm(null)} onError={fail} />
       )}
       {form === 'modification' && (
-        <ModificationForm projectId={projectId} onDone={created} onCancel={() => setForm(null)} onError={fail} />
+        <ModificationForm projectId={projectId} currency={currency} onDone={created} onCancel={() => setForm(null)} onError={fail} />
       )}
 
       <div role="tablist" className="mt-3 flex gap-1 border-b border-border-light px-4">
@@ -313,8 +342,13 @@ function Empty({ text }: { text: string }) {
   return <p className="p-4 text-sm text-content-tertiary">{text}</p>;
 }
 
+function fmtStamp(iso: string, locale: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 function History({ data, currency }: { data: BudgetLedger; currency: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (data.audit.length === 0 && data.lines.length === 0) {
     return <Empty text={t('cost_control.ledger.empty_history', { defaultValue: 'Nothing recorded yet.' })} />;
   }
@@ -362,7 +396,7 @@ function History({ data, currency }: { data: BudgetLedger; currency: string }) {
           <li key={`${a.entity_id}-${i}`} className="text-xs text-content-secondary">
             <span className="font-mono text-content-tertiary">{codeOf.get(a.entity_id) ?? ''}</span>{' '}
             {actionLabel(t, a.action)}
-            {a.created_at ? `, ${a.created_at.slice(0, 16).replace('T', ' ')}` : ''}
+            {a.created_at ? `, ${fmtStamp(a.created_at, i18n.language)}` : ''}
             {a.note ? `: ${a.note}` : ''}
           </li>
         ))}
@@ -373,12 +407,22 @@ function History({ data, currency }: { data: BudgetLedger; currency: string }) {
 
 interface FormProps {
   projectId: string;
+  currency: string;
   onDone: () => void;
   onCancel: () => void;
   onError: (e: unknown) => void;
 }
 
 const FIELD = 'w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm';
+
+function AmountInput({ value, onChange, currency }: { value: string; onChange: (v: string) => void; currency: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <input className={FIELD} inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} />
+      <span className="text-xs text-content-tertiary">{currency}</span>
+    </div>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -389,13 +433,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function TransferForm({ projectId, onDone, onCancel, onError }: FormProps) {
+function TransferForm({ projectId, currency, onDone, onCancel, onError }: FormProps) {
   const { t } = useTranslation();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
-  const value = num(amount);
+  const value = parseMoneyInput(amount) ?? 0;
   const valid = !!from && !!to && from !== to && value > 0 && !!reason.trim();
   const save = useMutation({
     mutationFn: () =>
@@ -418,7 +462,7 @@ function TransferForm({ projectId, onDone, onCancel, onError }: FormProps) {
         <CostLinePicker projectId={projectId} value={to} onChange={setTo} data-testid="ledger-to" />
       </Field>
       <Field label={t('cost_control.ledger.amount', { defaultValue: 'Amount' })}>
-        <input className={FIELD} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <AmountInput value={amount} onChange={setAmount} currency={currency} />
       </Field>
       <Field label={t('cost_control.ledger.reason', { defaultValue: 'Reason' })}>
         <input className={FIELD} value={reason} onChange={(e) => setReason(e.target.value)} />
@@ -440,13 +484,13 @@ function TransferForm({ projectId, onDone, onCancel, onError }: FormProps) {
   );
 }
 
-function ModificationForm({ projectId, onDone, onCancel, onError }: FormProps) {
+function ModificationForm({ projectId, currency, onDone, onCancel, onError }: FormProps) {
   const { t } = useTranslation();
   const [line, setLine] = useState('');
   const [amount, setAmount] = useState('');
   const [ref, setRef] = useState('');
   const [reason, setReason] = useState('');
-  const value = num(amount);
+  const value = parseMoneyInput(amount) ?? 0;
   const valid = !!line && value !== 0 && !!reason.trim();
   const save = useMutation({
     mutationFn: () =>
@@ -465,7 +509,7 @@ function ModificationForm({ projectId, onDone, onCancel, onError }: FormProps) {
         <CostLinePicker projectId={projectId} value={line} onChange={setLine} data-testid="ledger-line" />
       </Field>
       <Field label={t('cost_control.ledger.amount_signed', { defaultValue: 'Amount (a minus sign lowers the budget)' })}>
-        <input className={FIELD} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <AmountInput value={amount} onChange={setAmount} currency={currency} />
       </Field>
       <Field label={t('cost_control.ledger.approval_ref', { defaultValue: 'Owner approval (letter or minute no.)' })}>
         <input className={FIELD} value={ref} onChange={(e) => setRef(e.target.value)} />

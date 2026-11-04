@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../api', async (importOriginal) => {
@@ -113,7 +113,43 @@ describe('BudgetLedgerPanel', () => {
     await screen.findByTestId('transfer-BT-002');
     expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    expect(budgetLedgerApi.step).not.toHaveBeenCalled();
+    const approveDialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(approveDialog).getByRole('button', { name: 'Approve' }));
     await waitFor(() => expect(budgetLedgerApi.step).toHaveBeenCalledWith('p-1', 'transfer', 't-2', 'approve', ''));
+  });
+
+  it('deleting a draft asks first', async () => {
+    vi.mocked(budgetLedgerApi.remove).mockResolvedValue(undefined as never);
+    renderPanel(true, false);
+    await screen.findByTestId('transfer-BT-001');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(budgetLedgerApi.remove).not.toHaveBeenCalled();
+    const deleteDialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(deleteDialog).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(budgetLedgerApi.remove).toHaveBeenCalledWith('p-1', 'transfer', 't-1'));
+  });
+
+  it('reads an amount typed with a decimal comma', async () => {
+    vi.mocked(budgetLedgerApi.createTransfer).mockResolvedValue(LEDGER.transfers[0]!);
+    renderPanel(true, false);
+    await screen.findByTestId('transfer-BT-001');
+    fireEvent.click(screen.getByRole('button', { name: 'Move budget' }));
+    fireEvent.change(screen.getByTestId('ledger-from'), { target: { value: 'l-1' } });
+    fireEvent.change(screen.getByTestId('ledger-to'), { target: { value: 'l-2' } });
+    const inputs = screen.getAllByRole('textbox');
+    fireEvent.change(inputs[0]!, { target: { value: '12,50' } });
+    fireEvent.change(inputs[1]!, { target: { value: 'x' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save as draft' }));
+    await waitFor(() =>
+      expect(budgetLedgerApi.createTransfer).toHaveBeenCalledWith('p-1', {
+        reason: 'x',
+        legs: [
+          { cost_line_id: 'l-1', amount: '-12.50' },
+          { cost_line_id: 'l-2', amount: '12.50' },
+        ],
+      }),
+    );
   });
 
   it('rejecting needs a reason', async () => {
