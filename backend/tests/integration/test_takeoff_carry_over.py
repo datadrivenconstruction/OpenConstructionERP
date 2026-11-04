@@ -188,3 +188,36 @@ async def test_carry_refuses_same_document_and_foreign_project():
             await carry_measurements(service, uuid.uuid4(), seed["a"], seed["b"], user_id=seed["user"])
         assert foreign.value.status_code == 404
         await session.rollback()
+
+
+@pytest.mark.asyncio
+async def test_preview_writes_nothing_and_auto_carry_is_idempotent():
+    from app.modules.takeoff.carry_over import CARRY_KEY, carry_measurements, preview_carry
+    from app.modules.takeoff.service import TakeoffService
+
+    async with async_session_factory() as session:
+        seed = await _seed(session)
+        service = TakeoffService(session)
+        await _measure(service, seed, annotation="Wall W1")
+
+        before = await service.measurement_repo.list_all_for_document(seed["project"], seed["b"], max_rows=100)
+        preview = await preview_carry(service, seed["project"], seed["a"], seed["b"], align="auto")
+        after = await service.measurement_repo.list_all_for_document(seed["project"], seed["b"], max_rows=100)
+        assert len(before) == len(after) == 0
+        assert preview["pages"][0]["new"] == 1 and preview["pages"][0]["method"] == "title"
+        # No anchors on either sheet: geometry unverified, so never "high".
+        assert preview["items"][0]["band"] == "review"
+
+        first = await carry_measurements(
+            service, seed["project"], seed["a"], seed["b"], user_id=seed["user"], align="auto", page_map={1: 1}
+        )
+        assert first["carried"] == 1
+        copy = (await service.measurement_repo.list_all_for_document(seed["project"], seed["b"], max_rows=100))[0]
+        carry = copy.metadata_[CARRY_KEY]
+        assert carry["status"] == "needs_review" and carry["page_match"] == "manual"
+        assert 0.6 <= carry["match_confidence"] < 0.85 and carry["from_page"] == 1
+
+        again = await carry_measurements(
+            service, seed["project"], seed["a"], seed["b"], user_id=seed["user"], align="auto"
+        )
+        assert again["carried"] == 0 and again["already_carried"] == 1

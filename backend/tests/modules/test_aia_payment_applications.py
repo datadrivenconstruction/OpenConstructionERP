@@ -22,17 +22,16 @@ import pytest
 import pytest_asyncio
 from fastapi import HTTPException
 
-from app.modules.contracts.aia import (
+from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
+from app.modules.contracts.pay_application import (
     apply_retention_snapshot,
     build_g702_summary,
     build_g703,
     build_g703_line,
-    is_aia_eligible,
-    normalise_country,
 )
-from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
 from app.modules.contracts.service import ContractsService
 from app.modules.projects.models import Project
+from app.modules.us_pack.billing_forms import is_aia_eligible, normalise_country
 from app.modules.users.models import User
 from tests._pg import transactional_session
 
@@ -302,7 +301,7 @@ async def _seed_claim(s, *, country_code: str, address: dict | None = None) -> P
 async def test_aia_application_built_for_us_project(session) -> None:
     claim = await _seed_claim(session, country_code="US")
     svc = ContractsService(session)
-    app = await svc.build_aia_application(claim.id)
+    app = await svc.build_form_application("aia-application", claim.id)
 
     assert app["currency"] == "USD"
     assert len(app["lines"]) == 1
@@ -318,7 +317,7 @@ async def test_aia_application_built_via_address_name(session) -> None:
     # country_code blank-ish (DE default would block), but address says Canada.
     claim = await _seed_claim(session, country_code="CA")
     svc = ContractsService(session)
-    app = await svc.build_aia_application(claim.id)
+    app = await svc.build_form_application("aia-application", claim.id)
     assert app["summary"]["total_completed_stored"] == Decimal("5000.00")
 
 
@@ -327,7 +326,7 @@ async def test_aia_application_404_for_non_us_project(session) -> None:
     claim = await _seed_claim(session, country_code="DE")
     svc = ContractsService(session)
     with pytest.raises(HTTPException) as exc:
-        await svc.build_aia_application(claim.id)
+        await svc.build_form_application("aia-application", claim.id)
     assert exc.value.status_code == 404
 
 
@@ -342,10 +341,10 @@ async def test_canonical_payment_application_preserves_claim_figures(session, co
     assert application["summary"]["total_earned_less_retainage"] == Decimal("4750.00")
     assert application["lines"][0]["retainage"] == Decimal("250.00")
     if country in {"US", "CA", "AU"}:
-        assert application == await service.build_aia_application(claim.id)
+        assert application == await service.build_form_application("aia-application", claim.id)
     else:
         with pytest.raises(HTTPException) as exc:
-            await service.build_aia_application(claim.id)
+            await service.build_form_application("aia-application", claim.id)
         assert exc.value.status_code == 404
 
 
@@ -388,7 +387,7 @@ async def test_canonical_and_aia_use_claim_currency_for_shared_math(session, cur
     assert application["currency"] == currency
     assert application["summary"]["total_completed_stored"] == Decimal(amount)
     assert application["summary"]["retainage"] == Decimal(retained)
-    assert application == await service.build_aia_application(claim.id)
+    assert application == await service.build_form_application("aia-application", claim.id)
     assert await service.claim_completed_and_held(claim) == (Decimal(amount), Decimal(retained))
     context = await service.claim_rule_context(claim)
     assert Decimal(context["lines"][0]["total_completed_stored"]) == Decimal(amount)

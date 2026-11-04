@@ -462,7 +462,7 @@ async def test_the_certificate_adds_up_after_a_change_moved_lines(world) -> None
         )
         # Half of the concrete line as the change left it: 120 m3 x 400 / 2.
         assert claim.gross_amount == D("24000")
-        application = await svc.build_aia_application(claim.id)
+        application = await svc.build_form_application("aia-application", claim.id)
         summary = application["summary"]
         assert summary["change_orders_net"] == D("14500.00")
         scheduled = sum((D(str(row["scheduled_value"])) for row in application["lines"]), D("0"))

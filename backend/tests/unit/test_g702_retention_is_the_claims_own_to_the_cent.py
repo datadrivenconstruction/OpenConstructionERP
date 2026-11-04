@@ -16,7 +16,7 @@ import uuid
 from decimal import ROUND_HALF_UP, Decimal
 from types import SimpleNamespace
 
-from app.modules.contracts.aia import apply_retention_snapshot, build_g702_summary, build_g703
+from app.modules.contracts.pay_application import apply_retention_snapshot, build_g702_summary, build_g703
 
 CENT = Decimal("0.01")
 

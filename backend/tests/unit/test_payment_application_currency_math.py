@@ -5,7 +5,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-from app.modules.contracts.aia import (
+from app.modules.contracts.pay_application import (
     apply_retention_snapshot,
     build_cost_of_work_row,
     build_g702_summary,
