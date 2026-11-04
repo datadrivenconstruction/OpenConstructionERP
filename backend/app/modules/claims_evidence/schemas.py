@@ -4,7 +4,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EvidenceEntryOut(BaseModel):
@@ -42,6 +44,7 @@ class EvidencePackOut(BaseModel):
     date_to: str | None
     sections: list[EvidenceSectionOut]
     content_digest: str
+    warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # --------------------------------------------------------------------------- #
@@ -110,3 +113,4 @@ class ProvabilityScoreOut(BaseModel):
     entry_count: int
     date_from: str | None
     date_to: str | None
+    warnings: list[dict[str, Any]] = Field(default_factory=list)

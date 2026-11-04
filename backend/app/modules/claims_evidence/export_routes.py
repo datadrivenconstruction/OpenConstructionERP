@@ -30,7 +30,7 @@ from app.core.register_context import (
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.claims_evidence.pdf_export import evidence_pack_register
 from app.modules.claims_evidence.pdf_translations import evidence_pack_filename, resolve_pdf_locale, tr
-from app.modules.claims_evidence.service import assemble_evidence, reconstruct_subject
+from app.modules.claims_evidence.service import assemble_evidence, check_pack, reconstruct_subject
 
 export_router = APIRouter()
 
@@ -62,6 +62,7 @@ async def export_evidence_pack(
     pack = await assemble_evidence(
         session, project_id=project_id, subject_ref=subject_ref, basis=basis, activity_limit=limit
     )
+    await check_pack(pack)
     project = await load_project_header(session, project_id)
     document = evidence_pack_register(
         pack,
@@ -100,6 +101,7 @@ async def export_reconstructed_pack_document(
     pack = await reconstruct_subject(
         session, project_id=project_id, subject_type=subject_type, subject_id=subject_id, basis=basis
     )
+    await check_pack(pack)
     project = await load_project_header(session, project_id)
     document = evidence_pack_register(
         pack,

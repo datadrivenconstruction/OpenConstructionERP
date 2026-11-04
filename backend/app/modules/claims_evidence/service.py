@@ -12,6 +12,7 @@ no migration.
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -165,3 +166,69 @@ async def reconstruct_subject(
     thread = await build_event_thread(session, project_id, event_key)
     entries = [_entry_from_thread_record(tr) for tr in thread.records]
     return assemble_pack(event_key, entries, basis=basis)
+
+
+def pack_rule_context(pack: EvidencePack) -> dict[str, Any]:
+    """The ``claims_evidence`` rule-set context for an assembled pack."""
+    return {
+        "pack": {
+            "subject_ref": pack.subject_ref,
+            "basis": pack.basis,
+            "entry_count": pack.entry_count,
+            "date_from": pack.date_from,
+            "date_to": pack.date_to,
+            "sections": [
+                {
+                    "name": sec.name,
+                    "entries": [
+                        {
+                            "ref_id": e.ref_id,
+                            "source_module": e.source_module,
+                            "kind": e.kind,
+                            "occurred_at": e.occurred_at,
+                        }
+                        for e in sec.entries
+                    ],
+                }
+                for sec in pack.sections
+            ],
+        }
+    }
+
+
+async def check_pack(pack: EvidencePack) -> list[dict[str, Any]]:
+    """Run the ``claims_evidence`` rule set over a pack.
+
+    Errors raise a 422 (``claims_evidence_validation_failed``) before the pack is
+    returned or recorded; warnings are returned for the client.
+    """
+    from app.core.validation.money_rules import enforce_rule_set
+    from app.modules.claims_evidence.validators import CLAIMS_EVIDENCE_RULE_SET
+
+    return await enforce_rule_set(
+        pack_rule_context(pack),
+        rule_set=CLAIMS_EVIDENCE_RULE_SET,
+        target_type="claims_evidence_pack",
+        target_id=pack.subject_ref,
+        error_code="claims_evidence_validation_failed",
+    )
+
+
+async def check_score(subject_id: str, score: Any) -> list[dict[str, Any]]:
+    """Run the ``claims_evidence`` rule set over a provability score."""
+    from app.core.validation.money_rules import enforce_rule_set
+    from app.modules.claims_evidence.validators import CLAIMS_EVIDENCE_RULE_SET
+
+    return await enforce_rule_set(
+        {
+            "score": {
+                "subject_id": subject_id,
+                "score": score.score,
+                "sub_scores": [{"signal": x.signal, "weight": x.weight, "earned": x.earned} for x in score.sub_scores],
+            }
+        },
+        rule_set=CLAIMS_EVIDENCE_RULE_SET,
+        target_type="claims_evidence_score",
+        target_id=subject_id,
+        error_code="claims_evidence_validation_failed",
+    )

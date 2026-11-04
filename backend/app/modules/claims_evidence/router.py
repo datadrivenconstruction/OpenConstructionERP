@@ -31,7 +31,7 @@ from app.modules.claims_evidence.schemas import (
     ProvabilitySubScoreOut,
     ProvabilityWeaknessOut,
 )
-from app.modules.claims_evidence.service import assemble_evidence, reconstruct_subject
+from app.modules.claims_evidence.service import assemble_evidence, check_pack, check_score, reconstruct_subject
 
 router = APIRouter(tags=["Claims Evidence"])
 
@@ -85,7 +85,8 @@ async def get_evidence_pack(
         basis=basis,
         activity_limit=limit,
     )
-    return EvidencePackOut.model_validate(pack)
+    warnings = await check_pack(pack)
+    return EvidencePackOut.model_validate(pack).model_copy(update={"warnings": warnings})
 
 
 @router.get(
@@ -125,7 +126,8 @@ async def reconstruct_change(
         subject_id=subject_id,
         basis=basis,
     )
-    return EvidencePackOut.model_validate(pack)
+    warnings = await check_pack(pack)
+    return EvidencePackOut.model_validate(pack).model_copy(update={"warnings": warnings})
 
 
 @router.post(
@@ -168,6 +170,7 @@ async def export_reconstructed_pack(
         subject_id=subject_id,
         basis=basis,
     )
+    warnings = await check_pack(pack)
     if pack.entry_count > 0:
         await log_activity(
             session,
@@ -180,7 +183,7 @@ async def export_reconstructed_pack(
             parent_entity_id=str(project_id),
             metadata={"entry_count": pack.entry_count, "content_digest": pack.content_digest},
         )
-    return EvidencePackOut.model_validate(pack)
+    return EvidencePackOut.model_validate(pack).model_copy(update={"warnings": warnings})
 
 
 @router.get(
@@ -245,6 +248,8 @@ async def get_change_provability(
         for w in score.weaknesses
     ]
 
+    warnings = await check_score(result.subject_id, score)
+
     return ProvabilityScoreOut(
         subject_kind=result.subject_kind,
         subject_id=result.subject_id,
@@ -256,4 +261,5 @@ async def get_change_provability(
         entry_count=result.entry_count,
         date_from=result.date_from.isoformat() if result.date_from is not None else None,
         date_to=result.date_to.isoformat() if result.date_to is not None else None,
+        warnings=warnings,
     )
