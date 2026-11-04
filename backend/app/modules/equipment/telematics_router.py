@@ -226,6 +226,8 @@ async def cost_board(
     start, end = _window(date_from, date_to)
     if end < start:
         raise HTTPException(status_code=422, detail="date_to_before_date_from")
+    if (end - start).days > 731:
+        raise HTTPException(status_code=422, detail="window_too_long")
     board = await CostBoardService(session).board(start, end, day_hours, min_utilisation_pct)
     results = await run_rules({"machines": board["machines"]})
     return {**board, "results": results, "failed": sum(1 for r in results if not r["passed"])}
