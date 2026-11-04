@@ -2860,6 +2860,16 @@ class VariationsService:
                 detail=(f"Variation order is {vo.status} and is no longer editable"),
             )
         fields = data.model_dump(exclude_unset=True)
+        # Status moves only through ``transition_variation_order``, which owns
+        # the permission split, the void reason, the commitment check and the
+        # contract-sum event; a PATCH must not be a way around them.
+        if "status" in fields:
+            requested = fields.pop("status")
+            if requested is not None and requested != vo.status:
+                raise HTTPException(
+                    status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Status cannot be changed by editing; use the start, complete or void action.",
+                )
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
         if "final_cost_impact" in fields and fields["final_cost_impact"] is not None:
