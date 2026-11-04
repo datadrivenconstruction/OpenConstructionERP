@@ -142,7 +142,12 @@ async def make_award(
     lines: list[dict[str, Any]],
 ) -> Event:
     """A tender package with one winning bid, and the event that awards it."""
-    package = TenderPackage(project_id=project_id, name="Substructure", description="")
+    package = TenderPackage(
+        project_id=project_id,
+        name="Substructure",
+        description="",
+        metadata_={"package_type": "supply"},
+    )
     session.add(package)
     await session.flush()
 
