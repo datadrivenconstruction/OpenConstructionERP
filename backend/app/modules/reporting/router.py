@@ -22,7 +22,7 @@ Endpoints:
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import HTMLResponse, Response
 
 from app.core.content_disposition import attachment_disposition
@@ -126,6 +126,18 @@ async def recalculate_all_kpis(
 # ── PO retainage reconciliation (Gap F) ───────────────────────────────────
 
 
+def _check_period(period_start: str, period_end: str) -> None:
+    """422 on an impossible calendar date or an inverted period (the regex only checks the shape)."""
+    from datetime import date
+
+    try:
+        start, end = date.fromisoformat(period_start), date.fromisoformat(period_end)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="period_start/period_end must be real ISO dates") from exc
+    if start > end:
+        raise HTTPException(status_code=422, detail="period_start must not be after period_end")
+
+
 @router.get("/po-retainage-reconciliation/", response_model=dict)
 async def get_po_retainage_reconciliation(
     session: SessionDep,
@@ -142,6 +154,7 @@ async def get_po_retainage_reconciliation(
     ISO ``YYYY-MM-DD``) that carry a non-zero retention percentage. Money is
     rolled up per currency (never blended). Deterministic; no AI.
     """
+    _check_period(period_start, period_end)
     await verify_project_access(project_id, user_id, session)
     return await service.render_po_retainage_reconciliation(
         project_id=project_id,
@@ -193,7 +206,6 @@ async def list_scheduled_templates(
     (``project_id_scope is None``) remain visible to all authenticated
     callers since they are not bound to any single tenant's data.
     """
-    from fastapi import HTTPException
 
     from app.modules.projects.repository import ProjectRepository
     from app.modules.reporting.models import ReportTemplate

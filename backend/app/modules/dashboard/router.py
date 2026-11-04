@@ -74,8 +74,11 @@ def _parse_uuid_list(raw: str | None) -> list[uuid.UUID] | None:
     """
     if raw is None:
         return None
+    items = _parse_csv_list(raw)
+    if not items:
+        return None
     out: list[uuid.UUID] = []
-    for item in _parse_csv_list(raw):
+    for item in items:
         try:
             out.append(uuid.UUID(item))
         except ValueError:
