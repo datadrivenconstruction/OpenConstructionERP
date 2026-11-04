@@ -13,7 +13,7 @@ Stateless service layer.  Handles:
 import logging
 import uuid
 from datetime import UTC, date, datetime, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -115,6 +115,13 @@ def _str_to_decimal(value: str | None) -> Decimal:
         return Decimal(str(value))
     except (ValueError, TypeError, ArithmeticError):
         return Decimal("0")
+
+
+def _index(numerator: Decimal, denominator: Decimal) -> float:
+    """Performance index (EV / PV or EV / AC) to 4 places, half-even; 0.0 on a zero denominator."""
+    if denominator == 0:
+        return 0.0
+    return float((numerator / denominator).quantize(Decimal("0.0001"), rounding=ROUND_HALF_EVEN))
 
 
 def _safe_divide(numerator: float, denominator: float) -> float:
@@ -287,19 +294,12 @@ class CostModelService:
         spi = data.spi
         cpi = data.cpi
 
-        # Auto-compute indices if not provided (left at default 0).
-        # v3 §10 - money fields are Decimal; cast to float at this
-        # boundary because SPI/CPI are unitless ratios stored as float.
-        if spi == 0.0 and float(data.planned_cost) > 0.0:
-            spi = round(
-                _safe_divide(float(data.earned_value), float(data.planned_cost)),
-                4,
-            )
-        if cpi == 0.0 and float(data.actual_cost) > 0.0:
-            cpi = round(
-                _safe_divide(float(data.earned_value), float(data.actual_cost)),
-                4,
-            )
+        # Auto-compute indices if not provided (left at default 0). The ratio
+        # is exact Decimal; float only at the boundary, the schema types it so.
+        if spi == 0.0 and data.planned_cost > 0:
+            spi = _index(data.earned_value, data.planned_cost)
+        if cpi == 0.0 and data.actual_cost > 0:
+            cpi = _index(data.earned_value, data.actual_cost)
 
         snapshot = CostSnapshot(
             project_id=data.project_id,
