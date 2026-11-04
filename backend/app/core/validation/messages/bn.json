@@ -1763,5 +1763,12 @@
       "fail": "ফলাফল {result}, কিন্তু চেকলিস্টের {count}টি বিষয় ব্যর্থ হয়েছে।",
       "suggestion": "ফলাফল সংশোধন করুন বা ব্যর্থ বিষয়গুলো পর্যালোচনা করুন।"
     }
+  },
+  "site": {
+    "future_date": "তারিখ {field} ({value}) ভবিষ্যতে রয়েছে।",
+    "contradiction": "{field} ({value}) এবং {other_field} ({other_value}) পরস্পরবিরোধী।",
+    "required_when": "{other_field} যখন {other_value}, তখন {field} উল্লেখ করতে হবে।",
+    "limit_exceeded": "{field} ({value}) সীমা {limit} ছাড়িয়ে গেছে, যা {limit_field} নির্ধারণ করেছে।",
+    "suggestion": "রেকর্ডটি যাচাই করুন এবং সংরক্ষণের আগে ভুল মান বা তারিখ সংশোধন করুন।"
   }
 }

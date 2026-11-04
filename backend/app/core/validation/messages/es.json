@@ -1763,5 +1763,12 @@
       "fail": "El resultado es {result}, pero {count} puntos de la lista de control no cumplen.",
       "suggestion": "Corrija el resultado o revise los puntos que no cumplen."
     }
+  },
+  "site": {
+    "future_date": "La fecha {field} ({value}) está en el futuro.",
+    "contradiction": "{field} ({value}) contradice {other_field} ({other_value}).",
+    "required_when": "{field} debe indicarse cuando {other_field} es {other_value}.",
+    "limit_exceeded": "{field} ({value}) supera el límite {limit} fijado por {limit_field}.",
+    "suggestion": "Revise el registro y corrija la cifra o la fecha errónea antes de guardar."
   }
 }

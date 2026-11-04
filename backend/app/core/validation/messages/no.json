@@ -1763,5 +1763,12 @@
       "fail": "Resultatet er {result}, men {count} sjekklistepunkter er ikke bestått.",
       "suggestion": "Rett resultatet, eller gå gjennom punktene som ikke er bestått."
     }
+  },
+  "site": {
+    "future_date": "Datoen {field} ({value}) ligger i fremtiden.",
+    "contradiction": "{field} ({value}) er i strid med {other_field} ({other_value}).",
+    "required_when": "{field} må oppgis når {other_field} er {other_value}.",
+    "limit_exceeded": "{field} ({value}) overskrider grensen {limit} satt av {limit_field}.",
+    "suggestion": "Kontroller posten og rett den feilaktige verdien eller datoen før du lagrer."
   }
 }

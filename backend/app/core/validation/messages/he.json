@@ -1763,5 +1763,12 @@
       "fail": "התוצאה היא {result}, אך {count} פריטים ברשימת הבדיקה נכשלו.",
       "suggestion": "תקנו את התוצאה או בדקו את הפריטים שנכשלו."
     }
+  },
+  "site": {
+    "future_date": "התאריך {field} ({value}) נמצא בעתיד.",
+    "contradiction": "{field} ({value}) סותר את {other_field} ({other_value}).",
+    "required_when": "יש לציין את {field} כאשר {other_field} הוא {other_value}.",
+    "limit_exceeded": "{field} ({value}) חורג מהמגבלה {limit} שנקבעה על ידי {limit_field}.",
+    "suggestion": "בדקו את הרשומה ותקנו את הערך או התאריך השגויים לפני השמירה."
   }
 }

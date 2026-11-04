@@ -1763,5 +1763,12 @@
       "fail": "Ang resulta ay {result}, ngunit {count} item sa checklist ang bumagsak.",
       "suggestion": "Itama ang resulta o suriin ang mga bumagsak na item."
     }
+  },
+  "site": {
+    "future_date": "Ang petsang {field} ({value}) ay nasa hinaharap.",
+    "contradiction": "Ang {field} ({value}) ay sumasalungat sa {other_field} ({other_value}).",
+    "required_when": "Dapat tukuyin ang {field} kapag ang {other_field} ay {other_value}.",
+    "limit_exceeded": "Ang {field} ({value}) ay lumampas sa limitasyong {limit} na itinakda ng {limit_field}.",
+    "suggestion": "Suriin ang tala at itama ang maling halaga o petsa bago i-save."
   }
 }

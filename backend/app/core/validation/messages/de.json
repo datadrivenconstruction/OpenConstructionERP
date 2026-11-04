@@ -1763,5 +1763,12 @@
       "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte wurden nicht bestanden.",
       "suggestion": "Ergebnis korrigieren oder die nicht bestandenen Prüfpunkte kontrollieren."
     }
+  },
+  "site": {
+    "future_date": "Das Datum {field} ({value}) liegt in der Zukunft.",
+    "contradiction": "{field} ({value}) widerspricht {other_field} ({other_value}).",
+    "required_when": "{field} muss angegeben werden, wenn {other_field} den Wert {other_value} hat.",
+    "limit_exceeded": "{field} ({value}) überschreitet den Grenzwert {limit} aus {limit_field}.",
+    "suggestion": "Prüfen Sie den Datensatz und korrigieren Sie vor dem Speichern die falsche Angabe oder das falsche Datum."
   }
 }

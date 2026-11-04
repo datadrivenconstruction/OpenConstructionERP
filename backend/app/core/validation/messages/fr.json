@@ -1763,5 +1763,12 @@
       "fail": "Le résultat est {result}, mais {count} points de la liste de contrôle sont non conformes.",
       "suggestion": "Corrigez le résultat ou vérifiez les points non conformes."
     }
+  },
+  "site": {
+    "future_date": "La date {field} ({value}) est dans le futur.",
+    "contradiction": "{field} ({value}) contredit {other_field} ({other_value}).",
+    "required_when": "{field} doit être renseigné lorsque {other_field} vaut {other_value}.",
+    "limit_exceeded": "{field} ({value}) dépasse la limite {limit} fixée par {limit_field}.",
+    "suggestion": "Vérifiez la fiche et corrigez la valeur ou la date erronée avant d'enregistrer."
   }
 }

@@ -1763,5 +1763,12 @@
       "fail": "ผลลัพธ์คือ {result} แต่รายการตรวจสอบ {count} ข้อไม่ผ่าน",
       "suggestion": "แก้ไขผลลัพธ์หรือตรวจสอบรายการที่ไม่ผ่าน"
     }
+  },
+  "site": {
+    "future_date": "วันที่ {field} ({value}) อยู่ในอนาคต",
+    "contradiction": "{field} ({value}) ขัดแย้งกับ {other_field} ({other_value})",
+    "required_when": "ต้องระบุ {field} เมื่อ {other_field} เป็น {other_value}",
+    "limit_exceeded": "{field} ({value}) เกินขีดจำกัด {limit} ที่กำหนดโดย {limit_field}",
+    "suggestion": "ตรวจสอบรายการและแก้ไขค่าหรือวันที่ที่ผิดก่อนบันทึก"
   }
 }

@@ -1763,5 +1763,12 @@
       "fail": "The result is {result}, but {count} checklist items failed.",
       "suggestion": "Correct the result, or review the failed checklist items."
     }
+  },
+  "site": {
+    "future_date": "The date {field} ({value}) lies in the future.",
+    "contradiction": "{field} ({value}) contradicts {other_field} ({other_value}).",
+    "required_when": "{field} must be stated when {other_field} is {other_value}.",
+    "limit_exceeded": "{field} ({value}) exceeds the limit {limit} set by {limit_field}.",
+    "suggestion": "Check the record and correct the figure or date that is wrong before saving."
   }
 }

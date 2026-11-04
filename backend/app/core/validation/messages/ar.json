@@ -1763,5 +1763,12 @@
       "fail": "النتيجة {result} لكن {count} من بنود قائمة الفحص لم تجتز.",
       "suggestion": "صحّح النتيجة أو راجع البنود التي لم تجتز."
     }
+  },
+  "site": {
+    "future_date": "التاريخ {field} ({value}) يقع في المستقبل.",
+    "contradiction": "{field} ({value}) يتعارض مع {other_field} ({other_value}).",
+    "required_when": "يجب تحديد {field} عندما تكون قيمة {other_field} هي {other_value}.",
+    "limit_exceeded": "{field} ({value}) يتجاوز الحد {limit} المحدد في {limit_field}.",
+    "suggestion": "راجع السجل وصحح القيمة أو التاريخ الخاطئ قبل الحفظ."
   }
 }

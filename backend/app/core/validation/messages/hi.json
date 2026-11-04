@@ -1763,5 +1763,12 @@
       "fail": "परिणाम {result} है, लेकिन चेकलिस्ट के {count} बिंदु विफल रहे।",
       "suggestion": "परिणाम सुधारें या विफल बिंदुओं की समीक्षा करें।"
     }
+  },
+  "site": {
+    "future_date": "तारीख {field} ({value}) भविष्य में है।",
+    "contradiction": "{field} ({value}) और {other_field} ({other_value}) में विरोध है।",
+    "required_when": "जब {other_field} का मान {other_value} हो, तब {field} दर्ज करना आवश्यक है।",
+    "limit_exceeded": "{field} ({value}) उस सीमा {limit} से अधिक है जो {limit_field} ने तय की है।",
+    "suggestion": "रिकॉर्ड जाँचें और सहेजने से पहले गलत मान या तारीख ठीक करें।"
   }
 }

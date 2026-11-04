@@ -1763,5 +1763,12 @@
       "fail": "نتیجہ {result} ہے لیکن چیک لسٹ کے {count} نکات ناکام ہوئے۔",
       "suggestion": "نتیجہ درست کریں یا ناکام نکات کا جائزہ لیں۔"
     }
+  },
+  "site": {
+    "future_date": "تاریخ {field} ({value}) مستقبل میں ہے۔",
+    "contradiction": "{field} ({value}) اور {other_field} ({other_value}) میں تضاد ہے۔",
+    "required_when": "جب {other_field} کی قدر {other_value} ہو تو {field} درج کرنا ضروری ہے۔",
+    "limit_exceeded": "{field} ({value}) اس حد {limit} سے تجاوز کرتا ہے جو {limit_field} نے مقرر کی ہے۔",
+    "suggestion": "ریکارڈ کی جانچ کریں اور محفوظ کرنے سے پہلے غلط قدر یا تاریخ درست کریں۔"
   }
 }

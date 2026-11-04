@@ -357,6 +357,8 @@ class SiteInventoryService:
         if payload.goods_receipt_id is not None:
             await self._require_goods_receipt_in_project(project_id, payload.goods_receipt_id)
 
+        await self._check_movement(project_id, item, payload)
+
         movement = StockMovement(
             project_id=project_id,
             item_id=payload.item_id,
@@ -376,6 +378,43 @@ class SiteInventoryService:
         self.session.add(movement)
         await self.session.flush()
         return movement
+
+    async def _check_movement(self, project_id: uuid.UUID, item: StockItem, payload: MovementCreate) -> None:
+        """Run the ``site_inventory`` rule set on a movement against the item's ledger.
+
+        Errors raise a coded 422; warnings are logged and kept on ``last_warnings``.
+        """
+        from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
+        from app.modules.site_inventory.validators import (  # noqa: PLC0415
+            SITE_INVENTORY_RULE_SET,
+            register_site_inventory_validation_rules,
+        )
+
+        rows = (
+            (await self.session.execute(select(StockMovement).where(StockMovement.item_id == item.id))).scalars().all()
+        )
+        history = [_to_ledger_movement(r) for r in rows]
+        self.last_warnings = await check_site_rules(
+            SITE_INVENTORY_RULE_SET,
+            register_site_inventory_validation_rules,
+            {
+                "movement": {
+                    "movement_type": payload.movement_type,
+                    "quantity": payload.quantity,
+                    "unit_cost": payload.unit_cost,
+                    "currency": payload.currency,
+                    "item_currency": item.currency,
+                    "occurred_at": payload.occurred_at,
+                    "has_history": bool(history),
+                    "on_hand": str(ledger.stock_on_hand(history)),
+                    "inbound_total": str(ledger.total_inbound(history)),
+                    "waste_total": str(ledger.total_wasted(history)),
+                }
+            },
+            target_type="site_inventory_movement",
+            target_id=str(item.id),
+            project_id=project_id,
+        )
 
     async def list_movements(
         self,
