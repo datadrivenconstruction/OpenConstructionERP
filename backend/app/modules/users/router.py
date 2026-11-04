@@ -1668,6 +1668,19 @@ async def get_onboarding_core_modules() -> dict[str, Any]:
 # ── Admin: User management ─────────────────────────────────────────────────
 
 
+def _guard_admin_scope(payload: dict[str, Any], *roles: str | None) -> None:
+    """Only an administrator may create, promote, edit or erase an administrator.
+
+    ``users.*`` permissions can be lowered in the matrix; without this a manager
+    holding ``users.update`` could promote themselves to admin.
+    """
+    if "admin" in roles and str(payload.get("role", "")).lower() != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only an administrator can manage administrator accounts",
+        )
+
+
 @router.post(
     "/",
     response_model=UserResponse,
@@ -1683,6 +1696,7 @@ async def get_onboarding_core_modules() -> dict[str, Any]:
 )
 async def admin_create_user(
     data: AdminUserCreate,
+    payload: CurrentUserPayload,
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
     """Admin-only: create a user with an arbitrary role and active state.
@@ -1699,6 +1713,7 @@ async def admin_create_user(
     Anything else (e.g. ``role="god"``) is rejected by Pydantic with 422
     *before* it can reach the service layer.
     """
+    _guard_admin_scope(payload, data.role)
     user = await service.admin_create(data)
     return UserResponse.model_validate(user)
 
@@ -1761,10 +1776,13 @@ async def update_user(
     user_id: uuid.UUID,
     data: UserAdminUpdate,
     viewer_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
     """Update user (admin only). The echoed record is redacted in demo mode."""
     fields = data.model_dump(exclude_unset=True)
+    target = await service.get_user(user_id)
+    _guard_admin_scope(payload, target.role, fields.get("role"))
     user = await service.update_profile(user_id, **fields)
     return redact_model(UserResponse.model_validate(user), subject_id=user.id, viewer_id=viewer_id)
 
@@ -1783,6 +1801,7 @@ async def update_user(
 async def admin_delete_user(
     user_id: uuid.UUID,
     actor_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: UserService = Depends(_get_service),
 ) -> None:
     """Admin-only: delete (erase) another user's account.
@@ -1800,6 +1819,7 @@ async def admin_delete_user(
     without an administrator. Declared after the ``/me`` routes so that literal
     path still resolves to self-deletion.
     """
+    _guard_admin_scope(payload, (await service.get_user(user_id)).role)
     await service.admin_erase_account(uuid.UUID(actor_id), user_id)
 
 
