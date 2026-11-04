@@ -101,3 +101,16 @@ def test_registered_under_rule_set() -> None:
     register_postcalc_validation_rules()
     ids = {r.rule_id for r in rule_registry.get_rules_for_sets([POSTCALC_RULE_SET])}
     assert len(ids) == 4
+
+
+async def test_rollup_tolerates_rounding_drift_over_many_lines() -> None:
+    # 20 lines of 0.005 h each round to 0.01 per line; the total (0.10 unrounded) rounds to 0.10 or 0.1
+    lines = [
+        _line(ref=str(i), planned_hours="0.01", actual_hours="0.01", planned_labour_cost="0.01") for i in range(20)
+    ]
+    project = _project(
+        total_planned_hours="0.10", total_actual_hours="0.10", total_planned_labour_cost="0.10", line_count=20
+    )
+    assert all(r.passed for r in await _run(ProjectRollupMatchesLinesRule(), _data(project, lines)))
+    project["total_planned_labour_cost"] = "5.00"
+    assert not all(r.passed for r in await _run(ProjectRollupMatchesLinesRule(), _data(project, lines)))

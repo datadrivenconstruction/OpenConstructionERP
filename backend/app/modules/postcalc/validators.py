@@ -22,6 +22,7 @@ from decimal import Decimal
 from app.core.validation.engine import RuleResult, ValidationContext, rule_registry
 from app.core.validation.money_rules import (
     MAX_SANE_AMOUNT,
+    MONEY_TOLERANCE,
     MoneyRule,
     blank,
     currency_of,
@@ -61,7 +62,11 @@ class ProjectRollupMatchesLinesRule(MoneyRule):
             parts = [to_dec(line.get(line_key)) for line in lines]
             if stated is None or any(p is None for p in parts):
                 continue
-            bad = self.total_mismatch(context, ref, label, stated, sum(parts, _ZERO), currency if money else "")
+            # Each line is rounded on its own, the total once: allow half a unit of drift per line.
+            slack = MONEY_TOLERANCE + Decimal("0.005") * len(parts)
+            bad = self.total_mismatch(
+                context, ref, label, stated, sum(parts, _ZERO), currency if money else "", tolerance=slack
+            )
             if bad:
                 out.append(bad)
         count = to_dec(project.get("line_count"))

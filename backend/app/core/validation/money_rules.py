@@ -123,12 +123,19 @@ class MoneyRule(ValidationRule):
         )
 
     def total_mismatch(
-        self, context: ValidationContext, ref: str, label: str, stated: Decimal, expected: Decimal, currency: str
+        self,
+        context: ValidationContext,
+        ref: str,
+        label: str,
+        stated: Decimal,
+        expected: Decimal,
+        currency: str,
+        tolerance: Decimal = MONEY_TOLERANCE,
     ) -> RuleResult | None:
-        """A failure when ``stated`` differs from ``expected`` by more than a minor unit."""
+        """A failure when ``stated`` differs from ``expected`` by more than ``tolerance``."""
         from app.core.currency_registry import sentence_amount  # noqa: PLC0415
 
-        if abs(stated - expected) <= MONEY_TOLERANCE:
+        if abs(stated - expected) <= tolerance:
             return None
         return self.fail(
             context,
