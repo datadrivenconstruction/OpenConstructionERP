@@ -1513,10 +1513,13 @@ class SupplierCatalogsService(PriceListOps):
         warehouse = await self.warehouses.get(data.warehouse_id)
         if warehouse is None:
             raise HTTPException(status_code=404, detail="Warehouse not found")
+        # IDOR: stock lands in this warehouse, so the caller must reach its project too.
+        await self._guard_project(warehouse.project_id, user_id)
 
         po_lines_by_id = {line.id: line for line in po.lines}
 
-        # Validate every GR line up front
+        # Validate every GR line up front; a PO line named twice counts once against its outstanding.
+        received_so_far: dict[uuid.UUID, Decimal] = {}
         for gr_line in data.lines:
             po_line = po_lines_by_id.get(gr_line.po_line_id)
             if po_line is None:
@@ -1525,7 +1528,8 @@ class SupplierCatalogsService(PriceListOps):
                     detail=f"PO line {gr_line.po_line_id} not found in PO {po.id}",
                 )
             outstanding = po_line.ordered_qty - po_line.received_qty
-            if gr_line.received_qty > outstanding:
+            received_so_far[po_line.id] = received_so_far.get(po_line.id, Decimal("0")) + gr_line.received_qty
+            if received_so_far[po_line.id] > outstanding:
                 raise HTTPException(
                     status_code=400,
                     detail=(
@@ -1543,6 +1547,7 @@ class SupplierCatalogsService(PriceListOps):
         # releases the savepoint, on exception it rolls back to it and the
         # error re-propagates (so the PO-status advance below never runs).
         low_stock_alerts: list[dict[str, Any]] = []
+        applied: dict[uuid.UUID, Decimal] = {}
         async with self.session.begin_nested():
             number = await self.grs.next_number()
             gr = GoodsReceipt(
@@ -1582,10 +1587,8 @@ class SupplierCatalogsService(PriceListOps):
                     )
                 )
                 # Advance PO line counter
-                await self.pos.update_line(
-                    po_line.id,
-                    received_qty=po_line.received_qty + accepted,
-                )
+                applied[po_line.id] = applied.get(po_line.id, po_line.received_qty) + accepted
+                await self.pos.update_line(po_line.id, received_qty=applied[po_line.id])
                 # Update stock balance for accepted_qty only
                 if accepted > 0 and po_line.catalog_item_id is not None:
                     alert = await self.receive_into_stock(
@@ -2174,6 +2177,16 @@ class SupplierCatalogsService(PriceListOps):
         )
         return await self.warehouses.create(wh)
 
+    async def list_warehouses(self, user_id: str | None = None) -> list[Warehouse]:
+        """List the warehouses the caller can see: tenant-global ones and those of their projects.
+
+        IDOR: the listing used to return every project's warehouses to any
+        holder of the read permission.
+        """
+        from app.dependencies import accessible_project_ids
+
+        return await self.warehouses.list(project_ids=await accessible_project_ids(self.session, user_id))
+
     async def update_warehouse(
         self,
         warehouse_id: uuid.UUID,
@@ -2271,6 +2284,8 @@ class SupplierCatalogsService(PriceListOps):
         if warehouse is None:
             raise HTTPException(status_code=404, detail="Warehouse not found")
         await self._guard_project(warehouse.project_id, user_id)
+        # The project the reservation is booked to is a second reference the caller names.
+        await self._guard_project(data.project_id, user_id)
         balance = await self.stock.get_or_create_balance(
             warehouse_id=data.warehouse_id,
             catalog_item_id=data.catalog_item_id,
@@ -2332,6 +2347,8 @@ class SupplierCatalogsService(PriceListOps):
         if warehouse is None:
             raise HTTPException(status_code=404, detail="Warehouse not found")
         await self._guard_project(warehouse.project_id, user_id)
+        # The receiving project is named by the caller and must be one they can reach.
+        await self._guard_project(data.to_project_id, user_id)
         balance = await self.stock.get_balance(
             warehouse_id=data.warehouse_id,
             catalog_item_id=data.catalog_item_id,

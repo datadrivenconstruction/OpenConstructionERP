@@ -670,6 +670,34 @@ def item_valuation(
     return None, ValuationBasis.NONE
 
 
+def price_unpriced_consumption(
+    movements: Iterable[Movement],
+    items: Iterable[StockItemRef],
+) -> list[Movement]:
+    """Return the movements with zero-cost consumption valued at the item's valuation cost.
+
+    A consumption booked without a price (the API default is ``0``) would add
+    nothing to the actual spend and make a position read under budget. It is
+    valued at what the item was received for, else its standard cost; with
+    neither it stays at zero because there is nothing honest to value it by.
+    """
+    movement_list = list(movements)
+    by_item = {item.item_id: item for item in items}
+    priced: list[Movement] = []
+    for movement in movement_list:
+        item = by_item.get(movement.item_id) if movement.item_id is not None else None
+        if (
+            item is None
+            or _movement_type_value(movement.movement_type) != MovementType.CONSUMPTION.value
+            or _as_decimal(movement.unit_cost) > _ZERO
+        ):
+            priced.append(movement)
+            continue
+        cost, _basis = item_valuation(movement_list, item)
+        priced.append(movement if cost is None else replace(movement, unit_cost=cost))
+    return priced
+
+
 def item_currency(movements: Iterable[Movement], item: StockItemRef) -> str:
     """The currency an item's stock is valued in.
 
