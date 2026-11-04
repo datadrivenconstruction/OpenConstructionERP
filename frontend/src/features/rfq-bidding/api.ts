@@ -312,6 +312,10 @@ export async function evaluateBid(bidId: string): Promise<Bid> {
   return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/evaluate/`);
 }
 
+export async function confirmBidScope(bidId: string, confirmed: boolean): Promise<Bid> {
+  return apiPost<Bid, { confirmed: boolean }>(`/v1/rfq-bidding/bids/${bidId}/scope-confirmed/`, { confirmed });
+}
+
 export async function awardBid(bidId: string): Promise<Bid> {
   return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/award/`);
 }
