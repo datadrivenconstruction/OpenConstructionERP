@@ -575,12 +575,30 @@ class AssemblyService:
             project_id=str(assembly.project_id) if assembly.project_id else None,
         )
 
-    async def _enforce_rules(self, assembly: Assembly, components: list[dict], **kwargs: object) -> None:
-        """Refuse a write that would break a blocking assembly rule; log the warnings."""
-        from app.core.validation.cost_gate import raise_on_errors  # noqa: PLC0415
+    async def _enforce_rules(
+        self,
+        assembly: Assembly,
+        components: list[dict],
+        *,
+        before_components: list[dict] | None = None,
+        **kwargs: object,
+    ) -> None:
+        """Refuse a write that would break a blocking assembly rule; log the warnings.
+
+        With ``before_components`` (an edit of a stored assembly) only errors the edit introduces block.
+        """
+        from app.core.validation.cost_gate import raise_on_introduced  # noqa: PLC0415
 
         report = await self.check_rules(assembly, components, **kwargs)  # type: ignore[arg-type]
-        raise_on_errors(report, error="assemblies_rules_failed")
+
+        async def stored() -> ValidationReport:
+            return await self.check_rules(
+                assembly, before_components or [], operation=str(kwargs.get("operation", "edit"))
+            )
+
+        await raise_on_introduced(
+            report, stored if before_components is not None else None, error="assemblies_rules_failed"
+        )
         if report.warnings:
             logger.info("Assembly %s rule warnings: %s", assembly.code, [w.rule_id for w in report.warnings])
 
@@ -734,10 +752,9 @@ class AssemblyService:
 
         # Convert bid_factor float to string for storage
         if "bid_factor" in fields:
+            stored_rows = [self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)]
             await self._enforce_rules(
-                assembly,
-                [self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)],
-                bid_factor=fields["bid_factor"],
+                assembly, stored_rows, before_components=stored_rows, bid_factor=fields["bid_factor"]
             )
             fields["bid_factor"] = str(fields["bid_factor"])
 
@@ -872,10 +889,11 @@ class AssemblyService:
         )
         max_order = await self.component_repo.get_max_sort_order(assembly_id)
 
+        stored_rows = [self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)]
         await self._enforce_rules(
             assembly,
             [
-                *[self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)],
+                *stored_rows,
                 {
                     "id": "",
                     "cost_item_id": str(data.cost_item_id) if data.cost_item_id else "",
@@ -885,6 +903,7 @@ class AssemblyService:
                     "unit_cost": unit_cost,
                 },
             ],
+            before_components=stored_rows,
         )
 
         component = Component(
@@ -999,6 +1018,7 @@ class AssemblyService:
                 }
                 for c in siblings
             ],
+            before_components=[self._component_row(c) for c in siblings],
         )
         new_metadata = fields.get("metadata_", component.metadata_) or {}
         fields["total"] = _compute_typed_total(

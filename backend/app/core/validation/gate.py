@@ -12,44 +12,38 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import HTTPException, status
-
 from app.core.i18n import get_locale
-from app.core.validation.engine import RuleResult, validation_engine
-
-
-def _row(r: RuleResult) -> dict[str, Any]:
-    return {
-        "code": r.rule_id,
-        "severity": r.severity.value,
-        "message": r.message,
-        "suggestion": r.suggestion,
-        "element_ref": r.element_ref or None,
-    }
+from app.core.validation.engine import validation_engine
+from app.core.validation.failure import finding, introduced_errors, raise_rule_failure
 
 
 async def run_gate(
-    data: dict[str, Any], rule_set: str, *, target_type: str, target_id: str = ""
+    data: dict[str, Any],
+    rule_set: str,
+    *,
+    target_type: str,
+    target_id: str = "",
+    before: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    """Validate ``data`` against ``rule_set``; raise 422 on errors, return the warnings."""
-    report = await validation_engine.validate(
-        data=data,
-        rule_sets=[rule_set],
-        target_type=target_type,
-        target_id=target_id,
-        metadata={"locale": get_locale()},
-    )
-    errors = [r for r in report.errors if not r.is_engine_error]
-    if errors:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "error": "validation_failed",
-                "code": errors[0].rule_id,
-                "message": "; ".join(r.message for r in errors[:3]),
-                "rule_set": rule_set,
-                "errors": [_row(r) for r in errors],
-                "warnings": [_row(r) for r in report.warnings],
-            },
+    """Validate ``data`` against ``rule_set``; raise 422 on errors, return the warnings.
+
+    With ``before`` (the stored record) only errors the edit introduces block.
+    """
+
+    async def run(payload: dict[str, Any]) -> Any:
+        return await validation_engine.validate(
+            data=payload,
+            rule_sets=[rule_set],
+            target_type=target_type,
+            target_id=target_id,
+            metadata={"locale": get_locale()},
         )
-    return [_row(r) for r in report.warnings]
+
+    report = await run(data)
+
+    async def stored() -> Any:
+        return await run(before or {})
+
+    errors = await introduced_errors(report, stored if before is not None else None)
+    raise_rule_failure(report, errors, error="validation_failed", rule_set=rule_set)
+    return [finding(r) for r in report.warnings]

@@ -139,3 +139,45 @@ async def test_api_blocks_with_coded_422_and_accepts_valid(db_session) -> None:
             },
         )
         assert r.status_code == 201, r.text
+
+
+async def test_update_entry_gate_warns_on_off_day_time_and_keeps_the_edit(db_session) -> None:
+    from app.modules.daily_diary.schemas import DiaryEntryCreate
+    from app.modules.daily_diary.service import DailyDiaryService
+
+    uid, pid = await make_project(db_session)
+    day = NOW.date().isoformat()
+    async with http(build_app(db_session, uid, diary_router, "/v1/daily-diary")) as c:
+        r = await c.post("/v1/daily-diary/diaries/", json={"project_id": str(pid), "diary_date": day})
+        assert r.status_code == 201, r.text
+        diary_id = r.json()["id"]
+    service = DailyDiaryService(db_session)
+    entry = await service.create_entry(
+        DiaryEntryCreate(diary_id=diary_id, entry_type="general", entry_time=NOW, title="pour")
+    )
+    assert service.last_warnings == []
+
+    # An entry time two weeks off the diary day is reported, not refused (shift work crosses midnight).
+    moved = await service.update_entry(entry.id, {"entry_time": NOW + timedelta(days=14)})
+    assert [w.rule_id for w in service.last_warnings] == ["daily_diary.entry_within_day"]
+    assert moved.entry_time is not None
+
+    # A title edit does not run the gate: the findings of the last gated edit stay as they were.
+    before = list(service.last_warnings)
+    await service.update_entry(entry.id, {"title": "pour, level 2"})
+    assert service.last_warnings == before
+
+
+async def test_rule_failure_body_has_one_shape(db_session) -> None:
+    uid, pid = await make_project(db_session)
+    base = {"project_id": str(pid), "captured_at": NOW.isoformat(), "source": "manual", "temperature_c": 7}
+    async with http(build_app(db_session, uid, diary_router, "/v1/daily-diary")) as c:
+        r = await c.post("/v1/daily-diary/weather-records/", json={**base, "sunrise": "18:00", "sunset": "06:00"})
+    assert r.status_code == 422, r.text
+    detail = r.json()["detail"]
+    assert {"error", "code", "message", "rule_set", "rule_sets", "status", "results", "errors", "warnings"} <= set(
+        detail
+    )
+    assert detail["code"] == detail["results"][0]["rule_id"] == detail["results"][0]["code"]
+    assert detail["rule_sets"] == [DAILY_DIARY_RULE_SET]
+    assert {"rule_id", "code", "message", "params"} <= set(detail["results"][0])

@@ -616,8 +616,12 @@ class ChangeOrderService:
         header: dict[str, Any],
         items: list[dict[str, Any]],
         operation: str,
+        before_header: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
-        """Run the change order rules; errors raise a coded 422, warnings are returned."""
+        """Run the change order rules; errors raise a coded 422, warnings are returned.
+
+        With ``before_header`` (the stored order) only errors the edit introduces block.
+        """
         from app.core.validation.money_rules import enforce_money_rules  # noqa: PLC0415
         from app.modules.changeorders.validators import CHANGEORDERS_RULE_SET  # noqa: PLC0415
 
@@ -629,6 +633,7 @@ class ChangeOrderService:
             target_id=ref,
             project_id=str(header.get("project_id") or "") or None,
             operation=operation,
+            before=None if before_header is None else {"change_order": {"id": ref, **before_header}, "items": items},
         )
 
     @staticmethod
@@ -1324,6 +1329,13 @@ class ChangeOrderService:
             },
             [self._item_rule_row(i) for i in await self.repo.list_items_for_order(order_id)],
             "update",
+            before_header={
+                "project_id": str(order.project_id),
+                "code": order.code,
+                "status": order.status,
+                "previous_status": order.status,
+                **{k: getattr(order, k) for k in ("cost_impact", "currency", "schedule_impact_days")},
+            },
         )
 
         await self.repo.update_fields(order_id, **fields)

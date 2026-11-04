@@ -16,6 +16,7 @@ from app.core.events import event_bus, publish_after_commit  # noqa: F401
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
+from app.core.validation.failure import introduced_errors
 from app.core.validation.quality_rules import rule_errors_detail, warning_findings
 from app.modules.ncr.models import NCR
 from app.modules.ncr.repository import NCRRepository
@@ -116,11 +117,11 @@ class NCRService:
         WARNING findings do not block: the caller attaches them to the response.
         """
         report = await self._run(state, ncr_id, project_id, operation)
-        blocking = list(report.errors)
-        if blocking and before is not None:
-            # A record saved before these rules existed is not frozen: only errors the edit introduces block.
-            legacy = {(r.rule_id, r.message) for r in (await self._run(before, ncr_id, project_id, operation)).errors}
-            blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+
+        async def stored() -> ValidationReport:
+            return await self._run(before or {}, ncr_id, project_id, operation)
+
+        blocking = await introduced_errors(report, stored if before is not None else None)
         if blocking:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

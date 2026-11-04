@@ -167,8 +167,12 @@ class RiskService:
         values: dict[str, Any],
         *,
         previous_status: str | None = None,
+        before_values: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
-        """Run the risk rules over the register entry as it will be after the write; errors raise a coded 422."""
+        """Run the risk rules over the register entry as it will be after the write; errors raise a coded 422.
+
+        With ``before_values`` (the stored entry) only errors the edit introduces block.
+        """
         from app.core.validation.control_rules import gate  # noqa: PLC0415
         from app.modules.risk.validators import RISK_RULE_SET  # noqa: PLC0415
 
@@ -178,6 +182,11 @@ class RiskService:
             target_type="risk",
             target_id=str(risk_id or ""),
             project_id=project_id,
+            before=(
+                None
+                if before_values is None
+                else {"risk": {"id": str(risk_id or ""), "previous_status": previous_status, **before_values}}
+            ),
         )
 
     async def create_risk(
@@ -359,6 +368,17 @@ class RiskService:
                 "written": list(fields),
             },
             previous_status=item.status,
+            before_values={
+                "status": item.status,
+                "impact_severity": item.impact_severity,
+                "impact_cost": item.impact_cost,
+                "response_cost": item.response_cost,
+                "mitigation_strategy": item.mitigation_strategy,
+                "mitigation_actions": item.mitigation_actions,
+                "owner_name": item.owner_name,
+                "owner_user_id": item.owner_user_id,
+                "written": [],
+            },
         )
 
         # Convert float fields to strings for storage

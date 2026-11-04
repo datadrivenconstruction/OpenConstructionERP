@@ -210,3 +210,45 @@ async def test_api_refuses_to_apply_an_empty_assembly(client: AsyncClient) -> No
     )
     assert r.status_code == 422, r.text
     assert r.json()["detail"]["code"] == "assemblies.applicable"
+
+
+@pytest_asyncio.fixture
+async def stored_session(client: AsyncClient):
+    """The session behind ``client`` is the transactional one; reach it through the dependency override."""
+    session = None
+    async for s in client._transport.app.dependency_overrides[get_session]():  # type: ignore[union-attr]
+        session = s
+    return session
+
+
+@pytest.mark.asyncio
+async def test_edit_is_blocked_only_by_errors_it_introduces(client: AsyncClient, stored_session) -> None:
+    from sqlalchemy import update
+
+    from app.modules.assemblies.models import Component
+
+    aid = await _make_assembly(client)
+    r = await client.post(
+        f"/v1/assemblies/{aid}/components/",
+        json={"description": "Brick", "unit": "pcs", "quantity": 50, "unit_cost": "0.8", "factor": 1.05},
+    )
+    assert r.status_code == 201, r.text
+    # A component saved before the rules existed carries a slipped factor.
+    await stored_session.execute(update(Component).where(Component.assembly_id == uuid.UUID(aid)).values(factor="115"))
+    await stored_session.flush()
+
+    r = await client.patch(f"/v1/assemblies/{aid}", json={"bid_factor": 1.1})
+    assert r.status_code == 200, r.text
+    r = await client.post(
+        f"/v1/assemblies/{aid}/components/",
+        json={"description": "Sand", "unit": "kg", "quantity": 5, "unit_cost": "0.3", "factor": 1.02},
+    )
+    assert r.status_code == 201, r.text
+    r = await client.post(
+        f"/v1/assemblies/{aid}/components/",
+        json={"description": "Mortar", "unit": "kg", "quantity": 5, "unit_cost": "0.3", "factor": 99},
+    )
+    assert r.status_code == 422, r.text
+    detail = r.json()["detail"]
+    assert detail["code"] == "assemblies.factors_in_range"
+    assert {"results", "rule_sets", "status"} <= set(detail)

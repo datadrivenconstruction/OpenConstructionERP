@@ -18,10 +18,9 @@ from collections.abc import Iterable
 from datetime import date
 from typing import Any
 
-from fastapi import HTTPException, status
-
 from app.core.i18n import get_locale
 from app.core.validation.engine import RuleResult, ValidationReport, validation_engine
+from app.core.validation.failure import finding, introduced_errors, raise_rule_failure
 from app.core.validation.money_rules import MoneyRule
 
 logger = logging.getLogger(__name__)
@@ -62,17 +61,6 @@ class ControlRule(MoneyRule):
         return super().fail(context, key, **kwargs)
 
 
-def _finding(r: RuleResult) -> dict[str, Any]:
-    return {
-        "rule_id": r.rule_id,
-        "rule_name": r.rule_name,
-        "severity": r.severity.value,
-        "message": r.message,
-        "element_ref": r.element_ref,
-        "suggestion": r.suggestion,
-    }
-
-
 async def gate(
     rule_set: str,
     data: dict[str, Any],
@@ -81,42 +69,42 @@ async def gate(
     target_id: str,
     project_id: Any = None,
     only: Iterable[str] | None = None,
+    before: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Run ``rule_set`` over ``data``; raise a coded 422 on errors, return the warnings.
 
     ``only`` limits the run to rules whose id is listed, for write points that
     touch one part of a record. The 422 body carries ``code`` (the first
     blocking rule id) next to every error and warning, so a screen can render
-    them and a client can branch on the code.
+    them and a client can branch on the code. With ``before`` (the stored record) only
+    errors the edit introduces block.
     """
-    report: ValidationReport = await validation_engine.validate(
-        data=data,
-        rule_sets=[rule_set],
-        target_type=target_type,
-        target_id=target_id,
-        project_id=str(project_id) if project_id else None,
-        metadata={"locale": get_locale()},
-    )
+
+    async def run(payload: dict[str, Any]) -> ValidationReport:
+        return await validation_engine.validate(
+            data=payload,
+            rule_sets=[rule_set],
+            target_type=target_type,
+            target_id=target_id,
+            project_id=str(project_id) if project_id else None,
+            metadata={"locale": get_locale()},
+        )
+
+    report = await run(data)
     if rule_set in report.unsupported_rule_sets:
         logger.error("validation: rule set %s is not registered; %s write unchecked", rule_set, target_type)
         return []
     keep = set(only) if only is not None else None
-    errors = [r for r in report.errors if keep is None or r.rule_id in keep]
+
+    async def stored() -> ValidationReport:
+        return await run(before or {})
+
+    errors = [
+        r
+        for r in await introduced_errors(report, stored if before is not None else None)
+        if keep is None or r.rule_id in keep
+    ]
     warnings = [r for r in report.warnings if keep is None or r.rule_id in keep]
     if errors:
-        heads = "; ".join(r.message for r in errors[:3])
-        more = len(errors) - 3
-        if more > 0:
-            heads = f"{heads} (+{more})"
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "error": "validation_failed",
-                "code": errors[0].rule_id,
-                "rule_set": rule_set,
-                "message": heads,
-                "errors": [_finding(r) for r in errors],
-                "warnings": [_finding(r) for r in warnings],
-            },
-        )
-    return [_finding(r) for r in warnings]
+        raise_rule_failure(report, errors, warnings=warnings, error="validation_failed", rule_set=rule_set)
+    return [finding(r) for r in warnings]

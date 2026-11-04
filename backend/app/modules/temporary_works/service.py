@@ -188,6 +188,7 @@ class TemporaryWorksService:
                 TEMPORARY_WORKS_RULE_SET,
                 target_type="temporary_works",
                 target_id=str(item_id),
+                before=item_snapshot(item, {}),
             )
         for key, value in data.items():
             setattr(item, key, value)
@@ -296,6 +297,7 @@ class TemporaryWorksService:
                 TEMPORARY_WORKS_RULE_SET,
                 target_type="temporary_works_permit",
                 target_id=str(permit_id),
+                before=permit_snapshot(permit, {}),
             )
         for key, value in data.items():
             setattr(permit, key, value)

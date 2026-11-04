@@ -293,6 +293,7 @@ class TransmittalService:
             TRANSMITTALS_RULE_SET,
             target_type="transmittal",
             target_id=str(transmittal_id),
+            before=snapshot(transmittal, transmittal.recipients or [], transmittal.items or [], issuing=False),
         )
 
         if fields:

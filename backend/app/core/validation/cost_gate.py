@@ -4,23 +4,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import Any
 
-from fastapi import HTTPException, status
-
 from app.core.i18n import get_locale
-from app.core.validation.engine import RuleResult, ValidationReport, validation_engine
-
-
-def finding(result: RuleResult) -> dict[str, Any]:
-    """One failed rule result as a plain dict for an API body."""
-    return {
-        "rule_id": result.rule_id,
-        "severity": result.severity.value,
-        "message": result.message,
-        "suggestion": result.suggestion,
-        "element_ref": result.element_ref,
-    }
+from app.core.validation.engine import ValidationReport, validation_engine
+from app.core.validation.failure import finding, introduced_errors, raise_rule_failure
 
 
 async def run_rule_set(
@@ -52,16 +41,14 @@ def raise_on_errors(report: ValidationReport, *, error: str) -> None:
 
     ``error`` is the module's stable error name, e.g. ``assemblies_rules_failed``.
     """
-    errors = report.errors
-    if not errors:
-        return
-    raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-        detail={
-            "error": error,
-            "code": errors[0].rule_id,
-            "message": errors[0].message,
-            "errors": [finding(r) for r in errors],
-            "warnings": warnings_of(report),
-        },
-    )
+    raise_rule_failure(report, error=error)
+
+
+async def raise_on_introduced(
+    report: ValidationReport,
+    before: Callable[[], Awaitable[ValidationReport]] | None,
+    *,
+    error: str,
+) -> None:
+    """Like :func:`raise_on_errors`, but an edit is blocked only by errors it introduces."""
+    raise_rule_failure(report, await introduced_errors(report, before), error=error)

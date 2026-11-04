@@ -672,7 +672,9 @@ class HSEAdvancedService:
         self.jsa_template_repo = JSATemplateRepository(session)
         self.last_warnings: list[Any] = []
 
-    async def _check(self, key: str, record: dict[str, Any], project_id: Any = None) -> None:
+    async def _check(
+        self, key: str, record: dict[str, Any], project_id: Any = None, before: dict[str, Any] | None = None
+    ) -> None:
         """Run the ``hse_advanced`` rule set on one record; errors raise a coded 422, warnings are logged."""
         from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
         from app.modules.hse_advanced.validators import HSE_RULE_SET, register_hse_validation_rules  # noqa: PLC0415
@@ -684,6 +686,7 @@ class HSEAdvancedService:
             target_type=f"hse_{key}",
             target_id=str(record.get("id", "")),
             project_id=project_id,
+            before=None if before is None else {key: before},
         )
 
     # ── Investigation ─────────────────────────────────────────────────────
@@ -1032,6 +1035,12 @@ class HSEAdvancedService:
                 "permit",
                 {"id": item_id, "permit_type": obj.permit_type, "work_start": new_start, "work_end": new_end},
                 obj.project_id,
+                before={
+                    "id": item_id,
+                    "permit_type": obj.permit_type,
+                    "work_start": obj.work_start,
+                    "work_end": obj.work_end,
+                },
             )
         if fields:
             await self.permit_repo.update_fields(item_id, **fields)

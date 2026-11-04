@@ -190,6 +190,7 @@ class CorrespondenceService:
                 CORRESPONDENCE_RULE_SET,
                 target_type="correspondence",
                 target_id=str(correspondence_id),
+                before=snapshot(correspondence, {}),
             )
         await self.repo.update_fields(correspondence_id, **fields)
         await self.session.refresh(correspondence)
