@@ -21,6 +21,7 @@ import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/ap
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
+import { SeenOnBadge } from '@/features/lessons-learned/SeenOnBadge';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { MonteCarloTab } from './MonteCarloTab';
@@ -420,6 +421,7 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
             <h3 className="mt-1 text-lg text-content-secondary">{risk.title}</h3>
             {risk.description && <p className="mt-2 text-sm text-content-tertiary max-w-2xl">{risk.description}</p>}
           </div>
+          <SeenOnBadge projectId={risk.project_id} riskCategory={risk.category} />
           {!editing && <Button variant="secondary" size="sm" onClick={startEdit}>{t('common.edit', { defaultValue: 'Edit' })}</Button>}
         </div>
       </div>
@@ -808,6 +810,9 @@ export function RiskRegisterPage() {
                 panel. Leads the cluster so charts are one obvious click away. */}
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={riskGuide} />
+            <Button variant="secondary" onClick={() => navigate('/lessons-learned')}>
+              {t('lessons_learned.title', { defaultValue: 'Lessons learned' })}
+            </Button>
             <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
               <Plus size={16} className="mr-1.5" />{t('risk.new', { defaultValue: 'Add Risk' })}
             </Button>
