@@ -2424,9 +2424,11 @@ class SupplierCatalogsService(PriceListOps):
             delta = count.counted_qty - balance.quantity_on_hand
             if delta == 0:
                 continue
+            # A recount below the reserved quantity must not leave negative availability.
             await self.stock.update_balance(
                 balance.id,
                 quantity_on_hand=count.counted_qty,
+                quantity_reserved=min(balance.quantity_reserved, count.counted_qty),
                 last_movement_at=_now_iso(),
             )
             mv = await self.stock.record_movement(
