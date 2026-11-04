@@ -16,7 +16,13 @@ from decimal import Decimal
 import pytest
 
 from app.core.site_monitoring import emission_class_meets, fuel_co2_kg_per_l, sensor_limit
-from app.modules.equipment.telematics import TelematicsParseError, daily_utilisation, parse_aemp, parse_csv
+from app.modules.equipment.telematics import (
+    MAX_BURN_L_PER_H,
+    TelematicsParseError,
+    daily_utilisation,
+    parse_aemp,
+    parse_csv,
+)
 
 AEMP_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 <Fleet xmlns="http://standards.iso.org/iso/15143/-3" version="2" snapshotTime="2026-10-20T12:00:00Z">
@@ -252,3 +258,14 @@ def test_restart_to_a_high_counter_cannot_exceed_the_time_between_readings() -> 
     assert use is not None
     assert use.counter_reset is True
     assert use.worked_hours + use.idle_hours <= Decimal("2")
+
+
+def test_fuel_after_a_counter_restart_is_capped_by_time_times_max_burn() -> None:
+    rows = [
+        _cum("2026-10-02T06:00:00+00:00", "100", fuel="90000"),
+        _cum("2026-10-02T08:00:00+00:00", "102", fuel="50000"),
+    ]
+    use = daily_utilisation(rows, date(2026, 10, 2))
+    assert use is not None and use.counter_reset is True
+    assert use.fuel_l is not None
+    assert use.fuel_l <= Decimal("2") * MAX_BURN_L_PER_H

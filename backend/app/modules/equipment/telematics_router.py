@@ -125,14 +125,19 @@ async def create_device(
 
 @router.get("/devices/", response_model=DeviceListResponse)
 async def list_devices(
+    user_id: CurrentUserId,
+    session: SessionDep,
     equipment_id: uuid.UUID | None = Query(default=None),
+    project_id: uuid.UUID | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: TelematicsService = Depends(_service),
 ) -> DeviceListResponse:
-    rows = await service.list_devices(equipment_id)
-    silent = {s["device_id"]: s["hours_silent"] for s in await service.silent_devices()}
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    rows = await service.list_devices(equipment_id, project_id)
+    silent = {s["device_id"]: s["hours_silent"] for s in await service.silent_devices(project_id=project_id)}
     page = [_device_out(d, silent_hours=silent.get(d.id)) for d in rows[offset : offset + limit]]
     return DeviceListResponse(items=page, total=len(rows), offset=offset, limit=limit)
 
@@ -151,21 +156,31 @@ async def revoke_device(
 
 @router.post("/alerts/silent/")
 async def notify_silent(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID | None = Query(default=None),
     _perm: None = Depends(RequirePermission("equipment.update")),
     service: TelematicsService = Depends(_service),
 ) -> dict[str, int]:
     """Notify project owners about hired machines whose device sent nothing for 24 h."""
-    return await service.notify_silent_devices()
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    return await service.notify_silent_devices(project_id=project_id)
 
 
 @router.post("/maintenance/prune/")
 async def prune_raw(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID | None = Query(default=None),
     keep_days: int = Query(default=RAW_RETENTION_DAYS, ge=7, le=3650),
     _perm: None = Depends(RequirePermission("equipment.update")),
     service: TelematicsService = Depends(_service),
 ) -> dict[str, int]:
     """Delete raw readings older than ``keep_days``; daily utilisation rows are kept."""
-    return {"removed": await service.prune_raw(keep_days)}
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    return {"removed": await service.prune_raw(keep_days, project_id=project_id)}
 
 
 @router.post("/ingest/")
