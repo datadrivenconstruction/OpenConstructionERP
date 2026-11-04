@@ -14,6 +14,8 @@ from decimal import Decimal, InvalidOperation
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py - money fields are stored /
@@ -61,7 +63,7 @@ class CostImpactComponents(BaseModel):
         "(default 10%). Multiplied by ``rework_positions_total`` to "
         "obtain ``rework_subtotal``.",
     )
-    rework_subtotal: Decimal = Field(
+    rework_subtotal: FiniteDecimal = Field(
         default=Decimal("0"),
         description="``rework_positions_total × (rework_factor_pct / 100)``.",
     )
@@ -74,7 +76,7 @@ class CostImpactComponents(BaseModel):
         default=0.0,
         description="Project-level blended labour rate per hour in the project's native currency (default 50.0).",
     )
-    labour_subtotal: Decimal = Field(
+    labour_subtotal: FiniteDecimal = Field(
         default=Decimal("0"),
         description="``labour_hours × blended_rate``.",
     )

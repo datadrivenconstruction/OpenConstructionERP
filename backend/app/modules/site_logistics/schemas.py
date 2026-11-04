@@ -18,6 +18,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal8_2, Decimal10_2
 from app.modules.site_logistics.models import DELIVERY_STATUSES
 
 # "HH:MM" 24-hour clock, e.g. 07:00 / 18:30.
@@ -64,12 +65,12 @@ class GateCreate(BaseModel):
     notes: str | None = None
     # Access kind (catalogue ``access_kinds``) and load limits (rule 5).
     access_kind: str | None = Field(default=None, max_length=40)
-    max_axle_load_t: Decimal | None = Field(default=None, ge=0)
-    max_gross_t: Decimal | None = Field(default=None, ge=0)
-    max_height_m: Decimal | None = Field(default=None, ge=0)
-    max_width_m: Decimal | None = Field(default=None, ge=0)
-    max_length_m: Decimal | None = Field(default=None, ge=0)
-    turning_radius_m: Decimal | None = Field(default=None, ge=0)
+    max_axle_load_t: Decimal10_2 | None = Field(default=None, ge=0)
+    max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
+    max_height_m: Decimal8_2 | None = Field(default=None, ge=0)
+    max_width_m: Decimal8_2 | None = Field(default=None, ge=0)
+    max_length_m: Decimal8_2 | None = Field(default=None, ge=0)
+    turning_radius_m: Decimal8_2 | None = Field(default=None, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -91,12 +92,12 @@ class GateUpdate(BaseModel):
     notes: str | None = None
     # Access kind (catalogue ``access_kinds``) and load limits (rule 5).
     access_kind: str | None = Field(default=None, max_length=40)
-    max_axle_load_t: Decimal | None = Field(default=None, ge=0)
-    max_gross_t: Decimal | None = Field(default=None, ge=0)
-    max_height_m: Decimal | None = Field(default=None, ge=0)
-    max_width_m: Decimal | None = Field(default=None, ge=0)
-    max_length_m: Decimal | None = Field(default=None, ge=0)
-    turning_radius_m: Decimal | None = Field(default=None, ge=0)
+    max_axle_load_t: Decimal10_2 | None = Field(default=None, ge=0)
+    max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
+    max_height_m: Decimal8_2 | None = Field(default=None, ge=0)
+    max_width_m: Decimal8_2 | None = Field(default=None, ge=0)
+    max_length_m: Decimal8_2 | None = Field(default=None, ge=0)
+    turning_radius_m: Decimal8_2 | None = Field(default=None, ge=0)
     metadata: dict[str, Any] | None = None
 
 

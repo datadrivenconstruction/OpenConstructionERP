@@ -16,6 +16,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal18_2, FiniteDecimal
+
 # Upper bound for money fields - far above any realistic NCR cost yet within
 # Decimal's precision and the Numeric(18,2) column, so one absurd value cannot
 # overflow the column (500 on write) or poison the project-wide COPQ rollup.
@@ -400,7 +402,7 @@ class NCRCreate(BaseModel):
     )
     root_cause: str | None = Field(default=None, max_length=5000)
     cost_impact_currency: str = Field(default="", max_length=3)
-    cost_impact_amount: Decimal | None = Field(default=None, ge=0)
+    cost_impact_amount: Decimal18_2 | None = Field(default=None, ge=0)
     linked_inspection_id: UUID | None = None
 
     @field_validator("cost_impact_amount")
@@ -426,7 +428,7 @@ class NCRUpdate(BaseModel):
         pattern=r"^(open|action_pending|verifying|closed|cancelled)$",
     )
     cost_impact_currency: str | None = Field(default=None, max_length=3)
-    cost_impact_amount: Decimal | None = Field(default=None, ge=0)
+    cost_impact_amount: Decimal18_2 | None = Field(default=None, ge=0)
     linked_variation_id: UUID | None = None
     linked_inspection_id: UUID | None = None
 
@@ -731,7 +733,7 @@ class _ReworkProvenance(BaseModel):
     rework_priced_count: int = 0
     rework_unpriced_count: int = 0
     rework_unreadable_count: int = 0
-    rework_by_currency: dict[str, Decimal] = Field(default_factory=dict)
+    rework_by_currency: dict[str, FiniteDecimal] = Field(default_factory=dict)
     rework_currency_mixed: bool = False
 
 
@@ -778,12 +780,12 @@ class COPQDetailed(_ReworkProvenance):
     """Detailed Cost of Poor Quality including warranty, delay, and rework."""
 
     project_id: UUID
-    ncr_cost_total: Decimal
+    ncr_cost_total: FiniteDecimal
     open_punch_count: int
-    rework_cost_estimate: Decimal
-    warranty_cost: Decimal
-    delay_penalty_cost: Decimal
-    copq_total: Decimal
+    rework_cost_estimate: FiniteDecimal
+    warranty_cost: FiniteDecimal
+    delay_penalty_cost: FiniteDecimal
+    copq_total: FiniteDecimal
     currency: str = ""
 
 

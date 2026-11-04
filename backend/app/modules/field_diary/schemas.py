@@ -11,6 +11,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal6_2, FiniteDecimal
+
 # ── Constants ─────────────────────────────────────────────────────────────
 
 DIARY_STATUSES = ("draft", "submitted", "approved")
@@ -37,7 +39,7 @@ class DiaryEntryCreate(BaseModel):
     project_id: uuid.UUID
     entry_date: str = Field(..., description="ISO YYYY-MM-DD")
     weather: str | None = Field(default=None, max_length=64)
-    temperature_c: Decimal | None = None
+    temperature_c: Decimal6_2 | None = None
     headcount: int = Field(default=0, ge=0, le=10_000)
     notes_md: str | None = Field(default=None, max_length=20_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -52,7 +54,7 @@ class DiaryEntryCreate(BaseModel):
 
 class DiaryEntryUpdate(BaseModel):
     weather: str | None = Field(default=None, max_length=64)
-    temperature_c: Decimal | None = None
+    temperature_c: Decimal6_2 | None = None
     headcount: int | None = Field(default=None, ge=0, le=10_000)
     notes_md: str | None = Field(default=None, max_length=20_000)
     metadata: dict[str, Any] | None = None
@@ -90,7 +92,7 @@ class DiaryEntryResponse(BaseModel):
 class DiaryActivityCreate(BaseModel):
     activity_type: Literal["work", "delay", "inspection", "visit", "incident"]
     description: str | None = Field(default=None, max_length=10_000)
-    hours: Decimal | None = Field(default=None, ge=0, le=24)
+    hours: Decimal6_2 | None = Field(default=None, ge=0, le=24)
     location: str | None = Field(default=None, max_length=255)
     started_at: datetime | None = None
     ended_at: datetime | None = None
@@ -257,7 +259,7 @@ class FieldScheduleProgressCreate(FieldCapture):
     activity_id: uuid.UUID
     percent_complete: float | None = Field(default=None, ge=0, le=100)
     remaining_duration: int | None = Field(default=None, ge=0)
-    installed_units: Decimal | None = Field(default=None, ge=0)
+    installed_units: FiniteDecimal | None = Field(default=None, ge=0)
     actual_start: str | None = Field(default=None, max_length=40)
     actual_finish: str | None = Field(default=None, max_length=40)
 

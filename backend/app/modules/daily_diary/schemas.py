@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal5_2, Decimal6_2, Decimal8_2, Decimal10_2, Decimal14_2
 from app.core.optimistic_lock import CLIENT_OP_ID_PATTERN
 
 
@@ -149,10 +150,10 @@ class WeatherRecordCreate(BaseModel):
     project_id: UUID
     captured_at: datetime
     source: str = Field(default="manual", pattern=_WEATHER_SOURCE_RE)
-    temperature_c: Decimal | None = Field(default=None, ge=-100, le=100)
-    humidity_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    wind_speed_kmh: Decimal | None = Field(default=None, ge=0, le=1000)
-    precipitation_mm: Decimal | None = Field(default=None, ge=0, le=9999)
+    temperature_c: Decimal6_2 | None = Field(default=None, ge=-100, le=100)
+    humidity_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
+    wind_speed_kmh: Decimal6_2 | None = Field(default=None, ge=0, le=1000)
+    precipitation_mm: Decimal6_2 | None = Field(default=None, ge=0, le=9999)
     conditions_code: str | None = Field(default=None, max_length=32)
     conditions_text: str | None = Field(default=None, max_length=255)
     sunrise: str | None = Field(default=None, max_length=40)
@@ -169,10 +170,10 @@ class WeatherRecordUpdate(BaseModel):
 
     captured_at: datetime | None = None
     source: str | None = Field(default=None, pattern=_WEATHER_SOURCE_RE)
-    temperature_c: Decimal | None = Field(default=None, ge=-100, le=100)
-    humidity_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    wind_speed_kmh: Decimal | None = Field(default=None, ge=0, le=1000)
-    precipitation_mm: Decimal | None = Field(default=None, ge=0, le=9999)
+    temperature_c: Decimal6_2 | None = Field(default=None, ge=-100, le=100)
+    humidity_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
+    wind_speed_kmh: Decimal6_2 | None = Field(default=None, ge=0, le=1000)
+    precipitation_mm: Decimal6_2 | None = Field(default=None, ge=0, le=9999)
     conditions_code: str | None = Field(default=None, max_length=32)
     conditions_text: str | None = Field(default=None, max_length=255)
     sunrise: str | None = Field(default=None, max_length=40)
@@ -474,18 +475,18 @@ class DroneSurveyCreate(BaseModel):
     # 100 km² since no realistic single drone flight exceeds that
     # (battery + line-of-sight limits); rejects a stray unit-mistake
     # (e.g. mm² confused with m²) before it pollutes the DB.
-    area_m2: Decimal | None = Field(default=None, ge=0, le=Decimal("100000000"))
+    area_m2: Decimal14_2 | None = Field(default=None, ge=0, le=Decimal("100000000"))
     ortho_file_url: str | None = Field(default=None, max_length=2000)
     dsm_file_url: str | None = Field(default=None, max_length=2000)
     point_cloud_url: str | None = Field(default=None, max_length=2000)
     # Elevations are bounded by realistic surveyed terrain - Mariana
     # Trench (-11 km) to Everest (8.85 km) plus a comfortable margin.
-    elevation_min_m: Decimal | None = Field(
+    elevation_min_m: Decimal10_2 | None = Field(
         default=None,
         ge=Decimal("-12000"),
         le=Decimal("10000"),
     )
-    elevation_max_m: Decimal | None = Field(
+    elevation_max_m: Decimal10_2 | None = Field(
         default=None,
         ge=Decimal("-12000"),
         le=Decimal("10000"),
@@ -515,7 +516,7 @@ class DroneSurveyUpdate(BaseModel):
     flown_at: datetime | None = None
     pilot_name: str | None = Field(default=None, max_length=255)
     drone_model: str | None = Field(default=None, max_length=255)
-    area_m2: Decimal | None = Field(
+    area_m2: Decimal14_2 | None = Field(
         default=None,
         ge=0,
         le=Decimal("100000000"),
@@ -523,12 +524,12 @@ class DroneSurveyUpdate(BaseModel):
     ortho_file_url: str | None = Field(default=None, max_length=2000)
     dsm_file_url: str | None = Field(default=None, max_length=2000)
     point_cloud_url: str | None = Field(default=None, max_length=2000)
-    elevation_min_m: Decimal | None = Field(
+    elevation_min_m: Decimal10_2 | None = Field(
         default=None,
         ge=Decimal("-12000"),
         le=Decimal("10000"),
     )
-    elevation_max_m: Decimal | None = Field(
+    elevation_max_m: Decimal10_2 | None = Field(
         default=None,
         ge=Decimal("-12000"),
         le=Decimal("10000"),
@@ -589,7 +590,7 @@ class RealityCaptureCreate(BaseModel):
     point_count_estimate: int | None = Field(default=None, ge=0, le=2_000_000_000)
     bbox_min: dict[str, float] | None = None
     bbox_max: dict[str, float] | None = None
-    accuracy_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("999999"))
+    accuracy_mm: Decimal8_2 | None = Field(default=None, ge=0, le=Decimal("999999"))
     notes: str | None = Field(default=None, max_length=20000)
     linked_bim_model_ref: UUID | None = None
 
@@ -606,7 +607,7 @@ class RealityCaptureUpdate(BaseModel):
     point_count_estimate: int | None = Field(default=None, ge=0, le=2_000_000_000)
     bbox_min: dict[str, float] | None = None
     bbox_max: dict[str, float] | None = None
-    accuracy_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("999999"))
+    accuracy_mm: Decimal8_2 | None = Field(default=None, ge=0, le=Decimal("999999"))
     notes: str | None = Field(default=None, max_length=20000)
     linked_bim_model_ref: UUID | None = None
 

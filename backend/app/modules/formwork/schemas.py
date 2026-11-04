@@ -16,6 +16,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal6_2, Decimal18_2, FiniteDecimal
+
 # ── enum-like patterns ───────────────────────────────────────────────────
 
 # Generic engineering categories only. Formwork in the real world is dominated
@@ -58,12 +60,12 @@ class FormworkSystemCreate(BaseModel):
     supplier: str | None = Field(default=None, max_length=255)
     material: str = Field(default="plywood", pattern=rf"^({MATERIALS})$")
     reuses_max: int = Field(default=30, ge=1, le=10_000)
-    unit_rate: Decimal = Field(default=Decimal("0"), ge=0)
-    erect_strike_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    unit_rate: Decimal18_2 = Field(default=Decimal("0"), ge=0)
+    erect_strike_rate: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     strip_time_days: int = Field(default=1, ge=0, le=365)
     rate_basis: str = Field(default="purchase", pattern=rf"^({RATE_BASES})$")
     typical_reuses: int | None = Field(default=None, ge=1, le=10_000)
-    cycle_days: Decimal = Field(default=Decimal("0"), ge=0, le=365)
+    cycle_days: Decimal6_2 = Field(default=Decimal("0"), ge=0, le=365)
     currency: str = Field(default="", max_length=3)
     notes: str | None = None
     tenant_id: UUID | None = None
@@ -86,14 +88,14 @@ class FormworkSystemUpdate(BaseModel):
     supplier: str | None = Field(default=None, max_length=255)
     material: str | None = Field(default=None, pattern=rf"^({MATERIALS})$")
     reuses_max: int | None = Field(default=None, ge=1, le=10_000)
-    unit_rate: Decimal | None = Field(default=None, ge=0)
-    erect_strike_rate: Decimal | None = Field(default=None, ge=0)
+    unit_rate: Decimal18_2 | None = Field(default=None, ge=0)
+    erect_strike_rate: Decimal18_2 | None = Field(default=None, ge=0)
     strip_time_days: int | None = Field(default=None, ge=0, le=365)
     rate_basis: str | None = Field(default=None, pattern=rf"^({RATE_BASES})$")
     # Nullable in the database, so an explicit ``null`` here legitimately
     # clears the published planning figure back to "not stated".
     typical_reuses: int | None = Field(default=None, ge=1, le=10_000)
-    cycle_days: Decimal | None = Field(default=None, ge=0, le=365)
+    cycle_days: Decimal6_2 | None = Field(default=None, ge=0, le=365)
     currency: str | None = Field(default=None, max_length=3)
     notes: str | None = None
 
@@ -151,8 +153,8 @@ class FormworkSystemUsage(BaseModel):
     system_id: UUID
     assignment_count: int
     project_count: int
-    total_area_m2: Decimal
-    total_cost: Decimal
+    total_area_m2: FiniteDecimal
+    total_cost: FiniteDecimal
 
     @field_serializer("total_area_m2", "total_cost")
     def _ser_money(self, v: Decimal) -> str:
@@ -176,9 +178,9 @@ class FormworkAssignmentCreate(BaseModel):
     project_id: UUID
     boq_position_id: UUID | None = None
     formwork_system_id: UUID
-    area_m2: Decimal = Field(default=Decimal("0"), ge=0)
+    area_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     reuse_count: int = Field(default=1, ge=1, le=10_000)
-    waste_pct: Decimal = Field(default=Decimal("5.00"), ge=0, le=100)
+    waste_pct: Decimal6_2 = Field(default=Decimal("5.00"), ge=0, le=100)
     notes: str | None = None
     tenant_id: UUID | None = None
 
@@ -196,9 +198,9 @@ class FormworkAssignmentUpdate(BaseModel):
 
     boq_position_id: UUID | None = None
     formwork_system_id: UUID | None = None
-    area_m2: Decimal | None = Field(default=None, ge=0)
+    area_m2: Decimal18_2 | None = Field(default=None, ge=0)
     reuse_count: int | None = Field(default=None, ge=1, le=10_000)
-    waste_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    waste_pct: Decimal6_2 | None = Field(default=None, ge=0, le=100)
     notes: str | None = None
 
 
@@ -281,7 +283,7 @@ class FormworkScheduleLineCreate(BaseModel):
     pour_no: int = Field(default=1, ge=1, le=10_000)
     pour_date: date | None = None
     level_label: str = Field(default="", max_length=120)
-    area_m2: Decimal = Field(default=Decimal("0"), ge=0)
+    area_m2: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     notes: str | None = None
 
 
@@ -297,7 +299,7 @@ class FormworkScheduleLineUpdate(BaseModel):
     pour_no: int | None = Field(default=None, ge=1, le=10_000)
     pour_date: date | None = None
     level_label: str | None = Field(default=None, max_length=120)
-    area_m2: Decimal | None = Field(default=None, ge=0)
+    area_m2: Decimal18_2 | None = Field(default=None, ge=0)
     notes: str | None = None
 
 
@@ -356,12 +358,12 @@ class FormworkCycleAnalysis(BaseModel):
 
     assignment_id: UUID
     pour_count: int
-    total_pour_area_m2: Decimal
-    peak_pour_area_m2: Decimal
-    reuse_ratio: Decimal
+    total_pour_area_m2: FiniteDecimal
+    peak_pour_area_m2: FiniteDecimal
+    reuse_ratio: FiniteDecimal
     derived_reuse_count: int
     current_reuse_count: int
-    current_area_m2: Decimal
+    current_area_m2: FiniteDecimal
     reuses_max: int
     strip_time_days: int
     min_gap_days: int | None = None
@@ -432,9 +434,9 @@ class FormworkTypeBreakdown(BaseModel):
 
     system_type: str
     assignment_count: int
-    area_m2: Decimal
-    total: Decimal
-    share_pct: Decimal
+    area_m2: Decimal18_2
+    total: FiniteDecimal
+    share_pct: FiniteDecimal
 
     @field_serializer("area_m2", "total", "share_pct")
     def _ser_money(self, v: Decimal) -> str:
@@ -537,7 +539,7 @@ class FormworkCompareRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    area_m2: Decimal = Field(..., ge=0, description="Contact area to be formed")
+    area_m2: Decimal18_2 = Field(..., ge=0, description="Contact area to be formed")
     # One reuse count for every candidate, deliberately. Pricing each system at
     # its OWN typical reuses and then calling the lowest total "cheapest" just
     # rewards whichever catalogue row claims the most turnarounds - a claim,
@@ -545,7 +547,7 @@ class FormworkCompareRequest(BaseModel):
     # each system's own limit separately so an impossible assumption is visible
     # rather than priced.
     reuse_count: int = Field(default=1, ge=1, le=10_000)
-    waste_pct: Decimal = Field(default=Decimal("5.00"), ge=0, le=100)
+    waste_pct: Decimal6_2 = Field(default=Decimal("5.00"), ge=0, le=100)
     # Narrow the candidates to what you are actually forming. Omitted means
     # "every system in the catalogue".
     system_type: str | None = Field(default=None, pattern=rf"^({SYSTEM_TYPES})$")
@@ -564,17 +566,17 @@ class FormworkCompareCandidate(BaseModel):
     # to believe alongside what it would cost.
     reuses_max: int
     typical_reuses: int | None = None
-    cycle_days: Decimal
+    cycle_days: Decimal6_2
     strip_time_days: int
     # The priced result at the REQUESTED reuse count.
-    unit_cost: Decimal
-    material_unit_cost: Decimal
-    labour_unit_cost: Decimal
-    total: Decimal
+    unit_cost: FiniteDecimal
+    material_unit_cost: Decimal18_2
+    labour_unit_cost: Decimal18_2
+    total: FiniteDecimal
     # What the same area costs with no reuse at all: the money the reuse
     # assumption is worth on this system.
-    single_use_total: Decimal
-    reuse_saving: Decimal
+    single_use_total: FiniteDecimal
+    reuse_saving: FiniteDecimal
     # True when the requested reuse count is more than these panels survive.
     # The row is still priced - refusing to price it would hide the comparison
     # that shows WHY it is the wrong system - but it is priced at a reuse

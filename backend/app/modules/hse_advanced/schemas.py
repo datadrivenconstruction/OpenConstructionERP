@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal5_2
+
 
 def _validate_safe_url(value: str | None) -> str | None:
     """Reject javascript:/data:/file: URLs in user-supplied evidence/report links.
@@ -559,8 +561,8 @@ class AuditUpdate(BaseModel):
         pattern=r"^(internal|external|regulatory|site_walk)$",
     )
     conducted_at: datetime | None = None
-    score_total: Decimal | None = None
-    max_score: Decimal | None = None
+    score_total: Decimal5_2 | None = None
+    max_score: Decimal5_2 | None = None
     status: str | None = Field(
         default=None,
         pattern=r"^(scheduled|in_progress|completed|cancelled)$",
