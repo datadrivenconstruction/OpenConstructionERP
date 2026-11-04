@@ -248,7 +248,7 @@ async def test_percentage_mode_line_follows_a_quantity_edit(client: AsyncClient)
 
 
 @pytest.mark.asyncio
-async def test_viewer_cannot_apply_or_undo(client: AsyncClient):
+async def test_other_users_viewer_cannot_apply_or_undo(client: AsyncClient):
     from sqlalchemy import update as sa_update
 
     from app.database import async_session_factory
@@ -269,8 +269,10 @@ async def test_viewer_cannot_apply_or_undo(client: AsyncClient):
     viewer = {"Authorization": f"Bearer {login.json()['access_token']}"}
     url = f"/api/v1/boq/boqs/{boq_id}/cost-risk/contingency/"
     body = {"percentile": 80, "iterations": 1000, "source": "register", "mode": "percentage"}
-    assert (await client.post(url, json=body, headers=viewer)).status_code == 403
-    assert (await client.delete(url, headers=viewer)).status_code == 403
+    # boq.update is granted to viewers on purpose (they fill their own estimates); another
+    # user's bill is refused by the owner check as "not found".
+    assert (await client.post(url, json=body, headers=viewer)).status_code == 404
+    assert (await client.delete(url, headers=viewer)).status_code == 404
 
 
 @pytest.mark.asyncio

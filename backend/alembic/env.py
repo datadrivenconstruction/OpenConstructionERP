@@ -209,6 +209,11 @@ try:
         from app.core import audit_log as _audit_log_core  # noqa: F401
     except Exception:  # noqa: BLE001
         pass
+    # ``event_effect`` defines ``oe_event_effect`` (once-only claims), also outside app.modules.*
+    try:
+        from app.core import event_effect as _event_effect_core  # noqa: F401
+    except Exception:  # noqa: BLE001
+        pass
 except Exception:  # noqa: BLE001
     # ``app.modules`` itself failed to import — keep the historical
     # behaviour (only the explicitly-listed modules above are registered).
