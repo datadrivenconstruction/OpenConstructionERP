@@ -157,3 +157,75 @@ describe('items from before stamping', () => {
     expect(await queue.held()).toHaveLength(1);
   });
 });
+
+describe('upgrade from before stamping, single-user device', () => {
+  const legacy = (id: string): QueuedOp => ({
+    seq: 1,
+    clientOpId: id,
+    method: 'POST',
+    path: '/v1/x/',
+    kind: 'k',
+    queuedAt: 1,
+    retries: 0,
+  });
+  const withPrior = (user: QueueOwner, prior: string | null) => {
+    const storage = createMemoryQueueStorage();
+    const sent: QueuedOp[] = [];
+    const sender: OpSender = async (op) => {
+      sent.push(op);
+      return { kind: 'applied', httpStatus: 201 };
+    };
+    const queue = new MutationQueue(storage, sender, {
+      owner: () => user,
+      lastUser: memoryLastUser(null),
+      priorUser: () => prior,
+    });
+    return { storage, sent, queue };
+  };
+
+  it('adopts them when the only user seen on the device before is the one signing in', async () => {
+    const { storage, queue, sent } = withPrior(A, 'A@site.test');
+    await storage.put(legacy('old'));
+    await queue.drain();
+    expect(sent.map((o) => o.clientOpId)).toEqual(['old']);
+  });
+
+  it('holds them when the earlier user on the device is someone else', async () => {
+    const { storage, queue, sent } = withPrior(B, 'a@site.test');
+    await storage.put(legacy('old'));
+    await queue.drain();
+    expect(sent).toHaveLength(0);
+    expect(await queue.held()).toHaveLength(1);
+  });
+
+  it('holds them when nobody was recorded', async () => {
+    const { storage, queue, sent } = withPrior(A, null);
+    await storage.put(legacy('old'));
+    await queue.drain();
+    expect(sent).toHaveLength(0);
+  });
+});
+
+describe('server refuses the owner', () => {
+  it('holds the op instead of dropping it, and does not resend it', async () => {
+    const storage = createMemoryQueueStorage();
+    let calls = 0;
+    const queue = new MutationQueue(
+      storage,
+      async () => {
+        calls += 1;
+        return { kind: 'held', httpStatus: 403, detail: 'queue_owner_mismatch' };
+      },
+      { owner: () => A, lastUser: memoryLastUser() },
+    );
+    await queue.enqueue(input('a1'));
+    const summary = await queue.drain();
+    expect(summary.held).toBe(1);
+    expect(summary.rejected).toBe(0);
+    expect(await queue.pending()).toEqual([]);
+    expect((await queue.held()).map((o) => o.clientOpId)).toEqual(['a1']);
+    await queue.drain();
+    expect(calls).toBe(1);
+    expect(JSON.parse(await queue.exportHeld()).ops).toHaveLength(1);
+  });
+});

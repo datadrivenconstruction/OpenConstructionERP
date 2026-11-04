@@ -39,7 +39,7 @@ import {
   type ReplayOutcome,
 } from '@/shared/lib/offline';
 import { getAuthToken, API_BASE } from '@/shared/lib/api';
-import { authOwner } from '@/shared/lib/offline/authOwner';
+import { authOwner, priorOfficeUser } from '@/shared/lib/offline/authOwner';
 import type { OfflineEntryPayload, OfflineEntryResult, OfflineWithdrawPayload } from './api';
 
 /** Its own IndexedDB database, never a new store in the field PWA's. */
@@ -155,6 +155,7 @@ export function getFieldTimeQueue(): MutationQueue {
     singleton = new MutationQueue(pickFieldTimeStorage(), createFieldTimeSender(), {
       owner: authOwner,
       ownerKey: 'field-time',
+      priorUser: priorOfficeUser,
     });
   }
   return singleton;

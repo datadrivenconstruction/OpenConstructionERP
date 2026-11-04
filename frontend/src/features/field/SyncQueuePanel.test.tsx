@@ -135,4 +135,29 @@ describe('SyncQueuePanel: offline gaps', () => {
     render(<SyncQueuePanel state={state} now={NOW} />);
     expect(screen.getByTestId('sync-queue-refused')).toHaveTextContent('Too old to sync (over 30 days)');
   });
+
+  it('shows held captures of other users with export and a confirmed discard', () => {
+    const discardHeld = vi.fn().mockResolvedValue(undefined);
+    const exportHeld = vi.fn().mockResolvedValue('{}');
+    const state = buildState({
+      heldOps: [
+        op({ clientOpId: 'h1', owner: { userId: 'u2', label: 'b@site.test' } }),
+        op({ clientOpId: 'h2', owner: { userId: '' } }),
+      ],
+      exportHeld,
+      discardHeld,
+    });
+    render(<SyncQueuePanel state={state} now={NOW} />);
+    expect(screen.getByTestId('sync-queue-held')).toBeInTheDocument();
+    expect(screen.getAllByTestId('sync-queue-held-owner')).toHaveLength(2);
+    fireEvent.click(screen.getByTestId('sync-queue-held-discard'));
+    expect(discardHeld).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('sync-queue-held-discard-yes'));
+    expect(discardHeld).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows no held section when nothing is held', () => {
+    render(<SyncQueuePanel state={buildState({ heldOps: [] })} now={NOW} />);
+    expect(screen.queryByTestId('sync-queue-held')).not.toBeInTheDocument();
+  });
 });
