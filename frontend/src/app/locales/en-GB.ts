@@ -87,6 +87,9 @@ const resource = {
     "rfq_bidding.issue_confirm_title": "Issue this RFQ?",
     "rfq_bidding.issue_confirm_message": "Vendors can bid once it is issued. An issued RFQ is no longer a draft and cannot be deleted.",
     "rfq_bidding.issue_needs_scope": "Add at least one scope line before issuing",
+    "rfq_bidding.reason_lump_sum_scope_unconfirmed": "Lump sum only: scope coverage not confirmed",
+    "rfq_bidding.scope_confirm_btn": "Confirm full scope",
+    "rfq_bidding.scope_confirm_hint": "This quote gives one lump sum and no line prices, so the comparison cannot tell what it covers. Confirm only if the bidder has stated that the sum covers the whole scope. The quote then joins the ranking, and your confirmation is logged.",
 
     "costs.labor": "Labour",
     "boq.add_scoped_markup": "Add markup for section",

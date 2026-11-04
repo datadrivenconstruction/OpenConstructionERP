@@ -1104,6 +1104,31 @@ class RFQService:
         )
         return await self._reload_bid(bid_id)
 
+    async def set_scope_confirmed(
+        self,
+        bid_id: uuid.UUID,
+        confirmed: bool,
+        *,
+        actor_id: str | None = None,
+    ) -> RFQBid:
+        """Record that the estimator confirmed a lump-sum quote covers the whole scope.
+
+        Without line prices the comparison cannot see what a lump sum covers, so
+        it keeps the quote out of the ranking until somebody states it does.
+        """
+        bid, _rfq = await self._bid_for_open_rfq(bid_id, "confirm the scope of a quote")
+        metadata = dict(bid.metadata_ or {})
+        metadata["scope_confirmed"] = bool(confirmed)
+        await self.bids_repo.update(bid_id, metadata_=metadata)
+        await self._log_bid_decision(
+            bid,
+            action="scope_confirmed" if confirmed else "scope_unconfirmed",
+            actor_id=actor_id,
+            reason="Lump-sum scope confirmed" if confirmed else "Lump-sum scope confirmation withdrawn",
+            to_status=bid.status,
+        )
+        return await self._reload_bid(bid_id)
+
     async def _log_bid_decision(
         self,
         bid: RFQBid,
