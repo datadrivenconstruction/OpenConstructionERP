@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationError
 
+from app.core.decimal_types import Decimal5_2, Decimal7_4, Decimal8_4, Decimal9_4, Decimal18_4, FiniteDecimal
 from app.modules.contracts.country_defaults import (
     PAYMENT_TERM_FIELDS,
     PAYMENT_TERMS_KEY,
@@ -74,7 +75,7 @@ class ContractPaymentTermFields(BaseModel):
     ``terms["payment_terms"]``.
     """
 
-    retention_cap_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_cap_percent: FiniteDecimal | None = Field(default=None, ge=0, le=100)
     retention_release_split: ReleaseSplit = None
     payment_period_days: int | None = Field(default=None, ge=0, le=365)
     valuation_interval: str | None = Field(default=None, pattern=rf"^({'|'.join(VALUATION_INTERVALS)})$")
@@ -135,9 +136,9 @@ class ContractCreate(ContractPaymentTermFields):
     parent_contract_id: UUID | None = None
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    total_value: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    total_value: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     currency: str = Field(default="", max_length=3)
-    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     retention_release_event: ReleaseEvent | None = Field(
         default=None,
         pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
@@ -169,9 +170,9 @@ class ContractUpdate(ContractPaymentTermFields):
     parent_contract_id: UUID | None = None
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    total_value: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    total_value: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     currency: str | None = Field(default=None, max_length=3)
-    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     retention_release_event: ReleaseEvent | None = Field(
         default=None,
         pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
@@ -235,10 +236,10 @@ class VatRegimeOption(BaseModel):
     labels: dict[str, str]
     activity: str
     tax_code: str
-    base_fraction: Decimal
+    base_fraction: FiniteDecimal
     input_credit: bool
-    nominal_rate_pct: Decimal | None = None
-    effective_rate_pct: Decimal | None = None
+    nominal_rate_pct: FiniteDecimal | None = None
+    effective_rate_pct: FiniteDecimal | None = None
     is_default: bool
     effective_from: date
     effective_to: date | None = None
@@ -338,8 +339,8 @@ class ContractLineCreate(BaseModel):
     scope_section: str | None = Field(default=None, max_length=255)
     line_type: str = Field(default="work", pattern=rf"^({LINE_TYPES})$")
     unit: str | None = Field(default=None, max_length=20)
-    quantity: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    unit_rate: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    quantity: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    unit_rate: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     order_index: int = Field(default=0, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -353,8 +354,8 @@ class ContractLineUpdate(BaseModel):
     scope_section: str | None = Field(default=None, max_length=255)
     line_type: str | None = Field(default=None, pattern=rf"^({LINE_TYPES})$")
     unit: str | None = Field(default=None, max_length=20)
-    quantity: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    unit_rate: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    quantity: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    unit_rate: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     order_index: int | None = Field(default=None, ge=0)
     metadata: dict[str, Any] | None = None
 
@@ -491,8 +492,8 @@ class RetentionScheduleResponse(BaseModel):
 class RetentionPolicyTier(BaseModel):
     """One step of the accrual ladder: the rate from a point of completion on."""
 
-    from_percent_complete: Decimal = Field(..., ge=0, le=100)
-    rate: Decimal = Field(..., ge=0, le=100)
+    from_percent_complete: FiniteDecimal = Field(..., ge=0, le=100)
+    rate: FiniteDecimal = Field(..., ge=0, le=100)
 
 
 class RetentionPolicyUpdate(BaseModel):
@@ -507,8 +508,8 @@ class RetentionPolicyUpdate(BaseModel):
 
     tiers: list[RetentionPolicyTier] | None = None
     tier_mode: str | None = Field(default=None, pattern=rf"^({'|'.join(TIER_MODES)})$")
-    stored_materials_rate: Decimal | None = Field(default=None, ge=0, le=100)
-    cap_percent_of_contract_sum: Decimal | None = Field(default=None, ge=0, le=100)
+    stored_materials_rate: FiniteDecimal | None = Field(default=None, ge=0, le=100)
+    cap_percent_of_contract_sum: FiniteDecimal | None = Field(default=None, ge=0, le=100)
     statute_reference: str | None = Field(default=None, max_length=200)
     effective_date: date | None = None
     notes: str | None = Field(default=None, max_length=2000)
@@ -556,8 +557,8 @@ class RetentionReleasePreviewRequest(BaseModel):
     """
 
     event: ReleaseEvent = Field(..., pattern=rf"^({RETENTION_RELEASE_ROW_EVENTS})$")
-    amount: Decimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
-    open_items_value: Decimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+    amount: Decimal18_4 | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+    open_items_value: FiniteDecimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
 
 
 class RetentionReleaseCreate(RetentionReleasePreviewRequest):
@@ -669,18 +670,18 @@ FEE_TYPES = "percent_of_cost|fixed|sliding_scale"
 class FeeStructureCreate(BaseModel):
     contract_id: UUID
     fee_type: str = Field(default="percent_of_cost", pattern=rf"^({FEE_TYPES})$")
-    fee_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    fee_fixed_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    fee_percent: Decimal8_4 = Field(default=Decimal("0"), ge=0, le=100)
+    fee_fixed_amount: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     sliding_scale: list[dict[str, Any]] = Field(default_factory=list)
-    max_fee: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    max_fee: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class FeeStructureUpdate(BaseModel):
     fee_type: str | None = Field(default=None, pattern=rf"^({FEE_TYPES})$")
-    fee_percent: Decimal | None = Field(default=None, ge=0, le=100)
-    fee_fixed_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    fee_percent: Decimal8_4 | None = Field(default=None, ge=0, le=100)
+    fee_fixed_amount: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     sliding_scale: list[dict[str, Any]] | None = None
-    max_fee: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    max_fee: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class FeeStructureResponse(BaseModel):
@@ -705,10 +706,10 @@ OVERRUN_RESPONSIBILITIES = "contractor|shared|owner"
 
 class GainshareConfigurationCreate(BaseModel):
     contract_id: UUID
-    target_cost: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    gmp_cap: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    savings_split_owner_pct: Decimal = Field(default=Decimal("50"), ge=0, le=100)
-    savings_split_contractor_pct: Decimal = Field(default=Decimal("50"), ge=0, le=100)
+    target_cost: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    gmp_cap: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    savings_split_owner_pct: Decimal5_2 = Field(default=Decimal("50"), ge=0, le=100)
+    savings_split_contractor_pct: Decimal5_2 = Field(default=Decimal("50"), ge=0, le=100)
     overrun_responsibility: str = Field(
         default="contractor",
         pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
@@ -716,10 +717,10 @@ class GainshareConfigurationCreate(BaseModel):
 
 
 class GainshareConfigurationUpdate(BaseModel):
-    target_cost: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    gmp_cap: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    savings_split_owner_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    savings_split_contractor_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    target_cost: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    gmp_cap: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    savings_split_owner_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
+    savings_split_contractor_pct: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     overrun_responsibility: str | None = Field(
         default=None,
         pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
@@ -748,9 +749,9 @@ LD_ENFORCEMENT_STATUSES = "active|waived"
 
 class LDClauseCreate(BaseModel):
     contract_id: UUID
-    per_day_amount: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    per_day_amount: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     currency: str = Field(default="", max_length=3)
-    max_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    max_amount: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     milestone_id: UUID | None = None
     enforcement_status: str = Field(
         default="active",
@@ -759,9 +760,9 @@ class LDClauseCreate(BaseModel):
 
 
 class LDClauseUpdate(BaseModel):
-    per_day_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    per_day_amount: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     currency: str | None = Field(default=None, max_length=3)
-    max_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    max_amount: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     milestone_id: UUID | None = None
     enforcement_status: str | None = Field(
         default=None,
@@ -866,21 +867,21 @@ class ProgressClaimListResponse(BaseModel):
 class ProgressClaimLineCreate(BaseModel):
     progress_claim_id: UUID
     contract_line_id: UUID
-    period_completed_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    period_completed_value: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    period_completed_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    cumulative_completed_value: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    assessed_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    certified_qty: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_qty: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_value: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_pct: Decimal7_4 = Field(default=Decimal("0"), ge=0, le=100)
+    cumulative_completed_value: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    assessed_qty: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    certified_qty: Decimal18_4 = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class ProgressClaimLineUpdate(BaseModel):
-    period_completed_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    period_completed_value: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    period_completed_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    cumulative_completed_value: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    assessed_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
-    certified_qty: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_qty: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_value: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    period_completed_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
+    cumulative_completed_value: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    assessed_qty: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    certified_qty: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
 class ProgressClaimLineResponse(BaseModel):
@@ -911,23 +912,23 @@ class ProgressClaimLineResponse(BaseModel):
 class AutoGenerateClaimRequest(BaseModel):
     """Payload to auto-generate a ProgressClaim from completion data."""
 
-    completion: dict[str, Decimal] = Field(
+    completion: dict[str, FiniteDecimal] = Field(
         default_factory=dict,
         description="contract_line_id (str) → completion percent (0-100)",
     )
-    measurements: dict[str, Decimal] = Field(
+    measurements: dict[str, FiniteDecimal] = Field(
         default_factory=dict,
         description="contract_line_id (str) → period-completed quantity (unit-price)",
     )
-    actual_costs_total: Decimal | None = Field(
+    actual_costs_total: FiniteDecimal | None = Field(
         default=None,
         description="Total actual costs incurred this period (cost-plus / T&M)",
     )
-    time_entries_total: Decimal | None = Field(
+    time_entries_total: FiniteDecimal | None = Field(
         default=None,
         description="T&M: total labor / equipment hours value this period",
     )
-    material_entries_total: Decimal | None = Field(
+    material_entries_total: FiniteDecimal | None = Field(
         default=None,
         description="T&M: total materials value this period",
     )
@@ -949,18 +950,18 @@ class ProgressClaimPopulatePreviewItem(BaseModel):
     contract_line_description: str = ""
     boq_position_id: UUID
     unit: str | None = None
-    contract_quantity: Decimal = Field(default=Decimal("0"))
-    contract_line_value: Decimal = Field(default=Decimal("0"))
+    contract_quantity: FiniteDecimal = Field(default=Decimal("0"))
+    contract_line_value: FiniteDecimal = Field(default=Decimal("0"))
     # Latest observed percent-complete for the linked BOQ position (0-100).
-    observed_pct: Decimal = Field(default=Decimal("0"))
+    observed_pct: FiniteDecimal = Field(default=Decimal("0"))
     period_label: str | None = None
     recorded_at: datetime | None = None
     # Derived figures at the observed percent. The observed percent is to
     # date, so the period value is what it adds over the earlier claims.
-    period_completed_qty: Decimal = Field(default=Decimal("0"))
-    period_completed_value: Decimal = Field(default=Decimal("0"))
-    prior_completed_value: Decimal = Field(default=Decimal("0"))
-    cumulative_completed_value: Decimal = Field(default=Decimal("0"))
+    period_completed_qty: Decimal18_4 = Field(default=Decimal("0"))
+    period_completed_value: Decimal18_4 = Field(default=Decimal("0"))
+    prior_completed_value: Decimal18_4 = Field(default=Decimal("0"))
+    cumulative_completed_value: Decimal18_4 = Field(default=Decimal("0"))
     # The observed percent is below what the earlier claims already billed on
     # this line. The period value is held at zero; a person decides whether
     # the earlier claims overstated the work.
@@ -1008,11 +1009,11 @@ class ProgressClaimCommitLine(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     contract_line_id: UUID
-    period_completed_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    period_completed_pct: Decimal7_4 = Field(default=Decimal("0"), ge=0, le=100)
     # Optional explicit value override; when omitted the value is derived from
     # the percent × contract line value. When supplied it is clamped to the
     # contract line value so the claim line can never exceed the SoV line.
-    period_completed_value: Decimal | None = None
+    period_completed_value: Decimal18_4 | None = None
 
 
 class ProgressClaimCommitRequest(BaseModel):
@@ -1034,11 +1035,11 @@ class FinalAccountCreate(BaseModel):
     # None means "not stated", which is not zero: the service keeps an agreed
     # final account's figure or reads it from the claims. A default of 0 here
     # made the Close button record that no retention was ever held.
-    final_contract_value: Decimal | None = None
-    total_paid: Decimal | None = None
-    retention_held: Decimal | None = None
-    retention_released: Decimal | None = None
-    final_balance: Decimal | None = None
+    final_contract_value: Decimal18_4 | None = None
+    total_paid: Decimal18_4 | None = None
+    retention_held: Decimal18_4 | None = None
+    retention_released: Decimal18_4 | None = None
+    final_balance: Decimal18_4 | None = None
     sign_off_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     sign_off_by: str | None = None
     status: str = Field(default="draft", pattern=rf"^({FINAL_ACCOUNT_STATUSES})$")
@@ -1046,11 +1047,11 @@ class FinalAccountCreate(BaseModel):
 
 
 class FinalAccountUpdate(BaseModel):
-    final_contract_value: Decimal | None = None
-    total_paid: Decimal | None = None
-    retention_held: Decimal | None = None
-    retention_released: Decimal | None = None
-    final_balance: Decimal | None = None
+    final_contract_value: Decimal18_4 | None = None
+    total_paid: Decimal18_4 | None = None
+    retention_held: Decimal18_4 | None = None
+    retention_released: Decimal18_4 | None = None
+    final_balance: Decimal18_4 | None = None
     sign_off_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     sign_off_by: str | None = None
     status: str | None = Field(default=None, pattern=rf"^({FINAL_ACCOUNT_STATUSES})$")
@@ -1102,13 +1103,13 @@ class ProgressClaimSummary(BaseModel):
 class GainshareCalculation(BaseModel):
     """Result of a GMP gainshare / overrun computation."""
 
-    actual_cost: Decimal
-    target_cost: Decimal
-    gmp_cap: Decimal
-    savings: Decimal
-    owner_share: Decimal
-    contractor_share: Decimal
-    overrun: Decimal
+    actual_cost: FiniteDecimal
+    target_cost: Decimal18_4
+    gmp_cap: Decimal18_4
+    savings: FiniteDecimal
+    owner_share: FiniteDecimal
+    contractor_share: FiniteDecimal
+    overrun: FiniteDecimal
     overrun_responsibility: str
 
 
@@ -1156,17 +1157,17 @@ class AIAG703Line(BaseModel):
     # value, so nothing to measure a percent or a balance against. Printed as
     # empty cells, never as zero. Required all the same, so a row that forgets
     # them fails here rather than printing a blank nobody meant.
-    scheduled_value: Decimal | None
-    previous_value: Decimal
-    this_period_value: Decimal
-    materials_stored: Decimal
-    total_completed_stored: Decimal
-    percent_complete: Decimal | None
-    balance_to_finish: Decimal | None
-    retainage: Decimal
+    scheduled_value: FiniteDecimal | None
+    previous_value: FiniteDecimal
+    this_period_value: FiniteDecimal
+    materials_stored: FiniteDecimal
+    total_completed_stored: FiniteDecimal
+    percent_complete: FiniteDecimal | None
+    balance_to_finish: FiniteDecimal | None
+    retainage: FiniteDecimal
     # Column I split into work and stored materials; they add up to it.
-    retainage_completed_work: Decimal = Decimal("0")
-    retainage_stored_materials: Decimal = Decimal("0")
+    retainage_completed_work: FiniteDecimal = Decimal("0")
+    retainage_stored_materials: FiniteDecimal = Decimal("0")
 
 
 class AIAG702Summary(BaseModel):
@@ -1197,7 +1198,7 @@ class AIACertification(BaseModel):
     architect_certified_by: str | None = None
     owner_certified_at: str | None = None
     owner_certified_by: str | None = None
-    certified_amount: Decimal | None = None
+    certified_amount: FiniteDecimal | None = None
 
 
 class PaymentApplicationResponse(BaseModel):
@@ -1296,9 +1297,9 @@ class ContractSecurityCreate(BaseModel):
     security_type: str = Field(default="other", pattern=rf"^({SECURITY_TYPES})$")
     reference: str | None = Field(default=None, max_length=120)
     provider_name: str = Field(default="", max_length=255)
-    amount: Decimal = Field(default=Decimal("0"), ge=0, lt=_MONEY_LIMIT)
+    amount: Decimal18_4 = Field(default=Decimal("0"), ge=0, lt=_MONEY_LIMIT)
     currency: str = Field(default="", max_length=3)
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     valid_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     valid_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: str = Field(default="required", pattern=rf"^({SECURITY_STATUSES})$")
@@ -1313,9 +1314,9 @@ class ContractSecurityUpdate(BaseModel):
     security_type: str | None = Field(default=None, pattern=rf"^({SECURITY_TYPES})$")
     reference: str | None = Field(default=None, max_length=120)
     provider_name: str | None = Field(default=None, max_length=255)
-    amount: Decimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+    amount: Decimal18_4 | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
     currency: str | None = Field(default=None, max_length=3)
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     valid_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     valid_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: str | None = Field(default=None, pattern=rf"^({SECURITY_STATUSES})$")
@@ -1494,8 +1495,8 @@ class ContractMilestoneCreate(BaseModel):
     code: str = Field(default="", max_length=80)
     name: str = Field(default="", max_length=500)
     planned_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    value: Decimal | None = None
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
+    value: Decimal18_4 | None = None
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     trigger: str = Field(default="date", pattern=rf"^({MILESTONE_TRIGGERS})$")
     status: str = Field(default="pending", pattern=rf"^({MILESTONE_STATUSES})$")
     kind: str = Field(default="progress", pattern=rf"^({MILESTONE_KINDS})$")
@@ -1511,8 +1512,8 @@ class ContractMilestoneUpdate(BaseModel):
     code: str | None = Field(default=None, max_length=80)
     name: str | None = Field(default=None, max_length=500)
     planned_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    value: Decimal | None = None
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
+    value: Decimal18_4 | None = None
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     trigger: str | None = Field(default=None, pattern=rf"^({MILESTONE_TRIGGERS})$")
     status: str | None = Field(default=None, pattern=rf"^({MILESTONE_STATUSES})$")
     kind: str | None = Field(default=None, pattern=rf"^({MILESTONE_KINDS})$")
@@ -1909,7 +1910,7 @@ class HakedisLineInput(BaseModel):
 
     state: str = Field(..., pattern=r"^(value|not_applicable|unset)$")
     amount: Decimal | None = Field(default=None, max_digits=18, decimal_places=4)
-    pct: Decimal | None = Field(default=None, ge=0, le=100)
+    pct: Decimal9_4 | None = Field(default=None, ge=0, le=100)
     note: str = Field(default="", max_length=2000)
 
 
@@ -2005,9 +2006,9 @@ class PriceAdjustmentCoefficientIn(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     item: str = Field(..., min_length=1, max_length=120)
-    coefficient: Decimal
-    base_index: Decimal | None = None
-    current_index: Decimal | None = None
+    coefficient: FiniteDecimal
+    base_index: FiniteDecimal | None = None
+    current_index: FiniteDecimal | None = None
     # A cost-index series of the price_index module; its points for
     # ``base_period`` and ``current_period`` are read when the values are not sent.
     index_series_id: UUID | None = None
@@ -2019,13 +2020,13 @@ class PriceAdjustmentComputeRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     regime: str = Field(..., min_length=1, max_length=60)
-    value_subject: Decimal
+    value_subject: FiniteDecimal
     coefficients: list[PriceAdjustmentCoefficientIn] = Field(..., min_length=1, max_length=50)
     base_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     current_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     #: The portion not subject to adjustment the contract data states, for a
     #: regime that has one (South Africa's Haylett formula); its default otherwise.
-    non_adjustable_portion: Decimal | None = None
+    non_adjustable_portion: FiniteDecimal | None = None
 
 
 class PriceAdjustmentComputeResponse(BaseModel):

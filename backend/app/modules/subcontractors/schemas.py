@@ -12,6 +12,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal5_2, Decimal18_2, Decimal18_4, FiniteDecimal
+
 # Upper bound for money fields - mirrors changeorders/full_evm/risk/punchlist.
 # A finite-but-absurd magnitude (e.g. 1e400) otherwise sums into gross and
 # reaches retention quantize() -> InvalidOperation -> opaque 500. ge=0 already
@@ -411,7 +413,7 @@ class CertificateCreate(BaseModel):
     notes: str | None = None
     is_mandatory: bool = False
     policy_number: str | None = Field(default=None, max_length=120)
-    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_amount: Decimal18_2 | None = Field(default=None, ge=0)
     coverage_currency: str | None = Field(default=None, min_length=3, max_length=3)
 
     @field_validator("document_url")
@@ -453,7 +455,7 @@ class CertificateUpdate(BaseModel):
     notes: str | None = None
     is_mandatory: bool | None = None
     policy_number: str | None = Field(default=None, max_length=120)
-    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_amount: Decimal18_2 | None = Field(default=None, ge=0)
     coverage_currency: str | None = Field(default=None, min_length=3, max_length=3)
 
     @field_validator("document_url")
@@ -504,13 +506,13 @@ class AgreementCreate(BaseModel):
     subcontractor_id: UUID
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=500)
-    total_value: Decimal = Field(default=Decimal("0"), ge=0)
+    total_value: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     start_date: date | None = None
     end_date: date | None = None
     # Left out, it starts from the usual retention of the project's country,
     # the same figure a contract there starts from (contracts.country_defaults).
-    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     retention_release_event: str | None = Field(default=None, max_length=120)
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None
@@ -565,11 +567,11 @@ class AgreementUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=1, max_length=500)
-    total_value: Decimal | None = Field(default=None, ge=0)
+    total_value: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     start_date: date | None = None
     end_date: date | None = None
-    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     retention_release_event: str | None = Field(default=None, max_length=120)
     requires_lien_waiver: bool | None = None
     prime_contract_id: UUID | None = None
@@ -629,8 +631,8 @@ class WorkPackageCreate(BaseModel):
     agreement_id: UUID
     name: str = Field(..., min_length=1, max_length=500)
     scope: str | None = None
-    planned_value: Decimal = Field(default=Decimal("0"), ge=0)
-    completion_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    planned_value: Decimal18_2 = Field(default=Decimal("0"), ge=0)
+    completion_percent: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     status: str = Field(
         default="planned",
         pattern=r"^(planned|in_progress|completed)$",
@@ -645,8 +647,8 @@ class WorkPackageUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=500)
     scope: str | None = None
-    planned_value: Decimal | None = Field(default=None, ge=0)
-    completion_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    planned_value: Decimal18_2 | None = Field(default=None, ge=0)
+    completion_percent: Decimal5_2 | None = Field(default=None, ge=0, le=100)
     status: str | None = Field(
         default=None,
         pattern=r"^(planned|in_progress|completed)$",
@@ -682,12 +684,12 @@ class PaymentApplicationLineCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     work_package_id: UUID
-    claimed_amount: Decimal = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
-    certified_amount: Decimal = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
-    approved_amount: Decimal = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
-    claimed_qty: Decimal = Field(default=Decimal("0"))
-    assessed_qty: Decimal = Field(default=Decimal("0"))
-    certified_qty: Decimal = Field(default=Decimal("0"))
+    claimed_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
+    certified_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
+    approved_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
+    claimed_qty: Decimal18_4 = Field(default=Decimal("0"))
+    assessed_qty: Decimal18_4 = Field(default=Decimal("0"))
+    certified_qty: Decimal18_4 = Field(default=Decimal("0"))
     # Optional override of the work package's GC schedule-of-values line.
     contract_line_id: UUID | None = None
 
@@ -707,7 +709,7 @@ class ApprovedLineAmount(BaseModel):
     """What finance approves on one line of the pay application it approves."""
 
     line_id: UUID
-    approved_amount: Decimal = Field(ge=0, le=_MONEY_MAX)
+    approved_amount: Decimal18_2 = Field(ge=0, le=_MONEY_MAX)
 
 
 class PaymentApplicationFinanceApproval(BaseModel):
@@ -768,7 +770,7 @@ class PaymentApplicationCreate(BaseModel):
     application_number: str | None = Field(default=None, max_length=40)
     period_start: date | None = None
     period_end: date | None = None
-    gross_amount: Decimal = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
+    gross_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
     currency: str = Field(default="", max_length=3)
     lines: list[PaymentApplicationLineCreate] = Field(default_factory=list)
 
@@ -785,7 +787,7 @@ class PaymentApplicationUpdate(BaseModel):
 
     period_start: date | None = None
     period_end: date | None = None
-    gross_amount: Decimal | None = Field(default=None, ge=0)
+    gross_amount: Decimal18_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     rejection_reason: str | None = None
 
@@ -865,7 +867,7 @@ class RetentionReleasePayload(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     agreement_id: UUID
-    amount: Decimal = Field(..., gt=0)
+    amount: Decimal18_2 = Field(..., gt=0)
     reason: str = Field(..., min_length=1, max_length=255)
 
     @field_validator("reason")
@@ -887,10 +889,10 @@ class RatingCreate(BaseModel):
 
     subcontractor_id: UUID
     period: str = Field(..., pattern=r"^\d{4}-\d{2}$")
-    quality_score: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    hse_score: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    schedule_score: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    cost_score: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    quality_score: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
+    hse_score: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
+    schedule_score: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
+    cost_score: Decimal5_2 = Field(default=Decimal("0"), ge=0, le=100)
     basis: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -1048,7 +1050,7 @@ class CurrencyAmount(BaseModel):
     """
 
     currency: str = ""
-    amount: Decimal = Decimal("0")
+    amount: Decimal18_2 = Decimal("0")
 
 
 class SubcontractorDashboard(BaseModel):
@@ -1057,7 +1059,7 @@ class SubcontractorDashboard(BaseModel):
     subcontractor_id: UUID
     legal_name: str
     prequalification_status: str
-    rating_score: Decimal = Decimal("0")
+    rating_score: Decimal5_2 = Decimal("0")
     active_agreements: int = 0
     open_payment_applications: int = 0
     # ── Money-correctness (additive, non-breaking) ──────────────────────
@@ -1069,7 +1071,7 @@ class SubcontractorDashboard(BaseModel):
     # should read ``pending_retention_by_currency`` (one bucket per
     # currency) and treat ``pending_retention`` as a blended figure only
     # when ``mixed_currency`` is False.
-    pending_retention: Decimal = Decimal("0")
+    pending_retention: FiniteDecimal = Decimal("0")
     pending_retention_by_currency: list[CurrencyAmount] = Field(default_factory=list)
     mixed_currency: bool = False
     expired_certificates: int = 0
@@ -1086,14 +1088,14 @@ class SOVRow(BaseModel):
 
     work_package_id: UUID
     name: str
-    planned_value: Decimal = Decimal("0")
-    completion_percent: Decimal = Decimal("0")
+    planned_value: Decimal18_2 = Decimal("0")
+    completion_percent: Decimal5_2 = Decimal("0")
     # All claim/cert/approved totals are rolled up across every payment app
     # tied to this work package - current period + all prior periods.
-    claimed_to_date: Decimal = Decimal("0")
-    certified_to_date: Decimal = Decimal("0")
-    approved_to_date: Decimal = Decimal("0")
-    remaining: Decimal = Decimal("0")
+    claimed_to_date: FiniteDecimal = Decimal("0")
+    certified_to_date: FiniteDecimal = Decimal("0")
+    approved_to_date: FiniteDecimal = Decimal("0")
+    remaining: FiniteDecimal = Decimal("0")
     status: str = "planned"
 
 
@@ -1199,7 +1201,7 @@ class LienWaiverFormFields(BaseModel):
     payment_application_id: UUID | None = None
     signed_date: date | None = None
     through_date: date | None = None
-    amount: Decimal = Decimal("0")
+    amount: Decimal18_2 = Decimal("0")
     currency: str = ""
     notes: str | None = None
 
@@ -1250,7 +1252,7 @@ class SubWaiverState(BaseModel):
     """
 
     state: str = "none"
-    amount_covered: Decimal = Decimal("0")
+    amount_covered: FiniteDecimal = Decimal("0")
     covers_net: bool = False
     through_date: date | None = None
     through_date_basis: str | None = None
@@ -1263,7 +1265,7 @@ class SubWithholdingTerms(BaseModel):
     rate_pct: str
     vat_included: bool = True
     # Small-amount limit per payee and calendar year, when the scheme has one.
-    annual_limit: Decimal | None = None
+    annual_limit: FiniteDecimal | None = None
     currency: str = ""
     reference: str | None = None
 
@@ -1301,11 +1303,11 @@ class SubRollupPayApp(BaseModel):
     period_start: date | None = None
     period_end: date | None = None
     currency: str = ""
-    gross_amount: Decimal = Decimal("0")
-    net_amount: Decimal = Decimal("0")
-    claimed_amount: Decimal = Decimal("0")
-    certified_amount: Decimal = Decimal("0")
-    approved_amount: Decimal = Decimal("0")
+    gross_amount: Decimal18_2 = Decimal("0")
+    net_amount: Decimal18_2 = Decimal("0")
+    claimed_amount: Decimal18_2 = Decimal("0")
+    certified_amount: Decimal18_2 = Decimal("0")
+    approved_amount: Decimal18_2 = Decimal("0")
     # Lines the pay application carries. With none it bills nothing on the
     # claim, even though approving it approves its gross for payment.
     line_count: int = 0
@@ -1335,9 +1337,9 @@ class SubRollupRow(BaseModel):
     subcontractor_id: UUID
     subcontractor_name: str = ""
     status: str
-    claimed_amount: Decimal = Decimal("0")
-    certified_amount: Decimal = Decimal("0")
-    approved_amount: Decimal = Decimal("0")
+    claimed_amount: Decimal18_2 = Decimal("0")
+    certified_amount: Decimal18_2 = Decimal("0")
+    approved_amount: Decimal18_2 = Decimal("0")
     waiver_state: str = "none"
     waiver_covers_net: bool = False
     certificates_ok: bool | None = None
@@ -1351,13 +1353,13 @@ class SubRollupLine(BaseModel):
     contract_line_id: UUID
     code: str = ""
     description: str = ""
-    scheduled_value: Decimal = Decimal("0")
-    gc_period_value: Decimal = Decimal("0")
-    sub_period_approved: Decimal = Decimal("0")
-    sub_approved_to_date: Decimal = Decimal("0")
+    scheduled_value: FiniteDecimal = Decimal("0")
+    gc_period_value: FiniteDecimal = Decimal("0")
+    sub_period_approved: FiniteDecimal = Decimal("0")
+    sub_approved_to_date: FiniteDecimal = Decimal("0")
     # GC figure minus the subs' approved figure for this period. Positive means
     # the GC bills more on the line than its subs were approved for.
-    variance: Decimal = Decimal("0")
+    variance: FiniteDecimal = Decimal("0")
     exceeds_scheduled_value: bool = False
     subs: list[SubRollupRow] = Field(default_factory=list)
 
@@ -1370,8 +1372,8 @@ class SubRollupUnmappedLine(BaseModel):
     line_id: UUID
     work_package_id: UUID
     work_package_name: str = ""
-    approved_amount: Decimal = Decimal("0")
-    claimed_amount: Decimal = Decimal("0")
+    approved_amount: Decimal18_2 = Decimal("0")
+    claimed_amount: Decimal18_2 = Decimal("0")
     # ``none`` (nothing mapped), ``foreign_line`` (mapped to a line that is not
     # on this contract's schedule of values) or ``parent_line`` (mapped to a
     # roll-up line, which is never billed directly).
@@ -1453,18 +1455,18 @@ class SuggestedClaimLineItem(BaseModel):
     contract_line_description: str = ""
     boq_position_id: UUID | None = None
     unit: str | None = None
-    contract_quantity: Decimal = Decimal("0")
-    contract_line_value: Decimal = Decimal("0")
-    observed_pct: Decimal = Decimal("0")
+    contract_quantity: FiniteDecimal = Decimal("0")
+    contract_line_value: FiniteDecimal = Decimal("0")
+    observed_pct: FiniteDecimal = Decimal("0")
     period_label: str | None = None
     recorded_at: datetime | None = None
-    period_completed_qty: Decimal = Decimal("0")
-    period_completed_value: Decimal = Decimal("0")
-    cumulative_completed_value: Decimal = Decimal("0")
+    period_completed_qty: FiniteDecimal = Decimal("0")
+    period_completed_value: FiniteDecimal = Decimal("0")
+    cumulative_completed_value: FiniteDecimal = Decimal("0")
     origin: str = "subcontract"
     # What the claim carries on this line today, so a reviewer can see what a
     # suggestion would replace. ``None`` when the claim has no line there yet.
-    current_period_value: Decimal | None = None
+    current_period_value: FiniteDecimal | None = None
 
 
 class SuggestedClaimLinesResponse(BaseModel):

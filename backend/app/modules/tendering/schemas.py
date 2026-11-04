@@ -14,6 +14,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 # Pragmatic email regex - RFC 5322 is impractical to validate at the
 # schema layer, so we apply the same shape check the frontend ``type=email``
 # input uses (HTML5 living standard). Empty string stays valid because the
@@ -306,8 +308,8 @@ class BidComparisonRow(BaseModel):
     description: str = ""
     unit: str = ""
     budget_quantity: float = 0.0
-    budget_rate: Decimal = Decimal("0")
-    budget_total: Decimal = Decimal("0")
+    budget_rate: FiniteDecimal = Decimal("0")
+    budget_total: FiniteDecimal = Decimal("0")
     # One entry per bid. ``priced`` is False when the bid has no rate for this
     # line, so a reader can tell a missing price from one quoted at zero (an
     # unpriced entry carries ``unit_rate`` and ``total`` null, not 0).
@@ -873,7 +875,7 @@ class LevelingMatrixCell(BaseModel):
     leveled_total: float = 0.0
     status: str = ""  # "" | "matched" | "scaled" | "imputed"
     # v3 §10 - the bidder's unit price is money (Decimal-as-string in JSON).
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
 
     @field_serializer("unit_rate", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:

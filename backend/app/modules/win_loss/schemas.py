@@ -11,6 +11,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal18_2, FiniteDecimal
+
 Outcome = Literal["pending", "won", "lost", "withdrawn", "no_decision"]
 LostReason = Literal["price", "scope", "schedule", "relationship", "capacity", "other"]
 
@@ -30,9 +32,9 @@ class BidOutcomeCreate(BaseModel):
     submitted_on: date | None = None
     outcome: Outcome = "pending"
     currency: str = Field(default="", max_length=10)
-    our_price: Decimal = Field(ge=0)
-    winning_price: Decimal | None = Field(default=None, gt=0)
-    second_price: Decimal | None = Field(default=None, gt=0)
+    our_price: Decimal18_2 = Field(ge=0)
+    winning_price: Decimal18_2 | None = Field(default=None, gt=0)
+    second_price: Decimal18_2 | None = Field(default=None, gt=0)
     competitor_count: int | None = Field(default=None, ge=0, le=500)
     lost_reason: LostReason | None = None
     notes: str = ""
@@ -51,9 +53,9 @@ class BidOutcomeUpdate(BaseModel):
     submitted_on: date | None = None
     outcome: Outcome | None = None
     currency: str | None = Field(default=None, max_length=10)
-    our_price: Decimal | None = Field(default=None, ge=0)
-    winning_price: Decimal | None = Field(default=None, gt=0)
-    second_price: Decimal | None = Field(default=None, gt=0)
+    our_price: Decimal18_2 | None = Field(default=None, ge=0)
+    winning_price: Decimal18_2 | None = Field(default=None, gt=0)
+    second_price: Decimal18_2 | None = Field(default=None, gt=0)
     competitor_count: int | None = Field(default=None, ge=0, le=500)
     lost_reason: LostReason | None = None
     notes: str | None = None
@@ -109,8 +111,8 @@ class GroupStat(BaseModel):
     submitted: int
     won: int
     lost: int
-    hit_rate_pct: Decimal | None
-    won_value: Decimal
+    hit_rate_pct: FiniteDecimal | None
+    won_value: FiniteDecimal
 
 
 class LedgerSummary(BaseModel):
