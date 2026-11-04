@@ -14,6 +14,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel
 
+from app.core.decimal_types import Decimal6_4, FiniteDecimal
 from app.modules.cost_recovery.back_charge import BackChargeStatus
 
 
@@ -24,8 +25,8 @@ class BackChargeCreate(BaseModel):
     responsible_party: str = ""
     description: str = ""
     basis: str = ""
-    gross_amount: Decimal = Decimal("0")
-    chargeable_pct: Decimal = Decimal("1")
+    gross_amount: FiniteDecimal = Decimal("0")
+    chargeable_pct: Decimal6_4 = Decimal("1")
     currency: str = ""
     status: BackChargeStatus = "proposed"
     # Optional link to a scored change subject. When both are set, create scores
@@ -56,10 +57,10 @@ class BackChargeUpdate(BaseModel):
     responsible_party: str | None = None
     description: str | None = None
     basis: str | None = None
-    gross_amount: Decimal | None = None
-    chargeable_pct: Decimal | None = None
+    gross_amount: FiniteDecimal | None = None
+    chargeable_pct: Decimal6_4 | None = None
     status: BackChargeStatus | None = None
-    recovered_amount: Decimal | None = None
+    recovered_amount: FiniteDecimal | None = None
 
 
 class BackChargeOut(BaseModel):
@@ -159,7 +160,7 @@ class ApportionmentShareIn(BaseModel):
     """
 
     party: str = ""
-    share_pct: Decimal = Decimal("0")
+    share_pct: Decimal6_4 = Decimal("0")
     basis: str = ""
 
 

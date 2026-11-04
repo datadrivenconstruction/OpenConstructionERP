@@ -27,6 +27,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.decimal_types import FiniteDecimal
 from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
 
 #: What a price stands on, as a closed vocabulary - issue #453.
@@ -284,7 +285,7 @@ class BOQCreate(BaseModel):
     #: it. The bounds are gone with the example: a rate is refused whatever
     #: its value, and a ``ge``/``le`` pair in the published schema would go on
     #: saying that some values are acceptable.
-    tax_rate: Decimal | None = Field(
+    tax_rate: FiniteDecimal | None = Field(
         default=None,
         description=(
             "Not stored on the bill. A bill's consumption tax is a markup row of category "
@@ -344,7 +345,7 @@ class BOQUpdate(BaseModel):
     #: published request schema alone; it only keeps a key the table cannot
     #: take out of the dump. Nothing else can ride it out: the validator above
     #: means ``None`` is the only value that gets this far.
-    tax_rate: Decimal | None = Field(
+    tax_rate: FiniteDecimal | None = Field(
         default=None,
         exclude=True,
         description=(
@@ -508,15 +509,15 @@ class PositionCreate(BaseModel):
     quantity: float = Field(..., ge=0.0, description="Measured quantity", examples=[125.5])
     # v3 §10 - money is Decimal-in / Decimal-as-string out. Pydantic v2
     # coerces int/float/str inputs to Decimal so legacy clients still work.
-    unit_rate: Decimal = Field(
+    unit_rate: FiniteDecimal = Field(
         default=Decimal("0"),
         ge=0,
         description="Price per unit",
         examples=["285.00"],
     )
-    net_cost_rate: Decimal | None = Field(default=None, ge=0, description="Net cost rate (contractor's cost)")
-    target_rate: Decimal | None = Field(default=None, ge=0, description="Target rate (budget benchmark)")
-    sale_rate: Decimal | None = Field(default=None, ge=0, description="Sale rate (client price)")
+    net_cost_rate: FiniteDecimal | None = Field(default=None, ge=0, description="Net cost rate (contractor's cost)")
+    target_rate: FiniteDecimal | None = Field(default=None, ge=0, description="Target rate (budget benchmark)")
+    sale_rate: FiniteDecimal | None = Field(default=None, ge=0, description="Sale rate (client price)")
     classification: dict[str, Any] = Field(
         default_factory=dict,
         description="Classification codes (e.g. din276, nrm, masterformat)",
@@ -681,10 +682,10 @@ class PositionUpdate(BaseModel):
     unit: str | None = Field(default=None, min_length=1, max_length=20)
     quantity: float | None = Field(default=None, ge=0.0)
     # v3 §10 - money is Decimal-in / Decimal-as-string out.
-    unit_rate: Decimal | None = Field(default=None, ge=0)
-    net_cost_rate: Decimal | None = Field(default=None, ge=0)
-    target_rate: Decimal | None = Field(default=None, ge=0)
-    sale_rate: Decimal | None = Field(default=None, ge=0)
+    unit_rate: FiniteDecimal | None = Field(default=None, ge=0)
+    net_cost_rate: FiniteDecimal | None = Field(default=None, ge=0)
+    target_rate: FiniteDecimal | None = Field(default=None, ge=0)
+    sale_rate: FiniteDecimal | None = Field(default=None, ge=0)
     classification: dict[str, Any] | None = None
     source: str | None = Field(
         default=None,
@@ -931,7 +932,7 @@ class BulkPositionUpdate(BaseModel):
         default=None,
         description="Find-and-replace specification for description text.",
     )
-    set_rate: Decimal | None = Field(
+    set_rate: FiniteDecimal | None = Field(
         default=None,
         ge=0,
         le=Decimal("1e12"),
@@ -1061,9 +1062,9 @@ class SheetEditedRow(BaseModel):
 
     id: UUID
     version: int
-    quantity: Decimal
-    unit_rate: Decimal
-    total: Decimal
+    quantity: FiniteDecimal
+    unit_rate: FiniteDecimal
+    total: FiniteDecimal
 
     @field_serializer("quantity", "unit_rate", "total", when_used="json")
     def _money_str(self, v: Decimal) -> str:
@@ -1307,7 +1308,7 @@ class MarkupCreate(_MarkupBase):
     # Negative only for ``tender_adjustment``: a bid quoted as a percentage
     # below a schedule of rates. Every other category stays 0..100.
     percentage: float = Field(default=0.0, ge=-100.0, le=100.0)
-    fixed_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    fixed_amount: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     apply_to: str = Field(default="direct_cost", pattern=r"^(direct_cost|subtotal|cumulative)$")
     sort_order: int = Field(default=0, ge=0)
     is_active: bool = True
@@ -1333,7 +1334,7 @@ class MarkupUpdate(_MarkupBase):
         pattern=r"^(overhead|profit|tax|contingency|insurance|bond|tender_adjustment|other)$",
     )
     percentage: float | None = Field(default=None, ge=-100.0, le=100.0)
-    fixed_amount: Decimal | None = Field(default=None, ge=0)
+    fixed_amount: FiniteDecimal | None = Field(default=None, ge=0)
     apply_to: str | None = Field(default=None, pattern=r"^(direct_cost|subtotal|cumulative)$")
     sort_order: int | None = Field(default=None, ge=0)
     is_active: bool | None = None
@@ -1584,8 +1585,8 @@ class LinkedPositionInfo(BaseModel):
     boq_id: UUID
     ordinal: str
     description: str
-    quantity: Decimal
-    total: Decimal
+    quantity: FiniteDecimal
+    total: FiniteDecimal
     link_role: str | None = None
     is_master: bool = False
 
@@ -1663,8 +1664,8 @@ class AIChatItem(BaseModel):
     description: str
     unit: str
     quantity: float
-    unit_rate: Decimal = Decimal("0")
-    total: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
+    total: FiniteDecimal = Decimal("0")
 
     @field_serializer("unit_rate", "total", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
@@ -1800,7 +1801,7 @@ class CostBreakdownCategory(BaseModel):
     """
 
     type: str
-    amount: Decimal = Decimal("0")
+    amount: FiniteDecimal = Decimal("0")
     percentage: float
     item_count: int
 
@@ -1817,7 +1818,7 @@ class CostBreakdownMarkup(BaseModel):
 
     name: str
     percentage: float
-    amount: Decimal = Decimal("0")
+    amount: FiniteDecimal = Decimal("0")
 
     @field_serializer("amount", when_used="json")
     def _ser_amount(self, v: Decimal) -> str | None:
@@ -1832,7 +1833,7 @@ class CostBreakdownResource(BaseModel):
 
     name: str
     type: str
-    total_cost: Decimal = Decimal("0")
+    total_cost: FiniteDecimal = Decimal("0")
     positions_count: int
 
     @field_serializer("total_cost", when_used="json")
@@ -1887,8 +1888,8 @@ class ResourceSummaryItem(BaseModel):
     unit: str
     total_quantity: float  # measurement, not money
     # v3 §10 - avg_unit_rate / total_cost are money: Decimal-as-string.
-    avg_unit_rate: Decimal = Decimal("0")
-    total_cost: Decimal = Decimal("0")
+    avg_unit_rate: FiniteDecimal = Decimal("0")
+    total_cost: FiniteDecimal = Decimal("0")
     positions_used: int
 
     # Variant surface - null when the resource has no abstract-resource
@@ -1978,7 +1979,7 @@ class ResourceCodeMatch(BaseModel):
     name: str = ""
     type: str = ""
     unit: str = ""
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     currency: str = ""
     # Provenance - surfaced verbatim to the user in the collision prompt.
     position_id: str = ""
@@ -2336,7 +2337,7 @@ class RateMatch(BaseModel):
 
     code: str
     description: str
-    rate: Decimal = Decimal("0")
+    rate: FiniteDecimal = Decimal("0")
     region: str
     score: float
 
@@ -2469,7 +2470,7 @@ class PrerequisiteItem(BaseModel):
 
     description: str
     unit: str
-    typical_rate_eur: Decimal = Decimal("0")
+    typical_rate_eur: FiniteDecimal = Decimal("0")
     relationship: str = "companion"  # prerequisite | companion | successor
     reason: str = ""
 
@@ -2511,7 +2512,7 @@ class ScopeMissingItem(BaseModel):
     category: str = ""
     priority: str = "medium"  # high | medium | low
     reason: str = ""
-    estimated_rate: Decimal = Decimal("0")
+    estimated_rate: FiniteDecimal = Decimal("0")
     unit: str = "lsum"
 
     @field_serializer("estimated_rate", when_used="json")
@@ -2598,7 +2599,7 @@ class EscalationFactors(BaseModel):
     """
 
     material_inflation: float = 0.0
-    labor_cost_change: Decimal = Decimal("0")
+    labor_cost_change: FiniteDecimal = Decimal("0")
     regional_adjustment: float = 0.0
 
     @field_serializer("labor_cost_change", when_used="json")
@@ -2925,8 +2926,8 @@ class ImportPreviewPosition(BaseModel):
     description: str = ""
     unit: str = "pcs"
     quantity: float = 0.0
-    unit_rate: Decimal = Decimal("0")
-    total: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
+    total: FiniteDecimal = Decimal("0")
     is_section: bool = False
     classification: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -2965,10 +2966,10 @@ class RiskContingencySuggestion(BaseModel):
     """What applying a contingency at one percentile would write (AI-free, but still a suggestion)."""
 
     percentile: int
-    amount: Decimal
+    amount: FiniteDecimal
     pct_of_base: float
-    base_total: Decimal
-    budget: Decimal
+    base_total: FiniteDecimal
+    budget: FiniteDecimal
     below_base: bool = False
     iterations: int
     seed: int
@@ -2983,9 +2984,9 @@ class RiskContingencySuggestion(BaseModel):
     source: Literal["positions", "register"] = "positions"
     mode: Literal["fixed", "percentage"] = "fixed"
     #: Direct cost a percentage line refers to.
-    direct_cost: Decimal | None = None
+    direct_cost: FiniteDecimal | None = None
     #: Percentage the line would carry in ``percentage`` mode (4 dp, Decimal-as-string).
-    percentage: Decimal | None = None
+    percentage: FiniteDecimal | None = None
     #: Register source: number of risks used.
     items_used: int | None = None
     register_fingerprint: str | None = None
@@ -3061,7 +3062,7 @@ class ApplyRiskContingencyRequest(BaseModel):
     optimistic_pct: float = Field(default=15.0, ge=0.0, le=50.0)
     pessimistic_pct: float = Field(default=25.0, ge=0.0, le=100.0)
     correlation: float = Field(default=0.2, ge=0.0, le=0.95)
-    expected_amount: Decimal | None = Field(default=None, ge=0)
+    expected_amount: FiniteDecimal | None = Field(default=None, ge=0)
     name: str | None = Field(default=None, max_length=255)
     #: ``positions`` samples the bill's ranges, ``register`` the project risk register.
     source: Literal["positions", "register"] = "positions"

@@ -21,6 +21,8 @@ from typing import Any, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── Money serialisation helper (mirrors match_elements / boq) ─────────────
 def _serialise_money(v: Decimal | None) -> str | None:
@@ -569,7 +571,7 @@ class PreviewResourceRow(BaseModel):
     factor: float  # ratio per parent unit, not currency
     quantity: float  # per ONE unit of the parent position, the figure apply stores
     unit: str
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     type: str = "other"
 
     @field_serializer("unit_rate", when_used="json")
@@ -594,9 +596,9 @@ class PreviewPositionRow(BaseModel):
     description: str
     unit: str
     quantity: float  # measurement, not money
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     currency: str
-    line_total: Decimal = Decimal("0")
+    line_total: FiniteDecimal = Decimal("0")
     confidence: float | None = None
     confidence_band: ConfidenceBand = "none"
     resources: list[PreviewResourceRow] = Field(default_factory=list)

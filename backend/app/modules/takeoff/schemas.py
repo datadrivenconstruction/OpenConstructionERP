@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── Money serialisation helper (mirrors ai_estimator / match_elements / boq) ──
 # v3 §10: dollar amounts cross the wire as a Decimal-rendered string, never a
@@ -660,7 +662,7 @@ class CreateBoqPositionFromMeasurementRequest(BaseModel):
         ),
     )
     cost_item_id: UUID | None = Field(default=None, description="Cost database item to price the position from")
-    unit_rate: Decimal | None = Field(default=None, ge=0, description="Unit rate; None = 0 (to be priced)")
+    unit_rate: FiniteDecimal | None = Field(default=None, ge=0, description="Unit rate; None = 0 (to be priced)")
 
 
 class CreateBoqPositionFromMeasurementResponse(BaseModel):

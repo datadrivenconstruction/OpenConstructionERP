@@ -21,6 +21,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.decimal_types import FiniteDecimal
 from app.modules.costs.buildup import buildup_rate as _buildup_rate
 from app.modules.costs.hazards import hazards_in as _hazards_in
 from app.modules.costs.region_currency import REGION_CURRENCY
@@ -551,8 +552,8 @@ class CostSearchQuery(BaseModel):
         default=None,
         description="Filter to items in one user-owned cost catalog (exact match).",
     )
-    min_rate: Decimal | None = Field(default=None, ge=0)
-    max_rate: Decimal | None = Field(default=None, ge=0)
+    min_rate: FiniteDecimal | None = Field(default=None, ge=0)
+    max_rate: FiniteDecimal | None = Field(default=None, ge=0)
     limit: int = Field(default=50, ge=1, le=500)
     offset: int = Field(default=0, ge=0)
     cursor: str | None = Field(

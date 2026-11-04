@@ -15,6 +15,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py - money fields are stored /
@@ -48,9 +50,9 @@ class SnapshotCreate(BaseModel):
 
     project_id: UUID | None = None  # Set from URL path
     period: str = Field(..., min_length=7, max_length=10, pattern=r"^\d{4}-\d{2}$")
-    planned_cost: Decimal = Decimal("0")
-    earned_value: Decimal = Decimal("0")
-    actual_cost: Decimal = Decimal("0")
+    planned_cost: FiniteDecimal = Decimal("0")
+    earned_value: FiniteDecimal = Decimal("0")
+    actual_cost: FiniteDecimal = Decimal("0")
     forecast_eac: float = 0.0
     spi: float = 0.0
     cpi: float = 0.0
@@ -67,9 +69,9 @@ class SnapshotUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    planned_cost: Decimal | None = None
-    earned_value: Decimal | None = None
-    actual_cost: Decimal | None = None
+    planned_cost: FiniteDecimal | None = None
+    earned_value: FiniteDecimal | None = None
+    actual_cost: FiniteDecimal | None = None
     forecast_eac: float | None = None
     spi: float | None = None
     cpi: float | None = None
@@ -129,10 +131,10 @@ class BudgetLineCreate(BaseModel):
         description="material, labor, equipment, subcontractor, overhead, contingency",
     )
     description: str = Field(default="", max_length=500)
-    planned_amount: Decimal = Decimal("0")
-    committed_amount: Decimal = Decimal("0")
-    actual_amount: Decimal = Decimal("0")
-    forecast_amount: Decimal = Decimal("0")
+    planned_amount: FiniteDecimal = Decimal("0")
+    committed_amount: FiniteDecimal = Decimal("0")
+    actual_amount: FiniteDecimal = Decimal("0")
+    forecast_amount: FiniteDecimal = Decimal("0")
     period_start: str | None = Field(default=None, max_length=20)
     period_end: str | None = Field(default=None, max_length=20)
     currency: str = Field(default="", max_length=10)
@@ -158,10 +160,10 @@ class BudgetLineUpdate(BaseModel):
     activity_id: UUID | None = None
     category: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=500)
-    planned_amount: Decimal | None = None
-    committed_amount: Decimal | None = None
-    actual_amount: Decimal | None = None
-    forecast_amount: Decimal | None = None
+    planned_amount: FiniteDecimal | None = None
+    committed_amount: FiniteDecimal | None = None
+    actual_amount: FiniteDecimal | None = None
+    forecast_amount: FiniteDecimal | None = None
     period_start: str | None = None
     period_end: str | None = None
     currency: str | None = Field(default=None, max_length=10)
@@ -246,12 +248,12 @@ class CashFlowCreate(BaseModel):
     project_id: UUID | None = None  # Set from URL path
     period: str = Field(..., min_length=7, max_length=10, pattern=r"^\d{4}-\d{2}$")
     category: str = Field(default="total", max_length=100)
-    planned_inflow: Decimal = Decimal("0")
-    planned_outflow: Decimal = Decimal("0")
-    actual_inflow: Decimal = Decimal("0")
-    actual_outflow: Decimal = Decimal("0")
-    cumulative_planned: Decimal = Decimal("0")
-    cumulative_actual: Decimal = Decimal("0")
+    planned_inflow: FiniteDecimal = Decimal("0")
+    planned_outflow: FiniteDecimal = Decimal("0")
+    actual_inflow: FiniteDecimal = Decimal("0")
+    actual_outflow: FiniteDecimal = Decimal("0")
+    cumulative_planned: FiniteDecimal = Decimal("0")
+    cumulative_actual: FiniteDecimal = Decimal("0")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_serializer(
@@ -273,12 +275,12 @@ class CashFlowUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     category: str | None = Field(default=None, max_length=100)
-    planned_inflow: Decimal | None = None
-    planned_outflow: Decimal | None = None
-    actual_inflow: Decimal | None = None
-    actual_outflow: Decimal | None = None
-    cumulative_planned: Decimal | None = None
-    cumulative_actual: Decimal | None = None
+    planned_inflow: FiniteDecimal | None = None
+    planned_outflow: FiniteDecimal | None = None
+    actual_inflow: FiniteDecimal | None = None
+    actual_outflow: FiniteDecimal | None = None
+    cumulative_planned: FiniteDecimal | None = None
+    cumulative_actual: FiniteDecimal | None = None
     metadata: dict[str, Any] | None = None
 
     @field_serializer(
@@ -389,8 +391,8 @@ class CashFlowPeriod(BaseModel):
     period: str
     inflow: float = 0.0
     outflow: float = 0.0
-    cumulative_planned: Decimal = Decimal("0")
-    cumulative_actual: Decimal = Decimal("0")
+    cumulative_planned: FiniteDecimal = Decimal("0")
+    cumulative_actual: FiniteDecimal = Decimal("0")
 
     @field_serializer("cumulative_planned", "cumulative_actual", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
@@ -433,9 +435,9 @@ class ContractExposureGroup(BaseModel):
     """
 
     group: str
-    budgeted: Decimal = Decimal("0")
-    committed: Decimal = Decimal("0")
-    remaining_to_commit: Decimal = Field(
+    budgeted: FiniteDecimal = Decimal("0")
+    committed: FiniteDecimal = Decimal("0")
+    remaining_to_commit: FiniteDecimal = Field(
         default=Decimal("0"),
         description="budgeted - committed (negative when overcommitted)",
     )
@@ -691,9 +693,9 @@ class CostLineCreate(BaseModel):
     source: str = Field(default="manual", max_length=40)
     boq_position_id: UUID | None = None
     boq_id: UUID | None = None
-    estimate_quantity: Decimal = Decimal("0")
-    estimate_unit_rate: Decimal = Decimal("0")
-    estimate_amount: Decimal = Decimal("0")
+    estimate_quantity: FiniteDecimal = Decimal("0")
+    estimate_unit_rate: FiniteDecimal = Decimal("0")
+    estimate_amount: FiniteDecimal = Decimal("0")
     currency: str = Field(default="", max_length=10)
     status: str = Field(default="active", max_length=40)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -715,9 +717,9 @@ class CostLineUpdate(BaseModel):
     source: str | None = Field(default=None, max_length=40)
     boq_position_id: UUID | None = None
     boq_id: UUID | None = None
-    estimate_quantity: Decimal | None = None
-    estimate_unit_rate: Decimal | None = None
-    estimate_amount: Decimal | None = None
+    estimate_quantity: FiniteDecimal | None = None
+    estimate_unit_rate: FiniteDecimal | None = None
+    estimate_amount: FiniteDecimal | None = None
     currency: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, max_length=40)
     metadata: dict[str, Any] | None = None
@@ -893,38 +895,38 @@ class PositionActualsRow(BaseModel):
     norm_id: str = ""
     norm_work_key: str = ""
 
-    estimate_quantity: Decimal = Decimal("0")
-    estimate_unit_rate: Decimal = Decimal("0")
-    estimate_amount: Decimal = Decimal("0")
+    estimate_quantity: FiniteDecimal = Decimal("0")
+    estimate_unit_rate: FiniteDecimal = Decimal("0")
+    estimate_amount: FiniteDecimal = Decimal("0")
 
-    budget_planned: Decimal = Decimal("0")
-    budget_actual: Decimal = Decimal("0")
-    committed_amount: Decimal = Decimal("0")
-    contracted_amount: Decimal = Decimal("0")
-    claimed_amount: Decimal = Decimal("0")
-    uncommitted_amount: Decimal = Decimal("0")
+    budget_planned: FiniteDecimal = Decimal("0")
+    budget_actual: FiniteDecimal = Decimal("0")
+    committed_amount: FiniteDecimal = Decimal("0")
+    contracted_amount: FiniteDecimal = Decimal("0")
+    claimed_amount: FiniteDecimal = Decimal("0")
+    uncommitted_amount: FiniteDecimal = Decimal("0")
 
     #: None when the crew has never reported on this position, which is not the
     #: same as reporting zero and must not be drawn as a 0 percent bar.
-    installed_percent: Decimal | None = None
-    installed_amount: Decimal = Decimal("0")
+    installed_percent: FiniteDecimal | None = None
+    installed_amount: FiniteDecimal = Decimal("0")
 
-    consumed_quantity: Decimal = Decimal("0")
-    consumed_amount: Decimal = Decimal("0")
+    consumed_quantity: FiniteDecimal = Decimal("0")
+    consumed_amount: FiniteDecimal = Decimal("0")
 
     #: Net hours booked against this position on approved, unreversed field
     #: timesheets. Labour and plant stay apart: only labour compares with a
     #: productivity norm.
-    labour_hours: Decimal = Decimal("0")
-    plant_hours: Decimal = Decimal("0")
+    labour_hours: FiniteDecimal = Decimal("0")
+    plant_hours: FiniteDecimal = Decimal("0")
     #: Labour hours per unit of work actually IN PLACE, or None when no progress
     #: has been reported for the position. Deliberately not hours over the
     #: billed quantity, which would make a half-built item read as twice as
     #: productive as it is and an untouched one as the best on the project.
-    labour_hours_per_installed_unit: Decimal | None = None
+    labour_hours_per_installed_unit: FiniteDecimal | None = None
     #: Verified haul tickets against the position (quantity, haulage cost).
-    hauled_quantity: Decimal = Decimal("0")
-    haul_amount: Decimal = Decimal("0")
+    hauled_quantity: FiniteDecimal = Decimal("0")
+    haul_amount: FiniteDecimal = Decimal("0")
 
     @field_serializer(
         "hauled_quantity",

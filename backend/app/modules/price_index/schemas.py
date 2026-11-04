@@ -18,6 +18,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, field_validator, model_validator
 
+from app.core.decimal_types import Decimal18_6, FiniteDecimal
+
 # Upper bound shared by every numeric input. 1e12 is far beyond any real index
 # value / money amount yet keeps each pairwise product finite in Decimal, so an
 # adjusted amount can never overflow to a non-finite value.
@@ -103,7 +105,7 @@ class CostIndexPointCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     period: str = Field(..., description="ISO year-month, e.g. '2026-01'")
-    factor: Decimal = Field(..., gt=0, le=_NUM_MAX)
+    factor: Decimal18_6 = Field(..., gt=0, le=_NUM_MAX)
 
     @field_validator("period")
     @classmethod
@@ -122,7 +124,7 @@ class CostIndexPointUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     period: str | None = Field(default=None)
-    factor: Decimal | None = Field(default=None, gt=0, le=_NUM_MAX)
+    factor: Decimal18_6 | None = Field(default=None, gt=0, le=_NUM_MAX)
 
     @field_validator("period")
     @classmethod
@@ -164,7 +166,7 @@ class LocationFactorCreate(BaseModel):
 
     region_code: str = Field(..., min_length=1, max_length=64)
     label: str = Field(default="", max_length=255)
-    factor: Decimal = Field(..., gt=0, le=_NUM_MAX)
+    factor: Decimal18_6 = Field(..., gt=0, le=_NUM_MAX)
 
     @field_validator("factor")
     @classmethod
@@ -179,7 +181,7 @@ class LocationFactorUpdate(BaseModel):
 
     region_code: str | None = Field(default=None, min_length=1, max_length=64)
     label: str | None = Field(default=None, max_length=255)
-    factor: Decimal | None = Field(default=None, gt=0, le=_NUM_MAX)
+    factor: Decimal18_6 | None = Field(default=None, gt=0, le=_NUM_MAX)
 
     @field_validator("factor")
     @classmethod
@@ -208,7 +210,7 @@ class AdjustLine(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    amount: Decimal = Field(..., ge=0, le=_NUM_MAX)
+    amount: FiniteDecimal = Field(..., ge=0, le=_NUM_MAX)
     base_period: str = Field(..., description="ISO year-month the amount is expressed in")
     target_period: str = Field(..., description="ISO year-month to bring the amount to")
     base_region: str | None = Field(default=None, max_length=64)
