@@ -16,8 +16,8 @@ from typing import Any
 
 import pytest
 
-from app.modules.contracts import aia_pdf
 from app.modules.contracts import router as contracts_router
+from app.modules.us_pack import aia_pdf
 
 
 async def test_the_aia_pdf_is_rendered_in_a_worker_thread(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -35,14 +35,14 @@ async def test_the_aia_pdf_is_rendered_in_a_worker_thread(monkeypatch: pytest.Mo
         def __init__(self, _session: Any) -> None:
             pass
 
-        async def build_aia_application(self, _claim_id: uuid.UUID, *, locale: str) -> dict[str, Any]:
+        async def build_form_application(self, _slug: str, _claim_id: uuid.UUID, *, locale: str) -> dict[str, Any]:
             return {"application_number": "7"}
 
     monkeypatch.setattr(aia_pdf, "render_aia_application_pdf", _render)
     monkeypatch.setattr(contracts_router, "_verify_claim_access", _allowed)
     monkeypatch.setattr(contracts_router, "ContractsService", _Service)
 
-    response = await contracts_router.export_aia_application_pdf(uuid.uuid4(), None, "user")  # type: ignore[arg-type]
+    response = await contracts_router.export_form_application_pdf(uuid.uuid4(), "aia-application", None, "user")  # type: ignore[arg-type]
 
     assert response.media_type == "application/pdf"
     assert drawn_on, "the renderer was never called"

@@ -327,7 +327,7 @@ async def test_a_claim_bills_on_a_schedule_that_carries_a_deductive_change(world
         )
         # Half of the structure, less the deduction taken in full.
         assert claim.gross_amount == Decimal("47500")
-        application = await svc.build_aia_application(claim.id)
+        application = await svc.build_form_application("aia-application", claim.id)
         assert application["summary"]["current_payment_due"] == Decimal(str(claim.net_due)).quantize(Decimal("0.01"))
         report = await svc.validate_claim(claim.id)
         assert report["errors"] == []

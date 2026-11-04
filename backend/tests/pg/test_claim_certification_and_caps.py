@@ -130,7 +130,7 @@ async def _claim(session, contract, number: str, month: int | None) -> ProgressC
 
 async def _certificate(svc: ContractsService, claim: ProgressClaim) -> dict:
     """The claim's application, asserting line 8 is what the claim is owed."""
-    application = await svc.build_aia_application(claim.id)
+    application = await svc.build_form_application("aia-application", claim.id)
     summary = application["summary"]
     assert summary["current_payment_due"] == Decimal(str(claim.net_due))
     assert summary["total_earned_less_retainage"] == summary["total_completed_stored"] - summary["retainage"]
@@ -319,7 +319,7 @@ async def test_a_cost_plus_claim_outside_the_aia_countries_still_certifies(sessi
 
     # The form itself is still American only: nothing here opened it up.
     with pytest.raises(HTTPException) as refused:
-        await svc.build_aia_application(march.id)
+        await svc.build_form_application("aia-application", march.id)
     assert refused.value.status_code == 404
 
 

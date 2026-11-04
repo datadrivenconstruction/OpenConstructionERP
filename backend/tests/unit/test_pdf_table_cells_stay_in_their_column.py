@@ -212,7 +212,7 @@ def aia_payload(**overrides: Any) -> dict[str, Any]:
 
 
 def aia_pdf(**overrides: Any) -> bytes:
-    from app.modules.contracts.aia_pdf import render_aia_application_pdf
+    from app.modules.us_pack.aia_pdf import render_aia_application_pdf
 
     return render_aia_application_pdf(aia_payload(**overrides))
 

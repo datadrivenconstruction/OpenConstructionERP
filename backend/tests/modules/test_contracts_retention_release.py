@@ -132,7 +132,7 @@ def _request(event: str, **extra):
 
 async def _foots(svc: ContractsService, claim: ProgressClaim) -> dict:
     """The application for ``claim``, asserting line 5 is column I added up."""
-    application = await svc.build_aia_application(claim.id)
+    application = await svc.build_form_application("aia-application", claim.id)
     column_i = sum((Decimal(str(line["retainage"])) for line in application["lines"]), Decimal("0"))
     assert application["summary"]["retainage"] == column_i
     split = application["summary"]["retainage_completed_work"] + application["summary"]["retainage_stored_materials"]
