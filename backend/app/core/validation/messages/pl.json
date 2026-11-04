@@ -1707,5 +1707,35 @@
       "fail": "Dla {code} zapadła decyzja i nie można jej już zmieniać ani usuwać.",
       "suggestion": "Wprowadź nowe przesunięcie lub zmianę budżetu, która ją skoryguje."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Suma {label} {stated} nie zgadza się z sumą jej pozycji {expected}.",
+      "suggestion": "Przelicz sumę z pozycji ponownie lub popraw błędną pozycję."
+    },
+    "value_in_range": {
+      "fail": "Wartość {value} pola {field} jest poza dozwolonym zakresem od {low} do {high}.",
+      "suggestion": "Sprawdź liczbę i jednostkę; zwykle przyczyną jest przesunięty przecinek."
+    },
+    "currency_present": {
+      "fail": "Nie podano waluty.",
+      "suggestion": "Ustaw walutę rekordu, zanim zaufasz jego kwotom."
+    },
+    "currency_consistent": {
+      "fail": "Rekord miesza waluty ({currencies}).",
+      "suggestion": "Używaj jednej waluty w całym rekordzie lub najpierw przelicz kwoty."
+    },
+    "reference_present": {
+      "fail": "Brakuje wymaganego odniesienia {field}.",
+      "suggestion": "Powiąż rekord z projektem, umową lub stroną."
+    },
+    "status_transition": {
+      "fail": "Status nie może zmienić się z {from_status} na {to_status}.",
+      "suggestion": "Zachowaj kolejność procesu; jeśli trzeba się cofnąć, najpierw otwórz rekord ponownie."
+    },
+    "dates_ordered": {
+      "fail": "Daty {earlier} i {later} są w złej kolejności lub poza okresem.",
+      "suggestion": "Popraw daty tak, aby wcześniejsza była pierwsza, a każdy wpis mieścił się w okresie."
+    }
   }
 }

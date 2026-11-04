@@ -1707,5 +1707,35 @@
       "fail": "{code} je odlučen i više se ne može mijenjati ni brisati.",
       "suggestion": "Unesite novi prijenos ili izmjenu proračuna koja ga ispravlja."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Zbroj {label} {stated} ne odgovara zbroju njegovih stavki {expected}.",
+      "suggestion": "Ponovno izračunajte zbroj iz stavki ili ispravite pogrešnu stavku."
+    },
+    "value_in_range": {
+      "fail": "Vrijednost {value} polja {field} izvan je dopuštenog raspona od {low} do {high}.",
+      "suggestion": "Provjerite broj i jedinicu; uobičajeni uzrok je pomaknuta decimalna točka."
+    },
+    "currency_present": {
+      "fail": "Valuta nije navedena.",
+      "suggestion": "Postavite valutu zapisa prije nego se oslonite na njegove iznose."
+    },
+    "currency_consistent": {
+      "fail": "Zapis miješa valute ({currencies}).",
+      "suggestion": "Koristite jednu valutu u cijelom zapisu ili najprije preračunajte iznose."
+    },
+    "reference_present": {
+      "fail": "Nedostaje obvezna referenca {field}.",
+      "suggestion": "Povežite zapis s njegovim projektom, ugovorom ili stranom."
+    },
+    "status_transition": {
+      "fail": "Status se ne može promijeniti iz {from_status} u {to_status}.",
+      "suggestion": "Slijedite redoslijed tijeka rada; ako se zapis mora vratiti, najprije ga ponovno otvorite."
+    },
+    "dates_ordered": {
+      "fail": "Datumi {earlier} i {later} nisu u ispravnom redoslijedu ili su izvan razdoblja.",
+      "suggestion": "Ispravite datume tako da raniji dođe prvi i da svaki unos bude unutar razdoblja."
+    }
   }
 }

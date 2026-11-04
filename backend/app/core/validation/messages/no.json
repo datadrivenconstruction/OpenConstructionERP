@@ -1707,5 +1707,35 @@
       "fail": "{code} er avgjort og kan ikke lenger endres eller slettes.",
       "suggestion": "Registrer en ny overføring eller budsjettendring som retter den opp."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Summen {label} {stated} stemmer ikke med summen av linjene {expected}.",
+      "suggestion": "Beregn summen på nytt fra linjene, eller rett den feile linjen."
+    },
+    "value_in_range": {
+      "fail": "Verdien {value} for {field} ligger utenfor det tillatte området {low} til {high}.",
+      "suggestion": "Kontroller tallet og enheten; vanligvis er et feilplassert desimaltegn årsaken."
+    },
+    "currency_present": {
+      "fail": "Ingen valuta er oppgitt.",
+      "suggestion": "Angi valutaen til posten før du stoler på beløpene."
+    },
+    "currency_consistent": {
+      "fail": "Posten blander valutaer ({currencies}).",
+      "suggestion": "Bruk én valuta gjennomgående, eller regn først om beløpene."
+    },
+    "reference_present": {
+      "fail": "Den påkrevde referansen {field} mangler.",
+      "suggestion": "Koble posten til prosjektet, kontrakten eller parten."
+    },
+    "status_transition": {
+      "fail": "Statusen kan ikke endres fra {from_status} til {to_status}.",
+      "suggestion": "Følg rekkefølgen i arbeidsflyten; åpne posten på nytt først hvis den må tilbake."
+    },
+    "dates_ordered": {
+      "fail": "Datoene {earlier} og {later} er i feil rekkefølge eller utenfor perioden.",
+      "suggestion": "Rett datoene slik at den tidligste kommer først og hver post ligger innenfor perioden."
+    }
   }
 }

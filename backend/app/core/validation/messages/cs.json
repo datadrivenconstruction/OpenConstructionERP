@@ -1707,5 +1707,35 @@
       "fail": "{code} je rozhodnut a už ho nelze měnit ani mazat.",
       "suggestion": "Zadejte nový přesun nebo změnu rozpočtu, která ho opraví."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Součet {label} {stated} se neshoduje se součtem jeho řádků {expected}.",
+      "suggestion": "Přepočítejte součet z řádků nebo opravte chybný řádek."
+    },
+    "value_in_range": {
+      "fail": "Hodnota {value} pole {field} je mimo povolený rozsah {low} až {high}.",
+      "suggestion": "Zkontrolujte číslo a jednotku; obvyklou příčinou je posunutá desetinná čárka."
+    },
+    "currency_present": {
+      "fail": "Není uvedena měna.",
+      "suggestion": "Nastavte měnu záznamu dříve, než se spolehnete na jeho částky."
+    },
+    "currency_consistent": {
+      "fail": "Záznam míchá měny ({currencies}).",
+      "suggestion": "Používejte všude jednu měnu, nebo částky nejprve přepočtěte."
+    },
+    "reference_present": {
+      "fail": "Chybí povinný odkaz {field}.",
+      "suggestion": "Propojte záznam s projektem, smlouvou nebo stranou."
+    },
+    "status_transition": {
+      "fail": "Stav nelze změnit z {from_status} na {to_status}.",
+      "suggestion": "Dodržte pořadí postupu; pokud se má záznam vrátit, nejprve jej znovu otevřete."
+    },
+    "dates_ordered": {
+      "fail": "Data {earlier} a {later} jsou v nesprávném pořadí nebo mimo období.",
+      "suggestion": "Opravte data tak, aby dřívější šlo první a každý záznam spadal do období."
+    }
   }
 }

@@ -1707,5 +1707,35 @@
       "fail": "Napagdesisyunan na ang {code} at hindi na ito mababago o mabubura.",
       "suggestion": "Maglagay ng bagong paglilipat o pagbabago sa budget na magwawasto rito."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Ang kabuuang {label} na {stated} ay hindi tugma sa kabuuan ng mga linya nito na {expected}.",
+      "suggestion": "Kalkulahin muli ang kabuuan mula sa mga linya o ayusin ang maling linya."
+    },
+    "value_in_range": {
+      "fail": "Ang halagang {value} ng {field} ay wala sa pinapayagang saklaw na {low} hanggang {high}.",
+      "suggestion": "Suriin ang numero at ang yunit nito; karaniwang sanhi ang maling pwesto ng decimal point."
+    },
+    "currency_present": {
+      "fail": "Walang nakasaad na currency.",
+      "suggestion": "Itakda ang currency ng tala bago umasa sa mga halaga nito."
+    },
+    "currency_consistent": {
+      "fail": "Pinaghahalo ng tala ang mga currency ({currencies}).",
+      "suggestion": "Gumamit ng iisang currency sa buong tala o i-convert muna ang mga halaga."
+    },
+    "reference_present": {
+      "fail": "Nawawala ang kinakailangang reference na {field}.",
+      "suggestion": "Iugnay ang tala sa proyekto, kontrata, o partido nito."
+    },
+    "status_transition": {
+      "fail": "Hindi maaaring palitan ang status mula {from_status} patungong {to_status}.",
+      "suggestion": "Sundin ang pagkakasunod-sunod ng daloy ng trabaho; buksan muna muli ang tala kung kailangang bumalik."
+    },
+    "dates_ordered": {
+      "fail": "Mali ang pagkakasunod ng mga petsang {earlier} at {later} o nasa labas ng panahon.",
+      "suggestion": "Ayusin ang mga petsa upang mauna ang mas maaga at nasa loob ng panahon ang bawat entry."
+    }
   }
 }

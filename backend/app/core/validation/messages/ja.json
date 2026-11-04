@@ -1707,5 +1707,35 @@
       "fail": "{code} は決裁済みのため、変更も削除もできません。",
       "suggestion": "修正するには、新しい振替または予算変更を入力してください。"
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "{label}の合計 {stated} が明細の合計 {expected} と一致しません。",
+      "suggestion": "明細から合計を再計算するか、誤っている明細を修正してください。"
+    },
+    "value_in_range": {
+      "fail": "{field} の値 {value} が許容範囲 {low} ～ {high} の外にあります。",
+      "suggestion": "数値と単位を確認してください。小数点の位置ずれが原因であることが多いです。"
+    },
+    "currency_present": {
+      "fail": "通貨が指定されていません。",
+      "suggestion": "金額を信頼する前に、レコードの通貨を設定してください。"
+    },
+    "currency_consistent": {
+      "fail": "レコード内で通貨が混在しています ({currencies})。",
+      "suggestion": "全体で単一の通貨を使うか、先に金額を換算してください。"
+    },
+    "reference_present": {
+      "fail": "必須の参照 {field} がありません。",
+      "suggestion": "レコードをプロジェクト、契約、または当事者に関連付けてください。"
+    },
+    "status_transition": {
+      "fail": "ステータスを {from_status} から {to_status} へ変更することはできません。",
+      "suggestion": "ワークフローの順序に従ってください。戻す必要がある場合は、先にレコードを再度開いてください。"
+    },
+    "dates_ordered": {
+      "fail": "日付 {earlier} と {later} の順序が正しくないか、期間外です。",
+      "suggestion": "早い日付が先になり、すべての項目が期間内に収まるよう日付を修正してください。"
+    }
   }
 }

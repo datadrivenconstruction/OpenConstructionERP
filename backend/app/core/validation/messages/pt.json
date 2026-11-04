@@ -1707,5 +1707,35 @@
       "fail": "{code} já foi decidido e não pode mais ser alterado nem excluído.",
       "suggestion": "Registre uma nova transferência ou alteração de orçamento que o corrija."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "O total {label} {stated} não corresponde à soma das suas linhas {expected}.",
+      "suggestion": "Recalcule o total a partir das linhas ou corrija a linha errada."
+    },
+    "value_in_range": {
+      "fail": "O valor {value} de {field} está fora do intervalo permitido de {low} a {high}.",
+      "suggestion": "Verifique o número e a sua unidade; a causa habitual é uma vírgula decimal fora do lugar."
+    },
+    "currency_present": {
+      "fail": "Nenhuma moeda foi indicada.",
+      "suggestion": "Defina a moeda do registo antes de confiar nos seus valores."
+    },
+    "currency_consistent": {
+      "fail": "O registo mistura moedas ({currencies}).",
+      "suggestion": "Use uma única moeda em todo o registo ou converta primeiro os valores."
+    },
+    "reference_present": {
+      "fail": "Falta a referência obrigatória {field}.",
+      "suggestion": "Associe o registo ao seu projeto, contrato ou parte."
+    },
+    "status_transition": {
+      "fail": "O estado não pode mudar de {from_status} para {to_status}.",
+      "suggestion": "Siga a ordem do fluxo; reabra primeiro o registo se tiver de recuar."
+    },
+    "dates_ordered": {
+      "fail": "As datas {earlier} e {later} estão fora de ordem ou fora do período.",
+      "suggestion": "Corrija as datas para que a mais antiga venha primeiro e cada entrada fique dentro do período."
+    }
   }
 }

@@ -1707,5 +1707,35 @@
       "fail": "{code} hakkında karar verildi; artık değiştirilemez veya silinemez.",
       "suggestion": "Bunu düzeltecek yeni bir aktarım veya bütçe değişikliği girin."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "{label} toplamı {stated}, satırlarının toplamı {expected} ile eşleşmiyor.",
+      "suggestion": "Toplamı satırlardan yeniden hesaplayın veya hatalı satırı düzeltin."
+    },
+    "value_in_range": {
+      "fail": "{field} alanının {value} değeri izin verilen {low} ile {high} aralığının dışında.",
+      "suggestion": "Sayıyı ve birimi kontrol edin; genellikle kayan bir ondalık virgül nedendir."
+    },
+    "currency_present": {
+      "fail": "Para birimi belirtilmemiş.",
+      "suggestion": "Tutarlara güvenmeden önce kaydın para birimini belirleyin."
+    },
+    "currency_consistent": {
+      "fail": "Kayıt para birimlerini karıştırıyor ({currencies}).",
+      "suggestion": "Baştan sona tek bir para birimi kullanın veya önce tutarları dönüştürün."
+    },
+    "reference_present": {
+      "fail": "Zorunlu {field} referansı eksik.",
+      "suggestion": "Kaydı projesine, sözleşmesine veya tarafına bağlayın."
+    },
+    "status_transition": {
+      "fail": "Durum {from_status} durumundan {to_status} durumuna geçemez.",
+      "suggestion": "İş akışının sırasını izleyin; kaydın geri dönmesi gerekiyorsa önce yeniden açın."
+    },
+    "dates_ordered": {
+      "fail": "{earlier} ve {later} tarihleri yanlış sırada veya dönemin dışında.",
+      "suggestion": "Tarihleri, erken olan önce gelecek ve her giriş dönemin içinde kalacak şekilde düzeltin."
+    }
   }
 }

@@ -1707,5 +1707,35 @@
       "fail": "{code} đã có quyết định và không thể sửa hay xóa nữa.",
       "suggestion": "Hãy nhập một lần điều chuyển hoặc điều chỉnh ngân sách mới để sửa lại."
     }
+  },
+  "money": {
+    "total_matches_lines": {
+      "fail": "Tổng {label} {stated} không khớp với tổng các dòng của nó {expected}.",
+      "suggestion": "Tính lại tổng từ các dòng hoặc sửa dòng sai."
+    },
+    "value_in_range": {
+      "fail": "Giá trị {value} của {field} nằm ngoài khoảng cho phép từ {low} đến {high}.",
+      "suggestion": "Kiểm tra con số và đơn vị; nguyên nhân thường là dấu thập phân đặt sai chỗ."
+    },
+    "currency_present": {
+      "fail": "Chưa ghi đơn vị tiền tệ.",
+      "suggestion": "Hãy đặt đơn vị tiền tệ của bản ghi trước khi dựa vào các số tiền."
+    },
+    "currency_consistent": {
+      "fail": "Bản ghi trộn lẫn các đơn vị tiền tệ ({currencies}).",
+      "suggestion": "Dùng một đơn vị tiền tệ xuyên suốt hoặc quy đổi các số tiền trước."
+    },
+    "reference_present": {
+      "fail": "Thiếu tham chiếu bắt buộc {field}.",
+      "suggestion": "Liên kết bản ghi với dự án, hợp đồng hoặc bên liên quan của nó."
+    },
+    "status_transition": {
+      "fail": "Trạng thái không thể chuyển từ {from_status} sang {to_status}.",
+      "suggestion": "Làm theo thứ tự quy trình; nếu cần quay lại, hãy mở lại bản ghi trước."
+    },
+    "dates_ordered": {
+      "fail": "Các ngày {earlier} và {later} sai thứ tự hoặc nằm ngoài giai đoạn.",
+      "suggestion": "Sửa các ngày để ngày sớm hơn đứng trước và mỗi mục nằm trong giai đoạn."
+    }
   }
 }

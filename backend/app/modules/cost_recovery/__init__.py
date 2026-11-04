@@ -26,3 +26,6 @@ async def on_startup() -> None:
     )
 
     register_cost_recovery_permissions()
+    from app.modules.cost_recovery.validators import register_cost_recovery_validation_rules
+
+    register_cost_recovery_validation_rules()

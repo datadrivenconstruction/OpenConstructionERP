@@ -35,3 +35,6 @@ async def on_startup() -> None:
     )
 
     register_claims_evidence_permissions()
+    from app.modules.claims_evidence.validators import register_claims_evidence_validation_rules
+
+    register_claims_evidence_validation_rules()
