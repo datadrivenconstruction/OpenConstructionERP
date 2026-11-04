@@ -1868,6 +1868,7 @@ async def get_user_module_access(
 async def set_user_module_access(
     user_id: uuid.UUID,
     data: UserModuleAccessPayload,
+    payload: CurrentUserPayload,
     service: UserService = Depends(_get_service),
 ) -> UserModuleAccessPayload:
     """Set per-module access settings for a user (admin only).
@@ -1875,6 +1876,7 @@ async def set_user_module_access(
     Also syncs module_preferences for sidebar visibility.
     """
     user = await service.get_user(user_id)
+    _guard_admin_scope(payload, user.role)
     metadata = dict(user.metadata_ if hasattr(user, "metadata_") else (user.metadata or {}))
     # Store full access config
     access_data = {}
