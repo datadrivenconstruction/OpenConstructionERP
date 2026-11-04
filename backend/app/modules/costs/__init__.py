@@ -14,3 +14,6 @@ async def on_startup() -> None:
 
     register_cost_permissions()
     register_pricelist_job_handlers()
+    from app.modules.costs.validators import register_costs_validation_rules
+
+    register_costs_validation_rules()

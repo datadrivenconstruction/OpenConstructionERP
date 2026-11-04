@@ -16,6 +16,7 @@ import uuid
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
+from fastapi import HTTPException
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
@@ -493,6 +494,8 @@ class EstimateBasisService:
             created_by=created_by,
         )
         self.session.add(doc)
+        # The platform drafts this document itself, so its findings are reported and never refuse the draft.
+        doc.validation_warnings = await self._gate(doc, "generate", warn_only=True)  # type: ignore[attr-defined]
         await self.session.flush()
         return doc
 
@@ -647,6 +650,52 @@ class EstimateBasisService:
         rows = await self.session.execute(stmt)
         return list(rows.scalars().all())
 
+    # ── Validation rules (rule set ``estimate_basis``) ───────────────────────
+
+    @staticmethod
+    def _rule_state(doc: EstimateBasis) -> dict:
+        """A document as the ``estimate_basis`` rule set reads it."""
+        return {
+            "id": str(doc.id or ""),
+            "status": doc.status,
+            "estimate_class": doc.estimate_class,
+            "accuracy_low_pct": doc.accuracy_low_pct,
+            "accuracy_high_pct": doc.accuracy_high_pct,
+            "market_conditions": doc.market_conditions,
+            "contingency_rationale": doc.contingency_rationale,
+            "budget_target": doc.budget_target,
+            "pricing_date": doc.pricing_date,
+        }
+
+    async def _gate(
+        self,
+        doc: EstimateBasis,
+        operation: str,
+        *,
+        before: dict | None = None,
+        warn_only: bool = False,
+    ) -> list[dict]:
+        """Run the ``estimate_basis`` rules; errors answer a coded 422, the rest is returned as findings."""
+        from app.core.validation.estimating_rules import all_findings, gate_rules  # noqa: PLC0415
+        from app.core.validation.quality_rules import warning_findings  # noqa: PLC0415
+        from app.modules.estimate_basis.validators import (  # noqa: PLC0415
+            ESTIMATE_BASIS_RULE_SET,
+            register_estimate_basis_validation_rules,
+        )
+
+        report = await gate_rules(
+            ESTIMATE_BASIS_RULE_SET,
+            {"basis": self._rule_state(doc)},
+            target_type="estimate_basis",
+            target_id=str(doc.id or ""),
+            project_id=str(doc.project_id),
+            operation=operation,
+            before={"basis": before} if before is not None else None,
+            warn_only=warn_only,
+            register=register_estimate_basis_validation_rules,
+        )
+        return all_findings(report) if warn_only else warning_findings(report)
+
     # ── Update ───────────────────────────────────────────────────────────────
 
     async def update_document(
@@ -655,6 +704,7 @@ class EstimateBasisService:
         payload: UpdateRequest,
     ) -> EstimateBasis:
         """Persist user edits. Only the provided fields are touched."""
+        before = self._rule_state(doc)
         if payload.title is not None:
             doc.title = payload.title.strip() or doc.title
         if payload.status is not None:
@@ -674,6 +724,12 @@ class EstimateBasisService:
         if payload.budget_target is not None:
             doc.budget_target = payload.budget_target
         self._apply_class(doc, payload)
+        try:
+            doc.validation_warnings = await self._gate(doc, "update", before=before)  # type: ignore[attr-defined]
+        except HTTPException:
+            # A refused edit leaves the stored document as it was.
+            await self.session.refresh(doc)
+            raise
         await self.session.flush()
         return doc
 
@@ -760,6 +816,7 @@ class EstimateBasisService:
             market_conditions=doc.market_conditions or "",
             contingency_rationale=doc.contingency_rationale or "",
             budget_target=doc.budget_target,
+            validation_warnings=getattr(doc, "validation_warnings", []),
             generated_at=doc.generated_at,
             created_at=cls._iso(doc.created_at),
             updated_at=cls._iso(doc.updated_at),
