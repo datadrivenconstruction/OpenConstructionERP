@@ -52,7 +52,7 @@ async def test_confirm_applies_rate_hours_and_history(session):
     out = await RateFeedbackService(session).confirm(prop.id, USER, ConfirmRequest())
     assert out.status == "accepted" and out.applied_rate == D("120")
     assert D(item.rate) == D("120")
-    assert item.metadata_[HOURS_KEY] == "3.5000"
+    assert item.metadata_[HOURS_KEY] == 3.5
     assert item.metadata_[HISTORY_KEY][-1]["from_rate"] == "100"
 
 
