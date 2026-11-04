@@ -58,11 +58,23 @@ async function outcomeFromResponse(res: Response): Promise<ReplayOutcome> {
   if (res.status === 409) {
     return { kind: 'conflict', httpStatus: res.status, detail: await safeDetail(res) };
   }
+  if (res.status === 403 && (await isOwnerMismatch(res))) {
+    return { kind: 'held', httpStatus: res.status, detail: 'queue_owner_mismatch' };
+  }
   if (res.status >= 400 && res.status < 500) {
     return { kind: 'rejected', httpStatus: res.status, detail: await safeDetail(res) };
   }
   // 5xx and anything else: transient.
   return { kind: 'retry', httpStatus: res.status };
+}
+
+async function isOwnerMismatch(res: Response): Promise<boolean> {
+  try {
+    const data = (await res.clone().json()) as { detail?: { code?: unknown } | string } | null;
+    return typeof data?.detail === 'object' && data.detail?.code === 'queue_owner_mismatch';
+  } catch {
+    return false;
+  }
 }
 
 async function safeDetail(res: Response): Promise<string | undefined> {
@@ -111,6 +123,15 @@ export function pickQueueStorage(): QueueStorage {
   return createMemoryQueueStorage();
 }
 
+// Read at load, before this page load's PIN sign-in: the one user the previous build had here.
+const priorFieldUser = (() => {
+  try {
+    return sessionStorage.getItem('oe_field_session_user');
+  } catch {
+    return null;
+  }
+})();
+
 /** The field session's user, read where the PIN screen stored it. */
 export function fieldSessionOwner(): QueueOwner | null {
   try {
@@ -134,6 +155,7 @@ export function getFieldQueue(getHeaders: FieldHeadersProvider): MutationQueue {
     singleton = new MutationQueue(pickQueueStorage(), createFieldSender(getHeaders), {
       owner: fieldSessionOwner,
       ownerKey: 'field',
+      priorUser: () => priorFieldUser,
     });
   }
   return singleton;

@@ -47,7 +47,9 @@ export type ReplayOutcome =
       currentVersion?: number;
       current?: unknown;
     }
-  | { kind: 'retry'; httpStatus?: number; detail?: string };
+  | { kind: 'retry'; httpStatus?: number; detail?: string }
+  /** The server says the token's user is not the op's owner: keep it aside, never drop it. */
+  | { kind: 'held'; httpStatus?: number; detail?: string };
 
 /** The server's side of a version conflict, kept on the op until it is merged. */
 export interface MergeConflictInfo {
@@ -95,13 +97,15 @@ export interface QueuedOp {
   meta?: Record<string, unknown>;
   /** The user who captured it. Absent only on items from before stamping. */
   owner?: QueueOwner;
+  /** Set when the server refused the owner: the op stays on the device, out of replay. */
+  heldReason?: string;
 }
 
 /** What a drain run reports back to the caller per op. */
 export interface DrainResult {
   clientOpId: string;
   kind: string;
-  status: 'applied' | 'conflict' | 'rejected' | 'retry' | 'merge_conflict';
+  status: 'applied' | 'conflict' | 'rejected' | 'retry' | 'merge_conflict' | 'held';
   httpStatus?: number;
   detail?: string;
   resultId?: string | null;
@@ -115,6 +119,8 @@ export interface DrainSummary {
   retry: number;
   /** Versioned writes parked for a merge (still in the queue). */
   merge_conflict: number;
+  /** Ops the server refused for their owner; kept in the held list. */
+  held: number;
   results: DrainResult[];
 }
 
@@ -141,6 +147,11 @@ export function sameOwner(a: QueueOwner | undefined, b: QueueOwner | null): bool
   if (!a || !b || !a.userId || !b.userId) return false;
   if (a.userId !== b.userId) return false;
   return !(a.tenantId && b.tenantId && a.tenantId !== b.tenantId);
+}
+
+/** The op belongs to this user and the server has not refused it. */
+function isMine(op: QueuedOp, cur: QueueOwner | null): boolean {
+  return !op.heldReason && sameOwner(op.owner, cur);
 }
 
 function localLastUser(key: string): LastUserStore {
@@ -364,6 +375,12 @@ export interface MutationQueueOptions {
   ownerKey?: string;
   /** Seam for tests. */
   lastUser?: LastUserStore;
+  /**
+   * Who used the device before stamping existed (a user id or an email),
+   * read from storage written by the previous build. Pre-stamping items go
+   * to the current user only when it names that same person.
+   */
+  priorUser?: () => string | null;
   /** Enable exponential backoff for transient failures. Off by default. */
   backoff?: boolean | BackoffOptions;
   /** Clock and randomness seams for tests. */
@@ -389,6 +406,7 @@ export class MutationQueue {
   private readonly random: () => number;
   private readonly getOwner: (() => QueueOwner | null) | null;
   private readonly lastUser: LastUserStore;
+  private readonly priorUser: (() => string | null) | null;
   private seqCounter = 0;
   private draining = false;
   private readonly changeListeners = new Set<() => void>();
@@ -402,6 +420,7 @@ export class MutationQueue {
       ? { ...DEFAULT_BACKOFF, ...(options.backoff === true ? {} : options.backoff) }
       : null;
     this.getOwner = options.owner ?? null;
+    this.priorUser = options.priorUser ?? null;
     this.lastUser = options.lastUser ?? localLastUser(`oe_queue_last_user:${options.ownerKey ?? 'default'}`);
     this.now = options.now ?? Date.now;
     this.random = options.random ?? Math.random;
@@ -430,14 +449,14 @@ export class MutationQueue {
     const all = sortByFifo(await this.storage.getAll());
     if (!this.getOwner) return all;
     const cur = this.getOwner();
-    return all.filter((o) => sameOwner(o.owner, cur));
+    return all.filter((o) => isMine(o, cur));
   }
 
   /** Ops captured by someone else (or unattributable): kept, never replayed. */
   async held(): Promise<QueuedOp[]> {
     if (!this.getOwner) return [];
     const cur = this.getOwner();
-    return sortByFifo((await this.storage.getAll()).filter((o) => !sameOwner(o.owner, cur)));
+    return sortByFifo((await this.storage.getAll()).filter((o) => !isMine(o, cur)));
   }
 
   /** The held ops as a JSON document the device owner can save before discarding. */
@@ -465,7 +484,12 @@ export class MutationQueue {
     if (!cur || !cur.userId) return null;
     const legacy = (await this.storage.getAll()).filter((o) => !o.owner);
     if (legacy.length > 0) {
-      const owner = this.lastUser.get() === cur.userId ? cur : LEGACY_OWNER;
+      const last = this.lastUser.get();
+      const prior = last === null ? this.priorUser?.()?.trim().toLowerCase() : null;
+      const adopt =
+        last === cur.userId ||
+        (!!prior && (prior === cur.userId.toLowerCase() || prior === (cur.label ?? '').trim().toLowerCase()));
+      const owner = adopt ? cur : LEGACY_OWNER;
       for (const op of legacy) await this.storage.put({ ...op, owner });
     }
     this.lastUser.set(cur.userId);
@@ -517,6 +541,7 @@ export class MutationQueue {
       rejected: 0,
       retry: 0,
       merge_conflict: 0,
+      held: 0,
       results: [],
     };
     if (this.draining) return summary;
@@ -526,7 +551,7 @@ export class MutationQueue {
       // No signed-in user, no replay: a token must never carry another's items.
       if (this.getOwner && !owner) return summary;
       const all = sortByFifo(await this.storage.getAll()).filter(
-        (o) => !this.getOwner || sameOwner(o.owner, owner),
+        (o) => !this.getOwner || isMine(o, owner),
       );
       const now = this.now();
       const blocked = new Set<string>();
@@ -548,7 +573,7 @@ export class MutationQueue {
         const key = recordKeyOf(op);
         if (key && blocked.has(key)) continue;
         // The person may have signed out or switched while earlier ops were in flight.
-        if (this.getOwner && !sameOwner(op.owner, this.getOwner())) break;
+        if (this.getOwner && !isMine(op, this.getOwner())) break;
         const result = await this.replayOne(op);
         summary.results.push(result);
         summary[result.status] += 1;
@@ -560,7 +585,7 @@ export class MutationQueue {
     } finally {
       this.draining = false;
     }
-    if (summary.applied + summary.conflict + summary.rejected + summary.merge_conflict > 0) {
+    if (summary.applied + summary.conflict + summary.rejected + summary.merge_conflict + summary.held > 0) {
       this.notify();
     }
     return summary;
@@ -645,6 +670,17 @@ export class MutationQueue {
         clientOpId: op.clientOpId,
         kind: op.kind,
         status: 'merge_conflict',
+        httpStatus: outcome.httpStatus,
+        detail: outcome.detail,
+      };
+    }
+
+    if (outcome.kind === 'held') {
+      await this.storage.put({ ...op, heldReason: outcome.detail ?? 'owner_mismatch' });
+      return {
+        clientOpId: op.clientOpId,
+        kind: op.kind,
+        status: 'held',
         httpStatus: outcome.httpStatus,
         detail: outcome.detail,
       };
