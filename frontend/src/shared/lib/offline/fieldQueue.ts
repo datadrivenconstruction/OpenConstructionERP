@@ -18,6 +18,7 @@ import {
   createIndexedDbQueueStorage,
   createMemoryQueueStorage,
   type OpSender,
+  type QueueOwner,
   type QueuedOp,
   type ReplayOutcome,
   type QueueStorage,
@@ -86,6 +87,7 @@ export function createFieldSender(getHeaders: FieldHeadersProvider): OpSender {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       'X-Client-Op-Id': op.clientOpId,
+      ...(op.owner?.userId ? { 'X-Queue-Owner': op.owner.userId } : {}),
       ...getHeaders(),
     };
     const body =
@@ -109,6 +111,17 @@ export function pickQueueStorage(): QueueStorage {
   return createMemoryQueueStorage();
 }
 
+/** The field session's user, read where the PIN screen stored it. */
+export function fieldSessionOwner(): QueueOwner | null {
+  try {
+    const userId = sessionStorage.getItem('oe_field_session_user');
+    const token = sessionStorage.getItem('oe_field_session_token');
+    return userId && token ? { userId, label: userId } : null;
+  } catch {
+    return null;
+  }
+}
+
 let singleton: MutationQueue | null = null;
 
 /**
@@ -118,7 +131,10 @@ let singleton: MutationQueue | null = null;
  */
 export function getFieldQueue(getHeaders: FieldHeadersProvider): MutationQueue {
   if (!singleton) {
-    singleton = new MutationQueue(pickQueueStorage(), createFieldSender(getHeaders));
+    singleton = new MutationQueue(pickQueueStorage(), createFieldSender(getHeaders), {
+      owner: fieldSessionOwner,
+      ownerKey: 'field',
+    });
   }
   return singleton;
 }

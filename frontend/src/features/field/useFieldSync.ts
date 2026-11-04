@@ -52,6 +52,12 @@ export interface FieldSyncState {
    * sync with `pending` via the queue's change events.
    */
   pendingOps: QueuedOp[];
+  /** Captures made by other users on this device: kept, never sent under this sign-in. */
+  heldOps: QueuedOp[];
+  /** The held captures as a JSON document to save. */
+  exportHeld: () => Promise<string>;
+  /** Drop the held captures for good (the caller confirms first). */
+  discardHeld: () => Promise<void>;
   /** True while a drain is running. */
   syncing: boolean;
   /** Per-item outcomes from the most recent drain (for the review surface). */
@@ -75,6 +81,7 @@ export function useFieldSync(getHeaders: FieldHeadersProvider): FieldSyncState {
   const online = useConnectivity();
   const [pending, setPending] = useState(0);
   const [pendingOps, setPendingOps] = useState<QueuedOp[]>([]);
+  const [heldOps, setHeldOps] = useState<QueuedOp[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [lastResults, setLastResults] = useState<DrainResult[]>([]);
 
@@ -86,6 +93,7 @@ export function useFieldSync(getHeaders: FieldHeadersProvider): FieldSyncState {
     const ops = await queue.pending();
     setPendingOps(ops);
     setPending(ops.length);
+    setHeldOps(await queue.held());
   }, [queue]);
 
   const syncNow = useCallback(async (): Promise<DrainSummary | null> => {
@@ -123,6 +131,12 @@ export function useFieldSync(getHeaders: FieldHeadersProvider): FieldSyncState {
     [queue, refreshPending],
   );
 
+  const exportHeld = useCallback(() => queue.exportHeld(), [queue]);
+  const discardHeld = useCallback(async () => {
+    await queue.discardHeld();
+    await refreshPending();
+  }, [queue, refreshPending]);
+
   // Keep the badge in sync with queue-size changes from any source.
   useEffect(() => {
     void refreshPending();
@@ -141,5 +155,5 @@ export function useFieldSync(getHeaders: FieldHeadersProvider): FieldSyncState {
     return () => clearTimeout(timer);
   }, [online, syncNow]);
 
-  return { online, pending, pendingOps, syncing, lastResults, enqueue, syncNow, discard };
+  return { online, pending, pendingOps, heldOps, exportHeld, discardHeld, syncing, lastResults, enqueue, syncNow, discard };
 }
