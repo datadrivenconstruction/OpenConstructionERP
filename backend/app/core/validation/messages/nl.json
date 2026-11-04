@@ -1999,5 +1999,51 @@
       "fail": "Een ploeg van {headcount} was op de bouwplaats, maar er is geen werk, keuring of vertraging vastgelegd.",
       "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "De ondergrens moet 0 of lager zijn en de bovengrens 0 of hoger.",
+      "fail": "De nauwkeurigheidsband van {low} % tot {high} % omvat de raming niet."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Voer de lineaire massa in kg per eenheid in of verwijder de massabasis.",
+      "fail": "De prijs geldt per {basis}, maar de massa per eenheid ontbreekt of is nul."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Stel de tekeningschaal in of kalibreer hem voordat u op de hoeveelheid vertrouwt.",
+      "fail": "Deze lengte of oppervlakte is gemeten op een tekening die nog op de standaardschaal 1:1 staat."
+    },
+    "price_date_stale": {
+      "suggestion": "Prijs de raming opnieuw of indexeer de prijzen voordat ze wordt vrijgegeven.",
+      "fail": "De prijzen zijn van {date}, meer dan een jaar geleden."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Bevestig eerst het voorstel; alleen een bevestigde meting voedt het bestek.",
+      "fail": "Een meting met status {status} kan niet aan een bestekspost worden gekoppeld."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibreer de schaal van het blad en meet opnieuw.",
+      "fail": "De meting van het type {type} heeft geen tekeningschaal, dus de hoeveelheid is niet gecontroleerd."
+    },
+    "scale_unusual": {
+      "suggestion": "Controleer de schaal of kalibreer hem aan de hand van een bekende maat.",
+      "fail": "De tekeningschaal 1:{scale} ligt buiten het gebruikelijke bereik."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Kies of de prijs per ton of per kg geldt, of verwijder de massa.",
+      "fail": "Er is een massa van {mass} kg per eenheid opgegeven, maar niet de prijsbasis (per ton of per kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Teken de vorm opnieuw met genoeg punten of verwijder de meting.",
+      "fail": "Een meting van het type {type} heeft {count} punten; er zijn er minstens {needed} nodig."
+    },
+    "unit_mismatch": {
+      "suggestion": "Gebruik een lengte-eenheid voor afstanden, een oppervlakte-eenheid voor oppervlakten en een inhoudseenheid voor volumes.",
+      "fail": "De eenheid {unit} past niet bij een meting van het type {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Tel alleen hele stuks en corrigeer de waarde.",
+      "fail": "Een telling van {value} is geen geheel getal."
+    }
   }
 }

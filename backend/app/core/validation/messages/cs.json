@@ -1999,5 +1999,51 @@
       "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Dolní mez musí být 0 nebo menší a horní mez 0 nebo větší.",
+      "fail": "Rozmezí přesnosti od {low} % do {high} % rozpočet neobklopuje."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Zadejte hmotnost na jednotku v kg nebo hmotnostní základ odstraňte.",
+      "fail": "Cena je uvedena za {basis}, ale hmotnost na jednotku chybí nebo je nulová."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Nastavte nebo zkalibrujte měřítko výkresu, než se na množství spolehnete.",
+      "fail": "Tato délka nebo plocha je změřena na výkrese, který má stále výchozí měřítko 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Rozpočet znovu oceňte nebo ceny zindexujte před jeho schválením.",
+      "fail": "Ceny jsou z {date}, tedy starší než rok."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Nejprve návrh potvrďte; výkaz výměr plní jen potvrzené měření.",
+      "fail": "Měření ve stavu {status} nelze propojit s položkou výkazu výměr."
+    },
+    "scale_missing": {
+      "suggestion": "Zkalibrujte měřítko listu a změřte znovu.",
+      "fail": "Měření typu {type} nemá měřítko výkresu, takže jeho množství není ověřeno."
+    },
+    "scale_unusual": {
+      "suggestion": "Zkontrolujte měřítko nebo jej zkalibrujte podle známého rozměru.",
+      "fail": "Měřítko výkresu 1:{scale} je mimo obvyklý rozsah."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Zvolte, zda je cena za tunu, nebo za kg, nebo hmotnost odstraňte.",
+      "fail": "Je uvedena hmotnost {mass} kg na jednotku, ale ne základ ceny (za tunu nebo za kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Nakreslete tvar znovu s dostatkem bodů nebo měření smažte.",
+      "fail": "Měření typu {type} má {count} bodů; potřebuje alespoň {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Pro vzdálenosti použijte jednotku délky, pro plochy jednotku plochy a pro objemy jednotku objemu.",
+      "fail": "Jednotka {unit} se nehodí pro měření typu {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Počítejte jen celé kusy a hodnotu opravte.",
+      "fail": "Počet {value} není celé číslo."
+    }
   }
 }

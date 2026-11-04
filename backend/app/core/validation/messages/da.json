@@ -1999,5 +1999,51 @@
       "fail": "Et hold på {headcount} var på pladsen, men intet arbejde, ingen kontrol og ingen forsinkelse er registreret.",
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Den nedre grænse skal være 0 eller lavere og den øvre 0 eller højere.",
+      "fail": "Nøjagtighedsintervallet {low} % til {high} % omslutter ikke overslaget."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Angiv løbende masse i kg pr. enhed, eller fjern massegrundlaget.",
+      "fail": "Prisen er angivet pr. {basis}, men massen pr. enhed mangler eller er nul."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Indstil eller kalibrér tegningens målestok, før du stoler på mængden.",
+      "fail": "Denne længde eller dette areal er målt på en tegning, der stadig står på standardmålestokken 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Prisfastsæt overslaget igen, eller indeksér priserne, før det godkendes.",
+      "fail": "Priserne er fra {date}, mere end et år gamle."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Bekræft først forslaget; kun en bekræftet måling fylder tilbudslisten.",
+      "fail": "En måling med status {status} kan ikke knyttes til en post i tilbudslisten."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrér arkets målestok, og mål igen.",
+      "fail": "Målingen af typen {type} har ingen tegningsmålestok, så mængden er ikke kontrolleret."
+    },
+    "scale_unusual": {
+      "suggestion": "Kontrollér målestokken, eller kalibrér den ud fra et kendt mål.",
+      "fail": "Tegningens målestok 1:{scale} ligger uden for det sædvanlige område."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Vælg om prisen er pr. ton eller pr. kg, eller fjern massen.",
+      "fail": "Der er angivet en masse på {mass} kg pr. enhed, men ikke prisgrundlaget (pr. ton eller pr. kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Tegn formen igen med nok punkter, eller slet målingen.",
+      "fail": "En måling af typen {type} har {count} punkter; der skal være mindst {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Brug en længdeenhed til afstande, en arealenhed til arealer og en rumfangsenhed til rumfang.",
+      "fail": "Enheden {unit} passer ikke til en måling af typen {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Tæl kun hele stk., og ret værdien.",
+      "fail": "Et antal på {value} er ikke et helt tal."
+    }
   }
 }

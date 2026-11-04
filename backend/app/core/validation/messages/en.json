@@ -1999,5 +1999,51 @@
       "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
       "suggestion": "Add what the crew did, or record the delay that stopped work."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "The low bound must be 0 or below and the high bound 0 or above.",
+      "fail": "The accuracy band {low} % to {high} % does not bracket the estimate."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Enter the linear mass in kg per unit, or clear the mass basis.",
+      "fail": "The rate is quoted per {basis} but the mass per unit is missing or zero."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Set or calibrate the drawing scale before relying on the quantity.",
+      "fail": "This length or area is measured on a drawing that is still at the default 1:1 scale."
+    },
+    "price_date_stale": {
+      "suggestion": "Re-price the estimate or index the rates before signing it off.",
+      "fail": "The rates are dated {date}, more than a year ago."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Confirm the proposal first; only a confirmed measurement feeds the BOQ.",
+      "fail": "A measurement that is {status} cannot be linked to a bill of quantities position."
+    },
+    "scale_missing": {
+      "suggestion": "Calibrate the sheet scale and measure again.",
+      "fail": "The {type} measurement has no drawing scale, so its quantity is not verified."
+    },
+    "scale_unusual": {
+      "suggestion": "Check the scale or recalibrate it from a known dimension.",
+      "fail": "The drawing scale 1:{scale} is outside the usual range."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Choose whether the rate is per tonne or per kg, or clear the mass.",
+      "fail": "A mass of {mass} kg per unit is stated but the rate basis (per tonne or per kg) is not."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Redraw the shape with enough points, or delete the measurement.",
+      "fail": "A {type} measurement has {count} points; it needs at least {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Use a length unit for distances, an area unit for areas and a volume unit for volumes.",
+      "fail": "The unit {unit} does not fit a {type} measurement."
+    },
+    "count_not_whole": {
+      "suggestion": "Count whole items only and correct the figure.",
+      "fail": "A count of {value} is not a whole number."
+    }
   }
 }

@@ -1999,5 +1999,51 @@
       "fail": "现场有 {headcount} 人的班组，但未记录施工、检查或延误。",
       "suggestion": "请补充班组所做工作，或导致停工的延误。"
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "下限必须不大于0，上限必须不小于0。",
+      "fail": "{low} %至{high} %的精度区间未包含该估算。"
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "请输入每单位的线质量(千克)，或取消质量基准。",
+      "fail": "单价按每{basis}给出，但单位质量缺失或为零。"
+    },
+    "scale_uncalibrated": {
+      "suggestion": "在依赖该工程量之前，请设置或校准图纸比例。",
+      "fail": "该长度或面积是在仍为默认比例1:1的图纸上测得的。"
+    },
+    "price_date_stale": {
+      "suggestion": "批准前请重新计价，或按指数调整单价。",
+      "fail": "单价日期为{date}，已超过一年。"
+    },
+    "link_needs_confirmed": {
+      "suggestion": "请先确认建议；只有已确认的测量才会进入工程量清单。",
+      "fail": "状态为{status}的测量不能关联到工程量清单项目。"
+    },
+    "scale_missing": {
+      "suggestion": "请校准图纸比例后重新测量。",
+      "fail": "{type}类型的测量没有图纸比例，因此其工程量未经核实。"
+    },
+    "scale_unusual": {
+      "suggestion": "请检查比例，或根据已知尺寸重新校准。",
+      "fail": "图纸比例1:{scale}超出常见范围。"
+    },
+    "geometry_too_few_points": {
+      "suggestion": "请选择单价按每吨还是每千克计，或清除质量。",
+      "fail": "已给出每单位{mass}千克的质量，但未给出单价基准(每吨或每千克)。"
+    },
+    "mass_needs_basis": {
+      "suggestion": "请用足够的点重新绘制图形，或删除该测量。",
+      "fail": "{type}类型的测量只有{count}个点，至少需要{needed}个。"
+    },
+    "unit_mismatch": {
+      "suggestion": "距离使用长度单位，面积使用面积单位，体积使用体积单位。",
+      "fail": "单位{unit}不适用于{type}类型的测量。"
+    },
+    "count_not_whole": {
+      "suggestion": "只统计完整的个数，并更正数值。",
+      "fail": "计数{value}不是整数。"
+    }
   }
 }

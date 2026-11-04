@@ -1999,5 +1999,51 @@
       "fail": "A helyszínen {headcount} fős brigád volt, de nincs rögzítve munka, ellenőrzés vagy akadályoztatás.",
       "suggestion": "Adja meg, mit csinált a brigád, vagy a munkát leállító akadályoztatást."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Az alsó határnak 0-nak vagy kisebbnek, a felsőnek 0-nak vagy nagyobbnak kell lennie.",
+      "fail": "A {low} % és {high} % közötti pontossági sáv nem fogja közre a becslést."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Adja meg a folyóméter tömeget kg/egységben, vagy törölje a tömegalapot.",
+      "fail": "Az ár {basis} szerint van megadva, de az egységre jutó tömeg hiányzik vagy nulla."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Állítsa be vagy kalibrálja a rajz méretarányát, mielőtt a mennyiségre támaszkodik.",
+      "fail": "Ezt a hosszt vagy területet olyan rajzon mérték, amely még az alapértelmezett 1:1 méretarányon áll."
+    },
+    "price_date_stale": {
+      "suggestion": "Árazza újra a becslést, vagy indexálja az árakat a jóváhagyás előtt.",
+      "fail": "Az árak dátuma {date}, több mint egy évvel ezelőtti."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Először hagyja jóvá a javaslatot; a költségvetést csak jóváhagyott felmérés tölti.",
+      "fail": "A(z) {status} állapotú felmérés nem köthető költségvetési tételhez."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibrálja a lap méretarányát, és mérjen újra.",
+      "fail": "A(z) {type} típusú felmérésnek nincs rajzi méretaránya, ezért a mennyiség nem ellenőrzött."
+    },
+    "scale_unusual": {
+      "suggestion": "Ellenőrizze a méretarányt, vagy kalibrálja egy ismert méretből.",
+      "fail": "Az 1:{scale} rajzi méretarány a szokásos tartományon kívül esik."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Válassza ki, hogy az ár tonnánként vagy kg-onként értendő, vagy törölje a tömeget.",
+      "fail": "Meg van adva {mass} kg/egység tömeg, de az ár alapja (tonnánként vagy kg-onként) nincs."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Rajzolja újra az alakzatot elegendő ponttal, vagy törölje a felmérést.",
+      "fail": "A(z) {type} típusú felmérésnek {count} pontja van; legalább {needed} szükséges."
+    },
+    "unit_mismatch": {
+      "suggestion": "Távolsághoz hosszmértéket, területhez területmértéket, térfogathoz térfogatmértéket használjon.",
+      "fail": "A(z) {unit} mértékegység nem illik a(z) {type} típusú felméréshez."
+    },
+    "count_not_whole": {
+      "suggestion": "Csak egész darabokat számoljon, és javítsa az értéket.",
+      "fail": "A(z) {value} darabszám nem egész szám."
+    }
   }
 }

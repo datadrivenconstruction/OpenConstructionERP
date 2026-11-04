@@ -1999,5 +1999,51 @@
       "fail": "Na budowie była brygada {headcount} osób, ale nie zapisano ani robót, ani kontroli, ani opóźnienia.",
       "suggestion": "Dodaj, co robiła brygada, lub opóźnienie, które wstrzymało roboty."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Dolna granica musi wynosić 0 lub mniej, a górna 0 lub więcej.",
+      "fail": "Przedział dokładności od {low} % do {high} % nie obejmuje kosztorysu."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Wpisz masę liniową w kg na jednostkę albo usuń podstawę masową.",
+      "fail": "Cena jest podana za {basis}, ale brakuje masy na jednostkę albo wynosi zero."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Ustaw lub skalibruj skalę rysunku, zanim zaufasz ilości.",
+      "fail": "Ta długość lub powierzchnia została zmierzona na rysunku, który nadal ma skalę domyślną 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Przeceń kosztorys ponownie lub zindeksuj ceny przed zatwierdzeniem.",
+      "fail": "Ceny pochodzą z dnia {date}, sprzed ponad roku."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Najpierw zatwierdź propozycję; przedmiar zasila tylko zatwierdzony pomiar.",
+      "fail": "Pomiaru w statusie {status} nie można powiązać z pozycją przedmiaru."
+    },
+    "scale_missing": {
+      "suggestion": "Skalibruj skalę arkusza i zmierz ponownie.",
+      "fail": "Pomiar typu {type} nie ma skali rysunku, więc jego ilość nie jest zweryfikowana."
+    },
+    "scale_unusual": {
+      "suggestion": "Sprawdź skalę albo skalibruj ją na znanym wymiarze.",
+      "fail": "Skala rysunku 1:{scale} wykracza poza zwykły zakres."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Wybierz, czy cena jest za tonę, czy za kg, albo usuń masę.",
+      "fail": "Podano masę {mass} kg na jednostkę, ale nie podano podstawy ceny (za tonę lub za kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Narysuj kształt ponownie z wystarczającą liczbą punktów albo usuń pomiar.",
+      "fail": "Pomiar typu {type} ma {count} punktów; potrzeba co najmniej {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Dla odległości użyj jednostki długości, dla powierzchni jednostki powierzchni, dla objętości jednostki objętości.",
+      "fail": "Jednostka {unit} nie pasuje do pomiaru typu {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Licz tylko całe sztuki i popraw wartość.",
+      "fail": "Liczba {value} nie jest liczbą całkowitą."
+    }
   }
 }

@@ -1999,5 +1999,51 @@
       "fail": "Tổ đội {headcount} người có mặt nhưng không ghi công việc, kiểm tra hay chậm trễ.",
       "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Giới hạn dưới phải bằng 0 hoặc nhỏ hơn, giới hạn trên bằng 0 hoặc lớn hơn.",
+      "fail": "Khoảng chính xác từ {low} % đến {high} % không bao quanh dự toán."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Nhập khối lượng dài theo kg trên mỗi đơn vị hoặc bỏ cơ sở khối lượng.",
+      "fail": "Đơn giá được nêu theo {basis} nhưng khối lượng trên mỗi đơn vị bị thiếu hoặc bằng không."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Đặt hoặc hiệu chuẩn tỷ lệ bản vẽ trước khi dựa vào khối lượng.",
+      "fail": "Chiều dài hoặc diện tích này được đo trên bản vẽ vẫn đang ở tỷ lệ mặc định 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Hãy định giá lại dự toán hoặc điều chỉnh đơn giá theo chỉ số trước khi phê duyệt.",
+      "fail": "Đơn giá có ngày {date}, đã hơn một năm."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Hãy xác nhận đề xuất trước; chỉ lần đo đã xác nhận mới đưa vào bảng tiên lượng.",
+      "fail": "Lần đo ở trạng thái {status} không thể liên kết với hạng mục trong bảng tiên lượng."
+    },
+    "scale_missing": {
+      "suggestion": "Hiệu chuẩn tỷ lệ của tờ bản vẽ rồi đo lại.",
+      "fail": "Lần đo loại {type} không có tỷ lệ bản vẽ nên khối lượng chưa được kiểm chứng."
+    },
+    "scale_unusual": {
+      "suggestion": "Kiểm tra tỷ lệ hoặc hiệu chuẩn lại theo một kích thước đã biết.",
+      "fail": "Tỷ lệ bản vẽ 1:{scale} nằm ngoài phạm vi thông thường."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Chọn đơn giá theo tấn hay theo kg, hoặc bỏ khối lượng.",
+      "fail": "Đã nêu khối lượng {mass} kg trên mỗi đơn vị nhưng chưa nêu cơ sở đơn giá (theo tấn hay theo kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Vẽ lại hình với đủ điểm hoặc xóa lần đo.",
+      "fail": "Một lần đo loại {type} có {count} điểm; cần ít nhất {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Dùng đơn vị chiều dài cho khoảng cách, đơn vị diện tích cho diện tích và đơn vị thể tích cho thể tích.",
+      "fail": "Đơn vị {unit} không phù hợp với lần đo loại {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Chỉ đếm số lượng nguyên và sửa lại giá trị.",
+      "fail": "Số đếm {value} không phải là số nguyên."
+    }
   }
 }

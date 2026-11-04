@@ -1999,5 +1999,51 @@
       "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Dapat 0 o mas mababa ang pinakamababang hangganan at 0 o mas mataas ang pinakamataas.",
+      "fail": "Hindi sakop ng saklaw ng katumpakan na {low} % hanggang {high} % ang estimate."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Ilagay ang linear na bigat sa kg kada yunit, o alisin ang batayan ng bigat.",
+      "fail": "Ang presyo ay nakasaad kada {basis}, ngunit wala o zero ang bigat kada yunit."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Itakda o i-calibrate ang sukatan ng drowing bago umasa sa dami.",
+      "fail": "Ang haba o lawak na ito ay sinukat sa drowing na nasa default na sukatang 1:1 pa rin."
+    },
+    "price_date_stale": {
+      "suggestion": "Presyuhan muli ang estimate o i-index ang mga presyo bago aprubahan.",
+      "fail": "Ang mga presyo ay may petsang {date}, mahigit isang taon na ang nakalipas."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Kumpirmahin muna ang mungkahi; kumpirmadong sukat lang ang pumapasok sa BOQ.",
+      "fail": "Ang sukat na may status na {status} ay hindi maiuugnay sa aytem ng bill of quantities."
+    },
+    "scale_missing": {
+      "suggestion": "I-calibrate ang sukatan ng sheet at sukatin muli.",
+      "fail": "Walang sukatan ng drowing ang sukat na uri ng {type}, kaya hindi pa napatutunayan ang dami nito."
+    },
+    "scale_unusual": {
+      "suggestion": "Suriin ang sukatan o i-calibrate ito mula sa kilalang sukat.",
+      "fail": "Wala sa karaniwang saklaw ang sukatan ng drowing na 1:{scale}."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Piliin kung kada tonelada o kada kg ang presyo, o alisin ang bigat.",
+      "fail": "May nakasaad na bigat na {mass} kg kada yunit ngunit walang batayan ng presyo (kada tonelada o kada kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Iguhit muli ang hugis na may sapat na punto, o burahin ang sukat.",
+      "fail": "Ang sukat na uri ng {type} ay may {count} punto; kailangan ng hindi bababa sa {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Gumamit ng yunit ng haba para sa distansya, yunit ng lawak para sa lawak, at yunit ng dami para sa volume.",
+      "fail": "Hindi angkop ang yunit na {unit} sa sukat na uri ng {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Bilangin lang ang buong piraso at itama ang halaga.",
+      "fail": "Ang bilang na {value} ay hindi buong numero."
+    }
   }
 }

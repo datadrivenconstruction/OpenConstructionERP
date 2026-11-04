@@ -1999,5 +1999,51 @@
       "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Il limite inferiore deve essere 0 o meno e quello superiore 0 o più.",
+      "fail": "La fascia di precisione da {low} % a {high} % non comprende la stima."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Inserire la massa lineare in kg per unità oppure eliminare la base di massa.",
+      "fail": "Il prezzo è espresso per {basis}, ma la massa per unità manca o è zero."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Impostare o tarare la scala del disegno prima di fare affidamento sulla quantità.",
+      "fail": "Questa lunghezza o superficie è misurata su un disegno ancora alla scala predefinita 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Riprezzare la stima o indicizzare i prezzi prima di approvarla.",
+      "fail": "I prezzi sono datati {date}, cioè più di un anno fa."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Confermare prima la proposta; solo una misura confermata alimenta il computo.",
+      "fail": "Una misura nello stato {status} non può essere collegata a una voce del computo."
+    },
+    "scale_missing": {
+      "suggestion": "Tarare la scala del foglio e misurare di nuovo.",
+      "fail": "La misura di tipo {type} non ha scala del disegno, quindi la quantità non è verificata."
+    },
+    "scale_unusual": {
+      "suggestion": "Verificare la scala o tararla su una quota nota.",
+      "fail": "La scala del disegno 1:{scale} è fuori dall'intervallo abituale."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Scegliere se il prezzo è a tonnellata o a kg, oppure eliminare la massa.",
+      "fail": "È indicata una massa di {mass} kg per unità ma non la base del prezzo (a tonnellata o a kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Ridisegnare la forma con un numero sufficiente di punti oppure eliminare la misura.",
+      "fail": "Una misura di tipo {type} ha {count} punti; ne servono almeno {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Usare un'unità di lunghezza per le distanze, di superficie per le aree e di volume per i volumi.",
+      "fail": "L'unità {unit} non è adatta a una misura di tipo {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Contare solo elementi interi e correggere il valore.",
+      "fail": "Un conteggio di {value} non è un numero intero."
+    }
   }
 }

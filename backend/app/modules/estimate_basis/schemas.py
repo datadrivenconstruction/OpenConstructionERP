@@ -254,6 +254,8 @@ class EstimateBasisResponse(BaseModel):
         default=None,
         description="Client budget target alongside the calculated estimate.",
     )
+    # Non-blocking findings of the estimate_basis rule set for the write that produced this response.
+    validation_warnings: list[dict] = Field(default_factory=list)
     generated_at: str | None
     created_at: str | None
     updated_at: str | None

@@ -1999,5 +1999,51 @@
       "fail": "Sahada {headcount} kişilik bir ekip vardı ancak iş, kontrol veya gecikme kaydı yok.",
       "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Alt sınır 0 veya daha küçük, üst sınır 0 veya daha büyük olmalıdır.",
+      "fail": "% {low} ile % {high} arasındaki doğruluk aralığı tahmini kapsamıyor."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Birim başına doğrusal kütleyi kg olarak girin veya kütle esasını kaldırın.",
+      "fail": "Fiyat {basis} başına verilmiş, ancak birim başına kütle eksik veya sıfır."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Miktara güvenmeden önce çizim ölçeğini ayarlayın veya kalibre edin.",
+      "fail": "Bu uzunluk veya alan, hâlâ varsayılan 1:1 ölçeğindeki bir çizimde ölçülmüş."
+    },
+    "price_date_stale": {
+      "suggestion": "Onaylamadan önce tahmini yeniden fiyatlandırın veya fiyatları endeksleyin.",
+      "fail": "Fiyatlar {date} tarihli, bir yıldan eski."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Önce öneriyi onaylayın; metraj cetvelini yalnızca onaylı ölçüm besler.",
+      "fail": "{status} durumundaki bir ölçüm metraj cetvelindeki bir kaleme bağlanamaz."
+    },
+    "scale_missing": {
+      "suggestion": "Paftanın ölçeğini kalibre edin ve yeniden ölçün.",
+      "fail": "{type} türündeki ölçümün çizim ölçeği yok, bu yüzden miktarı doğrulanmadı."
+    },
+    "scale_unusual": {
+      "suggestion": "Ölçeği kontrol edin veya bilinen bir ölçüden yeniden kalibre edin.",
+      "fail": "1:{scale} çizim ölçeği olağan aralığın dışında."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Fiyatın ton mu kg mı başına olduğunu seçin veya kütleyi kaldırın.",
+      "fail": "Birim başına {mass} kg kütle belirtilmiş, ancak fiyat esası (ton veya kg başına) belirtilmemiş."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Şekli yeterli noktayla yeniden çizin veya ölçümü silin.",
+      "fail": "{type} türündeki bir ölçümün {count} noktası var; en az {needed} gerekir."
+    },
+    "unit_mismatch": {
+      "suggestion": "Mesafeler için uzunluk, alanlar için alan, hacimler için hacim birimi kullanın.",
+      "fail": "{unit} birimi {type} türündeki bir ölçüme uymuyor."
+    },
+    "count_not_whole": {
+      "suggestion": "Yalnızca tam adetleri sayın ve değeri düzeltin.",
+      "fail": "{value} adedi bir tam sayı değil."
+    }
   }
 }

@@ -1999,5 +1999,51 @@
       "fail": "Objektil oli {headcount} liikmeline brigaad, kuid tööd, kontrolli ega viivitust pole kirjendatud.",
       "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Alampiir peab olema 0 või väiksem ja ülempiir 0 või suurem.",
+      "fail": "Täpsusvahemik {low} % kuni {high} % ei hõlma hinnangut."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Sisestage joonmass kg ühiku kohta või eemaldage massipõhi.",
+      "fail": "Hind on antud {basis} kohta, kuid massi ühiku kohta puudub või on null."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Määrake või kalibreerige joonise mõõtkava, enne kui koguse peale loodate.",
+      "fail": "See pikkus või pind on mõõdetud joonisel, mille mõõtkava on endiselt vaikimisi 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Hinnake eelarve uuesti või indekseerige hinnad enne kinnitamist.",
+      "fail": "Hinnad on kuupäevaga {date}, rohkem kui aasta vanused."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Kinnitage kõigepealt ettepanek; eelarvet toidab ainult kinnitatud mõõtmine.",
+      "fail": "Olekus {status} mõõtmist ei saa siduda eelarve real."
+    },
+    "scale_missing": {
+      "suggestion": "Kalibreerige lehe mõõtkava ja mõõtke uuesti.",
+      "fail": "Tüübi {type} mõõtmisel puudub joonise mõõtkava, mistõttu kogust pole kontrollitud."
+    },
+    "scale_unusual": {
+      "suggestion": "Kontrollige mõõtkava või kalibreerige see teadaoleva mõõdu järgi.",
+      "fail": "Joonise mõõtkava 1:{scale} jääb tavapärasest vahemikust välja."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Valige, kas hind on tonni või kg kohta, või eemaldage mass.",
+      "fail": "Märgitud on mass {mass} kg ühiku kohta, kuid hinna alus (tonni või kg kohta) puudub."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Joonistage kuju uuesti piisava punktide arvuga või kustutage mõõtmine.",
+      "fail": "Tüübi {type} mõõtmisel on {count} punkti; vaja on vähemalt {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Kasutage kauguste jaoks pikkusühikut, pindade jaoks pinnaühikut ja mahtude jaoks ruumalaühikut.",
+      "fail": "Ühik {unit} ei sobi tüübi {type} mõõtmisega."
+    },
+    "count_not_whole": {
+      "suggestion": "Lugege ainult terveid ühikuid ja parandage väärtus.",
+      "fail": "Arv {value} ei ole täisarv."
+    }
   }
 }

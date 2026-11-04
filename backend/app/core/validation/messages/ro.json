@@ -1999,5 +1999,51 @@
       "fail": "O echipă de {headcount} persoane era pe șantier, dar nu sunt consemnate lucrări, inspecții sau întârzieri.",
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "Limita inferioară trebuie să fie 0 sau mai mică, iar cea superioară 0 sau mai mare.",
+      "fail": "Intervalul de precizie de la {low} % la {high} % nu cuprinde estimarea."
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "Introduceți masa liniară în kg pe unitate sau eliminați baza de masă.",
+      "fail": "Prețul este dat pe {basis}, dar masa pe unitate lipsește sau este zero."
+    },
+    "scale_uncalibrated": {
+      "suggestion": "Setați sau calibrați scara desenului înainte de a vă baza pe cantitate.",
+      "fail": "Această lungime sau suprafață a fost măsurată pe un desen care este încă la scara implicită 1:1."
+    },
+    "price_date_stale": {
+      "suggestion": "Reevaluați devizul sau indexați prețurile înainte de aprobare.",
+      "fail": "Prețurile sunt datate {date}, adică de acum mai bine de un an."
+    },
+    "link_needs_confirmed": {
+      "suggestion": "Confirmați mai întâi propunerea; devizul este alimentat doar de o măsurătoare confirmată.",
+      "fail": "O măsurătoare în starea {status} nu poate fi legată de un articol din devizul de cantități."
+    },
+    "scale_missing": {
+      "suggestion": "Calibrați scara foii și măsurați din nou.",
+      "fail": "Măsurătoarea de tip {type} nu are scara desenului, deci cantitatea ei nu este verificată."
+    },
+    "scale_unusual": {
+      "suggestion": "Verificați scara sau calibrați-o după o cotă cunoscută.",
+      "fail": "Scara desenului 1:{scale} este în afara intervalului obișnuit."
+    },
+    "geometry_too_few_points": {
+      "suggestion": "Alegeți dacă prețul este pe tonă sau pe kg, ori eliminați masa.",
+      "fail": "S-a indicat o masă de {mass} kg pe unitate, dar nu și baza prețului (pe tonă sau pe kg)."
+    },
+    "mass_needs_basis": {
+      "suggestion": "Redesenați forma cu suficiente puncte sau ștergeți măsurătoarea.",
+      "fail": "O măsurătoare de tip {type} are {count} puncte; are nevoie de cel puțin {needed}."
+    },
+    "unit_mismatch": {
+      "suggestion": "Folosiți o unitate de lungime pentru distanțe, de arie pentru suprafețe și de volum pentru volume.",
+      "fail": "Unitatea {unit} nu se potrivește unei măsurători de tip {type}."
+    },
+    "count_not_whole": {
+      "suggestion": "Numărați doar bucăți întregi și corectați valoarea.",
+      "fail": "O numărătoare de {value} nu este un număr întreg."
+    }
   }
 }

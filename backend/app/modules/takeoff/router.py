@@ -4847,6 +4847,7 @@ def _measurement_to_response(item: object) -> TakeoffMeasurementResponse:
         drawing_title=getattr(item, "drawing_title", None),
         drawing_revision=getattr(item, "drawing_revision", None),
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", []),
         created_by=item.created_by,  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]

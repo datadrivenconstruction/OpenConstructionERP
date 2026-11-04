@@ -1999,5 +1999,51 @@
       "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
     }
+  },
+  "estimating": {
+    "accuracy_band_invalid": {
+      "suggestion": "下限は0以下、上限は0以上にしてください。",
+      "fail": "精度の範囲{low} %~{high} %が見積を挟んでいません。"
+    },
+    "mass_basis_needs_mass": {
+      "suggestion": "単位あたりの線質量をkgで入力するか、質量基準を解除してください。",
+      "fail": "単価は{basis}あたりで指定されていますが、単位あたりの質量がないか0です。"
+    },
+    "scale_uncalibrated": {
+      "suggestion": "数量に頼る前に、図面の縮尺を設定または校正してください。",
+      "fail": "この長さまたは面積は、まだ既定の縮尺1:1のままの図面で計測されています。"
+    },
+    "price_date_stale": {
+      "suggestion": "承認する前に見積を再積算するか、単価を指数で更新してください。",
+      "fail": "単価の日付は{date}で、1年以上前です。"
+    },
+    "link_needs_confirmed": {
+      "suggestion": "先に提案を承認してください。数量書に反映されるのは承認済みの計測だけです。",
+      "fail": "状態が{status}の計測は、数量書の項目に紐付けられません。"
+    },
+    "scale_missing": {
+      "suggestion": "図面シートの縮尺を校正してから計測し直してください。",
+      "fail": "種類{type}の計測には図面の縮尺がないため、数量は未検証です。"
+    },
+    "scale_unusual": {
+      "suggestion": "縮尺を確認するか、既知の寸法から校正し直してください。",
+      "fail": "図面の縮尺1:{scale}は通常の範囲外です。"
+    },
+    "geometry_too_few_points": {
+      "suggestion": "単価がトンあたりかkgあたりかを選ぶか、質量を解除してください。",
+      "fail": "単位あたり{mass} kgの質量が指定されていますが、単価の基準(トンあたりかkgあたり)がありません。"
+    },
+    "mass_needs_basis": {
+      "suggestion": "十分な点数で図形を描き直すか、計測を削除してください。",
+      "fail": "種類{type}の計測には{count}点しかありません。最低{needed}点が必要です。"
+    },
+    "unit_mismatch": {
+      "suggestion": "距離には長さ、面積には面積、体積には体積の単位を使ってください。",
+      "fail": "単位{unit}は種類{type}の計測に合いません。"
+    },
+    "count_not_whole": {
+      "suggestion": "整数の個数だけを数え、値を修正してください。",
+      "fail": "個数{value}は整数ではありません。"
+    }
   }
 }
