@@ -174,9 +174,23 @@ function LessonRow(props: { lesson: Lesson; onConfirm: () => void; onDelete: () 
       </div>
       {l.description && <p className="mt-1 text-sm text-content-secondary">{l.description}</p>}
       {l.recommendation && <p className="mt-1 text-sm text-content-primary">{l.recommendation}</p>}
+      {l.findings.length > 0 && (
+        <ul data-testid="lesson-findings" className="mt-1 list-disc ps-5 text-xs text-content-tertiary">
+          {l.findings.map((f) => (
+            <li key={f.rule_id}>
+              {t(`lessons_learned.finding.${f.rule_id.split('.').pop()}`, { defaultValue: f.message })}
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="mt-2 flex gap-2">
         {l.status === 'draft' && (
-          <Button size="sm" variant="secondary" onClick={props.onConfirm}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={l.findings.some((f) => f.severity === 'error')}
+            onClick={props.onConfirm}
+          >
             {t('lessons_learned.confirm', { defaultValue: 'Confirm' })}
           </Button>
         )}

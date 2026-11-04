@@ -66183,6 +66183,10 @@ const resource = {
     "lessons_learned.seen_few": "Встречалось в {{count}} прошлых проектах",
     "lessons_learned.seen_many": "Встречалось в {{count}} прошлых проектах",
     "lessons_learned.seen_other": "Встречалось в {{count}} прошлых проектах",
+    "lessons_learned.finding.title_required": "Добавьте заголовок.",
+    "lessons_learned.finding.has_tag": "Укажите вид работ, код затрат или категорию риска.",
+    "lessons_learned.finding.has_content": "Опишите, что произошло или что делать.",
+    "lessons_learned.finding.confirmed_has_recommendation": "Добавьте, что делать в следующий раз.",
   }
 } as { translation: Record<string, string> };
 
