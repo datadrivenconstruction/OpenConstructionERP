@@ -14,6 +14,7 @@ Endpoints:
 
 import logging
 import uuid
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -235,8 +236,9 @@ async def create_variation_from_ncr(
     try:
         from sqlalchemy import select
 
-        from app.modules.changeorders.models import ChangeOrder
         from app.modules.changeorders.repository import ChangeOrderRepository
+        from app.modules.changeorders.schemas import ChangeOrderCreate
+        from app.modules.changeorders.service import ChangeOrderService
         from app.modules.projects.models import Project
 
         repo = ChangeOrderRepository(session)
@@ -262,9 +264,6 @@ async def create_variation_from_ncr(
                     "ncr_id": str(ncr_id),
                     "title": existing_order.title,
                 }
-
-        count = await repo.count_for_project(ncr.project_id)
-        code = f"CO-{count + 1:03d}"
 
         # Money-correctness fix: ncr.cost_impact is free text like "BRL 12000".
         # Passing it raw to ChangeOrder.cost_impact (a numeric MoneyType) coerces
@@ -305,31 +304,40 @@ async def create_variation_from_ncr(
         if ncr.root_cause:
             description_parts.extend(["", "Root Cause:", ncr.root_cause])
 
-        order = ChangeOrder(
-            project_id=ncr.project_id,
-            code=code,
-            title=f"Variation: {ncr.title}",
-            description="\n".join(description_parts),
-            reason_category="non_conformance",
-            # Numeric-only amount so the MoneyType coercion no longer rounds to 0.
-            cost_impact=amount,
-            # Set the real currency (parsed ISO code, else project currency) instead
-            # of leaving ChangeOrder.currency at its blank default.
-            currency=currency,
-            schedule_impact_days=ncr.schedule_impact_days or 0,
-            metadata_={
-                "source": "ncr",
-                "ncr_id": str(ncr_id),
-                "ncr_number": ncr.ncr_number,
-                # Preserve the original free-text value for traceability/audit.
-                "ncr_cost_impact_raw": ncr.cost_impact,
-                # Same key the automatic draft sets: the amount is 0 because the
-                # text could not be read as one amount, not because it is free.
-                **({"amount_needs_review": needs_review} if needs_review else {}),
-            },
+        metadata = {
+            "source": "ncr",
+            "ncr_id": str(ncr_id),
+            "ncr_number": ncr.ncr_number,
+            # Preserve the original free-text value for traceability/audit.
+            "ncr_cost_impact_raw": ncr.cost_impact,
+        }
+        if needs_review:
+            # Same key the automatic draft sets: the amount is 0 because the
+            # text could not be read as one amount, not because it is free.
+            metadata["amount_needs_review"] = needs_review
+        if not currency and Decimal(str(amount or "0")) != 0:
+            # The changeorders rules refuse money with no currency. Neither the
+            # NCR text nor the project names one, so the order is raised at 0
+            # and flagged for review; the raw text stays in the metadata.
+            amount = "0"
+            metadata["amount_needs_review"] = True
+            metadata["currency_missing"] = True
+
+        # Through the service so the changeorders money rules run exactly as on
+        # a hand-made order; a failing rule raises the coded 422.
+        order = await ChangeOrderService(session).create_order(
+            ChangeOrderCreate(
+                project_id=ncr.project_id,
+                title=f"Variation: {ncr.title}"[:255],
+                description="\n".join(description_parts)[:5000],
+                reason_category="non_conformance",
+                cost_impact=str(amount),
+                currency=currency,
+                schedule_impact_days=max(ncr.schedule_impact_days or 0, 0),
+                metadata=metadata,
+            )
         )
-        session.add(order)
-        await session.flush()
+        code = order.code
 
         # Link the change order back to the NCR
         ncr.change_order_id = str(order.id)
