@@ -18,6 +18,7 @@ from typing import Any, Iterable
 
 from fastapi import HTTPException
 from fastapi import status as http_status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.day_basis import CALENDAR, add_days
@@ -2848,6 +2849,22 @@ class VariationsService:
             "applied": applied,
         }
 
+    async def _check_links_in_project(self, project_id: uuid.UUID, fields: dict[str, Any]) -> None:
+        """Refuse a linked change order or contract that belongs to another project (422)."""
+        from app.modules.changeorders.models import ChangeOrder
+        from app.modules.contracts.models import Contract
+
+        for key, model in (("reference_change_order_id", ChangeOrder), ("affected_contract_id", Contract)):
+            ref = fields.get(key)
+            if ref is None:
+                continue
+            owner = await self.session.scalar(select(model.project_id).where(model.id == ref))
+            if owner is None or owner != project_id:
+                raise HTTPException(
+                    status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"{key} does not belong to this project.",
+                )
+
     async def update_order(
         self,
         vo_id: uuid.UUID,
@@ -2882,6 +2899,8 @@ class VariationsService:
             fields["final_cost_impact"] = _to_decimal(fields["final_cost_impact"])
         if not fields:
             return vo
+        if fields.get("reference_change_order_id") or fields.get("affected_contract_id"):
+            await self._check_links_in_project(vo.project_id, fields)
         ball_changed = "ball_in_court" in fields and fields["ball_in_court"] != vo.ball_in_court
         old_ball = vo.ball_in_court
         code_snapshot = vo.code
