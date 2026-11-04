@@ -73,8 +73,8 @@ class ComputeRequest(BaseModel):
 
     base_wage: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
-    components: list[OnCostIn] = Field(default_factory=list)
-    crew: list[CrewMemberIn] = Field(default_factory=list)
+    components: list[OnCostIn] = Field(default_factory=list, max_length=100)
+    crew: list[CrewMemberIn] = Field(default_factory=list, max_length=200)
 
     @field_serializer("base_wage", when_used="json")
     def _ser_base(self, v: Decimal) -> str | None:
@@ -166,7 +166,7 @@ class TemplateCreate(BaseModel):
     base_wage: Decimal18_4 = Field(..., gt=0)
     currency: str = Field(default="", max_length=3)
     description: str = Field(default="", max_length=2000)
-    components: list[OnCostIn] = Field(default_factory=list)
+    components: list[OnCostIn] = Field(default_factory=list, max_length=100)
 
     @field_serializer("base_wage", when_used="json")
     def _ser_base(self, v: Decimal) -> str | None:
@@ -190,7 +190,7 @@ class TemplateUpdate(BaseModel):
     base_wage: Decimal18_4 | None = Field(default=None, gt=0)
     currency: str | None = Field(default=None, max_length=3)
     description: str | None = Field(default=None, max_length=2000)
-    components: list[OnCostIn] | None = None
+    components: list[OnCostIn] | None = Field(default=None, max_length=100)
 
     @field_serializer("base_wage", when_used="json")
     def _ser_base(self, v: Decimal | None) -> str | None:
@@ -251,7 +251,7 @@ class CrewSaveRequest(BaseModel):
 
     crew_id: UUID | None = None
     currency: str = Field(default="", max_length=3)
-    members: list[CrewMemberIn] = Field(default_factory=list)
+    members: list[CrewMemberIn] = Field(default_factory=list, max_length=200)
 
 
 class CrewMemberOut(BaseModel):

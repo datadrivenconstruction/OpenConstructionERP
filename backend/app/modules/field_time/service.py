@@ -498,6 +498,10 @@ class FieldTimeService:
         if not fields:
             return timesheet
 
+        # Moving the day must not carry a draft into (or out of) a locked period.
+        if fields.get("date") is not None and fields["date"] != timesheet.date:
+            await self._assert_payroll_open(timesheet.project_id, fields["date"])
+
         await self.repo.update_fields(timesheet_id, **fields)
         await self.session.refresh(timesheet)
         return timesheet
@@ -905,6 +909,7 @@ class FieldTimeService:
                         "withdraw it. An approved timesheet is corrected by reversing it."
                     ),
                 )
+            await self._assert_payroll_open(timesheet.project_id, timesheet.date)
             await self.repo.delete(timesheet.id)
 
         await self._record_offline_key(
@@ -942,7 +947,11 @@ class FieldTimeService:
                 ),
             )
 
-        # A newer full state for a day still in draft: replace it wholesale.
+        # A newer full state for a day still in draft: replace it wholesale, unless
+        # a locked payroll period covers the day it is on or the day it moves to.
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
+        if data.date != timesheet.date:
+            await self._assert_payroll_open(timesheet.project_id, data.date)
         for line in list(timesheet.lines):
             await self.repo.delete_line(line.id)
         for line in data.lines:
