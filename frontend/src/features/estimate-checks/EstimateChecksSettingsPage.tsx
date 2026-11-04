@@ -123,7 +123,8 @@ export function EstimateChecksSettingsPage() {
                   max={200}
                   className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
                   value={draft.min_comparables}
-                  onChange={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 2, 200, true) })}
+                  onChange={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 0, 200, true) })}
+                  onBlur={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 2, 200, true) })}
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-content-secondary">
