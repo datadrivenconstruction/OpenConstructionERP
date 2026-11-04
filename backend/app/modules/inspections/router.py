@@ -331,6 +331,7 @@ async def merge_inspection(
         actor_id=str(user_id) if user_id else None,
         project_id=inspection.project_id,
         current_payload=(await _to_response_many(session, [inspection]))[0].model_dump(mode="json"),
+        guard=lambda changes: service.check_merge(inspection, changes),
     )
     return OfflineMergeResponse(
         version=version,
