@@ -137,6 +137,21 @@ def satisfies(delivered: str | None, required: str | None) -> bool:
     return have.family == want.family and have.rank >= want.rank
 
 
+def annotate_receipt_line(line: dict) -> dict:
+    """Resolve a receipt line's certificates against the catalogue, in place.
+
+    Adds ``required_certificate_label`` and, per certificate, ``satisfies_required``,
+    which is all the stdlib-only validator reads.
+    """
+    required = str(line.get("required_certificate_type") or "").strip()
+    ctype = get_certificate_type(required)
+    line["required_certificate_label"] = ctype.label if ctype else required
+    for cert in line.get("certificates") or []:
+        if isinstance(cert, dict):
+            cert["satisfies_required"] = bool(required) and satisfies(str(cert.get("certificate_type") or ""), required)
+    return line
+
+
 def reload_catalogue() -> None:
     """Forget the cached catalogue so the next read sees files added since (tests, packs)."""
     _catalogue.cache_clear()

@@ -48,7 +48,8 @@ def _line(**overrides: Any) -> dict[str, Any]:
 
 
 def _receipt(*lines: dict[str, Any]) -> dict[str, Any]:
-    return {"receipt_ref": "LS-4711", "po_number": "PO-0007", "items": list(lines) or [_line()]}
+    items = [certificates.annotate_receipt_line(line) for line in (lines or (_line(),))]
+    return {"receipt_ref": "LS-4711", "po_number": "PO-0007", "items": items}
 
 
 class TestCatalogue:

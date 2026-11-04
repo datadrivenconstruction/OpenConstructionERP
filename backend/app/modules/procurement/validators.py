@@ -987,6 +987,9 @@ def check_requisition_over_allocated(req: dict[str, Any]) -> list[Finding]:
 #                 "certificates": [{"certificate_type", "certificate_number",
 #                                   "batch_number"}]}]}
 #
+# ``required_certificate_label`` and each certificate's ``satisfies_required`` are
+# resolved against the catalogue by the caller (``certificates.annotate_receipt_line``),
+# so this module needs nothing from the procurement package.
 # ``required_certificate_type`` comes from the order line: the document type is
 # agreed when the material is ordered, so the order is where the requirement is
 # read from. A line that received nothing (fully rejected) needs no document.
@@ -1007,8 +1010,6 @@ def _certs(line: dict[str, Any]) -> list[dict[str, Any]]:
 
 def check_receipt_certificate_present(payload: dict[str, Any]) -> list[Finding]:
     """A line whose order asks for a certificate must carry one that satisfies it."""
-    from app.modules.procurement.certificates import get_certificate_type, satisfies
-
     findings: list[Finding] = []
     for line in _receipt_lines(payload):
         required = str(line.get("required_certificate_type") or "").strip()
@@ -1017,17 +1018,17 @@ def check_receipt_certificate_present(payload: dict[str, Any]) -> list[Finding]:
         received = parse_money(line.get("quantity_received"))
         if received is None or received <= 0:
             continue
-        delivered = [str(c.get("certificate_type") or "") for c in _certs(line)]
-        if any(satisfies(code, required) for code in delivered):
+        certs = _certs(line)
+        delivered = [str(c.get("certificate_type") or "") for c in certs]
+        if any(c.get("satisfies_required") for c in certs):
             continue
-        ctype = get_certificate_type(required)
         label = str(line.get("label") or "?")
         findings.append(
             Finding(
                 element_ref=label,
                 params={
                     "line": label,
-                    "required": ctype.label if ctype else required,
+                    "required": str(line.get("required_certificate_label") or required),
                     "delivered": ", ".join(sorted(set(filter(None, delivered)))) or "-",
                 },
                 details={"required_certificate_type": required, "delivered_types": delivered},

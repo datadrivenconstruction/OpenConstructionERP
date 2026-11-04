@@ -35,6 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.events import publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
+from app.modules.procurement.certificates import annotate_receipt_line
 from app.modules.procurement.models import (
     GoodsReceipt,
     GoodsReceiptCertificate,
@@ -80,21 +81,23 @@ def receipt_validation_payload(gr: GoodsReceipt, po: PurchaseOrder) -> dict[str,
     for index, line in enumerate(gr.items or []):
         po_item = po_items.get(line.po_item_id) if line.po_item_id else None
         items.append(
-            {
-                "label": labels.get(line.po_item_id, str(index + 1)) if line.po_item_id else str(index + 1),
-                "po_item_id": str(line.po_item_id) if line.po_item_id else None,
-                "quantity_received": line.quantity_received,
-                "batch_lot": line.batch_lot,
-                "required_certificate_type": po_item.required_certificate_type if po_item else None,
-                "certificates": [
-                    {
-                        "certificate_type": c.certificate_type,
-                        "certificate_number": c.certificate_number,
-                        "batch_number": c.batch_number,
-                    }
-                    for c in line.certificates or []
-                ],
-            }
+            annotate_receipt_line(
+                {
+                    "label": labels.get(line.po_item_id, str(index + 1)) if line.po_item_id else str(index + 1),
+                    "po_item_id": str(line.po_item_id) if line.po_item_id else None,
+                    "quantity_received": line.quantity_received,
+                    "batch_lot": line.batch_lot,
+                    "required_certificate_type": po_item.required_certificate_type if po_item else None,
+                    "certificates": [
+                        {
+                            "certificate_type": c.certificate_type,
+                            "certificate_number": c.certificate_number,
+                            "batch_number": c.batch_number,
+                        }
+                        for c in line.certificates or []
+                    ],
+                }
+            )
         )
     return {
         "id": str(gr.id),
