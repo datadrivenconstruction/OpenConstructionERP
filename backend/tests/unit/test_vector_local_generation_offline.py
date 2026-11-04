@@ -101,3 +101,59 @@ def test_the_stand_in_matches_the_real_search_signature() -> None:
         f"CostItemRepository.search now returns {len(returned)} values; the stand-in above returns 3, "
         "so the fallback test is no longer evidence about the real call"
     )
+
+
+def _patch_offline(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, encode: Any) -> None:
+    import app.core.vector as vector_module
+    import app.modules.costs.repository as repository_module
+
+    def _no_download(*_args: Any, **_kwargs: Any) -> None:
+        raise OSError("404 Not Found")
+
+    monkeypatch.setitem(router._GITHUB_CWICR_FILES, DB_ID, f"{DB_ID}/{DB_ID}.parquet")
+    monkeypatch.setattr(router, "_CWICR_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(router, "_download_to_file", _no_download)
+    monkeypatch.setattr(repository_module, "CostItemRepository", _Repo)
+    monkeypatch.setattr(vector_module, "encode_texts", encode)
+    monkeypatch.setattr(vector_module, "vector_index", lambda records: len(records))
+
+
+async def test_a_server_without_an_embedding_model_answers_503_with_a_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Issue #555: AR_DUBAI answered a bare 500 on a server without the vector stack.
+
+    No ``*_vectors.parquet`` is published for any region, so every call takes
+    the offline branch, and on such a server that branch cannot run. That is a
+    missing optional service, not a crash.
+    """
+    from fastapi import HTTPException
+
+    def _no_model(_texts: list[str]) -> list[list[float]]:
+        raise RuntimeError("No embedding model available.")
+
+    _patch_offline(monkeypatch, tmp_path, _no_model)
+
+    with pytest.raises(HTTPException) as caught:
+        await router.load_vector_from_github(db_id=DB_ID, session=None, _user_id=None)  # type: ignore[arg-type]
+
+    assert caught.value.status_code == 503
+    assert caught.value.detail["code"] == "vector_backend_unavailable"
+    assert DB_ID in caught.value.detail["message"]
+
+
+async def test_an_unexpected_failure_still_answers_500_but_with_a_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from fastapi import HTTPException
+
+    def _broken(_texts: list[str]) -> list[list[float]]:
+        raise ValueError("bad batch")
+
+    _patch_offline(monkeypatch, tmp_path, _broken)
+
+    with pytest.raises(HTTPException) as caught:
+        await router.load_vector_from_github(db_id=DB_ID, session=None, _user_id=None)  # type: ignore[arg-type]
+
+    assert caught.value.status_code == 500
+    assert caught.value.detail["code"] == "vector_generation_failed"

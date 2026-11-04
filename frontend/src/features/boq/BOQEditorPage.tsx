@@ -133,7 +133,11 @@ import {
   computeQualityScore,
   isResourceDrivenRate,
   nextTopLevelSectionOrdinal,
+  RESOURCE_BASIS_KEY,
+  resourceQuantityBasis,
+  resourceQuantityEdit,
   type QualityBreakdown,
+  type ResourceQuantityBasis,
   type Tip,
 } from './boqHelpers';
 
@@ -3784,6 +3788,21 @@ export function BOQEditorPage() {
     [boq?.positions, updatePositionMutate, perUnitRateInBase],
   );
 
+  /** Issue #555: switch how a position's resource quantities are entered.
+   *  Only the declared basis is sent; the server converts the rows (fills or
+   *  drops each row's whole-position quantity) and re-derives the rate. */
+  const handleSetResourceBasis = useCallback(
+    (positionId: string, basis: ResourceQuantityBasis) => {
+      const pos = boq?.positions.find((p) => p.id === positionId);
+      if (!pos) return;
+      updatePositionMutate({
+        id: positionId,
+        data: { metadata: { ...pos.metadata, [RESOURCE_BASIS_KEY]: basis } },
+      });
+    },
+    [boq?.positions, updatePositionMutate],
+  );
+
   /** Single-field shim — delegates to the batched implementation. */
   const handleUpdateResource = useCallback(
     (positionId: string, resourceIndex: number, field: string, value: number | string) => {
@@ -4270,6 +4289,14 @@ export function BOQEditorPage() {
     ) => {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
+      // Issue #555: on a position whose resources are entered for the whole
+      // position, the typed quantity is a whole-position figure too.
+      const qtyFields = resourceQuantityEdit(
+        resourceQuantityBasis(pos.metadata),
+        resource.quantity,
+        Number(pos.quantity) || 0,
+      );
+      const norm = qtyFields.quantity ?? resource.quantity;
       const newRes = {
         name: resource.name,
         // Issue #133 — persist the reusable code so it stays
@@ -4277,10 +4304,11 @@ export function BOQEditorPage() {
         code: (resource.code ?? '').trim(),
         type: resource.type,
         unit: resource.unit,
-        quantity: resource.quantity,
+        ...qtyFields,
+        quantity: norm,
         unit_rate: resource.unit_rate,
         ...(resource.currency ? { currency: resource.currency } : {}),
-        total: Math.round(resource.quantity * resource.unit_rate * 100) / 100,
+        total: Math.round(norm * resource.unit_rate * 100) / 100,
       };
       const existing = [...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>)];
       const merged = [...existing, newRes];
@@ -5810,6 +5838,7 @@ export function BOQEditorPage() {
           onRemoveResource={handleRemoveResource}
           onUpdateResource={handleUpdateResource}
           onUpdateResourceFields={handleUpdateResourceFields}
+          onSetResourceBasis={handleSetResourceBasis}
           onUpdateResourceCustomField={handleUpdateResourceCustomField}
           onSaveResourceToCatalog={handleSaveResourceToCatalog}
           onSaveVariantHeaderToCatalog={handleSaveVariantHeaderToCatalog}

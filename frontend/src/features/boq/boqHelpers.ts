@@ -791,6 +791,54 @@ export function isResourceDrivenRate(
   return hasContributingResources((meta as { resources?: unknown }).resources);
 }
 
+/* ── Resource quantity basis (issue #555) ────────────────────────────────
+ * Stored resource rows are always per-unit norms, so every reader can sum
+ * ``quantity × unit_rate`` into the unit rate. A position may declare that its
+ * resources were entered for the WHOLE position instead; then each row keeps
+ * the entered figure in ``quantity_for_position`` and the backend derives the
+ * norm (entered ÷ position quantity) and the unit rate (resources total ÷
+ * position quantity). Mirrors ``backend/app/modules/boq/resource_basis.py``.
+ */
+export const RESOURCE_BASIS_KEY = 'resource_quantity_basis';
+export const RESOURCE_QTY_FOR_POSITION_KEY = 'quantity_for_position';
+export type ResourceQuantityBasis = 'per_unit' | 'per_position';
+
+function finiteOrNull(value: unknown): number | null {
+  if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null;
+  const n = typeof value === 'number' ? value : parseFloat(String(value));
+  return Number.isFinite(n) ? n : null;
+}
+
+/** The basis a position declares; anything unknown reads as per-unit. */
+export function resourceQuantityBasis(metadata: unknown): ResourceQuantityBasis {
+  if (!metadata || typeof metadata !== 'object') return 'per_unit';
+  return (metadata as Record<string, unknown>)[RESOURCE_BASIS_KEY] === 'per_position' ? 'per_position' : 'per_unit';
+}
+
+/** One resource's quantity for the whole position: the entered figure, else norm × position quantity. */
+export function resourceQuantityForPosition(row: unknown, positionQuantity: number): number {
+  const r = row && typeof row === 'object' ? (row as Record<string, unknown>) : {};
+  const entered = finiteOrNull(r[RESOURCE_QTY_FOR_POSITION_KEY]);
+  if (entered !== null) return entered;
+  return (finiteOrNull(r.quantity) ?? 0) * (Number.isFinite(positionQuantity) ? positionQuantity : 0);
+}
+
+/**
+ * Fields to write when a resource quantity is typed under ``basis``. Under the
+ * whole-position basis the typed figure is kept as entered and the norm sent
+ * alongside is only the optimistic value; the server re-derives it exactly.
+ */
+export function resourceQuantityEdit(
+  basis: ResourceQuantityBasis,
+  typed: number,
+  positionQuantity: number,
+): Record<string, number> {
+  if (basis === 'per_position' && positionQuantity > 0) {
+    return { [RESOURCE_QTY_FOR_POSITION_KEY]: typed, quantity: typed / positionQuantity };
+  }
+  return { quantity: typed };
+}
+
 /* ── Quality Score ───────────────────────────────────────────────────── */
 
 export interface QualityBreakdown {
