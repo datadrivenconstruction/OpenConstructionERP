@@ -11,6 +11,7 @@ Stateless service layer. Handles:
 import logging
 import uuid
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -18,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.core.validation.gate import run_gate
 from app.modules.transmittals.logic import (
     RESPONDABLE_STATUSES,
     STATUS_ISSUED,
@@ -37,6 +39,7 @@ from app.modules.transmittals.schemas import (
     TransmittalCreate,
     TransmittalUpdate,
 )
+from app.modules.transmittals.validators import TRANSMITTALS_RULE_SET, snapshot
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
@@ -114,6 +117,7 @@ class TransmittalService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = TransmittalRepository(session)
+        self.findings: list[dict] = []
 
     # ── Create ────────────────────────────────────────────────────────────
 
@@ -139,6 +143,13 @@ class TransmittalService:
             data.issued_date,
             data.response_due_date,
             metadata,
+        )
+        self.findings = await run_gate(
+            snapshot(
+                SimpleNamespace(id="", response_due_date=response_due_date), data.recipients, data.items, issuing=False
+            ),
+            TRANSMITTALS_RULE_SET,
+            target_type="transmittal",
         )
 
         last_exc: Exception | None = None
@@ -272,6 +283,18 @@ class TransmittalService:
                 detail=date_error,
             )
 
+        self.findings = await run_gate(
+            snapshot(
+                transmittal,
+                data.recipients if data.recipients is not None else (transmittal.recipients or []),
+                data.items if data.items is not None else (transmittal.items or []),
+                issuing=False,
+            ),
+            TRANSMITTALS_RULE_SET,
+            target_type="transmittal",
+            target_id=str(transmittal_id),
+        )
+
         if fields:
             await self.repo.update_fields(transmittal_id, **fields)
 
@@ -401,6 +424,13 @@ class TransmittalService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Cannot issue this transmittal yet. " + " ".join(blockers),
             )
+
+        self.findings = await run_gate(
+            snapshot(transmittal, transmittal.recipients or [], transmittal.items or [], issuing=True),
+            TRANSMITTALS_RULE_SET,
+            target_type="transmittal",
+            target_id=str(transmittal_id),
+        )
 
         now = datetime.now(UTC).isoformat()
         project_id_s = str(transmittal.project_id)

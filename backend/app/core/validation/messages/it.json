@@ -1737,5 +1737,80 @@
       "fail": "Le date {earlier} e {later} sono in ordine errato o fuori dal periodo.",
       "suggestion": "Corregga le date in modo che la prima venga per prima e ogni voce rientri nel periodo."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "I numeri di riga {numbers} compaiono più volte in questa trasmissione."
+    },
+    "item_identifies_document": {
+      "fail": "La riga {numbers} non indica né documento, né revisione, né descrizione."
+    },
+    "recipient_identified": {
+      "fail": "{count} destinatario/i senza organizzazione, utente, nome o indirizzo e-mail."
+    },
+    "action_needs_deadline": {
+      "fail": "A {count} destinatario/i è richiesta un'azione ma non è fissata alcuna data di risposta."
+    },
+    "suggestion": "Rinumerare le righe, indicare ogni documento inviato e ogni destinatario e fissare una data di risposta prima dell'emissione."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "La lettera risulta ricevuta il {received}, prima dell'invio il {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "La risposta è dovuta il {due}, prima della data della lettera {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Questa comunicazione non cita alcuna clausola contrattuale e potrebbe non valere come comunicazione ai sensi del contratto."
+    },
+    "suggestion": "Correggere le date e indicare la clausola contrattuale in base alla quale è data la comunicazione."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Un progetto di categoria {category} richiede un verificatore indipendente designato prima di essere segnato come verificato."
+    },
+    "checker_is_designer": {
+      "fail": "Il verificatore {name} è anche il progettista; un progetto di categoria 2 o 3 richiede una verifica indipendente."
+    },
+    "coordinator_assigned": {
+      "fail": "Non è designato alcun coordinatore delle opere provvisionali, benché l'opera sia approvata al carico o in uso."
+    },
+    "strike_before_load": {
+      "fail": "La data di disarmo/rimozione {strike} precede la data di carico {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Il progetto è dovuto il {due}, dopo la data di carico richiesta {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Il permesso scade il {end}, prima del suo inizio il {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Il permesso è chiuso il {closed}, prima del rilascio il {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Un permesso di carico in vigore richiede la verifica del progetto accettata e registrata."
+    },
+    "inspection_not_passed": {
+      "fail": "Un permesso di carico in vigore richiede l'ispezione superata e registrata."
+    },
+    "suggestion": "Designare il verificatore indipendente e il coordinatore, correggere le date e registrare la verifica del progetto e l'ispezione prima di consentire il carico."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "La segnalazione è chiusa senza una risoluzione registrata."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "I collaudi non possono essere dichiarati completi finché prove funzionali sono aperte o una non conformità critica è irrisolta."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} verifica/e preliminare/i di questo sistema sono fallite."
+    },
+    "prefunctional_open": {
+      "fail": "{count} verifica/e preliminare/i di questo sistema sono ancora aperte."
+    },
+    "failed_test_needs_note": {
+      "fail": "La prova fallita non ha una nota che descriva quanto rilevato."
+    },
+    "suggestion": "Registrare la risoluzione o l'osservazione e completare le verifiche preliminari e le prove funzionali prima della chiusura."
   }
 }

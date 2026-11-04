@@ -17,3 +17,6 @@ async def on_startup() -> None:
     )
 
     register_commissioning_permissions()
+    from app.modules.commissioning.validators import register_commissioning_validation_rules
+
+    register_commissioning_validation_rules()

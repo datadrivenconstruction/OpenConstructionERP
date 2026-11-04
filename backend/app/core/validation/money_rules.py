@@ -86,6 +86,10 @@ class MoneyRule(ValidationRule):
 
     severity = Severity.ERROR
     category = RuleCategory.CONSISTENCY
+    #: Message bundle section the rule's texts live under; other rule sets reuse this base.
+    message_section = "money"
+    #: When set, every rule of the set shares this suggestion key instead of one per rule.
+    suggestion_key: str | None = None
 
     def ok(self, ref: str = "") -> RuleResult:
         """A passing result."""
@@ -108,7 +112,7 @@ class MoneyRule(ValidationRule):
         severity: Severity | None = None,
         **params: Any,
     ) -> RuleResult:
-        """A failing result whose text is ``money.<key>`` in the caller's locale."""
+        """A failing result whose text is ``<section>.<key>`` in the caller's locale."""
         locale = locale_of(context)
         return RuleResult(
             rule_id=self.rule_id,
@@ -116,9 +120,9 @@ class MoneyRule(ValidationRule):
             severity=severity or self.severity,
             category=self.category,
             passed=False,
-            message=translate(f"money.{key}.fail", locale=locale, **params),
+            message=translate(f"{self.message_section}.{key}.fail", locale=locale, **params),
             element_ref=ref,
-            suggestion=translate(f"money.{key}.suggestion", locale=locale),
+            suggestion=translate(self.suggestion_key or f"{self.message_section}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
 

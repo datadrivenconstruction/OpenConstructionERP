@@ -21,8 +21,10 @@ from typing import TYPE_CHECKING
 from fastapi import HTTPException, status
 from sqlalchemy import select
 
+from app.core.validation.gate import run_gate
 from app.modules.temporary_works import register
 from app.modules.temporary_works.models import TemporaryWorksItem, TemporaryWorksPermit
+from app.modules.temporary_works.validators import TEMPORARY_WORKS_RULE_SET, item_snapshot, permit_snapshot
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,6 +86,7 @@ class TemporaryWorksService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.findings: list[dict] = []
 
     # -- Items --------------------------------------------------------------
 
@@ -95,6 +98,7 @@ class TemporaryWorksService:
     ) -> TemporaryWorksItem:
         """Create a temporary-works item (409 if the reference is already used)."""
         await self._require_unique_reference(project_id, payload.reference)
+        self.findings = await run_gate(item_snapshot(payload), TEMPORARY_WORKS_RULE_SET, target_type="temporary_works")
         item = TemporaryWorksItem(
             project_id=project_id,
             reference=payload.reference,
@@ -172,6 +176,9 @@ class TemporaryWorksService:
         new_reference = data.get("reference")
         if new_reference is not None and new_reference != item.reference:
             await self._require_unique_reference(project_id, new_reference, exclude_item_id=item_id)
+        self.findings = await run_gate(
+            item_snapshot(item, data), TEMPORARY_WORKS_RULE_SET, target_type="temporary_works", target_id=str(item_id)
+        )
         for key, value in data.items():
             setattr(item, key, value)
         await self.session.flush()
@@ -199,6 +206,9 @@ class TemporaryWorksService:
         can never straddle two projects.
         """
         await self._require_item_in_project(project_id, item_id)
+        self.findings = await run_gate(
+            permit_snapshot(payload), TEMPORARY_WORKS_RULE_SET, target_type="temporary_works_permit"
+        )
         permit = TemporaryWorksPermit(
             project_id=project_id,
             item_id=item_id,
@@ -270,6 +280,12 @@ class TemporaryWorksService:
         """Patch (or close) a permit; only provided fields are changed."""
         permit = await self.require_permit(project_id, permit_id)
         data = payload.model_dump(exclude_unset=True)
+        self.findings = await run_gate(
+            permit_snapshot(permit, data),
+            TEMPORARY_WORKS_RULE_SET,
+            target_type="temporary_works_permit",
+            target_id=str(permit_id),
+        )
         for key, value in data.items():
             setattr(permit, key, value)
         await self.session.flush()

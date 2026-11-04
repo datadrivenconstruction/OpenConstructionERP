@@ -1737,5 +1737,80 @@
       "fail": "Các ngày {earlier} và {later} sai thứ tự hoặc nằm ngoài giai đoạn.",
       "suggestion": "Sửa các ngày để ngày sớm hơn đứng trước và mỗi mục nằm trong giai đoạn."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Số dòng {numbers} xuất hiện nhiều lần trong phiếu chuyển giao tài liệu này."
+    },
+    "item_identifies_document": {
+      "fail": "Dòng {numbers} không nêu tài liệu, phiên bản sửa đổi hay mô tả."
+    },
+    "recipient_identified": {
+      "fail": "{count} người nhận không có tổ chức, người dùng, tên hoặc địa chỉ email."
+    },
+    "action_needs_deadline": {
+      "fail": "Đã yêu cầu {count} người nhận thực hiện hành động nhưng chưa đặt hạn phản hồi."
+    },
+    "suggestion": "Đánh số lại các dòng, nêu rõ từng tài liệu gửi đi và từng người nhận, và đặt hạn phản hồi trước khi phát hành."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Công văn được ghi nhận nhận ngày {received}, trước ngày gửi {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Hạn phản hồi {due} sớm hơn ngày của công văn {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Thông báo này không viện dẫn điều khoản hợp đồng nào nên có thể không được coi là thông báo theo hợp đồng."
+    },
+    "suggestion": "Sửa lại các ngày và nêu điều khoản hợp đồng làm căn cứ của thông báo."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Thiết kế loại {category} cần có người kiểm tra độc lập được chỉ định trước khi đánh dấu là đã kiểm tra."
+    },
+    "checker_is_designer": {
+      "fail": "Người kiểm tra {name} cũng là người thiết kế; thiết kế loại 2 hoặc 3 cần kiểm tra độc lập."
+    },
+    "coordinator_assigned": {
+      "fail": "Chưa chỉ định điều phối viên công trình tạm, trong khi hạng mục đã được duyệt chịu tải hoặc đang sử dụng."
+    },
+    "strike_before_load": {
+      "fail": "Ngày tháo dỡ {strike} sớm hơn ngày chịu tải {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Thiết kế đến hạn ngày {due}, muộn hơn ngày chịu tải yêu cầu {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Giấy phép hết hạn ngày {end}, trước ngày bắt đầu {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Giấy phép được đóng ngày {closed}, trước ngày cấp {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Giấy phép chịu tải đang hiệu lực cần có hồ sơ kiểm tra thiết kế đã được chấp nhận."
+    },
+    "inspection_not_passed": {
+      "fail": "Giấy phép chịu tải đang hiệu lực cần có hồ sơ kiểm tra nghiệm thu đạt."
+    },
+    "suggestion": "Chỉ định người kiểm tra độc lập và điều phối viên, sửa các ngày, và ghi nhận kiểm tra thiết kế cùng nghiệm thu trước khi cho phép chịu tải."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Tồn tại được đóng mà không có giải pháp khắc phục được ghi nhận."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Không thể đánh dấu hoàn tất thử nghiệm khi còn thử nghiệm chức năng đang mở hoặc tồn tại nghiêm trọng chưa xử lý."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} hạng mục kiểm tra sơ bộ của hệ thống này không đạt."
+    },
+    "prefunctional_open": {
+      "fail": "{count} hạng mục kiểm tra sơ bộ của hệ thống này vẫn đang mở."
+    },
+    "failed_test_needs_note": {
+      "fail": "Thử nghiệm không đạt chưa có ghi chú mô tả điều đã quan sát."
+    },
+    "suggestion": "Ghi nhận giải pháp hoặc quan sát, và hoàn tất kiểm tra sơ bộ cùng thử nghiệm chức năng trước khi đóng."
   }
 }

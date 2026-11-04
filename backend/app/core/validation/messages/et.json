@@ -1737,5 +1737,80 @@
       "fail": "Kuupäevad {earlier} ja {later} on valesti järjestatud või perioodist väljas.",
       "suggestion": "Parandage kuupäevad nii, et varasem tuleb esimesena ja iga kirje jääb perioodi sisse."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Reanumbrid {numbers} esinevad selles edastuslehes mitu korda."
+    },
+    "item_identifies_document": {
+      "fail": "Rida {numbers} ei nimeta dokumenti, redaktsiooni ega kirjeldust."
+    },
+    "recipient_identified": {
+      "fail": "{count} adressaadil puudub organisatsioon, kasutaja, nimi või e-posti aadress."
+    },
+    "action_needs_deadline": {
+      "fail": "{count} adressaadilt oodatakse tegevust, kuid vastamistähtaega pole määratud."
+    },
+    "suggestion": "Nummerdage read uuesti, nimetage iga saadetav dokument ja adressaat ning määrake enne väljastamist vastamistähtaeg."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Kiri on registreeritud saabunuks {received}, enne saatmist {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Vastus on tähtajaga {due}, enne kirja kuupäeva {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Teade ei viita lepingu punktile ega pruugi seetõttu lepingujärgse teatena kehtida."
+    },
+    "suggestion": "Parandage kuupäevad ja nimetage lepingu punkt, mille alusel teade antakse."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Kategooria {category} projekt nõuab määratud sõltumatut kontrollijat, enne kui see märgitakse kontrollituks."
+    },
+    "checker_is_designer": {
+      "fail": "Kontrollija {name} on ühtlasi projekteerija; kategooria 2 või 3 projekt nõuab sõltumatut kontrolli."
+    },
+    "coordinator_assigned": {
+      "fail": "Ajutiste konstruktsioonide koordinaatorit pole määratud, kuigi element on koormamiseks kinnitatud või kasutuses."
+    },
+    "strike_before_load": {
+      "fail": "Lahtikäärimise kuupäev {strike} on enne koormamise kuupäeva {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Projekt on tähtajaga {due}, pärast nõutavat koormamise kuupäeva {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Luba aegub {end}, enne algust {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Luba on suletud {closed}, enne väljaandmist {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Kehtiv koormusluba nõuab registreeritud, vastuvõetud projektikontrolli."
+    },
+    "inspection_not_passed": {
+      "fail": "Kehtiv koormusluba nõuab registreeritud, läbitud ülevaatust."
+    },
+    "suggestion": "Määrake sõltumatu kontrollija ja koordinaator, parandage kuupäevad ning registreerige projektikontroll ja ülevaatus enne koormamise lubamist."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Puudus on suletud ilma registreeritud lahenduseta."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Katseid ei saa lõpetatuks märkida, kuni funktsionaalkatsed on avatud või kriitiline puudus on lahendamata."
+    },
+    "prefunctional_failed": {
+      "fail": "Selle süsteemi {count} eelkontrolli ei läbitud."
+    },
+    "prefunctional_open": {
+      "fail": "Selle süsteemi {count} eelkontrolli on veel avatud."
+    },
+    "failed_test_needs_note": {
+      "fail": "Läbikukkunud katsel puudub märkus tuvastatu kohta."
+    },
+    "suggestion": "Registreerige lahendus või tähelepanek ning lõpetage eelkontrollid ja funktsionaalkatsed enne sulgemist."
   }
 }

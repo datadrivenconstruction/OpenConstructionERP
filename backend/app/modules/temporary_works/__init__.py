@@ -28,3 +28,6 @@ async def on_startup() -> None:
     )
 
     register_temporary_works_permissions()
+    from app.modules.temporary_works.validators import register_temporary_works_validation_rules
+
+    register_temporary_works_validation_rules()
