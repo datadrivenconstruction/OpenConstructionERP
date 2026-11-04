@@ -1871,5 +1871,80 @@
       "fail": "De geplande {pct}% voor {period} botst met de {other_pct}% gepland voor {other}; een cumulatieve planning daalt nooit.",
       "suggestion": "Corrigeer de geplande percentages zodat ze van periode tot periode stijgen."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "De regelnummers {numbers} komen meer dan eens voor in deze verzending."
+    },
+    "item_identifies_document": {
+      "fail": "Regel {numbers} vermeldt geen document, revisie of omschrijving."
+    },
+    "recipient_identified": {
+      "fail": "{count} ontvanger(s) zonder organisatie, gebruiker, naam of e-mailadres."
+    },
+    "action_needs_deadline": {
+      "fail": "Van {count} ontvanger(s) wordt een actie gevraagd, maar er is geen uiterste reactiedatum."
+    },
+    "suggestion": "Nummer de regels opnieuw, benoem elk verzonden document en elke ontvanger en stel vóór uitgifte een reactiedatum in."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "De brief is geregistreerd als ontvangen op {received}, vóór verzending op {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "De reactie is verschuldigd op {due}, vóór de datum van de brief {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Deze kennisgeving noemt geen contractbepaling en geldt mogelijk niet als kennisgeving onder het contract."
+    },
+    "suggestion": "Corrigeer de data en vermeld de contractbepaling waarop de kennisgeving berust."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Een ontwerp van categorie {category} vraagt om een aangewezen onafhankelijke toetser voordat het als getoetst geldt."
+    },
+    "checker_is_designer": {
+      "fail": "De toetser {name} is ook de ontwerper; een ontwerp van categorie 2 of 3 vraagt om een onafhankelijke toetsing."
+    },
+    "coordinator_assigned": {
+      "fail": "Er is geen coördinator tijdelijke werken aangewezen, terwijl het onderdeel is goedgekeurd voor belasting of in gebruik is."
+    },
+    "strike_before_load": {
+      "fail": "De ontkistings-/verwijderdatum {strike} ligt vóór de belastingsdatum {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Het ontwerp is verschuldigd op {due}, na de vereiste belastingsdatum {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "De vergunning verloopt op {end}, vóór de ingang op {start}."
+    },
+    "closed_before_issued": {
+      "fail": "De vergunning is gesloten op {closed}, vóór de afgifte op {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Een geldige belastingsvergunning vraagt om de vastgelegde, geaccepteerde ontwerptoetsing."
+    },
+    "inspection_not_passed": {
+      "fail": "Een geldige belastingsvergunning vraagt om de vastgelegde, geslaagde inspectie."
+    },
+    "suggestion": "Wijs de onafhankelijke toetser en de coördinator aan, corrigeer de data en leg ontwerptoetsing en inspectie vast voordat belasting wordt toegestaan."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "De melding is gesloten zonder vastgelegde oplossing."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Testen kunnen niet als voltooid gelden zolang functionele testen openstaan of een kritieke melding onopgelost is."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} voorcontrole(s) van dit systeem zijn mislukt."
+    },
+    "prefunctional_open": {
+      "fail": "{count} voorcontrole(s) van dit systeem staan nog open."
+    },
+    "failed_test_needs_note": {
+      "fail": "De mislukte test heeft geen notitie met wat is waargenomen."
+    },
+    "suggestion": "Leg de oplossing of waarneming vast en rond voorcontroles en functionele testen af vóór afsluiting."
   }
 }

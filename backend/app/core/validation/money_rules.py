@@ -91,6 +91,9 @@ class MoneyRule(ValidationRule):
     message_section = "money"
     own_message_keys: frozenset[str] = frozenset()
 
+    #: When set, every rule of the set shares this suggestion key instead of one per rule.
+    suggestion_key: str | None = None
+
     def _section_of(self, key: str) -> str:
         if not self.own_message_keys or key in self.own_message_keys:
             return self.message_section
@@ -129,7 +132,7 @@ class MoneyRule(ValidationRule):
             passed=False,
             message=translate(f"{section}.{key}.fail", locale=locale, **params),
             element_ref=ref,
-            suggestion=translate(f"{section}.{key}.suggestion", locale=locale),
+            suggestion=translate(self.suggestion_key or f"{section}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
 

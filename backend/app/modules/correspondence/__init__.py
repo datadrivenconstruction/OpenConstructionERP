@@ -13,3 +13,6 @@ async def on_startup() -> None:
     from app.modules.correspondence.permissions import register_correspondence_permissions
 
     register_correspondence_permissions()
+    from app.modules.correspondence.validators import register_correspondence_validation_rules
+
+    register_correspondence_validation_rules()

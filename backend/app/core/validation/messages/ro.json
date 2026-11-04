@@ -1871,5 +1871,80 @@
       "fail": "Cei {pct} % planificați pentru {period} contrazic cei {other_pct} % planificați pentru {other}; un plan cumulat nu scade niciodată.",
       "suggestion": "Corectați procentele planificate astfel încât să crească de la o perioadă la alta."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Numerele de linie {numbers} apar de mai multe ori în acest transmital."
+    },
+    "item_identifies_document": {
+      "fail": "Linia {numbers} nu indică nici document, nici revizie, nici descriere."
+    },
+    "recipient_identified": {
+      "fail": "{count} destinatari fără organizație, utilizator, nume sau adresă de e-mail."
+    },
+    "action_needs_deadline": {
+      "fail": "Se cere o acțiune de la {count} destinatari, dar nu este stabilit un termen de răspuns."
+    },
+    "suggestion": "Renumerotați liniile, indicați fiecare document trimis și fiecare destinatar și stabiliți un termen de răspuns înainte de emitere."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Scrisoarea este înregistrată ca primită la {received}, înainte de trimitere, la {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Răspunsul este scadent la {due}, înainte de data scrisorii {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Această notificare nu citează nicio clauză a contractului și poate să nu conteze ca notificare în sensul contractului."
+    },
+    "suggestion": "Corectați datele și indicați clauza contractului în temeiul căreia se face notificarea."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Un proiect de categoria {category} cere un verificator independent desemnat înainte de a fi marcat ca verificat."
+    },
+    "checker_is_designer": {
+      "fail": "Verificatorul {name} este și proiectantul; un proiect de categoria 2 sau 3 cere o verificare independentă."
+    },
+    "coordinator_assigned": {
+      "fail": "Nu este desemnat coordonatorul lucrărilor temporare, deși elementul este aprobat pentru încărcare sau este în uz."
+    },
+    "strike_before_load": {
+      "fail": "Data decofrării/demontării {strike} este înaintea datei de încărcare {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Proiectul este scadent la {due}, după data de încărcare cerută {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Autorizația expiră la {end}, înainte de începerea ei la {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Autorizația este închisă la {closed}, înainte de emiterea ei la {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "O autorizație de încărcare în vigoare cere verificarea proiectului acceptată și consemnată."
+    },
+    "inspection_not_passed": {
+      "fail": "O autorizație de încărcare în vigoare cere inspecția promovată și consemnată."
+    },
+    "suggestion": "Desemnați verificatorul independent și coordonatorul, corectați datele și consemnați verificarea proiectului și inspecția înainte de a permite încărcarea."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Neconformitatea este închisă fără o rezolvare consemnată."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Probele nu pot fi marcate ca finalizate cât timp există probe funcționale deschise sau o neconformitate critică nerezolvată."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} verificări prealabile ale acestui sistem au eșuat."
+    },
+    "prefunctional_open": {
+      "fail": "{count} verificări prealabile ale acestui sistem sunt încă deschise."
+    },
+    "failed_test_needs_note": {
+      "fail": "Proba eșuată nu are o notă care să descrie constatarea."
+    },
+    "suggestion": "Consemnați rezolvarea sau constatarea și încheiați verificările prealabile și probele funcționale înainte de închidere."
   }
 }

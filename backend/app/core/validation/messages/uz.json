@@ -1871,5 +1871,80 @@
       "fail": "{period} uchun rejalashtirilgan {pct} % {other} uchun rejalashtirilgan {other_pct} % bilan zid; jamlanma reja hech qachon kamaymaydi.",
       "suggestion": "Rejadagi foizlarni davrdan davrga oshib borishi uchun tuzating."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Qator raqamlari {numbers} ushbu topshirish varaqasida bir necha marta uchraydi."
+    },
+    "item_identifies_document": {
+      "fail": "{numbers}-qatorda hujjat, tahrir yoki tavsif koʻrsatilmagan."
+    },
+    "recipient_identified": {
+      "fail": "{count} qabul qiluvchida tashkilot, foydalanuvchi, ism yoki elektron pochta manzili yoʻq."
+    },
+    "action_needs_deadline": {
+      "fail": "{count} qabul qiluvchidan harakat soʻralgan, lekin javob muddati belgilanmagan."
+    },
+    "suggestion": "Qatorlarni qayta raqamlang, yuborilgan har bir hujjat va har bir qabul qiluvchini koʻrsating, chiqarishdan oldin javob muddatini belgilang."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Xat {received} kuni olingan deb qayd etilgan, bu yuborilgan kundan {sent} oldin."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Javob muddati {due} xat sanasidan {start} oldin."
+    },
+    "notice_cites_clause": {
+      "fail": "Xabarnomada shartnomaning birorta bandiga havola yoʻq, shuning uchun u shartnoma boʻyicha xabarnoma hisoblanmasligi mumkin."
+    },
+    "suggestion": "Sanalarni toʻgʻrilang va xabarnoma berilayotgan shartnoma bandini koʻrsating."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "{category}-toifadagi loyiha tekshirilgan deb belgilanishidan oldin tayinlangan mustaqil tekshiruvchini talab qiladi."
+    },
+    "checker_is_designer": {
+      "fail": "Tekshiruvchi {name} loyihachi ham; 2 yoki 3-toifadagi loyiha mustaqil tekshiruvni talab qiladi."
+    },
+    "coordinator_assigned": {
+      "fail": "Element yuklashga tasdiqlangan yoki foydalanishda, lekin vaqtinchalik ishlar koordinatori tayinlanmagan."
+    },
+    "strike_before_load": {
+      "fail": "Demontaj sanasi {strike} yuklash sanasidan {load} oldin."
+    },
+    "design_due_after_load": {
+      "fail": "Loyiha muddati {due} talab qilingan yuklash sanasidan {load} keyin."
+    },
+    "valid_to_before_from": {
+      "fail": "Ruxsatnoma boshlanish sanasidan {start} oldin, {end} kuni tugaydi."
+    },
+    "closed_before_issued": {
+      "fail": "Ruxsatnoma berilgan sanadan {issued} oldin, {closed} kuni yopilgan."
+    },
+    "design_check_not_accepted": {
+      "fail": "Amaldagi yuklash ruxsatnomasi loyiha tekshiruvining qabul qilingan yozuvini talab qiladi."
+    },
+    "inspection_not_passed": {
+      "fail": "Amaldagi yuklash ruxsatnomasi muvaffaqiyatli oʻtgan koʻrikning yozuvini talab qiladi."
+    },
+    "suggestion": "Mustaqil tekshiruvchi va koordinatorni tayinlang, sanalarni toʻgʻrilang va yuklashga ruxsat berishdan oldin loyiha tekshiruvi hamda koʻrikni qayd eting."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Kamchilik hal qilinishi qayd etilmay yopilgan."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Funksional sinovlar ochiq yoki jiddiy kamchilik hal etilmagan boʻlsa, sinovlarni yakunlandi deb belgilab boʻlmaydi."
+    },
+    "prefunctional_failed": {
+      "fail": "Ushbu tizimning {count} dastlabki tekshiruvidan oʻtilmadi."
+    },
+    "prefunctional_open": {
+      "fail": "Ushbu tizimning {count} dastlabki tekshiruvi hali ochiq."
+    },
+    "failed_test_needs_note": {
+      "fail": "Oʻtmagan sinovda aniqlanganlar tavsiflangan natija izohi yoʻq."
+    },
+    "suggestion": "Yechim yoki kuzatuvni qayd eting va yopishdan oldin dastlabki tekshiruvlar va funksional sinovlarni yakunlang."
   }
 }

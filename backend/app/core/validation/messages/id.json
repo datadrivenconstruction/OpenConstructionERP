@@ -1871,5 +1871,80 @@
       "fail": "{pct}% yang direncanakan untuk {period} bertentangan dengan {other_pct}% untuk {other}; rencana kumulatif tidak pernah turun.",
       "suggestion": "Perbaiki persentase rencana agar naik dari satu periode ke periode berikutnya."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Nomor baris {numbers} muncul lebih dari sekali dalam transmital ini."
+    },
+    "item_identifies_document": {
+      "fail": "Baris {numbers} tidak menyebut dokumen, revisi, atau uraian."
+    },
+    "recipient_identified": {
+      "fail": "{count} penerima tidak memiliki organisasi, pengguna, nama, atau alamat e-mail."
+    },
+    "action_needs_deadline": {
+      "fail": "Tindakan diminta dari {count} penerima tetapi batas waktu tanggapan belum ditetapkan."
+    },
+    "suggestion": "Nomori ulang baris, sebutkan setiap dokumen yang dikirim dan setiap penerima, dan tetapkan batas waktu tanggapan sebelum diterbitkan."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Surat tercatat diterima pada {received}, sebelum dikirim pada {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Tanggapan jatuh tempo pada {due}, sebelum tanggal surat {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Pemberitahuan ini tidak merujuk pasal kontrak mana pun sehingga mungkin tidak dianggap sebagai pemberitahuan menurut kontrak."
+    },
+    "suggestion": "Perbaiki tanggal dan sebutkan pasal kontrak yang menjadi dasar pemberitahuan."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Desain kategori {category} memerlukan pemeriksa independen yang ditunjuk sebelum ditandai telah diperiksa."
+    },
+    "checker_is_designer": {
+      "fail": "Pemeriksa {name} juga perancangnya; desain kategori 2 atau 3 memerlukan pemeriksaan independen."
+    },
+    "coordinator_assigned": {
+      "fail": "Koordinator pekerjaan sementara belum ditunjuk, padahal elemen telah disetujui untuk dibebani atau sedang digunakan."
+    },
+    "strike_before_load": {
+      "fail": "Tanggal pembongkaran {strike} lebih awal daripada tanggal pembebanan {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Desain jatuh tempo pada {due}, setelah tanggal pembebanan yang diperlukan {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Izin berakhir pada {end}, sebelum mulai berlaku pada {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Izin ditutup pada {closed}, sebelum diterbitkan pada {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Izin pembebanan yang berlaku memerlukan catatan pemeriksaan desain yang telah diterima."
+    },
+    "inspection_not_passed": {
+      "fail": "Izin pembebanan yang berlaku memerlukan catatan inspeksi yang telah lulus."
+    },
+    "suggestion": "Tunjuk pemeriksa independen dan koordinator, perbaiki tanggal, dan catat pemeriksaan desain serta inspeksi sebelum pembebanan diizinkan."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Temuan ditutup tanpa catatan penyelesaian."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Pengujian tidak dapat ditandai selesai selama uji fungsi masih terbuka atau ada temuan kritis yang belum diselesaikan."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} pemeriksaan pendahuluan pada sistem ini gagal."
+    },
+    "prefunctional_open": {
+      "fail": "{count} pemeriksaan pendahuluan pada sistem ini masih terbuka."
+    },
+    "failed_test_needs_note": {
+      "fail": "Uji yang gagal tidak memiliki catatan hasil yang menjelaskan apa yang teramati."
+    },
+    "suggestion": "Catat penyelesaian atau pengamatan, dan selesaikan pemeriksaan pendahuluan serta uji fungsi sebelum penutupan."
   }
 }

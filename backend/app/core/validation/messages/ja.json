@@ -1871,5 +1871,80 @@
       "fail": "{period} の計画 {pct}% は {other} の計画 {other_pct}% と矛盾します。累計計画は減少しません。",
       "suggestion": "計画の割合が期間ごとに増えるように修正してください。"
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "この文書送付票で行番号 {numbers} が重複しています。"
+    },
+    "item_identifies_document": {
+      "fail": "行 {numbers} に文書、改訂版、説明のいずれも記載がありません。"
+    },
+    "recipient_identified": {
+      "fail": "{count} 件の宛先に、組織、ユーザー、氏名、メールアドレスのいずれもありません。"
+    },
+    "action_needs_deadline": {
+      "fail": "{count} 件の宛先に対応を依頼していますが、回答期限が設定されていません。"
+    },
+    "suggestion": "行を振り直し、送付する各文書と各宛先を明記し、発行前に回答期限を設定してください。"
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "この書簡の受領日 {received} が発信日 {sent} より前に記録されています。"
+    },
+    "response_deadline_after_notice": {
+      "fail": "回答期限 {due} が書簡の日付 {start} より前です。"
+    },
+    "notice_cites_clause": {
+      "fail": "この通知は契約条項を引用しておらず、契約上の通知として認められない可能性があります。"
+    },
+    "suggestion": "日付を訂正し、通知の根拠となる契約条項を明記してください。"
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "カテゴリー {category} の設計は、確認済みにする前に独立した照査者を指名する必要があります。"
+    },
+    "checker_is_designer": {
+      "fail": "照査者 {name} は設計者でもあります。カテゴリー 2 または 3 の設計には独立した照査が必要です。"
+    },
+    "coordinator_assigned": {
+      "fail": "載荷が承認済みまたは使用中ですが、仮設工事コーディネーターが指名されていません。"
+    },
+    "strike_before_load": {
+      "fail": "解体日 {strike} が載荷日 {load} より前です。"
+    },
+    "design_due_after_load": {
+      "fail": "設計期限 {due} が、必要な載荷日 {load} より後です。"
+    },
+    "valid_to_before_from": {
+      "fail": "許可は開始日 {start} より前の {end} に失効します。"
+    },
+    "closed_before_issued": {
+      "fail": "許可は発行日 {issued} より前の {closed} に終了しています。"
+    },
+    "design_check_not_accepted": {
+      "fail": "有効な載荷許可には、承認済みの設計照査の記録が必要です。"
+    },
+    "inspection_not_passed": {
+      "fail": "有効な載荷許可には、合格した検査の記録が必要です。"
+    },
+    "suggestion": "独立した照査者とコーディネーターを指名し、日付を訂正し、載荷を許可する前に設計照査と検査を記録してください。"
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "この指摘事項は是正内容が記録されないまま完了されています。"
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "機能試験が未完了、または重大な指摘事項が未解決のうちは、試験を完了にできません。"
+    },
+    "prefunctional_failed": {
+      "fail": "このシステムの事前点検 {count} 件が不合格です。"
+    },
+    "prefunctional_open": {
+      "fail": "このシステムの事前点検 {count} 件が未完了です。"
+    },
+    "failed_test_needs_note": {
+      "fail": "不合格の試験に、確認内容を記した結果メモがありません。"
+    },
+    "suggestion": "是正内容または所見を記録し、完了前に事前点検と機能試験を終えてください。"
   }
 }

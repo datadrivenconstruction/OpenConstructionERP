@@ -21,9 +21,11 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.json_merge import merge_metadata
+from app.core.validation.gate import run_gate
 from app.modules.commissioning.events import emit_system_commissioned
 from app.modules.commissioning.models import (
     CxChecklist,
@@ -50,7 +52,7 @@ from app.modules.commissioning.schemas import (
     SystemCreate,
     SystemUpdate,
 )
-from app.modules.commissioning.validators import compute_readiness
+from app.modules.commissioning.validators import COMMISSIONING_RULE_SET, compute_readiness
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +79,7 @@ class CommissioningService:
         self.checklist_repo = ChecklistRepository(session)
         self.item_repo = ItemRepository(session)
         self.issue_repo = IssueRepository(session)
+        self.findings: list[dict] = []
 
     # ── Systems ───────────────────────────────────────────────────────────
 
@@ -168,6 +171,21 @@ class CommissioningService:
         if not fields:
             return system
 
+        if fields.get("status") == "tests_complete":
+            readiness = await self.readiness_summary(system_id)
+            self.findings = await run_gate(
+                {
+                    "system": {
+                        "id": str(system_id),
+                        "status": "tests_complete",
+                        "can_commission": readiness["can_commission"],
+                    }
+                },
+                COMMISSIONING_RULE_SET,
+                target_type="cx_system",
+                target_id=str(system_id),
+            )
+
         await self.system_repo.update_fields(system_id, **fields)
         await self.session.refresh(system)
         logger.info("Cx system updated: %s (fields=%s)", system_id, list(fields.keys()))
@@ -195,6 +213,36 @@ class CommissioningService:
         fmap = await self.system_repo.functional_status_counts(system_ids)
         cmap = await self.system_repo.open_critical_issue_counts(system_ids)
         return {sid: compute_readiness(_counts_to_statuses(fmap.get(sid, {})), cmap.get(sid, 0)) for sid in system_ids}
+
+    async def _prefunctional_counts(self, system_id: uuid.UUID) -> dict[str, int]:
+        """Failed and open pre-functional items of a system."""
+        stmt = (
+            select(CxChecklistItem.status, func.count())
+            .join(CxChecklist, CxChecklist.id == CxChecklistItem.checklist_id)
+            .where(CxChecklist.system_id == system_id, CxChecklist.kind == "prefunctional")
+            .group_by(CxChecklistItem.status)
+        )
+        by_status = {row[0]: int(row[1]) for row in (await self.session.execute(stmt)).all()}
+        return {"failed": by_status.get("fail", 0), "pending": by_status.get("pending", 0)}
+
+    async def _gate_result(
+        self,
+        item_id: uuid.UUID,
+        kind: str,
+        system_id: uuid.UUID,
+        result_status: str,
+        result_note: str | None,
+    ) -> None:
+        pre = await self._prefunctional_counts(system_id) if kind == "functional" and result_status == "pass" else {}
+        self.findings = await run_gate(
+            {
+                "result": {"id": str(item_id), "kind": kind, "status": result_status, "result_note": result_note},
+                "prefunctional": pre,
+            },
+            COMMISSIONING_RULE_SET,
+            target_type="cx_checklist_item",
+            target_id=str(item_id),
+        )
 
     async def commission_system(
         self,
@@ -388,12 +436,20 @@ class CommissioningService:
         is refreshed; setting it back to ``pending`` clears the timestamp and
         verifier.
         """
-        item = await self.get_item(item_id)
+        item, checklist, _system = await self.resolve_item_context(item_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             incoming = fields.pop("metadata")
             fields["metadata_"] = (
                 merge_metadata(getattr(item, "metadata_", None), incoming) if isinstance(incoming, dict) else incoming
+            )
+        if "status" in fields:
+            await self._gate_result(
+                item_id,
+                checklist.kind,
+                checklist.system_id,
+                fields["status"],
+                fields.get("result_note", item.result_note),
             )
         if "status" in fields:
             if fields["status"] == "pending":
@@ -419,6 +475,13 @@ class CommissioningService:
         checklist_kind = checklist.kind
         system_id = system.id
         system_status = system.status
+        await self._gate_result(
+            item_id,
+            checklist_kind,
+            system_id,
+            data.status,
+            data.result_note if data.result_note is not None else item.result_note,
+        )
 
         fields: dict[str, Any] = {
             "status": data.status,
@@ -463,6 +526,11 @@ class CommissioningService:
         """Create an issue against a system."""
         await self.get_system(system_id)
         closed_at = datetime.now(UTC).isoformat() if data.status == "closed" else None
+        self.findings = await run_gate(
+            {"issue": {"severity": data.severity, "status": data.status, "resolution": data.resolution}},
+            COMMISSIONING_RULE_SET,
+            target_type="cx_issue",
+        )
         issue = CxIssue(
             system_id=system_id,
             description=data.description,
@@ -517,6 +585,19 @@ class CommissioningService:
                 merge_metadata(getattr(issue, "metadata_", None), incoming) if isinstance(incoming, dict) else incoming
             )
         new_status = fields.get("status")
+        self.findings = await run_gate(
+            {
+                "issue": {
+                    "id": str(issue_id),
+                    "severity": fields.get("severity", issue.severity),
+                    "status": fields.get("status", issue.status),
+                    "resolution": fields.get("resolution", issue.resolution),
+                }
+            },
+            COMMISSIONING_RULE_SET,
+            target_type="cx_issue",
+            target_id=str(issue_id),
+        )
         if new_status == "closed" and prior_status != "closed":
             fields["closed_at"] = datetime.now(UTC).isoformat()
             fields["closed_by"] = user_id

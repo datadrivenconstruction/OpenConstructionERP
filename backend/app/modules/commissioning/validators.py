@@ -27,6 +27,9 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Any
 
+from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
+from app.core.validation.money_rules import MoneyRule, blank, section
+
 # ── Vocabulary ─────────────────────────────────────────────────────────────
 
 ITEM_PENDING = "pending"
@@ -158,3 +161,111 @@ def compute_readiness(
         "blocking_reasons": blocking_reasons,
         "formula": "functional_passed / (functional_total - functional_na) * 100",
     }
+
+
+# ── Engine rules (rule set ``commissioning``) ─────────────────────────────
+#
+# Rules run over a plain dict built by the service:
+#   {"issue": {"id", "severity", "status", "resolution"}}
+#   {"system": {"id", "status", "can_commission", "blocking_reasons"}}
+#   {"result": {"id", "kind", "status", "result_note"},
+#    "prefunctional": {"failed", "pending"}}
+# Each rule reads only the section for the write it guards.
+
+COMMISSIONING_RULE_SET = "commissioning"
+_HARD_SEVERITIES = frozenset({"high", "critical"})
+
+
+class _CommissioningRule(MoneyRule):
+    standard = COMMISSIONING_RULE_SET
+    message_section = "commissioning"
+    suggestion_key = "commissioning.suggestion"
+
+
+class IssueClosedHasResolutionRule(_CommissioningRule):
+    """A closed issue says how it was resolved; high and critical ones must."""
+
+    rule_id = "commissioning.issue_closed_has_resolution"
+    name = "Closed issue records its resolution"
+    description = "A high or critical issue cannot be closed without a resolution; lower severities are warned"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        issue = section(context, "issue")
+        ref = str(issue.get("id", ""))
+        if issue.get("status") != "closed" or not blank(issue.get("resolution")):
+            return [self.ok(ref)]
+        severity = Severity.ERROR if issue.get("severity") in _HARD_SEVERITIES else Severity.WARNING
+        return [
+            self.fail(context, "issue_closed_has_resolution", ref=ref, severity=severity, level=issue.get("severity"))
+        ]
+
+
+class SystemTestsCompleteRule(_CommissioningRule):
+    """A system is labelled tests complete only when its functional tests are all passed."""
+
+    rule_id = "commissioning.tests_complete_requires_passed_tests"
+    name = "Tests complete means functional tests passed"
+    description = (
+        "Setting a system to tests_complete needs every applicable functional item passed and no critical issue open"
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        system = section(context, "system")
+        ref = str(system.get("id", ""))
+        if system.get("status") != "tests_complete" or system.get("can_commission"):
+            return [self.ok(ref)]
+        return [self.fail(context, "tests_complete_requires_passed_tests", ref=ref)]
+
+
+class FunctionalAfterPrefunctionalRule(_CommissioningRule):
+    """A functional test is signed off only on equipment whose pre-functional checks are done."""
+
+    rule_id = "commissioning.functional_after_prefunctional"
+    name = "Functional pass follows pre-functional checks"
+    description = (
+        "Passing a functional item with a failed pre-functional item is blocked; with an open one it is warned"
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        result = section(context, "result")
+        ref = str(result.get("id", ""))
+        if result.get("kind") != "functional" or result.get("status") != "pass":
+            return [self.ok(ref)]
+        pre = section(context, "prefunctional")
+        failed, pending = int(pre.get("failed") or 0), int(pre.get("pending") or 0)
+        out: list[RuleResult] = []
+        if failed:
+            out.append(self.fail(context, "prefunctional_failed", ref=ref, count=failed))
+        if pending:
+            out.append(self.fail(context, "prefunctional_open", ref=ref, severity=Severity.WARNING, count=pending))
+        return out or [self.ok(ref)]
+
+
+class FailedTestNeedsNoteRule(_CommissioningRule):
+    """A failed test records what was observed, so the retest has something to prove."""
+
+    rule_id = "commissioning.failed_test_needs_note"
+    name = "Failed test has a result note"
+    severity = Severity.WARNING
+    description = "A fail result without a note leaves the deficiency untraceable"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        result = section(context, "result")
+        ref = str(result.get("id", ""))
+        if result.get("status") == "fail" and blank(result.get("result_note")):
+            return [self.fail(context, "failed_test_needs_note", ref=ref)]
+        return [self.ok(ref)]
+
+
+COMMISSIONING_RULES = (
+    IssueClosedHasResolutionRule,
+    SystemTestsCompleteRule,
+    FunctionalAfterPrefunctionalRule,
+    FailedTestNeedsNoteRule,
+)
+
+
+def register_commissioning_validation_rules() -> None:
+    """Register the commissioning rules with the platform rule registry."""
+    for rule_class in COMMISSIONING_RULES:
+        rule_registry.register(rule_class(), [COMMISSIONING_RULE_SET])

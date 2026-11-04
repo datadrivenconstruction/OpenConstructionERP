@@ -1871,5 +1871,80 @@
       "fail": "{period}의 계획 {pct}%가 {other}의 계획 {other_pct}%와 모순됩니다. 누적 계획은 줄어들지 않습니다.",
       "suggestion": "계획 비율이 기간마다 증가하도록 수정하세요."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "이 문서 송부서에서 행 번호 {numbers}이(가) 중복됩니다."
+    },
+    "item_identifies_document": {
+      "fail": "{numbers}번 행에 문서, 개정판, 설명이 모두 없습니다."
+    },
+    "recipient_identified": {
+      "fail": "수신자 {count}명에게 조직, 사용자, 이름, 이메일 주소가 없습니다."
+    },
+    "action_needs_deadline": {
+      "fail": "수신자 {count}명에게 조치를 요청했지만 회신 기한이 설정되지 않았습니다."
+    },
+    "suggestion": "행 번호를 다시 매기고, 발송하는 각 문서와 모든 수신자를 명시하고, 발행 전에 회신 기한을 설정하세요."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "서신의 수신일 {received}이(가) 발신일 {sent}보다 앞서 기록되어 있습니다."
+    },
+    "response_deadline_after_notice": {
+      "fail": "회신 기한 {due}이(가) 서신 날짜 {start}보다 앞입니다."
+    },
+    "notice_cites_clause": {
+      "fail": "이 통지는 계약 조항을 인용하지 않아 계약상 통지로 인정되지 않을 수 있습니다."
+    },
+    "suggestion": "날짜를 바로잡고 통지의 근거가 되는 계약 조항을 명시하세요."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "{category}등급 설계는 검토 완료로 표시하기 전에 독립 검토자를 지정해야 합니다."
+    },
+    "checker_is_designer": {
+      "fail": "검토자 {name}이(가) 설계자이기도 합니다. 2등급 또는 3등급 설계는 독립 검토가 필요합니다."
+    },
+    "coordinator_assigned": {
+      "fail": "부재가 하중 재하 승인 상태이거나 사용 중인데 가설공사 코디네이터가 지정되지 않았습니다."
+    },
+    "strike_before_load": {
+      "fail": "해체일 {strike}이(가) 하중 재하일 {load}보다 앞입니다."
+    },
+    "design_due_after_load": {
+      "fail": "설계 기한 {due}이(가) 요구되는 하중 재하일 {load}보다 늦습니다."
+    },
+    "valid_to_before_from": {
+      "fail": "허가가 시작일 {start}보다 앞선 {end}에 만료됩니다."
+    },
+    "closed_before_issued": {
+      "fail": "허가가 발급일 {issued}보다 앞선 {closed}에 종결되었습니다."
+    },
+    "design_check_not_accepted": {
+      "fail": "유효한 하중 재하 허가에는 승인된 설계 검토 기록이 필요합니다."
+    },
+    "inspection_not_passed": {
+      "fail": "유효한 하중 재하 허가에는 합격한 검사 기록이 필요합니다."
+    },
+    "suggestion": "독립 검토자와 코디네이터를 지정하고, 날짜를 바로잡고, 하중 재하를 허가하기 전에 설계 검토와 검사를 기록하세요."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "이 지적 사항이 조치 내용 기록 없이 종결되었습니다."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "기능 시험이 열려 있거나 중대한 지적 사항이 미해결인 동안에는 시험을 완료로 표시할 수 없습니다."
+    },
+    "prefunctional_failed": {
+      "fail": "이 시스템의 사전 점검 {count}건이 불합격했습니다."
+    },
+    "prefunctional_open": {
+      "fail": "이 시스템의 사전 점검 {count}건이 아직 열려 있습니다."
+    },
+    "failed_test_needs_note": {
+      "fail": "불합격한 시험에 확인된 내용을 설명하는 결과 메모가 없습니다."
+    },
+    "suggestion": "조치 내용 또는 관찰 사항을 기록하고, 종결 전에 사전 점검과 기능 시험을 마치세요."
   }
 }

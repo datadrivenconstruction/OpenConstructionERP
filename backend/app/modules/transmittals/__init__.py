@@ -13,3 +13,6 @@ async def on_startup() -> None:
     from app.modules.transmittals.permissions import register_transmittals_permissions
 
     register_transmittals_permissions()
+    from app.modules.transmittals.validators import register_transmittals_validation_rules
+
+    register_transmittals_validation_rules()
