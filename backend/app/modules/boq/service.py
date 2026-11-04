@@ -69,6 +69,8 @@ from app.core.validation.messages import translate
 # the existing snapshot intact.
 
 
+# Same bound as app.core.decimal_types.FiniteDecimal (|v| < 1e22).
+_FX_RATE_LIMIT = Decimal(10) ** 22
 _SNAPSHOT_RATE_TOLERANCE = Decimal("0.005")
 _SNAPSHOT_RATE_QUANTUM = Decimal("0.0001")
 # Default context (28 digits) makes quantize raise on rates above ~1e24.
@@ -809,7 +811,7 @@ def resource_fx_factor(
     if raw is None:
         return None
     rate = _to_decimal(raw, default=Decimal("-1"))
-    if rate <= 0:
+    if rate <= 0 or rate >= _FX_RATE_LIMIT:
         return None
     return rate
 
@@ -878,7 +880,7 @@ def _position_total_in_base(
     if factor is None:
         return Decimal("0")
     if code and base and code != base:
-        amount *= _to_decimal((fx_rates_map or {}).get(code))
+        amount *= factor
     return amount
 
 

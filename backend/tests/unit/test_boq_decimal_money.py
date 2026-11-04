@@ -12,6 +12,7 @@ from app.modules.boq.service import (
     _stamp_resource_variant_snapshots,
     _stamp_variant_snapshot,
     is_empty_position,
+    resource_fx_factor,
 )
 
 
@@ -116,3 +117,12 @@ def test_three_decimal_quantity_and_large_rate() -> None:
 def test_snapshot_huge_rate_does_not_raise(rate: str) -> None:
     meta = _stamp_variant_snapshot(_meta(), unit_rate=rate, currency="EUR")
     assert meta["variant_snapshot"]["rate"] == pytest.approx(float(rate))
+
+
+@pytest.mark.parametrize("raw", ["1e400", "1e22", "1e30", "inf", "nan", "0", "-2", "abc"])
+def test_fx_rate_not_finite_or_out_of_bounds_is_rejected(raw: str) -> None:
+    assert resource_fx_factor("EUR", "USD", {"EUR": raw}) is None
+
+
+def test_fx_rate_sane_value_accepted() -> None:
+    assert resource_fx_factor("EUR", "USD", {"EUR": "1.0850"}) == Decimal("1.0850")
