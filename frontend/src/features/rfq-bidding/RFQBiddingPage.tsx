@@ -991,7 +991,9 @@ function RankedQuoteRow({
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
   const name = bidderName(quote.bidder_contact_id);
+  const plugs = quote.plugs_applied ? (quote.plug_sources ?? []) : [];
   return (
+    <>
     <tr className={clsx('border-t border-border-light', recommended && 'bg-semantic-success/5')}>
       <td className="px-4 py-2.5 tabular-nums text-content-secondary">{quote.rank ?? '-'}</td>
       <td className="px-4 py-2.5 text-content-primary">
@@ -1000,6 +1002,11 @@ function RankedQuoteRow({
           {recommended && (
             <Badge variant="success" size="sm">
               {t('rfq_bidding.recommended', { defaultValue: 'Recommended' })}
+            </Badge>
+          )}
+          {plugs.length > 0 && (
+            <Badge variant="warning" size="sm">
+              {t('rfq_bidding.plugged_badge', { defaultValue: 'Plugged' })}
             </Badge>
           )}
         </div>
@@ -1021,6 +1028,14 @@ function RankedQuoteRow({
         ) : (
           <span className="text-content-tertiary">-</span>
         )}
+        {plugs.length > 0 && quote.raw_total != null && quote.plug_total != null && (
+          <div className="mt-0.5 text-xs font-normal text-content-tertiary">
+            {t('rfq_bidding.plug_quoted', { defaultValue: 'Quoted' })}{' '}
+            <MoneyDisplay amount={quote.raw_total} currency={basisCurrency} /> +{' '}
+            {t('rfq_bidding.plug_added', { defaultValue: 'Plugs' })}{' '}
+            <MoneyDisplay amount={quote.plug_total} currency={basisCurrency} />
+          </div>
+        )}
       </td>
       <td className="px-4 py-2.5 text-right">
         <button
@@ -1036,7 +1051,50 @@ function RankedQuoteRow({
         </button>
       </td>
     </tr>
+    {plugs.length > 0 && (
+      <tr className="bg-semantic-warning/5">
+        <td />
+        <td colSpan={showScore ? 5 : 4} className="px-4 pb-3 pt-1 text-xs text-content-secondary">
+          <p className="mb-1 font-medium">
+            {t('rfq_bidding.plug_heading', {
+              defaultValue: 'Lines this quote left out, priced so the ranking is fair',
+            })}
+          </p>
+          <ul className="space-y-0.5">
+            {plugs.map((p) => (
+              <li key={p.line_id} className="flex flex-wrap justify-between gap-x-3">
+                <span>
+                  {p.line} ({plugReason(p.reason, t)})
+                </span>
+                <span className={clsx('tabular-nums', p.source === 'none' && 'text-semantic-error')}>
+                  {plugSource(p.source, t)}: <MoneyDisplay amount={p.amount} currency={basisCurrency} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </td>
+      </tr>
+    )}
+    </>
   );
+}
+
+/** Where a plug came from (plug sources of bid_management/plugs.py), in words. */
+function plugSource(code: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  const labels: Record<string, string> = {
+    median: t('rfq_bidding.plug_src_median', { defaultValue: 'Median of other quotes' }),
+    median_of_2: t('rfq_bidding.plug_src_median_of_2', { defaultValue: 'Market of 2 (mean of two quotes)' }),
+    estimate: t('rfq_bidding.plug_src_estimate', { defaultValue: 'Estimate rate' }),
+    single_bid: t('rfq_bidding.plug_src_single_bid', { defaultValue: 'One other quote' }),
+    none: t('rfq_bidding.plug_src_none', { defaultValue: 'No basis, counted as 0' }),
+  };
+  return labels[code] ?? code;
+}
+
+function plugReason(code: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  return code === 'excluded'
+    ? t('rfq_bidding.plug_reason_excluded', { defaultValue: 'excluded' })
+    : t('rfq_bidding.plug_reason_missing', { defaultValue: 'not priced' });
 }
 
 /* ── Awards panel ─────────────────────────────────────────────────────── */

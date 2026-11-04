@@ -8,7 +8,7 @@ country-neutral; REB 23.003 (DA11/DA12) and OENORM A 2063 are presets over it
 (see ``presets.py``), and the same sheet works for a NRM or CESMM take-off or
 an ad-hoc measurement anywhere.
 
-Pure library (no manifest, no router of its own), Decimal-exact and ORM-free
+Pure library (manifest and validation rules, no router or tables), Decimal-exact and ORM-free
 like the ``price_breakdown`` and ``einvoice`` libraries.
 """
 
