@@ -1083,6 +1083,13 @@ class DailyDiaryService:
         await self._assert_entry_diary_mutable(entry)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+        if "entry_time" in fields:
+            diary = await self.get_diary(entry.diary_id)
+            await self._check(
+                "entry",
+                {"id": entry_id, "entry_time": fields["entry_time"], "diary_date": diary.diary_date},
+                diary.project_id,
+            )
         if fields:
             await self.entry_repo.update_fields(entry_id, **fields)
         return await self.get_entry(entry_id)

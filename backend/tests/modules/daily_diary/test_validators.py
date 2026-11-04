@@ -81,6 +81,11 @@ async def test_partial_and_forecast_records_do_not_false_positive() -> None:
     assert all(r.passed for r in await _run(WeatherSunOrderRule(), only_rise))
     iso = {"weather": {"id": "w", "sunrise": "2026-11-03T06:10", "sunset": "2026-11-03T16:40"}}
     assert all(r.passed for r in await _run(WeatherSunOrderRule(), iso))
+    # UTC stamps of a local day that wraps midnight, and a polar-summer sunset after midnight
+    wrap = {"weather": {"id": "w", "sunrise": "2026-06-20T20:30:00Z", "sunset": "2026-06-21T07:00:00Z"}}
+    assert all(r.passed for r in await _run(WeatherSunOrderRule(), wrap))
+    polar = {"weather": {"id": "w", "sunrise": "03:30", "sunset": "00:20"}}
+    assert all(r.passed for r in await _run(WeatherSunOrderRule(), polar))
 
 
 async def test_registration_and_severities() -> None:
