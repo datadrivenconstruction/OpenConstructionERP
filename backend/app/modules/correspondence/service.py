@@ -15,7 +15,8 @@ from app.core.validation.gate import run_gate
 from app.modules.correspondence.models import Correspondence
 from app.modules.correspondence.repository import CorrespondenceRepository
 from app.modules.correspondence.schemas import CorrespondenceCreate, CorrespondenceUpdate
-from app.modules.correspondence.validators import CORRESPONDENCE_RULE_SET, FIELDS as RULE_FIELDS, snapshot
+from app.modules.correspondence.validators import CORRESPONDENCE_RULE_SET, snapshot
+from app.modules.correspondence.validators import FIELDS as RULE_FIELDS
 
 logger = logging.getLogger(__name__)
 
