@@ -12,6 +12,7 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ImportPreviewDialog } from '../ImportPreviewDialog';
 
@@ -64,6 +65,9 @@ const MAPPED = preview({
     header_row: 5,
   },
 });
+// The Excel review answers first when the file is a spreadsheet; nothing to review here.
+const NO_REVIEW = { round_trip: false, counts: { created: 0, updated: 0, would_delete: 0, conflicts: 0 } };
+
 
 function json(body: unknown) {
   return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -83,7 +87,11 @@ afterEach(() => {
 });
 
 function open() {
-  render(<ImportPreviewDialog open onClose={() => {}} boqId="boq-1" onImported={() => {}} />);
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ImportPreviewDialog open onClose={() => {}} boqId="boq-1" onImported={() => {}} />
+    </QueryClientProvider>,
+  );
   const input = document.querySelector('input[type="file"]') as HTMLInputElement;
   fireEvent.change(input, { target: { files: [new File(['x'], 'koltsegvetes.xlsx')] } });
 }
@@ -94,6 +102,7 @@ describe('import preview column mapping', () => {
       .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(json(preview()))
       .mockResolvedValueOnce(json(MAPPED))
+      .mockResolvedValueOnce(json(NO_REVIEW))
       .mockResolvedValueOnce(json({ imported: 1, warnings: [] }));
     open();
 
@@ -112,14 +121,15 @@ describe('import preview column mapping', () => {
     fireEvent.click(next);
     fireEvent.click(await screen.findByRole('button', { name: 'Import' }));
 
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(3));
-    expect(sent(fetchSpy)[2]).toEqual({ url: '/api/v1/boq/boqs/boq-1/import/auto/?background=true', mapping: expected });
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(4));
+    expect(sent(fetchSpy)[3]).toEqual({ url: '/api/v1/boq/boqs/boq-1/import/auto/?background=true', mapping: expected });
   });
 
   it('sends no mapping when the user left the importer reading alone', async () => {
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(json(MAPPED))
+      .mockResolvedValueOnce(json(NO_REVIEW))
       .mockResolvedValueOnce(json({ imported: 1, warnings: [] }));
     open();
 
@@ -128,8 +138,8 @@ describe('import preview column mapping', () => {
     fireEvent.click(next);
     fireEvent.click(await screen.findByRole('button', { name: 'Import' }));
 
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2));
-    expect(sent(fetchSpy).map((call) => call.mapping)).toEqual([null, null]);
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(3));
+    expect(sent(fetchSpy).map((call) => call.mapping)).toEqual([null, null, null]);
     expect(screen.queryByTestId('import-preview-apply-mapping')).toBeNull();
   });
 

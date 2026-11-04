@@ -179,7 +179,11 @@ vi.mock('@/shared/lib/api', async () => {
   return {
     ...actual,
     apiGet: vi.fn(async (url: string) =>
-      url.includes('/v1/boq/boqs') ? [{ id: 'b1', name: 'Bill of works', status: 'draft' }] : {},
+      url.includes('/v1/boq/boqs')
+        ? [{ id: 'b1', name: 'Bill of works', status: 'draft' }]
+        : url.includes('/by-target/')
+          ? []
+          : {},
     ),
   };
 });

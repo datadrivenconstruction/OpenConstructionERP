@@ -10,6 +10,7 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ImportPreviewDialog } from '../ImportPreviewDialog';
 import { useToastStore } from '@/stores/useToastStore';
@@ -51,7 +52,11 @@ afterEach(() => {
 });
 
 async function confirmImport(onImported: () => void = () => {}) {
-  render(<ImportPreviewDialog open onClose={() => {}} boqId="boq-1" onImported={onImported} />);
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ImportPreviewDialog open onClose={() => {}} boqId="boq-1" onImported={onImported} />
+    </QueryClientProvider>,
+  );
   const input = document.querySelector('input[type="file"]') as HTMLInputElement;
   fireEvent.change(input, { target: { files: [new File(['x'], 'computo.xpwe')] } });
   const next = await screen.findByRole('button', { name: 'Continue' });

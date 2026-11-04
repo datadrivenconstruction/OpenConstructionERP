@@ -268,7 +268,7 @@ export function ScimPanel() {
                       </td>
                       <td className="py-1.5 pr-3">
                         <Badge variant={SOURCE_VARIANT[u.source]} size="sm">
-                          {t(`scim.source_${u.source}`, { defaultValue: u.source.toUpperCase() })}
+                          {t(`scim.source_${u.source}`, { defaultValue: u.source === 'local' ? 'Local' : u.source.toUpperCase() })}
                         </Badge>
                         {!u.is_active && (
                           <Badge variant="warning" size="sm" className="ml-1">
