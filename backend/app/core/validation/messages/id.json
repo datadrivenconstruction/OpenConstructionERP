@@ -1737,5 +1737,59 @@
       "fail": "Tanggal {earlier} dan {later} tidak berurutan atau di luar periode.",
       "suggestion": "Perbaiki tanggal agar yang lebih awal datang lebih dulu dan setiap entri berada dalam periode."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Tanggal {value} pada kolom {field} tidak ada di kalender.",
+      "suggestion": "Masukkan tanggal kalender yang valid."
+    },
+    "checklist_open": {
+      "fail": "{count} dari {total} butir daftar periksa masih terbuka.",
+      "suggestion": "Centang atau hapus butir yang masih terbuka sebelum menyelesaikan tugas."
+    },
+    "decision_unrecorded": {
+      "fail": "Tugas keputusan sudah selesai, tetapi tidak ada keputusan yang dicatat.",
+      "suggestion": "Tulis keputusan pada hasil agar tim lapangan dapat menindaklanjutinya."
+    },
+    "owner_missing": {
+      "fail": "Belum ada yang ditunjuk sebagai penanggung jawab.",
+      "suggestion": "Tunjuk penanggung jawab atau kontak sebelum pekerjaan dimulai."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Perubahan dengan tingkat risiko {risk_level} tidak dapat disetujui tanpa tindakan mitigasi.",
+      "suggestion": "Catat mitigasi pada baris dampak, lalu setujui perubahan."
+    },
+    "decline_reason_missing": {
+      "fail": "Perubahan ditolak tanpa alasan.",
+      "suggestion": "Catat alasan penolakan agar pengusul dan jejak audit dapat menelusurinya."
+    },
+    "mitigation_missing": {
+      "fail": "Risiko berstatus {status}, tetapi tidak ada strategi atau tindakan mitigasi yang dicatat.",
+      "suggestion": "Jelaskan mitigasi sebelum memindahkan risiko ke status ini."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Biaya respons {response} lebih tinggi daripada dampak penuh {impact}.",
+      "suggestion": "Periksa kedua angka, atau terima risikonya daripada mengeluarkan biaya penanganan lebih besar dari kerugian yang mungkin terjadi."
+    },
+    "closed_unaddressed": {
+      "fail": "Risiko dengan tingkat keparahan {level} ditutup tanpa dimitigasi dan tanpa pernah terjadi.",
+      "suggestion": "Mitigasi dulu, atau catat mengapa risiko ini tidak berlaku lagi."
+    },
+    "progress_regression": {
+      "fail": "Pembacaan {new}% lebih rendah daripada pembacaan sebelumnya {previous}%.",
+      "suggestion": "Jika ini koreksi, catat alasannya; jika bukan, periksa kembali entri."
+    },
+    "completion_unevidenced": {
+      "fail": "100% dilaporkan tanpa foto atau catatan sebagai bukti.",
+      "suggestion": "Lampirkan foto atau tambahkan catatan agar penyelesaian dapat diverifikasi."
+    },
+    "geo_incomplete": {
+      "fail": "Hanya lintang atau hanya bujur yang diisi.",
+      "suggestion": "Isi kedua koordinat atau kosongkan lokasi."
+    },
+    "plan_order": {
+      "fail": "{pct}% yang direncanakan untuk {period} bertentangan dengan {other_pct}% untuk {other}; rencana kumulatif tidak pernah turun.",
+      "suggestion": "Perbaiki persentase rencana agar naik dari satu periode ke periode berikutnya."
+    }
   }
 }

@@ -1749,5 +1749,59 @@
       "fail": "The dates {earlier} and {later} are out of order or outside the period.",
       "suggestion": "Correct the dates so the earlier one comes first and every entry falls inside the period."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "The date {value} in {field} does not exist on the calendar.",
+      "suggestion": "Enter a real calendar date."
+    },
+    "checklist_open": {
+      "fail": "{count} of {total} checklist items are still open.",
+      "suggestion": "Tick off or remove the open items before completing the task."
+    },
+    "decision_unrecorded": {
+      "fail": "The decision task is completed but no decision is recorded.",
+      "suggestion": "Write the decision into the result so the site team can act on it."
+    },
+    "owner_missing": {
+      "fail": "Nobody is named as responsible.",
+      "suggestion": "Assign a responsible person or a contact before the work goes ahead."
+    },
+    "high_risk_unmitigated": {
+      "fail": "A change with {risk_level} risk cannot be accepted without a mitigation.",
+      "suggestion": "Record the mitigation on an impact line, then accept the change."
+    },
+    "decline_reason_missing": {
+      "fail": "The change is declined without a reason.",
+      "suggestion": "Record why it was declined, so the originator and the audit trail can follow."
+    },
+    "mitigation_missing": {
+      "fail": "The risk is {status} but no mitigation strategy or action is recorded.",
+      "suggestion": "Describe the mitigation before moving the risk to this status."
+    },
+    "response_exceeds_exposure": {
+      "fail": "The response cost {response} is higher than the full impact {impact}.",
+      "suggestion": "Check both figures, or accept the risk instead of paying more to treat it than it can cost."
+    },
+    "closed_unaddressed": {
+      "fail": "A risk of {level} severity is closed without having been mitigated or having occurred.",
+      "suggestion": "Mitigate it first, or note why it no longer applies."
+    },
+    "progress_regression": {
+      "fail": "The reading {new}% is below the previous reading {previous}%.",
+      "suggestion": "If this is a correction, note the reason; otherwise check the entry."
+    },
+    "completion_unevidenced": {
+      "fail": "100% is reported with no photo or note as evidence.",
+      "suggestion": "Attach a photo or add a note so the completion can be verified."
+    },
+    "geo_incomplete": {
+      "fail": "Only one of latitude and longitude is given.",
+      "suggestion": "Give both coordinates or leave the location empty."
+    },
+    "plan_order": {
+      "fail": "The planned {pct}% for {period} conflicts with {other_pct}% planned for {other}; a cumulative plan never falls.",
+      "suggestion": "Correct the planned percentages so they rise from one period to the next."
+    }
   }
 }

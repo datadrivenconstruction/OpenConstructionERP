@@ -1737,5 +1737,59 @@
       "fail": "A(z) {earlier} és {later} dátum rossz sorrendben van, vagy az időszakon kívül esik.",
       "suggestion": "Javítsa a dátumokat úgy, hogy a korábbi legyen elöl, és minden tétel az időszakba essen."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "A(z) {field} mezőben megadott {value} dátum nem létezik a naptárban.",
+      "suggestion": "Adjon meg létező naptári dátumot."
+    },
+    "checklist_open": {
+      "fail": "Az ellenőrzőlista {total} pontjából {count} még nyitott.",
+      "suggestion": "A feladat lezárása előtt pipálja ki vagy törölje a nyitott pontokat."
+    },
+    "decision_unrecorded": {
+      "fail": "A döntési feladat le van zárva, de nincs rögzítve döntés.",
+      "suggestion": "Írja be a döntést az eredménybe, hogy az építésvezetés eszerint járhasson el."
+    },
+    "owner_missing": {
+      "fail": "Nincs felelős kijelölve.",
+      "suggestion": "A munka megkezdése előtt jelöljön ki felelőst vagy kapcsolattartót."
+    },
+    "high_risk_unmitigated": {
+      "fail": "A(z) {risk_level} kockázati szintű változtatás nem fogadható el kockázatcsökkentő intézkedés nélkül.",
+      "suggestion": "Rögzítse az intézkedést egy hatássoron, majd fogadja el a változtatást."
+    },
+    "decline_reason_missing": {
+      "fail": "A változtatás indoklás nélkül lett elutasítva.",
+      "suggestion": "Rögzítse az elutasítás okát, hogy a kezdeményező és az auditnapló követhesse."
+    },
+    "mitigation_missing": {
+      "fail": "A kockázat állapota {status}, de nincs rögzítve kockázatcsökkentő stratégia vagy intézkedés.",
+      "suggestion": "Írja le a kockázatcsökkentést, mielőtt a kockázatot erre az állapotra állítja."
+    },
+    "response_exceeds_exposure": {
+      "fail": "A válaszintézkedés költsége ({response}) meghaladja a teljes hatást ({impact}).",
+      "suggestion": "Ellenőrizze mindkét összeget, vagy fogadja el a kockázatot ahelyett, hogy a kezelésére többet költene, mint amennyibe kerülhet."
+    },
+    "closed_unaddressed": {
+      "fail": "Egy {level} súlyosságú kockázat lezárult anélkül, hogy csökkentették volna vagy bekövetkezett volna.",
+      "suggestion": "Előbb csökkentse, vagy jegyezze fel, miért nem releváns már."
+    },
+    "progress_regression": {
+      "fail": "A(z) {new}% -os mérés alacsonyabb az előző, {previous}% -os mérésnél.",
+      "suggestion": "Ha javításról van szó, adja meg az okát; különben ellenőrizze a bejegyzést."
+    },
+    "completion_unevidenced": {
+      "fail": "100% szerepel fénykép vagy megjegyzés nélkül, bizonyíték nélkül.",
+      "suggestion": "Csatoljon fényképet vagy írjon megjegyzést, hogy a készre jelentés ellenőrizhető legyen."
+    },
+    "geo_incomplete": {
+      "fail": "Csak a szélességi vagy csak a hosszúsági fok van megadva.",
+      "suggestion": "Adja meg mindkét koordinátát, vagy hagyja üresen a helyet."
+    },
+    "plan_order": {
+      "fail": "A(z) {period} időszakra tervezett {pct}% ellentmond a(z) {other} időszakra tervezett {other_pct}%-nak; a halmozott terv sosem csökken.",
+      "suggestion": "Javítsa a tervezett százalékokat úgy, hogy időszakról időszakra növekedjenek."
+    }
   }
 }

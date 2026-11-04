@@ -160,6 +160,26 @@ class RiskService:
 
     # ── Create ────────────────────────────────────────────────────────────
 
+    async def _gate(
+        self,
+        risk_id: Any,
+        project_id: uuid.UUID,
+        values: dict[str, Any],
+        *,
+        previous_status: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Run the risk rules over the register entry as it will be after the write; errors raise a coded 422."""
+        from app.core.validation.control_rules import gate  # noqa: PLC0415
+        from app.modules.risk.validators import RISK_RULE_SET  # noqa: PLC0415
+
+        return await gate(
+            RISK_RULE_SET,
+            {"risk": {"id": str(risk_id or ""), "previous_status": previous_status, **values}},
+            target_type="risk",
+            target_id=str(risk_id or ""),
+            project_id=project_id,
+        )
+
     async def create_risk(
         self,
         data: RiskCreate,
@@ -172,6 +192,20 @@ class RiskService:
         # Currency is data-driven: an explicit payload value wins, else it
         # is inherited from the owning project. Never a hardcoded "EUR".
         currency = data.currency or await self._get_project_currency(data.project_id)
+
+        warnings = await self._gate(
+            None,
+            data.project_id,
+            {
+                "status": data.status,
+                "impact_severity": data.impact_severity,
+                "impact_cost": data.impact_cost,
+                "response_cost": data.response_cost,
+                "mitigation_strategy": data.mitigation_strategy,
+                "owner_name": data.owner_name,
+                "owner_user_id": data.owner_user_id,
+            },
+        )
 
         risk_score = _compute_risk_score(data.probability, data.impact_severity)
 
@@ -206,6 +240,7 @@ class RiskService:
             metadata_=data.metadata,
         )
         item = await self.repo.create(item)
+        item.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Risk created: %s for project %s", code, data.project_id)
         # On-create escalation hook: a risk can be born already critical (or
         # imported with a lapsed review date), so evaluate it immediately.
@@ -309,6 +344,23 @@ class RiskService:
             fields["impact_score_time"] = impact_score
             fields["risk_tier"] = _compute_risk_tier(prob_score, impact_score)
 
+        warnings = await self._gate(
+            risk_id,
+            item.project_id,
+            {
+                "status": fields.get("status", item.status),
+                "impact_severity": fields.get("impact_severity", item.impact_severity),
+                "impact_cost": fields.get("impact_cost", item.impact_cost),
+                "response_cost": fields.get("response_cost", item.response_cost),
+                "mitigation_strategy": fields.get("mitigation_strategy", item.mitigation_strategy),
+                "mitigation_actions": item.mitigation_actions,
+                "owner_name": fields.get("owner_name", item.owner_name),
+                "owner_user_id": fields.get("owner_user_id", item.owner_user_id),
+                "written": list(fields),
+            },
+            previous_status=item.status,
+        )
+
         # Convert float fields to strings for storage
         for key in ("probability", "impact_cost", "response_cost"):
             if key in fields:
@@ -323,6 +375,7 @@ class RiskService:
 
         await self.repo.update_fields(risk_id, **fields)
         await self.session.refresh(item)
+        item.validation_warnings = warnings  # type: ignore[attr-defined]
 
         # On-update escalation hook: re-score may have crossed the threshold,
         # or the metadata may carry a (now lapsed) review date. Idempotent -

@@ -109,6 +109,7 @@ def _risk_to_response(item: object) -> RiskResponse:
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
+        validation_warnings=getattr(item, "validation_warnings", None) or [],
     )
 
 

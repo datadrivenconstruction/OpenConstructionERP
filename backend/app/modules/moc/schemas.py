@@ -60,6 +60,10 @@ class MoCImpactResponse(BaseModel):
     schedule_delta_days: int
     currency: str
     mitigation: str
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
     model_config = {"from_attributes": True}
 
@@ -148,6 +152,10 @@ class MoCEntryResponse(BaseModel):
     # inherited MetaData object to {}.
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     impacts: list[MoCImpactResponse] = Field(default_factory=list)
+    validation_warnings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the write that produced this response.",
+    )
 
     model_config = {"from_attributes": True}
 

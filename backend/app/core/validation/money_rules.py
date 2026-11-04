@@ -86,6 +86,8 @@ class MoneyRule(ValidationRule):
 
     severity = Severity.ERROR
     category = RuleCategory.CONSISTENCY
+    #: Message section the keys of this rule family live under.
+    message_section = "money"
 
     def ok(self, ref: str = "") -> RuleResult:
         """A passing result."""
@@ -106,9 +108,11 @@ class MoneyRule(ValidationRule):
         *,
         ref: str = "",
         severity: Severity | None = None,
+        section: str | None = None,
         **params: Any,
     ) -> RuleResult:
-        """A failing result whose text is ``money.<key>`` in the caller's locale."""
+        """A failing result whose text is ``<section>.<key>`` in the caller's locale."""
+        section = section or self.message_section
         locale = locale_of(context)
         return RuleResult(
             rule_id=self.rule_id,
@@ -116,9 +120,9 @@ class MoneyRule(ValidationRule):
             severity=severity or self.severity,
             category=self.category,
             passed=False,
-            message=translate(f"money.{key}.fail", locale=locale, **params),
+            message=translate(f"{section}.{key}.fail", locale=locale, **params),
             element_ref=ref,
-            suggestion=translate(f"money.{key}.suggestion", locale=locale),
+            suggestion=translate(f"{section}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
 

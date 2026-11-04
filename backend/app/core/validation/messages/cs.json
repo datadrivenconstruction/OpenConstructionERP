@@ -1737,5 +1737,59 @@
       "fail": "Data {earlier} a {later} jsou v nesprávném pořadí nebo mimo období.",
       "suggestion": "Opravte data tak, aby dřívější šlo první a každý záznam spadal do období."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Datum {value} v poli {field} v kalendáři neexistuje.",
+      "suggestion": "Zadejte existující kalendářní datum."
+    },
+    "checklist_open": {
+      "fail": "Otevřených položek kontrolního seznamu: {count} z {total}.",
+      "suggestion": "Před dokončením úkolu otevřené položky odškrtněte nebo odstraňte."
+    },
+    "decision_unrecorded": {
+      "fail": "Rozhodovací úkol je dokončen, ale rozhodnutí není zaznamenáno.",
+      "suggestion": "Zapište rozhodnutí do výsledku, aby se jím mohl řídit tým na stavbě."
+    },
+    "owner_missing": {
+      "fail": "Není určena žádná odpovědná osoba.",
+      "suggestion": "Před zahájením prací určete odpovědnou osobu nebo kontakt."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Změnu s úrovní rizika {risk_level} nelze schválit bez opatření ke snížení rizika.",
+      "suggestion": "Zaznamenejte opatření na řádku dopadu a poté změnu schvalte."
+    },
+    "decline_reason_missing": {
+      "fail": "Změna je zamítnuta bez uvedení důvodu.",
+      "suggestion": "Zaznamenejte důvod zamítnutí, aby ho mohli sledovat navrhovatel i auditní stopa."
+    },
+    "mitigation_missing": {
+      "fail": "Riziko má stav {status}, ale není zaznamenána žádná strategie ani akce ke snížení.",
+      "suggestion": "Popište snížení rizika, než riziko přesunete do tohoto stavu."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Náklady na reakci {response} jsou vyšší než plný dopad {impact}.",
+      "suggestion": "Zkontrolujte obě částky, nebo riziko přijměte, místo abyste na jeho řešení vydali víc, než může stát."
+    },
+    "closed_unaddressed": {
+      "fail": "Riziko se závažností {level} bylo uzavřeno, aniž by bylo sníženo nebo nastalo.",
+      "suggestion": "Nejprve ho snižte, nebo uveďte, proč už neplatí."
+    },
+    "progress_regression": {
+      "fail": "Hodnota {new} % je nižší než předchozí hodnota {previous} %.",
+      "suggestion": "Jde-li o opravu, uveďte důvod; jinak zkontrolujte záznam."
+    },
+    "completion_unevidenced": {
+      "fail": "Je hlášeno 100 % bez fotografie či poznámky jako dokladu.",
+      "suggestion": "Přiložte fotografii nebo poznámku, aby bylo možné dokončení ověřit."
+    },
+    "geo_incomplete": {
+      "fail": "Je zadána jen zeměpisná šířka nebo jen délka.",
+      "suggestion": "Zadejte obě souřadnice, nebo nechte polohu prázdnou."
+    },
+    "plan_order": {
+      "fail": "Plánovaných {pct} % na {period} odporuje {other_pct} % plánovaným na {other}; kumulativní plán nikdy neklesá.",
+      "suggestion": "Opravte plánovaná procenta tak, aby od období k období rostla."
+    }
   }
 }

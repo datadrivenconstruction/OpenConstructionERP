@@ -36,6 +36,7 @@ from app.modules.moc.schemas import (
     MoCImpactCreate,
     MoCImpactUpdate,
 )
+from app.modules.moc.validators import CostMatchesImpactsRule, CurrencyStatedRule
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,9 @@ MOC_TRANSITIONS: dict[str, list[str]] = {
     "declined": [],
     "implemented": [],
 }
+
+# Rules a change to the impact lines can move; the rest judge the entry itself.
+_IMPACT_RULES = (CurrencyStatedRule, CostMatchesImpactsRule)
 
 # Transitions that require ``moc.approve`` (manager-level).
 _APPROVE_TRANSITIONS = frozenset({"accepted", "declined"})
@@ -128,10 +132,62 @@ class MoCService:
         self.repo = MoCRepository(session)
         self.impact_repo = MoCImpactRepository(session)
 
+    async def _gate(
+        self,
+        entry: MoCEntry | None,
+        values: dict[str, Any],
+        impacts: list[dict[str, Any]],
+        *,
+        previous_status: str | None = None,
+        project_id: uuid.UUID | None = None,
+        only: tuple[type, ...] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Run the MoC rules over the entry as it will be after the write; errors raise a coded 422."""
+        from app.core.validation.control_rules import gate  # noqa: PLC0415
+        from app.modules.moc.validators import MOC_RULE_SET  # noqa: PLC0415
+
+        entry_id = str(entry.id) if entry else ""
+        return await gate(
+            MOC_RULE_SET,
+            {"moc": {"id": entry_id, "previous_status": previous_status, **values}, "impacts": impacts},
+            target_type="moc_entry",
+            target_id=entry_id,
+            project_id=project_id or (entry.project_id if entry else None),
+            only=[r.rule_id for r in only] if only else None,
+        )
+
+    @staticmethod
+    def _entry_values(entry: MoCEntry, **over: Any) -> dict[str, Any]:
+        base = {
+            "status": entry.status,
+            "risk_level": entry.risk_level,
+            "cost_impact": entry.cost_impact,
+            "currency": entry.currency,
+            "schedule_delta_days": entry.schedule_delta_days,
+            "decision_notes": entry.decision_notes,
+        }
+        return {**base, **over}
+
+    @staticmethod
+    def _impact_dict(i: MoCImpact) -> dict[str, Any]:
+        return {"id": str(i.id), "cost_impact": i.cost_impact, "currency": i.currency, "mitigation": i.mitigation}
+
     # ── Create ────────────────────────────────────────────────────────────
 
     async def create_entry(self, data: MoCEntryCreate, user_id: str | None = None) -> MoCEntry:
         """Create a new MoC entry in 'proposed' status."""
+        warnings = await self._gate(
+            None,
+            {
+                "status": "proposed",
+                "risk_level": data.risk_level,
+                "cost_impact": data.cost_impact,
+                "currency": data.currency,
+                "schedule_delta_days": data.schedule_delta_days,
+            },
+            [],
+            project_id=data.project_id,
+        )
         code = await self.repo.next_code(data.project_id)
         now = _now_iso()
         entry = MoCEntry(
@@ -153,6 +209,7 @@ class MoCService:
             metadata_=data.metadata,
         )
         entry = await self.repo.create(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
         _safe_publish(
             "moc.entry.proposed",
             {
@@ -206,6 +263,16 @@ class MoCService:
             fields["cost_impact"] = _to_decimal(fields["cost_impact"])
         if not fields:
             return entry
+        written = {
+            k: v for k, v in fields.items() if k in {"risk_level", "cost_impact", "currency", "schedule_delta_days"}
+        }
+        warnings = await self._gate(
+            entry,
+            # Only a delta being written is judged, so a legacy value never blocks an unrelated edit.
+            self._entry_values(entry, **{"schedule_delta_days": None, **written}),
+            [self._impact_dict(i) for i in entry.impacts],
+            previous_status=entry.status,
+        )
         # Snapshot the prior holder before update_fields() expires the entry so a
         # ball-in-court change is recorded for ownership-chain reconstruction.
         ball_changed = "ball_in_court" in fields and fields["ball_in_court"] != entry.ball_in_court
@@ -213,6 +280,7 @@ class MoCService:
         code_snapshot = entry.code
         await self.repo.update_fields(entry_id, **fields)
         await self.session.refresh(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
         if ball_changed:
             from app.core.audit_log import log_ownership_handoff
 
@@ -262,6 +330,14 @@ class MoCService:
                 ),
             )
         from_status = entry.status
+        decision_notes = notes if notes is not None and to_status in _APPROVE_TRANSITIONS else entry.decision_notes
+        warnings = await self._gate(
+            entry,
+            # A legacy delta never blocks a status change; only a delta being written is judged.
+            self._entry_values(entry, status=to_status, decision_notes=decision_notes, schedule_delta_days=None),
+            [self._impact_dict(i) for i in entry.impacts],
+            previous_status=from_status,
+        )
         now = _now_iso()
         fields: dict[str, Any] = {"status": to_status}
 
@@ -283,6 +359,7 @@ class MoCService:
 
         await self.repo.update_fields(entry_id, **fields)
         await self.session.refresh(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
 
         # Audit trail - same transaction as status write.
         await _write_audit(
@@ -323,7 +400,17 @@ class MoCService:
     # ── Impact lines ──────────────────────────────────────────────────────
 
     async def add_impact(self, entry_id: uuid.UUID, data: MoCImpactCreate) -> MoCImpact:
-        await self.get_entry(entry_id)  # 404 guard
+        entry = await self.get_entry(entry_id)  # 404 guard
+        warnings = await self._gate(
+            entry,
+            self._entry_values(entry),
+            [
+                *[self._impact_dict(i) for i in entry.impacts],
+                {"cost_impact": data.cost_impact, "currency": data.currency, "mitigation": data.mitigation},
+            ],
+            previous_status=entry.status,
+            only=_IMPACT_RULES,
+        )
         impact = MoCImpact(
             moc_entry_id=entry_id,
             impact_area=data.impact_area,
@@ -334,7 +421,9 @@ class MoCService:
             currency=data.currency,
             mitigation=data.mitigation,
         )
-        return await self.impact_repo.create(impact)
+        impact = await self.impact_repo.create(impact)
+        impact.validation_warnings = warnings  # type: ignore[attr-defined]
+        return impact
 
     async def get_impact(self, impact_id: uuid.UUID) -> MoCImpact:
         row = await self.impact_repo.get_by_id(impact_id)
@@ -352,8 +441,15 @@ class MoCService:
             fields["cost_impact"] = _to_decimal(fields["cost_impact"])
         if not fields:
             return impact
+        entry = await self.get_entry(impact.moc_entry_id)
+        written = {k: v for k, v in fields.items() if k in {"cost_impact", "currency", "mitigation"}}
+        merged = [{**self._impact_dict(i), **(written if i.id == impact_id else {})} for i in entry.impacts]
+        warnings = await self._gate(
+            entry, self._entry_values(entry), merged, previous_status=entry.status, only=_IMPACT_RULES
+        )
         await self.impact_repo.update_fields(impact_id, **fields)
         await self.session.refresh(impact)
+        impact.validation_warnings = warnings  # type: ignore[attr-defined]
         return impact
 
     async def delete_impact(self, impact_id: uuid.UUID) -> None:

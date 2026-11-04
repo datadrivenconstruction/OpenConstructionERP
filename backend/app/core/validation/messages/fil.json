@@ -1737,5 +1737,59 @@
       "fail": "Mali ang pagkakasunod ng mga petsang {earlier} at {later} o nasa labas ng panahon.",
       "suggestion": "Ayusin ang mga petsa upang mauna ang mas maaga at nasa loob ng panahon ang bawat entry."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Ang petsang {value} sa {field} ay wala sa kalendaryo.",
+      "suggestion": "Maglagay ng totoong petsa sa kalendaryo."
+    },
+    "checklist_open": {
+      "fail": "{count} sa {total} aytem ng checklist ang bukas pa.",
+      "suggestion": "I-tsek o alisin ang mga bukas na aytem bago tapusin ang gawain."
+    },
+    "decision_unrecorded": {
+      "fail": "Tapos na ang gawaing pagpapasya, ngunit walang naitalang desisyon.",
+      "suggestion": "Isulat ang desisyon sa resulta para masunod ito ng pangkat sa site."
+    },
+    "owner_missing": {
+      "fail": "Walang itinalagang responsable.",
+      "suggestion": "Magtalaga ng responsableng tao o kontak bago magsimula ang trabaho."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Hindi maaaring tanggapin ang pagbabagong may antas ng panganib na {risk_level} kung walang hakbang sa pagpapagaan.",
+      "suggestion": "Itala ang hakbang sa pagpapagaan sa isang linya ng epekto, saka tanggapin ang pagbabago."
+    },
+    "decline_reason_missing": {
+      "fail": "Tinanggihan ang pagbabago nang walang dahilan.",
+      "suggestion": "Itala kung bakit ito tinanggihan para masundan ng nagmungkahi at ng audit trail."
+    },
+    "mitigation_missing": {
+      "fail": "Ang panganib ay nasa katayuang {status}, ngunit walang naitalang estratehiya o aksyon sa pagpapagaan.",
+      "suggestion": "Ilarawan ang pagpapagaan bago ilipat ang panganib sa katayuang ito."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Mas mataas ang gastos sa tugon na {response} kaysa sa buong epekto na {impact}.",
+      "suggestion": "Suriin ang dalawang halaga, o tanggapin ang panganib sa halip na gumastos nang higit sa maaari nitong gastusin."
+    },
+    "closed_unaddressed": {
+      "fail": "Isinara ang panganib na may kalubhaang {level} nang hindi napagaan at hindi nangyari.",
+      "suggestion": "Pagaanin muna ito, o itala kung bakit hindi na ito naaangkop."
+    },
+    "progress_regression": {
+      "fail": "Ang basa na {new}% ay mas mababa kaysa sa nakaraang basa na {previous}%.",
+      "suggestion": "Kung pagwawasto ito, itala ang dahilan; kung hindi, suriin ang entry."
+    },
+    "completion_unevidenced": {
+      "fail": "Iniulat ang 100% nang walang larawan o tala bilang patunay.",
+      "suggestion": "Maglakip ng larawan o magdagdag ng tala para ma-verify ang pagkumpleto."
+    },
+    "geo_incomplete": {
+      "fail": "Isa lang sa latitude at longitude ang ibinigay.",
+      "suggestion": "Ibigay ang dalawang coordinate o iwanang walang laman ang lokasyon."
+    },
+    "plan_order": {
+      "fail": "Ang planong {pct}% para sa {period} ay salungat sa {other_pct}% na plano para sa {other}; hindi kailanman bumababa ang pinagsama-samang plano.",
+      "suggestion": "Itama ang mga planong porsyento para tumaas ito mula sa isang panahon hanggang sa susunod."
+    }
   }
 }

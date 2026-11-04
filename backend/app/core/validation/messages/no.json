@@ -1737,5 +1737,59 @@
       "fail": "Datoene {earlier} og {later} er i feil rekkefølge eller utenfor perioden.",
       "suggestion": "Rett datoene slik at den tidligste kommer først og hver post ligger innenfor perioden."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "Datoen {value} i {field} finnes ikke i kalenderen.",
+      "suggestion": "Oppgi en gyldig kalenderdato."
+    },
+    "checklist_open": {
+      "fail": "{count} av {total} punkter på sjekklisten er fortsatt åpne.",
+      "suggestion": "Kryss av eller fjern de åpne punktene før oppgaven fullføres."
+    },
+    "decision_unrecorded": {
+      "fail": "Beslutningsoppgaven er fullført, men ingen beslutning er registrert.",
+      "suggestion": "Skriv beslutningen inn i resultatet, slik at byggeplassteamet kan handle etter den."
+    },
+    "owner_missing": {
+      "fail": "Ingen er utpekt som ansvarlig.",
+      "suggestion": "Utpek en ansvarlig person eller kontakt før arbeidet starter."
+    },
+    "high_risk_unmitigated": {
+      "fail": "En endring med risikonivå {risk_level} kan ikke godkjennes uten et risikoreduserende tiltak.",
+      "suggestion": "Registrer tiltaket på en konsekvenslinje, og godkjenn deretter endringen."
+    },
+    "decline_reason_missing": {
+      "fail": "Endringen er avslått uten begrunnelse.",
+      "suggestion": "Registrer hvorfor den ble avslått, slik at innsenderen og revisjonssporet kan følge det."
+    },
+    "mitigation_missing": {
+      "fail": "Risikoen har status {status}, men ingen risikoreduserende strategi eller handling er registrert.",
+      "suggestion": "Beskriv tiltaket før risikoen flyttes til denne statusen."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Kostnaden for tiltaket {response} er høyere enn full konsekvens {impact}.",
+      "suggestion": "Kontroller begge beløpene, eller aksepter risikoen i stedet for å bruke mer på å håndtere den enn den kan koste."
+    },
+    "closed_unaddressed": {
+      "fail": "En risiko med alvorlighetsgrad {level} er lukket uten å ha blitt redusert eller inntruffet.",
+      "suggestion": "Reduser den først, eller registrer hvorfor den ikke lenger gjelder."
+    },
+    "progress_regression": {
+      "fail": "Avlesningen {new} % er lavere enn forrige avlesning {previous} %.",
+      "suggestion": "Hvis det er en rettelse, oppgi årsaken; ellers kontroller registreringen."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % er meldt uten bilde eller notat som dokumentasjon.",
+      "suggestion": "Legg ved et bilde eller et notat slik at ferdigstillelsen kan kontrolleres."
+    },
+    "geo_incomplete": {
+      "fail": "Bare breddegrad eller lengdegrad er oppgitt.",
+      "suggestion": "Oppgi begge koordinatene, eller la stedet stå tomt."
+    },
+    "plan_order": {
+      "fail": "De planlagte {pct} % for {period} strider mot {other_pct} % planlagt for {other}; en kumulativ plan synker aldri.",
+      "suggestion": "Rett de planlagte prosentene slik at de stiger fra periode til periode."
+    }
   }
 }

@@ -1737,5 +1737,59 @@
       "fail": "日付 {earlier} と {later} の順序が正しくないか、期間外です。",
       "suggestion": "早い日付が先になり、すべての項目が期間内に収まるよう日付を修正してください。"
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "{field} の日付 {value} はカレンダーに存在しません。",
+      "suggestion": "カレンダー上に実在する日付を入力してください。"
+    },
+    "checklist_open": {
+      "fail": "チェックリスト {total} 項目のうち {count} 項目が未完了です。",
+      "suggestion": "タスクを完了する前に、未完了の項目をチェックするか削除してください。"
+    },
+    "decision_unrecorded": {
+      "fail": "判断タスクは完了していますが、決定事項が記録されていません。",
+      "suggestion": "現場チームが対応できるよう、決定事項を結果に記入してください。"
+    },
+    "owner_missing": {
+      "fail": "責任者が指定されていません。",
+      "suggestion": "作業開始前に責任者または連絡窓口を指定してください。"
+    },
+    "high_risk_unmitigated": {
+      "fail": "リスクレベル {risk_level} の変更は、低減策なしでは承認できません。",
+      "suggestion": "低減策を影響行に記録してから、変更を承認してください。"
+    },
+    "decline_reason_missing": {
+      "fail": "この変更は理由なしで却下されています。",
+      "suggestion": "申請者と監査証跡が追えるよう、却下の理由を記録してください。"
+    },
+    "mitigation_missing": {
+      "fail": "リスクのステータスは {status} ですが、低減策または対応が記録されていません。",
+      "suggestion": "このステータスに移す前に、低減策を記述してください。"
+    },
+    "response_exceeds_exposure": {
+      "fail": "対応コスト {response} が影響額の全体 {impact} を上回っています。",
+      "suggestion": "両方の金額を確認するか、想定損失を超える費用をかけずにリスクを受容してください。"
+    },
+    "closed_unaddressed": {
+      "fail": "重大度 {level} のリスクが、低減も発生もしていない状態で終了されています。",
+      "suggestion": "先に低減するか、もう該当しない理由を記録してください。"
+    },
+    "progress_regression": {
+      "fail": "測定値 {new}% が前回の測定値 {previous}% を下回っています。",
+      "suggestion": "訂正であれば理由を記録し、そうでなければ入力を確認してください。"
+    },
+    "completion_unevidenced": {
+      "fail": "写真もメモも根拠として添えずに 100% が報告されています。",
+      "suggestion": "完了を確認できるよう、写真を添付するかメモを追加してください。"
+    },
+    "geo_incomplete": {
+      "fail": "緯度と経度の片方しか入力されていません。",
+      "suggestion": "両方の座標を入力するか、位置を空にしてください。"
+    },
+    "plan_order": {
+      "fail": "{period} の計画 {pct}% は {other} の計画 {other_pct}% と矛盾します。累計計画は減少しません。",
+      "suggestion": "計画の割合が期間ごとに増えるように修正してください。"
+    }
   }
 }

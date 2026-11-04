@@ -1737,5 +1737,59 @@
       "fail": "De data {earlier} en {later} staan in de verkeerde volgorde of buiten de periode.",
       "suggestion": "Corrigeer de data zodat de vroegste eerst komt en elke invoer binnen de periode valt."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "De datum {value} in {field} bestaat niet in de kalender.",
+      "suggestion": "Voer een bestaande kalenderdatum in."
+    },
+    "checklist_open": {
+      "fail": "{count} van de {total} checklistpunten staan nog open.",
+      "suggestion": "Vink de open punten af of verwijder ze voordat u de taak afrondt."
+    },
+    "decision_unrecorded": {
+      "fail": "De beslistaak is afgerond, maar er is geen besluit vastgelegd.",
+      "suggestion": "Schrijf het besluit in het resultaat, zodat het bouwplaatsteam ernaar kan handelen."
+    },
+    "owner_missing": {
+      "fail": "Er is niemand als verantwoordelijke aangewezen.",
+      "suggestion": "Wijs een verantwoordelijke of contactpersoon aan voordat het werk start."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Een wijziging met risiconiveau {risk_level} kan niet worden geaccepteerd zonder beheersmaatregel.",
+      "suggestion": "Leg de beheersmaatregel vast op een impactregel en accepteer de wijziging daarna."
+    },
+    "decline_reason_missing": {
+      "fail": "De wijziging is zonder reden afgewezen.",
+      "suggestion": "Leg vast waarom ze is afgewezen, zodat indiener en auditspoor het kunnen volgen."
+    },
+    "mitigation_missing": {
+      "fail": "Het risico heeft status {status}, maar er is geen beheersstrategie of -actie vastgelegd.",
+      "suggestion": "Beschrijf de beheersmaatregel voordat u het risico naar deze status zet."
+    },
+    "response_exceeds_exposure": {
+      "fail": "De responskosten {response} liggen hoger dan de volledige impact {impact}.",
+      "suggestion": "Controleer beide bedragen, of accepteer het risico in plaats van meer aan de behandeling uit te geven dan het kan kosten."
+    },
+    "closed_unaddressed": {
+      "fail": "Een risico met ernst {level} is gesloten zonder te zijn beheerst of te zijn opgetreden.",
+      "suggestion": "Beheers het eerst, of noteer waarom het niet meer van toepassing is."
+    },
+    "progress_regression": {
+      "fail": "De meting van {new}% ligt onder de vorige meting van {previous}%.",
+      "suggestion": "Is dit een correctie, noteer dan de reden; controleer anders de invoer."
+    },
+    "completion_unevidenced": {
+      "fail": "100% wordt gemeld zonder foto of notitie als bewijs.",
+      "suggestion": "Voeg een foto of notitie toe zodat de oplevering kan worden gecontroleerd."
+    },
+    "geo_incomplete": {
+      "fail": "Alleen de breedtegraad of de lengtegraad is opgegeven.",
+      "suggestion": "Geef beide coördinaten op of laat de locatie leeg."
+    },
+    "plan_order": {
+      "fail": "De geplande {pct}% voor {period} botst met de {other_pct}% gepland voor {other}; een cumulatieve planning daalt nooit.",
+      "suggestion": "Corrigeer de geplande percentages zodat ze van periode tot periode stijgen."
+    }
   }
 }

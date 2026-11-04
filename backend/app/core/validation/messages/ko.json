@@ -1737,5 +1737,59 @@
       "fail": "날짜 {earlier}와(과) {later}의 순서가 맞지 않거나 기간을 벗어났습니다.",
       "suggestion": "빠른 날짜가 먼저 오고 모든 항목이 기간 안에 들어오도록 날짜를 수정하세요."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "{field}의 날짜 {value}은(는) 달력에 없는 날짜입니다.",
+      "suggestion": "달력에 실제로 있는 날짜를 입력하세요."
+    },
+    "checklist_open": {
+      "fail": "체크리스트 {total}개 항목 중 {count}개가 아직 열려 있습니다.",
+      "suggestion": "작업을 완료하기 전에 열린 항목을 체크하거나 삭제하세요."
+    },
+    "decision_unrecorded": {
+      "fail": "의사결정 작업은 완료되었지만 기록된 결정이 없습니다.",
+      "suggestion": "현장 팀이 따를 수 있도록 결정 내용을 결과에 기록하세요."
+    },
+    "owner_missing": {
+      "fail": "책임자가 지정되지 않았습니다.",
+      "suggestion": "작업을 시작하기 전에 책임자 또는 담당 연락처를 지정하세요."
+    },
+    "high_risk_unmitigated": {
+      "fail": "위험 수준이 {risk_level}인 변경은 완화 조치 없이 승인할 수 없습니다.",
+      "suggestion": "영향 행에 완화 조치를 기록한 다음 변경을 승인하세요."
+    },
+    "decline_reason_missing": {
+      "fail": "변경이 사유 없이 반려되었습니다.",
+      "suggestion": "요청자와 감사 추적이 확인할 수 있도록 반려 사유를 기록하세요."
+    },
+    "mitigation_missing": {
+      "fail": "위험 상태는 {status}이지만 기록된 완화 전략이나 조치가 없습니다.",
+      "suggestion": "위험을 이 상태로 옮기기 전에 완화 방안을 기술하세요."
+    },
+    "response_exceeds_exposure": {
+      "fail": "대응 비용 {response}이(가) 전체 영향 {impact}보다 큽니다.",
+      "suggestion": "두 금액을 확인하거나, 위험이 초래할 비용보다 많은 비용을 들이지 말고 위험을 수용하세요."
+    },
+    "closed_unaddressed": {
+      "fail": "심각도 {level}의 위험이 완화되지도 발생하지도 않은 채 종료되었습니다.",
+      "suggestion": "먼저 완화하거나 더 이상 해당되지 않는 이유를 기록하세요."
+    },
+    "progress_regression": {
+      "fail": "측정값 {new}%가 이전 측정값 {previous}%보다 낮습니다.",
+      "suggestion": "정정이라면 사유를 기록하고, 아니라면 입력을 확인하세요."
+    },
+    "completion_unevidenced": {
+      "fail": "증빙 사진이나 메모 없이 100%가 보고되었습니다.",
+      "suggestion": "완료를 확인할 수 있도록 사진을 첨부하거나 메모를 추가하세요."
+    },
+    "geo_incomplete": {
+      "fail": "위도와 경도 중 하나만 입력되었습니다.",
+      "suggestion": "두 좌표를 모두 입력하거나 위치를 비워 두세요."
+    },
+    "plan_order": {
+      "fail": "{period}의 계획 {pct}%가 {other}의 계획 {other_pct}%와 모순됩니다. 누적 계획은 줄어들지 않습니다.",
+      "suggestion": "계획 비율이 기간마다 증가하도록 수정하세요."
+    }
   }
 }

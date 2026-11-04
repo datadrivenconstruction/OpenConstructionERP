@@ -58,6 +58,7 @@ def _entry_to_response(entry: object) -> ProgressEntryResponse:
         metadata=getattr(entry, "metadata_", None) or {},
         created_at=entry.created_at,  # type: ignore[attr-defined]
         updated_at=entry.updated_at,  # type: ignore[attr-defined]
+        validation_warnings=getattr(entry, "validation_warnings", None) or [],
     )
 
 
@@ -239,6 +240,7 @@ async def upsert_plan_point(
             notes=plan.notes,
             created_at=plan.created_at,
             updated_at=plan.updated_at,
+            validation_warnings=getattr(plan, "validation_warnings", None) or [],
         )
     except HTTPException:
         raise

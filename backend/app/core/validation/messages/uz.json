@@ -1737,5 +1737,59 @@
       "fail": "{earlier} va {later} sanalari noto'g'ri tartibda yoki davrdan tashqarida.",
       "suggestion": "Sanalarni avvalgisi birinchi kelib, har bir yozuv davr ichida bo'ladigan qilib to'g'rilang."
     }
+  },
+  "control": {
+    "date_invalid": {
+      "fail": "{field} maydonidagi {value} sanasi kalendarda mavjud emas.",
+      "suggestion": "Kalendarda mavjud boʻlgan haqiqiy sanani kiriting."
+    },
+    "checklist_open": {
+      "fail": "Tekshiruv roʻyxatining {total} bandidan {count} tasi hali ochiq.",
+      "suggestion": "Vazifani yakunlashdan oldin ochiq bandlarni belgilang yoki olib tashlang."
+    },
+    "decision_unrecorded": {
+      "fail": "Qaror vazifasi yakunlangan, ammo qaror qayd etilmagan.",
+      "suggestion": "Obyektdagi jamoa amal qila olishi uchun qarorni natijaga yozing."
+    },
+    "owner_missing": {
+      "fail": "Masʼul shaxs tayinlanmagan.",
+      "suggestion": "Ish boshlanishidan oldin masʼul shaxs yoki aloqa shaxsini tayinlang."
+    },
+    "high_risk_unmitigated": {
+      "fail": "Xavf darajasi {risk_level} boʻlgan oʻzgarishni yumshatish chorasisiz qabul qilib boʻlmaydi.",
+      "suggestion": "Chorani taʼsir qatoriga yozing, soʻng oʻzgarishni qabul qiling."
+    },
+    "decline_reason_missing": {
+      "fail": "Oʻzgarish sababsiz rad etilgan.",
+      "suggestion": "Taklif qiluvchi va audit izi kuzata olishi uchun nima uchun rad etilganini yozing."
+    },
+    "mitigation_missing": {
+      "fail": "Xavf holati {status}, ammo yumshatish strategiyasi yoki harakati qayd etilmagan.",
+      "suggestion": "Xavfni bu holatga oʻtkazishdan oldin yumshatish choralarini tavsiflang."
+    },
+    "response_exceeds_exposure": {
+      "fail": "Javob xarajati ({response}) toʻliq taʼsirdan ({impact}) yuqori.",
+      "suggestion": "Ikkala summani tekshiring yoki xavfni uni hal qilishga uning narxidan ortiq sarflamasdan qabul qiling."
+    },
+    "closed_unaddressed": {
+      "fail": "Jiddiylik darajasi {level} boʻlgan xavf yumshatilmasdan va yuz bermasdan yopildi.",
+      "suggestion": "Avval uni yumshating yoki endi nima uchun qoʻllanilmasligini yozing."
+    },
+    "progress_regression": {
+      "fail": "{new} % koʻrsatkichi oldingi {previous} % koʻrsatkichdan past.",
+      "suggestion": "Agar bu tuzatish boʻlsa, sababini yozing; aks holda yozuvni tekshiring."
+    },
+    "completion_unevidenced": {
+      "fail": "100 % dalil sifatida suratsiz yoki izohsiz xabar qilindi.",
+      "suggestion": "Tugallanganini tekshirish mumkin boʻlishi uchun surat biriktiring yoki izoh qoʻshing."
+    },
+    "geo_incomplete": {
+      "fail": "Kenglik va uzunlikdan faqat bittasi berilgan.",
+      "suggestion": "Ikkala koordinatani ham kiriting yoki joylashuvni boʻsh qoldiring."
+    },
+    "plan_order": {
+      "fail": "{period} uchun rejalashtirilgan {pct} % {other} uchun rejalashtirilgan {other_pct} % bilan zid; jamlanma reja hech qachon kamaymaydi.",
+      "suggestion": "Rejadagi foizlarni davrdan davrga oshib borishi uchun tuzating."
+    }
   }
 }
