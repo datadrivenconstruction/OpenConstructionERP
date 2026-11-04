@@ -13,3 +13,6 @@ async def on_startup() -> None:
     from app.modules.portfolio.permissions import register_portfolio_permissions
 
     register_portfolio_permissions()
+    from app.modules.portfolio.validators import register_portfolio_validation_rules
+
+    register_portfolio_validation_rules()

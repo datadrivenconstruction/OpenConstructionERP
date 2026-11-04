@@ -1763,5 +1763,71 @@
       "fail": "Výsledek je {result}, ale nevyhovělo bodů kontrolního seznamu: {count}.",
       "suggestion": "Opravte výsledek nebo zkontrolujte nevyhovující body."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakt nemá jméno: chybí firma, obchodní jméno, jméno i příjmení.",
+      "suggestion": "Zadejte název firmy nebo jméno osoby."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' není platné datum.",
+      "suggestion": "Použijte formát RRRR-MM-DD, například 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Platební lhůta '{value}' není celé číslo dnů od 0 do {max}.",
+      "suggestion": "Zadejte platební lhůtu ve dnech, například 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Předkvalifikace je schválena, ale vypršela dne {date}.",
+      "suggestion": "Obnovte předkvalifikaci nebo nastavte její stav na vypršela."
+    },
+    "vat_country_mismatch": {
+      "fail": "DIČ {vat} začíná na {prefix}, ale země je {country}.",
+      "suggestion": "Zkontrolujte DIČ a zemi kontaktu."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Příležitost má hodnotu {value}, ale nemá měnu.",
+      "suggestion": "Vyberte měnu odhadované hodnoty."
+    },
+    "date_invalid": {
+      "fail": "Očekávané datum uzavření {value} není skutečné datum.",
+      "suggestion": "Zadejte platné datum ve formátu RRRR-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Příležitost je stále otevřená, ale očekávané datum uzavření {date} již uplynulo.",
+      "suggestion": "Upravte datum uzavření nebo označte příležitost jako vyhranou či prohranou."
+    },
+    "won_without_value": {
+      "fail": "Příležitost je vyhraná, ale nemá hodnotu; rozpočet projektu by začínal na nule.",
+      "suggestion": "Zadejte hodnotu zadané zakázky."
+    },
+    "owner_missing": {
+      "fail": "Otevřená příležitost nemá vlastníka.",
+      "suggestion": "Přiřaďte osobu odpovědnou za nabídku."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Kód {code} už používá jiný uzel pod stejným nadřazeným.",
+      "suggestion": "Použijte pro tento uzel jiný kód."
+    },
+    "level_order": {
+      "fail": "Uzel typu {child} nemůže být pod {parent}.",
+      "suggestion": "Přesuňte uzel nebo změňte jeho typ: portfolio obsahuje programy a program obsahuje podprogramy."
+    },
+    "link_endpoints": {
+      "fail": "Vazba mezi harmonogramy musí spojovat dvě různé činnosti ve dvou různých harmonogramech.",
+      "suggestion": "Vyberte činnosti z různých harmonogramů; uvnitř jednoho harmonogramu použijte běžnou závislost."
+    },
+    "link_repeats": {
+      "fail": "Tyto dvě činnosti jsou již propojeny, v jednom či druhém směru; vazba by se opakovala nebo uzavřela smyčku.",
+      "suggestion": "Nejprve odstraňte stávající vazbu nebo vyberte jiné činnosti."
+    },
+    "lag_extreme": {
+      "fail": "Prodleva {days} dnů mezi dvěma projekty je neobvykle dlouhá.",
+      "suggestion": "Zkontrolujte jednotku: prodleva se zadává ve dnech."
+    }
   }
 }

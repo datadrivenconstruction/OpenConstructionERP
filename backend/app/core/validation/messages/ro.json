@@ -1763,5 +1763,71 @@
       "fail": "Rezultatul este {result}, dar {count} puncte din lista de verificare nu sunt conforme.",
       "suggestion": "Corectați rezultatul sau revizuiți punctele neconforme."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Contactul nu are nume: nici companie, nici denumire legală, nici prenume, nici nume.",
+      "suggestion": "Introduceți numele companiei sau al persoanei."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' nu este o dată validă.",
+      "suggestion": "Folosiți formatul AAAA-LL-ZZ, de exemplu 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Termenul de plată '{value}' nu este un număr întreg de zile între 0 și {max}.",
+      "suggestion": "Introduceți termenul de plată în zile, de exemplu 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Precalificarea este aprobată, dar a expirat la {date}.",
+      "suggestion": "Reînnoiți precalificarea sau setați starea ei ca expirată."
+    },
+    "vat_country_mismatch": {
+      "fail": "Codul de TVA {vat} începe cu {prefix}, dar țara este {country}.",
+      "suggestion": "Verificați codul de TVA și țara contactului."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Oportunitatea are valoarea {value}, dar nu are monedă.",
+      "suggestion": "Alegeți moneda valorii estimate."
+    },
+    "date_invalid": {
+      "fail": "Data de închidere așteptată {value} nu este o dată reală.",
+      "suggestion": "Introduceți o dată validă în formatul AAAA-LL-ZZ."
+    },
+    "close_date_passed": {
+      "fail": "Oportunitatea este încă deschisă, dar data de închidere așteptată {date} a trecut.",
+      "suggestion": "Actualizați data de închidere sau marcați oportunitatea ca învinsă sau pierdută."
+    },
+    "won_without_value": {
+      "fail": "Oportunitatea este câștigată, dar nu are valoare; bugetul proiectului ar începe de la zero.",
+      "suggestion": "Introduceți valoarea contractului atribuit."
+    },
+    "owner_missing": {
+      "fail": "Oportunitatea deschisă nu are responsabil.",
+      "suggestion": "Atribuiți persoana responsabilă de ofertă."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Codul {code} este deja folosit de alt nod sub același părinte.",
+      "suggestion": "Folosiți alt cod pentru acest nod."
+    },
+    "level_order": {
+      "fail": "Un nod de tip {child} nu poate fi sub {parent}.",
+      "suggestion": "Mutați nodul sau schimbați-i tipul: un portofoliu conține programe, iar un program conține subprograme."
+    },
+    "link_endpoints": {
+      "fail": "O legătură între grafice trebuie să unească două activități diferite din două grafice diferite.",
+      "suggestion": "Alegeți activități din grafice diferite; în interiorul unui grafic folosiți o dependență obișnuită."
+    },
+    "link_repeats": {
+      "fail": "Aceste două activități sunt deja legate, într-un sens sau în celălalt; legătura s-ar repeta sau ar închide o buclă.",
+      "suggestion": "Ștergeți mai întâi legătura existentă sau alegeți alte activități."
+    },
+    "lag_extreme": {
+      "fail": "Un decalaj de {days} zile între două proiecte este neobișnuit de lung.",
+      "suggestion": "Verificați unitatea: decalajul se introduce în zile."
+    }
   }
 }

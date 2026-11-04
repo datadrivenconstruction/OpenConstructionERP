@@ -1763,5 +1763,71 @@
       "fail": "O resultado é {result}, mas {count} itens da lista de verificação foram reprovados.",
       "suggestion": "Corrija o resultado ou reveja os itens reprovados."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "O contacto não tem nome: nem empresa, nem designação legal, nem nome próprio nem apelido.",
+      "suggestion": "Introduza o nome da empresa ou da pessoa."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' não é uma data válida.",
+      "suggestion": "Use o formato AAAA-MM-DD, por exemplo 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "O prazo de pagamento '{value}' não é um número inteiro de dias entre 0 e {max}.",
+      "suggestion": "Introduza o prazo de pagamento em dias, por exemplo 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "A pré-qualificação está aprovada, mas expirou em {date}.",
+      "suggestion": "Renove a pré-qualificação ou altere o seu estado para expirada."
+    },
+    "vat_country_mismatch": {
+      "fail": "O número de IVA {vat} começa por {prefix}, mas o país é {country}.",
+      "suggestion": "Verifique o número de IVA e o país do contacto."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "A oportunidade vale {value} mas não tem moeda.",
+      "suggestion": "Escolha a moeda do valor estimado."
+    },
+    "date_invalid": {
+      "fail": "A data de fecho prevista {value} não é uma data real.",
+      "suggestion": "Introduza uma data válida no formato AAAA-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "A oportunidade continua aberta, mas a data de fecho prevista {date} já passou.",
+      "suggestion": "Atualize a data de fecho ou marque a oportunidade como ganha ou perdida."
+    },
+    "won_without_value": {
+      "fail": "A oportunidade está ganha mas não tem valor; o orçamento do projeto começaria em zero.",
+      "suggestion": "Introduza o valor do contrato adjudicado."
+    },
+    "owner_missing": {
+      "fail": "A oportunidade aberta não tem responsável.",
+      "suggestion": "Atribua a pessoa responsável pela proposta."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "O código {code} já é usado por outro nó sob o mesmo pai.",
+      "suggestion": "Use outro código para este nó."
+    },
+    "level_order": {
+      "fail": "Um nó do tipo {child} não pode ficar sob {parent}.",
+      "suggestion": "Mova o nó ou altere o seu tipo: um portefólio contém programas e um programa contém subprogramas."
+    },
+    "link_endpoints": {
+      "fail": "Uma ligação entre cronogramas deve unir duas atividades diferentes de dois cronogramas diferentes.",
+      "suggestion": "Escolha atividades de cronogramas diferentes; dentro de um cronograma use uma dependência normal."
+    },
+    "link_repeats": {
+      "fail": "Estas duas atividades já estão ligadas, num sentido ou noutro; a ligação repetir-se-ia ou fecharia um ciclo.",
+      "suggestion": "Remova primeiro a ligação existente ou escolha outras atividades."
+    },
+    "lag_extreme": {
+      "fail": "Um desfasamento de {days} dias entre dois projetos é invulgarmente longo.",
+      "suggestion": "Verifique a unidade: o desfasamento é introduzido em dias."
+    }
   }
 }

@@ -1763,5 +1763,71 @@
       "fail": "Kết quả là {result} nhưng {count} mục trong danh sách kiểm tra không đạt.",
       "suggestion": "Sửa kết quả hoặc xem lại các mục không đạt."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Liên hệ không có tên: không có công ty, tên pháp lý, tên hay họ.",
+      "suggestion": "Nhập tên công ty hoặc tên người."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' không phải ngày hợp lệ.",
+      "suggestion": "Dùng định dạng YYYY-MM-DD, ví dụ 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Thời hạn thanh toán '{value}' không phải số ngày nguyên từ 0 đến {max}.",
+      "suggestion": "Nhập thời hạn thanh toán theo ngày, ví dụ 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Sơ tuyển đã được duyệt nhưng đã hết hạn vào {date}.",
+      "suggestion": "Gia hạn sơ tuyển hoặc đặt trạng thái là hết hạn."
+    },
+    "vat_country_mismatch": {
+      "fail": "Mã số thuế {vat} bắt đầu bằng {prefix} nhưng quốc gia là {country}.",
+      "suggestion": "Kiểm tra mã số thuế và quốc gia của liên hệ."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Cơ hội có giá trị {value} nhưng không có tiền tệ.",
+      "suggestion": "Chọn tiền tệ của giá trị ước tính."
+    },
+    "date_invalid": {
+      "fail": "Ngày đóng dự kiến {value} không phải ngày có thật.",
+      "suggestion": "Nhập ngày hợp lệ theo định dạng YYYY-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Cơ hội vẫn đang mở nhưng ngày đóng dự kiến {date} đã qua.",
+      "suggestion": "Cập nhật ngày đóng hoặc đánh dấu cơ hội là thắng hoặc thua."
+    },
+    "won_without_value": {
+      "fail": "Cơ hội đã thắng nhưng không có giá trị; ngân sách dự án sẽ bắt đầu từ không.",
+      "suggestion": "Nhập giá trị hợp đồng được trao."
+    },
+    "owner_missing": {
+      "fail": "Cơ hội đang mở chưa có người phụ trách.",
+      "suggestion": "Giao người phụ trách hồ sơ dự thầu."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Mã {code} đã được nút khác dưới cùng nút cha sử dụng.",
+      "suggestion": "Dùng mã khác cho nút này."
+    },
+    "level_order": {
+      "fail": "Nút loại {child} không thể nằm dưới {parent}.",
+      "suggestion": "Di chuyển nút hoặc đổi loại: danh mục chứa chương trình và chương trình chứa chương trình con."
+    },
+    "link_endpoints": {
+      "fail": "Liên kết giữa các tiến độ phải nối hai công việc khác nhau thuộc hai tiến độ khác nhau.",
+      "suggestion": "Chọn công việc từ các tiến độ khác nhau; trong cùng một tiến độ hãy dùng quan hệ phụ thuộc thông thường."
+    },
+    "link_repeats": {
+      "fail": "Hai công việc này đã được liên kết theo hướng này hoặc hướng kia; liên kết sẽ lặp lại hoặc tạo vòng lặp.",
+      "suggestion": "Xóa liên kết hiện có trước hoặc chọn công việc khác."
+    },
+    "lag_extreme": {
+      "fail": "Độ trễ {days} ngày giữa hai dự án dài bất thường.",
+      "suggestion": "Kiểm tra đơn vị: độ trễ nhập theo ngày."
+    }
   }
 }

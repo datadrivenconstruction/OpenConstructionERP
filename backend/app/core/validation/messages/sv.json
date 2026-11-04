@@ -1763,5 +1763,71 @@
       "fail": "Resultatet är {result}, men {count} checklistpunkter underkändes.",
       "suggestion": "Rätta resultatet eller granska de underkända punkterna."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakten saknar namn: inget företag, inget juridiskt namn, inget förnamn eller efternamn.",
+      "suggestion": "Ange företagsnamnet eller personens namn."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' är inte ett giltigt datum.",
+      "suggestion": "Använd formatet ÅÅÅÅ-MM-DD, till exempel 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Betalningsvillkoret '{value}' är inte ett heltal dagar mellan 0 och {max}.",
+      "suggestion": "Ange betalningsvillkoret i dagar, till exempel 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prekvalificeringen är godkänd men gick ut {date}.",
+      "suggestion": "Förnya prekvalificeringen eller sätt dess status till utgången."
+    },
+    "vat_country_mismatch": {
+      "fail": "Momsnumret {vat} börjar med {prefix}, men landet är {country}.",
+      "suggestion": "Kontrollera momsnumret och kontaktens land."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Affärsmöjligheten är värd {value} men saknar valuta.",
+      "suggestion": "Välj valuta för det uppskattade värdet."
+    },
+    "date_invalid": {
+      "fail": "Det förväntade avslutsdatumet {value} är inget riktigt datum.",
+      "suggestion": "Ange ett giltigt datum i formatet ÅÅÅÅ-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Affärsmöjligheten är fortfarande öppen, men det förväntade avslutsdatumet {date} har passerat.",
+      "suggestion": "Uppdatera avslutsdatumet eller markera affärsmöjligheten som vunnen eller förlorad."
+    },
+    "won_without_value": {
+      "fail": "Affärsmöjligheten är vunnen men saknar värde; projektbudgeten skulle börja på noll.",
+      "suggestion": "Ange värdet på det tilldelade kontraktet."
+    },
+    "owner_missing": {
+      "fail": "Den öppna affärsmöjligheten saknar ansvarig.",
+      "suggestion": "Tilldela den som ansvarar för anbudet."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Koden {code} används redan av en annan nod under samma överordnade.",
+      "suggestion": "Använd en annan kod för noden."
+    },
+    "level_order": {
+      "fail": "En nod av typen {child} kan inte ligga under {parent}.",
+      "suggestion": "Flytta noden eller ändra dess typ: en portfölj innehåller program och ett program innehåller delprogram."
+    },
+    "link_endpoints": {
+      "fail": "En länk mellan tidplaner måste förbinda två olika aktiviteter i två olika tidplaner.",
+      "suggestion": "Välj aktiviteter från olika tidplaner; inom en tidplan används ett vanligt beroende."
+    },
+    "link_repeats": {
+      "fail": "De två aktiviteterna är redan länkade, i den ena eller andra riktningen; länken skulle upprepas eller sluta en slinga.",
+      "suggestion": "Ta först bort den befintliga länken eller välj andra aktiviteter."
+    },
+    "lag_extreme": {
+      "fail": "En fördröjning på {days} dagar mellan två projekt är ovanligt lång.",
+      "suggestion": "Kontrollera enheten: fördröjningen anges i dagar."
+    }
   }
 }

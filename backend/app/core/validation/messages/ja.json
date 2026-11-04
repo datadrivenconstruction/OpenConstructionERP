@@ -1763,5 +1763,71 @@
       "fail": "結果は {result} ですが、チェックリストの {count} 項目が不合格です。",
       "suggestion": "結果を修正するか、不合格の項目を確認してください。"
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "連絡先に名前がありません。会社名、正式名称、姓名のいずれもありません。",
+      "suggestion": "会社名または個人名を入力してください。"
+    },
+    "date_invalid": {
+      "fail": "{field}「{value}」は有効な日付ではありません。",
+      "suggestion": "YYYY-MM-DD 形式で入力してください（例: 2027-03-31）。"
+    },
+    "payment_terms_invalid": {
+      "fail": "支払条件「{value}」は 0 から {max} までの整数日ではありません。",
+      "suggestion": "支払期間を日数で入力してください（例: 30）。"
+    },
+    "prequalification_lapsed": {
+      "fail": "事前資格審査は承認済みですが、{date} に期限切れとなりました。",
+      "suggestion": "事前資格審査を更新するか、状態を期限切れに設定してください。"
+    },
+    "vat_country_mismatch": {
+      "fail": "VAT 番号 {vat} は {prefix} で始まりますが、国は {country} です。",
+      "suggestion": "VAT 番号と連絡先の国を確認してください。"
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "案件の金額は {value} ですが、通貨が未設定です。",
+      "suggestion": "見積金額の通貨を選択してください。"
+    },
+    "date_invalid": {
+      "fail": "完了予定日 {value} は実在しない日付です。",
+      "suggestion": "YYYY-MM-DD 形式で有効な日付を入力してください。"
+    },
+    "close_date_passed": {
+      "fail": "案件はまだ進行中ですが、完了予定日 {date} を過ぎています。",
+      "suggestion": "完了予定日を更新するか、案件を受注または失注にしてください。"
+    },
+    "won_without_value": {
+      "fail": "案件は受注済みですが金額がなく、プロジェクト予算がゼロから始まってしまいます。",
+      "suggestion": "受注した契約金額を入力してください。"
+    },
+    "owner_missing": {
+      "fail": "進行中の案件に担当者がいません。",
+      "suggestion": "入札の責任者を割り当ててください。"
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "コード {code} は同じ親の下にある別のノードで既に使われています。",
+      "suggestion": "このノードには別のコードを使用してください。"
+    },
+    "level_order": {
+      "fail": "{child} タイプのノードは {parent} の下に置けません。",
+      "suggestion": "ノードを移動するかタイプを変更してください。ポートフォリオはプログラムを、プログラムはサブプログラムを含みます。"
+    },
+    "link_endpoints": {
+      "fail": "工程表間のリンクは、異なる 2 つの工程表にある異なる 2 つの作業を結ぶ必要があります。",
+      "suggestion": "異なる工程表の作業を選んでください。同一工程表内では通常の依存関係を使います。"
+    },
+    "link_repeats": {
+      "fail": "この 2 つの作業は既にどちらかの向きでリンクされており、リンクが重複するか循環になります。",
+      "suggestion": "先に既存のリンクを削除するか、別の作業を選んでください。"
+    },
+    "lag_extreme": {
+      "fail": "2 つのプロジェクト間の {days} 日のラグは異常に長いです。",
+      "suggestion": "単位を確認してください。ラグは日数で入力します。"
+    }
   }
 }

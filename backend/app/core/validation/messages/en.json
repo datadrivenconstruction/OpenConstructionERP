@@ -1763,5 +1763,71 @@
       "fail": "The result is {result}, but {count} checklist items failed.",
       "suggestion": "Correct the result, or review the failed checklist items."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "The contact has no name: no company, legal name, first name or last name.",
+      "suggestion": "Enter the company name or the person's name."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' is not a valid date.",
+      "suggestion": "Use the format YYYY-MM-DD, for example 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Payment terms '{value}' are not a whole number of days between 0 and {max}.",
+      "suggestion": "Enter the payment period in days, for example 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prequalification is approved, but it ran out on {date}.",
+      "suggestion": "Renew the prequalification or set its status to expired."
+    },
+    "vat_country_mismatch": {
+      "fail": "VAT number {vat} starts with {prefix}, but the country is {country}.",
+      "suggestion": "Check the VAT number and the country of the contact."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "The deal is worth {value} but has no currency.",
+      "suggestion": "Choose the currency of the estimated value."
+    },
+    "date_invalid": {
+      "fail": "The expected close date {value} is not a real date.",
+      "suggestion": "Enter a valid date in the format YYYY-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "The deal is still open, but its expected close date {date} has passed.",
+      "suggestion": "Update the close date, or mark the deal as won or lost."
+    },
+    "won_without_value": {
+      "fail": "The deal is won but has no value, so the project budget would start at zero.",
+      "suggestion": "Enter the awarded contract value."
+    },
+    "owner_missing": {
+      "fail": "The deal is open but has no owner.",
+      "suggestion": "Assign the person who is responsible for the bid."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "The code {code} is already used by another node under the same parent.",
+      "suggestion": "Use a different code for this node."
+    },
+    "level_order": {
+      "fail": "A {child} cannot sit under a {parent}.",
+      "suggestion": "Move the node, or change its type: a portfolio holds programmes and a programme holds subprogrammes."
+    },
+    "link_endpoints": {
+      "fail": "A cross-schedule link must join two different activities in two different schedules.",
+      "suggestion": "Pick activities from different schedules; inside one schedule use an ordinary dependency."
+    },
+    "link_repeats": {
+      "fail": "These two activities are already linked, in one direction or the other, so this link would repeat or close a loop.",
+      "suggestion": "Remove the existing link first, or choose different activities."
+    },
+    "lag_extreme": {
+      "fail": "A lag of {days} days between two projects is unusually long.",
+      "suggestion": "Check the unit: the lag is entered in days."
+    }
   }
 }

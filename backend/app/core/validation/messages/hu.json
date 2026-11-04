@@ -1763,5 +1763,71 @@
       "fail": "Az eredmény {result}, de {count} ellenőrzőlista-tétel nem felelt meg.",
       "suggestion": "Javítsa az eredményt, vagy vizsgálja át a nem megfelelő tételeket."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "A kapcsolatnak nincs neve: sem cég, sem jogi név, sem keresztnév, sem vezetéknév.",
+      "suggestion": "Adja meg a cég nevét vagy a személy nevét."
+    },
+    "date_invalid": {
+      "fail": "A(z) {field} '{value}' nem érvényes dátum.",
+      "suggestion": "Használja az ÉÉÉÉ-HH-NN formátumot, például 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "A '{value}' fizetési határidő nem egész napszám 0 és {max} között.",
+      "suggestion": "Adja meg a fizetési határidőt napokban, például 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Az előminősítés jóváhagyott, de {date} napon lejárt.",
+      "suggestion": "Újítsa meg az előminősítést, vagy állítsa lejártra az állapotát."
+    },
+    "vat_country_mismatch": {
+      "fail": "A(z) {vat} adószám {prefix} előtaggal kezdődik, de az ország {country}.",
+      "suggestion": "Ellenőrizze az adószámot és a kapcsolat országát."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Az ügylet értéke {value}, de nincs pénzneme.",
+      "suggestion": "Válassza ki a becsült érték pénznemét."
+    },
+    "date_invalid": {
+      "fail": "A várt lezárási dátum ({value}) nem létező dátum.",
+      "suggestion": "Adjon meg érvényes dátumot ÉÉÉÉ-HH-NN formátumban."
+    },
+    "close_date_passed": {
+      "fail": "Az ügylet még nyitott, de a várt lezárási dátum ({date}) elmúlt.",
+      "suggestion": "Frissítse a lezárási dátumot, vagy jelölje az ügyletet megnyertnek vagy elveszettnek."
+    },
+    "won_without_value": {
+      "fail": "Az ügylet megnyert, de nincs értéke; a projekt költségvetése nulláról indulna.",
+      "suggestion": "Adja meg az odaítélt szerződés értékét."
+    },
+    "owner_missing": {
+      "fail": "A nyitott ügyletnek nincs felelőse.",
+      "suggestion": "Rendelje hozzá az ajánlatért felelős személyt."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "A(z) {code} kódot már használja egy másik csomópont ugyanazon szülő alatt.",
+      "suggestion": "Használjon másik kódot ehhez a csomóponthoz."
+    },
+    "level_order": {
+      "fail": "A(z) {child} típusú csomópont nem lehet a(z) {parent} alatt.",
+      "suggestion": "Helyezze át a csomópontot, vagy módosítsa a típusát: a portfólió programokat, a program alprogramokat tartalmaz."
+    },
+    "link_endpoints": {
+      "fail": "Az ütemtervek közötti kapcsolatnak két különböző tevékenységet kell összekötnie két különböző ütemtervben.",
+      "suggestion": "Válasszon tevékenységeket különböző ütemtervekből; egy ütemterven belül használjon szokásos függőséget."
+    },
+    "link_repeats": {
+      "fail": "Ez a két tevékenység már össze van kötve, az egyik vagy a másik irányban; a kapcsolat ismétlődne vagy hurkot zárna.",
+      "suggestion": "Először törölje a meglévő kapcsolatot, vagy válasszon más tevékenységeket."
+    },
+    "lag_extreme": {
+      "fail": "A két projekt közötti {days} napos késleltetés szokatlanul hosszú.",
+      "suggestion": "Ellenőrizze a mértékegységet: a késleltetést napokban kell megadni."
+    }
   }
 }

@@ -1763,5 +1763,71 @@
       "fail": "Rezultat je {result}, ali nije prošlo stavki kontrolnog popisa: {count}.",
       "suggestion": "Ispravite rezultat ili pregledajte stavke koje nisu prošle."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakt nema naziv: nema tvrtke, pravnog naziva, imena ni prezimena.",
+      "suggestion": "Unesite naziv tvrtke ili ime osobe."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' nije valjan datum.",
+      "suggestion": "Koristite format GGGG-MM-DD, na primjer 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Rok plaćanja '{value}' nije cijeli broj dana između 0 i {max}.",
+      "suggestion": "Unesite rok plaćanja u danima, na primjer 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Pretkvalifikacija je odobrena, ali je istekla {date}.",
+      "suggestion": "Obnovite pretkvalifikaciju ili postavite njezin status na isteklo."
+    },
+    "vat_country_mismatch": {
+      "fail": "PDV broj {vat} počinje s {prefix}, a država je {country}.",
+      "suggestion": "Provjerite PDV broj i državu kontakta."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Prilika vrijedi {value}, ali nema valutu.",
+      "suggestion": "Odaberite valutu procijenjene vrijednosti."
+    },
+    "date_invalid": {
+      "fail": "Očekivani datum zatvaranja {value} nije stvaran datum.",
+      "suggestion": "Unesite valjan datum u formatu GGGG-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Prilika je još otvorena, ali je očekivani datum zatvaranja {date} prošao.",
+      "suggestion": "Ažurirajte datum zatvaranja ili označite priliku kao dobivenu ili izgubljenu."
+    },
+    "won_without_value": {
+      "fail": "Prilika je dobivena, ali nema vrijednost; proračun projekta počeo bi od nule.",
+      "suggestion": "Unesite vrijednost dodijeljenog ugovora."
+    },
+    "owner_missing": {
+      "fail": "Otvorena prilika nema odgovornu osobu.",
+      "suggestion": "Dodijelite osobu odgovornu za ponudu."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Šifru {code} već koristi drugi čvor pod istim nadređenim.",
+      "suggestion": "Koristite drugu šifru za ovaj čvor."
+    },
+    "level_order": {
+      "fail": "Čvor tipa {child} ne može biti pod {parent}.",
+      "suggestion": "Premjestite čvor ili promijenite njegov tip: portfelj sadrži programe, a program podprograme."
+    },
+    "link_endpoints": {
+      "fail": "Veza između planova mora povezivati dvije različite aktivnosti u dva različita plana.",
+      "suggestion": "Odaberite aktivnosti iz različitih planova; unutar jednog plana koristite običnu ovisnost."
+    },
+    "link_repeats": {
+      "fail": "Ove dvije aktivnosti već su povezane, u jednom ili drugom smjeru; veza bi se ponovila ili zatvorila petlju.",
+      "suggestion": "Prvo uklonite postojeću vezu ili odaberite druge aktivnosti."
+    },
+    "lag_extreme": {
+      "fail": "Odmak od {days} dana između dva projekta neobično je dug.",
+      "suggestion": "Provjerite jedinicu: odmak se unosi u danima."
+    }
   }
 }

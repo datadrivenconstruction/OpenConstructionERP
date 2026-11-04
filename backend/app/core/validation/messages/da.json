@@ -1763,5 +1763,71 @@
       "fail": "Resultatet er {result}, men {count} tjeklistepunkter er ikke bestået.",
       "suggestion": "Ret resultatet, eller gennemgå de punkter, der ikke er bestået."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "Kontakten har intet navn: ingen virksomhed, intet juridisk navn, intet fornavn eller efternavn.",
+      "suggestion": "Angiv virksomhedens navn eller personens navn."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' er ikke en gyldig dato.",
+      "suggestion": "Brug formatet ÅÅÅÅ-MM-DD, for eksempel 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "Betalingsbetingelsen '{value}' er ikke et helt antal dage mellem 0 og {max}.",
+      "suggestion": "Angiv betalingsfristen i dage, for eksempel 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "Prækvalificeringen er godkendt, men udløb den {date}.",
+      "suggestion": "Forny prækvalificeringen eller sæt dens status til udløbet."
+    },
+    "vat_country_mismatch": {
+      "fail": "Momsnummer {vat} begynder med {prefix}, men landet er {country}.",
+      "suggestion": "Kontrollér momsnummeret og kontaktens land."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "Salgsmuligheden har en værdi på {value}, men ingen valuta.",
+      "suggestion": "Vælg valutaen for den anslåede værdi."
+    },
+    "date_invalid": {
+      "fail": "Den forventede lukkedato {value} er ikke en rigtig dato.",
+      "suggestion": "Angiv en gyldig dato i formatet ÅÅÅÅ-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "Salgsmuligheden er stadig åben, men den forventede lukkedato {date} er overskredet.",
+      "suggestion": "Opdater lukkedatoen, eller markér salgsmuligheden som vundet eller tabt."
+    },
+    "won_without_value": {
+      "fail": "Salgsmuligheden er vundet, men har ingen værdi; projektbudgettet ville starte på nul.",
+      "suggestion": "Angiv værdien af den tildelte kontrakt."
+    },
+    "owner_missing": {
+      "fail": "Den åbne salgsmulighed har ingen ansvarlig.",
+      "suggestion": "Tildel den person, der er ansvarlig for tilbuddet."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "Koden {code} bruges allerede af en anden knude under samme overordnede.",
+      "suggestion": "Brug en anden kode til denne knude."
+    },
+    "level_order": {
+      "fail": "En knude af typen {child} kan ikke ligge under {parent}.",
+      "suggestion": "Flyt knuden eller ændr dens type: en portefølje indeholder programmer, og et program indeholder underprogrammer."
+    },
+    "link_endpoints": {
+      "fail": "Et link mellem tidsplaner skal forbinde to forskellige aktiviteter i to forskellige tidsplaner.",
+      "suggestion": "Vælg aktiviteter fra forskellige tidsplaner; inden for én tidsplan bruges en almindelig afhængighed."
+    },
+    "link_repeats": {
+      "fail": "De to aktiviteter er allerede forbundet, i den ene eller anden retning; linket ville gentage sig eller lukke en løkke.",
+      "suggestion": "Fjern først det eksisterende link, eller vælg andre aktiviteter."
+    },
+    "lag_extreme": {
+      "fail": "En forskydning på {days} dage mellem to projekter er usædvanligt lang.",
+      "suggestion": "Kontrollér enheden: forskydningen angives i dage."
+    }
   }
 }

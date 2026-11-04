@@ -18,6 +18,7 @@ from sqlalchemy import delete as sa_delete
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.dependencies import accessible_project_ids, verify_project_access
 from app.modules.portfolio.models import (
     PortfolioCrossLink,
@@ -26,6 +27,7 @@ from app.modules.portfolio.models import (
 )
 from app.modules.portfolio.schemas import CrossLinkCreate, NodeCreate, NodePatch
 from app.modules.portfolio.tree_logic import build_visible_tree
+from app.modules.portfolio.validators import PORTFOLIO_RULE_SET
 
 
 def _not_found(detail: str = "Not found") -> HTTPException:
@@ -90,9 +92,61 @@ class PortfolioService:
 
     # ── Node CRUD ────────────────────────────────────────────────────────────
 
+    async def _node_state(
+        self,
+        *,
+        node_type: str,
+        code: str,
+        parent_id: uuid.UUID | None,
+        node_id: uuid.UUID | None = None,
+    ) -> dict:
+        """What the ``portfolio`` node rules read: own type and code, parent type, child types, sibling codes."""
+        parent_type = None
+        if parent_id is not None:
+            parent = await self.session.get(PortfolioNode, parent_id)
+            parent_type = parent.node_type if parent is not None else None
+        siblings = select(PortfolioNode.code).where(
+            PortfolioNode.parent_id.is_(None) if parent_id is None else PortfolioNode.parent_id == parent_id
+        )
+        child_types: list[str] = []
+        if node_id is not None:
+            siblings = siblings.where(PortfolioNode.id != node_id)
+            child_types = list(
+                (await self.session.execute(select(PortfolioNode.node_type).where(PortfolioNode.parent_id == node_id)))
+                .scalars()
+                .all()
+            )
+        return {
+            "node_type": node_type,
+            "code": code,
+            "parent_type": parent_type,
+            "child_types": child_types,
+            "sibling_codes": list((await self.session.execute(siblings)).scalars().all()),
+        }
+
+    @staticmethod
+    async def _check_node_rules(state: dict, *, node_id: str, operation: str, before: dict | None = None):  # noqa: ANN205
+        """Run the ``portfolio`` rule set over the node as it will be stored; ERROR findings answer 422."""
+        return await gate_rule_set(
+            state,
+            rule_set=PORTFOLIO_RULE_SET,
+            key="node",
+            target_type="portfolio_node",
+            target_id=node_id,
+            operation=operation,
+            subject="portfolio node",
+            error_code="portfolio_rules_failed",
+            before=before,
+        )
+
     async def create_node(self, data: NodeCreate, user_id: str) -> PortfolioNode:
         if data.parent_id is not None:
             await self.get_node(data.parent_id)  # 404 if the parent is missing
+        report = await self._check_node_rules(
+            await self._node_state(node_type=data.node_type, code=data.code, parent_id=data.parent_id),
+            node_id="",
+            operation="create",
+        )
         node = PortfolioNode(
             parent_id=data.parent_id,
             node_type=data.node_type,
@@ -104,6 +158,7 @@ class PortfolioService:
         )
         self.session.add(node)
         await self.session.flush()
+        node.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return node
 
     async def _require_manageable(self, node: PortfolioNode, user_id: str) -> None:
@@ -131,6 +186,21 @@ class PortfolioService:
         await self._require_manageable(node, user_id)
 
         fields_set = data.model_fields_set
+        new_parent = data.parent_id if "parent_id" in fields_set else node.parent_id
+        before = await self._node_state(
+            node_type=node.node_type, code=node.code, parent_id=node.parent_id, node_id=node.id
+        )
+        report = await self._check_node_rules(
+            await self._node_state(
+                node_type=data.node_type if data.node_type is not None else node.node_type,
+                code=data.code if data.code is not None else node.code,
+                parent_id=new_parent,
+                node_id=node.id,
+            ),
+            node_id=str(node.id),
+            operation="update",
+            before=before,
+        )
         if "parent_id" in fields_set:
             if data.parent_id is None:
                 node.parent_id = None
@@ -148,6 +218,7 @@ class PortfolioService:
             node.sort_order = data.sort_order
 
         await self.session.flush()
+        node.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return node
 
     async def delete_node(self, node_id: uuid.UUID, user_id: str) -> None:
@@ -226,6 +297,44 @@ class PortfolioService:
             data.predecessor_activity_id, data.predecessor_schedule_id, "predecessor"
         )
         await self._assert_activity_in_schedule(data.successor_activity_id, data.successor_schedule_id, "successor")
+        pair = (
+            data.predecessor_schedule_id,
+            data.predecessor_activity_id,
+            data.successor_schedule_id,
+            data.successor_activity_id,
+        )
+
+        async def link_exists(ends: tuple) -> bool:
+            found = await self.session.scalar(
+                select(PortfolioCrossLink.id)
+                .where(
+                    PortfolioCrossLink.predecessor_schedule_id == ends[0],
+                    PortfolioCrossLink.predecessor_activity_id == ends[1],
+                    PortfolioCrossLink.successor_schedule_id == ends[2],
+                    PortfolioCrossLink.successor_activity_id == ends[3],
+                )
+                .limit(1)
+            )
+            return found is not None
+
+        report = await gate_rule_set(
+            {
+                "predecessor_schedule_id": data.predecessor_schedule_id,
+                "predecessor_activity_id": data.predecessor_activity_id,
+                "successor_schedule_id": data.successor_schedule_id,
+                "successor_activity_id": data.successor_activity_id,
+                "lag_days": data.lag_days,
+                "duplicate": await link_exists(pair),
+                "reverse_exists": await link_exists((pair[2], pair[3], pair[0], pair[1])),
+            },
+            rule_set=PORTFOLIO_RULE_SET,
+            key="cross_link",
+            target_type="portfolio_cross_link",
+            target_id="",
+            operation="create",
+            subject="cross-schedule link",
+            error_code="portfolio_rules_failed",
+        )
         link = PortfolioCrossLink(
             predecessor_schedule_id=data.predecessor_schedule_id,
             predecessor_activity_id=data.predecessor_activity_id,
@@ -236,6 +345,7 @@ class PortfolioService:
         )
         self.session.add(link)
         await self.session.flush()
+        link.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return link
 
     async def list_cross_links(self, schedule_id: uuid.UUID, user_id: str) -> list[PortfolioCrossLink]:

@@ -1763,5 +1763,71 @@
       "fail": "El resultado es {result}, pero {count} puntos de la lista de control no cumplen.",
       "suggestion": "Corrija el resultado o revise los puntos que no cumplen."
     }
+  },
+  "contacts": {
+    "identity_missing": {
+      "fail": "El contacto no tiene nombre: ni empresa, ni razón social, ni nombre ni apellido.",
+      "suggestion": "Introduzca el nombre de la empresa o de la persona."
+    },
+    "date_invalid": {
+      "fail": "{field} '{value}' no es una fecha válida.",
+      "suggestion": "Use el formato AAAA-MM-DD, por ejemplo 2027-03-31."
+    },
+    "payment_terms_invalid": {
+      "fail": "El plazo de pago '{value}' no es un número entero de días entre 0 y {max}.",
+      "suggestion": "Introduzca el plazo de pago en días, por ejemplo 30."
+    },
+    "prequalification_lapsed": {
+      "fail": "La precalificación está aprobada, pero caducó el {date}.",
+      "suggestion": "Renueve la precalificación o cambie su estado a caducada."
+    },
+    "vat_country_mismatch": {
+      "fail": "El NIF-IVA {vat} empieza por {prefix}, pero el país es {country}.",
+      "suggestion": "Compruebe el NIF-IVA y el país del contacto."
+    }
+  },
+  "crm": {
+    "currency_required": {
+      "fail": "La oportunidad tiene un valor de {value} pero no tiene moneda.",
+      "suggestion": "Elija la moneda del valor estimado."
+    },
+    "date_invalid": {
+      "fail": "La fecha de cierre prevista {value} no es una fecha real.",
+      "suggestion": "Introduzca una fecha válida con el formato AAAA-MM-DD."
+    },
+    "close_date_passed": {
+      "fail": "La oportunidad sigue abierta, pero su fecha de cierre prevista {date} ya pasó.",
+      "suggestion": "Actualice la fecha de cierre o marque la oportunidad como ganada o perdida."
+    },
+    "won_without_value": {
+      "fail": "La oportunidad está ganada pero no tiene valor; el presupuesto del proyecto empezaría en cero.",
+      "suggestion": "Introduzca el valor del contrato adjudicado."
+    },
+    "owner_missing": {
+      "fail": "La oportunidad abierta no tiene responsable.",
+      "suggestion": "Asigne a la persona responsable de la oferta."
+    }
+  },
+  "portfolio": {
+    "code_duplicate": {
+      "fail": "El código {code} ya lo usa otro nodo bajo el mismo padre.",
+      "suggestion": "Use otro código para este nodo."
+    },
+    "level_order": {
+      "fail": "Un nodo de tipo {child} no puede estar bajo {parent}.",
+      "suggestion": "Mueva el nodo o cambie su tipo: una cartera contiene programas y un programa contiene subprogramas."
+    },
+    "link_endpoints": {
+      "fail": "Un vínculo entre cronogramas debe unir dos actividades distintas de dos cronogramas distintos.",
+      "suggestion": "Elija actividades de cronogramas distintos; dentro de un cronograma use una dependencia normal."
+    },
+    "link_repeats": {
+      "fail": "Estas dos actividades ya están vinculadas, en un sentido o en otro; el vínculo se repetiría o cerraría un bucle.",
+      "suggestion": "Elimine primero el vínculo existente o elija otras actividades."
+    },
+    "lag_extreme": {
+      "fail": "Un desfase de {days} días entre dos proyectos es inusualmente largo.",
+      "suggestion": "Compruebe la unidad: el desfase se introduce en días."
+    }
   }
 }
