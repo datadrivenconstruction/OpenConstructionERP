@@ -151,6 +151,7 @@ const preloaders: Record<string, () => void> = {
   '/payroll': () => void import('@/features/payroll/PayrollPage'),
   '/cost-benchmarks': () => void import('@/features/cost-benchmarks/CostBenchmarksPage'),
   '/crm': () => void import('@/features/crm'),
+  '/win-loss': () => void import('@/features/win-loss'),
   '/carbon': () => void import('@/features/carbon'),
   '/accommodation': () => void import('@/features/accommodation'),
   '/leasing': () => void import('@/features/leasing'),

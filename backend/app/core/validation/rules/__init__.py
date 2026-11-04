@@ -12220,6 +12220,101 @@ class BidLinkedTenderAwarded(_BidLevelingRule):
     check_name = "check_linked_tender_awarded"
 
 
+class _BidOutcomeRule(_SubcontractRule):
+    """Same translation body as the subcontract rules, over ``win_loss.validators``."""
+
+    standard = "bid_outcome"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        payload = context.data if isinstance(context.data, dict) else {}
+        if not payload:
+            return []
+        from app.modules.win_loss import validators as outcome_checks
+
+        findings = getattr(outcome_checks, self.check_name)(payload)
+        if not findings:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(self._message_key("fail"), locale=locale, **finding.params),
+                element_ref=finding.element_ref,
+                details=dict(finding.details),
+                suggestion=translate(self._message_key("suggestion"), locale=locale),
+            )
+            for finding in findings
+        ]
+
+
+class BidOutcomeWinnerRecorded(_BidOutcomeRule):
+    """Flags a lost bid with no winning price."""
+
+    rule_id = "bid_outcome.winner_recorded"
+    name = "Lost Bid Records The Winner"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a lost bid with no winning price."
+    check_name = "check_winner_recorded"
+
+
+class BidOutcomeWonMatchesPrice(_BidOutcomeRule):
+    """Flags a won bid whose winning price differs from our own."""
+
+    rule_id = "bid_outcome.won_matches_price"
+    name = "Won Bid Matches Our Price"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a won bid whose winning price differs from our own."
+    check_name = "check_won_matches_price"
+
+
+class BidOutcomeSecondAboveWinner(_BidOutcomeRule):
+    """Flags a second price lower than the winning price."""
+
+    rule_id = "bid_outcome.second_above_winner"
+    name = "Second Price Not Below Winner"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a second price lower than the winning price."
+    check_name = "check_second_not_below_winner"
+
+
+class BidOutcomeCompetitorsRecorded(_BidOutcomeRule):
+    """Flags a won or lost bid with no competitor count."""
+
+    rule_id = "bid_outcome.competitors_recorded"
+    name = "Decided Bid Records Competitors"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a won or lost bid with no competitor count."
+    check_name = "check_competitors_recorded"
+
+
+class BidOutcomeLostReasonRecorded(_BidOutcomeRule):
+    """Flags a lost bid with no reason."""
+
+    rule_id = "bid_outcome.lost_reason_recorded"
+    name = "Lost Bid Records A Reason"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a lost bid with no reason."
+    check_name = "check_lost_reason_recorded"
+
+
 class SubmittalReviewerAssigned(_SubmittalRule):
     """A submitted submittal must name the reviewer it is waiting on."""
 
@@ -12728,6 +12823,12 @@ def register_builtin_rules() -> None:
         (BidGapsPlugged(), ["bid_leveling", "bid_award"]),
         (BidAwardLeveled(), ["bid_award"]),
         (BidLinkedTenderAwarded(), ["bid_leveling"]),
+        # Bid outcome ledger
+        (BidOutcomeWinnerRecorded(), ["bid_outcome"]),
+        (BidOutcomeWonMatchesPrice(), ["bid_outcome"]),
+        (BidOutcomeSecondAboveWinner(), ["bid_outcome"]),
+        (BidOutcomeCompetitorsRecorded(), ["bid_outcome"]),
+        (BidOutcomeLostReasonRecorded(), ["bid_outcome"]),
         # Submittals (submission gate)
         # Registered into the "submittal" set, which
         # SubmittalService._validate_submittal passes on submit and on the

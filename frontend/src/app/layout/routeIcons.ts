@@ -190,6 +190,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/risks': ShieldAlert,
   // ── 8. Commercial ─────────────────────────────────────────────────
   '/crm': Briefcase,
+  '/win-loss': Scale,
   '/contracts': FileSignature,
   '/payment-clock': Scale,
   '/tax-withholding': Percent,

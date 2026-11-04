@@ -1,0 +1,49 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Bid outcome ledger data access layer."""
+
+from __future__ import annotations
+
+import uuid
+from typing import Any
+
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.win_loss.models import BidOutcome
+
+
+class BidOutcomeRepository:
+    """CRUD and filtered listing for ledger entries."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get_by_id(self, entry_id: uuid.UUID) -> BidOutcome | None:
+        return await self.session.get(BidOutcome, entry_id)
+
+    async def create(self, entry: BidOutcome) -> BidOutcome:
+        self.session.add(entry)
+        await self.session.flush()
+        return entry
+
+    async def update_fields(self, entry_id: uuid.UUID, **fields: Any) -> None:
+        if not fields:
+            return
+        await self.session.execute(update(BidOutcome).where(BidOutcome.id == entry_id).values(**fields))
+        await self.session.flush()
+
+    async def delete(self, entry_id: uuid.UUID) -> None:
+        await self.session.execute(delete(BidOutcome).where(BidOutcome.id == entry_id))
+        await self.session.flush()
+
+    async def list_all(
+        self, *, outcome: str | None = None, client: str | None = None, limit: int = 10000
+    ) -> list[BidOutcome]:
+        stmt = select(BidOutcome).order_by(BidOutcome.submitted_on.desc().nullslast(), BidOutcome.created_at.desc())
+        if outcome:
+            stmt = stmt.where(BidOutcome.outcome == outcome)
+        if client:
+            stmt = stmt.where(BidOutcome.client_name == client)
+        result = await self.session.execute(stmt.limit(limit))
+        return list(result.scalars().all())

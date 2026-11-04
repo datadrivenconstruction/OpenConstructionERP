@@ -1592,5 +1592,27 @@
       "fail": "Der Agentenentwurf '{title}' wartet seit {days} Tagen auf Prüfung (Grenze {limit}).",
       "suggestion": "Nehmen Sie den Entwurf an oder lehnen Sie ihn ab, oder schalten Sie den Agenten ab, wenn seine Entwürfe nicht genutzt werden."
     }
+  },
+  "bid_outcome": {
+    "winner_recorded": {
+      "fail": "Verlorenes Angebot {bid} hat keinen Zuschlagspreis",
+      "suggestion": "Zuschlagspreis eintragen, um den Abstand zu messen"
+    },
+    "won_matches_price": {
+      "fail": "Gewonnenes Angebot {bid}: Zuschlagspreis {winning} weicht vom eigenen Preis {ours} ab",
+      "suggestion": "Bei einem gewonnenen Angebot ist der Zuschlagspreis der eigene; einen der Werte korrigieren"
+    },
+    "second_above_winner": {
+      "fail": "Angebot {bid}: Zweitpreis {second} liegt unter dem Zuschlagspreis {winning}",
+      "suggestion": "Der Zweitpreis kann nicht unter dem des Gewinners liegen; beide prüfen"
+    },
+    "competitors_recorded": {
+      "fail": "Entschiedenes Angebot {bid} hat keine Mitbewerberzahl",
+      "suggestion": "Anzahl der weiteren Bieter eintragen"
+    },
+    "lost_reason_recorded": {
+      "fail": "Verlorenes Angebot {bid} hat keinen Grund",
+      "suggestion": "Hauptgrund wählen, damit das nächste Angebot daraus lernt"
+    }
   }
 }
