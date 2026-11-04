@@ -86,3 +86,19 @@ async def test_valid_inspection_completes_clean(client, admin_auth, project_id):
         assert done.status == "completed"
         assert done.validation_warnings == []
         await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_legacy_record_with_existing_violation_stays_editable(client, admin_auth, project_id):
+    async with async_session_factory() as session:
+        svc = InspectionService(session)
+        insp = await svc.create_inspection(_data(project_id))
+        await svc.repo.update_fields(
+            insp.id, result="pass", checklist_data=[{"id": "1", "question": "Level?", "response": "fail"}]
+        )
+        await session.refresh(insp)
+        updated = await svc.update_inspection(
+            insp.id, InspectionUpdate.model_construct(_fields_set={"title"}, title="Renamed")
+        )
+        assert updated.title == "Renamed"
+        await session.rollback()

@@ -92,14 +92,8 @@ class NCRService:
             )
         return str(order_uuid)
 
-    async def _check_rules(
-        self, state: dict[str, Any], *, ncr_id: str, project_id: uuid.UUID, operation: str
-    ) -> ValidationReport:
-        """Run the ``ncr`` rule set over the record as it will be stored; ERROR findings answer 422.
-
-        WARNING findings do not block: the caller attaches them to the response.
-        """
-        report = await validation_engine.validate(
+    async def _run(self, state: dict[str, Any], ncr_id: str, project_id: uuid.UUID, operation: str) -> ValidationReport:
+        return await validation_engine.validate(
             data={"ncr": {**state, "id": ncr_id}},
             rule_sets=[NCR_RULE_SET],
             target_type="ncr",
@@ -107,12 +101,33 @@ class NCRService:
             project_id=str(project_id),
             metadata={"locale": get_locale(), "operation": operation},
         )
-        if report.has_errors:
+
+    async def _check_rules(
+        self,
+        state: dict[str, Any],
+        *,
+        ncr_id: str,
+        project_id: uuid.UUID,
+        operation: str,
+        before: dict[str, Any] | None = None,
+    ) -> ValidationReport:
+        """Run the ``ncr`` rule set over the record as it will be stored; ERROR findings answer 422.
+
+        WARNING findings do not block: the caller attaches them to the response.
+        """
+        report = await self._run(state, ncr_id, project_id, operation)
+        blocking = list(report.errors)
+        if blocking and before is not None:
+            # A record saved before these rules existed is not frozen: only errors the edit introduces block.
+            legacy = {(r.rule_id, r.message) for r in (await self._run(before, ncr_id, project_id, operation)).errors}
+            blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+        if blocking:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=rule_errors_detail(
                     report,
                     f"This NCR cannot be saved ({operation}) until the errors listed below are corrected.",
+                    blocking,
                 ),
             )
         return report
@@ -360,8 +375,11 @@ class NCRService:
             fields["verified_by"] = user_id
             fields["verified_at"] = datetime.now(UTC)
 
-        state = {**self._state_of(ncr), **{k: v for k, v in fields.items() if k in self._state_of(ncr)}}
-        report = await self._check_rules(state, ncr_id=str(ncr_id), project_id=ncr.project_id, operation="update")
+        prior = self._state_of(ncr)
+        state = {**prior, **{k: v for k, v in fields.items() if k in prior}}
+        report = await self._check_rules(
+            state, ncr_id=str(ncr_id), project_id=ncr.project_id, operation="update", before=prior
+        )
 
         await self.repo.update_fields(ncr_id, **fields)
         await self.session.refresh(ncr)
