@@ -18,6 +18,7 @@
  * to attach rows to). Mirrors the per-report pattern of ReportAttachments.
  */
 
+import { clampInput } from '@/shared/lib/clampInput';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -227,7 +228,7 @@ function WorkforceLogEditor({
                 min={0}
                 value={draft.headcount || ''}
                 onChange={(e) =>
-                  setDraft((d) => ({ ...d, headcount: parseInt(e.target.value, 10) || 0 }))
+                  setDraft((d) => ({ ...d, headcount: clampInput(e.target.value, 0, Number.POSITIVE_INFINITY, true) }))
                 }
                 placeholder={t('fieldreports.headcount', { defaultValue: 'Headcount' })}
                 aria-label={t('fieldreports.headcount', { defaultValue: 'Headcount' })}

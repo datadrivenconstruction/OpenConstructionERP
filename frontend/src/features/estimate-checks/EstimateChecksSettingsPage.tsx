@@ -4,6 +4,7 @@
  * Estimate check settings: the user's own display choice, and (for managers)
  * which figures the company checks and the ranges it accepts.
  */
+import { clampInput } from '@/shared/lib/clampInput';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -122,7 +123,7 @@ export function EstimateChecksSettingsPage() {
                   max={200}
                   className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
                   value={draft.min_comparables}
-                  onChange={(e) => setDraft({ ...draft, min_comparables: Number(e.target.value) || 2 })}
+                  onChange={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 2, 200, true) })}
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-content-secondary">
@@ -133,7 +134,7 @@ export function EstimateChecksSettingsPage() {
                   className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
                   value={draft.database_rate_tolerance_pct}
                   onChange={(e) =>
-                    setDraft({ ...draft, database_rate_tolerance_pct: Number(e.target.value) || 30 })
+                    setDraft({ ...draft, database_rate_tolerance_pct: clampInput(e.target.value, 1) })
                   }
                 />
               </label>

@@ -4,6 +4,7 @@ import { Fragment, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { clampInput } from '@/shared/lib/clampInput';
 import { fetchAllPages } from '@/shared/lib/apiHelpers';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
@@ -339,15 +340,15 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label htmlFor="risk-probability" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.probability', { defaultValue: 'Probability' })}</label>
-              <input id="risk-probability" type="number" min={0} max={1} step={0.1} value={f.probability} onChange={(e) => set('probability', parseFloat(e.target.value) || 0)} className={inputCls} />
+              <input id="risk-probability" type="number" min={0} max={1} step={0.1} value={f.probability} onChange={(e) => set('probability', clampInput(e.target.value, 0, 1))} className={inputCls} />
             </div>
             <div>
               <label htmlFor="risk-impact-cost" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.impact_cost', { defaultValue: 'Cost Impact' })}</label>
-              <input id="risk-impact-cost" type="number" min={0} step="any" value={f.impactCost} onChange={(e) => set('impactCost', parseFloat(e.target.value) || 0)} className={inputCls} />
+              <input id="risk-impact-cost" type="number" min={0} step="any" value={f.impactCost} onChange={(e) => set('impactCost', clampInput(e.target.value, 0))} className={inputCls} />
             </div>
             <div>
               <label htmlFor="risk-schedule-days" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
-              <input id="risk-schedule-days" type="number" min={0} max={36500} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
+              <input id="risk-schedule-days" type="number" min={0} max={36500} value={f.scheduleDays} onChange={(e) => set('scheduleDays', clampInput(e.target.value, 0, 36500, true))} className={inputCls} />
             </div>
           </div>
           <div>
