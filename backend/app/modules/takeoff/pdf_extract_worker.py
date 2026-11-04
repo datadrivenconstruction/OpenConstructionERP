@@ -320,17 +320,14 @@ def extract_pdf_data(pdf_path: str, max_pages: int | None = None, *, filename: s
                     if text:
                         page_text = text
                 else:
+                    # A drawing's title block is found as a table; the text outside
+                    # it (scale note, room names) must still reach page_text.
+                    page_text = page.extract_text() or ""
                     tables = page.extract_tables()
-                    if tables:
-                        for table in tables:
-                            cleaned = [[str(cell or "") for cell in row] for row in table]
-                            page_tables.append(cleaned)
-                            for row in cleaned:
-                                page_text += "\t".join(row) + "\n"
-                    else:
-                        text = page.extract_text()
-                        if text:
-                            page_text = text
+                    for table in tables or []:
+                        cleaned = [[str(cell or "") for cell in row] for row in table]
+                        page_tables.append(cleaned)
+                        page_text += ("\n" if page_text else "") + "\n".join("\t".join(row) for row in cleaned)
 
                 has_text = bool(page_text.strip())
                 if not has_text:

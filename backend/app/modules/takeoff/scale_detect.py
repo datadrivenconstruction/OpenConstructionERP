@@ -52,7 +52,14 @@ _SCALE_KEYWORD_WINDOW = 24
 # it ranks with the keyword tier even without the word "scale".
 _CONF_SCALE_KEYWORD = 0.95
 _CONF_IMPERIAL = 0.9
+_CONF_LABEL_ABOVE = 0.9
 _CONF_BARE_RATIO = 0.7
+# A bare ratio that no drawing is plotted at, or one beside "section"/"detail",
+# is still offered but never outranks the sheet's own scale.
+_CONF_ODD_RATIO = 0.5
+_CONF_DETAIL = 0.45
+# Below this the best candidate is offered in the list but not applied.
+_MIN_BEST_CONFIDENCE = 0.5
 
 # Words that, appearing immediately before a ``1:N`` token, mark it as a
 # drawing scale even without the literal "scale" (covers common title-block and
@@ -73,6 +80,93 @@ _SCALE_WORDS: tuple[str, ...] = (
     "schaal",  # NL
     "skala",  # PL / SE
     "масштаб",  # masshtab (RU)
+    "м",  # RU / UA abbreviation
+    "m",  # Latin "M 1:100"
+    "e",  # ES / PT "E 1:100"
+    "esc",
+    "éch",
+    "scala",  # IT
+    "mk",  # FI abbreviation
+    "mittakaava",  # FI
+    "měřítko",  # CS
+    "meritko",
+    "mierka",  # SK
+    "ölçek",  # TR
+    "olcek",
+    "målestok",  # DA / NO
+    "malestok",
+    "målestokk",
+    "mõõtkava",  # ET
+    "mastelis",  # LT
+    "mērogs",  # LV
+    "mjerilo",  # HR
+    "merilo",  # SL
+    "lépték",  # HU
+    "méretarány",
+    "scara",  # RO
+    "scară",
+    "κλίμακα",  # EL
+    "мащаб",  # BG
+    "縮尺",  # JA
+    "比例",  # ZH
+    "축척",  # KO
+    "مقياس",  # AR
+    "पैमाना",  # HI
+)
+
+# Long keywords may sit a few characters before the ratio ("Scale = 1:100") or
+# on the title-block line above it; the one-letter abbreviations only count
+# directly before the ratio.
+_LONG_SCALE_WORDS: tuple[str, ...] = tuple(w for w in _SCALE_WORDS if len(w) >= 4 or not w.isascii())
+
+# A ratio after one of these is a mix, a fall or a gradient, never a paper scale.
+_NOT_SCALE_WORDS: tuple[str, ...] = (
+    "mix",
+    "mortar",
+    "slope",
+    "fall",
+    "gradient",
+    "ramp",
+    "pitch",
+    "drain",
+    "ratio",
+    "aspect",
+    "pente",
+    "gefälle",
+    "neigung",
+    "mischung",
+    "pendiente",
+    "pendenza",
+    "уклон",
+)
+
+# Words that mark a ratio as the scale of a detail or section callout.
+_DETAIL_WORDS: tuple[str, ...] = (
+    "section",
+    "detail",
+    "détail",
+    "coupe",
+    "schnitt",
+    "corte",
+    "sezione",
+    "dettaglio",
+    "detalle",
+    "doorsnede",
+    "разрез",
+    "узел",
+)
+
+# Sheets that say they are not to scale.
+_NTS_RE = re.compile(
+    r"\b(?:n\.?\s?t\.?\s?s\.?|not\s+to\s+scale|sans\s+[ée]chelle|ohne\s+ma(?:ß|ss)stab|sin\s+escala)(?![\w])",
+    re.IGNORECASE,
+)
+
+# Scales drawings are actually plotted at (metric ratios and imperial equivalents).
+_STANDARD_RATIOS = frozenset(
+    {1, 2, 5, 10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 750}
+    | {1000, 1250, 1500, 2000, 2500, 5000, 10000}
+    | {4, 8, 12, 16, 24, 32, 48, 64, 96, 120, 128, 192, 240, 360, 480, 600, 720, 960, 1200}
 )
 
 # Pre-compiled patterns ------------------------------------------------------
@@ -83,6 +177,10 @@ _SCALE_WORDS: tuple[str, ...] = (
 # ratio or a "2:34" timestamp is filtered downstream by the antecedent check).
 _RATIO_RE = re.compile(r"(?<![\d.])(\d{1,3})\s*[:\uff1a]\s*(\d{1,3}(?:[ \u00a0]\d{3})*|\d{1,6})(?![\d.])")
 
+# "1/50" is a scale only straight after a scale keyword ("ECHELLE : 1/50");
+# anywhere else it is a fraction or a date.
+_SLASH_RE = re.compile(r"(?<![\d./])1\s*/\s*(\d{1,5})(?![\d./\"'\u2033])")
+
 # Imperial fraction or whole inch on the LEFT of an equals sign:
 #   1/4" = 1'-0"      3/8" = 1'-0"      1/2 in = 1 ft       1" = 20'
 # Left side: a whole and/or fraction measure captured as one ``lmeas`` token
@@ -92,7 +190,7 @@ _RATIO_RE = re.compile(r"(?<![\d.])(\d{1,3})\s*[:\uff1a]\s*(\d{1,3}(?:[ \u00a0]\
 # Right side: feet (with ' or ft) and optional residual inches.
 _IMPERIAL_RE = re.compile(
     r"""
-    (?<![\d.])
+    (?<![\d./-])
     (?P<lmeas>\d+(?:\s+\d+)?(?:\s*/\s*\d+)?)   # 1 | 1/4 | 1 1/2
     \s*(?P<lunit>"|''|\u2033|in\b|inch\b|inches\b)  # inch mark on the left
     \s*=\s*
@@ -184,6 +282,35 @@ def _word_before(text: str, start: int) -> str:
     return text[i:end].lower()
 
 
+def _line_bounds(text: str, pos: int) -> tuple[int, int]:
+    start = text.rfind("\n", 0, pos) + 1
+    end = text.find("\n", pos)
+    return start, len(text) if end < 0 else end
+
+
+def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
+    """Keyword evidence for the token at ``start:end``: (near a scale word, confidence cap)."""
+    line_start, _line_end = _line_bounds(text, start)
+    before = text[max(line_start, start - _SCALE_KEYWORD_WINDOW) : start].lower()
+    tail = text[end : end + 2]
+    if re.match(r"\s*[:\uff1a]\s*\d", tail):
+        return False, 0.0  # "1:2:3" is a mix
+    if any(w in before for w in _NOT_SCALE_WORDS):
+        return False, 0.0
+    cap = _CONF_DETAIL if any(w in before for w in _DETAIL_WORDS) else None
+    word = _word_before(text, start)
+    if word in _SCALE_WORDS or any(w in before for w in _LONG_SCALE_WORDS):
+        return True, cap
+    if line_start > 0:
+        # A title block prints the label on the line above its value.
+        prev_start = text.rfind("\n", 0, line_start - 1) + 1
+        prev = text[prev_start : line_start - 1].lower()
+        if any(re.search(r"(?<!\w)" + re.escape(w) + r"(?!\w)", prev) for w in _LONG_SCALE_WORDS):
+            if not _RATIO_RE.search(prev):
+                return True, cap if cap is not None else _CONF_LABEL_ABOVE
+    return False, cap
+
+
 def _ratio_is_plausible(ratio: int) -> bool:
     """True when ``ratio`` falls in the architectural/engineering band."""
     return _MIN_RATIO <= ratio <= _MAX_RATIO
@@ -206,15 +333,15 @@ def _scan_ratios(text: str, page: int) -> list[ScaleCandidate]:
         if not _ratio_is_plausible(right):
             continue
 
-        word = _word_before(text, m.start())
-        near_keyword = word in _SCALE_WORDS
-        # Also treat a "scale" word appearing a few characters before the match
-        # (e.g. "Scale = 1:100" or "DRAWING SCALE  1:50") as a keyword hit.
-        if not near_keyword:
-            window = text[max(0, m.start() - _SCALE_KEYWORD_WINDOW) : m.start()].lower()
-            near_keyword = any(w in window for w in ("scale", "échelle", "echelle", "massstab", "escala"))
-
-        confidence = _CONF_SCALE_KEYWORD if near_keyword else _CONF_BARE_RATIO
+        near_keyword, cap = _context(text, m.start(), m.end())
+        if cap == 0.0:
+            continue
+        if near_keyword:
+            confidence = _CONF_SCALE_KEYWORD
+        else:
+            confidence = _CONF_BARE_RATIO if right in _STANDARD_RATIOS else _CONF_ODD_RATIO
+        if cap is not None:
+            confidence = min(confidence, cap)
         out.append(
             ScaleCandidate(
                 ratio=right,
@@ -223,7 +350,25 @@ def _scan_ratios(text: str, page: int) -> list[ScaleCandidate]:
                 page=page,
                 evidence=m.group(0).strip(),
                 source="ratio",
-                detail={"near_keyword": near_keyword, "antecedent": left},
+                detail={"near_keyword": near_keyword, "antecedent": left, "callout": cap == _CONF_DETAIL},
+            )
+        )
+    for m in _SLASH_RE.finditer(text):
+        right = int(m.group(1))
+        if not _ratio_is_plausible(right):
+            continue
+        near_keyword, cap = _context(text, m.start(), m.end())
+        if not near_keyword or cap == 0.0:
+            continue
+        out.append(
+            ScaleCandidate(
+                ratio=right,
+                label=f"1:{right}",
+                confidence=min(_CONF_SCALE_KEYWORD, cap) if cap is not None else _CONF_SCALE_KEYWORD,
+                page=page,
+                evidence=m.group(0).strip(),
+                source="ratio",
+                detail={"near_keyword": True, "antecedent": 1, "slash": True, "callout": cap == _CONF_DETAIL},
             )
         )
     return out
@@ -324,6 +469,9 @@ def detect_scales_in_text(text: str, page: int = 1) -> list[ScaleCandidate]:
     if not text:
         return []
     candidates = _scan_ratios(text, page) + _scan_imperial(text, page)
+    if _NTS_RE.search(text):
+        # "NTS": only a ratio the sheet labels as its scale still counts.
+        candidates = [c for c in candidates if c.detail.get("near_keyword") or c.source == "imperial"]
     return _dedupe(candidates)
 
 
@@ -382,5 +530,12 @@ def detect_best_scale(
         if isinstance(text, str) and text:
             found.extend(detect_scales_in_text(text, page_int))
     ranked = rank_candidates(found)
-    best = ranked[0] if ranked else None
+    best = None
+    if ranked:
+        top = ranked[0]
+        if top.confidence >= _MIN_BEST_CONFIDENCE:
+            best = top
+        elif top.detail.get("callout") and len({c.ratio for c in ranked}) == 1:
+            # one callout scale and nothing else on the sheet: the sheet is that detail
+            best = top
     return best, ranked

@@ -89,7 +89,7 @@ _WALL_DEDUP_CELL_PX = 14
 _MAX_WALLS = 8
 
 # Never return more than this many candidates total (matches recognize.py).
-_MAX_CANDIDATES = 40
+_MAX_CANDIDATES = 200
 
 Point = tuple[float, float]
 
@@ -346,6 +346,114 @@ def _detect_walls(gray: Any, to_pt, scale: float) -> list[dict[str, Any]]:
 # ── public entry point ───────────────────────────────────────────────────────
 
 
+# ── scanned plan through the vector reader ───────────────────────────────────
+
+# Work on at most this many pixels; a 150 dpi ARCH D sheet is ~19 Mpx.
+_SCAN_PX_BUDGET = 6_000_000
+# A dark band at most this thick (px) is a pen stroke; thicker is a filled wall.
+_STROKE_MAX_PX = 4.0
+# Scan geometry is less certain than drawn geometry: confidences are scaled
+# into the raster band (never above 0.60).
+_SCAN_CONF_FACTOR = 0.62
+_SKETCH_MAX_PARTS = 60
+
+
+def _dark_mask(gray: Any) -> tuple[Any, float]:
+    """Binary ink mask of a scan, downscaled to the pixel budget; returns (mask, factor)."""
+    blur = cv2.medianBlur(gray, 3)
+    _thr, dark = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    h, w = dark.shape
+    f = min(1.0, math.sqrt(_SCAN_PX_BUDGET / max(1, h * w)))
+    if f < 1.0:
+        # pool rather than average so a one-pixel pen line survives the shrink
+        dark = cv2.resize(dark, (max(1, int(w * f)), max(1, int(h * f))), interpolation=cv2.INTER_AREA)
+        dark = np.where(dark > 60, 255, 0).astype(np.uint8)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(dark, connectivity=8)
+    speck = stats[:, cv2.CC_STAT_AREA] < 6
+    speck[0] = False
+    if speck.any():
+        dark[speck[lab]] = 0
+    del lab
+    return dark, f
+
+
+def _skew_deg(dark: Any) -> float:
+    """Drawing angle of the ink in degrees, from its long straight strokes."""
+    from app.modules.takeoff import vector_plan as vp
+
+    small = dark
+    if dark.shape[0] * dark.shape[1] > 1_500_000:
+        g = math.sqrt(1_500_000 / (dark.shape[0] * dark.shape[1]))
+        small = cv2.resize(dark, None, fx=g, fy=g, interpolation=cv2.INTER_AREA)
+        small = np.where(small > 60, 255, 0).astype(np.uint8)
+    lines = cv2.HoughLinesP(small, 1, math.pi / 720, threshold=40, minLineLength=30, maxLineGap=2)
+    if lines is None:
+        return 0.0
+    segs = [vp.Seg((float(x1), float(y1)), (float(x2), float(y2)), 1.0, 0) for x1, y1, x2, y2 in lines.reshape(-1, 4)]
+    return math.degrees(vp.dominant_angle(segs, []))
+
+
+def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[list[Any], list[Any]]:
+    """Pen strokes and filled wall bands of a scanned page, in page points."""
+    from app.modules.takeoff import floorplan as fp
+    from app.modules.takeoff import vector_plan as vp
+
+    dark, f = _dark_mask(gray)
+    h, w = dark.shape
+    ang = _skew_deg(dark)
+    inv = None
+    if abs(ang) >= 0.2:
+        # straighten so the walls run along the pixel axes
+        rot = cv2.getRotationMatrix2D((w / 2.0, h / 2.0), ang, 1.0)
+        cos, sin = abs(rot[0, 0]), abs(rot[0, 1])
+        nw, nh = int(h * sin + w * cos) + 2, int(h * cos + w * sin) + 2
+        rot[0, 2] += nw / 2.0 - w / 2.0
+        rot[1, 2] += nh / 2.0 - h / 2.0
+        dark = cv2.warpAffine(dark, rot, (nw, nh), flags=cv2.INTER_NEAREST)
+        inv = cv2.invertAffineTransform(rot)
+    sx, sy = page_width_pt / w, page_height_pt / h
+
+    def to_pt(x: float, y: float) -> tuple[float, float]:
+        if inv is not None:
+            x, y = inv[0, 0] * x + inv[0, 1] * y + inv[0, 2], inv[1, 0] * x + inv[1, 1] * y + inv[1, 2]
+        return (x * sx, y * sy)
+
+    segs: list[Any] = []
+    fills: list[Any] = []
+    for b in fp.axis_bands(dark, min_len_px=8):
+        if b.hi - b.lo < 3:
+            continue
+        if b.t <= _STROKE_MAX_PX:
+            a, c = ((b.lo, b.c), (b.hi, b.c)) if b.axis == "h" else ((b.c, b.lo), (b.c, b.hi))
+            segs.append(vp.Seg(to_pt(*a), to_pt(*c), 0.35, len(segs)))
+        elif fp.is_straight(b):
+            lo, hi, c0, c1 = b.lo, b.hi, b.c - b.t / 2, b.c + b.t / 2
+            box = (
+                [(lo, c0), (hi, c0), (hi, c1), (lo, c1)] if b.axis == "h" else [(c0, lo), (c0, hi), (c1, hi), (c1, lo)]
+            )
+            fills.append(vp.Fill([to_pt(*p) for p in box], 0.0, len(fills)))
+    return segs, fills
+
+
+def _plan_candidates(
+    gray: Any, page_width_pt: float, page_height_pt: float, scale: float
+) -> tuple[list[dict[str, Any]], int]:
+    """Rooms and walls of a scanned plan read like a vector page, and how many ink parts it has."""
+    from app.modules.takeoff import recognize, vector_plan
+
+    segs, fills = scan_parts(gray, page_width_pt, page_height_pt)
+    plan = vector_plan.read_parts(segs, fills, [], scale or None)
+    if not plan.found_structure:
+        return [], len(segs) + len(fills)
+    plan.counts = []  # pen strokes of a scan do not carry symbol identity
+    out = recognize.plan_candidates(plan, scale)
+    for cand in out:
+        cand["confidence"] = round(cand["confidence"] * _SCAN_CONF_FACTOR, 3)
+        cand.setdefault("count", None)
+        cand["reason"] = cand["reason"].replace("vector layer", "scanned image")
+    return out, len(segs) + len(fills)
+
+
 def recognize_raster(
     image_bgr: Any,
     page_width_pt: float,
@@ -382,6 +490,14 @@ def recognize_raster(
     scale = float(scale_pixels_per_unit or 0.0)
     to_pt = _make_px_to_pt(w, h, page_width_pt, page_height_pt)
 
-    candidates = _detect_rooms(gray, to_pt, scale) + _detect_walls(gray, to_pt, scale)
+    try:
+        candidates, n_parts = _plan_candidates(gray, page_width_pt, page_height_pt, scale)
+    except (cv2.error, ValueError, MemoryError):
+        candidates, n_parts = [], 0
+    # A sparse sketch (a few outlined boxes) is read by the outline detectors; on a
+    # busy sheet with no wall structure (notes, details, a schedule) every closed
+    # loop they find would be noise.
+    if n_parts <= _SKETCH_MAX_PARTS:
+        candidates = _detect_rooms(gray, to_pt, scale) + _detect_walls(gray, to_pt, scale)
     candidates.sort(key=lambda c: c.get("confidence", 0.0), reverse=True)
     return candidates[:max_candidates]
