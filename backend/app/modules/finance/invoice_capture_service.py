@@ -655,7 +655,11 @@ class InvoiceCaptureService:
             if amount <= 0:
                 continue
             ref = f"{row.id}:{idx}"
-            base_amount, _missing = _convert_to_base({currency: amount}, base_currency=base, fx_rates_map=fx_map)
+            base_amount, missing = _convert_to_base({currency: amount}, base_currency=base, fx_rates_map=fx_map)
+            if missing and base:
+                # A foreign amount summed as base units would corrupt the line's actuals.
+                errors.append(f"no FX rate for {','.join(missing)}; actual not posted")
+                continue
             try:
                 async with self.session.begin_nested():
                     await spine.post_actual_to_budget_line(
@@ -912,9 +916,8 @@ class InvoiceCaptureService:
                 raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Procurement is not installed.")
             po = await procurement.get_po(purchase_order_id)
             if po.project_id != row.project_id:
-                raise HTTPException(
-                    status.HTTP_422_UNPROCESSABLE_CONTENT, "The purchase order does not belong to this project."
-                )
+                # Same answer as a missing order, so another project's order ids cannot be probed.
+                raise HTTPException(status.HTTP_404_NOT_FOUND, "Purchase order not found")
             if po.status not in logic.BILLABLE_PO_STATUSES:
                 raise HTTPException(
                     status.HTTP_422_UNPROCESSABLE_CONTENT,

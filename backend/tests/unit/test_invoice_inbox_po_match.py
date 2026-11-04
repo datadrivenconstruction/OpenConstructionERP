@@ -261,6 +261,33 @@ async def test_actuals_go_to_the_spine_once_per_line_with_stable_refs(monkeypatc
 
 
 @pytest.mark.asyncio
+async def test_foreign_amount_without_fx_rate_is_not_posted_as_base(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[dict] = []
+
+    class _Spine:
+        def __init__(self, _session: Any) -> None: ...
+
+        async def post_actual_to_budget_line(self, **kw: Any) -> None:
+            calls.append(kw)
+
+    class _Repo:
+        def __init__(self, _session: Any) -> None: ...
+
+        async def get_by_id(self, _id: Any) -> Any:
+            return SimpleNamespace(currency="EUR", fx_rates=None, metadata_={})
+
+    monkeypatch.setattr("app.modules.costmodel.service.CostSpineService", _Spine)
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _Repo)
+    row = _row(currency_code="USD")
+    result = await _service(_FakeSession())._post_actuals(
+        row, uuid.uuid4(), row.project_id, [(None, uuid.uuid4(), Decimal("100"))]
+    )
+    assert calls == []
+    assert result["posted"] == 0
+    assert "USD" in result["errors"][0]
+
+
+@pytest.mark.asyncio
 async def test_a_spine_refusal_does_not_strand_the_booking(monkeypatch: pytest.MonkeyPatch) -> None:
     class _Spine:
         def __init__(self, _session: Any) -> None: ...
@@ -353,7 +380,7 @@ async def test_link_rejects_other_project_and_draft_orders(monkeypatch: pytest.M
     monkeypatch.setattr(InvoiceCaptureService, "_procurement", staticmethod(lambda _s: _FakeProcurement(foreign, [])))
     with pytest.raises(HTTPException) as exc:
         await service.link_purchase_order(row.id, foreign.id, None)
-    assert exc.value.status_code == 422
+    assert exc.value.status_code == 404
 
     draft = _purchase_order(project_id=row.project_id, status="draft")
     monkeypatch.setattr(InvoiceCaptureService, "_procurement", staticmethod(lambda _s: _FakeProcurement(draft, [])))

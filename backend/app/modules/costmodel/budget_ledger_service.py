@@ -215,6 +215,11 @@ class BudgetLedgerService:
                 legs = [(g.cost_line_id, g.amount) for g in await self._legs(entry.id)]
             else:
                 legs = [(entry.cost_line_id, entry.amount)]
+            if action == "approve":
+                # Serialise approvals on the same lines so two reductions cannot both pass the committed check.
+                await self.session.execute(
+                    select(CostLine.id).where(CostLine.id.in_(sorted({i for i, _ in legs}))).with_for_update()
+                )
             await self._refuse_on_errors(await self._payload(project_id, kind, action, legs, entry), project_id, locale)
         before, entry.status = entry.status, to
         now = datetime.now(UTC)
