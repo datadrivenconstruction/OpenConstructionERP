@@ -11,7 +11,7 @@ manifest = ModuleManifest(
     description="Core BOQ editor with hierarchical structure, positions, and cost calculations",
     author="OpenConstructionERP Core Team",
     category="core",
-    depends=["oe_projects"],
+    depends=["oe_projects", "oe_measurement", "oe_price_breakdown"],
     auto_install=True,
     enabled=True,
 )

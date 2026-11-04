@@ -12,7 +12,7 @@ one labelled presentation of the same data (see ``presets.py``); the model
 itself carries no country assumptions. NRM/CESMM detailed rates, FIDIC and NEC
 price breakdowns, and US bid cost breakdowns all map onto the same structure.
 
-Pure library (no manifest, no router of its own): the domain math lives here
+Pure library (manifest and validation rules, no router or tables): the domain math lives here
 and stays ORM-free and Decimal-exact, exactly like the ``einvoice`` library.
 """
 

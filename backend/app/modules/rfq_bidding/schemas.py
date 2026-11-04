@@ -703,6 +703,22 @@ class BidAwardRequest(BaseModel):
 # ── Comparison ──────────────────────────────────────────────────────────────
 
 
+class PlugSourceResponse(BaseModel):
+    """One gap in a quote and the number that stands in for it.
+
+    ``source`` says where the number came from: ``median`` of three or more
+    other quotes, ``median_of_2`` (the mean of just two, a thin market),
+    ``estimate`` (the line's estimate rate times the RFQ quantity),
+    ``single_bid`` or ``none`` (nothing to plug from, amount zero).
+    """
+
+    line_id: str
+    line: str
+    amount: str
+    source: str
+    reason: str
+
+
 class QuoteComparisonResponse(BaseModel):
     """One quote restated on the RFQ's basis.
 
@@ -737,6 +753,11 @@ class QuoteComparisonResponse(BaseModel):
     reasons: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
     rank: int | None = None
+    raw_total: str | None = None
+    plug_total: str = "0.00"
+    plugged_total: str | None = None
+    plugs_applied: bool = False
+    plug_sources: list[PlugSourceResponse] = Field(default_factory=list)
 
 
 class ComparisonResponse(BaseModel):

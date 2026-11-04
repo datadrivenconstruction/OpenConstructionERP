@@ -911,6 +911,92 @@ class RFQExclusionsPriced(ValidationRule):
         return results
 
 
+class RFQPlugHasSource(ValidationRule):
+    """A gap left in a quote must have a price to stand in for it."""
+
+    rule_id = "rfq.plug_has_source"
+    name = "RFQ Plug Has Source"
+    standard = "rfq"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a quote with an unpriced scope line that no other quote or estimate can stand in for."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        comparison = _comparison(_payload(context))
+        if comparison is None:
+            return []
+        stuck = [
+            (row, [p for p in row.get("plug_sources") or [] if isinstance(p, dict) and p.get("source") == "none"])
+            for row in _comparison_quotes(comparison)
+            if "gap_not_pluggable" in (row.get("notes") or [])
+        ]
+        stuck = [(row, gaps) for row, gaps in stuck if gaps]
+        if not stuck:
+            return [_result(self, True, "Every gap in a quote has a price to stand in for it.")]
+        return [
+            _result(
+                self,
+                False,
+                (
+                    f"Quote from {_quote_ref(row)} leaves {len(gaps)} line(s) unpriced and nothing can stand in "
+                    "for them, so its total is lower than the work it leaves out."
+                ),
+                element_ref=_quote_ref(row),
+                suggestion="Ask the supplier to price the lines, or add an estimate rate to the RFQ lines.",
+                details={"bid_id": row.get("bid_id"), "lines": [g.get("line") for g in gaps]},
+            )
+            for row, gaps in stuck
+        ]
+
+
+class RFQPlugDisclosed(ValidationRule):
+    """A quote ranked on a plugged total must say so, and how thin the plug is."""
+
+    rule_id = "rfq.plugged_quote_disclosed"
+    name = "RFQ Plugged Quote Disclosed"
+    standard = "rfq"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a quote whose rank rests on plugs, and any plug built on only one or two other quotes."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        comparison = _comparison(_payload(context))
+        if comparison is None:
+            return []
+        plugged = [row for row in _comparison_quotes(comparison) if row.get("plugs_applied")]
+        if not plugged:
+            return [_result(self, True, "No quote is ranked on a plugged total.")]
+        currency = _basis_currency(comparison)
+        results: list[RuleResult] = []
+        for row in plugged:
+            thin = [
+                p
+                for p in row.get("plug_sources") or []
+                if isinstance(p, dict) and p.get("source") in ("median_of_2", "single_bid")
+            ]
+            suffix = f" {len(thin)} of them rest on one or two other quotes only." if thin else ""
+            results.append(
+                _result(
+                    self,
+                    False,
+                    (
+                        f"Quote from {_quote_ref(row)} is ranked on {_quoted(row.get('plugged_total'), currency)}, "
+                        f"which includes {_quoted(row.get('plug_total'), currency)} of plugs for lines it left "
+                        f"unpriced.{suffix}"
+                    ),
+                    element_ref=_quote_ref(row),
+                    suggestion="Confirm the plugs before awarding; the raw total is shown beside the plugged one.",
+                    details={
+                        "bid_id": row.get("bid_id"),
+                        "raw_total": row.get("raw_total"),
+                        "plug_total": row.get("plug_total"),
+                        "plugged_total": row.get("plugged_total"),
+                    },
+                )
+            )
+        return results
+
+
 #: Rules this module registers itself, beyond the ten in the core rule file.
 _RFQ_ISSUE_RULES: tuple[ValidationRule, ...] = (
     RFQScopeLinesMeasurable(),
@@ -924,6 +1010,8 @@ _RFQ_AWARD_RULES: tuple[ValidationRule, ...] = (
     RFQLateQuoteInField(),
     RFQAwardFollowsRanking(),
     RFQExclusionsPriced(),
+    RFQPlugHasSource(),
+    RFQPlugDisclosed(),
 )
 
 #: Registered into both sets: the basis suppliers were given is worth checking

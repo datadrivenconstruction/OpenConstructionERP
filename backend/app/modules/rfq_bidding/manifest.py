@@ -11,7 +11,7 @@ manifest = ModuleManifest(
     description="Requests for quotation to suppliers for materials and services, quote evaluation and award to a purchase order",
     author="OpenConstructionERP Core Team",
     category="enterprise",
-    depends=["oe_users", "oe_projects", "oe_contacts", "oe_procurement"],
+    depends=["oe_users", "oe_projects", "oe_contacts", "oe_procurement", "oe_bid_management"],
     auto_install=False,
     enabled=True,
 )

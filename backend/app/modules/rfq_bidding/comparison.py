@@ -17,14 +17,18 @@ The rules it follows, in order:
 2. **One currency, at a rate that was written down.** Nothing is converted on a
    guess. A quote in another currency with no rate recorded against it is
    reported as not comparable rather than ranked at its face value.
-3. **Add back what is missing, never invent it.** An item the supplier excluded
-   is added to their comparable total at the amount recorded for it. Scope
-   nobody priced is *not* priced here at a neighbour's rate: the quote is
-   reported as covering part of the scope, and the buyer either rules it out or
-   records an explicit allowance as an adjustment. The neighbouring tendering
-   module levels bids against a BOQ package and does impute an omitted line at
-   the bidder's own mean rate; that is a different instrument, and this register
-   deliberately does not repeat it.
+3. **Add back what is missing, and say where the number came from.** An item
+   the supplier excluded is added to their comparable total at the amount
+   recorded for it. Scope nobody priced is a gap. When the RFQ requires full
+   scope the quote is reported as covering part of it and stays out of the
+   order. When the RFQ allows partial quotes the gap is plugged with the
+   shared rule of :mod:`app.modules.bid_management.plugs` (median of the other
+   quotes, the estimate rate, a single other quote), so a quote that left line
+   7 out no longer looks cheapest. Every plug carries its source; a gap with no
+   source at all is reported loudly (the plug is zero and the quote is flagged). A line priced at zero on
+   purpose is covered and is not plugged. Plugs are computed on the fly from the
+   quotes, never stored, and the raw total is always reported beside the plugged
+   one.
 4. **Only then rank**, on the normalised amount, or on a weighted blend of
    amount and technical score when the RFQ was issued that way.
 
@@ -39,8 +43,10 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
+from types import SimpleNamespace
 from typing import Any
 
+from app.modules.bid_management.plugs import GAP_STATUSES, compute_plugs
 from app.modules.rfq_bidding.validators import parse_date, parse_money
 
 #: Money is reported to two decimals; the arithmetic itself is exact.
@@ -78,6 +84,12 @@ NOTE_LINES_DISAGREE = "lines_disagree_with_total"
 NOTE_VALIDITY_EXPIRED = "validity_expired"
 NOTE_ADJUSTED = "adjusted_for_exclusions"
 NOTE_CONVERTED = "converted_to_basis_currency"
+NOTE_PLUGGED = "ranked_on_plugged_total"
+NOTE_GAP_NOT_PLUGGABLE = "gap_not_pluggable"
+
+#: Plug source reported when the median rests on only two other quotes: that is
+#: their mean, a thin market, and the buyer should read it as such.
+SOURCE_MEDIAN_OF_2 = "median_of_2"
 
 #: Ranking methods, mirroring ``RFQ.evaluation_method``.
 METHOD_LOWEST_PRICE = "lowest_price"
@@ -157,6 +169,11 @@ class QuoteComparison:
     reasons: tuple[str, ...]
     notes: tuple[str, ...]
     rank: int | None = None
+    raw_total: Decimal | None = None
+    plug_total: Decimal = Decimal("0")
+    plugged_total: Decimal | None = None
+    plugs_applied: bool = False
+    plug_sources: tuple[dict[str, str], ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         """Flatten to JSON-safe values for the API and the award record."""
@@ -187,6 +204,11 @@ class QuoteComparison:
             "reasons": list(self.reasons),
             "notes": list(self.notes),
             "rank": self.rank,
+            "raw_total": None if self.raw_total is None else _money(self.raw_total),
+            "plug_total": _money(self.plug_total),
+            "plugged_total": None if self.plugged_total is None else _money(self.plugged_total),
+            "plugs_applied": self.plugs_applied,
+            "plug_sources": [dict(row) for row in self.plug_sources],
         }
 
 
@@ -358,6 +380,92 @@ def _cover_scope(
     )
 
 
+def _plan_plugs(
+    bids: list[dict[str, Any]],
+    required: list[dict[str, Any]],
+    basis_currency: str,
+) -> dict[str, list[dict[str, str]]]:
+    """Price every gap of every standing quote with the shared plug rule.
+
+    Only quotes that are allowed to rank and can be moved to the basis currency
+    take part, as a market and as a receiver: a withdrawn or unconverted quote
+    must not set the price another quote is plugged at. Prices are restated in
+    the basis currency first, so a plug is in the currency the ranking uses.
+    """
+    ids = {_text(line.get("id")) for line in required if _text(line.get("id"))}
+    lines = [
+        SimpleNamespace(id=_text(line.get("id")), quantity=parse_money(line.get("quantity")) or Decimal("0"))
+        for line in required
+        if _text(line.get("id"))
+    ]
+    rates = {
+        _text(line.get("id")): rate
+        for line in required
+        if _text(line.get("id")) and (rate := parse_money(line.get("estimate_rate"))) is not None and rate > 0
+    }
+    priced: dict[str, dict[str, tuple[Decimal, str]]] = {}
+    zero_on_purpose: dict[str, set[str]] = {}
+    for bid in bids:
+        bid_id = _text(bid.get("id"))
+        # A headline-only quote has no line detail to plug against: adding a
+        # plug for every line to its lump sum would count the whole scope twice.
+        if _standing_reasons(bid)[0] or not _rows(bid, "lines"):
+            continue
+        _currency, rate = _quote_rate(bid, basis_currency)
+        if rate is None:
+            continue
+        rows: dict[str, tuple[Decimal, str]] = {}
+        for row in _rows(bid, "lines"):
+            line_id = _text(row.get("rfq_line_id"))
+            if line_id not in ids:
+                continue
+            if bool(row.get("is_excluded")):
+                rows.setdefault(line_id, (Decimal("0"), "excluded"))
+                continue
+            amount = parse_money(row.get("amount"))
+            if amount is None:
+                continue
+            if amount == 0:
+                zero_on_purpose.setdefault(bid_id, set()).add(line_id)
+            previous = rows.get(line_id)
+            base = previous[0] if previous and previous[1] not in GAP_STATUSES else Decimal("0")
+            rows[line_id] = (base + amount * rate, "included")
+        priced[bid_id] = rows
+    if not priced:
+        return {}
+    plugs = compute_plugs(lines, priced, estimate_rates=rates)
+    by_line = {_text(line.get("id")): line for line in required}
+    out: dict[str, list[dict[str, str]]] = {}
+    for bid_id, found in plugs.items():
+        rows_out: list[dict[str, str]] = []
+        for plug in found:
+            if plug.line_item_id in zero_on_purpose.get(bid_id, ()):
+                continue
+            source = plug.source
+            if source == "median":
+                others = sum(
+                    1
+                    for other, other_rows in priced.items()
+                    if other != bid_id
+                    and plug.line_item_id in other_rows
+                    and other_rows[plug.line_item_id][1] not in GAP_STATUSES
+                    and other_rows[plug.line_item_id][0] > 0
+                )
+                if others == 2:
+                    source = SOURCE_MEDIAN_OF_2
+            rows_out.append(
+                {
+                    "line_id": plug.line_item_id,
+                    "line": line_ref(by_line[plug.line_item_id]),
+                    "amount": _money(plug.amount),
+                    "source": source,
+                    "reason": plug.reason,
+                }
+            )
+        out[bid_id] = rows_out
+    return out
+
+
 def _validity_note(bid: dict[str, Any], as_of: Any) -> list[str]:
     """Flag a quote whose own validity period ran out before ``as_of``."""
     today = parse_date(as_of)
@@ -380,6 +488,7 @@ def _compare_one(
     required: list[dict[str, Any]],
     require_full_scope: bool,
     as_of: Any,
+    plugs: list[dict[str, str]] | None = None,
 ) -> QuoteComparison:
     """Restate one quote on the RFQ's basis, collecting every objection."""
     reasons, notes, admitted = _standing_reasons(bid)
@@ -418,7 +527,17 @@ def _compare_one(
         notes.append(NOTE_LINES_DISAGREE)
     notes.extend(_validity_note(bid, as_of))
 
-    normalised = None if converted is None else converted + adjustments
+    plugs = plugs or []
+    apply_plugs = not require_full_scope
+    plug_total = sum((Decimal(row["amount"]) for row in plugs), Decimal("0"))
+    if apply_plugs and any(row["source"] == "none" for row in plugs):
+        notes.append(NOTE_GAP_NOT_PLUGGABLE)
+    if apply_plugs and plugs:
+        notes.append(NOTE_PLUGGED)
+
+    raw_total = None if converted is None else converted + adjustments
+    plugged_total = None if raw_total is None else raw_total + plug_total
+    normalised = plugged_total if apply_plugs else raw_total
     if normalised is not None and normalised <= 0:
         reasons.append(REASON_TOTAL_NOT_POSITIVE)
 
@@ -450,6 +569,11 @@ def _compare_one(
         comparable=not unique_reasons,
         reasons=unique_reasons,
         notes=tuple(dict.fromkeys(notes)),
+        raw_total=raw_total,
+        plug_total=plug_total,
+        plugged_total=plugged_total,
+        plugs_applied=apply_plugs and bool(plugs),
+        plug_sources=tuple(plugs),
     )
 
 
@@ -535,6 +659,7 @@ def compare(rfq: dict[str, Any]) -> ComparisonResult:
     required = [line for line in _rows(rfq, "lines") if not bool(line.get("is_optional"))]
     as_of = rfq.get("as_of")
 
+    plans = _plan_plugs(bids, required, basis_currency)
     quotes = [
         _compare_one(
             bid,
@@ -542,6 +667,7 @@ def compare(rfq: dict[str, Any]) -> ComparisonResult:
             required=required,
             require_full_scope=require_full_scope,
             as_of=as_of,
+            plugs=plans.get(_text(bid.get("id"))),
         )
         for bid in bids
     ]

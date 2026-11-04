@@ -489,6 +489,7 @@ class RFQService:
             "unit": line.unit,
             "quantity": cls._decimal_str(line.quantity),
             "is_optional": line.is_optional,
+            "estimate_rate": (line.metadata_ or {}).get("estimate_rate"),
         }
 
     @classmethod
