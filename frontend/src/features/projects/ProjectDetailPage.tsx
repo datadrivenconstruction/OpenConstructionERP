@@ -162,6 +162,17 @@ export function areaFromDescription(description: string | null | undefined): num
 }
 
 /**
+ * A bar width in percent, always inside 0..100.
+ *
+ * An unparsable or missing figure gives NaN, and `width: NaN%` is an invalid
+ * declaration the browser drops, so a block-level bar falls back to full width
+ * and reads as 100% on an empty project.
+ */
+export function barPercent(value: number): number {
+  return Number.isFinite(value) ? Math.min(Math.max(value, 0), 100) : 0;
+}
+
+/**
  * Sum the grand totals of several estimates.
  *
  * `grand_total` arrives as a decimal string, so `total += detail.grand_total`
@@ -2611,7 +2622,7 @@ export function ProjectDetailPage() {
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
-                        width: `${Math.min(parseFloat(dashboardData.budget.consumed_pct), 100)}%`,
+                        width: `${barPercent(parseFloat(dashboardData.budget.consumed_pct))}%`,
                         background: dashboardData.budget.warning_level === 'critical'
                           ? 'var(--oe-error, #dc2626)'
                           : dashboardData.budget.warning_level === 'warning'
@@ -2761,17 +2772,17 @@ export function ProjectDetailPage() {
                         <>
                           <div
                             className="absolute inset-y-0 left-0 bg-oe-blue/20 rounded-lg"
-                            style={{ width: `${Math.min((original / forecast) * 100, 100)}%` }}
+                            style={{ width: `${barPercent((original / forecast) * 100)}%` }}
                             title={`${t('projects.dash_original', { defaultValue: 'Original' })}: ${formatCurrency(original, currency)}`}
                           />
                           <div
                             className="absolute inset-y-0 left-0 bg-oe-blue/40 rounded-l-lg"
-                            style={{ width: `${Math.min((committed / forecast) * 100, 100)}%` }}
+                            style={{ width: `${barPercent((committed / forecast) * 100)}%` }}
                             title={`${t('projects.dash_committed', { defaultValue: 'Committed' })}: ${formatCurrency(committed, currency)}`}
                           />
                           <div
                             className="absolute inset-y-0 left-0 bg-oe-blue rounded-l-lg"
-                            style={{ width: `${Math.min((actual / forecast) * 100, 100)}%` }}
+                            style={{ width: `${barPercent((actual / forecast) * 100)}%` }}
                             title={`${t('projects.dash_actual', { defaultValue: 'Actual' })}: ${formatCurrency(actual, currency)}`}
                           />
                         </>
@@ -2827,7 +2838,7 @@ export function ProjectDetailPage() {
                         <circle
                           cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="7"
                           strokeLinecap="round"
-                          strokeDasharray={`${(parseFloat(dashboardData.schedule.progress_pct) / 100) * 213.63} 213.63`}
+                          strokeDasharray={`${(barPercent(parseFloat(dashboardData.schedule.progress_pct)) / 100) * 213.63} 213.63`}
                           className="text-oe-blue transition-all duration-500"
                         />
                       </svg>
