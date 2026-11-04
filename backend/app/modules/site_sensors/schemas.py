@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal6_2, Decimal8_2, Decimal10_4, Decimal14_4
+
 SensorKind = Literal["concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level"]
 
 #: Default unit per kind, used when a device is created without one.
@@ -32,7 +34,7 @@ class DeviceCreate(BaseModel):
     name: str = Field(default="", max_length=200)
     kind: SensorKind
     unit: str = Field(default="", max_length=20)
-    limit_value: Decimal | None = None
+    limit_value: Decimal14_4 | None = None
     country_code: str = Field(default="", max_length=2)
     offline_after_minutes: int = Field(default=60, ge=1, le=10080)
     lat: float | None = Field(default=None, ge=-90, le=90)
@@ -47,7 +49,7 @@ class DeviceUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, max_length=200)
-    limit_value: Decimal | None = None
+    limit_value: Decimal14_4 | None = None
     country_code: str | None = Field(default=None, max_length=2)
     offline_after_minutes: int | None = Field(default=None, ge=1, le=10080)
     active: bool | None = None
@@ -102,10 +104,10 @@ class MixCreate(BaseModel):
     project_id: UUID | None = None
     code: str = Field(min_length=1, max_length=50)
     name: str = Field(default="", max_length=200)
-    datum_temp_c: Decimal = Decimal("-10")
-    curve_a: Decimal
-    curve_b: Decimal = Field(gt=0)
-    strip_strength_mpa: Decimal | None = Field(default=None, gt=0)
+    datum_temp_c: Decimal6_2 = Decimal("-10")
+    curve_a: Decimal10_4
+    curve_b: Decimal10_4 = Field(gt=0)
+    strip_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
     notes: str | None = None
 
 
@@ -159,7 +161,7 @@ class StripCreate(BaseModel):
     device_id: UUID
     element: str = Field(default="", max_length=200)
     schedule_activity_id: UUID | None = None
-    target_strength_mpa: Decimal | None = Field(default=None, gt=0)
+    target_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
     planned_at: datetime | None = None
 
 

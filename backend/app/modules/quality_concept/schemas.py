@@ -16,6 +16,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.decimal_types import Decimal10_7, Decimal12_4, FiniteDecimal
 from app.modules.quality_concept import vocab
 
 _CODE = r"^[a-z0-9][a-z0-9_]*$"
@@ -145,7 +146,7 @@ class CertificationTransition(_In):
 class CreditIn(_In):
     credit_code: str = Field(min_length=1, max_length=64)
     category: str = Field(default="", max_length=64)
-    points_targeted: Decimal = Decimal("0")
+    points_targeted: Decimal12_4 = Decimal("0")
     owner_user_id: uuid.UUID | None = None
 
     _p = field_validator("points_targeted", mode="before")(_points)
@@ -153,8 +154,8 @@ class CreditIn(_In):
 
 class CreditPatch(_In):
     category: str | None = Field(default=None, max_length=64)
-    points_targeted: Decimal | None = None
-    points_achieved: Decimal | None = None
+    points_targeted: Decimal12_4 | None = None
+    points_achieved: Decimal12_4 | None = None
     owner_user_id: uuid.UUID | None = None
     action: Literal["submit_evidence", "achieve", "not_achieve", "return", "drop", "reinstate"] | None = None
 
@@ -169,10 +170,10 @@ class CreditBulk(_In):
 
 
 class QuantityRuleIn(_In):
-    per_quantity: Decimal
+    per_quantity: FiniteDecimal
     unit: str = Field(max_length=20)
     min_count: int = Field(default=1, ge=1, le=10000)
-    placed_quantity: Decimal | None = None
+    placed_quantity: FiniteDecimal | None = None
 
     _p = field_validator("per_quantity", "placed_quantity", mode="before")(_points)
 
@@ -358,8 +359,8 @@ class PreservationIn(_In):
     surveyor_contact_id: uuid.UUID | None = None
     planned_date: date | None = None
     paired_with_id: uuid.UUID | None = None
-    lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    lng: Decimal | None = Field(default=None, ge=-180, le=180)
+    lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    lng: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
 
     _s = field_validator("subject_kind")(_one_of(vocab.PRESERVATION_SUBJECTS))
     _p = field_validator("phase")(_one_of(vocab.SURVEY_PHASES))
@@ -390,8 +391,8 @@ class PreservationPatch(_In):
     methods: list[str] | None = Field(default=None, max_length=10)
     surveyor_contact_id: uuid.UUID | None = None
     planned_date: date | None = None
-    lat: Decimal | None = Field(default=None, ge=-90, le=90)
-    lng: Decimal | None = Field(default=None, ge=-180, le=180)
+    lat: Decimal10_7 | None = Field(default=None, ge=-90, le=90)
+    lng: Decimal10_7 | None = Field(default=None, ge=-180, le=180)
 
 
 class PreservationAction(_In):

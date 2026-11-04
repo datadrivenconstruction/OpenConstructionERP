@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_serializer, field_validator
 
+from app.core.decimal_types import Decimal18_4
+
 # Reused enum-like patterns
 _ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
 
@@ -40,8 +42,8 @@ class EquipmentTypeCreate(BaseModel):
     code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1, max_length=200)
     category: str = Field(default="other", max_length=50)
-    default_service_interval_hours: Decimal | None = None
-    default_service_interval_km: Decimal | None = None
+    default_service_interval_hours: Decimal18_4 | None = None
+    default_service_interval_km: Decimal18_4 | None = None
     default_inspection_interval_days: int | None = Field(default=None, ge=1)
     description: str | None = None
 
@@ -53,8 +55,8 @@ class EquipmentTypeUpdate(BaseModel):
 
     name: str | None = Field(default=None, max_length=200)
     category: str | None = Field(default=None, max_length=50)
-    default_service_interval_hours: Decimal | None = None
-    default_service_interval_km: Decimal | None = None
+    default_service_interval_hours: Decimal18_4 | None = None
+    default_service_interval_km: Decimal18_4 | None = None
     default_inspection_interval_days: int | None = Field(default=None, ge=1)
     description: str | None = None
 
@@ -117,19 +119,19 @@ class EquipmentCreate(BaseModel):
     )
     location_lat: float | None = Field(default=None, ge=-90, le=90)
     location_lng: float | None = Field(default=None, ge=-180, le=180)
-    hour_meter: Decimal = Decimal("0")
-    odometer_km: Decimal = Decimal("0")
+    hour_meter: Decimal18_4 = Decimal("0")
+    odometer_km: Decimal18_4 = Decimal("0")
     purchase_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    purchase_value: Decimal | None = None
+    purchase_value: Decimal18_4 | None = None
     depreciation_method: str = Field(default="linear", max_length=30)
     useful_life_years: int | None = Field(default=None, ge=1, le=100)
-    residual_value: Decimal | None = None
+    residual_value: Decimal18_4 | None = None
     currency: str = Field(default="", max_length=3)
     notes: str | None = None
     cost_code: str = Field(default="", max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
-    holding_cost_per_month: Decimal | None = Field(default=None, ge=0)
-    market_hire_rate_per_day: Decimal | None = Field(default=None, ge=0)
+    holding_cost_per_month: Decimal18_4 | None = Field(default=None, ge=0)
+    market_hire_rate_per_day: Decimal18_4 | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
 
     @field_validator("required_certificates")
@@ -156,19 +158,19 @@ class EquipmentUpdate(BaseModel):
     )
     location_lat: float | None = Field(default=None, ge=-90, le=90)
     location_lng: float | None = Field(default=None, ge=-180, le=180)
-    hour_meter: Decimal | None = None
-    odometer_km: Decimal | None = None
+    hour_meter: Decimal18_4 | None = None
+    odometer_km: Decimal18_4 | None = None
     purchase_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    purchase_value: Decimal | None = None
+    purchase_value: Decimal18_4 | None = None
     depreciation_method: str | None = Field(default=None, max_length=30)
     useful_life_years: int | None = Field(default=None, ge=1, le=100)
-    residual_value: Decimal | None = None
+    residual_value: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
     notes: str | None = None
     cost_code: str | None = Field(default=None, max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
-    holding_cost_per_month: Decimal | None = Field(default=None, ge=0)
-    market_hire_rate_per_day: Decimal | None = Field(default=None, ge=0)
+    holding_cost_per_month: Decimal18_4 | None = Field(default=None, ge=0)
+    market_hire_rate_per_day: Decimal18_4 | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
 
     @field_validator("required_certificates")
@@ -250,14 +252,14 @@ class TelemetryReadingCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     recorded_at: datetime
-    fuel_level: Decimal | None = None
-    hour_meter: Decimal | None = None
-    odometer_km: Decimal | None = None
+    fuel_level: Decimal18_4 | None = None
+    hour_meter: Decimal18_4 | None = None
+    odometer_km: Decimal18_4 | None = None
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
     engine_status: str | None = Field(default=None, max_length=30)
-    idle_hours: Decimal | None = None
-    fuel_used_l: Decimal | None = None
+    idle_hours: Decimal18_4 | None = None
+    fuel_used_l: Decimal18_4 | None = None
     fault_codes: list[str] = Field(default_factory=list)
     source: str = Field(default="manual", max_length=20)
     raw_payload: dict[str, Any] = Field(default_factory=dict)
@@ -294,11 +296,11 @@ class MaintenanceScheduleCreate(BaseModel):
 
     equipment_id: UUID
     trigger_type: str = Field(..., pattern=r"^(hours|km|date)$")
-    trigger_threshold: Decimal = Decimal("0")
+    trigger_threshold: Decimal18_4 = Decimal("0")
     description: str = Field(default="", max_length=500)
     last_completed_at: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    last_completed_meter: Decimal | None = None
-    next_due_meter: Decimal | None = None
+    last_completed_meter: Decimal18_4 | None = None
+    next_due_meter: Decimal18_4 | None = None
     next_due_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
     active: bool = True
 
@@ -309,11 +311,11 @@ class MaintenanceScheduleUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     trigger_type: str | None = Field(default=None, pattern=r"^(hours|km|date)$")
-    trigger_threshold: Decimal | None = None
+    trigger_threshold: Decimal18_4 | None = None
     description: str | None = Field(default=None, max_length=500)
     last_completed_at: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    last_completed_meter: Decimal | None = None
-    next_due_meter: Decimal | None = None
+    last_completed_meter: Decimal18_4 | None = None
+    next_due_meter: Decimal18_4 | None = None
     next_due_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
     active: bool | None = None
 
@@ -352,7 +354,7 @@ class MaintenanceWorkOrderCreate(BaseModel):
     )
     technician_id: str | None = Field(default=None, max_length=36)
     work_summary: str | None = None
-    cost: Decimal = Decimal("0")
+    cost: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
 
 
@@ -369,7 +371,7 @@ class MaintenanceWorkOrderUpdate(BaseModel):
     )
     technician_id: str | None = Field(default=None, max_length=36)
     work_summary: str | None = None
-    cost: Decimal | None = None
+    cost: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
 
 
@@ -475,8 +477,8 @@ class EquipmentRentalCreate(BaseModel):
     project_id: UUID
     start_date: str = Field(..., pattern=_ISO_DATE_PATTERN)
     end_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    internal_rate_per_day: Decimal = Decimal("0")
-    internal_rate_per_hour: Decimal = Decimal("0")
+    internal_rate_per_day: Decimal18_4 = Decimal("0")
+    internal_rate_per_hour: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
     status: str = Field(default="active", pattern=r"^(active|returned)$")
 
@@ -487,8 +489,8 @@ class EquipmentRentalUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     end_date: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    internal_rate_per_day: Decimal | None = None
-    internal_rate_per_hour: Decimal | None = None
+    internal_rate_per_day: Decimal18_4 | None = None
+    internal_rate_per_hour: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
     status: str | None = Field(default=None, pattern=r"^(active|returned)$")
 
@@ -523,10 +525,10 @@ class FuelLogCreate(BaseModel):
 
     equipment_id: UUID
     logged_at: str = Field(..., pattern=_ISO_DATE_PATTERN)
-    fuel_liters: Decimal = Decimal("0")
-    hour_meter_at_fill: Decimal | None = None
-    odometer_km_at_fill: Decimal | None = None
-    cost: Decimal = Decimal("0")
+    fuel_liters: Decimal18_4 = Decimal("0")
+    hour_meter_at_fill: Decimal18_4 | None = None
+    odometer_km_at_fill: Decimal18_4 | None = None
+    cost: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
     supplier: str | None = Field(default=None, max_length=255)
     fuel_type: str | None = Field(default=None, max_length=40)
@@ -538,10 +540,10 @@ class FuelLogUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     logged_at: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
-    fuel_liters: Decimal | None = None
-    hour_meter_at_fill: Decimal | None = None
-    odometer_km_at_fill: Decimal | None = None
-    cost: Decimal | None = None
+    fuel_liters: Decimal18_4 | None = None
+    hour_meter_at_fill: Decimal18_4 | None = None
+    odometer_km_at_fill: Decimal18_4 | None = None
+    cost: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
     supplier: str | None = Field(default=None, max_length=255)
     fuel_type: str | None = Field(default=None, max_length=40)
@@ -596,8 +598,8 @@ class PartsLogCreate(BaseModel):
     work_order_id: UUID | None = None
     part_number: str = Field(..., min_length=1, max_length=100)
     description: str = Field(default="", max_length=500)
-    quantity: Decimal = Decimal("1")
-    unit_cost: Decimal = Decimal("0")
+    quantity: Decimal18_4 = Decimal("1")
+    unit_cost: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
     logged_at: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
 
@@ -608,8 +610,8 @@ class PartsLogUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     description: str | None = Field(default=None, max_length=500)
-    quantity: Decimal | None = None
-    unit_cost: Decimal | None = None
+    quantity: Decimal18_4 | None = None
+    unit_cost: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
     logged_at: str | None = Field(default=None, pattern=_ISO_DATE_PATTERN)
 
@@ -644,7 +646,7 @@ class DamageReportCreate(BaseModel):
     severity: str = Field(default="minor", pattern=r"^(minor|major|critical)$")
     description: str = Field(default="", max_length=10000)
     photos: list[str] = Field(default_factory=list)
-    repair_cost_estimate: Decimal | None = None
+    repair_cost_estimate: Decimal18_4 | None = None
     currency: str = Field(default="", max_length=3)
 
 
@@ -656,7 +658,7 @@ class DamageReportUpdate(BaseModel):
     severity: str | None = Field(default=None, pattern=r"^(minor|major|critical)$")
     description: str | None = Field(default=None, max_length=10000)
     photos: list[str] | None = None
-    repair_cost_estimate: Decimal | None = None
+    repair_cost_estimate: Decimal18_4 | None = None
     currency: str | None = Field(default=None, max_length=3)
     status: str | None = Field(
         default=None,

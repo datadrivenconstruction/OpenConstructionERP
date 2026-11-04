@@ -11,6 +11,16 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import (
+    Decimal8_2,
+    Decimal8_3,
+    Decimal10_2,
+    Decimal12_3,
+    Decimal14_3,
+    Decimal18_2,
+    Decimal18_4,
+)
+
 HaulType = Literal["earthworks", "aggregates", "concrete", "asphalt", "waste", "other"]
 LocationKind = Literal["quarry", "plant", "site", "dump", "other"]
 Unit = Literal["t", "m3", "load"]
@@ -40,10 +50,10 @@ class TicketFields(BaseModel):
     material_code: str = Field(default="", max_length=60)
     material_name: str = Field(default="", max_length=255)
     unit: Unit = "t"
-    gross_t: Decimal | None = Field(default=None, ge=0)
-    tare_t: Decimal | None = Field(default=None, ge=0)
-    net_t: Decimal | None = None
-    volume_m3: Decimal | None = Field(default=None, ge=0)
+    gross_t: Decimal12_3 | None = Field(default=None, ge=0)
+    tare_t: Decimal12_3 | None = Field(default=None, ge=0)
+    net_t: Decimal12_3 | None = None
+    volume_m3: Decimal12_3 | None = Field(default=None, ge=0)
     loads: int = Field(default=1, ge=0, le=1000)
     truck_source: Literal["own", "hired"] = "hired"
     equipment_id: uuid.UUID | None = None
@@ -51,12 +61,12 @@ class TicketFields(BaseModel):
     haulier_party_id: uuid.UUID | None = None
     plate: str = Field(default="", max_length=30)
     driver_name: str = Field(default="", max_length=255)
-    vehicle_max_gross_t: Decimal | None = Field(default=None, ge=0)
-    vehicle_capacity: Decimal | None = Field(default=None, ge=0)
+    vehicle_max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
+    vehicle_capacity: Decimal10_2 | None = Field(default=None, ge=0)
     po_id: uuid.UUID | None = None
     rate_basis: RateBasis = "t"
-    rate: Decimal | None = Field(default=None, ge=0)
-    hours: Decimal | None = Field(default=None, ge=0)
+    rate: Decimal18_4 | None = Field(default=None, ge=0)
+    hours: Decimal8_2 | None = Field(default=None, ge=0)
     currency: str = Field(default="", max_length=10)
     boq_position_id: uuid.UUID | None = None
     cost_code: str = Field(default="", max_length=100)
@@ -96,10 +106,10 @@ class TicketUpdate(BaseModel):
     material_code: str | None = Field(default=None, max_length=60)
     material_name: str | None = Field(default=None, max_length=255)
     unit: Unit | None = None
-    gross_t: Decimal | None = Field(default=None, ge=0)
-    tare_t: Decimal | None = Field(default=None, ge=0)
-    net_t: Decimal | None = None
-    volume_m3: Decimal | None = Field(default=None, ge=0)
+    gross_t: Decimal12_3 | None = Field(default=None, ge=0)
+    tare_t: Decimal12_3 | None = Field(default=None, ge=0)
+    net_t: Decimal12_3 | None = None
+    volume_m3: Decimal12_3 | None = Field(default=None, ge=0)
     loads: int | None = Field(default=None, ge=0, le=1000)
     truck_source: Literal["own", "hired"] | None = None
     equipment_id: uuid.UUID | None = None
@@ -107,12 +117,12 @@ class TicketUpdate(BaseModel):
     haulier_party_id: uuid.UUID | None = None
     plate: str | None = Field(default=None, max_length=30)
     driver_name: str | None = Field(default=None, max_length=255)
-    vehicle_max_gross_t: Decimal | None = Field(default=None, ge=0)
-    vehicle_capacity: Decimal | None = Field(default=None, ge=0)
+    vehicle_max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
+    vehicle_capacity: Decimal10_2 | None = Field(default=None, ge=0)
     po_id: uuid.UUID | None = None
     rate_basis: RateBasis | None = None
-    rate: Decimal | None = Field(default=None, ge=0)
-    hours: Decimal | None = Field(default=None, ge=0)
+    rate: Decimal18_4 | None = Field(default=None, ge=0)
+    hours: Decimal8_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=10)
     boq_position_id: uuid.UUID | None = None
     cost_code: str | None = Field(default=None, max_length=100)
@@ -211,7 +221,7 @@ class TicketListResponse(BaseModel):
 
 class SettingsIn(BaseModel):
     mandatory_fields: list[str] = Field(default_factory=list, max_length=30)
-    max_gross_t: Decimal | None = Field(default=None, ge=0)
+    max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
     capacity_tolerance_pct: int = Field(default=10, ge=0, le=100)
     price_tolerance_pct: int = Field(default=1, ge=0, le=50)
     waste_catalogue: str = Field(default="", max_length=40)
@@ -227,7 +237,7 @@ class RateIn(BaseModel):
     haulier_name: str = Field(max_length=255)
     material_code: str = Field(default="", max_length=60)
     rate_basis: RateBasis = "t"
-    rate: Decimal = Field(ge=0)
+    rate: Decimal18_4 = Field(ge=0)
     currency: str = Field(default="", max_length=10)
     po_id: uuid.UUID | None = None
 
@@ -241,7 +251,7 @@ class MaterialIn(BaseModel):
     name: str = Field(default="", max_length=255)
     unit: Unit = "t"
     haul_type: HaulType = "other"
-    density_t_m3: Decimal | None = Field(default=None, gt=0)
+    density_t_m3: Decimal8_3 | None = Field(default=None, gt=0)
     waste_code: str = Field(default="", max_length=40)
 
 
@@ -252,9 +262,9 @@ class MaterialOut(_DecimalOut, MaterialIn):
 
 class InvoiceLineIn(BaseModel):
     ticket_number: str = Field(default="", max_length=60)
-    quantity: Decimal | None = None
-    rate: Decimal | None = None
-    amount: Decimal | None = None
+    quantity: Decimal14_3 | None = None
+    rate: Decimal18_4 | None = None
+    amount: Decimal18_2 | None = None
     description: str = Field(default="", max_length=255)
 
 

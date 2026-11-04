@@ -10,6 +10,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal8_2, Decimal10_1, Decimal12_2, Decimal14_3
 from app.modules.rebar_schedule.abs_format import SUPER_GROUPS
 
 _GROUP_PATTERN = "^(" + "|".join(SUPER_GROUPS) + ")$"
@@ -136,10 +137,10 @@ class AbsPreviewShape(BaseModel):
     super_group: str
     drawing_ref: str | None = None
     position: str | None = None
-    length_mm: Decimal | None = None
+    length_mm: Decimal12_2 | None = None
     quantity: int | None = None
-    weight_kg: Decimal | None = None
-    diameter_mm: Decimal | None = None
+    weight_kg: Decimal14_3 | None = None
+    diameter_mm: Decimal8_2 | None = None
     steel_grade: str | None = None
     checksum_ok: bool
     block_layout: str
@@ -197,18 +198,18 @@ class BbsEntryBase(BaseModel):
 
     member: str | None = Field(default=None, min_length=1, max_length=120)
     bar_mark: str | None = Field(default=None, min_length=1, max_length=32)
-    diameter_mm: Decimal | None = Field(default=None, gt=0, le=100)
+    diameter_mm: Decimal8_2 | None = Field(default=None, gt=0, le=100)
     shape_standard: str | None = Field(default=None, max_length=16)
     shape_code: str | None = Field(default=None, max_length=8)
-    dim_a: Decimal | None = Field(default=None, ge=0)
-    dim_b: Decimal | None = Field(default=None, ge=0)
-    dim_c: Decimal | None = Field(default=None, ge=0)
-    dim_d: Decimal | None = Field(default=None, ge=0)
-    dim_e: Decimal | None = Field(default=None, ge=0)
+    dim_a: Decimal10_1 | None = Field(default=None, ge=0)
+    dim_b: Decimal10_1 | None = Field(default=None, ge=0)
+    dim_c: Decimal10_1 | None = Field(default=None, ge=0)
+    dim_d: Decimal10_1 | None = Field(default=None, ge=0)
+    dim_e: Decimal10_1 | None = Field(default=None, ge=0)
     members_count: int | None = Field(default=None, ge=1, le=100000)
     bars_per_member: int | None = Field(default=None, ge=1, le=100000)
     steel_grade: str | None = Field(default=None, max_length=32)
-    lap_length_mm: Decimal | None = Field(default=None, ge=0)
+    lap_length_mm: Decimal10_1 | None = Field(default=None, ge=0)
     boq_position_id: UUID | None = None
     notes: str | None = Field(default=None, max_length=2000)
 
@@ -217,7 +218,7 @@ class BbsEntryCreate(BbsEntryBase):
     project_id: UUID
     member: str = Field(..., min_length=1, max_length=120)
     bar_mark: str = Field(..., min_length=1, max_length=32)
-    diameter_mm: Decimal = Field(..., gt=0, le=100)
+    diameter_mm: Decimal8_2 = Field(..., gt=0, le=100)
     shape_standard: str = Field(..., max_length=16)
     shape_code: str = Field(..., max_length=8)
     members_count: int = Field(default=1, ge=1, le=100000)
@@ -256,10 +257,10 @@ class BbsEntryResponse(BaseModel):
 
 
 class BbsDiameterTotal(BaseModel):
-    diameter_mm: Decimal
+    diameter_mm: Decimal8_2
     bar_count: int
-    total_length_m: Decimal
-    weight_kg: Decimal
+    total_length_m: Decimal14_3
+    weight_kg: Decimal14_3
 
 
 class BbsScheduleResponse(BaseModel):
