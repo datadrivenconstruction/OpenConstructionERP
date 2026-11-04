@@ -158,6 +158,17 @@ def test_line_priced_at_zero_on_purpose_is_not_plugged() -> None:
     assert a.plug_total == Decimal("0")
 
 
+def test_credit_line_is_not_plugged() -> None:
+    bids = [
+        _bid("a", {1: "100", 2: "-20"}),
+        _bid("b", {1: "100", 2: "40"}),
+        _bid("c", {1: "100", 2: "60"}),
+    ]
+    a = cmp.compare(_rfq(bids, n_lines=2)).get("a")
+    assert a is not None
+    assert a.plug_sources == ()
+
+
 def test_excluded_line_is_plugged_with_reason_excluded() -> None:
     bids = [_bid("a", {1: "100", 2: None}), _bid("b", {1: "100", 2: "40"}), _bid("c", {1: "100", 2: "60"})]
     plug = cmp.compare(_rfq(bids, n_lines=2)).get("a").plug_sources[0]  # type: ignore[union-attr]
