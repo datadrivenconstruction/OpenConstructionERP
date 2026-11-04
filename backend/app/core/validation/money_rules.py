@@ -95,6 +95,8 @@ class MoneyRule(ValidationRule):
         if self.own_message_keys and key not in self.own_message_keys:
             return "money"
         return self.message_section
+    #: When set, every rule of the set shares this suggestion key instead of one per rule.
+    suggestion_key: str | None = None
 
     def ok(self, ref: str = "") -> RuleResult:
         """A passing result."""
@@ -129,7 +131,7 @@ class MoneyRule(ValidationRule):
             passed=False,
             message=translate(f"{section}.{key}.fail", locale=locale, **params),
             element_ref=ref,
-            suggestion=translate(f"{section}.{key}.suggestion", locale=locale),
+            suggestion=translate(self.suggestion_key or f"{section}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
 

@@ -1866,5 +1866,80 @@
       "fail": "Přirážky dávají dohromady {percent} % přímých nákladů.",
       "suggestion": "Zkontrolujte řádky režie, zisku, rizika a valorizace, zda procento nebylo zadáno jako částka nebo započteno dvakrát."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Čísla položek {numbers} se v tomto předávacím listu opakují."
+    },
+    "item_identifies_document": {
+      "fail": "Položka {numbers} neuvádí dokument, revizi ani popis."
+    },
+    "recipient_identified": {
+      "fail": "{count} příjemců bez organizace, uživatele, jména nebo e-mailové adresy."
+    },
+    "action_needs_deadline": {
+      "fail": "Od {count} příjemců se požaduje akce, ale není stanoven termín odpovědi."
+    },
+    "suggestion": "Přečíslujte položky, uveďte každý odesílaný dokument a každého příjemce a před vydáním stanovte termín odpovědi."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Dopis je zaznamenán jako přijatý {received}, tedy před odesláním {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Odpověď je splatná {due}, před datem dopisu {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Oznámení neodkazuje na žádné ustanovení smlouvy, a nemusí tak platit jako oznámení podle smlouvy."
+    },
+    "suggestion": "Opravte data a uveďte ustanovení smlouvy, na jehož základě se oznámení podává."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Návrh kategorie {category} vyžaduje určeného nezávislého kontrolora, než se označí jako zkontrolovaný."
+    },
+    "checker_is_designer": {
+      "fail": "Kontrolor {name} je zároveň projektantem; návrh kategorie 2 nebo 3 vyžaduje nezávislou kontrolu."
+    },
+    "coordinator_assigned": {
+      "fail": "Není určen koordinátor provizorních konstrukcí, ačkoli je prvek schválen k zatížení nebo je v provozu."
+    },
+    "strike_before_load": {
+      "fail": "Datum odbednění/demontáže {strike} je dřívější než datum zatížení {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Návrh je splatný {due}, po požadovaném datu zatížení {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Povolení vyprší {end}, před začátkem platnosti {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Povolení je uzavřeno {closed}, před vydáním {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Platné povolení k zatížení vyžaduje zaznamenanou, přijatou kontrolu návrhu."
+    },
+    "inspection_not_passed": {
+      "fail": "Platné povolení k zatížení vyžaduje zaznamenanou, úspěšnou inspekci."
+    },
+    "suggestion": "Určete nezávislého kontrolora a koordinátora, opravte data a před povolením zatížení zaznamenejte kontrolu návrhu a inspekci."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Závada je uzavřena bez zaznamenaného řešení."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Zkoušky nelze označit za dokončené, dokud jsou funkční zkoušky otevřené nebo je nevyřešená kritická závada."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} předběžných kontrol tohoto systému selhalo."
+    },
+    "prefunctional_open": {
+      "fail": "{count} předběžných kontrol tohoto systému je stále otevřených."
+    },
+    "failed_test_needs_note": {
+      "fail": "Neúspěšná zkouška nemá poznámku popisující zjištěný stav."
+    },
+    "suggestion": "Zaznamenejte řešení nebo zjištění a před uzavřením dokončete předběžné kontroly a funkční zkoušky."
   }
 }

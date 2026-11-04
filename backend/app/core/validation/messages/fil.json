@@ -1866,5 +1866,80 @@
       "fail": "Ang mga dagdag ay umaabot sa {percent} % ng direktang gastos.",
       "suggestion": "Suriin ang mga linya ng overhead, tubo, panganib, at eskalasyon kung may porsyentong inilagay bilang halaga o nabilang nang dalawang beses."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Ang mga numero ng linya na {numbers} ay lumitaw nang higit sa isang beses sa transmittal na ito."
+    },
+    "item_identifies_document": {
+      "fail": "Ang linya {numbers} ay walang binanggit na dokumento, rebisyon, o paglalarawan."
+    },
+    "recipient_identified": {
+      "fail": "{count} tatanggap ang walang organisasyon, user, pangalan, o e-mail address."
+    },
+    "action_needs_deadline": {
+      "fail": "May hinihinging aksyon mula sa {count} tatanggap pero walang itinakdang petsa ng sagot."
+    },
+    "suggestion": "Bilangin muli ang mga linya, pangalanan ang bawat ipinadalang dokumento at bawat tatanggap, at magtakda ng petsa ng sagot bago ilabas."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "Naitala ang sulat na natanggap noong {received}, bago ito ipinadala noong {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "Ang sagot ay dapat sa {due}, bago ang petsa ng sulat na {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Walang binabanggit na probisyon ng kontrata ang abisong ito, kaya maaaring hindi ito mabilang na abiso sa ilalim ng kontrata."
+    },
+    "suggestion": "Itama ang mga petsa at banggitin ang probisyon ng kontrata na batayan ng abiso."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Ang disenyong kategorya {category} ay nangangailangan ng itinalagang independiyenteng tagasuri bago markahang nasuri na."
+    },
+    "checker_is_designer": {
+      "fail": "Ang tagasuring si {name} ay siya ring nagdisenyo; ang disenyong kategorya 2 o 3 ay nangangailangan ng independiyenteng pagsusuri."
+    },
+    "coordinator_assigned": {
+      "fail": "Walang itinalagang koordinador ng pansamantalang gawa, kahit aprubado na ang elemento para pasanin o ginagamit na."
+    },
+    "strike_before_load": {
+      "fail": "Ang petsa ng pagtanggal na {strike} ay bago ang petsa ng pagpapasan na {load}."
+    },
+    "design_due_after_load": {
+      "fail": "Ang disenyo ay dapat sa {due}, pagkatapos ng kinakailangang petsa ng pagpapasan na {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "Mapapaso ang permit sa {end}, bago ang simula nito sa {start}."
+    },
+    "closed_before_issued": {
+      "fail": "Isinara ang permit noong {closed}, bago ito inilabas noong {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Ang umiiral na permit sa pagpapasan ay nangangailangan ng nakatalang tinanggap na pagsusuri ng disenyo."
+    },
+    "inspection_not_passed": {
+      "fail": "Ang umiiral na permit sa pagpapasan ay nangangailangan ng nakatalang pasadong inspeksyon."
+    },
+    "suggestion": "Italaga ang independiyenteng tagasuri at koordinador, itama ang mga petsa, at itala ang pagsusuri ng disenyo at inspeksyon bago payagan ang pagpapasan."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "Isinara ang isyu nang walang nakatalang solusyon."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Hindi maaaring markahang kumpleto ang mga pagsubok habang bukas pa ang mga functional test o may hindi pa nalulutas na kritikal na isyu."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} paunang pagsusuri ng sistemang ito ang bumagsak."
+    },
+    "prefunctional_open": {
+      "fail": "{count} paunang pagsusuri ng sistemang ito ang bukas pa."
+    },
+    "failed_test_needs_note": {
+      "fail": "Ang bumagsak na pagsubok ay walang tala na naglalarawan ng naobserbahan."
+    },
+    "suggestion": "Itala ang solusyon o obserbasyon, at tapusin ang mga paunang pagsusuri at functional test bago isara."
   }
 }

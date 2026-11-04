@@ -1866,5 +1866,80 @@
       "fail": "Los recargos suman un {percent} % del coste directo.",
       "suggestion": "Revise las líneas de gastos generales, beneficio, riesgo y revisión de precios: porcentaje introducido como importe o contado dos veces."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Los números de línea {numbers} aparecen más de una vez en este envío documental."
+    },
+    "item_identifies_document": {
+      "fail": "La línea {numbers} no indica documento, revisión ni descripción."
+    },
+    "recipient_identified": {
+      "fail": "{count} destinatario(s) sin organización, usuario, nombre ni correo electrónico."
+    },
+    "action_needs_deadline": {
+      "fail": "Se solicita una acción a {count} destinatario(s) pero no hay fecha límite de respuesta."
+    },
+    "suggestion": "Renumere las líneas, identifique cada documento enviado y a cada destinatario, y fije una fecha de respuesta antes de emitir."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "La carta consta como recibida el {received}, antes de su envío el {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "La respuesta vence el {due}, antes de la fecha de la carta {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Esta notificación no cita ninguna cláusula del contrato, por lo que podría no valer como notificación contractual."
+    },
+    "suggestion": "Corrija las fechas e indique la cláusula del contrato en que se basa la notificación."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Un diseño de categoría {category} requiere un revisor independiente designado antes de marcarlo como revisado."
+    },
+    "checker_is_designer": {
+      "fail": "El revisor {name} es también el proyectista; un diseño de categoría 2 o 3 requiere una revisión independiente."
+    },
+    "coordinator_assigned": {
+      "fail": "No hay coordinador de obras temporales designado, aunque el elemento está aprobado para cargar o en uso."
+    },
+    "strike_before_load": {
+      "fail": "La fecha de desencofrado/retirada {strike} es anterior a la fecha de carga {load}."
+    },
+    "design_due_after_load": {
+      "fail": "El diseño vence el {due}, después de la fecha de carga requerida {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "El permiso caduca el {end}, antes de comenzar el {start}."
+    },
+    "closed_before_issued": {
+      "fail": "El permiso se cierra el {closed}, antes de su emisión el {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Un permiso de carga vigente requiere la revisión del diseño aceptada y registrada."
+    },
+    "inspection_not_passed": {
+      "fail": "Un permiso de carga vigente requiere la inspección superada y registrada."
+    },
+    "suggestion": "Designe al revisor independiente y al coordinador, corrija las fechas y registre la revisión del diseño y la inspección antes de autorizar la carga."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "La incidencia se cierra sin una resolución registrada."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Las pruebas no pueden darse por completas mientras haya pruebas funcionales abiertas o una incidencia crítica sin resolver."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} comprobación(es) previa(s) de este sistema han fallado."
+    },
+    "prefunctional_open": {
+      "fail": "{count} comprobación(es) previa(s) de este sistema siguen abiertas."
+    },
+    "failed_test_needs_note": {
+      "fail": "La prueba fallida no tiene una nota que describa lo observado."
+    },
+    "suggestion": "Registre la resolución o la observación y complete las comprobaciones previas y las pruebas funcionales antes del cierre."
   }
 }

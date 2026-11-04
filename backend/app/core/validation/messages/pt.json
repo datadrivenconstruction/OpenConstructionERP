@@ -1866,5 +1866,80 @@
       "fail": "Os acréscimos somam {percent} % do custo direto.",
       "suggestion": "Verifique as linhas de custos indiretos, lucro, risco e reajuste: percentagem lançada como valor ou contada duas vezes."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "Os números de linha {numbers} aparecem mais de uma vez neste envio de documentos."
+    },
+    "item_identifies_document": {
+      "fail": "A linha {numbers} não indica documento, revisão nem descrição."
+    },
+    "recipient_identified": {
+      "fail": "{count} destinatário(s) sem organização, utilizador, nome ou endereço de e-mail."
+    },
+    "action_needs_deadline": {
+      "fail": "É pedida uma ação a {count} destinatário(s) mas não há prazo de resposta."
+    },
+    "suggestion": "Renumere as linhas, identifique cada documento enviado e cada destinatário e defina um prazo de resposta antes de emitir."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "A carta consta como recebida em {received}, antes do envio em {sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "A resposta é devida em {due}, antes da data da carta {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "Esta notificação não cita nenhuma cláusula do contrato e pode não valer como notificação contratual."
+    },
+    "suggestion": "Corrija as datas e indique a cláusula do contrato ao abrigo da qual a notificação é feita."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "Um projeto de categoria {category} exige um verificador independente designado antes de ser marcado como verificado."
+    },
+    "checker_is_designer": {
+      "fail": "O verificador {name} é também o projetista; um projeto de categoria 2 ou 3 exige verificação independente."
+    },
+    "coordinator_assigned": {
+      "fail": "Não há coordenador de obras temporárias designado, embora o elemento esteja aprovado para carga ou em uso."
+    },
+    "strike_before_load": {
+      "fail": "A data de descimbramento/remoção {strike} é anterior à data de carga {load}."
+    },
+    "design_due_after_load": {
+      "fail": "O projeto é devido em {due}, depois da data de carga exigida {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "A autorização expira em {end}, antes de começar em {start}."
+    },
+    "closed_before_issued": {
+      "fail": "A autorização é encerrada em {closed}, antes de ser emitida em {issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "Uma autorização de carga em vigor exige a verificação do projeto aceite e registada."
+    },
+    "inspection_not_passed": {
+      "fail": "Uma autorização de carga em vigor exige a inspeção aprovada e registada."
+    },
+    "suggestion": "Designe o verificador independente e o coordenador, corrija as datas e registe a verificação do projeto e a inspeção antes de autorizar a carga."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "A ocorrência foi fechada sem resolução registada."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "Os ensaios não podem ser dados como concluídos enquanto houver ensaios funcionais em aberto ou uma ocorrência crítica por resolver."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} verificação(ões) prévia(s) deste sistema falharam."
+    },
+    "prefunctional_open": {
+      "fail": "{count} verificação(ões) prévia(s) deste sistema continuam em aberto."
+    },
+    "failed_test_needs_note": {
+      "fail": "O ensaio reprovado não tem nota a descrever o que foi observado."
+    },
+    "suggestion": "Registe a resolução ou a observação e conclua as verificações prévias e os ensaios funcionais antes do encerramento."
   }
 }

@@ -1866,5 +1866,80 @@
       "fail": "התוספות מסתכמות ב-{percent} % מהעלות הישירה.",
       "suggestion": "בדקו את שורות ההוצאות הכלליות, הרווח, הסיכון וההצמדה לאיתור אחוז שהוזן כסכום או שנספר פעמיים."
     }
+  },
+  "transmittals": {
+    "unique_item_numbers": {
+      "fail": "מספרי השורות {numbers} מופיעים יותר מפעם אחת בטופס ההעברה."
+    },
+    "item_identifies_document": {
+      "fail": "שורה {numbers} אינה מציינת מסמך, מהדורה או תיאור."
+    },
+    "recipient_identified": {
+      "fail": "ל-{count} נמענים אין ארגון, משתמש, שם או כתובת דוא\"ל."
+    },
+    "action_needs_deadline": {
+      "fail": "מתבקשת פעולה מ-{count} נמענים אך לא נקבע מועד למענה."
+    },
+    "suggestion": "מספרו מחדש את השורות, ציינו כל מסמך שנשלח וכל נמען, וקבעו מועד למענה לפני ההוצאה."
+  },
+  "correspondence": {
+    "received_not_before_sent": {
+      "fail": "המכתב נרשם כנתקבל ב-{received}, לפני שנשלח ב-{sent}."
+    },
+    "response_deadline_after_notice": {
+      "fail": "המענה נדרש עד {due}, לפני תאריך המכתב {start}."
+    },
+    "notice_cites_clause": {
+      "fail": "ההודעה אינה מפנה לסעיף בחוזה, ולכן ייתכן שלא תיחשב הודעה לפי החוזה."
+    },
+    "suggestion": "תקנו את התאריכים וציינו את סעיף החוזה שמכוחו ניתנת ההודעה."
+  },
+  "temporary_works": {
+    "checker_missing": {
+      "fail": "תכן בקטגוריה {category} מחייב בודק עצמאי ממונה לפני שיסומן כנבדק."
+    },
+    "checker_is_designer": {
+      "fail": "הבודק {name} הוא גם המתכנן; תכן בקטגוריה 2 או 3 מחייב בדיקה עצמאית."
+    },
+    "coordinator_assigned": {
+      "fail": "לא מונה מתאם לעבודות זמניות, אף שהרכיב אושר לעמיסה או נמצא בשימוש."
+    },
+    "strike_before_load": {
+      "fail": "תאריך הפירוק {strike} קודם לתאריך העמיסה {load}."
+    },
+    "design_due_after_load": {
+      "fail": "התכן נדרש עד {due}, אחרי תאריך העמיסה הנדרש {load}."
+    },
+    "valid_to_before_from": {
+      "fail": "ההיתר פג ב-{end}, לפני תחילתו ב-{start}."
+    },
+    "closed_before_issued": {
+      "fail": "ההיתר נסגר ב-{closed}, לפני הונפק ב-{issued}."
+    },
+    "design_check_not_accepted": {
+      "fail": "היתר עמיסה בתוקף מחייב רישום של בדיקת תכן שהתקבלה."
+    },
+    "inspection_not_passed": {
+      "fail": "היתר עמיסה בתוקף מחייב רישום של בדיקה שעברה בהצלחה."
+    },
+    "suggestion": "מנו בודק עצמאי ומתאם, תקנו את התאריכים ורשמו את בדיקת התכן והבדיקה לפני מתן היתר עמיסה."
+  },
+  "commissioning": {
+    "issue_closed_has_resolution": {
+      "fail": "הליקוי נסגר ללא רישום של פתרון."
+    },
+    "tests_complete_requires_passed_tests": {
+      "fail": "לא ניתן לסמן את הבדיקות כהושלמו כל עוד בדיקות תפקוד פתוחות או שליקוי קריטי טרם נפתר."
+    },
+    "prefunctional_failed": {
+      "fail": "{count} בדיקות מקדימות של מערכת זו נכשלו."
+    },
+    "prefunctional_open": {
+      "fail": "{count} בדיקות מקדימות של מערכת זו עדיין פתוחות."
+    },
+    "failed_test_needs_note": {
+      "fail": "לבדיקה שנכשלה אין הערה שמתארת את הנצפה."
+    },
+    "suggestion": "רשמו את הפתרון או את הממצא והשלימו את הבדיקות המקדימות ובדיקות התפקוד לפני הסגירה."
   }
 }
