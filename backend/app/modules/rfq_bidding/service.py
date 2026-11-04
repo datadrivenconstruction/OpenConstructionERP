@@ -490,6 +490,7 @@ class RFQService:
             "quantity": cls._decimal_str(line.quantity),
             "is_optional": line.is_optional,
             "estimate_rate": (line.metadata_ or {}).get("estimate_rate"),
+            "estimate_currency": (line.metadata_ or {}).get("estimate_currency"),
         }
 
     @classmethod
@@ -510,6 +511,7 @@ class RFQService:
             "commercial_score": bid.commercial_score,
             "exchange_rate": cls._decimal_str(bid.exchange_rate),
             "exchange_rate_date": bid.exchange_rate_date,
+            "scope_confirmed": bool((bid.metadata_ or {}).get("scope_confirmed")),
             "lines": [
                 {
                     "id": str(line.id),
