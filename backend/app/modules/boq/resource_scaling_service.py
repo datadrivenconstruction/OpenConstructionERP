@@ -147,11 +147,11 @@ async def apply_plan(
         HTTPException 409: the bill is locked, or the figures moved since the
             preview the user confirmed (``expected_factor`` no longer matches).
     """
+    from app.modules.boq.resource_basis import ROW_POSITION_QUANTITY_KEY, apply_resource_basis
     from app.modules.boq.service import (
         _compute_total,
+        _derived_unit_rate_str,
         _has_contributing_resources,
-        _quantize_money_str,
-        _resource_total_in_base,
         _safe_publish,
         _stamp_resource_breakdown,
     )
@@ -182,11 +182,16 @@ async def apply_plan(
         position = by_id[line.id]
         meta = dict(position.metadata_) if isinstance(position.metadata_, dict) else {}
         meta["resources"] = line.resources
+        # The plan rewrote the norms; whole-position quantities follow them.
+        for res in meta["resources"] or []:
+            if isinstance(res, dict):
+                res.pop(ROW_POSITION_QUANTITY_KEY, None)
+        apply_resource_basis(meta, position.quantity)
         _stamp_resource_breakdown(meta)
         row: dict[str, Any] = {"id": position.id, "metadata_": meta, "version": int(position.version or 0) + 1}
         if _has_contributing_resources(line.resources):
             res_dicts = [r for r in line.resources or [] if isinstance(r, dict)]
-            unit_rate = _quantize_money_str(_resource_total_in_base(res_dicts, fx_map, base_currency or ""))
+            unit_rate = _derived_unit_rate_str(res_dicts, meta, position.quantity, fx_map, base_currency or "")
             row["unit_rate"] = unit_rate
             row["total"] = _compute_total(position.quantity, unit_rate)
         writes.append(row)

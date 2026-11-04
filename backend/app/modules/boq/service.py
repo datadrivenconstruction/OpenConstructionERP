@@ -320,6 +320,13 @@ from app.modules.boq.repository import (
     PositionRepository,
     QuantityLinkRepository,
 )
+from app.modules.boq.resource_basis import (
+    BASIS_KEY,
+    PER_POSITION,
+    apply_resource_basis,
+    resource_basis,
+    rows_at_position_quantities,
+)
 from app.modules.boq.resource_norms import (
     clear_unit_rate_kept,
     stamp_unit_rate_kept,
@@ -726,6 +733,28 @@ def _resource_total_in_base(
         sub = _position_total_in_base(str(sub), code, fx_rates_map, base)
         total += sub
     return total
+
+
+def _derived_unit_rate_str(
+    resources: list[dict[str, Any]],
+    metadata: Any,
+    quantity: Any,
+    fx_rates_map: dict[str, str] | None,
+    base_currency: str,
+) -> str:
+    """The unit rate a position's resource rows derive, quantised for storage.
+
+    Per-unit rows (the default): ``sum(quantity * unit_rate)``. Rows entered for
+    the whole position (``resource_basis.PER_POSITION``): their total divided
+    by the position quantity, computed from the entered quantities so a norm
+    that does not terminate never enters the sum. A quantity of zero falls back
+    to the per-unit sum, which the stored norms still carry.
+    """
+    qty = _to_decimal(quantity)
+    if resource_basis(metadata) == PER_POSITION and qty > 0:
+        position_sum = _resource_total_in_base(rows_at_position_quantities(resources), fx_rates_map, base_currency)
+        return _quantize_money_str(position_sum / qty)
+    return _quantize_money_str(_resource_total_in_base(resources, fx_rates_map, base_currency))
 
 
 def _detect_resource_fx_warnings(
@@ -4556,6 +4585,32 @@ class BOQService:
             if existing_resources != meta["resources"]:
                 triggered_by_resources = True
 
+        # ── Resource quantity basis (issue #555) ──────────────────────────
+        # Rows entered as totals for the whole position keep those totals as
+        # entered and store norms derived from them (see ``resource_basis``),
+        # so every reader of the norms stays right. A quantity edit on such a
+        # position re-derives the norms and the unit rate, it does not scale
+        # the resources; a switch of basis converts the rows once.
+        _stored_meta_basis = position.metadata_ if isinstance(position.metadata_, dict) else {}
+        _basis = resource_basis(meta if isinstance(meta, dict) else _stored_meta_basis)
+        _basis_switched = isinstance(meta, dict) and _basis != resource_basis(_stored_meta_basis)
+        if _basis == PER_POSITION and triggered_by_qty and not isinstance(meta, dict):
+            _stored_rows = _stored_meta_basis.get("resources")
+            if isinstance(_stored_rows, list) and _has_contributing_resources(_stored_rows):
+                meta = {
+                    **_stored_meta_basis,
+                    "resources": [dict(r) if isinstance(r, dict) else r for r in _stored_rows],
+                }
+                fields["metadata_"] = meta
+        if (
+            isinstance(meta, dict)
+            and (_basis == PER_POSITION or _basis_switched)
+            and apply_resource_basis(meta, new_quantity)
+        ):
+            triggered_by_resources = True
+        if _basis == PER_POSITION and triggered_by_qty and isinstance(meta, dict):
+            triggered_by_resources = True
+
         # ── FX context (resolved once, reused below for warning detection) ──
         # Resolving the project FX table here lets the resource→unit_rate
         # derivation convert each foreign-currency resource into the project
@@ -4614,7 +4669,9 @@ class BOQService:
                 # currencies into the stored rate (Issue #88 / #157). Mirrors the
                 # read-side ``_resource_total_in_base`` so the persisted value and
                 # the FX-aware rollup agree.
-                new_unit_rate = _quantize_money_str(_resource_total_in_base(resources, _fx_map, _fx_base_ccy or ""))
+                # Rows entered for the whole position divide by the position
+                # quantity instead (issue #555, ``_derived_unit_rate_str``).
+                new_unit_rate = _derived_unit_rate_str(resources, meta, new_quantity, _fx_map, _fx_base_ccy or "")
                 fields["unit_rate"] = new_unit_rate
 
         # OC-21: when the user directly patches unit_rate WITHOUT changing
@@ -7174,12 +7231,12 @@ class BOQService:
         # from rather than reloading a row an earlier iteration rewrote, which
         # raises MissingGreenlet (only reproduced with ≥2 resource-loaded
         # positions).
-        snapshots: list[tuple[uuid.UUID, list[dict[str, Any]], str | None]] = []
+        snapshots: list[tuple[uuid.UUID, list[dict[str, Any]], str | None, str]] = []
         for pos in positions:
             meta = pos.metadata_ or {}
             resources = meta.get("resources") or []
             resources = [r for r in resources if isinstance(r, dict)]
-            snapshots.append((pos.id, resources, pos.quantity))
+            snapshots.append((pos.id, resources, pos.quantity, resource_basis(meta)))
 
         # Resolve the project FX table once so foreign-currency resources are
         # converted to the project BASE currency before summing, exactly as
@@ -7189,14 +7246,17 @@ class BOQService:
 
         updated = 0
         skipped = 0
-        for pos_id, resources, pos_qty_raw in snapshots:
+        for pos_id, resources, pos_qty_raw, basis in snapshots:
             if resources:
                 # Per-unit norm: unit_rate = Σ(r.qty × r.rate in base), NO
-                # division by position quantity (mirrors update_position).
+                # division by position quantity (mirrors update_position);
+                # rows entered for the whole position divide by it (#555).
                 # Each resource is converted from its own currency to the
                 # project base before summing so the stored rate never blends
                 # currencies (Issue #88 / #157).
-                new_unit_rate = _quantize_money_str(_resource_total_in_base(resources, fx_map, fx_base_ccy or ""))
+                new_unit_rate = _derived_unit_rate_str(
+                    resources, {BASIS_KEY: basis}, pos_qty_raw, fx_map, fx_base_ccy or ""
+                )
                 if _to_decimal(new_unit_rate) > 0:
                     new_total = _compute_total(pos_qty_raw, new_unit_rate)
                     await self.position_repo.update_fields(
@@ -8048,7 +8108,7 @@ class BOQService:
                 # update_position / recalculate_rates so this propagation path
                 # never blends currencies into the stored rate (Issue #88 / #157).
                 res_dicts = [r for r in new_res if isinstance(r, dict)]
-                derived_rate = _quantize_money_str(_resource_total_in_base(res_dicts, fx_map, fx_base_ccy or ""))
+                derived_rate = _derived_unit_rate_str(res_dicts, new_meta, s["quantity"], fx_map, fx_base_ccy or "")
                 new_total = _compute_total(s["quantity"], derived_rate)
                 writes.append(
                     {

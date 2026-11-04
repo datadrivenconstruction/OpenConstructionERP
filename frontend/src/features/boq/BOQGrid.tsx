@@ -107,6 +107,8 @@ import {
   getUnitsForLocale,
   isResourceDrivenRate,
   resourceAwareTotalInBase, isExcludedFromTotal,
+  resourceQuantityBasis,
+  resourceQuantityForPosition,
   saveCustomUnit,
 } from './boqHelpers';
 import { RESOURCE_TYPES, getResourceTypeLabel } from './boqResourceTypes';
@@ -115,7 +117,7 @@ import {
   resourceExpansionState,
   type ResourceExpansionState,
 } from './resourceExpansion';
-import type { UnitsSystem } from './boqHelpers';
+import type { ResourceQuantityBasis, UnitsSystem } from './boqHelpers';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
 import { useBoqDescDensityStore, BOQ_DESC_ROW_HEIGHT } from '@/stores/useBoqDescDensityStore';
@@ -266,6 +268,12 @@ interface ResourceRow {
   _resourceVariantDefault?: 'mean' | 'median';
   /** Frozen snapshot stamped by the backend; surfaced for hover tooltips. */
   _resourceVariantSnapshot?: Record<string, unknown>;
+  /** How the parent's resource quantities were entered (issue #555). */
+  _resourceBasis: ResourceQuantityBasis;
+  /** This resource's quantity for the whole parent position. */
+  _resourceQtyForPosition: number;
+  _positionQuantity: number;
+  _positionUnit: string;
   id: string;
   // Fields needed for GridRow compatibility
   description: string;
@@ -279,7 +287,13 @@ interface ResourceRow {
 interface AddResourceRow {
   _isAddResource: true;
   _parentPositionId: string;
+  /** Resources per 1 unit of the position, in base currency. */
+  _positionResourceUnitRate: number;
+  /** Resources for the whole position, in base currency. */
   _positionResourceTotal: number;
+  _resourceBasis: ResourceQuantityBasis;
+  _positionQuantity: number;
+  _positionUnit: string;
   id: string;
   description: string;
   ordinal: string;
@@ -435,6 +449,8 @@ export interface BOQGridProps {
   onRemoveResource?: (positionId: string, resourceIndex: number) => void;
   onUpdateResource?: (positionId: string, resourceIndex: number, field: string, value: number | string) => void;
   onUpdateResourceFields?: (positionId: string, resourceIndex: number, fields: Record<string, number | string>) => void;
+  /** Switch how a position's resource quantities are entered (issue #555). */
+  onSetResourceBasis?: (positionId: string, basis: ResourceQuantityBasis) => void;
   /** Per-resource custom-field write — stored at
    *  ``parent.metadata.resources[i].metadata.custom_fields[fieldName]`` so a
    *  resource can carry its own supplier / lead time / QC inspector etc. */
@@ -708,6 +724,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onRemoveResource,
   onUpdateResource,
   onUpdateResourceFields,
+  onSetResourceBasis,
   onUpdateResourceCustomField,
   onSaveResourceToCatalog,
   onSaveVariantHeaderToCatalog,
@@ -1413,6 +1430,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onRemoveResource: onRemoveResource ?? (() => {}),
       onUpdateResource: onUpdateResource ?? (() => {}),
       onUpdateResourceFields,
+      onSetResourceBasis,
       onSaveResourceToCatalog: onSaveResourceToCatalog ?? (() => {}),
       onSaveVariantHeaderToCatalog,
       onOpenCostDbForPosition: onOpenCostDbForPosition ?? (() => {}),
@@ -1488,7 +1506,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       unitsSystem,
     }) as FullGridContext,
     [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
-     expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
+     expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields, onSetResourceBasis,
      onSaveResourceToCatalog, onSaveVariantHeaderToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
      openVariantPickerSignal, openVariantPickerFor, clearOpenVariantPicker, openPositionVariantPicker, onUpdateVariantHeader,
      onDeletePosition, onSaveToDatabase, onAddComment,
@@ -1801,6 +1819,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }>;
     if (resources.length === 0) return;
 
+    // Issue #555: rows may have been entered for the whole position. Their
+    // stored ``quantity`` stays the per-unit norm (the pricing and share
+    // readers use it); the grid shows the whole-position figure instead.
+    const basis = resourceQuantityBasis(pos.metadata);
+    const posQty = Number(pos.quantity) || 0;
+
     // Variant-catalog dedupe at render time. Two scenarios collapse here:
     //
     //   1. CWICR ships two components with the same ``resource_code`` (e.g.
@@ -1822,9 +1846,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     const variantPrimaryByHash = new Map<string, number>();
 
     let resTotal = 0;
+    let resPositionTotal = 0;
     for (let i = 0; i < resources.length; i++) {
       const r = resources[i]!;
       const rTotal = Number(r.total ?? r.quantity * r.unit_rate) || 0;
+      const rQtyForPosition = resourceQuantityForPosition(r, posQty);
+      const rPositionTotal = basis === 'per_position'
+        ? rQtyForPosition * (Number(r.unit_rate) || 0)
+        : rTotal * posQty;
       // Issue #111 (skolodi follow-up) — the per-position resource
       // subtotal (``_positionResourceTotal``, rendered on the
       // "Add resource" row) is one of the TWO places the contributor
@@ -1835,6 +1864,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // currency wins; absent ⇒ project base (no conversion).
       const rCcy = (r.currency || '').trim() || currencyCode;
       resTotal += convertToBase(rTotal, rCcy, currencyCode, fxRates ?? null);
+      resPositionTotal += convertToBase(rPositionTotal, rCcy, currencyCode, fxRates ?? null);
 
       const hasVariantCatalog =
         Array.isArray(r.available_variants) && r.available_variants.length >= 2;
@@ -1877,6 +1907,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         _resourceVariant: r.variant,
         _resourceVariantDefault: r.variant_default,
         _resourceVariantSnapshot: r.variant_snapshot,
+        _resourceBasis: basis,
+        _resourceQtyForPosition: rQtyForPosition,
+        _positionQuantity: posQty,
+        _positionUnit: pos.unit ?? '',
         id: `${pos.id}_res_${i}`,
         description: r.name,
         ordinal: '',
@@ -1892,7 +1926,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     const addRow: AddResourceRow = {
       _isAddResource: true,
       _parentPositionId: pos.id,
-      _positionResourceTotal: resTotal,
+      // Per 1 unit of the position (= its unit rate) and for the whole
+      // position (= its total): the old footer showed the first one alone,
+      // in the Total column, and read as the position's resource total.
+      _positionResourceUnitRate: basis === 'per_position' && posQty > 0 ? resPositionTotal / posQty : resTotal,
+      _positionResourceTotal: resPositionTotal,
+      _resourceBasis: basis,
+      _positionQuantity: posQty,
+      _positionUnit: pos.unit ?? '',
       id: `${pos.id}_add_res`,
       description: '',
       ordinal: '',

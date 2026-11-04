@@ -32,6 +32,7 @@ import {
   Check,
   AlertTriangle,
   Link2,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -42,7 +43,9 @@ import {
   fmtWithCurrency,
   getUnitsForLocale,
   hasContributingResources,
+  resourceQuantityEdit,
   saveCustomUnit,
+  type ResourceQuantityBasis,
   type UnitsSystem,
 } from '../boqHelpers';
 import { RESOURCE_TYPES, getResourceTypeLabel, getResourceTypeShortCode } from '../boqResourceTypes';
@@ -618,6 +621,8 @@ export interface ResourceGridContext {
    *  Without this, two sequential `onUpdateResource` calls race on the React Query
    *  cache and the second silently overwrites the first. */
   onUpdateResourceFields?: (positionId: string, resourceIndex: number, fields: Record<string, number | string>) => void;
+  /** Switch how a position's resource quantities are entered (issue #555). */
+  onSetResourceBasis?: (positionId: string, basis: ResourceQuantityBasis) => void;
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
   /** Save a variant-header synthetic row to the user's catalog under the
    *  user-edited custom name. Reads the chosen variant off the position
@@ -3947,11 +3952,17 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
   const resourceType = (data._resourceType as string) || 'other';
   const qty = (data._resourceQty as number) ?? 0;
   const rate = (data._resourceRate as number) ?? 0;
+  // Issue #555: under the whole-position basis the row shows and edits the
+  // quantity for the whole position; the stored per-unit norm stays in qty.
+  const basis = (data._resourceBasis as ResourceQuantityBasis | undefined) ?? 'per_unit';
+  const positionQty = Number(data._positionQuantity) || 0;
+  const positionUnit = (data._positionUnit as string | undefined) || ctx.t('boq.position_unit_fallback', { defaultValue: 'unit' });
+  const shownQty = basis === 'per_position' ? Number(data._resourceQtyForPosition) || 0 : qty;
   // ``total`` stays computed from the metric-canonical qty * rate so it is
   // invariant across measurement systems (Issue #285). Only the qty / rate
   // INPUTS below are shown converted; the displayed pair still multiplies
   // to this same total because the rate is re-expressed reciprocally.
-  const total = qty * rate;
+  const total = shownQty * rate;
   // Issue #285: resources carry their own unit (``_resourceUnit``). Show qty
   // converted into the user's system and the rate reciprocally so the row
   // reconciles; the inline editors reverse the edit back to metric before
@@ -3959,8 +3970,8 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
   // metric / unmapped units, so these are safe to compute unconditionally.
   const resourceUnitForDisplay = (data._resourceUnit as string | undefined) ?? '';
   const displayQty = ctx.displayQuantity
-    ? ctx.displayQuantity.convert(qty, resourceUnitForDisplay).value
-    : qty;
+    ? ctx.displayQuantity.convert(shownQty, resourceUnitForDisplay).value
+    : shownQty;
   const displayRate = ctx.displayQuantity
     ? ctx.displayQuantity.convertRate(rate, resourceUnitForDisplay)
     : rate;
@@ -4257,9 +4268,11 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
       const metric = ctx.displayQuantity
         ? ctx.displayQuantity.toMetric(v, resourceUnitForDisplay)
         : v;
-      ctx.onUpdateResource?.(posId, resIdx, 'quantity', metric);
+      const fields = resourceQuantityEdit(basis, metric, positionQty);
+      if (ctx.onUpdateResourceFields) ctx.onUpdateResourceFields(posId, resIdx, fields);
+      else ctx.onUpdateResource?.(posId, resIdx, 'quantity', fields.quantity ?? metric);
     },
-    [ctx, posId, resIdx, resourceUnitForDisplay],
+    [ctx, posId, resIdx, resourceUnitForDisplay, basis, positionQty],
   );
   const handleRateChange = useCallback(
     (v: number) => {
@@ -4357,7 +4370,20 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
   }, [baseCurrency, fxRates, resourceCurrency]);
 
   const totalTitle = (() => {
-    if (!isForeign) return formattedTotal;
+    if (!isForeign) {
+      return basis === 'per_position'
+        ? ctx.t('boq.resource_total_for_position', {
+            defaultValue: '{{amount}} for the whole position ({{quantity}} {{unit}})',
+            amount: formattedTotal,
+            quantity: positionQty.toLocaleString(ctx.locale ?? getNumberLocale()),
+            unit: positionUnit,
+          })
+        : ctx.t('boq.resource_total_per_unit', {
+            defaultValue: '{{amount}} per 1 {{unit}} of the position',
+            amount: formattedTotal,
+            unit: positionUnit,
+          });
+    }
     if (hasFxRate && formattedTotalInBase) {
       return ctx.t('boq.resource_total_in_base', {
         defaultValue: '{{foreign}} ≈ {{base}} (1 {{code}} = {{rate}} {{baseCode}})',
@@ -5192,32 +5218,108 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   if (data?._isAddResource) {
     // Adding a resource is a write, and a locked bill takes none.
     if (ctx.readOnly) return <div className="h-full w-full" aria-hidden="true" />;
-    const renderTotalSlot = (width: number) => {
-      if (typeof data._positionResourceTotal !== 'number' || data._positionResourceTotal <= 0) {
-        return (
-          <span
-            key="total"
-            className="shrink-0 self-center"
-            style={{ width: `${width}px` }}
-            aria-hidden="true"
-          />
-        );
+    const footerPosId = data._parentPositionId as string;
+    const basis = (data._resourceBasis as ResourceQuantityBasis | undefined) ?? 'per_unit';
+    const positionQty = Number(data._positionQuantity) || 0;
+    const positionUnit = (data._positionUnit as string | undefined) || ctx.t('boq.position_unit_fallback', { defaultValue: 'unit' });
+    const positionQtyText = positionQty.toLocaleString(ctx.locale ?? getNumberLocale());
+
+    // One money figure in a footer slot. Issue #88: follow the display
+    // currency like the rest of the BOQ; the stored values are base.
+    const renderMoneySlot = (key: string, width: number, baseValue: unknown, title: string) => {
+      if (typeof baseValue !== 'number' || baseValue <= 0) {
+        return <span key={key} className="shrink-0 self-center" style={{ width: `${width}px` }} aria-hidden="true" />;
       }
-      // Issue #88 — keep this footer in lock-step with the rest of the
-      // BOQ when display currency is active. The base value is stored in
-      // ``_positionResourceTotal``; only the rendering changes.
-      const baseValue = data._positionResourceTotal as number;
       const dc = ctx.displayCurrency;
       const shown = dc && dc.rate > 0 ? baseValue / dc.rate : baseValue;
       const code = dc && dc.rate > 0 ? dc.code : (ctx.currencyCode ?? 'EUR');
       return (
         <span
-          key="total"
+          key={key}
           className="shrink-0 self-center text-right tabular-nums text-[10px] font-medium text-content-tertiary pr-2 pl-2"
           style={{ width: `${width}px` }}
-          title={ctx.t('boq.resources_total', { defaultValue: 'Resources total' })}
+          title={title}
         >
           {fmtWithCurrency(shown, ctx.locale ?? getNumberLocale(), code)}
+        </span>
+      );
+    };
+    // Issue #555: the footer used to show the per-unit sum alone, in the
+    // Total column, where it read as the position's resource total. Now the
+    // per-unit sum sits under Unit Rate and the whole-position sum under Total.
+    const renderUnitRateSlot = (width: number) =>
+      renderMoneySlot(
+        'unit_rate',
+        width,
+        data._positionResourceUnitRate,
+        ctx.t('boq.resources_unit_rate_hint', {
+          defaultValue: 'Resources per 1 {{unit}}: this is the unit rate of the position',
+          unit: positionUnit,
+        }),
+      );
+    const renderTotalSlot = (width: number) =>
+      renderMoneySlot(
+        'total',
+        width,
+        data._positionResourceTotal,
+        ctx.t('boq.resources_total_for_position_hint', {
+          defaultValue: 'Resources for the whole position ({{quantity}} {{unit}}): this is the position total',
+          quantity: positionQtyText,
+          unit: positionUnit,
+        }),
+      );
+
+    // How the resource quantities above were entered, and the switch.
+    const renderBasisSlot = (width: number) => {
+      const next: ResourceQuantityBasis = basis === 'per_unit' ? 'per_position' : 'per_unit';
+      const blocked = next === 'per_position' && !(positionQty > 0);
+      const label = basis === 'per_unit'
+        ? ctx.t('boq.resource_basis_per_unit', { defaultValue: 'Qty per 1 {{unit}}', unit: positionUnit })
+        : ctx.t('boq.resource_basis_per_position', {
+            defaultValue: 'Qty for {{quantity}} {{unit}}',
+            quantity: positionQtyText,
+            unit: positionUnit,
+          });
+      const hint = blocked
+        ? ctx.t('boq.resource_basis_needs_quantity', {
+            defaultValue: 'Enter the position quantity first: resources for the whole position are divided by it.',
+          })
+        : basis === 'per_unit'
+          ? ctx.t('boq.resource_basis_per_unit_hint', {
+              defaultValue:
+                'Resource quantities are per 1 {{unit}} of this position: unit rate = sum of resources, total = quantity x unit rate. Click to enter them for the whole position instead.',
+              unit: positionUnit,
+            })
+          : ctx.t('boq.resource_basis_per_position_hint', {
+              defaultValue:
+                'Resource quantities are for the whole position ({{quantity}} {{unit}}): unit rate = resources total / quantity. Click to enter them per 1 {{unit}} instead.',
+              quantity: positionQtyText,
+              unit: positionUnit,
+            });
+      return (
+        <span
+          key="quantity"
+          className="shrink-0 self-center flex justify-end pr-1 min-w-0"
+          style={{ width: `${width}px` }}
+        >
+          <button
+            type="button"
+            disabled={blocked || !ctx.onSetResourceBasis}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.onSetResourceBasis?.(footerPosId, next);
+            }}
+            title={hint}
+            aria-label={hint}
+            data-testid={`resource-basis-toggle-${footerPosId}`}
+            data-basis={basis}
+            className="inline-flex items-center gap-1 h-5 px-1.5 rounded text-[10px] font-medium min-w-0
+                       text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+          >
+            <ArrowLeftRight size={10} className="shrink-0" />
+            <span className="truncate">{label}</span>
+          </button>
         </span>
       );
     };
@@ -5278,6 +5380,8 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
         {slots.map((slot) => {
           if (LEFT_PAD_COL_IDS.has(slot.colId)) return null;
           if (slot.colId === 'description') return renderDescriptionSlot(slot.width);
+          if (slot.colId === 'quantity') return renderBasisSlot(slot.width);
+          if (slot.colId === 'unit_rate') return renderUnitRateSlot(slot.width);
           if (slot.colId === 'total') return renderTotalSlot(slot.width);
           // All other columns (ordinal, _bim_link, unit, _bim_qty,
           // quantity, unit_rate, classification, _actions, custom_*)

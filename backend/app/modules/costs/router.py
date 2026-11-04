@@ -2520,6 +2520,12 @@ async def load_vector_from_github(
 
     Downloads a parquet file with pre-computed 384d embeddings (all-MiniLM-L6-v2)
     for the given region, so users don't need to run the embedding model locally.
+
+    The data repo publishes no ``<region>_vectors.parquet`` today, so in
+    practice every call builds the vectors locally from the loaded cost items.
+    A server without the optional semantic-search stack answers 503 with code
+    ``vector_backend_unavailable``; any other failure answers 500 with code
+    ``vector_generation_failed``.
     """
     import time
 
@@ -2688,12 +2694,33 @@ async def load_vector_from_github(
             }
         except HTTPException:
             raise
+        except (ImportError, RuntimeError) as gen_err:
+            # What app.core.vector raises for a missing piece: no embedding
+            # model, no LanceDB, no Qdrant. That is a server without the
+            # optional semantic-search stack, not a crash, so it answers 503
+            # with a code the client can act on (issue #555, AR_DUBAI).
+            logger.warning("Vector generation unavailable for %s: %s", db_id, gen_err)
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "vector_backend_unavailable",
+                    "message": (
+                        f"Semantic search vectors for '{db_id}' could not be built on this server: {gen_err}. "
+                        "The cost database itself is loaded and usable; install the optional "
+                        "semantic-search components to enable vector search."
+                    ),
+                    "database": db_id,
+                },
+            ) from gen_err
         except Exception as gen_err:
             logger.exception("Failed to generate vectors for %s", db_id)
             raise HTTPException(
-                500,
-                f"Vector generation failed for '{db_id}': {gen_err}. "
-                f"Ensure sentence-transformers and lancedb are installed.",
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "code": "vector_generation_failed",
+                    "message": f"Vector generation failed for '{db_id}': {gen_err}.",
+                    "database": db_id,
+                },
             ) from gen_err
 
     logger.info("Loading vector data from %s", local_path)
