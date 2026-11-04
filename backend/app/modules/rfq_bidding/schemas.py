@@ -393,6 +393,14 @@ class BidLineResponse(BaseModel):
         return _serialise_decimal(v)
 
 
+class BidScopeConfirmation(BaseModel):
+    """Whether the estimator confirms a lump-sum quote covers the whole scope."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    confirmed: bool = True
+
+
 class BidAdjustmentCreate(BaseModel):
     """An inclusion or exclusion that moves a quote's comparable total."""
 

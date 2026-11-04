@@ -33,6 +33,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { fetchContacts, type Contact } from '@/features/contacts/api';
 import {
   fetchRFQs,
+  confirmBidScope,
   createRFQ,
   issueRFQ,
   deleteRFQ,
@@ -353,6 +354,17 @@ export function RFQBiddingPage() {
     },
   });
 
+  const scopeMutation = useMutation({
+    mutationFn: (bidId: string) => confirmBidScope(bidId, true),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rfq-bidding-comparison'] });
+      addToast({ type: 'success', title: t('rfq_bidding.scope_confirm_done', { defaultValue: 'Scope confirmed, quote added to the ranking' }) });
+    },
+    onError: () => {
+      addToast({ type: 'error', title: t('rfq_bidding.scope_confirm_error', { defaultValue: 'Could not confirm the scope' }) });
+    },
+  });
+
   // ── Tabs definition ───────────────────────────────────────────────────
 
   const tabs: TabBarTab<RFQTab>[] = useMemo(() => [
@@ -524,6 +536,8 @@ export function RFQBiddingPage() {
             isLoading={comparisonLoading}
             onAward={(bidId) => awardMutation.mutate(bidId)}
             awarding={awardMutation.isPending}
+            onConfirmScope={(bidId) => scopeMutation.mutate(bidId)}
+            confirmingScope={scopeMutation.isPending}
             bidderName={bidderName}
             t={t}
           />
@@ -762,6 +776,8 @@ function ComparisonPanel({
   isLoading,
   onAward,
   awarding,
+  onConfirmScope,
+  confirmingScope,
   bidderName,
   t,
 }: {
@@ -772,6 +788,8 @@ function ComparisonPanel({
   isLoading: boolean;
   onAward: (bidId: string) => void;
   awarding: boolean;
+  onConfirmScope: (bidId: string) => void;
+  confirmingScope: boolean;
   bidderName: BidderName;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
@@ -826,6 +844,8 @@ function ComparisonPanel({
           comparison={comparison}
           onAward={onAward}
           awarding={awarding}
+          onConfirmScope={onConfirmScope}
+          confirmingScope={confirmingScope}
           bidderName={bidderName}
           t={t}
         />
@@ -856,12 +876,16 @@ function ComparisonTable({
   comparison,
   onAward,
   awarding,
+  onConfirmScope,
+  confirmingScope,
   bidderName,
   t,
 }: {
   comparison: ComparisonResponse;
   onAward: (bidId: string) => void;
   awarding: boolean;
+  onConfirmScope: (bidId: string) => void;
+  confirmingScope: boolean;
   bidderName: BidderName;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
@@ -927,17 +951,62 @@ function ComparisonTable({
           </div>
           <ul className="divide-y divide-border-light">
             {comparison.excluded.map((quote) => (
-              <li key={quote.bid_id} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5 text-sm">
-                <span className="font-medium text-content-primary">{bidderName(quote.bidder_contact_id)}</span>
-                <span className="text-xs text-content-tertiary">
-                  {quote.reasons.map((r) => exclusionReason(r, t)).join('; ')}
-                </span>
-              </li>
+              <ExcludedQuoteRow
+                key={quote.bid_id}
+                quote={quote}
+                bidderName={bidderName}
+                onConfirmScope={onConfirmScope}
+                confirmingScope={confirmingScope}
+                t={t}
+              />
             ))}
           </ul>
         </div>
       )}
     </div>
+  );
+}
+
+/** One quote kept out of the ranking, with its reasons and, for an unconfirmed lump sum, the way back in. */
+export function ExcludedQuoteRow({
+  quote,
+  bidderName,
+  onConfirmScope,
+  confirmingScope,
+  t,
+}: {
+  quote: QuoteComparison;
+  bidderName: BidderName;
+  onConfirmScope: (bidId: string) => void;
+  confirmingScope: boolean;
+  t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+  const needsScope = quote.reasons.includes('lump_sum_scope_unconfirmed');
+  return (
+    <li className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5 text-sm">
+      <span className="font-medium text-content-primary">{bidderName(quote.bidder_contact_id)}</span>
+      <span className="text-xs text-content-tertiary">
+        {quote.reasons.map((r) => exclusionReason(r, t)).join('; ')}
+      </span>
+      {needsScope && (
+        <div className="flex w-full flex-wrap items-center justify-between gap-2">
+          <p className="max-w-xl text-xs text-content-secondary">
+            {t('rfq_bidding.scope_confirm_hint', {
+              defaultValue:
+                'This quote gives one lump sum and no line prices, so the comparison cannot tell what it covers. Confirm only if the bidder has stated that the sum covers the whole scope. The quote then joins the ranking, and your confirmation is logged.',
+            })}
+          </p>
+          <button
+            type="button"
+            disabled={confirmingScope}
+            onClick={() => onConfirmScope(quote.bid_id)}
+            className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-50"
+          >
+            {t('rfq_bidding.scope_confirm_btn', { defaultValue: 'Confirm full scope' })}
+          </button>
+        </div>
+      )}
+    </li>
   );
 }
 
@@ -963,6 +1032,9 @@ function exclusionReason(code: string, t: (k: string, o?: Record<string, unknown
     scope_not_covered: t('rfq_bidding.reason_scope_not_covered', { defaultValue: 'Part of the scope is not priced' }),
     normalised_total_not_positive: t('rfq_bidding.reason_normalised_total_not_positive', {
       defaultValue: 'Restated total is zero or negative',
+    }),
+    lump_sum_scope_unconfirmed: t('rfq_bidding.reason_lump_sum_scope_unconfirmed', {
+      defaultValue: 'Lump sum only: scope coverage not confirmed',
     }),
     technical_score_missing: t('rfq_bidding.reason_technical_score_missing', {
       defaultValue: 'No technical score recorded',

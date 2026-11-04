@@ -23,6 +23,7 @@ Endpoints:
     POST   /bids/{id}/adjustments  - Record an inclusion, exclusion or allowance
     POST   /bids/{id}/withdraw     - Record that the supplier withdrew the quote
     POST   /bids/{id}/disqualify   - Rule a quote out of the ranking (award roles)
+    POST   /bids/{id}/scope-confirmed - Confirm a lump-sum quote covers the whole scope
     POST   /bids/{id}/admit-late   - Admit a late quote into the ranking (award roles)
     POST   /bids/{id}/award        - Award bid (requires rfq.update + project access)
 """
@@ -32,9 +33,13 @@ from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
-from app.core.i18n import get_locale
-from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
+from app.dependencies import (
+    CurrentUserId,
+    CurrentUserPayload,
+    RequirePermission,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.rfq_bidding.schemas import (
     BidAdjustmentCreate,
     BidAwardRequest,
@@ -42,6 +47,7 @@ from app.modules.rfq_bidding.schemas import (
     BidDecision,
     BidEvaluation,
     BidListResponse,
+    BidScopeConfirmation,
     ComparisonResponse,
     RFQAwardResponse,
     RFQBidResponse,
@@ -69,28 +75,14 @@ async def _verify_project_access(
     user_id: str,
     payload: dict | None = None,
 ) -> None:
-    """Verify the current user owns (or is admin on) the given project.
+    """Allow the project owner, admins and project team members (404 otherwise).
 
-    Adapted from ``erp_chat.tools._require_project_access``. Central
-    choke-point: every project-scoped RFQ endpoint must call this.
+    Delegates to the shared helper tendering uses; write routes stay behind
+    their own ``rfq.*`` permissions.
     """
     if payload and payload.get("role") == "admin":
         return
-
-    from app.modules.projects.repository import ProjectRepository
-
-    proj_repo = ProjectRepository(session)
-    project = await proj_repo.get_by_id(project_id)
-    if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=translate("errors.project_not_found", locale=get_locale()),
-        )
-    if str(project.owner_id) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=translate("errors.project_not_found", locale=get_locale()),
-        )
+    await verify_project_access(project_id, user_id, session)
 
 
 async def _verify_rfq_access(
@@ -499,6 +491,25 @@ async def evaluate_bid(
     """Evaluate a bid. Verifies project access via parent RFQ."""
     await _verify_bid_access(session, bid_id, user_id, payload)
     bid = await service.evaluate_bid(bid_id, data)
+    return RFQBidResponse.model_validate(bid)
+
+
+@router.post(
+    "/bids/{bid_id}/scope-confirmed/",
+    response_model=RFQBidResponse,
+    dependencies=[Depends(RequirePermission("rfq.update"))],
+)
+async def set_bid_scope_confirmed(
+    bid_id: uuid.UUID,
+    data: BidScopeConfirmation,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: RFQService = Depends(_get_service),
+) -> RFQBidResponse:
+    """Confirm (or withdraw the confirmation) that a lump-sum quote covers the whole scope."""
+    await _verify_bid_access(session, bid_id, user_id, payload)
+    bid = await service.set_scope_confirmed(bid_id, data.confirmed, actor_id=user_id)
     return RFQBidResponse.model_validate(bid)
 
 
