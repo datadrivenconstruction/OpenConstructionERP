@@ -114,6 +114,9 @@ class _StubRepo:
     async def get_by_id(self, item_id: uuid.UUID) -> Any:
         return self.rows.get(item_id)
 
+    async def get_many(self, item_ids: list[uuid.UUID]) -> dict[uuid.UUID, Any]:
+        return {i: self.rows[i] for i in item_ids if i in self.rows}
+
     async def update_fields(self, item_id: uuid.UUID, **kwargs: Any) -> None:
         item = self.rows.get(item_id)
         if item:
