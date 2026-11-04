@@ -1496,8 +1496,13 @@ async def _readable_document_ids(
     session,  # type: ignore[no-untyped-def]
     user_id: str,
     ids: list[uuid.UUID],
+    *,
+    for_delete: bool = False,
 ) -> list[uuid.UUID]:
     """The subset of ``ids`` the caller could open one by one.
+
+    With ``for_delete`` the single ``DELETE /{document_id}`` rules also apply:
+    folder write access, and editors only remove their own uploads.
 
     Applies the guard ``GET /{document_id}/references`` applies to a single
     document - project membership, then folder read - so asking about a batch
@@ -1509,20 +1514,25 @@ async def _readable_document_ids(
     from sqlalchemy import select as _select
 
     from app.modules.documents.folder_permissions_service import (
+        can_write,
         folder_access_for,
         kind_and_path_for_document,
     )
     from app.modules.documents.models import Document
 
     rows = (
-        await session.execute(_select(Document.id, Document.project_id, Document.category).where(Document.id.in_(ids)))
+        await session.execute(
+            _select(Document.id, Document.project_id, Document.category, Document.uploaded_by).where(
+                Document.id.in_(ids)
+            )
+        )
     ).all()
 
     project_ok: dict[uuid.UUID, bool] = {}
-    folder_ok: dict[tuple[uuid.UUID, str, str | None], bool] = {}
+    folder_role: dict[tuple[uuid.UUID, str, str | None], str | None] = {}
     caller = uuid.UUID(str(user_id))
     readable: list[uuid.UUID] = []
-    for doc_id, project_id, category in rows:
+    for doc_id, project_id, category, uploaded_by in rows:
         if project_id not in project_ok:
             try:
                 await _verify_project_membership_or_404(project_id, user_id, session)
@@ -1533,17 +1543,23 @@ async def _readable_document_ids(
             continue
         kind, path = kind_and_path_for_document(category)
         folder_key = (project_id, kind, path)
-        if folder_key not in folder_ok:
-            role = await folder_access_for(
+        if folder_key not in folder_role:
+            folder_role[folder_key] = await folder_access_for(
                 session,
                 project_id=project_id,
                 user_id=caller,
                 scope_kind=kind,
                 scope_path=path,
             )
-            folder_ok[folder_key] = role is not None
-        if folder_ok[folder_key]:
-            readable.append(doc_id)
+        role = folder_role[folder_key]
+        if role is None:
+            continue
+        if for_delete:
+            if role != "owner" and not can_write(role):
+                continue
+            if role == "editor" and uploaded_by and str(uploaded_by) != str(user_id):
+                continue
+        readable.append(doc_id)
     # Keep the caller's order, which is the order the selection was made in.
     order = {doc_id: index for index, doc_id in enumerate(ids)}
     readable.sort(key=lambda doc_id: order.get(doc_id, len(order)))
@@ -1598,17 +1614,7 @@ async def batch_delete_documents(
     The report of what was severed is returned with the deletion count either
     way, so the caller can say afterwards what the delete cost.
     """
-    from sqlalchemy import select as _select
-
-    from app.modules.documents.models import Document
-    from app.modules.projects.repository import ProjectRepository
-
-    proj_repo = ProjectRepository(session)
-    owned_projects, _ = await proj_repo.list_for_user(owner_id=user_id, offset=0, limit=10000, exclude_archived=False)
-    owned_project_ids = {str(p.id) for p in owned_projects}
-
-    rows = (await session.execute(_select(Document.id, Document.project_id).where(Document.id.in_(body.ids)))).all()
-    allowed = list(dict.fromkeys(r[0] for r in rows if str(r[1]) in owned_project_ids))
+    allowed = list(dict.fromkeys(await _readable_document_ids(session, str(user_id), list(body.ids), for_delete=True)))
 
     references = await service.get_references_batch(allowed)
     if references.severs and not body.acknowledge_references:
