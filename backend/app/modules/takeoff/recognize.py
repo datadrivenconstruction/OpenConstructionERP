@@ -23,8 +23,11 @@ rect-like objects defensively so tests can feed plain tuples.
 
 from __future__ import annotations
 
+import logging
 import math
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 # Coordinates from drawings() are in PDF points - the same space the
 # frontend stores measurement points in, so they drop straight in with no
@@ -41,8 +44,13 @@ _MIN_AREA_PX2 = 600.0
 _SYMBOL_MAX_DIAG_PX = 46.0
 # A repeated-symbol cluster needs at least this many near-identical members.
 _MIN_CLUSTER = 3
-# Never return more than this many candidates (keeps the review panel sane).
-_MAX_CANDIDATES = 40
+# Never return more than this many candidates. A floor plan with 30 rooms has
+# about as many walls plus a few symbol counts, so the cap sits well above that.
+_MAX_CANDIDATES = 200
+# A drawing without a wall structure is read by the simple shape detectors only
+# when it is this small: on a full sheet its closed loops are table cells,
+# title blocks and legends, not rooms.
+_SKETCH_MAX_PATHS = 60
 
 Point = tuple[float, float]
 
@@ -349,10 +357,68 @@ def recognize_candidates(
     Candidates are sorted by confidence and capped at ``max_candidates``.
     """
     scale = float(scale_pixels_per_unit or 0.0)
-    prims = primitives_from_drawings(drawings)
-    candidates = detect_areas(prims, scale) + detect_lengths(prims, scale) + detect_counts(prims)
+    plan = None
+    try:
+        from app.modules.takeoff import vector_plan  # noqa: PLC0415 - numpy/OpenCV only when a page is read
+
+        plan = vector_plan.read_plan(drawings, scale or None)
+    except Exception:  # a malformed path must not cost the user the simple detectors
+        logger.exception("takeoff.recognize: floor-plan reader failed, using the shape detectors")
+    if plan is not None and plan.found_structure:
+        candidates = plan_candidates(plan, scale)
+    elif len(drawings or []) <= _SKETCH_MAX_PATHS:
+        prims = primitives_from_drawings(drawings)
+        candidates = detect_areas(prims, scale) + detect_lengths(prims, scale) + detect_counts(prims)
+    else:
+        candidates = []
     candidates.sort(key=lambda c: c.get("confidence", 0.0), reverse=True)
     return candidates[:max_candidates]
+
+
+def plan_candidates(plan: Any, scale: float) -> list[dict[str, Any]]:
+    """Candidates from a :class:`~app.modules.takeoff.vector_plan.PlanResult`."""
+    out: list[dict[str, Any]] = []
+    for room in plan.rooms:
+        pts = room["points"]
+        # Confidence: snapped onto CAD face lines and a simple outline score higher.
+        conf = 0.6 + 0.3 * room["snapped"] - (0.1 if room["vertices"] > 8 else 0.0)
+        out.append(
+            {
+                "type": "area",
+                "points": [{"x": p[0], "y": p[1]} for p in pts],
+                "value": _area_value(pts, scale),
+                "dimension": "area",
+                "confidence": round(max(0.3, min(0.95, conf)), 2),
+                "reason": "Room enclosed by walls in the vector layer",
+            }
+        )
+    for wall in plan.walls:
+        a, b = wall["points"]
+        conf = 0.5 + 0.3 * wall["support"] + 0.05 * wall["joined"]
+        out.append(
+            {
+                "type": "distance",
+                "points": [{"x": a[0], "y": a[1]}, {"x": b[0], "y": b[1]}],
+                "value": _length_value([a, b], scale),
+                "dimension": "length",
+                "confidence": round(max(0.3, min(0.9, conf)), 2),
+                "reason": "Wall centreline, junction to junction",
+            }
+        )
+    for group in plan.counts:
+        n = group["count"]
+        out.append(
+            {
+                "type": "count",
+                "points": [{"x": p[0], "y": p[1]} for p in group["points"]],
+                "value": float(n),
+                "count": n,
+                "dimension": "count",
+                "confidence": group["confidence"],
+                "reason": f"{n} identical symbols inside the rooms",
+            }
+        )
+    return out
 
 
 # ── seeded similar-symbol search ("count by example") ────────────────────────
