@@ -131,3 +131,20 @@ async def test_complete_from_in_progress_allowed_canonical() -> None:
     result = await service.complete_inspection(inspection.id, "fail")
     assert result.status == "completed"
     assert result.result == "fail"
+
+
+@pytest.mark.asyncio
+async def test_patching_status_to_completed_is_rejected_without_a_result() -> None:
+    """in_progress -> completed by PATCH would close the record with no result and no events."""
+    from app.modules.inspections.schemas import InspectionUpdate
+
+    service = _service()
+    inspection = await service.create_inspection(
+        InspectionCreate(project_id=uuid.uuid4(), inspection_type="general", title="Pour check")
+    )
+    inspection.status = "in_progress"
+
+    with pytest.raises(HTTPException) as exc_info:
+        await service.update_inspection(inspection.id, InspectionUpdate(status="completed"))
+    assert exc_info.value.status_code == 400
+    assert inspection.status == "in_progress"
