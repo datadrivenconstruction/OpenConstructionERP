@@ -45,3 +45,16 @@ def test_other_links_are_unaffected():
     for _ in range(share_link_limiter.max_requests):
         _throttle_share_link(req, "tok-c")
     _throttle_share_link(req, "tok-d")
+
+
+def test_idle_bucket_keys_are_swept():
+    from app.core.rate_limiter import RateLimiter
+
+    lim = RateLimiter(max_requests=5, window_seconds=1)
+    for i in range(50):
+        lim.is_allowed(f"k{i}")
+    import time
+
+    time.sleep(1.1)
+    lim.is_allowed("fresh")
+    assert set(lim._requests) == {"fresh"}
