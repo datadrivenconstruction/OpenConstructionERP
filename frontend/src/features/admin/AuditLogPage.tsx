@@ -65,7 +65,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { adminGuide } from './adminGuide';
 import { useToastStore } from '@/stores/useToastStore';
 import { triggerDownload } from '@/shared/lib/api';
-import { fetchUsers, type User } from '@/features/users/api';
+import { fetchAllUsers, type User } from '@/features/users/api';
 import {
   countAuditEntries,
   listAuditEntries,
@@ -155,9 +155,11 @@ function extractDiff(details: Record<string, unknown> | null): {
   return { before: null, after: null, raw: d };
 }
 
-function toCsvCell(value: unknown): string {
+export function toCsvCell(value: unknown): string {
   if (value == null) return '';
-  const s = typeof value === 'string' ? value : JSON.stringify(value);
+  let s = typeof value === 'string' ? value : JSON.stringify(value);
+  // A recorded name or id that starts with = + - @ would run as a formula in a spreadsheet.
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   const needsQuote = /[",\n\r]/.test(s);
   const escaped = s.replace(/"/g, '""');
   return needsQuote ? `"${escaped}"` : escaped;
@@ -813,10 +815,8 @@ export function AuditLogPage() {
 
   const usersQuery = useQuery({
     queryKey: ['audit-log', 'users'],
-    // Backend caps /v1/users/?limit at 100 (422 above it). The audit-log
-    // page only uses this list to resolve user IDs to display names — 100
-    // is plenty and avoids a 422 every time /admin/audit-log mounts.
-    queryFn: () => fetchUsers({ limit: 100 }),
+    // Resolves user ids to display names, so it needs every user, not one page.
+    queryFn: () => fetchAllUsers(),
     staleTime: 60_000,
   });
 

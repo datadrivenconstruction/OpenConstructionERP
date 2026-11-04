@@ -29,11 +29,11 @@ vi.mock('./api', async (importOriginal) => {
 });
 
 vi.mock('@/features/users/api', () => ({
-  fetchUsers: vi.fn(),
+  fetchAllUsers: vi.fn(),
 }));
 
 import { countAuditEntries, listAuditEntries } from './api';
-import { fetchUsers } from '@/features/users/api';
+import { fetchAllUsers } from '@/features/users/api';
 import { AuditLogPage } from './AuditLogPage';
 
 const sampleEntry: AuditEntry = {
@@ -173,7 +173,7 @@ describe('AuditLogPage', () => {
 
   it('renders a timeline row from the API and opens the drawer on click', async () => {
     (listAuditEntries as ReturnType<typeof vi.fn>).mockResolvedValue([sampleEntry]);
-    (fetchUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
+    (fetchAllUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
 
     renderWithProviders();
 
@@ -215,7 +215,7 @@ describe('AuditLogPage', () => {
       },
     ];
     (listAuditEntries as ReturnType<typeof vi.fn>).mockResolvedValue(entries);
-    (fetchUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
+    (fetchAllUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
 
     renderWithProviders();
 
@@ -239,7 +239,7 @@ describe('AuditLogPage', () => {
 
   it('toggles sort order via the timestamp column header', async () => {
     (listAuditEntries as ReturnType<typeof vi.fn>).mockResolvedValue([sampleEntry]);
-    (fetchUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
+    (fetchAllUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
 
     renderWithProviders();
 
@@ -262,7 +262,7 @@ describe('AuditLogPage', () => {
 
   it('applies a date-range preset and forwards the bounds to the API', async () => {
     (listAuditEntries as ReturnType<typeof vi.fn>).mockResolvedValue([sampleEntry]);
-    (fetchUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
+    (fetchAllUsers as ReturnType<typeof vi.fn>).mockResolvedValue(sampleUsers);
 
     renderWithProviders();
 
