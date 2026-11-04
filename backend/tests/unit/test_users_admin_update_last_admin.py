@@ -80,3 +80,12 @@ async def test_non_admin_cannot_promote_self_or_touch_admins():
         await update_user(uuid.uuid4(), UserAdminUpdate(role="admin"), "v", {"role": "manager"}, svc)
     assert e.value.status_code == 403
     assert svc.user_repo.updated == []
+
+
+def test_guard_admin_scope_blocks_non_admin_module_access_edit():
+    from app.modules.users.router import _guard_admin_scope
+
+    with pytest.raises(HTTPException) as exc:
+        _guard_admin_scope({"role": "manager"}, "admin")
+    assert exc.value.status_code == 403
+    _guard_admin_scope({"role": "admin"}, "admin")
