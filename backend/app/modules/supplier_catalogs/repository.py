@@ -476,8 +476,12 @@ class WarehouseRepository:
         await self.session.refresh(wh)
         return wh
 
-    async def list(self) -> list[Warehouse]:
-        stmt = select(Warehouse).order_by(Warehouse.code)
+    async def list(self, *, project_ids: set[uuid.UUID] | None = None, limit: int = 1000) -> list[Warehouse]:
+        """List warehouses, ``project_ids`` limits to those projects plus tenant-global ones."""
+        stmt = select(Warehouse)
+        if project_ids is not None:
+            stmt = stmt.where(Warehouse.project_id.is_(None) | Warehouse.project_id.in_(project_ids))
+        stmt = stmt.order_by(Warehouse.code).limit(limit)
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def list_balances(self, warehouse_id: uuid.UUID) -> list[StockBalance]:

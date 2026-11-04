@@ -457,7 +457,7 @@ class SiteInventoryService:
         rows = await self._all_movements(project_id)
         raw = [_to_ledger_movement(r) for r in rows]
         items = [_to_ledger_item(i) for i in await self.list_items(project_id)]
-        movements = ledger.resolve_positions(raw, items)
+        movements = ledger.price_unpriced_consumption(ledger.resolve_positions(raw, items), items)
 
         consumed_position_ids = {
             m.boq_position_id

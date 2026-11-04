@@ -1016,7 +1016,7 @@ async def list_warehouses(
     user_id: CurrentUserId,
     service: SupplierCatalogsService = Depends(_svc),
 ) -> list[WarehouseResponse]:
-    rows = await service.warehouses.list()
+    rows = await service.list_warehouses(user_id=str(user_id))
     return [WarehouseResponse.model_validate(w) for w in rows]
 
 
