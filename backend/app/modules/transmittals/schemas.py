@@ -224,4 +224,6 @@ class AcknowledgeRequest(BaseModel):
 class RespondRequest(BaseModel):
     """Submit a response to a transmittal."""
 
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     response: str = Field(..., min_length=1, max_length=5000)
