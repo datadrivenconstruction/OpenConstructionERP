@@ -90,6 +90,8 @@ class BackChargeOut(BaseModel):
     contact_id: str | None = None
     ncr_id: str | None = None
     punch_item_id: str | None = None
+    # Non-blocking findings of the cost_recovery rule set from the write that produced this row.
+    validation_warnings: list[dict] = []
 
 
 class PartyRecoveryOut(BaseModel):

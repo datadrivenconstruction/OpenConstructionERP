@@ -15,6 +15,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -267,6 +268,52 @@ async def _resolve_source(
     return fill
 
 
+def _rule_context(
+    *,
+    ref: str,
+    project_id: uuid.UUID,
+    responsible_party: str,
+    gross: Decimal | None,
+    pct: Decimal | None,
+    recovered: Decimal | None,
+    currency: str,
+    status: str,
+    previous_status: str | None = None,
+    shares: Sequence[dict[str, Any]] = (),
+) -> dict[str, Any]:
+    return {
+        "back_charge": {
+            "id": ref,
+            "project_id": str(project_id),
+            "responsible_party": responsible_party,
+            "gross_amount": gross,
+            "chargeable_pct": pct,
+            "recovered_amount": recovered,
+            "currency": currency,
+            "status": status,
+            "previous_status": previous_status,
+        },
+        "apportionments": list(shares),
+    }
+
+
+_RULE_FIELDS = ("responsible_party", "gross_amount", "chargeable_pct", "recovered_amount", "status")
+
+
+async def _enforce(project_id: uuid.UUID, ref: str, data: dict[str, Any], operation: str) -> list[dict[str, Any]]:
+    from app.core.validation.money_rules import enforce_money_rules  # noqa: PLC0415
+    from app.modules.cost_recovery.validators import COST_RECOVERY_RULE_SET  # noqa: PLC0415
+
+    return await enforce_money_rules(
+        COST_RECOVERY_RULE_SET,
+        data,
+        target_type="back_charge",
+        target_id=ref,
+        project_id=str(project_id),
+        operation=operation,
+    )
+
+
 async def create_back_charge(
     session: AsyncSession,
     project_id: uuid.UUID,
@@ -296,10 +343,28 @@ async def create_back_charge(
         if not (requested_currency or "").strip():
             requested_currency = source.currency
     currency = await _resolve_currency(session, project_id, requested_currency)
+    responsible_party = payload.responsible_party or party.label
+    status = payload.status or "proposed"
+    chargeable_pct = payload.chargeable_pct if payload.chargeable_pct is not None else Decimal("1")
+    warnings = await _enforce(
+        project_id,
+        "",
+        _rule_context(
+            ref="",
+            project_id=project_id,
+            responsible_party=responsible_party,
+            gross=gross,
+            pct=chargeable_pct,
+            recovered=Decimal("0"),
+            currency=currency,
+            status=status,
+        ),
+        "create",
+    )
     back_charge = BackCharge(
         project_id=project_id,
         source_ref=payload.source_ref or source.source_ref,
-        responsible_party=payload.responsible_party or party.label,
+        responsible_party=responsible_party,
         subcontractor_id=party.subcontractor_id,
         contact_id=party.contact_id,
         ncr_id=payload.ncr_id,
@@ -307,13 +372,14 @@ async def create_back_charge(
         description=payload.description or source.description,
         basis=payload.basis or "",
         gross_amount=gross,
-        chargeable_pct=payload.chargeable_pct if payload.chargeable_pct is not None else Decimal("1"),
+        chargeable_pct=chargeable_pct,
         currency=currency,
-        status=payload.status or "proposed",
+        status=status,
         created_by=created_by,
     )
     session.add(back_charge)
     await session.flush()
+    back_charge.validation_warnings = warnings  # type: ignore[attr-defined]
 
     # When the caller links the back-charge to a scored change subject, stamp the
     # subject's provability band so the recovery-by-traceability split is real.
@@ -375,6 +441,38 @@ async def update_back_charge(
         return None
 
     fields = payload.model_dump(exclude_unset=True)
+    # Rules judge the record as it will be, before any attribute is written.
+    shares = [
+        {
+            "id": str(a.id),
+            "party": a.party,
+            "share_pct": a.share_pct,
+            "share_amount": a.share_amount,
+            "currency": a.currency,
+        }
+        for a in await list_apportionment(session, project_id, back_charge_id)
+    ]
+    merged = {
+        **{k: getattr(back_charge, k) for k in _RULE_FIELDS},
+        **{k: v for k, v in fields.items() if k in _RULE_FIELDS},
+    }
+    warnings = await _enforce(
+        project_id,
+        str(back_charge.id),
+        _rule_context(
+            ref=str(back_charge.id),
+            project_id=project_id,
+            responsible_party=merged["responsible_party"] or "",
+            gross=merged["gross_amount"],
+            pct=merged["chargeable_pct"],
+            recovered=merged["recovered_amount"],
+            currency=back_charge.currency or "",
+            status=merged["status"] or "",
+            previous_status=back_charge.status,
+            shares=shares,
+        ),
+        "update",
+    )
     if "subcontractor_id" in fields or "contact_id" in fields:
         # Re-link: a new subcontractor without a contact takes the
         # subcontractor's own contact, not the one the old party had.
@@ -399,6 +497,7 @@ async def update_back_charge(
         back_charge.recovered_at = now_iso
 
     await session.flush()
+    back_charge.validation_warnings = warnings  # type: ignore[attr-defined]
     return back_charge
 
 
@@ -468,6 +567,32 @@ async def apportion_back_charge(
     # resolved to "unassigned" by the engine; carry the engine's resolved name.
     party_shares = [PartyShare(party=s.party or "", share_pct=s.share_pct) for s in shares]
     distributed = distribute_chargeable(item.chargeable_amount, party_shares)
+    share_by_party = {party: pct for party, pct in _merge_share_pcts(party_shares)}
+    await _enforce(
+        project_id,
+        str(back_charge.id),
+        _rule_context(
+            ref=str(back_charge.id),
+            project_id=project_id,
+            responsible_party=back_charge.responsible_party or "",
+            gross=back_charge.gross_amount,
+            pct=back_charge.chargeable_pct,
+            recovered=back_charge.recovered_amount,
+            currency=currency,
+            status=back_charge.status or "",
+            shares=[
+                {
+                    "id": party,
+                    "party": party,
+                    "share_pct": share_by_party.get(party, Decimal("0")),
+                    "share_amount": amount,
+                    "currency": currency,
+                }
+                for party, amount in distributed
+            ],
+        ),
+        "apportion",
+    )
 
     # Keep each resolved party's basis from the request. Duplicate parties are
     # merged by the engine; the first non-empty basis for a resolved party wins.
@@ -485,7 +610,6 @@ async def apportion_back_charge(
         )
     )
 
-    share_by_party = {party: pct for party, pct in _merge_share_pcts(party_shares)}
     rows: list[BackChargeApportionment] = []
     for party, amount in distributed:
         row = BackChargeApportionment(

@@ -608,6 +608,80 @@ class ChangeOrderService:
         self.session = session
         self.repo = ChangeOrderRepository(session)
 
+    # ── Validation rules (rule set ``changeorders``) ──────────────────────
+
+    async def _enforce_rules(
+        self,
+        order_id: uuid.UUID | None,
+        header: dict[str, Any],
+        items: list[dict[str, Any]],
+        operation: str,
+    ) -> list[dict[str, Any]]:
+        """Run the change order rules; errors raise a coded 422, warnings are returned."""
+        from app.core.validation.money_rules import enforce_money_rules  # noqa: PLC0415
+        from app.modules.changeorders.validators import CHANGEORDERS_RULE_SET  # noqa: PLC0415
+
+        ref = str(order_id) if order_id else ""
+        return await enforce_money_rules(
+            CHANGEORDERS_RULE_SET,
+            {"change_order": {"id": ref, **header}, "items": items},
+            target_type="change_order",
+            target_id=ref,
+            project_id=str(header.get("project_id") or "") or None,
+            operation=operation,
+        )
+
+    @staticmethod
+    def _item_rule_row(item: Any) -> dict[str, Any]:
+        return {
+            "id": str(getattr(item, "id", "") or ""),
+            "original_quantity": item.original_quantity,
+            "new_quantity": item.new_quantity,
+            "original_rate": item.original_rate,
+            "new_rate": item.new_rate,
+            "cost_delta": item.cost_delta,
+            "currency": getattr(item, "currency", "") or "",
+        }
+
+    async def _gate_items(
+        self, order: ChangeOrder, items: list[dict[str, Any]], operation: str
+    ) -> list[dict[str, Any]]:
+        """Gate the item list an add or edit would leave behind, before it is written."""
+        total = _round2(sum((_dec(i["cost_delta"]) for i in items), Decimal("0")))
+        header = {
+            "project_id": str(order.project_id),
+            "code": order.code,
+            "status": order.status,
+            "previous_status": order.status,
+            "cost_impact": total,
+            "currency": order.currency or "",
+            "schedule_impact_days": order.schedule_impact_days,
+        }
+        return await self._enforce_rules(order.id, header, items, operation)
+
+    async def _gate_order(
+        self,
+        order: ChangeOrder,
+        operation: str,
+        *,
+        target_status: str | None = None,
+        cost_impact: Any = None,
+    ) -> list[dict[str, Any]]:
+        """Gate a stored order (and its stored items) at a status change."""
+        items = [self._item_rule_row(i) for i in await self.repo.list_items_for_order(order.id)]
+        for row in items:
+            row["currency"] = row["currency"] or order.currency or ""
+        header = {
+            "project_id": str(order.project_id),
+            "code": order.code,
+            "status": target_status or order.status,
+            "previous_status": order.status,
+            "cost_impact": order.cost_impact if cost_impact is None else cost_impact,
+            "currency": order.currency or "",
+            "schedule_impact_days": order.schedule_impact_days,
+        }
+        return await self._enforce_rules(order.id, header, items, operation)
+
     # ── Create ────────────────────────────────────────────────────────────
 
     async def create_order(self, data: ChangeOrderCreate) -> ChangeOrder:
@@ -657,6 +731,19 @@ class ChangeOrderService:
         last_exc: Exception | None = None
         # Read once: a retry only bumps the ordinal, it does not re-count.
         count = await self.repo.count_for_project(data.project_id)
+        warnings = await self._enforce_rules(
+            None,
+            {
+                "project_id": str(data.project_id),
+                "code": f"CO-{count + 1:03d}",
+                "status": "draft",
+                "cost_impact": initial_cost_impact,
+                "currency": currency,
+                "schedule_impact_days": data.schedule_impact_days,
+            },
+            [],
+            "create",
+        )
         for attempt in range(_MAX_RETRIES):
             code = f"CO-{count + 1 + attempt:03d}"
 
@@ -691,6 +778,7 @@ class ChangeOrderService:
                 data.project_id,
                 attempt + 1,
             )
+            order.validation_warnings = warnings  # type: ignore[attr-defined]
             return order
 
         raise HTTPException(
@@ -1223,8 +1311,24 @@ class ChangeOrderService:
         old_ball = order.ball_in_court
         code_snapshot = order.code
 
+        # The rules judge the order as it will be, before the write.
+        merged = {k: fields.get(k, getattr(order, k)) for k in ("cost_impact", "currency", "schedule_impact_days")}
+        warnings = await self._enforce_rules(
+            order_id,
+            {
+                "project_id": str(order.project_id),
+                "code": order.code,
+                "status": order.status,
+                "previous_status": order.status,
+                **merged,
+            },
+            [self._item_rule_row(i) for i in await self.repo.list_items_for_order(order_id)],
+            "update",
+        )
+
         await self.repo.update_fields(order_id, **fields)
         await self.session.refresh(order)
+        order.validation_warnings = warnings  # type: ignore[attr-defined]
 
         if ball_changed:
             from app.core.audit_log import log_ownership_handoff
@@ -1372,6 +1476,8 @@ class ChangeOrderService:
         """
         order = await self.get_order(order_id)
         self._validate_transition(order.status, "submitted")
+        warnings = await self._gate_order(order, "submitted", target_status="submitted")
+        order.validation_warnings = warnings  # type: ignore[attr-defined]
         amount, mirror_resynced = await self._resolve_mirrored_amount(order)
         # Snapshot the from-status so the audit row records the
         # transition accurately even after update_fields() expires the
@@ -1489,6 +1595,8 @@ class ChangeOrderService:
         if not _from_chain:
             await self._assert_not_self_approval(order, user_id, "approve")
         self._validate_transition(order.status, "approved")
+        warnings = await self._gate_order(order, "approved", target_status="approved")
+        order.validation_warnings = warnings  # type: ignore[attr-defined]
         # Ask the bill question before anything moves. Everything below this
         # line writes - status, audit row, budget, delta row, event - and the
         # BOQ section is written last, so a target that cannot be resolved has
@@ -2316,6 +2424,8 @@ class ChangeOrderService:
             )
         await self._assert_not_self_approval(order, user_id, "reject")
         self._validate_transition(order.status, "rejected")
+        warnings = await self._gate_order(order, "rejected", target_status="rejected")
+        order.validation_warnings = warnings  # type: ignore[attr-defined]
         # Snapshot pre-transition state for the audit row.
         from_status = order.status
         code_snapshot = order.code
@@ -2370,6 +2480,8 @@ class ChangeOrderService:
         """
         order = await self.get_order(order_id)
         self._validate_transition(order.status, "executed")
+        warnings = await self._gate_order(order, "executed", target_status="executed")
+        order.validation_warnings = warnings  # type: ignore[attr-defined]
         from_status = order.status
         code_snapshot = order.code
 
@@ -2497,6 +2609,22 @@ class ChangeOrderService:
             _dec(data.original_quantity) * _dec(data.original_rate)
         )
 
+        existing = [self._item_rule_row(i) for i in await self.repo.list_items_for_order(order_id)]
+        warnings = await self._gate_items(
+            order,
+            existing
+            + [
+                {
+                    "original_quantity": data.original_quantity,
+                    "new_quantity": data.new_quantity,
+                    "original_rate": data.original_rate,
+                    "new_rate": data.new_rate,
+                    "cost_delta": _round2(cost_delta),
+                }
+            ],
+            "add_item",
+        )
+
         item = ChangeOrderItem(
             change_order_id=order_id,
             description=data.description,
@@ -2524,6 +2652,7 @@ class ChangeOrderService:
         # stored row.
         await self.session.refresh(item)
 
+        item.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Item added to change order %s: %s", order_code, data.description[:40])
         return item
 
@@ -2605,11 +2734,28 @@ class ChangeOrderService:
             if key in fields:
                 fields[key] = str(fields[key])
 
+        warnings: list[dict[str, Any]] = []
         if fields:
+            others = [self._item_rule_row(i) for i in await self.repo.list_items_for_order(order_id) if i.id != item_id]
+            warnings = await self._gate_items(
+                order,
+                others
+                + [
+                    {
+                        "original_quantity": orig_qty,
+                        "new_quantity": new_qty,
+                        "original_rate": orig_rate,
+                        "new_rate": new_rate,
+                        "cost_delta": fields.get("cost_delta", item.cost_delta),
+                    }
+                ],
+                "update_item",
+            )
             await self.repo.update_item_fields(item_id, **fields)
             await self._recalculate_cost_impact(order_id)
             await self.session.refresh(item)
 
+        item.validation_warnings = warnings  # type: ignore[attr-defined]
         return item
 
     async def delete_item(self, order_id: uuid.UUID, item_id: uuid.UUID) -> None:
