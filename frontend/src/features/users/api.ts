@@ -46,6 +46,19 @@ export interface UserModuleAccessPayload {
   custom_role_name?: string | null;
 }
 
+const USERS_PAGE = 500;
+
+/** Every user, paged: the directory is not silently cut at one page. */
+export async function fetchAllUsers(params?: { is_active?: boolean }): Promise<User[]> {
+  const all: User[] = [];
+  for (let offset = 0; offset < 50 * USERS_PAGE; offset += USERS_PAGE) {
+    const page = await fetchUsers({ ...params, limit: USERS_PAGE, offset });
+    all.push(...page);
+    if (page.length < USERS_PAGE) break;
+  }
+  return all;
+}
+
 export async function fetchUsers(params?: {
   is_active?: boolean;
   limit?: number;

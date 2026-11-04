@@ -48,7 +48,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet } from '@/shared/lib/api';
 import {
-  fetchUsers,
+  fetchAllUsers,
   updateUser,
   deleteUser,
   inviteUser,
@@ -767,9 +767,8 @@ export function UserManagementPage() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users', filterActive],
     queryFn: () =>
-      fetchUsers({
+      fetchAllUsers({
         is_active: filterActive === 'all' ? undefined : filterActive === 'active',
-        limit: 100,
       }),
     enabled: canListUsers,
   });
