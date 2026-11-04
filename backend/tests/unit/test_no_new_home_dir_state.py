@@ -56,9 +56,7 @@ def test_home_dir_uses_are_only_the_reviewed_ones() -> None:
         if uses:
             found[path.relative_to(APP_ROOT).as_posix()] = uses
 
-    unexpected = {
-        name: uses for name, uses in found.items() if uses > ALLOWED.get(name, (0, ""))[0]
-    }
+    unexpected = {name: uses for name, uses in found.items() if uses > ALLOWED.get(name, (0, ""))[0]}
     assert not unexpected, (
         f"New home-directory paths in {unexpected}. Persistent state must go through "
         "app.core.home_state.home_state_dir so it follows OE_DATA_DIR; if this one is "
