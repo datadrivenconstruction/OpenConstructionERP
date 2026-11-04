@@ -1824,5 +1824,47 @@
       "fail": "Planerade {pct} % för {period} strider mot {other_pct} % planerade för {other}; en ackumulerad plan sjunker aldrig.",
       "suggestion": "Rätta de planerade procenten så att de ökar från period till period."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} förekommer mer än en gång och räknas därför två gånger.",
+      "suggestion": "Behåll en rad med summerade mängder eller ta bort dubbletten."
+    },
+    "burden_high": {
+      "fail": "De procentuella lönebikostnaderna uppgår till {percent} % av grundlönen, över de vanliga {limit} %.",
+      "suggestion": "Kontrollera raderna för sociala avgifter, försäkring och semesterersättning med avseende på felplacerat decimaltecken eller dubbelräknad avgift."
+    },
+    "empty_assembly": {
+      "fail": "Kalkylposten {code} saknar komponenter eller har pris noll, så posten skulle prissättas till noll.",
+      "suggestion": "Lägg till prissatta komponenter innan kalkylposten används i en kalkyl."
+    },
+    "unit_mismatch": {
+      "fail": "Enheten {unit} passar inte mätningen: sträcka mäts i längdenheter, yta i areaenheter, antal i styck.",
+      "suggestion": "Rätta enheten eller markeringstypen innan mängden förs till kalkylen."
+    },
+    "link_without_measurement": {
+      "fail": "Markeringen saknar uppmätt värde, så det finns ingen mängd att koppla till posten.",
+      "suggestion": "Mät objektet med en markering för sträcka, yta eller antal och koppla den sedan."
+    },
+    "scale_unit_not_length": {
+      "fail": "Skalan är kalibrerad i {unit}, som inte är en längd.",
+      "suggestion": "Kalibrera mot en känd sträcka, till exempel i meter."
+    },
+    "measurement_without_scale": {
+      "fail": "Sidan saknar kalibrerad skala, så det uppmätta värdet är osäkert.",
+      "suggestion": "Kalibrera sidans skala mot en känd sträcka."
+    },
+    "unallocated_share": {
+      "fail": "{share} % av direkt kostnad ({count} poster) saknar användbart NRM 1-element.",
+      "suggestion": "Koppla posterna till ett NRM 1-element så att elementuppdelningen blir komplett."
+    },
+    "gifa_missing": {
+      "fail": "Ingen bruttoarea är angiven, så kostnad per m2 kan inte visas.",
+      "suggestion": "Ange arean i projektet eller för den här visningen."
+    },
+    "markup_load": {
+      "fail": "Påläggen uppgår till {percent} % av direkt kostnad.",
+      "suggestion": "Kontrollera raderna för omkostnader, vinst, risk och prisglidning med avseende på procent angiven som belopp eller dubbelräknad."
+    }
   }
 }

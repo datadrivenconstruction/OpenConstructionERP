@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.i18n import get_locale
+from app.core.validation.engine import ValidationReport
 from app.core.validation.messages import translate
 from app.modules.assemblies.formula_engine import (
     FormulaEvaluator,
@@ -533,6 +534,62 @@ class AssemblyService:
 
     # ── Assembly operations ────────────────────────────────────────────────
 
+    @staticmethod
+    def _component_row(comp: Component) -> dict:
+        return {
+            "id": str(comp.id),
+            "cost_item_id": str(comp.cost_item_id) if comp.cost_item_id else "",
+            "description": comp.description,
+            "factor": comp.factor,
+            "quantity": comp.quantity,
+            "unit_cost": comp.unit_cost,
+        }
+
+    async def check_rules(
+        self,
+        assembly: Assembly,
+        components: list[dict],
+        *,
+        operation: str = "edit",
+        bid_factor: object = None,
+    ) -> ValidationReport:
+        """Run the assembly rule set over the assembly as it would stand after a write."""
+        from app.core.validation.cost_gate import run_rule_set  # noqa: PLC0415
+        from app.modules.assemblies.validators import ASSEMBLIES_RULE_SET  # noqa: PLC0415
+
+        return await run_rule_set(
+            ASSEMBLIES_RULE_SET,
+            {
+                "assembly": {
+                    "id": str(assembly.id),
+                    "code": assembly.code,
+                    "currency": assembly.currency,
+                    "total_rate": assembly.total_rate,
+                    "bid_factor": bid_factor if bid_factor is not None else assembly.bid_factor,
+                    "operation": operation,
+                },
+                "components": components,
+            },
+            target_type="assembly",
+            target_id=str(assembly.id),
+            project_id=str(assembly.project_id) if assembly.project_id else None,
+        )
+
+    async def _enforce_rules(self, assembly: Assembly, components: list[dict], **kwargs: object) -> None:
+        """Refuse a write that would break a blocking assembly rule; log the warnings."""
+        from app.core.validation.cost_gate import raise_on_errors  # noqa: PLC0415
+
+        report = await self.check_rules(assembly, components, **kwargs)  # type: ignore[arg-type]
+        raise_on_errors(report, error="assemblies_rules_failed")
+        if report.warnings:
+            logger.info("Assembly %s rule warnings: %s", assembly.code, [w.rule_id for w in report.warnings])
+
+    async def validate_rules(self, assembly_id: uuid.UUID) -> ValidationReport:
+        """Report every rule finding of an assembly as it stands."""
+        assembly = await self.get_assembly(assembly_id)
+        comps = await self.component_repo.list_for_assembly(assembly_id)
+        return await self.check_rules(assembly, [self._component_row(c) for c in comps])
+
     async def create_assembly(self, data: AssemblyCreate, owner_id: str | None = None) -> Assembly:
         """Create a new assembly.
 
@@ -677,6 +734,11 @@ class AssemblyService:
 
         # Convert bid_factor float to string for storage
         if "bid_factor" in fields:
+            await self._enforce_rules(
+                assembly,
+                [self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)],
+                bid_factor=fields["bid_factor"],
+            )
             fields["bid_factor"] = str(fields["bid_factor"])
 
         # Issue #365 - a supplied ``parameters`` REPLACES the whole set; the
@@ -810,6 +872,21 @@ class AssemblyService:
         )
         max_order = await self.component_repo.get_max_sort_order(assembly_id)
 
+        await self._enforce_rules(
+            assembly,
+            [
+                *[self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)],
+                {
+                    "id": "",
+                    "cost_item_id": str(data.cost_item_id) if data.cost_item_id else "",
+                    "description": description,
+                    "factor": data.factor,
+                    "quantity": data.quantity,
+                    "unit_cost": unit_cost,
+                },
+            ],
+        )
+
         component = Component(
             assembly_id=assembly_id,
             cost_item_id=data.cost_item_id,
@@ -907,6 +984,22 @@ class AssemblyService:
         new_quantity = fields.get("quantity", component.quantity)
         new_unit_cost = fields.get("unit_cost", component.unit_cost)
         new_resource_type = fields.get("resource_type", component.resource_type)
+        parent = await self.get_assembly(assembly_id)
+        siblings = await self.component_repo.list_for_assembly(assembly_id)
+        await self._enforce_rules(
+            parent,
+            [
+                {
+                    **self._component_row(c),
+                    **(
+                        {"factor": new_factor, "quantity": new_quantity, "unit_cost": new_unit_cost}
+                        if c.id == component_id
+                        else {}
+                    ),
+                }
+                for c in siblings
+            ],
+        )
         new_metadata = fields.get("metadata_", component.metadata_) or {}
         fields["total"] = _compute_typed_total(
             resource_type=new_resource_type,
@@ -1193,6 +1286,11 @@ class AssemblyService:
         from app.modules.projects.repository import ProjectRepository
 
         assembly = await self.get_assembly(assembly_id)
+        await self._enforce_rules(
+            assembly,
+            [self._component_row(c) for c in await self.component_repo.list_for_assembly(assembly_id)],
+            operation="apply",
+        )
 
         # ── Cross-currency handling (ASM-006, Issue #128) ───────────────
         # An assembly priced in a currency other than the target

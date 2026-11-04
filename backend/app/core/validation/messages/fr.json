@@ -1824,5 +1824,47 @@
       "fail": "Les {pct} % prévus pour {period} contredisent les {other_pct} % prévus pour {other} ; un plan cumulé ne diminue jamais.",
       "suggestion": "Corrigez les pourcentages prévus pour qu'ils augmentent d'une période à l'autre."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} figure plusieurs fois et est donc comptée deux fois.",
+      "suggestion": "Conservez une seule ligne en additionnant les quantités, ou supprimez le doublon."
+    },
+    "burden_high": {
+      "fail": "Les charges en pourcentage totalisent {percent} % du salaire de base, au-dessus des {limit} % habituels.",
+      "suggestion": "Vérifiez les lignes de charges sociales, d'assurance et de congés payés : virgule décalée ou charge comptée deux fois."
+    },
+    "empty_assembly": {
+      "fail": "L'ouvrage composé {code} n'a aucun composant ou un prix nul : le poste serait chiffré à zéro.",
+      "suggestion": "Ajoutez des composants chiffrés avant d'appliquer l'ouvrage à un bordereau."
+    },
+    "unit_mismatch": {
+      "fail": "L'unité {unit} ne convient pas à ce métré : une distance se mesure en unités de longueur, une surface en unités de surface, un nombre en pièces.",
+      "suggestion": "Corrigez l'unité ou le type d'annotation avant que la quantité parte au bordereau."
+    },
+    "link_without_measurement": {
+      "fail": "Cette annotation n'a pas de valeur mesurée : il n'y a pas de quantité à lier au poste.",
+      "suggestion": "Mesurez l'élément avec une annotation de distance, de surface ou de comptage, puis liez-la."
+    },
+    "scale_unit_not_length": {
+      "fail": "L'échelle est étalonnée en {unit}, qui n'est pas une longueur.",
+      "suggestion": "Étalonnez sur une distance connue, par exemple en mètres."
+    },
+    "measurement_without_scale": {
+      "fail": "Cette page n'a pas d'échelle étalonnée : la valeur mesurée n'est pas fiable.",
+      "suggestion": "Étalonnez l'échelle de la page sur une distance connue."
+    },
+    "unallocated_share": {
+      "fail": "{share} % du coût direct ({count} postes) n'ont aucun élément NRM 1 exploitable.",
+      "suggestion": "Rattachez ces postes à un élément NRM 1 pour que la ventilation par éléments soit complète."
+    },
+    "gifa_missing": {
+      "fail": "Aucune surface de plancher n'est indiquée : le coût au m2 ne peut pas être affiché.",
+      "suggestion": "Saisissez la surface sur le projet ou pour cette lecture."
+    },
+    "markup_load": {
+      "fail": "Les majorations totalisent {percent} % du coût direct.",
+      "suggestion": "Vérifiez les lignes de frais généraux, bénéfice, aléas et actualisation : pourcentage saisi comme montant ou compté deux fois."
+    }
   }
 }

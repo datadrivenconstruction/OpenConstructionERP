@@ -1824,5 +1824,47 @@
       "fail": "De geplande {pct}% voor {period} botst met de {other_pct}% gepland voor {other}; een cumulatieve planning daalt nooit.",
       "suggestion": "Corrigeer de geplande percentages zodat ze van periode tot periode stijgen."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} staat meer dan eens in de lijst en wordt dus dubbel geteld.",
+      "suggestion": "Houd één regel aan en tel de hoeveelheden op, of verwijder het duplicaat."
+    },
+    "burden_high": {
+      "fail": "De procentuele loonkosten tellen op tot {percent} % van het basisloon, boven de gebruikelijke {limit} %.",
+      "suggestion": "Controleer de regels voor sociale lasten, verzekering en vakantiegeld op een verschoven komma of dubbel geteld bedrag."
+    },
+    "empty_assembly": {
+      "fail": "Samenstelling {code} heeft geen onderdelen of een prijs van nul; de post zou op nul worden geraamd.",
+      "suggestion": "Voeg geprijsde onderdelen toe voordat de samenstelling in een begroting wordt gebruikt."
+    },
+    "unit_mismatch": {
+      "fail": "De eenheid {unit} past niet bij deze meting: afstand in lengte-eenheden, oppervlak in oppervlakte-eenheden, aantal in stuks.",
+      "suggestion": "Corrigeer de eenheid of het markeringstype voordat de hoeveelheid naar de begroting gaat."
+    },
+    "link_without_measurement": {
+      "fail": "Deze markering heeft geen gemeten waarde, dus er is geen hoeveelheid om aan de post te koppelen.",
+      "suggestion": "Meet het element met een markering voor afstand, oppervlak of aantal en koppel die daarna."
+    },
+    "scale_unit_not_length": {
+      "fail": "De schaal is gekalibreerd in {unit}, wat geen lengte is.",
+      "suggestion": "Kalibreer op een bekende afstand, bijvoorbeeld in meters."
+    },
+    "measurement_without_scale": {
+      "fail": "Deze pagina heeft geen gekalibreerde schaal, dus de gemeten waarde is niet betrouwbaar.",
+      "suggestion": "Kalibreer de schaal van de pagina op een bekende afstand."
+    },
+    "unallocated_share": {
+      "fail": "{share} % van de directe kosten ({count} posten) heeft geen bruikbaar NRM 1-element.",
+      "suggestion": "Koppel deze posten aan een NRM 1-element zodat de elementenverdeling compleet is."
+    },
+    "gifa_missing": {
+      "fail": "Er is geen bruto vloeroppervlak opgegeven, dus de kosten per m2 kunnen niet worden getoond.",
+      "suggestion": "Voer het vloeroppervlak in bij het project of voor deze weergave."
+    },
+    "markup_load": {
+      "fail": "De opslagen tellen op tot {percent} % van de directe kosten.",
+      "suggestion": "Controleer de regels voor algemene kosten, winst, risico en prijsstijging op een percentage dat als bedrag is ingevoerd of dubbel geteld is."
+    }
   }
 }

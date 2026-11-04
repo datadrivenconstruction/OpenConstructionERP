@@ -1824,5 +1824,47 @@
       "fail": "{period} uchun rejalashtirilgan {pct} % {other} uchun rejalashtirilgan {other_pct} % bilan zid; jamlanma reja hech qachon kamaymaydi.",
       "suggestion": "Rejadagi foizlarni davrdan davrga oshib borishi uchun tuzating."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} bir necha marta keltirilgan, shu sababli ikki marta hisoblanadi.",
+      "suggestion": "Hajmlarni qoʻshib bitta qatorni qoldiring yoki takrorni oʻchiring."
+    },
+    "burden_high": {
+      "fail": "Foizli qoʻshimcha xarajatlar asosiy ish haqining {percent} % ini tashkil etadi, bu odatdagi {limit} % dan yuqori.",
+      "suggestion": "Ijtimoiy ajratmalar, sugʻurta va taʻtil toʻlovi qatorlarida vergul siljib ketmaganini yoki xarajat ikki marta hisoblanmaganini tekshiring."
+    },
+    "empty_assembly": {
+      "fail": "{code} jamlanmasida tarkibiy qismlar yoʻq yoki narxi nolga teng, shuning uchun pozitsiya nolga baholanadi.",
+      "suggestion": "Jamlanmani smetaga qoʻllashdan oldin narxi bor tarkibiy qismlarni qoʻshing."
+    },
+    "unit_mismatch": {
+      "fail": "{unit} oʻlchov birligi bu oʻlchovga mos kelmaydi: masofa uzunlik birligida, maydon maydon birligida, soni donada beriladi.",
+      "suggestion": "Hajm smetaga oʻtishidan oldin birlikni yoki belgi turini tuzating."
+    },
+    "link_without_measurement": {
+      "fail": "Bu belgida oʻlchangan qiymat yoʻq, shuning uchun smeta pozitsiyasiga bogʻlanadigan hajm yoʻq.",
+      "suggestion": "Elementni masofa, maydon yoki sanash belgisi bilan oʻlchab, keyin bogʻlang."
+    },
+    "scale_unit_not_length": {
+      "fail": "Masshtab {unit} boʻyicha kalibrlangan, bu uzunlik emas.",
+      "suggestion": "Maʻlum masofa boʻyicha, masalan metrda kalibrlang."
+    },
+    "measurement_without_scale": {
+      "fail": "Bu sahifada kalibrlangan masshtab yoʻq, shuning uchun oʻlchangan qiymat ishonchsiz.",
+      "suggestion": "Sahifa masshtabini maʻlum masofa boʻyicha kalibrlang."
+    },
+    "unallocated_share": {
+      "fail": "Toʻgʻridan-toʻgʻri xarajatning {share} % i ({count} pozitsiya) yaroqli NRM 1 elementiga ega emas.",
+      "suggestion": "Elementlar boʻyicha taqsimot toʻliq boʻlishi uchun bu pozitsiyalarni NRM 1 elementiga biriktiring."
+    },
+    "gifa_missing": {
+      "fail": "Umumiy pol maydoni koʻrsatilmagan, shuning uchun m2 uchun xarajatni koʻrsatib boʻlmaydi.",
+      "suggestion": "Maydonni loyihada yoki shu koʻrinish uchun kiriting."
+    },
+    "markup_load": {
+      "fail": "Ustamalar toʻgʻridan-toʻgʻri xarajatning {percent} % ini tashkil etadi.",
+      "suggestion": "Ustama xarajat, foyda, xavf va qimmatlashuv qatorlarida foiz summa sifatida kiritilmaganini yoki ikki marta hisoblanmaganini tekshiring."
+    }
   }
 }

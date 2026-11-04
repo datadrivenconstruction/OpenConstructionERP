@@ -1824,5 +1824,47 @@
       "fail": "De planlagte {pct} % for {period} strider mod {other_pct} % planlagt for {other}; en kumulativ plan falder aldrig.",
       "suggestion": "Ret de planlagte procenter, så de stiger fra periode til periode."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} er opført mere end én gang og tælles derfor to gange.",
+      "suggestion": "Behold én linje med de samlede mængder, eller fjern dubletten."
+    },
+    "burden_high": {
+      "fail": "De procentvise tillæg udgør {percent} % af grundlønnen, over de sædvanlige {limit} %.",
+      "suggestion": "Kontrollér linjerne for sociale bidrag, forsikring og feriepenge for forskudt komma eller dobbelttælling."
+    },
+    "empty_assembly": {
+      "fail": "Sammensat pris {code} har ingen komponenter eller en pris på nul, så posten ville blive prissat til nul.",
+      "suggestion": "Tilføj prissatte komponenter, før sammensætningen bruges i et overslag."
+    },
+    "unit_mismatch": {
+      "fail": "Enheden {unit} passer ikke til målingen: afstand i længdeenheder, areal i arealenheder, antal i stk.",
+      "suggestion": "Ret enheden eller markeringstypen, før mængden går til overslaget."
+    },
+    "link_without_measurement": {
+      "fail": "Markeringen har ingen målt værdi, så der er ingen mængde at koble til posten.",
+      "suggestion": "Mål elementet med en markering for afstand, areal eller antal, og kobl den derefter."
+    },
+    "scale_unit_not_length": {
+      "fail": "Målestokken er kalibreret i {unit}, som ikke er en længde.",
+      "suggestion": "Kalibrér mod en kendt afstand, for eksempel i meter."
+    },
+    "measurement_without_scale": {
+      "fail": "Siden har ingen kalibreret målestok, så den målte værdi er upålidelig.",
+      "suggestion": "Kalibrér sidens målestok mod en kendt afstand."
+    },
+    "unallocated_share": {
+      "fail": "{share} % af de direkte omkostninger ({count} poster) har intet brugbart NRM 1-element.",
+      "suggestion": "Tildel posterne et NRM 1-element, så elementfordelingen bliver komplet."
+    },
+    "gifa_missing": {
+      "fail": "Der er ikke angivet bruttoareal, så prisen pr. m2 kan ikke vises.",
+      "suggestion": "Angiv arealet på projektet eller for denne visning."
+    },
+    "markup_load": {
+      "fail": "Tillæggene udgør {percent} % af de direkte omkostninger.",
+      "suggestion": "Kontrollér linjerne for overhead, avance, risiko og prisstigning for en procent, der er indtastet som beløb eller talt to gange."
+    }
   }
 }

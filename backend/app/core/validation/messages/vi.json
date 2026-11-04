@@ -1824,5 +1824,47 @@
       "fail": "{pct}% kế hoạch cho {period} mâu thuẫn với {other_pct}% kế hoạch cho {other}; kế hoạch lũy kế không bao giờ giảm.",
       "suggestion": "Hãy sửa các tỷ lệ phần trăm kế hoạch để chúng tăng dần từ kỳ này sang kỳ khác."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} được liệt kê nhiều lần nên bị tính hai lần.",
+      "suggestion": "Giữ một dòng và cộng gộp khối lượng, hoặc xóa dòng trùng."
+    },
+    "burden_high": {
+      "fail": "Các khoản phụ phí theo tỷ lệ cộng lại bằng {percent} % lương cơ bản, cao hơn mức thông thường {limit} %.",
+      "suggestion": "Kiểm tra các dòng bảo hiểm xã hội, bảo hiểm và nghỉ phép xem có đặt sai dấu thập phân hoặc tính trùng không."
+    },
+    "empty_assembly": {
+      "fail": "Đơn giá tổng hợp {code} không có thành phần hoặc có giá bằng không, nên hạng mục sẽ được tính giá bằng không.",
+      "suggestion": "Hãy thêm các thành phần đã có giá trước khi áp đơn giá tổng hợp vào dự toán."
+    },
+    "unit_mismatch": {
+      "fail": "Đơn vị {unit} không phù hợp với phép đo này: khoảng cách dùng đơn vị chiều dài, diện tích dùng đơn vị diện tích, số đếm dùng cái.",
+      "suggestion": "Hãy sửa đơn vị hoặc loại ghi chú trước khi khối lượng được đưa vào dự toán."
+    },
+    "link_without_measurement": {
+      "fail": "Ghi chú này chưa có giá trị đo nên không có khối lượng để liên kết với hạng mục.",
+      "suggestion": "Hãy đo cấu kiện bằng ghi chú khoảng cách, diện tích hoặc đếm rồi mới liên kết."
+    },
+    "scale_unit_not_length": {
+      "fail": "Tỷ lệ bản vẽ được hiệu chuẩn theo {unit}, không phải đơn vị chiều dài.",
+      "suggestion": "Hãy hiệu chuẩn theo một khoảng cách đã biết, ví dụ tính bằng mét."
+    },
+    "measurement_without_scale": {
+      "fail": "Trang này chưa có tỷ lệ được hiệu chuẩn nên giá trị đo không đáng tin cậy.",
+      "suggestion": "Hãy hiệu chuẩn tỷ lệ của trang theo một khoảng cách đã biết."
+    },
+    "unallocated_share": {
+      "fail": "{share} % chi phí trực tiếp ({count} hạng mục) chưa có cấu kiện NRM 1 dùng được.",
+      "suggestion": "Hãy gán các hạng mục này vào một cấu kiện NRM 1 để bảng phân tích theo cấu kiện đầy đủ."
+    },
+    "gifa_missing": {
+      "fail": "Chưa nêu tổng diện tích sàn nên không thể hiển thị chi phí trên mỗi m2.",
+      "suggestion": "Hãy nhập diện tích trong dự án hoặc cho lần xem này."
+    },
+    "markup_load": {
+      "fail": "Các khoản phụ thu cộng lại bằng {percent} % chi phí trực tiếp.",
+      "suggestion": "Hãy kiểm tra các dòng chi phí chung, lợi nhuận, rủi ro và trượt giá xem có nhập tỷ lệ thành số tiền hoặc tính trùng không."
+    }
   }
 }

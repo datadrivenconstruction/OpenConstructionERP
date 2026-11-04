@@ -1824,5 +1824,47 @@
       "fail": "Perioodi {period} kavandatud {pct} % on vastuolus perioodi {other} kavandatud {other_pct} %-ga; kumulatiivne kava ei lange kunagi.",
       "suggestion": "Parandage kavandatud protsendid nii, et need kasvaksid perioodist perioodi."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} on loetletud mitu korda ja seetõttu loetakse see kaks korda.",
+      "suggestion": "Jätke üks rida koos liidetud kogustega või eemaldage duplikaat."
+    },
+    "burden_high": {
+      "fail": "Protsentuaalsed lisakulud on kokku {percent} % põhipalgast, mis ületab tavapärast {limit} %.",
+      "suggestion": "Kontrollige sotsiaalmaksu, kindlustuse ja puhkusetasu ridu nihkunud koma või kaks korda arvestatud lisa suhtes."
+    },
+    "empty_assembly": {
+      "fail": "Koondhinnal {code} puuduvad komponendid või hind on null, mistõttu positsioon hinnataks nulliks.",
+      "suggestion": "Lisage hinnaga komponendid enne, kui koondhinda eelarves kasutate."
+    },
+    "unit_mismatch": {
+      "fail": "Ühik {unit} ei sobi sellele mõõtmisele: kaugus pikkusühikutes, pind pindalaühikutes, arv tükkides.",
+      "suggestion": "Parandage ühik või märgise tüüp enne, kui kogus eelarvesse jõuab."
+    },
+    "link_without_measurement": {
+      "fail": "Sellel märgisel pole mõõdetud väärtust, seega pole kogust, mida positsiooniga siduda.",
+      "suggestion": "Mõõtke element kauguse, pinna või arvu märgisega ja siduge see seejärel."
+    },
+    "scale_unit_not_length": {
+      "fail": "Mõõtkava on kalibreeritud ühikus {unit}, mis ei ole pikkus.",
+      "suggestion": "Kalibreerige tuntud vahemaa järgi, näiteks meetrites."
+    },
+    "measurement_without_scale": {
+      "fail": "Sellel lehel pole kalibreeritud mõõtkava, seega pole mõõdetud väärtus usaldusväärne.",
+      "suggestion": "Kalibreerige lehe mõõtkava tuntud vahemaa järgi."
+    },
+    "unallocated_share": {
+      "fail": "{share} % otsekuludest ({count} positsiooni) ei ole kasutatavat NRM 1 elementi.",
+      "suggestion": "Seostage need positsioonid NRM 1 elemendiga, et elemendipõhine jaotus oleks täielik."
+    },
+    "gifa_missing": {
+      "fail": "Brutopinda pole märgitud, seega ei saa kulu m2 kohta näidata.",
+      "suggestion": "Sisestage pind projektile või selle vaate jaoks."
+    },
+    "markup_load": {
+      "fail": "Juurdehindlused on kokku {percent} % otsekuludest.",
+      "suggestion": "Kontrollige üldkulu, kasumi, riski ja hinnatõusu ridu summana sisestatud või kaks korda arvestatud protsendi suhtes."
+    }
   }
 }

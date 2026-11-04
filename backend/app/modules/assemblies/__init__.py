@@ -20,6 +20,9 @@ async def on_startup() -> None:
 
     register_assemblies_permissions()
     register_assemblies_subscribers()
+    from app.modules.assemblies.validators import register_assemblies_validation_rules
+
+    register_assemblies_validation_rules()
 
     # Seed the canonical Assembly Library on startup. Best-effort: a
     # missing table (alembic head behind v40) or a DB hiccup logs a

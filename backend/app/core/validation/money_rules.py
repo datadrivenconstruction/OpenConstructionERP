@@ -86,8 +86,15 @@ class MoneyRule(ValidationRule):
 
     severity = Severity.ERROR
     category = RuleCategory.CONSISTENCY
-    #: Message section the keys of this rule family live under.
+    #: Message section the keys of this rule family live under; when ``own_message_keys`` is set only
+    #: those keys live there and every other key is the shared ``money`` text.
     message_section = "money"
+    own_message_keys: frozenset[str] = frozenset()
+
+    def _section_of(self, key: str) -> str:
+        if self.own_message_keys and key not in self.own_message_keys:
+            return "money"
+        return self.message_section
 
     def ok(self, ref: str = "") -> RuleResult:
         """A passing result."""
@@ -112,7 +119,7 @@ class MoneyRule(ValidationRule):
         **params: Any,
     ) -> RuleResult:
         """A failing result whose text is ``<section>.<key>`` in the caller's locale."""
-        section = section or self.message_section
+        section = section or self._section_of(key)
         locale = locale_of(context)
         return RuleResult(
             rule_id=self.rule_id,

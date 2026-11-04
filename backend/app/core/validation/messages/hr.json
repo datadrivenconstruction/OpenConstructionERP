@@ -1824,5 +1824,47 @@
       "fail": "Planiranih {pct} % za {period} proturječi s {other_pct} % planiranih za {other}; kumulativni plan nikada ne pada.",
       "suggestion": "Ispravite planirane postotke tako da rastu od razdoblja do razdoblja."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "Stavka {label} navedena je više puta pa se računa dvaput.",
+      "suggestion": "Zadržite jedan redak zbrajanjem količina ili uklonite duplikat."
+    },
+    "burden_high": {
+      "fail": "Postotni dodaci zbrajaju se na {percent} % osnovne plaće, iznad uobičajenih {limit} %.",
+      "suggestion": "Provjerite retke doprinosa, osiguranja i godišnjeg odmora zbog pomaknutog zareza ili dodatka obračunatog dvaput."
+    },
+    "empty_assembly": {
+      "fail": "Sastavnica {code} nema komponenti ili ima nultu cijenu pa bi stavka bila procijenjena na nulu.",
+      "suggestion": "Dodajte komponente s cijenom prije primjene sastavnice u troškovniku."
+    },
+    "unit_mismatch": {
+      "fail": "Jedinica {unit} ne odgovara ovom mjerenju: udaljenost se izražava u jedinicama duljine, površina u jedinicama površine, broj u komadima.",
+      "suggestion": "Ispravite jedinicu ili vrstu oznake prije nego količina ode u troškovnik."
+    },
+    "link_without_measurement": {
+      "fail": "Ova oznaka nema izmjerenu vrijednost pa nema količine koju bi se povezalo sa stavkom.",
+      "suggestion": "Izmjerite element oznakom udaljenosti, površine ili broja pa je povežite."
+    },
+    "scale_unit_not_length": {
+      "fail": "Mjerilo je kalibrirano u {unit}, što nije duljina.",
+      "suggestion": "Kalibrirajte prema poznatoj udaljenosti, na primjer u metrima."
+    },
+    "measurement_without_scale": {
+      "fail": "Ova stranica nema kalibrirano mjerilo pa izmjerena vrijednost nije pouzdana.",
+      "suggestion": "Kalibrirajte mjerilo stranice prema poznatoj udaljenosti."
+    },
+    "unallocated_share": {
+      "fail": "{share} % izravnih troškova ({count} stavki) nema upotrebljiv element NRM 1.",
+      "suggestion": "Dodijelite te stavke elementu NRM 1 kako bi podjela po elementima bila potpuna."
+    },
+    "gifa_missing": {
+      "fail": "Nije navedena bruto površina pa se trošak po m2 ne može prikazati.",
+      "suggestion": "Unesite površinu na projektu ili za ovaj prikaz."
+    },
+    "markup_load": {
+      "fail": "Dodaci se zbrajaju na {percent} % izravnih troškova.",
+      "suggestion": "Provjerite retke općih troškova, dobiti, rizika i poskupljenja zbog postotka unesenog kao iznos ili obračunatog dvaput."
+    }
   }
 }
