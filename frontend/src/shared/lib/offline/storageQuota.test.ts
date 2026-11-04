@@ -64,3 +64,13 @@ describe('formatBytes', () => {
     expect(formatBytes(18 * 1024 * 1024)).toBe('18 MB');
   });
 });
+
+describe('summariseBacklog bytes', () => {
+  it('counts UTF-8 bytes, not string length', () => {
+    const body = { t: 'Штукатурка' }; // 10 Cyrillic chars, 2 bytes each
+    const expected = new TextEncoder().encode(JSON.stringify(body)).length;
+    const s = summariseBacklog([op(1000, body)], 2000);
+    expect(s.bytes).toBe(expected);
+    expect(s.bytes).toBeGreaterThan(JSON.stringify(body).length);
+  });
+});

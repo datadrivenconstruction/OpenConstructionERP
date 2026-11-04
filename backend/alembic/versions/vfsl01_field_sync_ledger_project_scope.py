@@ -6,7 +6,7 @@ against another project returned that project's result and the key blocked a
 second row. The key is now ``(project_id, client_op_id)``. Inspector-guarded so a
 database the runtime already built from the models is a no-op.
 
-Revision ID: v3331_field_sync_ledger_project
+Revision ID: vfsl01_field_sync_ledger_project
 Revises: vap01_inbox_po_match
 Create Date: 2026-11-04
 """
@@ -16,7 +16,7 @@ from __future__ import annotations
 import sqlalchemy as sa
 from alembic import op
 
-revision = "v3331_field_sync_ledger_project"
+revision = "vfsl01_field_sync_ledger_project"
 down_revision = "vap01_inbox_po_match"
 branch_labels = None
 depends_on = None

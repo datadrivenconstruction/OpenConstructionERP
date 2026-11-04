@@ -75,7 +75,7 @@ const DAY_MS = 86_400_000;
 function bodyBytes(op: QueuedOp): number {
   if (op.body === undefined || op.body === null) return 0;
   try {
-    return JSON.stringify(op.body).length;
+    return new TextEncoder().encode(JSON.stringify(op.body)).length;
   } catch {
     return 0;
   }

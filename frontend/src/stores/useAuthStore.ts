@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { create } from 'zustand';
+import { purgeFieldUserData } from '@/shared/lib/offline/fieldSession';
 
 /**
  * Decode the `role` claim from a JWT access token without external deps.
@@ -503,6 +504,7 @@ export function createAuthStore(env: AuthTabEnv) {
         if (email && email !== previousEmail) {
           local.removeItem('oe_onboarding_completed');
           local.removeItem(KEY_COMPANY_TYPE);
+          void purgeFieldUserData();
         }
         endHandshake();
         set({
@@ -548,6 +550,8 @@ export function createAuthStore(env: AuthTabEnv) {
         // The next person to sign in on this browser must not open on this
         // user's workspace while the server answers for them.
         local.removeItem(KEY_COMPANY_TYPE);
+        // Cached field lists belong to this user; queued unsynced captures stay.
+        void purgeFieldUserData();
         clearSession();
         env.channel?.post({ type: 'logout' });
       },

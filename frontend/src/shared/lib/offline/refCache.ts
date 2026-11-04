@@ -42,6 +42,7 @@ interface RefStorage {
   get(key: string): Promise<RefRecord | undefined>;
   put(rec: RefRecord): Promise<void>;
   clearProject(projectId: string): Promise<void>;
+  clearAll(): Promise<void>;
 }
 
 function memoryStorage(): RefStorage {
@@ -50,6 +51,9 @@ function memoryStorage(): RefStorage {
     get: async (k) => map.get(k),
     put: async (r) => {
       map.set(r.key, r);
+    },
+    clearAll: async () => {
+      map.clear();
     },
     clearProject: async (p) => {
       for (const k of [...map.keys()]) if (k.startsWith(`${p}:`)) map.delete(k);
@@ -84,6 +88,9 @@ function idbStorage(): RefStorage {
     get: async (k) => (await run<RefRecord | undefined>('readonly', (s) => s.get(k))) ?? undefined,
     put: async (r) => {
       await run('readwrite', (s) => s.put(r));
+    },
+    clearAll: async () => {
+      await run('readwrite', (s) => s.clear());
     },
     clearProject: async (p) => {
       const db = await open();
@@ -166,6 +173,15 @@ export async function getRef<T>(
 export async function clearProjectRefs(projectId: string): Promise<void> {
   try {
     await getStorage().clearProject(projectId);
+  } catch {
+    /* nothing to clear */
+  }
+}
+
+/** Forget every stored list (sign-out, user switch on a shared device). */
+export async function clearAllRefs(): Promise<void> {
+  try {
+    await getStorage().clearAll();
   } catch {
     /* nothing to clear */
   }
