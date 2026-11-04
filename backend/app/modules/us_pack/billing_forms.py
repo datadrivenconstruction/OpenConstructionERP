@@ -88,9 +88,9 @@ def is_us_project(country_code: str | None, address: Any = None) -> bool:
 
 # ── State lien-waiver law ───────────────────────────────────────────────────
 
-#: States that prescribe the wording of a lien waiver, with the statute.
-#: In these states a waiver on any other wording is unenforceable, so the
-#: record carries the citation for the reviewer to check the signed form.
+#: States whose statute prescribes the wording of a lien waiver (some accept
+#: substantial compliance). The record carries the citation so a reviewer can
+#: check the signed form against it; this is not legal advice.
 STATUTORY_WAIVER_STATES: dict[str, dict[str, Any]] = {
     "US-AZ": {"citation": "A.R.S. § 33-1008"},
     "US-CA": {
