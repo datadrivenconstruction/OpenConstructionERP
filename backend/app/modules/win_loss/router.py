@@ -26,22 +26,24 @@ def _service(session: SessionDep) -> WinLossService:
 
 @router.get("/summary", response_model=LedgerSummary)
 async def summary(
+    user_id: CurrentUserId,
     currency: str | None = Query(default=None, max_length=10),
     _perm: None = Depends(RequirePermission("win_loss.read")),
     svc: WinLossService = Depends(_service),
 ) -> LedgerSummary:
-    return await svc.summary(currency)
+    return await svc.summary(currency, user_id)
 
 
 @router.get("/", response_model=list[BidOutcomeResponse])
 async def list_entries(
+    user_id: CurrentUserId,
     outcome: str | None = Query(default=None, max_length=20),
     client: str | None = Query(default=None, max_length=255),
     limit: int = Query(default=500, ge=1, le=5000),
     _perm: None = Depends(RequirePermission("win_loss.read")),
     svc: WinLossService = Depends(_service),
 ) -> list[BidOutcomeResponse]:
-    rows = await svc.repo.list_all(outcome=outcome, client=client, limit=limit)
+    rows = await svc.list_entries(user_id, outcome=outcome, client=client, limit=limit)
     return [await svc.to_response(r) for r in rows]
 
 
@@ -62,10 +64,11 @@ async def create_entry(
 @router.get("/{entry_id}", response_model=BidOutcomeResponse)
 async def get_entry(
     entry_id: uuid.UUID,
+    user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("win_loss.read")),
     svc: WinLossService = Depends(_service),
 ) -> BidOutcomeResponse:
-    return await svc.to_response(await svc.get(entry_id), with_warnings=True)
+    return await svc.to_response(await svc.get_for_user(entry_id, user_id), with_warnings=True)
 
 
 @router.patch("/{entry_id}", response_model=BidOutcomeResponse)
@@ -79,14 +82,15 @@ async def update_entry(
 ) -> BidOutcomeResponse:
     if data.project_id is not None:
         await verify_project_access(data.project_id, user_id, session)
-    entry = await svc.update(entry_id, data)
+    entry = await svc.update(entry_id, data, user_id)
     return await svc.to_response(entry, with_warnings=True)
 
 
 @router.delete("/{entry_id}", status_code=204)
 async def delete_entry(
     entry_id: uuid.UUID,
+    user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("win_loss.delete")),
     svc: WinLossService = Depends(_service),
 ) -> None:
-    await svc.delete(entry_id)
+    await svc.delete(entry_id, user_id)
