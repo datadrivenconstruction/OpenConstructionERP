@@ -573,6 +573,23 @@ class CDEService:
             if not file_name:
                 file_name = source_doc.name
 
+        if data.document_id is None and storage_key:
+            # An uploaded key must not name a file that belongs to another project.
+            from app.modules.documents.models import Document as _Doc
+
+            foreign = (
+                await self.session.execute(
+                    select(_Doc.id)
+                    .where(_Doc.file_path == storage_key, _Doc.project_id != container.project_id)
+                    .limit(1)
+                )
+            ).first()
+            if foreign is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="storage_key refers to a file of a different project",
+                )
+
         rev_number = await self.revision_repo.next_revision_number(container_id)
 
         # Generate revision code: P.01.01 for preliminary, C.01 for contractual

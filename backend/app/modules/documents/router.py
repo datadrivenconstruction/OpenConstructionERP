@@ -2042,7 +2042,7 @@ async def upload_document_revision(
     session: SessionDep,
     file: UploadFile = File(...),
     notes: str | None = Form(default=None),
-    revision_code: str | None = Form(default=None),
+    revision_code: str | None = Form(default=None, max_length=20),
     user_id: CurrentUserId = "",  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("documents.update")),
     service: DocumentService = Depends(_get_service),

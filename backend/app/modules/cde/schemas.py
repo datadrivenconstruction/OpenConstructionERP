@@ -169,6 +169,19 @@ class RevisionCreate(BaseModel):
     change_summary: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("storage_key")
+    @classmethod
+    def _storage_key_is_relative(cls, v: str | None) -> str | None:
+        """Refuse keys that escape the storage root (absolute, drive, ``..``, NUL)."""
+        if not v:
+            return v
+        norm = v.replace("\\", "/")
+        if "\x00" in v or norm.startswith("/") or (len(norm) > 1 and norm[1] == ":"):
+            raise ValueError("storage_key must be a relative storage key")
+        if ".." in norm.split("/"):
+            raise ValueError("storage_key must not contain '..' segments")
+        return v
+
 
 # ── Revision Response ────────────────────────────────────────────────────
 
