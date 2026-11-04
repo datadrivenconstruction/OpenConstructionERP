@@ -3471,14 +3471,15 @@ async def list_categories(
 
     # The caller's own catalogues, live; the shared part below is cached.
     own = [row[0] for row in (await session.execute(stmt.where(_private_rows()))).all() if row[0]]
-    if _region_cache.get(cache_key) is not None and now - _region_cache["ts"] < _CACHE_TTL:
+    ts_key = f"{cache_key}:ts"
+    if _region_cache.get(cache_key) is not None and now - (_region_cache.get(ts_key) or 0) < _CACHE_TTL:
         return sorted({*_region_cache[cache_key], *own})
 
     with cost_scope.shared_scope():
         result = await session.execute(stmt)
     cats = [row[0] for row in result.all() if row[0]]
     _region_cache[cache_key] = cats
-    _region_cache["ts"] = now
+    _region_cache[ts_key] = now
     return sorted({*cats, *own})
 
 
