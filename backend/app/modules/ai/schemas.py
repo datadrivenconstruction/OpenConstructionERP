@@ -13,6 +13,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Money fields are stored / accepted as ``Decimal`` but emitted as plain
@@ -259,7 +261,7 @@ class EstimateItem(BaseModel):
     description: str
     unit: str = "m2"
     quantity: float = 0.0
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     total: float = 0.0
     classification: dict[str, str] = Field(default_factory=dict)
     category: str = "General"

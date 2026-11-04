@@ -17,6 +17,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
+from app.core.decimal_types import Decimal18_6, FiniteDecimal
+
 # Upper bound for any single coefficient / quantity. 1e9 is far beyond any real
 # productivity coefficient or takeoff quantity yet keeps every product finite.
 _NUM_MAX = Decimal("1000000000")
@@ -46,7 +48,7 @@ class NormMaterialCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255)
     unit: str = Field(..., min_length=1, max_length=20)
-    qty_per_unit: Decimal = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
+    qty_per_unit: Decimal18_6 = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
     sort_order: int = Field(default=0, ge=0, le=100_000)
 
 
@@ -81,8 +83,8 @@ class NormCreate(BaseModel):
     name: str = Field(default="", max_length=255)
     unit: str = Field(..., min_length=1, max_length=20)
     category: str = Field(default="", max_length=100)
-    labor_hours_per_unit: Decimal = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
-    machine_hours_per_unit: Decimal = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
+    labor_hours_per_unit: Decimal18_6 = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
+    machine_hours_per_unit: Decimal18_6 = Field(default=Decimal("0"), ge=0, le=_NUM_MAX)
     notes: str = Field(default="", max_length=2000)
     is_active: bool = True
     materials: list[NormMaterialCreate] = Field(default_factory=list, max_length=200)
@@ -105,8 +107,8 @@ class NormUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=255)
     unit: str | None = Field(default=None, min_length=1, max_length=20)
     category: str | None = Field(default=None, max_length=100)
-    labor_hours_per_unit: Decimal | None = Field(default=None, ge=0, le=_NUM_MAX)
-    machine_hours_per_unit: Decimal | None = Field(default=None, ge=0, le=_NUM_MAX)
+    labor_hours_per_unit: Decimal18_6 | None = Field(default=None, ge=0, le=_NUM_MAX)
+    machine_hours_per_unit: Decimal18_6 | None = Field(default=None, ge=0, le=_NUM_MAX)
     notes: str | None = Field(default=None, max_length=2000)
     is_active: bool | None = None
 
@@ -168,7 +170,7 @@ class ExpandRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     work_key: str = Field(..., min_length=1, max_length=120)
-    quantity: Decimal = Field(..., gt=0, le=_NUM_MAX)
+    quantity: FiniteDecimal = Field(..., gt=0, le=_NUM_MAX)
 
 
 class ExpandBatchRequest(BaseModel):
@@ -238,7 +240,7 @@ class BuildAssemblyRequest(BaseModel):
     # assembly would still call its total complete. "This costs nothing" and
     # "nobody has priced this yet" must not render as the same line, and the
     # second one is what omitting the field already says.
-    labor_rate: Decimal | None = Field(
+    labor_rate: FiniteDecimal | None = Field(
         default=None,
         gt=0,
         le=_NUM_MAX,
@@ -248,7 +250,7 @@ class BuildAssemblyRequest(BaseModel):
             "unpriced - no rate is ever synthesised."
         ),
     )
-    machine_rate: Decimal | None = Field(
+    machine_rate: FiniteDecimal | None = Field(
         default=None,
         gt=0,
         le=_NUM_MAX,

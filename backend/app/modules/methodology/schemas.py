@@ -21,6 +21,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 # ── Controlled vocabularies (single source of truth) ───────────────────────
 
 # Where a methodology originates. Mirrors Methodology.scope.
@@ -73,8 +75,8 @@ class MarkupStepSchema(BaseModel):
     label: str = Field(default="", max_length=255)
     category: str = Field(default="other", max_length=40)
     kind: str = Field(default="percentage", pattern=_STEP_KIND_PATTERN)
-    rate: Decimal = Field(default=Decimal("0"))
-    amount: Decimal = Field(default=Decimal("0"))
+    rate: FiniteDecimal = Field(default=Decimal("0"))
+    amount: FiniteDecimal = Field(default=Decimal("0"))
     base: list[str] = Field(default_factory=list)
 
     @field_serializer("rate", "amount", when_used="json")
@@ -214,7 +216,7 @@ class MethodologyBase(BaseModel):
     # Nothing prices from it. The ``tax`` step inside ``cascade_steps`` is what
     # computes, and a project that states its own rate replaces that step, so
     # read ``effective_vat`` on the response for the figure actually applied.
-    vat_rate: Decimal | None = None
+    vat_rate: FiniteDecimal | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
 
     @field_serializer("vat_rate", when_used="json")
@@ -253,7 +255,7 @@ class MethodologyUpdate(BaseModel):
     base_mapping: dict[str, list[str]] | None = None
     composites: dict[str, list[str]] | None = None
     cascade_steps: list[MarkupStepSchema] | None = None
-    vat_rate: Decimal | None = None
+    vat_rate: FiniteDecimal | None = None
     metadata: dict[str, Any] | None = None
 
     @field_serializer("vat_rate", when_used="json")
@@ -284,14 +286,14 @@ class EffectiveVat(BaseModel):
 
     # The rate that will actually be applied, or None when the stack carries no
     # single tax line and so no one figure can be named for it.
-    rate: Decimal | None = None
+    rate: FiniteDecimal | None = None
     # ``project`` when the project's own rate is substituted, ``methodology``
     # when the stack's own tax line stands, ``none`` when there is no single
     # tax line to speak about. Never guess a fourth meaning from a null rate.
     source: Literal["project", "methodology", "none"] = "none"
     # What the stored cascade says, so a reader can be shown both figures
     # without fetching the steps and reasoning about them again.
-    stored_rate: Decimal | None = None
+    stored_rate: FiniteDecimal | None = None
     # True only when the priced rate and the stored rate genuinely differ. A
     # project whose rate equals the template's is not an override worth
     # announcing, which is why this is a comparison and not `source ==
@@ -385,7 +387,7 @@ class ResourceTotals(BaseModel):
 
     # Free-form resource-type -> amount. Kept permissive (any string key) so a
     # template can introduce new resource types without a schema change.
-    totals: dict[str, Decimal] = Field(default_factory=dict)
+    totals: dict[str, FiniteDecimal] = Field(default_factory=dict)
 
 
 class ComputeEstimateRequest(BaseModel):
@@ -405,7 +407,7 @@ class ComputeEstimateRequest(BaseModel):
     project_id: UUID
     methodology_slug: str | None = Field(default=None, max_length=80)
     boq_id: UUID | None = None
-    resource_totals: dict[str, Decimal] | None = None
+    resource_totals: dict[str, FiniteDecimal] | None = None
 
 
 class StepResultSchema(BaseModel):
@@ -417,10 +419,10 @@ class StepResultSchema(BaseModel):
     label: str
     category: str
     kind: str
-    rate: Decimal = Decimal("0")
-    base_amount: Decimal = Decimal("0")
-    amount: Decimal = Decimal("0")
-    running_total: Decimal = Decimal("0")
+    rate: FiniteDecimal = Decimal("0")
+    base_amount: FiniteDecimal = Decimal("0")
+    amount: FiniteDecimal = Decimal("0")
+    running_total: FiniteDecimal = Decimal("0")
 
     @field_serializer("rate", "base_amount", "amount", "running_total", when_used="json")
     def _ser(self, v: Decimal) -> str | None:

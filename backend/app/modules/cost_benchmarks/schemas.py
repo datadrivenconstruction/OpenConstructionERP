@@ -11,13 +11,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal14_2, Decimal18_2, FiniteDecimal
 from app.modules.cost_benchmarks.bench_math import STANDARDS
 
 
 class ElementIn(BaseModel):
     code: str = Field(min_length=1, max_length=30)
     label: str = Field(default="", max_length=255)
-    amount: Decimal = Field(ge=0)
+    amount: Decimal18_2 = Field(ge=0)
 
 
 class RecordCreate(BaseModel):
@@ -29,10 +30,10 @@ class RecordCreate(BaseModel):
     currency: str = Field(min_length=3, max_length=3)
     cost_date: date
     standard: str = Field(default="din276")
-    gfa_m2: Decimal | None = Field(default=None, ge=0)
+    gfa_m2: Decimal14_2 | None = Field(default=None, ge=0)
     functional_unit: str = Field(default="", max_length=30)
-    functional_units: Decimal | None = Field(default=None, ge=0)
-    total_cost: Decimal | None = Field(default=None, ge=0)
+    functional_units: Decimal14_2 | None = Field(default=None, ge=0)
+    total_cost: Decimal18_2 | None = Field(default=None, ge=0)
     notes: str = ""
     elements: list[ElementIn] = []
 
@@ -84,8 +85,8 @@ class CompareRequest(BaseModel):
     project_type: str | None = None
     countries: list[str] = []
     region: str | None = None
-    gfa_min: Decimal | None = None
-    gfa_max: Decimal | None = None
+    gfa_min: FiniteDecimal | None = None
+    gfa_max: FiniteDecimal | None = None
     year_from: int | None = None
     year_to: int | None = None
     base_date: date | None = None

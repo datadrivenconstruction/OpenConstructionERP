@@ -16,6 +16,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal18_4, FiniteDecimal
+
 OnCostKind = Literal["percentage", "fixed"]
 
 
@@ -43,7 +45,7 @@ class OnCostIn(BaseModel):
 
     label: str = Field(..., min_length=1, max_length=255)
     kind: OnCostKind = "percentage"
-    value: Decimal = Decimal("0")
+    value: Decimal18_4 = Decimal("0")
 
     @field_serializer("value", when_used="json")
     def _ser_value(self, v: Decimal) -> str | None:
@@ -57,7 +59,7 @@ class CrewMemberIn(BaseModel):
 
     trade: str = Field(..., min_length=1, max_length=120)
     count: int = Field(default=1, ge=0, le=100_000)
-    all_in_rate: Decimal = Decimal("0")
+    all_in_rate: Decimal18_4 = Decimal("0")
 
     @field_serializer("all_in_rate", when_used="json")
     def _ser_rate(self, v: Decimal) -> str | None:
@@ -69,7 +71,7 @@ class ComputeRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    base_wage: Decimal = Decimal("0")
+    base_wage: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
     components: list[OnCostIn] = Field(default_factory=list)
     crew: list[CrewMemberIn] = Field(default_factory=list)
@@ -114,8 +116,8 @@ class CrewBreakdown(BaseModel):
 
     currency: str = ""
     headcount: int = 0
-    total_cost_per_hour: Decimal = Decimal("0")
-    blended_hourly_rate: Decimal = Decimal("0")
+    total_cost_per_hour: FiniteDecimal = Decimal("0")
+    blended_hourly_rate: FiniteDecimal = Decimal("0")
     members: list[CrewMemberLineOut] = Field(default_factory=list)
 
     @field_serializer("total_cost_per_hour", "blended_hourly_rate", when_used="json")
@@ -126,11 +128,11 @@ class CrewBreakdown(BaseModel):
 class RateBreakdown(BaseModel):
     """The full all-in rate build-up, optionally with a crew blend."""
 
-    base_wage: Decimal = Decimal("0")
+    base_wage: Decimal18_4 = Decimal("0")
     currency: str = ""
-    percentage_total: Decimal = Decimal("0")
-    fixed_total: Decimal = Decimal("0")
-    all_in_rate: Decimal = Decimal("0")
+    percentage_total: FiniteDecimal = Decimal("0")
+    fixed_total: FiniteDecimal = Decimal("0")
+    all_in_rate: Decimal18_4 = Decimal("0")
     lines: list[OnCostLineOut] = Field(default_factory=list)
     crew: CrewBreakdown | None = None
 
@@ -161,7 +163,7 @@ class TemplateCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str = Field(..., min_length=1, max_length=255)
-    base_wage: Decimal = Field(..., gt=0)
+    base_wage: Decimal18_4 = Field(..., gt=0)
     currency: str = Field(default="", max_length=3)
     description: str = Field(default="", max_length=2000)
     components: list[OnCostIn] = Field(default_factory=list)
@@ -185,7 +187,7 @@ class TemplateUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    base_wage: Decimal | None = Field(default=None, gt=0)
+    base_wage: Decimal18_4 | None = Field(default=None, gt=0)
     currency: str | None = Field(default=None, max_length=3)
     description: str | None = Field(default=None, max_length=2000)
     components: list[OnCostIn] | None = None
