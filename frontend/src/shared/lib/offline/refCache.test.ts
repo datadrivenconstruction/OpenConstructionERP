@@ -50,3 +50,14 @@ describe('refCache', () => {
     expect(await getRef('p2', 'roster', T0)).not.toBeNull();
   });
 });
+
+describe('clearAllRefs', () => {
+  it('forgets every project', async () => {
+    const { clearAllRefs } = await import('./refCache');
+    await putRef('p1', 'punch_items', [1], null, T0);
+    await putRef('p2', 'roster', [2], null, T0);
+    await clearAllRefs();
+    expect(await getRef('p1', 'punch_items', T0)).toBeNull();
+    expect(await getRef('p2', 'roster', T0)).toBeNull();
+  });
+});
