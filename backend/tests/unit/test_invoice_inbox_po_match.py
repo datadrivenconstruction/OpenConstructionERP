@@ -386,7 +386,8 @@ async def test_link_rejects_other_project_and_draft_orders(monkeypatch: pytest.M
     monkeypatch.setattr(InvoiceCaptureService, "_procurement", staticmethod(lambda _s: _FakeProcurement(draft, [])))
     with pytest.raises(HTTPException) as exc:
         await service.link_purchase_order(row.id, draft.id, None)
-    assert "issued" in exc.value.detail
+    assert exc.value.status_code == 422
+    assert exc.value.detail["code"] == "invoice_capture_po_not_billable"
 
 
 @pytest.mark.asyncio
