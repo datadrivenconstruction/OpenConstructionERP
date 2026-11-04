@@ -208,3 +208,28 @@ async def test_outcome_only_for_a_bid_and_cleared_when_decision_flips() -> None:
     card = _card(decision="bid", outcome="won")
     await svc.decide(card, DecideRequest(decision="no_bid", reason="Client withdrew the invitation"), "u1")
     assert card.outcome == ""
+
+
+async def test_opportunity_of_another_project_is_not_found() -> None:
+    svc, _ = _service()
+    project, other = uuid.uuid4(), uuid.uuid4()
+    opps = {
+        "foreign": SimpleNamespace(project_id=other),
+        "free": SimpleNamespace(project_id=None),
+        "own": SimpleNamespace(project_id=project),
+    }
+    ids = {k: uuid.uuid4() for k in opps}
+    by_id = {ids[k]: v for k, v in opps.items()}
+
+    class _Session:
+        async def get(self, _model: Any, key: uuid.UUID) -> Any:
+            return by_id.get(key)
+
+    svc.session = _Session()  # type: ignore[assignment]
+    card = _card(project_id=project)
+    with pytest.raises(HTTPException) as exc:
+        await svc.update(card, ScorecardUpdate(opportunity_id=ids["foreign"]), "u1")
+    assert exc.value.status_code == 404 and card.opportunity_id is None
+    for key in ("free", "own"):
+        await svc.update(card, ScorecardUpdate(opportunity_id=ids[key]), "u1")
+        assert card.opportunity_id == ids[key]

@@ -225,7 +225,7 @@ class BidNoBidService:
 
     async def ledger(self, project_id: uuid.UUID) -> dict[str, Any]:
         cards = await self.repo.cards(project_id)
-        crm = await self._crm_status({c.opportunity_id for c in cards if c.opportunity_id})
+        crm = await self._crm_status({c.opportunity_id for c in cards if c.opportunity_id}, project_id)
         tenders = {c.tender_id: (await self.tender(c.tender_id)).name for c in cards}
         rows: list[dict[str, Any]] = []
         for card in cards:
@@ -251,17 +251,19 @@ class BidNoBidService:
             )
         return {"summary": logic.win_loss_summary(rows), "rows": rows}
 
-    async def _crm_status(self, ids: set[uuid.UUID | None]) -> dict[uuid.UUID | None, str]:
+    async def _crm_status(self, ids: set[uuid.UUID | None], project_id: uuid.UUID) -> dict[uuid.UUID | None, str]:
         wanted = {i for i in ids if i}
         if not wanted:
             return {}
         try:
-            from sqlalchemy import select
+            from sqlalchemy import or_, select
 
             from app.modules.crm.models import Opportunity
         except ImportError:
             return {}
-        stmt = select(Opportunity.id, Opportunity.status).where(Opportunity.id.in_(wanted))
+        stmt = select(Opportunity.id, Opportunity.status).where(
+            Opportunity.id.in_(wanted), or_(Opportunity.project_id.is_(None), Opportunity.project_id == project_id)
+        )
         return {oid: str(st) for oid, st in (await self.session.execute(stmt)).all()}
 
     async def _check_opportunity(self, card: BidNoBidScorecard, opportunity_id: uuid.UUID) -> None:
@@ -269,7 +271,9 @@ class BidNoBidService:
             from app.modules.crm.models import Opportunity
         except ImportError as exc:
             raise _conflict("crm_missing", "The CRM module is not installed.") from exc
-        if await self.session.get(Opportunity, opportunity_id) is None:
+        opp = await self.session.get(Opportunity, opportunity_id)
+        # An opportunity tied to another project is invisible here, same as a missing one.
+        if opp is None or (opp.project_id is not None and opp.project_id != card.project_id):
             raise _not_found("Opportunity")
 
     # ── audit ────────────────────────────────────────────────────────────
