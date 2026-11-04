@@ -38,7 +38,7 @@ from app.core.audit import (
     count_audit_entries,
     get_audit_entries,
 )
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentTenantId, CurrentUserId, RequirePermission, SessionDep
 
 router = APIRouter(prefix="/api/v1/audit", tags=["Audit"])
 logger = logging.getLogger(__name__)
@@ -172,6 +172,7 @@ def _activity_to_dict(row: Any) -> dict[str, Any]:
 async def get_timeline(
     session: SessionDep,
     _user_id: CurrentUserId,
+    tenant_id: CurrentTenantId,
     _perm: None = Depends(RequirePermission("audit.view")),
     entity_type: str | None = Query(default=None),
     entity_id: str | None = Query(default=None),
@@ -193,6 +194,20 @@ async def get_timeline(
     from app.core.audit_log import ActivityLog
 
     stmt = select(ActivityLog)
+    # Admins see every tenant; everyone else sees their own tenant's rows plus
+    # system rows (tenant_id NULL), never another tenant's.
+    from sqlalchemy import or_
+
+    from app.core.tenant_scope import tenant_scope_owner
+
+    scope = await tenant_scope_owner(session, tenant_id)
+    if scope is not None:
+        try:
+            tenant_uuid = _uuid_mod.UUID(str(scope))
+        except (ValueError, AttributeError):
+            stmt = stmt.where(ActivityLog.tenant_id.is_(None))
+        else:
+            stmt = stmt.where(or_(ActivityLog.tenant_id == tenant_uuid, ActivityLog.tenant_id.is_(None)))
     if entity_type is not None:
         stmt = stmt.where(ActivityLog.entity_type == entity_type)
     if entity_id is not None:
