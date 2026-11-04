@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { clampInput } from '@/shared/lib/clampInput';
 import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
@@ -4393,7 +4394,7 @@ function CreateLookAheadModal({
           min={1}
           max={24}
           value={weeks}
-          onChange={(e) => setWeeks(Number(e.target.value) || 6)}
+          onChange={(e) => setWeeks(clampInput(e.target.value, 1, 24, true))}
           className={inputCls}
         />
       </div>

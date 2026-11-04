@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { clampInput } from '@/shared/lib/clampInput';
 import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -2094,7 +2095,7 @@ function ReportModal({
                     type="number"
                     value={entry.count || ''}
                     onChange={(e) =>
-                      handleWorkforceChange(idx, 'count', parseInt(e.target.value, 10) || 0)
+                      handleWorkforceChange(idx, 'count', clampInput(e.target.value, 0, Number.POSITIVE_INFINITY, true))
                     }
                     placeholder={t('fieldreports.count', { defaultValue: 'Count' })}
                     min={0}
@@ -2106,7 +2107,7 @@ function ReportModal({
                     type="number"
                     value={entry.hours || ''}
                     onChange={(e) =>
-                      handleWorkforceChange(idx, 'hours', parseFloat(e.target.value) || 0)
+                      handleWorkforceChange(idx, 'hours', clampInput(e.target.value, 0))
                     }
                     placeholder={t('fieldreports.hours', { defaultValue: 'Hours' })}
                     min={0}
