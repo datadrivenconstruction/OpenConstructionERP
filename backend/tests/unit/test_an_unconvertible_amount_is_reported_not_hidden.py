@@ -37,8 +37,8 @@ def test_nothing_to_convert_is_a_factor_of_one(currency: str | None, base: str, 
 
 
 def test_a_usable_rate_is_returned() -> None:
-    assert resource_fx_factor("USD", "EUR", RATES) == 0.92
-    assert resource_fx_factor("usd", "EUR", RATES) == 0.92
+    assert resource_fx_factor("USD", "EUR", RATES) == Decimal("0.92")
+    assert resource_fx_factor("usd", "EUR", RATES) == Decimal("0.92")
 
 
 @pytest.mark.parametrize(
@@ -81,7 +81,7 @@ def test_unconvertible_is_none_and_never_one() -> None:
     # And the negative control on the control: if the rate IS present, the
     # second case must stop being None, or this test would pass against a
     # function that simply never converts anything.
-    assert resource_fx_factor("USD", "EUR", RATES) == 0.92
+    assert resource_fx_factor("USD", "EUR", RATES) == Decimal("0.92")
 
 
 def test_the_response_carries_the_unconverted_amounts_as_decimal_strings() -> None:

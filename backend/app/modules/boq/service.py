@@ -24,7 +24,7 @@ import uuid
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Final, Literal, NamedTuple
 
@@ -69,6 +69,20 @@ from app.core.validation.messages import translate
 # the existing snapshot intact.
 
 
+_SNAPSHOT_RATE_TOLERANCE = Decimal("0.005")
+_SNAPSHOT_RATE_QUANTUM = Decimal("0.0001")
+
+
+def _snapshot_rate(value: object) -> float:
+    """Unit rate for a variant snapshot: exact Decimal, 4dp half-even, float only for the JSON edge."""
+    return float(_to_decimal(value).quantize(_SNAPSHOT_RATE_QUANTUM, rounding=ROUND_HALF_EVEN))
+
+
+def _snapshot_rate_unchanged(stored: object, new_rate: float) -> bool:
+    """Whether a stored snapshot rate is within half a cent of the new one."""
+    return abs(_to_decimal(stored) - _to_decimal(new_rate)) < _SNAPSHOT_RATE_TOLERANCE
+
+
 def _stamp_variant_snapshot(
     metadata: dict[str, Any],
     *,
@@ -110,11 +124,7 @@ def _stamp_variant_snapshot(
 
     # Numeric rate - quantise lightly so the snapshot never carries a
     # full-precision Decimal that won't survive JSON round-trip.
-    try:
-        rate_val = float(unit_rate) if unit_rate is not None else 0.0
-    except (TypeError, ValueError):
-        rate_val = 0.0
-    rate_val = round(rate_val, 4)
+    rate_val = _snapshot_rate(unit_rate)
 
     if has_user_pick:
         label = str(variant["label"])
@@ -128,7 +138,7 @@ def _stamp_variant_snapshot(
         isinstance(existing, dict)
         and existing.get("label") == label
         and existing.get("source") == source
-        and abs(float(existing.get("rate", 0)) - rate_val) < 0.005
+        and _snapshot_rate_unchanged(existing.get("rate"), rate_val)
     ):
         # No-op patch - preserve the original captured_at timestamp so the
         # immutability marker doesn't drift on every unrelated metadata
@@ -185,11 +195,7 @@ def _stamp_resource_variant_snapshots(
         if not (has_user_pick or has_default):
             continue
 
-        try:
-            rate_val = float(resource.get("unit_rate", 0) or 0)
-        except (TypeError, ValueError):
-            rate_val = 0.0
-        rate_val = round(rate_val, 4)
+        rate_val = _snapshot_rate(resource.get("unit_rate"))
 
         if has_user_pick:
             label = str(variant["label"])
@@ -203,7 +209,7 @@ def _stamp_resource_variant_snapshots(
             isinstance(existing, dict)
             and existing.get("label") == label
             and existing.get("source") == source
-            and abs(float(existing.get("rate", 0)) - rate_val) < 0.005
+            and _snapshot_rate_unchanged(existing.get("rate"), rate_val)
         ):
             continue
 
@@ -567,9 +573,7 @@ def _is_section(position: Position) -> bool:
     This enables multi-level BOQ hierarchies (3-4+ levels).
     """
     unit = (position.unit or "").strip().lower()
-    qty = _str_to_float(position.quantity)
-    rate = _str_to_float(position.unit_rate)
-    return unit in SECTION_UNITS and qty == 0.0 and rate == 0.0
+    return unit in SECTION_UNITS and _to_decimal(position.quantity) == 0 and _to_decimal(position.unit_rate) == 0
 
 
 def is_empty_position(position: Any) -> bool:
@@ -602,7 +606,7 @@ def is_empty_position(position: Any) -> bool:
     if _is_section(position):
         return False
     description = (getattr(position, "description", "") or "").strip()
-    return not description and _str_to_float(getattr(position, "quantity", 0)) == 0.0
+    return not description and _to_decimal(getattr(position, "quantity", 0)) == 0
 
 
 def exportable_positions(positions: Iterable[Any]) -> list[Any]:
@@ -761,7 +765,7 @@ def resource_fx_factor(
     currency: str | None,
     base_currency: str | None,
     fx_rates_map: dict[str, str] | None,
-) -> float | None:
+) -> Decimal | None:
     """The multiplier that converts ``currency`` into ``base_currency``.
 
     This is the project's FX policy stated once, so callers stop restating it.
@@ -797,16 +801,13 @@ def resource_fx_factor(
     code = (currency or "").strip().upper()
     base = (base_currency or "").strip().upper()
     if not code or not base or code == base:
-        return 1.0
+        return Decimal("1")
 
     raw = (fx_rates_map or {}).get(code)
     if raw is None:
         return None
-    try:
-        rate = float(raw)
-    except (ValueError, TypeError):
-        return None
-    if not math.isfinite(rate) or rate <= 0.0:
+    rate = _to_decimal(raw, default=Decimal("-1"))
+    if rate <= 0:
         return None
     return rate
 
@@ -8563,7 +8564,7 @@ class BOQService:
                     factor = resource_fx_factor(res_currency, base_currency, fx_map)
                     if factor is None:
                         continue
-                    weight *= factor
+                    weight *= float(factor)
                     shares.append(
                         (
                             self._normalize_resource_category(str(res.get("type", "other")).lower()),
