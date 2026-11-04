@@ -2769,11 +2769,17 @@ class VariationsService:
         if (not standard or not clause_ref) and data.variation_request_id:
             try:
                 vr = await self.get_request(data.variation_request_id)
+                if vr.project_id != data.project_id:
+                    raise HTTPException(
+                        status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+                        detail="The variation request belongs to another project.",
+                    )
                 standard = standard or (vr.contract_standard or "")
                 clause_ref = clause_ref or (vr.contract_clause_ref or "")
-            except HTTPException:
+            except HTTPException as exc:
+                if exc.status_code != http_status.HTTP_404_NOT_FOUND:
+                    raise
                 # Upstream VR vanished - proceed without clause carry-over.
-                pass
         affected_contract = getattr(data, "affected_contract_id", None)
         vo = VariationOrder(
             project_id=data.project_id,
