@@ -648,7 +648,11 @@ def resolve_cwicr_target(settings: Any = None) -> CwicrTarget:
     url = getattr(s, "cwicr_qdrant_url", None)
     if url:
         return CwicrTarget("url", url)
-    path = getattr(s, "cwicr_qdrant_path", "") or os.path.expanduser("~/.openestimator/qdrant_cwicr")
+    path = getattr(s, "cwicr_qdrant_path", "")
+    if not path:
+        from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir_or_legacy
+
+        path = str(home_state_dir_or_legacy(LEGACY_HOME_ROOT, "qdrant_cwicr"))
     return CwicrTarget("embedded", path)
 
 

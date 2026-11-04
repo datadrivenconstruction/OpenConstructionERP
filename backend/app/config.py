@@ -599,7 +599,7 @@ class Settings(BaseSettings):
     # yet; it will be removed entirely in a future release.
     vector_backend: str = "qdrant"  # "qdrant" (default) or "lancedb" (legacy fallback)
     qdrant_url: str | None = "http://localhost:6333"
-    vector_data_dir: str = ""  # LanceDB storage path, default: ~/.openestimator/data/vectors
+    vector_data_dir: str = ""  # LanceDB path, default: $OE_DATA_DIR/data/vectors, else ~/.openestimator/data/vectors
     # Embedding model used by the multi-collection semantic memory layer.
     # Default is multilingual so the CWICR cost database (24 languages) and
     # cross-module collections (BOQ, documents, tasks, risks, BIM elements,
@@ -634,7 +634,7 @@ class Settings(BaseSettings):
     # (`QdrantClient(path=...)`); when empty, it falls back to
     # ``cwicr_qdrant_url``. Embedded keeps the dependency footprint inside
     # the app's data dir; URL is for shared/Dockerised deployments.
-    cwicr_qdrant_path: str = ""  # default resolved to ~/.openestimator/qdrant_cwicr
+    cwicr_qdrant_path: str = ""  # default: $OE_DATA_DIR/qdrant_cwicr, else ~/.openestimator/qdrant_cwicr
     cwicr_qdrant_url: str | None = None
     # Root directory that holds the per-region parquet files
     # ``<XX>___DDC_CWICR/<region>_workitems_costs_resources_DDC_CWICR.parquet``.

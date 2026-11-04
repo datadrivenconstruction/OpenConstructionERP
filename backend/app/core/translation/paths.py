@@ -2,7 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Filesystem layout for downloaded dictionaries.
 
-All dictionary state lives under ``~/.openestimate/translations/``
+All dictionary state lives under ``~/.openestimate/translations/`` (or
+``$OE_DATA_DIR/translations/`` when an operator data dir is set)
 unless overridden:
 
     translations/
@@ -31,7 +32,9 @@ def translations_root(root: str | None = None) -> Path:
     if root:
         path = Path(root).expanduser()
     else:
-        path = Path.home() / ".openestimate" / "translations"
+        from app.core.home_state import HOME_ROOT, home_state_dir
+
+        path = home_state_dir(HOME_ROOT, "translations")
     path.mkdir(parents=True, exist_ok=True)
     return path
 

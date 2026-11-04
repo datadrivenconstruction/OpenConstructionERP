@@ -52,6 +52,7 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
+from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir_or_legacy
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -5246,7 +5247,7 @@ _LOCAL_CWICR_FILE_ALIASES: dict[str, tuple[str, ...]] = {
 # on the next load, so a region survives GitHub being unreachable later
 # (fresh offline installs were left with no rates at all when the runtime
 # download failed).
-_CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
+_CWICR_CACHE_DIR = home_state_dir_or_legacy(LEGACY_HOME_ROOT, "cache")
 
 # Optional bundled CWICR parquet files inside the installed package. The
 # regional workitems parquet files are 25-60 MB each (30 regions, ~1 GB

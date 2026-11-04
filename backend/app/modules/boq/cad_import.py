@@ -23,7 +23,15 @@ from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
-from app.core.converter_source import PACKAGES, all_packages, host_packages, host_platform_key, install_dir_name
+from app.core.converter_source import (
+    PACKAGES,
+    all_packages,
+    converter_install_root,
+    converter_install_roots,
+    host_packages,
+    host_platform_key,
+    install_dir_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +57,7 @@ def _converter_subprocess_env(converter_path: Path) -> dict[str, str] | None:
 # Look for converters in these locations (in order)
 CONVERTER_SEARCH_PATHS: list[Path] = [
     Path("converters/bin"),
-    Path.home() / ".openestimator" / "converters",
+    *converter_install_roots(),
     Path("/opt/openestimator/converters"),
     Path("C:/ProgramData/OpenConstructionERP/converters"),
 ]
@@ -124,9 +132,9 @@ def _find_ddc_toolkit_bin() -> Path | None:
                 return candidate
 
     # 5. Final fallback: the BIM auto-installer's shared drop-dir.
-    shared = Path.home() / ".openestimator" / "converters"
-    if shared.is_dir():
-        return shared
+    for shared in converter_install_roots():
+        if shared.is_dir():
+            return shared
 
     return None
 
@@ -227,10 +235,13 @@ def find_converter(extension: str) -> Path | None:
             if cand not in search_paths:
                 search_paths.insert(0, cand)
 
-    installed_root = Path.home() / ".openestimator" / "converters"
-    per_format = [installed_root / f"{extension}_windows"]
-    if host_pkg is not None and host_key:
-        per_format.append(installed_root / install_dir_name(extension, host_key))
+    # Each insert below goes to the front, so the legacy root is listed first
+    # and the current install root ends up ahead of it.
+    per_format: list[Path] = []
+    for installed_root in reversed(converter_install_roots()):
+        per_format.append(installed_root / f"{extension}_windows")
+        if host_pkg is not None and host_key:
+            per_format.append(installed_root / install_dir_name(extension, host_key))
     for cand in per_format:
         if cand not in search_paths:
             search_paths.insert(0, cand)
@@ -282,7 +293,7 @@ def find_converter(extension: str) -> Path | None:
 
 # Where per-format Windows converters are installed. Mirrors the constant
 # in ``takeoff.router`` (kept in sync; the download routine writes here).
-_CONVERTER_INSTALL_ROOT: Path = Path.home() / ".openestimator" / "converters"
+_CONVERTER_INSTALL_ROOT: Path = converter_install_root()
 
 # Format-alias → converter-id map. Some upload extensions are handled by a
 # converter registered under a different id: RVT family files (.rfa) by

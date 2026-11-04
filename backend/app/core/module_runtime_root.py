@@ -50,8 +50,14 @@ DEFAULT_SUBPATH = (".openestimator", "modules")
 
 
 def default_runtime_modules_dir() -> Path:
-    """The built-in location for installed modules, ignoring any override."""
-    return Path.home().joinpath(*DEFAULT_SUBPATH)
+    """The built-in location for installed modules, ignoring ``OE_RUNTIME_MODULES_DIR``.
+
+    Below the operator data dir when one is set, so a container keeps its
+    installed modules on the mounted volume; otherwise ``~/.openestimator/modules``.
+    """
+    from app.core.home_state import home_state_dir
+
+    return home_state_dir(*DEFAULT_SUBPATH)
 
 
 def runtime_modules_dir() -> Path:

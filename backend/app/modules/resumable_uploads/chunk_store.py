@@ -8,7 +8,8 @@ computes the SHA-256 incrementally, so the whole payload is never held in
 memory. The assembled file is then handed to the document service.
 
 The temp root sits under the same per-user data directory the rest of the
-local storage uses (``OE_CLI_DATA_DIR`` / ``DATA_DIR`` / ``~/.openestimator``)
+local storage uses (``OE_DATA_DIR`` / ``DATA_DIR`` / ``OE_CLI_DATA_DIR`` /
+``~/.openestimator``)
 so it inherits the platform's safe-root containment and is cleaned up by
 the GC sweep.
 """
@@ -36,10 +37,13 @@ def _resumable_base_dir() -> Path:
     so an install under a read-only location still has a writable scratch
     area, then falls back to ``~/.openestimator/resumable``.
     """
-    override = os.environ.get("OE_CLI_DATA_DIR") or os.environ.get("DATA_DIR")
-    if override:
-        return Path(override) / "resumable"
-    return Path.home() / ".openestimator" / "resumable"
+    from app.core.home_state import LEGACY_HOME_ROOT, home_state_dir, operator_data_dir
+
+    if operator_data_dir() is None:
+        cli_dir = (os.environ.get("OE_CLI_DATA_DIR") or "").strip()
+        if cli_dir:
+            return Path(cli_dir) / "resumable"
+    return home_state_dir(LEGACY_HOME_ROOT, "resumable")
 
 
 def session_dir(session_id: uuid.UUID | str) -> Path:

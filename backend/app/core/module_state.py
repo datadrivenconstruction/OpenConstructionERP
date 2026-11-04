@@ -7,7 +7,7 @@ Stores state in a JSON file alongside the database.  Core modules cannot be disa
 File location resolution:
 1. Explicit ``data_dir`` argument
 2. Directory containing the SQLite database (from ``DATABASE_URL``)
-3. ``~/.openestimate/``
+3. The operator data dir (``OE_DATA_DIR`` / ``DATA_DIR``), else ``~/.openestimate/``
 """
 
 from __future__ import annotations
@@ -50,8 +50,9 @@ def _resolve_data_dir(data_dir: Path | None = None) -> Path:
             if db_path.parent.exists():
                 return db_path.parent
 
-    # Fallback
-    fallback = Path.home() / ".openestimate"
+    from app.core.home_state import HOME_ROOT, home_state_dir
+
+    fallback = home_state_dir(HOME_ROOT)
     fallback.mkdir(parents=True, exist_ok=True)
     return fallback
 
