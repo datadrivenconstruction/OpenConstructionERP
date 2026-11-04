@@ -121,6 +121,14 @@ class _Rows:
         return iter(())
 
 
+class _Nested:
+    async def __aenter__(self) -> None:
+        return None
+
+    async def __aexit__(self, *_exc) -> bool:
+        return False
+
+
 class FakeSession:
     def __init__(self) -> None:
         self.added: list = []
@@ -133,6 +141,9 @@ class FakeSession:
         for obj in self.added:
             if getattr(obj, "id", None) is None:
                 obj.id = uuid.uuid4()
+
+    def begin_nested(self):
+        return _Nested()
 
     async def delete(self, obj) -> None:
         self.deleted.append(obj)
@@ -349,3 +360,30 @@ def test_viewer_cannot_write_and_editor_cannot_decide():
     assert permission_registry.role_has_permission(Role.EDITOR, "costmodel.write")
     assert not permission_registry.role_has_permission(Role.EDITOR, "costmodel.manage")
     assert permission_registry.role_has_permission(Role.MANAGER, "costmodel.manage")
+
+
+async def test_code_race_takes_the_next_number(service, monkeypatch):
+    from sqlalchemy.exc import IntegrityError
+
+    session = service.session
+    real_flush = session.flush
+    state = {"clashed": False}
+
+    async def flush():
+        if not state["clashed"] and any(getattr(o, "code", "") == "BT-001" for o in session.added):
+            state["clashed"] = True
+            session.added[:] = [o for o in session.added if getattr(o, "code", "") != "BT-001"]
+            raise IntegrityError("insert", {}, Exception("uq_costmodel_budget_transfer_code"))
+        await real_flush()
+
+    session.flush = flush
+    out = await service.create_transfer(
+        PROJECT,
+        TransferIn(
+            reason="Race",
+            legs=[LegIn(cost_line_id=WALLS, amount=D("-100")), LegIn(cost_line_id=ROOF, amount=D("100"))],
+        ),
+        "u1",
+        "en",
+    )
+    assert state["clashed"] and out.code == "BT-002"

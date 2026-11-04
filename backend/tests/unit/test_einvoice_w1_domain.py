@@ -621,3 +621,29 @@ def test_manifest_is_market_tagged() -> None:
     assert sorted(manifest.markets) == sorted(SUPPORTED_COUNTRIES)
     assert is_visible(manifest.markets, ["DE"])
     assert not is_visible(manifest.markets, ["US"])
+
+
+_UBL_DISCOUNT = b"""<?xml version="1.0"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+ xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+ <cbc:ID>INV-9</cbc:ID><cbc:IssueDate>2026-10-20</cbc:IssueDate><cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+ <cac:AccountingSupplierParty><cac:Party><cac:PartyLegalEntity><cbc:RegistrationName>S GmbH</cbc:RegistrationName>
+ </cac:PartyLegalEntity></cac:Party></cac:AccountingSupplierParty>
+ <cac:LegalMonetaryTotal><cbc:TaxExclusiveAmount>90.00</cbc:TaxExclusiveAmount>
+ <cbc:TaxInclusiveAmount>90.00</cbc:TaxInclusiveAmount></cac:LegalMonetaryTotal>
+ <cac:InvoiceLine><cbc:InvoicedQuantity>1</cbc:InvoicedQuantity><cbc:LineExtensionAmount>100.00</cbc:LineExtensionAmount>
+  <cac:Item><cbc:Name>Work</cbc:Name></cac:Item><cac:Price><cbc:PriceAmount>100.00</cbc:PriceAmount></cac:Price></cac:InvoiceLine>
+ <cac:InvoiceLine><cbc:InvoicedQuantity>1</cbc:InvoicedQuantity><cbc:LineExtensionAmount>-10.00</cbc:LineExtensionAmount>
+  <cac:Item><cbc:Name>Discount</cbc:Name></cac:Item><cac:Price><cbc:PriceAmount>-10.00</cbc:PriceAmount></cac:Price></cac:InvoiceLine>
+</Invoice>"""
+
+
+def test_negative_inbound_line_is_kept_and_flagged() -> None:
+    inv = parse_inbound(_UBL_DISCOUNT)
+    amounts = [Decimal(ln["amount"]) for ln in inv.lines]
+    assert amounts == [Decimal("100.00"), Decimal("-10.00")]
+    assert sum(amounts) == inv.amount_net
+    assert inv.lines[1]["unit_rate"] == "-10.00"
+    flagged = [f for f in inv.findings if f["code"] == "LINE-NEGATIVE"]
+    assert len(flagged) == 1 and flagged[0]["severity"] == "warning"

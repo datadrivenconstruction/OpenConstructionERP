@@ -6965,6 +6965,11 @@ class ContractsService:
             "attached_at": _dt.now(UTC).isoformat(),
             "attached_by": actor_id,
         }
+        # A double click re-sends the same signing: hand back the stored record instead of duplicating it.
+        identity = ("waiver_type", "through_date", "signed_by", "amount")
+        for existing in waivers:
+            if all(str(existing.get(k)) == str(record[k]) for k in identity):
+                return existing
         statutory = await self._statutory_waiver_form(claim, record["jurisdiction"], record["waiver_type"])
         if statutory is not None:
             record["statutory_form"] = statutory
