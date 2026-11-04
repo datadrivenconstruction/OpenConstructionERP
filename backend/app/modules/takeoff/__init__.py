@@ -8,3 +8,6 @@ async def on_startup() -> None:
     from app.modules.takeoff.permissions import register_takeoff_permissions
 
     register_takeoff_permissions()
+    from app.modules.takeoff.validators import register_takeoff_validation_rules
+
+    register_takeoff_validation_rules()
