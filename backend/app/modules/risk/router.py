@@ -160,10 +160,12 @@ async def get_matrix(
 async def create_risk(
     data: RiskCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("risk.create")),
     service: RiskService = Depends(_get_service),
 ) -> RiskResponse:
     """Create a new risk item."""
+    await verify_project_access(data.project_id, user_id, session)
     try:
         item = await service.create_risk(data, user_id=str(user_id) if user_id else None)
         return _risk_to_response(item)
