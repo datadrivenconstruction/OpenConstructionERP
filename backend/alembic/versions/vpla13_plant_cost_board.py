@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vpla13_plant_cost_board"
-down_revision: str | Sequence[str] | None = "vdee9_schedule_constraint_names"
+down_revision: str | Sequence[str] | None = "vrat13"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

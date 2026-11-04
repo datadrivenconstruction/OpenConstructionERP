@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vrat13"
-down_revision: str | Sequence[str] | None = "vdee9_schedule_constraint_names"
+down_revision: str | Sequence[str] | None = "vles12_lessons_learned"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
