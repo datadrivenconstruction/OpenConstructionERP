@@ -1775,5 +1775,47 @@
       "fail": "Az eredmény {result}, de {count} ellenőrzőlista-tétel nem felelt meg.",
       "suggestion": "Javítsa az eredményt, vagy vizsgálja át a nem megfelelő tételeket."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "A(z) {label} több alkalommal szerepel, ezért kétszer számít.",
+      "suggestion": "Tartson meg egy sort az mennyiségek összeadásával, vagy törölje a duplikátumot."
+    },
+    "burden_high": {
+      "fail": "A százalékos járulékok az alapbér {percent} %-át teszik ki, a szokásos {limit} % fölött.",
+      "suggestion": "Ellenőrizze a társadalombiztosítási, biztosítási és szabadságdíj sorokat elcsúszott tizedesvessző vagy kétszer számolt tétel miatt."
+    },
+    "empty_assembly": {
+      "fail": "A(z) {code} tételösszeállításnak nincs összetevője, vagy nulla az ára, így a tétel nullára értékelődne.",
+      "suggestion": "Adjon hozzá árazott összetevőket, mielőtt az összeállítást költségvetésbe emelné."
+    },
+    "unit_mismatch": {
+      "fail": "A(z) {unit} mértékegység nem illik ehhez a méréshez: a távolság hosszúsági, a terület területi mértékegységben, a darabszám darabban értendő.",
+      "suggestion": "Javítsa a mértékegységet vagy a jelölés típusát, mielőtt a mennyiség a költségvetésbe kerül."
+    },
+    "link_without_measurement": {
+      "fail": "Ennek a jelölésnek nincs mért értéke, így nincs mennyiség, amit a tételhez lehetne kötni.",
+      "suggestion": "Mérje meg az elemet távolság-, terület- vagy darabszámjelöléssel, majd kapcsolja össze."
+    },
+    "scale_unit_not_length": {
+      "fail": "A méretarány kalibrálása {unit} egységben történt, ami nem hosszúság.",
+      "suggestion": "Kalibráljon ismert távolságon, például méterben."
+    },
+    "measurement_without_scale": {
+      "fail": "Ennek az oldalnak nincs kalibrált méretaránya, ezért a mért érték nem megbízható.",
+      "suggestion": "Kalibrálja az oldal méretarányát ismert távolságon."
+    },
+    "unallocated_share": {
+      "fail": "A közvetlen költség {share} %-a ({count} tétel) nem tartozik használható NRM 1 elemhez.",
+      "suggestion": "Rendelje ezeket a tételeket NRM 1 elemhez, hogy az elemenkénti bontás teljes legyen."
+    },
+    "gifa_missing": {
+      "fail": "Nincs megadva a bruttó alapterület, ezért az m2-enkénti költség nem jeleníthető meg.",
+      "suggestion": "Adja meg az alapterületet a projektben vagy ehhez a lekérdezéshez."
+    },
+    "markup_load": {
+      "fail": "A felárak a közvetlen költség {percent} %-át teszik ki.",
+      "suggestion": "Ellenőrizze a rezsi-, nyereség-, kockázat- és árváltozás sorokat összegként megadott vagy kétszer számolt százalék miatt."
+    }
   }
 }

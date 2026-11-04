@@ -23,3 +23,6 @@ async def on_startup() -> None:
     from app.modules.cost_plan.permissions import register_cost_plan_permissions
 
     register_cost_plan_permissions()
+    from app.modules.cost_plan.validators import register_cost_plan_validation_rules
+
+    register_cost_plan_validation_rules()

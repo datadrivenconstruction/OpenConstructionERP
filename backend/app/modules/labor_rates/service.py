@@ -168,6 +168,17 @@ class LaborRateService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking findings of the latest write, for the router to report.
+        self.warnings: list[dict[str, Any]] = []
+
+    async def _gate(self, context: dict[str, Any], target_id: str) -> None:
+        """Run the labor rate rules; errors raise a coded 422, warnings are kept."""
+        from app.core.validation.cost_gate import raise_on_errors, run_rule_set, warnings_of  # noqa: PLC0415
+        from app.modules.labor_rates.validators import LABOR_RATES_RULE_SET  # noqa: PLC0415
+
+        report = await run_rule_set(LABOR_RATES_RULE_SET, context, target_type="labor_rate", target_id=target_id)
+        raise_on_errors(report, error="labor_rates_rules_failed")
+        self.warnings = warnings_of(report)
 
     # ── Compute ─────────────────────────────────────────────────────────────
 
@@ -208,6 +219,13 @@ class LaborRateService:
         Returns:
             The persisted template with its components loaded.
         """
+        await self._gate(
+            {
+                "template": {"name": data.name, "base_wage": data.base_wage, "currency": data.currency},
+                "components": [c.model_dump(include={"label", "kind", "value"}) for c in data.components],
+            },
+            data.name,
+        )
         template = LaborRateTemplate(
             owner_id=owner_id,
             name=data.name,
@@ -276,6 +294,24 @@ class LaborRateService:
             The updated template.
         """
         fields = data.model_dump(exclude_unset=True)
+
+        merged = (
+            [{"label": c.label, "kind": c.kind, "value": c.value} for c in data.components]
+            if data.components is not None
+            else [{"label": c.label, "kind": c.kind, "value": c.value} for c in template.components]
+        )
+        await self._gate(
+            {
+                "template": {
+                    "id": str(template.id),
+                    "name": template.name,
+                    "base_wage": data.base_wage if data.base_wage is not None else template.base_wage,
+                    "currency": data.currency if data.currency is not None else template.currency,
+                },
+                "components": merged,
+            },
+            str(template.id),
+        )
 
         if "name" in fields:
             template.name = data.name  # type: ignore[assignment]
@@ -499,6 +535,16 @@ class LaborRateService:
             The saved crew with its blended breakdown.
         """
         crew_id = data.crew_id or uuid.uuid4()
+        await self._gate(
+            {
+                "crew": {
+                    "id": str(crew_id),
+                    "currency": data.currency,
+                    "members": [m.model_dump(include={"trade", "count", "all_in_rate"}) for m in data.members],
+                }
+            },
+            str(crew_id),
+        )
 
         if data.crew_id is not None:
             # A crew id held by another owner is not ours to write into; answer as
@@ -528,7 +574,9 @@ class LaborRateService:
                 )
             )
         await self.session.flush()
-        return await self.get_crew(crew_id, owner_id)
+        saved = await self.get_crew(crew_id, owner_id)
+        saved.warnings = self.warnings
+        return saved
 
     async def list_crew_members(self, crew_id: uuid.UUID, owner_id: uuid.UUID | None) -> list[CrewMember]:
         """Return a crew's members ordered by sort order."""

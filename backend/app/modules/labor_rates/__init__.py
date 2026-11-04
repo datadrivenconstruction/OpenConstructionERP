@@ -14,3 +14,6 @@ async def on_startup() -> None:
     from app.modules.labor_rates.permissions import register_labor_rates_permissions
 
     register_labor_rates_permissions()
+    from app.modules.labor_rates.validators import register_labor_rates_validation_rules
+
+    register_labor_rates_validation_rules()

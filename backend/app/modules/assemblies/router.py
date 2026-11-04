@@ -649,6 +649,29 @@ async def apply_to_boq(
 # ── Parametric assemblies (Issue #365) ───────────────────────────────────────
 
 
+@router.get(
+    "/{assembly_id}/validation/",
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def validate_assembly_rules(
+    assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> dict:
+    """Every finding of the assembly rule set: errors block writes, warnings are advice."""
+    from app.core.validation.cost_gate import finding
+
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    report = await service.validate_rules(assembly_id)
+    return {
+        "errors": [finding(r) for r in report.errors],
+        "warnings": [finding(r) for r in report.warnings],
+        "checked": len(report.results),
+    }
+
+
 @router.post(
     "/{assembly_id}/validate-parameters/",
     response_model=ParameterValidationResponse,

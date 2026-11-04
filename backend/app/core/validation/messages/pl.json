@@ -1775,5 +1775,47 @@
       "fail": "Wynik to {result}, ale niezaliczonych pozycji listy kontrolnej: {count}.",
       "suggestion": "Popraw wynik lub sprawdź niezaliczone pozycje."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "Pozycja {label} występuje więcej niż raz i jest liczona podwójnie.",
+      "suggestion": "Zostaw jeden wiersz, sumując ilości, albo usuń duplikat."
+    },
+    "burden_high": {
+      "fail": "Narzuty procentowe sumują się do {percent} % stawki podstawowej, powyżej zwykłych {limit} %.",
+      "suggestion": "Sprawdź wiersze składek, ubezpieczenia i urlopów pod kątem przesuniętego przecinka lub narzutu policzonego dwa razy."
+    },
+    "empty_assembly": {
+      "fail": "Zestawienie {code} nie ma składników lub ma cenę zero, więc pozycja zostałaby wyceniona na zero.",
+      "suggestion": "Dodaj wycenione składniki, zanim zastosujesz zestawienie w kosztorysie."
+    },
+    "unit_mismatch": {
+      "fail": "Jednostka {unit} nie pasuje do tego pomiaru: odległość w jednostkach długości, powierzchnia w jednostkach powierzchni, liczba w sztukach.",
+      "suggestion": "Popraw jednostkę lub typ znacznika, zanim ilość trafi do kosztorysu."
+    },
+    "link_without_measurement": {
+      "fail": "Ten znacznik nie ma zmierzonej wartości, więc nie ma ilości do powiązania z pozycją.",
+      "suggestion": "Zmierz element znacznikiem odległości, powierzchni lub liczby, a potem go powiąż."
+    },
+    "scale_unit_not_length": {
+      "fail": "Skala jest skalibrowana w {unit}, a to nie jest jednostka długości.",
+      "suggestion": "Skalibruj na znanej odległości, na przykład w metrach."
+    },
+    "measurement_without_scale": {
+      "fail": "Ta strona nie ma skalibrowanej skali, więc zmierzona wartość jest niepewna.",
+      "suggestion": "Skalibruj skalę strony na znanej odległości."
+    },
+    "unallocated_share": {
+      "fail": "{share} % kosztów bezpośrednich ({count} pozycji) nie ma użytecznego elementu NRM 1.",
+      "suggestion": "Przypisz te pozycje do elementu NRM 1, aby podział na elementy był kompletny."
+    },
+    "gifa_missing": {
+      "fail": "Nie podano powierzchni całkowitej, więc nie można pokazać kosztu za m2.",
+      "suggestion": "Wpisz powierzchnię w projekcie lub dla tego odczytu."
+    },
+    "markup_load": {
+      "fail": "Narzuty sumują się do {percent} % kosztów bezpośrednich.",
+      "suggestion": "Sprawdź wiersze kosztów ogólnych, zysku, ryzyka i waloryzacji pod kątem procentu wpisanego jako kwota lub policzonego dwa razy."
+    }
   }
 }

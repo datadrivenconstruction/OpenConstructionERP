@@ -194,3 +194,7 @@ class CostPlanResponse(BaseModel):
         default=0, description="Positions placed through a parent section's code rather than their own."
     )
     warnings: list[str] = Field(default_factory=list, description="Stable warning keys the UI translates.")
+    findings: list[dict] = Field(
+        default_factory=list,
+        description="Non-blocking findings of the cost plan rules, worded in the caller's language.",
+    )

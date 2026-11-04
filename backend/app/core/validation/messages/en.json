@@ -1775,5 +1775,47 @@
       "fail": "The result is {result}, but {count} checklist items failed.",
       "suggestion": "Correct the result, or review the failed checklist items."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} is listed more than once, so it is counted twice.",
+      "suggestion": "Keep one line and add the quantities, or remove the duplicate."
+    },
+    "burden_high": {
+      "fail": "The percentage on-costs add up to {percent} % of the base wage, above the usual {limit} %.",
+      "suggestion": "Check the social charges, insurance and holiday pay lines for a misplaced decimal point or a charge counted twice."
+    },
+    "empty_assembly": {
+      "fail": "Assembly {code} has no components or a zero rate, so it would price the position at zero.",
+      "suggestion": "Add priced components to the assembly before applying it to a bill."
+    },
+    "unit_mismatch": {
+      "fail": "The unit {unit} does not fit this measurement: a distance is in length units, an area in area units, a count in pieces.",
+      "suggestion": "Correct the unit or the markup type before the quantity goes to a bill."
+    },
+    "link_without_measurement": {
+      "fail": "This markup has no measured value, so there is no quantity to link to the bill position.",
+      "suggestion": "Measure the item with a distance, area or count markup, then link it."
+    },
+    "scale_unit_not_length": {
+      "fail": "The scale is calibrated in {unit}, which is not a length.",
+      "suggestion": "Calibrate against a known distance, for example metres or feet."
+    },
+    "measurement_without_scale": {
+      "fail": "This page has no calibrated scale, so the measured value is not reliable.",
+      "suggestion": "Calibrate the scale of the page against a known distance."
+    },
+    "unallocated_share": {
+      "fail": "{share} % of the direct cost ({count} positions) has no usable NRM 1 element.",
+      "suggestion": "Code these positions to an NRM 1 element so the elemental split is complete."
+    },
+    "gifa_missing": {
+      "fail": "No gross internal floor area is stated, so the cost per m2 cannot be shown.",
+      "suggestion": "Enter the floor area on the project or for this reading."
+    },
+    "markup_load": {
+      "fail": "The markups add up to {percent} % of the direct cost.",
+      "suggestion": "Check the overhead, profit, risk and escalation lines for a percentage entered as an amount or counted twice."
+    }
   }
 }

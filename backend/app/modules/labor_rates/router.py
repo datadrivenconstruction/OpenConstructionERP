@@ -119,7 +119,9 @@ async def create_template(
 ) -> TemplateResponse:
     """Create a labor rate template with its on-cost components."""
     template = await service.create_template(data, owner_id=_uuid_or_none(user_id))
-    return service.to_template_response(template)
+    created = service.to_template_response(template)
+    created.warnings = service.warnings
+    return created
 
 
 @router.get(
@@ -168,7 +170,9 @@ async def update_template(
     """Update a template; a provided ``components`` list replaces the old one."""
     template = await _load_owned_template(service, template_id, user_id, payload)
     updated = await service.update_template(template, data)
-    return service.to_template_response(updated)
+    result = service.to_template_response(updated)
+    result.warnings = service.warnings
+    return result
 
 
 @router.delete(

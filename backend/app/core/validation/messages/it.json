@@ -1775,5 +1775,47 @@
       "fail": "Il risultato è {result}, ma {count} voci della checklist non sono superate.",
       "suggestion": "Correggere il risultato o rivedere le voci non superate."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} compare più volte e viene quindi contata due volte.",
+      "suggestion": "Tenere una sola riga sommando le quantità, oppure eliminare il duplicato."
+    },
+    "burden_high": {
+      "fail": "Gli oneri percentuali sommano il {percent} % della paga base, oltre il consueto {limit} %.",
+      "suggestion": "Controllare le righe di oneri sociali, assicurazione e ferie: virgola spostata o onere contato due volte."
+    },
+    "empty_assembly": {
+      "fail": "La lavorazione composta {code} non ha componenti o ha prezzo zero: la voce sarebbe valutata a zero.",
+      "suggestion": "Aggiungere componenti valorizzati prima di applicare la lavorazione a un computo."
+    },
+    "unit_mismatch": {
+      "fail": "L'unità {unit} non è adatta a questa misura: una distanza si esprime in unità di lunghezza, un'area in unità di superficie, un conteggio in pezzi.",
+      "suggestion": "Correggere l'unità o il tipo di annotazione prima che la quantità passi al computo."
+    },
+    "link_without_measurement": {
+      "fail": "Questa annotazione non ha un valore misurato: non c'è quantità da collegare alla voce.",
+      "suggestion": "Misurare l'elemento con un'annotazione di distanza, area o conteggio, poi collegarla."
+    },
+    "scale_unit_not_length": {
+      "fail": "La scala è tarata in {unit}, che non è una lunghezza.",
+      "suggestion": "Tarare su una distanza nota, per esempio in metri."
+    },
+    "measurement_without_scale": {
+      "fail": "Questa pagina non ha una scala tarata, quindi il valore misurato non è affidabile.",
+      "suggestion": "Tarare la scala della pagina su una distanza nota."
+    },
+    "unallocated_share": {
+      "fail": "Il {share} % del costo diretto ({count} voci) non ha un elemento NRM 1 utilizzabile.",
+      "suggestion": "Assegnare queste voci a un elemento NRM 1 per completare la ripartizione per elementi."
+    },
+    "gifa_missing": {
+      "fail": "Non è indicata la superficie lorda, quindi il costo al m2 non può essere mostrato.",
+      "suggestion": "Inserire la superficie nel progetto o per questa lettura."
+    },
+    "markup_load": {
+      "fail": "Le maggiorazioni sommano il {percent} % del costo diretto.",
+      "suggestion": "Controllare le righe di spese generali, utile, rischio e revisione prezzi: percentuale inserita come importo o contata due volte."
+    }
   }
 }

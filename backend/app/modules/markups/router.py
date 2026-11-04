@@ -114,6 +114,7 @@ def _markup_to_response(item: object, names: dict[str, str] | None = None) -> Ma
         created_by=item.created_by,  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
+        warnings=getattr(item, "rule_warnings", []),
     )
 
 

@@ -1775,5 +1775,47 @@
       "fail": "结果为 {result}，但有 {count} 项检查清单未通过。",
       "suggestion": "请更正结果，或复核未通过的检查项。"
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} 被列出多次，因此会被重复计算。",
+      "suggestion": "保留一行并合并数量，或删除重复项。"
+    },
+    "burden_high": {
+      "fail": "按比例计取的附加费用合计为基本工资的 {percent} %，高于通常的 {limit} %。",
+      "suggestion": "请检查社保、保险和休假工资各行，是否有小数点错位或重复计取。"
+    },
+    "empty_assembly": {
+      "fail": "组合定额 {code} 没有组成项或单价为零，该清单项将按零计价。",
+      "suggestion": "将组合定额套用到工程量清单前，请先添加带单价的组成项。"
+    },
+    "unit_mismatch": {
+      "fail": "单位 {unit} 与此次量测不符：距离应使用长度单位，面积使用面积单位，计数使用件数。",
+      "suggestion": "在数量进入清单之前，请更正单位或标注类型。"
+    },
+    "link_without_measurement": {
+      "fail": "此标注没有量测值，因此没有可关联到清单项的数量。",
+      "suggestion": "请先用距离、面积或计数标注量测该构件，再进行关联。"
+    },
+    "scale_unit_not_length": {
+      "fail": "比例尺以 {unit} 校准，而它不是长度单位。",
+      "suggestion": "请按已知距离校准，例如以米为单位。"
+    },
+    "measurement_without_scale": {
+      "fail": "此页面没有已校准的比例尺，量测值不可靠。",
+      "suggestion": "请按已知距离校准该页面的比例尺。"
+    },
+    "unallocated_share": {
+      "fail": "{share} % 的直接费用（{count} 个清单项）没有可用的 NRM 1 要素。",
+      "suggestion": "请将这些清单项归入 NRM 1 要素，使按要素的划分完整。"
+    },
+    "gifa_missing": {
+      "fail": "未填写建筑面积，因此无法显示每平方米造价。",
+      "suggestion": "请在项目中或为本次查看输入面积。"
+    },
+    "markup_load": {
+      "fail": "各项加成合计为直接费用的 {percent} %。",
+      "suggestion": "请检查管理费、利润、风险和价差各行，是否把百分比误按金额输入或重复计取。"
+    }
   }
 }

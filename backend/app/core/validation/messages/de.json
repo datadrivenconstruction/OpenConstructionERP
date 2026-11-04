@@ -1775,5 +1775,47 @@
       "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte wurden nicht bestanden.",
       "suggestion": "Ergebnis korrigieren oder die nicht bestandenen Prüfpunkte kontrollieren."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} ist mehrfach aufgeführt und wird daher doppelt gezählt.",
+      "suggestion": "Eine Zeile behalten und die Mengen addieren oder das Duplikat entfernen."
+    },
+    "burden_high": {
+      "fail": "Die prozentualen Lohnnebenkosten summieren sich auf {percent} % des Grundlohns, über den üblichen {limit} %.",
+      "suggestion": "Zeilen für Sozialabgaben, Versicherung und Urlaubslohn auf ein verrutschtes Komma oder doppelt erfasste Zuschläge prüfen."
+    },
+    "empty_assembly": {
+      "fail": "Die Baugruppe {code} hat keine Komponenten oder einen Preis von null; die Position würde mit null bewertet.",
+      "suggestion": "Bewertete Komponenten ergänzen, bevor die Baugruppe in ein Leistungsverzeichnis übernommen wird."
+    },
+    "unit_mismatch": {
+      "fail": "Die Einheit {unit} passt nicht zu dieser Messung: Strecken in Längeneinheiten, Flächen in Flächeneinheiten, Anzahl in Stück.",
+      "suggestion": "Einheit oder Markierungstyp korrigieren, bevor die Menge ins Leistungsverzeichnis geht."
+    },
+    "link_without_measurement": {
+      "fail": "Diese Markierung hat keinen Messwert, daher gibt es keine Menge für die Position.",
+      "suggestion": "Das Element mit einer Strecken-, Flächen- oder Zählmarkierung messen und dann verknüpfen."
+    },
+    "scale_unit_not_length": {
+      "fail": "Der Maßstab ist in {unit} kalibriert, das ist keine Länge.",
+      "suggestion": "An einer bekannten Strecke kalibrieren, zum Beispiel in Metern."
+    },
+    "measurement_without_scale": {
+      "fail": "Diese Seite hat keinen kalibrierten Maßstab, der Messwert ist daher nicht verlässlich.",
+      "suggestion": "Den Maßstab der Seite an einer bekannten Strecke kalibrieren."
+    },
+    "unallocated_share": {
+      "fail": "{share} % der Herstellkosten ({count} Positionen) haben kein verwendbares NRM-1-Element.",
+      "suggestion": "Diese Positionen einem NRM-1-Element zuordnen, damit die Gliederung nach Elementen vollständig ist."
+    },
+    "gifa_missing": {
+      "fail": "Es ist keine Brutto-Grundfläche angegeben, daher lassen sich die Kosten je m2 nicht zeigen.",
+      "suggestion": "Die Grundfläche am Projekt oder für diese Auswertung eingeben."
+    },
+    "markup_load": {
+      "fail": "Die Zuschläge summieren sich auf {percent} % der Herstellkosten.",
+      "suggestion": "Gemeinkosten-, Gewinn-, Wagnis- und Preisgleitungszeilen auf einen als Betrag erfassten Prozentsatz oder Doppelerfassung prüfen."
+    }
   }
 }

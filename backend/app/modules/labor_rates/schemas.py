@@ -231,6 +231,8 @@ class TemplateResponse(BaseModel):
     all_in_rate: Decimal = Decimal("0")
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
     @field_serializer("base_wage", "all_in_rate", when_used="json")
     def _ser(self, v: Decimal) -> str | None:
@@ -283,6 +285,7 @@ class CrewResponse(BaseModel):
     total_cost_per_hour: Decimal = Decimal("0")
     blended_hourly_rate: Decimal = Decimal("0")
     members: list[CrewMemberOut] = Field(default_factory=list)
+    warnings: list[dict] = Field(default_factory=list)
 
     @field_serializer("total_cost_per_hour", "blended_hourly_rate", when_used="json")
     def _ser(self, v: Decimal) -> str | None:

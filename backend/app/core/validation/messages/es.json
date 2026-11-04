@@ -1775,5 +1775,47 @@
       "fail": "El resultado es {result}, pero {count} puntos de la lista de control no cumplen.",
       "suggestion": "Corrija el resultado o revise los puntos que no cumplen."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} aparece más de una vez, por lo que se cuenta dos veces.",
+      "suggestion": "Conserve una sola línea sumando las cantidades, o elimine el duplicado."
+    },
+    "burden_high": {
+      "fail": "Los costes indirectos porcentuales suman un {percent} % del salario base, por encima del {limit} % habitual.",
+      "suggestion": "Revise las líneas de cargas sociales, seguros y vacaciones: coma desplazada o cargo contado dos veces."
+    },
+    "empty_assembly": {
+      "fail": "El precio descompuesto {code} no tiene componentes o su precio es cero; la partida quedaría valorada en cero.",
+      "suggestion": "Añada componentes valorados antes de aplicar el precio descompuesto a un presupuesto."
+    },
+    "unit_mismatch": {
+      "fail": "La unidad {unit} no corresponde a esta medición: una distancia va en unidades de longitud, una superficie en unidades de superficie, un recuento en piezas.",
+      "suggestion": "Corrija la unidad o el tipo de anotación antes de que la cantidad pase al presupuesto."
+    },
+    "link_without_measurement": {
+      "fail": "Esta anotación no tiene valor medido, por lo que no hay cantidad que vincular a la partida.",
+      "suggestion": "Mida el elemento con una anotación de distancia, área o recuento y luego vincúlela."
+    },
+    "scale_unit_not_length": {
+      "fail": "La escala está calibrada en {unit}, que no es una longitud.",
+      "suggestion": "Calibre sobre una distancia conocida, por ejemplo en metros."
+    },
+    "measurement_without_scale": {
+      "fail": "Esta página no tiene escala calibrada, por lo que el valor medido no es fiable.",
+      "suggestion": "Calibre la escala de la página sobre una distancia conocida."
+    },
+    "unallocated_share": {
+      "fail": "El {share} % del coste directo ({count} partidas) no tiene un elemento NRM 1 utilizable.",
+      "suggestion": "Asigne estas partidas a un elemento NRM 1 para completar el desglose por elementos."
+    },
+    "gifa_missing": {
+      "fail": "No se indica la superficie construida, por lo que no se puede mostrar el coste por m2.",
+      "suggestion": "Introduzca la superficie en el proyecto o para esta lectura."
+    },
+    "markup_load": {
+      "fail": "Los recargos suman un {percent} % del coste directo.",
+      "suggestion": "Revise las líneas de gastos generales, beneficio, riesgo y revisión de precios: porcentaje introducido como importe o contado dos veces."
+    }
   }
 }

@@ -1775,5 +1775,47 @@
       "fail": "Sonuç {result}, ancak kontrol listesindeki {count} madde uygun bulunmadı.",
       "suggestion": "Sonucu düzeltin veya uygun bulunmayan maddeleri inceleyin."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} birden fazla kez listelenmiş ve bu yüzden iki kez sayılıyor.",
+      "suggestion": "Miktarları toplayarak tek satır bırakın veya yinelenen satırı silin."
+    },
+    "burden_high": {
+      "fail": "Yüzdelik ek maliyetler temel ücretin %{percent} oranına ulaşıyor, olağan %{limit} düzeyinin üstünde.",
+      "suggestion": "Sosyal güvenlik, sigorta ve yıllık izin satırlarında kayık virgül veya iki kez hesaplanmış kalem olup olmadığını kontrol edin."
+    },
+    "empty_assembly": {
+      "fail": "{code} birleşik imalatında bileşen yok ya da birim fiyat sıfır; poz sıfır bedelle fiyatlanırdı.",
+      "suggestion": "İmalatı metraj cetveline uygulamadan önce fiyatlı bileşenler ekleyin."
+    },
+    "unit_mismatch": {
+      "fail": "{unit} birimi bu ölçüme uymuyor: mesafe uzunluk birimiyle, alan alan birimiyle, adet parça olarak verilir.",
+      "suggestion": "Miktar metraja geçmeden önce birimi veya işaret türünü düzeltin."
+    },
+    "link_without_measurement": {
+      "fail": "Bu işaretin ölçülmüş değeri yok, pozla ilişkilendirilecek miktar bulunmuyor.",
+      "suggestion": "Öğeyi mesafe, alan veya adet işaretiyle ölçün, sonra ilişkilendirin."
+    },
+    "scale_unit_not_length": {
+      "fail": "Ölçek, uzunluk olmayan {unit} cinsinden kalibre edilmiş.",
+      "suggestion": "Bilinen bir mesafeye göre, örneğin metre cinsinden kalibre edin."
+    },
+    "measurement_without_scale": {
+      "fail": "Bu sayfada kalibre edilmiş ölçek yok, ölçülen değer güvenilir değil.",
+      "suggestion": "Sayfanın ölçeğini bilinen bir mesafeye göre kalibre edin."
+    },
+    "unallocated_share": {
+      "fail": "Doğrudan maliyetin %{share} oranı ({count} poz) kullanılabilir bir NRM 1 öğesine bağlı değil.",
+      "suggestion": "Öğe bazlı dağılım tamamlansın diye bu pozları bir NRM 1 öğesine atayın."
+    },
+    "gifa_missing": {
+      "fail": "Brüt kat alanı belirtilmemiş, bu yüzden m2 başına maliyet gösterilemiyor.",
+      "suggestion": "Alanı projede veya bu görünüm için girin."
+    },
+    "markup_load": {
+      "fail": "Ek oranlar doğrudan maliyetin %{percent} düzeyine ulaşıyor.",
+      "suggestion": "Genel gider, kâr, risk ve fiyat farkı satırlarında tutar olarak girilmiş veya iki kez sayılmış bir yüzde olup olmadığını kontrol edin."
+    }
   }
 }

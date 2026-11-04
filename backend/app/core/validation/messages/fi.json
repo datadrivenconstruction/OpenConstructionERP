@@ -1775,5 +1775,47 @@
       "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa hylättiin.",
       "suggestion": "Korjaa tulos tai tarkista hylätyt kohdat."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} on luettelossa useammin kuin kerran ja lasketaan siksi kahdesti.",
+      "suggestion": "Pidä yksi rivi ja laske määrät yhteen tai poista kaksoiskappale."
+    },
+    "burden_high": {
+      "fail": "Prosenttilisät ovat yhteensä {percent} % peruspalkasta, yli tavanomaisen {limit} %.",
+      "suggestion": "Tarkista sosiaaliturva-, vakuutus- ja lomakorvausrivit siirtyneen desimaalipilkun tai kahdesti lasketun lisän varalta."
+    },
+    "empty_assembly": {
+      "fail": "Yhdistelmäkustannuksella {code} ei ole komponentteja tai sen hinta on nolla, joten nimike hinnoiteltaisiin nollaksi.",
+      "suggestion": "Lisää hinnoitellut komponentit ennen kuin yhdistelmä otetaan kustannusarvioon."
+    },
+    "unit_mismatch": {
+      "fail": "Yksikkö {unit} ei sovi tähän mittaukseen: etäisyys pituusyksiköissä, pinta-ala pinta-alayksiköissä, lukumäärä kappaleina.",
+      "suggestion": "Korjaa yksikkö tai merkinnän tyyppi ennen kuin määrä siirtyy kustannusarvioon."
+    },
+    "link_without_measurement": {
+      "fail": "Merkinnällä ei ole mitattua arvoa, joten nimikkeeseen ei ole liitettävää määrää.",
+      "suggestion": "Mittaa kohde etäisyys-, pinta-ala- tai lukumäärämerkinnällä ja liitä se sitten."
+    },
+    "scale_unit_not_length": {
+      "fail": "Mittakaava on kalibroitu yksikössä {unit}, joka ei ole pituus.",
+      "suggestion": "Kalibroi tunnetun etäisyyden mukaan, esimerkiksi metreinä."
+    },
+    "measurement_without_scale": {
+      "fail": "Sivulla ei ole kalibroitua mittakaavaa, joten mitattu arvo ei ole luotettava.",
+      "suggestion": "Kalibroi sivun mittakaava tunnetun etäisyyden mukaan."
+    },
+    "unallocated_share": {
+      "fail": "{share} %:lla välittömistä kustannuksista ({count} nimikettä) ei ole käyttökelpoista NRM 1 -elementtiä.",
+      "suggestion": "Liitä nimikkeet NRM 1 -elementtiin, jotta elementtijako on täydellinen."
+    },
+    "gifa_missing": {
+      "fail": "Bruttoalaa ei ole ilmoitettu, joten kustannusta neliömetriä kohti ei voi näyttää.",
+      "suggestion": "Syötä ala hankkeelle tai tähän tarkasteluun."
+    },
+    "markup_load": {
+      "fail": "Lisät ovat yhteensä {percent} % välittömistä kustannuksista.",
+      "suggestion": "Tarkista yleiskustannus-, voitto-, riski- ja hintatasonmuutosrivit prosentin varalta, joka on syötetty summana tai laskettu kahdesti."
+    }
   }
 }

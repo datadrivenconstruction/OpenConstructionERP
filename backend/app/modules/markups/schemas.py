@@ -140,6 +140,8 @@ class MarkupResponse(BaseModel):
     created_by: str = ""
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings of the write that produced this response.
+    warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class MarkupBulkCreate(BaseModel):

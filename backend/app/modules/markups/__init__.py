@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.markups.permissions import register_markups_permissions
 
     register_markups_permissions()
+    from app.modules.markups.validators import register_markups_validation_rules
+
+    register_markups_validation_rules()

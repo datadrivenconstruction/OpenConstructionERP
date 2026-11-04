@@ -1775,5 +1775,47 @@
       "fail": "Rezultatul este {result}, dar {count} puncte din lista de verificare nu sunt conforme.",
       "suggestion": "Corectați rezultatul sau revizuiți punctele neconforme."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} apare de mai multe ori și este numărată de două ori.",
+      "suggestion": "Păstrați un singur rând însumând cantitățile sau eliminați duplicatul."
+    },
+    "burden_high": {
+      "fail": "Cheltuielile procentuale însumează {percent} % din salariul de bază, peste uzualul {limit} %.",
+      "suggestion": "Verificați rândurile de contribuții sociale, asigurare și concediu: virgulă mutată sau cheltuială numărată de două ori."
+    },
+    "empty_assembly": {
+      "fail": "Rețeta {code} nu are componente sau are preț zero, deci articolul ar fi evaluat la zero.",
+      "suggestion": "Adăugați componente cu preț înainte de a aplica rețeta într-un deviz."
+    },
+    "unit_mismatch": {
+      "fail": "Unitatea {unit} nu se potrivește acestei măsurători: distanța se exprimă în unități de lungime, suprafața în unități de suprafață, numărul în bucăți.",
+      "suggestion": "Corectați unitatea sau tipul de marcaj înainte ca cantitatea să ajungă în deviz."
+    },
+    "link_without_measurement": {
+      "fail": "Acest marcaj nu are valoare măsurată, deci nu există cantitate de legat de articol.",
+      "suggestion": "Măsurați elementul cu un marcaj de distanță, suprafață sau număr, apoi legați-l."
+    },
+    "scale_unit_not_length": {
+      "fail": "Scara este calibrată în {unit}, care nu este o lungime.",
+      "suggestion": "Calibrați pe o distanță cunoscută, de exemplu în metri."
+    },
+    "measurement_without_scale": {
+      "fail": "Această pagină nu are scară calibrată, deci valoarea măsurată nu este sigură.",
+      "suggestion": "Calibrați scara paginii pe o distanță cunoscută."
+    },
+    "unallocated_share": {
+      "fail": "{share} % din costul direct ({count} articole) nu are un element NRM 1 utilizabil.",
+      "suggestion": "Atribuiți aceste articole unui element NRM 1 pentru ca defalcarea pe elemente să fie completă."
+    },
+    "gifa_missing": {
+      "fail": "Nu este indicată suprafața desfășurată, deci costul pe m2 nu poate fi afișat.",
+      "suggestion": "Introduceți suprafața în proiect sau pentru această citire."
+    },
+    "markup_load": {
+      "fail": "Majorările însumează {percent} % din costul direct.",
+      "suggestion": "Verificați rândurile de regie, profit, risc și actualizare: procent introdus ca sumă sau numărat de două ori."
+    }
   }
 }
