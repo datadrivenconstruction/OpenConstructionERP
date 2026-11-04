@@ -230,6 +230,12 @@ IGNORE_QUALIFIED_MONEY: set[str] = {
     # (``0.6*coverage + 0.4*cost_weight``), never summed into a ledger or shown
     # as currency, so float is correct. The word "cost" trips the money regex.
     "cost_explorer.ByResourcesMatch.cost_weight",
+    # Benchmark cost per m2 of a BOQ template (sum of rate x qty_factor over a unit area): an
+    # indicative figure for choosing a template, not a ledger amount; float is enough.
+    "boq.TemplateInfo.avg_cost_per_m2",
+    # Measured quantity of the budget line in a bid comparison row (the word "budget" trips the
+    # money regex); it mirrors BidLineItem.quantity and is not a price.
+    "tendering.BidComparisonRow.budget_quantity",
 }
 
 

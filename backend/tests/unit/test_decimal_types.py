@@ -22,9 +22,9 @@ def test_rejects_non_finite_and_overflow(bad):
         _M(a=bad)
 
 
-def test_accepts_boundary_and_extra_fraction():
+def test_accepts_boundary_and_rounds_extra_fraction():
     assert _M(a="9999999999999999.99").a == Decimal("9999999999999999.99")
-    assert _M(a="1.123456789").a == Decimal("1.123456789")
+    assert _M(a="1.123456789").a == Decimal("1.12")
     assert _M(a="-5").a == Decimal("-5")
 
 
@@ -65,3 +65,45 @@ def test_field_level_gt_lt_are_not_shadowed():
         with pytest.raises(ValidationError):
             _G(**bad)
     assert _G(a=1, b=4, c=None).b == 4
+
+
+class _Q(BaseModel):
+    qty: finite_decimal(18, 2)
+    pct: finite_decimal(5, 2, non_negative=True)
+    delta: finite_decimal(10, 2)
+    raw: FiniteDecimal = Decimal("0")
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("1.125", "1.13"), ("-1.125", "-1.13"), ("2.994", "2.99"), ("0.005", "0.01"), ("7", "7"), (1.5, "1.5")],
+)
+def test_extra_fraction_is_rounded_half_up_not_rejected(raw, expected):
+    assert _Q(qty=raw, pct=1, delta=raw).qty == Decimal(expected)
+    assert _Q(qty=raw, pct=1, delta=raw).delta == Decimal(expected)
+
+
+def test_percentage_with_three_decimals_is_accepted_and_rounded():
+    assert _Q(qty=1, pct="12.345", delta=0).pct == Decimal("12.35")
+
+
+def test_rounding_up_into_overflow_is_rejected():
+    with pytest.raises(ValidationError):
+        _Q(qty=1, pct="999.995", delta=0)
+    assert _Q(qty=1, pct="999.994", delta=0).pct == Decimal("999.99")
+
+
+def test_giant_exponent_is_rejected_not_crashing():
+    with pytest.raises(ValidationError):
+        _Q(qty="1e999999", pct=1, delta=0)
+
+
+def test_signed_fields_keep_negatives_and_non_negative_rejects_them():
+    assert _Q(qty="-5.5", pct=0, delta="-0.004").delta == Decimal("0.00")
+    assert _Q(qty=1, pct=0, delta="-250.25").delta == Decimal("-250.25")
+    with pytest.raises(ValidationError):
+        _Q(qty=1, pct="-0.01", delta=0)
+
+
+def test_column_less_generic_type_keeps_all_digits():
+    assert _Q(qty=1, pct=0, delta=0, raw="1.123456789012").raw == Decimal("1.123456789012")
