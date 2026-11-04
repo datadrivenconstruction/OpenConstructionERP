@@ -117,6 +117,7 @@ class RateLimiter:
         self.window_seconds = window_seconds
         self._requests: dict[str, list[float]] = defaultdict(list)
         self._lock = Lock()
+        self._next_sweep = 0.0
 
     def is_allowed(self, key: str, max_requests: int | None = None) -> tuple[bool, int]:
         """Check if request is allowed. Returns (allowed, remaining).
@@ -127,6 +128,12 @@ class RateLimiter:
         limit = self.max_requests if max_requests is None else max_requests
         now = time.time()
         with self._lock:
+            # Keys minted from caller input (random tokens) are never revisited, so drop idle ones.
+            if now >= self._next_sweep:
+                self._next_sweep = now + self.window_seconds
+                cutoff = now - self.window_seconds
+                for k in [k for k, v in self._requests.items() if not v or v[-1] <= cutoff]:
+                    del self._requests[k]
             # Clean old entries
             self._requests[key] = [t for t in self._requests[key] if t > now - self.window_seconds]
 
