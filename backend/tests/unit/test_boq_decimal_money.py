@@ -110,3 +110,9 @@ def test_three_decimal_quantity_and_large_rate() -> None:
     from app.modules.boq.service import _resource_line_total
 
     assert _resource_line_total("1234.567", "98765432.1") == Decimal("121932543211.4007")
+
+
+@pytest.mark.parametrize("rate", ["1e30", "123456789012345678901234567890.5"])
+def test_snapshot_huge_rate_does_not_raise(rate: str) -> None:
+    meta = _stamp_variant_snapshot(_meta(), unit_rate=rate, currency="EUR")
+    assert meta["variant_snapshot"]["rate"] == pytest.approx(float(rate))
