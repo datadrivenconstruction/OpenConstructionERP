@@ -161,7 +161,9 @@ def downgrade() -> None:
         have = _columns(_KEY)
         with op.batch_alter_table(_KEY) as batch:
             if "rotated_from_id" in have:
-                batch.drop_constraint(_KEY_FK, type_="foreignkey")
+                # create_all installs carry the FK under an auto-generated name; dropping the column removes it.
+                if any(fk["name"] == _KEY_FK for fk in sa.inspect(op.get_bind()).get_foreign_keys(_KEY)):
+                    batch.drop_constraint(_KEY_FK, type_="foreignkey")
                 batch.drop_column("rotated_from_id")
             for col in ("request_count", "allowed_cidrs", "rate_limit_per_min"):
                 if col in have:

@@ -132,6 +132,7 @@ _MIGRATION_ENV_TAG: str = "37efb59ad47d364e"
 
 # Core models (not in modules/)
 from app.core import audit as _audit_core  # noqa: F401, E402
+from app.core import event_effect as _event_effect_core  # noqa: F401, E402
 from app.database import Base  # noqa: E402
 from app.modules.ai import models as _ai  # noqa: F401, E402
 from app.modules.assemblies import models as _asm  # noqa: F401, E402
