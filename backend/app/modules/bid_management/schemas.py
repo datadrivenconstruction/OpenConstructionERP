@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal8_4, Decimal18_2, Decimal18_4, FiniteDecimal
+
 # ── BidPackage ────────────────────────────────────────────────────────────
 
 _PACKAGE_STATUS = r"^(draft|published|open|closed|cancelled|awarded)$"
@@ -41,7 +43,7 @@ class BidPackageCreate(BaseModel):
     submission_deadline: str | None = Field(default=None, max_length=40)
     decision_due_by: str | None = Field(default=None, max_length=40)
     currency: str = Field(..., min_length=1, max_length=10)
-    total_budget_estimate: Decimal = Decimal("0")
+    total_budget_estimate: Decimal18_2 = Decimal("0")
     status: str = Field(default="draft", pattern=_PACKAGE_STATUS)
     confidentiality_level: str = Field(default="limited", pattern=_CONFIDENTIALITY)
     package_type: str = Field(default="subcontract", pattern=_PACKAGE_TYPE)
@@ -62,7 +64,7 @@ class BidPackageUpdate(BaseModel):
     submission_deadline: str | None = Field(default=None, max_length=40)
     decision_due_by: str | None = Field(default=None, max_length=40)
     currency: str | None = Field(default=None, max_length=10)
-    total_budget_estimate: Decimal | None = None
+    total_budget_estimate: Decimal18_2 | None = None
     status: str | None = Field(default=None, pattern=_PACKAGE_STATUS)
     confidentiality_level: str | None = Field(default=None, pattern=_CONFIDENTIALITY)
     package_type: str | None = Field(default=None, pattern=_PACKAGE_TYPE)
@@ -111,7 +113,7 @@ class BidPackageLineItemCreate(BaseModel):
     code: str = Field(default="", max_length=64)
     description: str = ""
     unit: str = Field(default="", max_length=20)
-    quantity: Decimal = Decimal("0")
+    quantity: Decimal18_4 = Decimal("0")
     alternative_allowed: bool = False
     order_index: int = 0
     parent_line_id: UUID | None = None
@@ -128,7 +130,7 @@ class BidPackageLineItemUpdate(BaseModel):
     code: str | None = Field(default=None, max_length=64)
     description: str | None = None
     unit: str | None = Field(default=None, max_length=20)
-    quantity: Decimal | None = None
+    quantity: Decimal18_4 | None = None
     alternative_allowed: bool | None = None
     order_index: int | None = None
     parent_line_id: UUID | None = None
@@ -298,7 +300,7 @@ class BidSubmissionCreate(BaseModel):
     invitation_id: UUID
     bidder_id: UUID
     submitted_at: str | None = Field(default=None, max_length=40)
-    total_amount: Decimal = Decimal("0")
+    total_amount: Decimal18_2 = Decimal("0")
     currency: str = Field(default="", max_length=10)
     notes_to_owner: str = ""
     exclusions: list[str] = Field(default_factory=list)
@@ -312,7 +314,7 @@ class BidSubmissionUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     submitted_at: str | None = Field(default=None, max_length=40)
-    total_amount: Decimal | None = None
+    total_amount: Decimal18_2 | None = None
     currency: str | None = Field(default=None, max_length=10)
     notes_to_owner: str | None = None
     exclusions: list[str] | None = None
@@ -355,8 +357,8 @@ class BidSubmissionLineCreate(BaseModel):
 
     submission_id: UUID
     line_item_id: UUID
-    unit_price: Decimal = Decimal("0")
-    quantity_priced: Decimal = Decimal("0")
+    unit_price: Decimal18_4 = Decimal("0")
+    quantity_priced: Decimal18_4 = Decimal("0")
     alternative_offered: bool = False
     alternative_description: str = ""
     comment: str = ""
@@ -369,8 +371,8 @@ class BidSubmissionLineUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    unit_price: Decimal | None = None
-    quantity_priced: Decimal | None = None
+    unit_price: Decimal18_4 | None = None
+    quantity_priced: Decimal18_4 | None = None
     alternative_offered: bool | None = None
     alternative_description: str | None = None
     comment: str | None = None
@@ -599,7 +601,7 @@ class BidAwardCreate(BaseModel):
 
     package_id: UUID
     awarded_bidder_id: UUID
-    awarded_amount: Decimal = Decimal("0")
+    awarded_amount: Decimal18_2 = Decimal("0")
     currency: str = Field(default="", max_length=10)
     decision_summary: str = ""
     decision_signed_by: str | None = Field(default=None, max_length=36)
@@ -612,7 +614,7 @@ class BidAwardUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    awarded_amount: Decimal | None = None
+    awarded_amount: Decimal18_2 | None = None
     currency: str | None = Field(default=None, max_length=10)
     decision_summary: str | None = None
     decision_signed_by: str | None = Field(default=None, max_length=36)
@@ -729,9 +731,9 @@ class LevelingMatrixCell(BaseModel):
 
     bidder_id: UUID
     company_name: str = ""
-    unit_price: Decimal = Decimal("0")
-    quantity_priced: Decimal = Decimal("0")
-    total_price: Decimal = Decimal("0")
+    unit_price: Decimal18_4 = Decimal("0")
+    quantity_priced: Decimal18_4 = Decimal("0")
+    total_price: Decimal18_2 = Decimal("0")
     inclusion_status: str = "included"
     alternative_offered: bool = False
     comment: str = ""
@@ -746,7 +748,7 @@ class LevelingMatrixRow(BaseModel):
     line_item_code: str = ""
     description: str = ""
     unit: str = ""
-    quantity: Decimal = Decimal("0")
+    quantity: Decimal18_4 = Decimal("0")
     is_mandatory: bool = True
     cells: list[LevelingMatrixCell] = Field(default_factory=list)
     excluded_count: int = 0
@@ -770,9 +772,9 @@ class BidParityLineCell(BaseModel):
 
     bidder_id: UUID
     company_name: str = ""
-    unit_price: Decimal = Decimal("0")
+    unit_price: Decimal18_4 = Decimal("0")
     # Absolute deviation of this unit price from the line median, in percent.
-    deviation_pct: Decimal = Decimal("0")
+    deviation_pct: FiniteDecimal = Decimal("0")
     # "above" / "below" / "at" the line median.
     direction: str = "at"
     is_outlier: bool = False
@@ -788,15 +790,15 @@ class BidParityLine(BaseModel):
     is_mandatory: bool = True
     # Number of competitive bids priced on this line (the median sample size).
     bid_count: int = 0
-    median_unit_price: Decimal | None = None
-    mean_unit_price: Decimal | None = None
-    min_unit_price: Decimal | None = None
-    max_unit_price: Decimal | None = None
-    spread: Decimal | None = None
-    spread_pct: Decimal | None = None
+    median_unit_price: FiniteDecimal | None = None
+    mean_unit_price: FiniteDecimal | None = None
+    min_unit_price: FiniteDecimal | None = None
+    max_unit_price: FiniteDecimal | None = None
+    spread: FiniteDecimal | None = None
+    spread_pct: FiniteDecimal | None = None
     # Coefficient of variation (std dev / mean) in percent.
-    cv_pct: Decimal | None = None
-    max_over_median: Decimal | None = None
+    cv_pct: FiniteDecimal | None = None
+    max_over_median: FiniteDecimal | None = None
     high_dispersion: bool = False
     outlier_count: int = 0
     cells: list[BidParityLineCell] = Field(default_factory=list)
@@ -808,8 +810,8 @@ class BidCostDriver(BaseModel):
     line_item_id: UUID
     line_item_code: str = ""
     description: str = ""
-    total_price: Decimal = Decimal("0")
-    contribution_pct: Decimal = Decimal("0")
+    total_price: Decimal18_2 = Decimal("0")
+    contribution_pct: FiniteDecimal = Decimal("0")
 
 
 class BidHealthCheck(BaseModel):
@@ -822,7 +824,7 @@ class BidHealthCheck(BaseModel):
     missing_mandatory_codes: list[str] = Field(default_factory=list)
     # "low" / "high" / "normal" against the sigma band of bid totals.
     abnormal_total: str = "normal"
-    consistency_score: Decimal = Decimal("0")
+    consistency_score: FiniteDecimal = Decimal("0")
     # "clean" / "review" / "attention".
     verdict: str = "clean"
     flags: list[str] = Field(default_factory=list)
@@ -833,7 +835,7 @@ class BidParityBid(BaseModel):
 
     bidder_id: UUID
     company_name: str = ""
-    bid_total: Decimal = Decimal("0")
+    bid_total: FiniteDecimal = Decimal("0")
     priced_line_count: int = 0
     cost_drivers: list[BidCostDriver] = Field(default_factory=list)
     health: BidHealthCheck
@@ -956,10 +958,10 @@ class SubcontractorScorecardCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     bidder_id: UUID
-    on_time_score: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    quality_score: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    safety_score: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
-    commercial_score: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    on_time_score: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    quality_score: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    safety_score: FiniteDecimal = Field(default=Decimal("0"), ge=Decimal("0"))
+    commercial_score: Decimal8_4 = Field(default=Decimal("0"), ge=Decimal("0"))
     notes: str = ""
 
 

@@ -15,6 +15,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
+from app.core.decimal_types import Decimal7_4, Decimal18_4, FiniteDecimal
+
 
 def _plain(value: Decimal | None) -> str | None:
     return None if value is None else format(value, "f")
@@ -40,20 +42,20 @@ class GuaranteeBase(BaseModel):
     bank_reference: str | None = Field(default=None, max_length=120)
     beneficiary: str = Field(default="", max_length=255)
     applicant: str = Field(default="", max_length=255)
-    amount: Decimal = Field(default=Decimal("0"), ge=0)
+    amount: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
-    contract_value: Decimal | None = Field(default=None, ge=0)
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
+    contract_value: Decimal18_4 | None = Field(default=None, ge=0)
     issue_date: date | None = None
     expiry_date: date | None = None
     auto_extend: bool = False
     extension_months: int | None = Field(default=None, ge=1, le=120)
     claim_period_days: int | None = Field(default=None, ge=0, le=3650)
     defects_period_months: int | None = Field(default=None, ge=0, le=240)
-    advance_amount: Decimal | None = Field(default=None, ge=0)
-    advance_recovery_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    advance_amount: Decimal18_4 | None = Field(default=None, ge=0)
+    advance_recovery_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     replaces_cash_retention: bool = False
-    commission_rate_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    commission_rate_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     form_code: str | None = Field(default=None, max_length=60)
     contract_id: UUID | None = None
     subcontractor_id: UUID | None = None
@@ -81,20 +83,20 @@ class GuaranteeUpdate(BaseModel):
     bank_reference: str | None = Field(default=None, max_length=120)
     beneficiary: str | None = Field(default=None, max_length=255)
     applicant: str | None = Field(default=None, max_length=255)
-    amount: Decimal | None = Field(default=None, ge=0)
+    amount: Decimal18_4 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
-    percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
-    contract_value: Decimal | None = Field(default=None, ge=0)
+    percent_of_contract: Decimal7_4 | None = Field(default=None, ge=0, le=100)
+    contract_value: Decimal18_4 | None = Field(default=None, ge=0)
     issue_date: date | None = None
     expiry_date: date | None = None
     auto_extend: bool | None = None
     extension_months: int | None = Field(default=None, ge=1, le=120)
     claim_period_days: int | None = Field(default=None, ge=0, le=3650)
     defects_period_months: int | None = Field(default=None, ge=0, le=240)
-    advance_amount: Decimal | None = Field(default=None, ge=0)
-    advance_recovery_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    advance_amount: Decimal18_4 | None = Field(default=None, ge=0)
+    advance_recovery_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     replaces_cash_retention: bool | None = None
-    commission_rate_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    commission_rate_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     form_code: str | None = Field(default=None, max_length=60)
     contract_id: UUID | None = None
     subcontractor_id: UUID | None = None
@@ -110,14 +112,14 @@ class TransitionRequest(BaseModel):
 
     status: StatusLiteral
     new_expiry_date: date | None = None
-    new_amount: Decimal | None = Field(default=None, ge=0)
+    new_amount: FiniteDecimal | None = Field(default=None, ge=0)
     note: str | None = Field(default=None, max_length=2000)
 
 
 class AdvanceRecoveryRequest(BaseModel):
     """Advance recovered through one interim payment (reduces the advance guarantee)."""
 
-    recovered_amount: Decimal = Field(gt=0)
+    recovered_amount: FiniteDecimal = Field(gt=0)
     source: str | None = Field(default=None, max_length=60)
     source_id: str | None = Field(default=None, max_length=36)
     note: str | None = Field(default=None, max_length=2000)
@@ -214,7 +216,7 @@ class FacilityCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     bank_name: str = Field(min_length=1, max_length=255)
     currency: str = Field(min_length=3, max_length=3)
-    limit_amount: Decimal = Field(ge=0)
+    limit_amount: Decimal18_4 = Field(ge=0)
     expiry_date: date | None = None
     legal_entity_id: UUID | None = None
     notes: str | None = None
@@ -225,7 +227,7 @@ class FacilityUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=120)
     bank_name: str | None = Field(default=None, min_length=1, max_length=255)
-    limit_amount: Decimal | None = Field(default=None, ge=0)
+    limit_amount: Decimal18_4 | None = Field(default=None, ge=0)
     expiry_date: date | None = None
     notes: str | None = None
 

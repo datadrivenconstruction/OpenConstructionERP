@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import FiniteDecimal
+
 # ── R7 money serialization helper ───────────────────────────────────────
 #
 # Pydantic v2 serializes ``Decimal`` to a JSON *number* by default, which
@@ -153,7 +155,7 @@ class VariationRequestCreate(BaseModel):
     requested_at: str | None = Field(default=None, max_length=40)
     classification: str = Field(default="scope_change", pattern=_VR_CLASSIFICATION)
     urgency: str = Field(default="med", pattern=_VR_URGENCY)
-    estimated_cost_impact: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    estimated_cost_impact: FiniteDecimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     estimated_schedule_days: int = Field(default=0, ge=-3650, le=3650)
     currency: str = Field(default="", max_length=10)
     status: str = Field(default="draft", pattern=_VR_STATUS)
@@ -178,7 +180,7 @@ class VariationRequestUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=20000)
     classification: str | None = Field(default=None, pattern=_VR_CLASSIFICATION)
     urgency: str | None = Field(default=None, pattern=_VR_URGENCY)
-    estimated_cost_impact: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    estimated_cost_impact: FiniteDecimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     estimated_schedule_days: int | None = Field(default=None, ge=-3650, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, pattern=_VR_STATUS)
@@ -293,7 +295,7 @@ class VariationBOQSourcePosition(BaseModel):
     #: The quantity this variation changes, which is rarely the contracted
     #: one - a variation usually re-measures part of a line. Omit to carry
     #: the source position's quantity across unchanged.
-    quantity: Decimal | None = None
+    quantity: FiniteDecimal | None = None
     change_kind: VariationChangeKind = DEFAULT_CHANGE_KIND
     note: str = Field(default="", max_length=2000)
 
@@ -304,7 +306,7 @@ class VariationBOQSourceContractLine(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     contract_line_id: UUID
-    quantity: Decimal | None = None
+    quantity: FiniteDecimal | None = None
     #: Still ``added`` by default, even though the line names a contracted
     #: item: extra quantity of a contracted item at the contract rate is the
     #: commonest variation there is, and it is an addition. An omission or a
@@ -383,7 +385,7 @@ class VariationBOQKindSubtotal(BaseModel):
     #: line the way ``BOQService.compute_boq_totals`` values them, so the
     #: three subtotals sum to the bill's ``direct_cost`` rather than to a
     #: number beside it. Negative for an omission carried as such.
-    total: Decimal = Decimal("0")
+    total: FiniteDecimal = Decimal("0")
 
     @field_serializer("total", when_used="json")
     @classmethod
@@ -479,7 +481,7 @@ class VariationOrderCreate(BaseModel):
     project_id: UUID
     variation_request_id: UUID | None = None
     title: str = Field(default="", max_length=500)
-    final_cost_impact: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    final_cost_impact: FiniteDecimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     final_schedule_days: int = Field(default=0, ge=-3650, le=3650)
     currency: str = Field(default="", max_length=10)
     agreed_at: str | None = Field(default=None, max_length=40)
@@ -499,7 +501,7 @@ class VariationOrderUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, max_length=500)
-    final_cost_impact: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    final_cost_impact: FiniteDecimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     final_schedule_days: int | None = Field(default=None, ge=-3650, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     agreed_at: str | None = Field(default=None, max_length=40)
@@ -582,9 +584,9 @@ class VariationCostImpactCreate(BaseModel):
     variation_order_id: UUID
     category: str = Field(default="material", pattern=_COST_IMPACT_CATEGORY)
     description: str = Field(default="", max_length=2000)
-    quantity: Decimal = Decimal("0")
+    quantity: FiniteDecimal = Decimal("0")
     unit: str = Field(default="", max_length=20)
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     currency: str = Field(default="", max_length=10)
     source: str = Field(default="manual", pattern=_COST_IMPACT_SOURCE)
 
@@ -594,9 +596,9 @@ class VariationCostImpactUpdate(BaseModel):
 
     category: str | None = Field(default=None, pattern=_COST_IMPACT_CATEGORY)
     description: str | None = Field(default=None, max_length=2000)
-    quantity: Decimal | None = None
+    quantity: FiniteDecimal | None = None
     unit: str | None = Field(default=None, max_length=20)
-    unit_rate: Decimal | None = None
+    unit_rate: FiniteDecimal | None = None
     currency: str | None = Field(default=None, max_length=10)
     source: str | None = Field(default=None, pattern=_COST_IMPACT_SOURCE)
 
@@ -676,7 +678,7 @@ class SiteMeasurementCreate(BaseModel):
     location: str = Field(default="", max_length=500)
     item_description: str = Field(default="", max_length=5000)
     unit: str = Field(default="", max_length=20)
-    measured_quantity: Decimal = Decimal("0")
+    measured_quantity: FiniteDecimal = Decimal("0")
     agreed_with_owner_at: str | None = Field(default=None, max_length=40)
     owner_signature_ref: str = Field(default="", max_length=255)
     photos: list[str] = Field(default_factory=list)
@@ -692,7 +694,7 @@ class SiteMeasurementUpdate(BaseModel):
     location: str | None = Field(default=None, max_length=500)
     item_description: str | None = Field(default=None, max_length=5000)
     unit: str | None = Field(default=None, max_length=20)
-    measured_quantity: Decimal | None = None
+    measured_quantity: FiniteDecimal | None = None
     agreed_with_owner_at: str | None = Field(default=None, max_length=40)
     owner_signature_ref: str | None = Field(default=None, max_length=255)
     photos: list[str] | None = None
@@ -741,7 +743,7 @@ class DayworkSheetCreate(BaseModel):
     owner_signature_ref: str = Field(default="", max_length=255)
     supplied_via_contract_id: UUID | None = None
     # BS 6079 §6.4.2 - markup percentage applied to subtotal of all lines.
-    markup_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    markup_percent: FiniteDecimal = Field(default=Decimal("0"), ge=0, le=100)
 
 
 class DayworkSheetUpdate(BaseModel):
@@ -753,7 +755,7 @@ class DayworkSheetUpdate(BaseModel):
     status: str | None = Field(default=None, pattern=_DAYWORK_STATUS)
     owner_signature_ref: str | None = Field(default=None, max_length=255)
     supplied_via_contract_id: UUID | None = None
-    markup_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    markup_percent: FiniteDecimal | None = Field(default=None, ge=0, le=100)
 
 
 class DayworkSheetResponse(BaseModel):
@@ -793,9 +795,9 @@ class DayworkSheetLineCreate(BaseModel):
     sheet_id: UUID
     line_type: str = Field(default="labor", pattern=_DAYWORK_LINE_TYPE)
     description: str = Field(default="", max_length=2000)
-    quantity: Decimal = Decimal("0")
+    quantity: FiniteDecimal = Decimal("0")
     unit: str = Field(default="", max_length=20)
-    unit_rate: Decimal = Decimal("0")
+    unit_rate: FiniteDecimal = Decimal("0")
     worker_name: str | None = Field(default=None, max_length=255)
     equipment_code: str | None = Field(default=None, max_length=100)
 
@@ -805,9 +807,9 @@ class DayworkSheetLineUpdate(BaseModel):
 
     line_type: str | None = Field(default=None, pattern=_DAYWORK_LINE_TYPE)
     description: str | None = Field(default=None, max_length=2000)
-    quantity: Decimal | None = None
+    quantity: FiniteDecimal | None = None
     unit: str | None = Field(default=None, max_length=20)
-    unit_rate: Decimal | None = None
+    unit_rate: FiniteDecimal | None = None
     worker_name: str | None = Field(default=None, max_length=255)
     equipment_code: str | None = Field(default=None, max_length=100)
 
@@ -847,20 +849,20 @@ class DisruptionClaimCreate(BaseModel):
     claim_period_end: str | None = Field(default=None, max_length=20)
     description: str = Field(default="", max_length=20000)
     root_cause: str = Field(default="", max_length=10000)
-    cost_amount: Decimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    cost_amount: FiniteDecimal = Field(default=Decimal("0"), gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     schedule_days: int = Field(default=0, ge=0, le=3650)
     currency: str = Field(default="", max_length=10)
     evidence_refs: list[str] = Field(default_factory=list)
     status: str = Field(default="draft", pattern=_DISRUPTION_STATUS)
     notes: str = Field(default="", max_length=10000)
     # AICPA measured-mile fields - units per hour.
-    baseline_productivity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
-    impacted_productivity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
+    baseline_productivity: FiniteDecimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
+    impacted_productivity: FiniteDecimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
     unit_of_measure: str = Field(default="", max_length=30)
     # If both productivities are set + measured_quantity, the service
     # will derive labour_hours_lost automatically.
-    measured_quantity: Decimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
-    labour_hours_lost: Decimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+    measured_quantity: FiniteDecimal | None = Field(default=None, ge=0, lt=Decimal(10**11))
+    labour_hours_lost: FiniteDecimal | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
 
 
 class DisruptionClaimUpdate(BaseModel):
@@ -868,13 +870,13 @@ class DisruptionClaimUpdate(BaseModel):
 
     description: str | None = Field(default=None, max_length=20000)
     root_cause: str | None = Field(default=None, max_length=10000)
-    cost_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    cost_amount: FiniteDecimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     schedule_days: int | None = Field(default=None, ge=0, le=3650)
     currency: str | None = Field(default=None, max_length=10)
     evidence_refs: list[str] | None = None
     status: str | None = Field(default=None, pattern=_DISRUPTION_STATUS)
     decision_at: str | None = Field(default=None, max_length=40)
-    decided_amount: Decimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
+    decided_amount: FiniteDecimal | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
     notes: str | None = Field(default=None, max_length=10000)
 
 
@@ -1003,22 +1005,22 @@ class FinalAccountCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    original_contract_value: Decimal = Decimal("0")
+    original_contract_value: FiniteDecimal = Decimal("0")
     currency: str = Field(default="", max_length=10)
-    retention_held: Decimal = Decimal("0")
-    retention_released: Decimal = Decimal("0")
+    retention_held: FiniteDecimal = Decimal("0")
+    retention_released: FiniteDecimal = Decimal("0")
     status: str = Field(default="draft", pattern=_FA_STATUS)
 
 
 class FinalAccountUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    original_contract_value: Decimal | None = None
-    variations_total: Decimal | None = None
-    daywork_total: Decimal | None = None
-    claims_total: Decimal | None = None
-    retention_held: Decimal | None = None
-    retention_released: Decimal | None = None
+    original_contract_value: FiniteDecimal | None = None
+    variations_total: FiniteDecimal | None = None
+    daywork_total: FiniteDecimal | None = None
+    claims_total: FiniteDecimal | None = None
+    retention_held: FiniteDecimal | None = None
+    retention_released: FiniteDecimal | None = None
     currency: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, pattern=_FA_STATUS)
     agreed_at: str | None = Field(default=None, max_length=40)

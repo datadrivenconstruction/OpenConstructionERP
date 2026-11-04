@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.decimal_types import Decimal7_4, Decimal8_4, Decimal18_2, Decimal18_4, FiniteDecimal
 from app.modules.supplier_catalogs.models import COST_STATE_UNKNOWN
 from app.modules.supplier_catalogs.validators import discount_out_of_range, url_problem
 
@@ -180,7 +181,7 @@ class CatalogItemCreate(BaseModel):
     spec: dict[str, Any] = Field(default_factory=dict)
     hazard_class: str | None = Field(default=None, max_length=50)
     shelf_life_days: int | None = Field(default=None, ge=0)
-    reorder_point: Decimal = Field(default=Decimal("0"))
+    reorder_point: Decimal18_4 = Field(default=Decimal("0"))
     gtin: str | None = Field(default=None, max_length=20)
     commodity_code: str | None = Field(default=None, max_length=32)
     commodity_scheme: str = Field(default="unspsc", max_length=16)
@@ -213,7 +214,7 @@ class CatalogItemUpdate(BaseModel):
     spec: dict[str, Any] | None = None
     hazard_class: str | None = Field(default=None, max_length=50)
     shelf_life_days: int | None = Field(default=None, ge=0)
-    reorder_point: Decimal | None = Field(default=None, ge=0)
+    reorder_point: Decimal18_4 | None = Field(default=None, ge=0)
     gtin: str | None = Field(default=None, max_length=20)
     commodity_code: str | None = Field(default=None, max_length=32)
     commodity_scheme: str | None = Field(default=None, max_length=16)
@@ -277,8 +278,8 @@ class CatalogItemListResponse(BaseModel):
 class CatalogEntryCreate(BaseModel):
     catalog_item_id: UUID
     vendor_sku: str | None = Field(default=None, max_length=100)
-    unit_price: Decimal = Field(..., ge=0)
-    min_order_qty: Decimal = Field(default=Decimal("1"), ge=0)
+    unit_price: Decimal18_4 = Field(..., ge=0)
+    min_order_qty: Decimal18_4 = Field(default=Decimal("1"), ge=0)
     lead_time_days: int = Field(default=7, ge=0)
     notes: str | None = Field(default=None, max_length=1000)
 
@@ -317,12 +318,12 @@ class PriceListEntryRow(BaseModel):
     vendor_sku: str | None = None
     mpn: str | None = None
     gtin: str | None = None
-    gross_price: Decimal
-    net_price: Decimal
-    discount_pct: Decimal | None = None
+    gross_price: FiniteDecimal
+    net_price: Decimal18_4
+    discount_pct: Decimal7_4 | None = None
     discount_source: str
     discount_agreement_id: UUID | None = None
-    min_order_qty: Decimal
+    min_order_qty: Decimal18_4
     lead_time_days: int
     product_url: str | None = None
     attachment_count: int = 0
@@ -408,8 +409,8 @@ class DiscountAgreementCreate(BaseModel):
     price_list_id: UUID | None = None
     category_id: UUID | None = None
     catalog_item_id: UUID | None = None
-    discount_pct: Decimal | None = None
-    fixed_net_price: Decimal | None = Field(default=None, ge=0)
+    discount_pct: Decimal7_4 | None = None
+    fixed_net_price: Decimal18_4 | None = Field(default=None, ge=0)
     valid_from: date | None = None
     valid_to: date | None = None
     active: bool = True
@@ -440,8 +441,8 @@ class DiscountAgreementUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     reference: str | None = Field(default=None, max_length=100)
-    discount_pct: Decimal | None = None
-    fixed_net_price: Decimal | None = Field(default=None, ge=0)
+    discount_pct: Decimal7_4 | None = None
+    fixed_net_price: Decimal18_4 | None = Field(default=None, ge=0)
     valid_from: date | None = None
     valid_to: date | None = None
     active: bool | None = None
@@ -515,15 +516,15 @@ class PriceComparisonRow(BaseModel):
     vendor_id: UUID
     vendor_code: str
     vendor_name: str
-    unit_price: Decimal
+    unit_price: Decimal18_4
     currency: str
-    min_order_qty: Decimal
+    min_order_qty: Decimal18_4
     lead_time_days: int
     price_list_id: UUID
     rating: int | None = None
-    gross_price: Decimal | None = None
-    net_price: Decimal | None = None
-    discount_pct: Decimal | None = None
+    gross_price: FiniteDecimal | None = None
+    net_price: Decimal18_4 | None = None
+    discount_pct: Decimal7_4 | None = None
     discount_source: str | None = None
     entry_id: UUID | None = None
     valid_to: str | None = None
@@ -535,10 +536,10 @@ class PriceComparisonRow(BaseModel):
 class PRLineCreate(BaseModel):
     catalog_item_id: UUID | None = None
     description: str = Field(..., min_length=1, max_length=500)
-    quantity: Decimal = Field(..., gt=0)
+    quantity: Decimal18_4 = Field(..., gt=0)
     unit_of_measure: str = Field(default="pcs", max_length=20)
     # Omitted with a catalog item: the lowest current net price of any vendor.
-    estimated_unit_price: Decimal | None = Field(default=None, ge=0)
+    estimated_unit_price: Decimal18_4 | None = Field(default=None, ge=0)
 
 
 class PRCreate(BaseModel):
@@ -588,11 +589,11 @@ class PRResponse(BaseModel):
 class POLineCreate(BaseModel):
     catalog_item_id: UUID | None = None
     description: str = Field(..., min_length=1, max_length=500)
-    ordered_qty: Decimal = Field(..., gt=0)
+    ordered_qty: Decimal18_4 = Field(..., gt=0)
     unit_of_measure: str = Field(default="pcs", max_length=20)
     # Omitted: the net price of ``catalog_entry_id``, or of the vendor's current
     # price list for ``catalog_item_id``. Given: a hand-agreed price.
-    unit_price: Decimal | None = Field(default=None, ge=0)
+    unit_price: Decimal18_4 | None = Field(default=None, ge=0)
     catalog_entry_id: UUID | None = None
 
 
@@ -606,7 +607,7 @@ class POCreateExt(BaseModel):
     order_date: str | None = None
     expected_delivery: str | None = None
     currency: str = Field(default="EUR", max_length=10)
-    tax: Decimal = Field(default=Decimal("0"), ge=0)
+    tax: Decimal18_2 = Field(default=Decimal("0"), ge=0)
     terms: str | None = Field(default=None, max_length=4000)
     lines: list[POLineCreate] = Field(default_factory=list)
 
@@ -643,9 +644,9 @@ class POResponseExt(BaseModel):
     order_date: str | None = None
     expected_delivery: str | None = None
     currency: str
-    subtotal: Decimal
-    tax: Decimal
-    total: Decimal
+    subtotal: Decimal18_2
+    tax: Decimal18_2
+    total: Decimal18_2
     terms: str | None = None
     lines: list[POLineResponse] = Field(default_factory=list)
 
@@ -655,9 +656,9 @@ class POResponseExt(BaseModel):
 
 class GRLineCreate(BaseModel):
     po_line_id: UUID
-    received_qty: Decimal = Field(..., ge=0)
-    accepted_qty: Decimal | None = None
-    rejected_qty: Decimal = Field(default=Decimal("0"), ge=0)
+    received_qty: Decimal18_4 = Field(..., ge=0)
+    accepted_qty: Decimal18_4 | None = None
+    rejected_qty: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     batch_lot: str | None = Field(default=None, max_length=100)
     serial_numbers: list[str] | None = None
     notes: str | None = Field(default=None, max_length=1000)
@@ -713,8 +714,8 @@ class VendorInvoiceCreate(BaseModel):
     invoice_date: str | None = None
     due_date: str | None = None
     currency: str = Field(default="EUR", max_length=10)
-    subtotal: Decimal = Field(..., ge=0)
-    tax: Decimal = Field(default=Decimal("0"), ge=0)
+    subtotal: Decimal18_2 = Field(..., ge=0)
+    tax: Decimal18_2 = Field(default=Decimal("0"), ge=0)
 
 
 class VendorInvoiceResponse(BaseModel):
@@ -878,7 +879,7 @@ class StockBalanceResponse(BaseModel):
 class StockReservePayload(BaseModel):
     catalog_item_id: UUID
     warehouse_id: UUID
-    quantity: Decimal = Field(..., gt=0)
+    quantity: Decimal18_4 = Field(..., gt=0)
     project_id: UUID | None = None
     batch_lot: str | None = None
 
@@ -886,7 +887,7 @@ class StockReservePayload(BaseModel):
 class StockIssuePayload(BaseModel):
     catalog_item_id: UUID
     warehouse_id: UUID
-    quantity: Decimal = Field(..., gt=0)
+    quantity: Decimal18_4 = Field(..., gt=0)
     to_project_id: UUID | None = None
     batch_lot: str | None = None
     notes: str | None = Field(default=None, max_length=1000)
@@ -894,7 +895,7 @@ class StockIssuePayload(BaseModel):
 
 class StocktakeCount(BaseModel):
     catalog_item_id: UUID
-    counted_qty: Decimal = Field(..., ge=0)
+    counted_qty: FiniteDecimal = Field(..., ge=0)
     batch_lot: str | None = None
 
 
@@ -975,12 +976,12 @@ def normalise_floor_currency(price_tolerance_abs: Decimal | None, currency: str 
 class TolerianceProfileCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=64)
     description: str | None = Field(default=None, max_length=1000)
-    price_tolerance_pct: Decimal = Field(default=Decimal("2.0"), ge=0, le=100)
-    price_tolerance_abs: Decimal = Field(default=Decimal("0"), ge=0)
+    price_tolerance_pct: Decimal8_4 = Field(default=Decimal("2.0"), ge=0, le=100)
+    price_tolerance_abs: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     #: ISO code for ``price_tolerance_abs``. Optional only because the floor
     #: defaults to zero, which is the same amount in every currency.
     currency: str | None = Field(default=None, min_length=3, max_length=3)
-    qty_tolerance_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    qty_tolerance_pct: Decimal8_4 = Field(default=Decimal("0"), ge=0, le=100)
     period_tolerance_days: int = Field(default=7, ge=0, le=365)
     require_gr: bool = True
     is_default: bool = False
@@ -994,10 +995,10 @@ class TolerianceProfileCreate(BaseModel):
 class TolerianceProfileUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=64)
     description: str | None = Field(default=None, max_length=1000)
-    price_tolerance_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    price_tolerance_abs: Decimal | None = Field(default=None, ge=0)
+    price_tolerance_pct: Decimal8_4 | None = Field(default=None, ge=0, le=100)
+    price_tolerance_abs: Decimal18_4 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3)
-    qty_tolerance_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    qty_tolerance_pct: Decimal8_4 | None = Field(default=None, ge=0, le=100)
     period_tolerance_days: int | None = Field(default=None, ge=0, le=365)
     require_gr: bool | None = None
     is_default: bool | None = None
@@ -1067,10 +1068,10 @@ class KYCDocumentResponse(BaseModel):
 class ScorecardWeights(BaseModel):
     """Weights for the composite formula. Must sum to a positive number."""
 
-    delivery: Decimal = Field(default=Decimal("30"), ge=0, le=100)
-    quality: Decimal = Field(default=Decimal("30"), ge=0, le=100)
-    price: Decimal = Field(default=Decimal("20"), ge=0, le=100)
-    esg: Decimal = Field(default=Decimal("20"), ge=0, le=100)
+    delivery: FiniteDecimal = Field(default=Decimal("30"), ge=0, le=100)
+    quality: FiniteDecimal = Field(default=Decimal("30"), ge=0, le=100)
+    price: FiniteDecimal = Field(default=Decimal("20"), ge=0, le=100)
+    esg: FiniteDecimal = Field(default=Decimal("20"), ge=0, le=100)
 
 
 class ScorecardRecomputeRequest(BaseModel):
