@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { parseApplyQuantity } from './applyQuantity';
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1643,7 +1644,7 @@ function ApplyToBOQModal({
               }),
             )
           : undefined;
-      return assembliesApi.applyToBoq(assemblyId, boqId, parseFloat(quantity) || 1, parameterValues);
+      return assembliesApi.applyToBoq(assemblyId, boqId, parseApplyQuantity(quantity) ?? 1, parameterValues);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boq'] });
@@ -1825,7 +1826,7 @@ function ApplyToBOQModal({
                 variant="primary"
                 type="submit"
                 loading={applyMutation.isPending}
-                disabled={!boqId}
+                disabled={!boqId || parseApplyQuantity(quantity) === null}
                 icon={<Send size={15} />}
               >
                 {t('common.apply', { defaultValue: 'Apply' })}
