@@ -104,6 +104,9 @@ class _StubRepo:
         self.orders: dict[uuid.UUID, SimpleNamespace] = {}
         self.update_log: list[tuple[uuid.UUID, dict[str, Any]]] = []
 
+    async def list_items_for_order(self, order_id: uuid.UUID) -> list[SimpleNamespace]:
+        return []
+
     async def get_by_id(self, order_id: uuid.UUID) -> SimpleNamespace | None:
         return self.orders.get(order_id)
 

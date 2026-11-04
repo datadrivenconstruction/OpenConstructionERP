@@ -213,6 +213,8 @@ class ChangeOrderItemResponse(BaseModel):
     cost_line_id: UUID | None = None
     cost_line_source: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Non-blocking findings of the changeorders rule set from the write that produced this record.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -264,6 +266,8 @@ class ChangeOrderResponse(BaseModel):
     schedule_impact_days: int = 0
     currency: str
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Non-blocking findings of the changeorders rule set from the write that produced this record.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
     item_count: int = 0

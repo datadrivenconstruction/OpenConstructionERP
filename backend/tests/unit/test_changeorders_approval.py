@@ -160,6 +160,9 @@ class _StubRepo:
     def __init__(self) -> None:
         self.orders: dict[uuid.UUID, SimpleNamespace] = {}
 
+    async def list_items_for_order(self, order_id: uuid.UUID) -> list[SimpleNamespace]:
+        return []
+
     async def get_by_id(self, order_id: uuid.UUID) -> SimpleNamespace | None:
         return self.orders.get(order_id)
 
