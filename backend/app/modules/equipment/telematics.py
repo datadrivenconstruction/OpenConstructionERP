@@ -34,6 +34,7 @@ _GALLON_L = Decimal("3.785411784")
 _MILE_KM = Decimal("1.609344")
 _DAY_HOURS = Decimal("24")
 _ZERO = Decimal("0")
+_RESET_TOLERANCE = Decimal("1")
 
 #: Columns of the CSV upload; only ``equipment`` and ``recorded_at`` are required.
 CSV_COLUMNS = (
@@ -83,6 +84,8 @@ class DayUse:
     off_hours: Decimal
     fuel_l: Decimal | None
     engine_hours_end: Decimal | None
+    #: An engine-hour counter went backwards (ECU swap or rollover) inside the window.
+    counter_reset: bool = False
 
 
 def _dec(raw: Any) -> Decimal | None:
@@ -345,6 +348,32 @@ def _clamp(v: Decimal, lo: Decimal, hi: Decimal) -> Decimal:
     return max(lo, min(hi, v))
 
 
+def _counter_delta(chain: list[dict[str, Any]], key: str) -> tuple[Decimal, bool]:
+    """Growth of a cumulative counter along time-ordered rows, and whether it was reset.
+
+    A value below its predecessor means the counter restarted (ECU swap, rollover):
+    the new value is then the amount counted since the restart, never a negative delta.
+    """
+    total = _ZERO
+    reset = False
+    prev: Decimal | None = None
+    for row in chain:
+        raw = row.get(key)
+        if raw is None:
+            continue
+        cur = Decimal(raw)
+        if prev is not None:
+            if cur >= prev:
+                total += cur - prev
+            elif prev - cur < _RESET_TOLERANCE:
+                pass  # sensor jitter, not a restart
+            else:
+                total += cur
+                reset = True
+        prev = cur
+    return total, reset
+
+
 def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None:
     """One day's use from cumulative counters.
 
@@ -355,7 +384,8 @@ def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None
         day: The UTC day to measure.
 
     Returns:
-        None when the day has no sample with an engine-hour counter.
+        None when the day has no sample with an engine-hour counter. A counter
+        that went backwards is treated as restarted and flagged ``counter_reset``.
     """
     start = datetime.combine(day, time.min, tzinfo=UTC)
     end = start + timedelta(days=1)
@@ -366,13 +396,15 @@ def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None
         return None
     base = before[-1] if before else inside[0]
     last = inside[-1]
-    engine = _clamp(Decimal(last["engine_hours"]) - Decimal(base["engine_hours"]), _ZERO, _DAY_HOURS)
+    chain = [base, *[r for r in inside if r is not base]]
+    engine, reset = _counter_delta(chain, "engine_hours")
+    engine = _clamp(engine, _ZERO, _DAY_HOURS)
     idle = _ZERO
     if last.get("idle_hours") is not None and base.get("idle_hours") is not None:
-        idle = _clamp(Decimal(last["idle_hours"]) - Decimal(base["idle_hours"]), _ZERO, engine)
+        idle = _clamp(_counter_delta(chain, "idle_hours")[0], _ZERO, engine)
     fuel = None
     if last.get("fuel_used_l") is not None and base.get("fuel_used_l") is not None:
-        fuel = max(_ZERO, Decimal(last["fuel_used_l"]) - Decimal(base["fuel_used_l"]))
+        fuel = _counter_delta(chain, "fuel_used_l")[0]
     return DayUse(
         day=day,
         worked_hours=engine - idle,
@@ -380,4 +412,5 @@ def daily_utilisation(samples: list[dict[str, Any]], day: date) -> DayUse | None
         off_hours=_DAY_HOURS - engine,
         fuel_l=fuel,
         engine_hours_end=Decimal(last["engine_hours"]),
+        counter_reset=reset,
     )

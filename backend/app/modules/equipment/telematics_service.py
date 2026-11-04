@@ -19,7 +19,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -41,6 +41,13 @@ TOKEN_PREFIX = "oet_"
 #: Idle share of engine hours above which a machine is flagged (rule and dashboard default).
 DEFAULT_IDLE_THRESHOLD = Decimal("0.35")
 _ZERO = Decimal("0")
+
+#: A device that reports nothing for this long while its machine is hired to a project is "silent".
+SILENT_AFTER = timedelta(hours=24)
+#: Raw readings older than this are pruned; the daily rollups are kept.
+RAW_RETENTION_DAYS = 90
+_PRUNE_EVERY = timedelta(hours=6)
+_last_prune: datetime | None = None
 
 EVENT_INGESTED = "equipment.telematics.ingested"
 EVENT_GEOFENCE_EXIT = "equipment.geofence.exited"
@@ -194,6 +201,7 @@ class TelematicsService:
         if device is not None:
             device.last_seen_at = datetime.now(UTC)
         await self.session.flush()
+        await self._prune_if_due()
         if accepted:
             event_bus.publish_detached(
                 EVENT_INGESTED,
@@ -201,6 +209,122 @@ class TelematicsService:
                 source_module="equipment",
             )
         return {"accepted": accepted, "unmatched": unmatched, "days_rolled_up": len(touched)}
+
+    # ── Retention ───────────────────────────────────────────────────────
+
+    async def prune_raw(self, keep_days: int = RAW_RETENTION_DAYS) -> int:
+        """Delete raw readings older than ``keep_days``; ``UtilisationDay`` rows stay.
+
+        Returns:
+            Number of readings removed.
+        """
+        cutoff = datetime.now(UTC) - timedelta(days=max(keep_days, 7))
+        result = await self.session.execute(delete(TelemetryReading).where(TelemetryReading.recorded_at < cutoff))
+        return int(getattr(result, "rowcount", 0) or 0)
+
+    async def _prune_if_due(self) -> None:
+        global _last_prune
+        now = datetime.now(UTC)
+        if _last_prune is not None and now - _last_prune < _PRUNE_EVERY:
+            return
+        _last_prune = now
+        try:
+            removed = await self.prune_raw()
+            if removed:
+                logger.info("telematics: pruned %d raw readings", removed)
+        except Exception:
+            logger.debug("telematics prune skipped", exc_info=True)
+
+    # ── Silent devices ──────────────────────────────────────────────────
+
+    async def silent_devices(self, now: datetime | None = None) -> list[dict[str, Any]]:
+        """Active devices on a machine hired to a project that sent nothing for 24 h."""
+        now = now or datetime.now(UTC)
+        today = now.date()
+        devices = [d for d in await self.list_devices() if d.active]
+        if not devices:
+            return []
+        eq_ids = {d.equipment_id for d in devices}
+        latest = {
+            eq_id: ts
+            for eq_id, ts in (
+                await self.session.execute(
+                    select(TelemetryReading.equipment_id, func.max(TelemetryReading.recorded_at))
+                    .where(TelemetryReading.equipment_id.in_(eq_ids))
+                    .group_by(TelemetryReading.equipment_id)
+                )
+            ).all()
+        }
+        rentals = {
+            r.equipment_id: r
+            for r in (
+                await self.session.execute(
+                    select(EquipmentRental).where(
+                        EquipmentRental.equipment_id.in_(eq_ids), EquipmentRental.status == "active"
+                    )
+                )
+            ).scalars()
+            if _rental_covers(r, today)
+        }
+        out: list[dict[str, Any]] = []
+        for d in devices:
+            rental = rentals.get(d.equipment_id)
+            if rental is None:
+                continue
+            seen = [x for x in (latest.get(d.equipment_id), d.last_seen_at) if x is not None]
+            last = max(_aware(x) for x in seen) if seen else _aware(d.created_at)
+            if now - last > SILENT_AFTER:
+                out.append(
+                    {
+                        "device_id": d.id,
+                        "equipment_id": d.equipment_id,
+                        "project_id": rental.project_id,
+                        "last_sample_at": last,
+                        "hours_silent": int((now - last).total_seconds() // 3600),
+                    }
+                )
+        return out
+
+    async def notify_silent_devices(self, now: datetime | None = None) -> dict[str, int]:
+        """Tell each project owner about silent devices, once per machine per day."""
+        from app.modules.notifications.models import Notification
+        from app.modules.notifications.service import NotificationService
+        from app.modules.projects.models import Project
+
+        now = now or datetime.now(UTC)
+        silent = await self.silent_devices(now)
+        notified = 0
+        for s in silent:
+            project = await self.session.get(Project, s["project_id"])
+            if project is None or project.owner_id is None:
+                continue
+            already = (
+                await self.session.execute(
+                    select(func.count())
+                    .select_from(Notification)
+                    .where(
+                        Notification.user_id == project.owner_id,
+                        Notification.title_key == "notifications.equipment_device_silent_title",
+                        Notification.entity_id == str(s["equipment_id"]),
+                        Notification.created_at >= now - SILENT_AFTER,
+                    )
+                )
+            ).scalar_one()
+            if already:
+                continue
+            eq = await self.session.get(Equipment, s["equipment_id"])
+            await NotificationService(self.session).create(
+                user_id=project.owner_id,
+                notification_type="warning",
+                title_key="notifications.equipment_device_silent_title",
+                body_key="notifications.equipment_device_silent_body",
+                body_context={"equipment": eq.code if eq else "", "hours": str(s["hours_silent"])},
+                entity_type="equipment",
+                entity_id=str(s["equipment_id"]),
+                action_url="/equipment",
+            )
+            notified += 1
+        return {"silent": len(silent), "notified": notified}
 
     # ── Daily rollup ────────────────────────────────────────────────────
 
@@ -304,6 +428,7 @@ class TelematicsService:
             (use.fuel_l * fuel_co2_kg_per_l("diesel")).quantize(Decimal("0.01")) if use.fuel_l is not None else None
         )
         row.engine_hours_end = use.engine_hours_end
+        row.counter_reset = use.counter_reset
         located = [r for r in readings if r.lat is not None and r.lng is not None and _aware(r.recorded_at) >= start]
         previous = row.outside_geofence_m
         row.outside_geofence_m = None
@@ -376,6 +501,7 @@ class TelematicsService:
                     "co2_kg": _ZERO,
                     "hire_cost": _ZERO,
                     "days": 0,
+                    "counter_reset_days": 0,
                     "project_ids": set(),
                 },
             )
@@ -386,6 +512,7 @@ class TelematicsService:
             m["co2_kg"] += d.co2_kg or _ZERO
             m["hire_cost"] += d.hire_cost or _ZERO
             m["days"] += 1
+            m["counter_reset_days"] += 1 if d.counter_reset else 0
             if d.project_id:
                 m["project_ids"].add(str(d.project_id))
         eqs = {}
@@ -530,6 +657,8 @@ class TelematicsService:
             ).scalars()
         )
         week = await self._days(today - timedelta(days=7), today, None)
+        silent = {s["equipment_id"]: s for s in await self.silent_devices()}
+        with_device = {d.equipment_id for d in await self.list_devices() if d.active}
         machines = []
         for eq in equipment:
             on_site = await self._on_site_project(eq, fences)
@@ -558,6 +687,8 @@ class TelematicsService:
                     "allocated_project_id": str(alloc) if alloc else None,
                     "maintenance_overdue": overdue,
                     "outside_geofence_m": str(outside) if outside is not None else None,
+                    "has_device": eq.id in with_device,
+                    "device_silent_hours": silent[eq.id]["hours_silent"] if eq.id in silent else None,
                     "engine_hours_7d": str(engine),
                     "idle_ratio_7d": str((idle / engine).quantize(Decimal("0.001"))) if engine > 0 else None,
                 }

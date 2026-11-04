@@ -1364,10 +1364,35 @@ export function autoDelayFragnet(
 export function computeDelayAnalysis(
   analysisId: string,
   apportionmentMethod?: DelayApportionment,
+  windowMode?: DelayWindowMode,
 ): Promise<DelayAnalysis> {
-  return apiPost<DelayAnalysis, { apportionment_method?: DelayApportionment }>(
-    `/v1/schedule-advanced/delay-analyses/${encodeURIComponent(analysisId)}/compute`,
-    apportionmentMethod ? { apportionment_method: apportionmentMethod } : {},
+  return apiPost<
+    DelayAnalysis,
+    { apportionment_method?: DelayApportionment; window_mode?: DelayWindowMode }
+  >(`/v1/schedule-advanced/delay-analyses/${encodeURIComponent(analysisId)}/compute`, {
+    ...(apportionmentMethod ? { apportionment_method: apportionmentMethod } : {}),
+    ...(windowMode ? { window_mode: windowMode } : {}),
+  });
+}
+
+/** How the Windows method cuts the project into windows. */
+export type DelayWindowMode = 'snapshot' | 'month' | 'quarter';
+
+export interface DelayRuleResult {
+  rule_id: string;
+  passed: boolean;
+  severity: string;
+  message: string;
+  element_ref: string;
+  details: Record<string, string>;
+}
+
+/** Rule results for one analysis: baseline present, events inside the project, no fragnet loop. */
+export function fetchDelayValidation(
+  analysisId: string,
+): Promise<{ results: DelayRuleResult[]; failed: number }> {
+  return apiGet<{ results: DelayRuleResult[]; failed: number }>(
+    `/v1/schedule-advanced/delay-analyses/${encodeURIComponent(analysisId)}/validation`,
   );
 }
 

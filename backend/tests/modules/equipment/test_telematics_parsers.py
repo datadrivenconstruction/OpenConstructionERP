@@ -149,10 +149,12 @@ def test_day_use_is_the_difference_to_the_last_sample_before_the_day() -> None:
     assert use.fuel_l == Decimal("90")
 
 
-def test_day_use_clamps_a_counter_reset_and_skips_an_empty_day() -> None:
+def test_day_use_flags_a_counter_reset_and_skips_an_empty_day() -> None:
     rows = [_row(17, "500", "50", day=19), _row(9, "3", "1")]
     use = daily_utilisation(rows, date(2026, 10, 20))
-    assert use is not None and use.worked_hours == 0 and use.off_hours == 24
+    # The restarted counter reads 3 h since the swap: counted, never negative, and flagged.
+    assert use is not None and use.counter_reset is True
+    assert use.worked_hours + use.idle_hours == 3 and use.off_hours == 21
     assert daily_utilisation(rows, date(2026, 10, 21)) is None
 
 
@@ -166,3 +168,74 @@ def test_country_data_limits_and_classes() -> None:
     assert emission_class_meets("US", "eu_stage_v") is None
     assert emission_class_meets("US", "electric") is True
     assert fuel_co2_kg_per_l() == Decimal("2.68")
+
+
+# ── Counter reset and rule ──────────────────────────────────────────────
+
+
+def _cum(ts: str, eng: str, idle: str | None = None, fuel: str | None = None) -> dict:
+    return {
+        "recorded_at": datetime.fromisoformat(ts),
+        "engine_hours": Decimal(eng),
+        "idle_hours": Decimal(idle) if idle is not None else None,
+        "fuel_used_l": Decimal(fuel) if fuel is not None else None,
+    }
+
+
+def test_counter_that_restarts_counts_from_zero_and_is_flagged() -> None:
+    from datetime import date
+
+    rows = [
+        _cum("2026-10-01T22:00:00+00:00", "1000"),
+        _cum("2026-10-02T08:00:00+00:00", "1002"),
+        _cum("2026-10-02T16:00:00+00:00", "3", "1", "5"),
+    ]
+    use = daily_utilisation(rows, date(2026, 10, 2))
+    assert use is not None
+    assert use.counter_reset is True
+    assert use.worked_hours + use.idle_hours == Decimal("5")
+
+
+def test_a_steady_counter_is_not_flagged() -> None:
+    from datetime import date
+
+    rows = [_cum("2026-10-01T22:00:00+00:00", "1000"), _cum("2026-10-02T16:00:00+00:00", "1006")]
+    use = daily_utilisation(rows, date(2026, 10, 2))
+    assert use is not None
+    assert use.counter_reset is False
+    assert use.worked_hours == Decimal("6")
+
+
+def test_sensor_jitter_below_tolerance_is_not_a_reset() -> None:
+    from datetime import date
+
+    rows = [
+        _cum("2026-10-01T22:00:00+00:00", "1000"),
+        _cum("2026-10-02T08:00:00+00:00", "1004"),
+        _cum("2026-10-02T16:00:00+00:00", "1003.8"),
+    ]
+    use = daily_utilisation(rows, date(2026, 10, 2))
+    assert use is not None
+    assert use.counter_reset is False
+    assert use.worked_hours == Decimal("4")
+
+
+def test_silent_device_rule_only_judges_hired_machines_with_a_device() -> None:
+    import asyncio
+
+    from app.modules.equipment.validators import run_rules
+
+    machines = [
+        {"equipment_id": "a", "code": "A", "has_device": True, "allocated_project_id": "p", "device_silent_hours": 30},
+        {
+            "equipment_id": "b",
+            "code": "B",
+            "has_device": True,
+            "allocated_project_id": "p",
+            "device_silent_hours": None,
+        },
+        {"equipment_id": "c", "code": "C", "has_device": False, "allocated_project_id": "p"},
+        {"equipment_id": "d", "code": "D", "has_device": True, "allocated_project_id": None, "device_silent_hours": 50},
+    ]
+    res = [r for r in asyncio.run(run_rules({"machines": machines})) if r["rule_id"].endswith("device_silent")]
+    assert {r["element_ref"]: r["passed"] for r in res} == {"a": False, "b": True}

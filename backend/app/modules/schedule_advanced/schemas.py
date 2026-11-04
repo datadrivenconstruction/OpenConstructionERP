@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
@@ -1350,6 +1350,8 @@ class DelayComputeRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     apportionment_method: str | None = Field(default=None, pattern=_APPORTIONMENT)
+    #: Windows method only: cut windows at snapshot dates, months or quarters.
+    window_mode: Literal["snapshot", "month", "quarter"] | None = None
 
 
 class FragnetResponse(BaseModel):

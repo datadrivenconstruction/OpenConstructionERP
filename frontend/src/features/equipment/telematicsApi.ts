@@ -23,6 +23,7 @@ export interface UtilisationMachine {
   co2_kg: string;
   hire_cost: string;
   days: number;
+  counter_reset_days?: number;
   utilisation_pct: string;
   idle_pct: string;
   project_ids: string[];
@@ -60,6 +61,8 @@ export interface TelematicsDevice {
   token_prefix: string;
   active: boolean;
   last_seen_at: string | null;
+  /** Whole hours without a reading while the machine is hired to a project; null when it reports. */
+  silent_hours?: number | null;
   token?: string | null;
 }
 

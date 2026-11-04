@@ -5,6 +5,8 @@
 POST /telematics/devices/               - Register a device, returns its token once
 GET  /telematics/devices/               - List devices (equipment_id=)
 POST /telematics/devices/{id}/revoke    - Revoke a device token
+POST /telematics/alerts/silent/         - Notify owners of devices silent for 24 h on hired machines
+POST /telematics/maintenance/prune/     - Drop raw readings older than keep_days (default 90)
 POST /telematics/ingest/                - Device ingest, header ``X-Device-Token``
 POST /telematics/import/aemp/           - ISO 15143-3 (AEMP 2.0) Fleet snapshot, XML or JSON
 POST /telematics/import/csv/            - CSV upload
@@ -29,7 +31,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.equipment.cost_board import DEFAULT_DAY_HOURS, DEFAULT_MIN_UTILISATION_PCT
 from app.modules.equipment.cost_board_service import CostBoardService
 from app.modules.equipment.telematics import TelematicsParseError, TelematicsSample, parse_aemp, parse_csv
-from app.modules.equipment.telematics_service import DEFAULT_IDLE_THRESHOLD, TelematicsService
+from app.modules.equipment.telematics_service import DEFAULT_IDLE_THRESHOLD, RAW_RETENTION_DAYS, TelematicsService
 from app.modules.equipment.validators import run_rules
 
 router = APIRouter(prefix="/telematics", tags=["equipment-telematics"])
@@ -51,6 +53,7 @@ class DeviceResponse(BaseModel):
     active: bool
     last_seen_at: datetime | None = None
     token: str | None = None
+    silent_hours: int | None = None
 
 
 class DeviceListResponse(BaseModel):
@@ -87,7 +90,7 @@ def _service(session: SessionDep) -> TelematicsService:
     return TelematicsService(session)
 
 
-def _device_out(d: Any, token: str | None = None) -> DeviceResponse:
+def _device_out(d: Any, token: str | None = None, silent_hours: int | None = None) -> DeviceResponse:
     return DeviceResponse(
         id=d.id,
         equipment_id=d.equipment_id,
@@ -96,6 +99,7 @@ def _device_out(d: Any, token: str | None = None) -> DeviceResponse:
         active=d.active,
         last_seen_at=d.last_seen_at,
         token=token,
+        silent_hours=silent_hours,
     )
 
 
@@ -128,7 +132,8 @@ async def list_devices(
     service: TelematicsService = Depends(_service),
 ) -> DeviceListResponse:
     rows = await service.list_devices(equipment_id)
-    page = [_device_out(d) for d in rows[offset : offset + limit]]
+    silent = {s["device_id"]: s["hours_silent"] for s in await service.silent_devices()}
+    page = [_device_out(d, silent_hours=silent.get(d.id)) for d in rows[offset : offset + limit]]
     return DeviceListResponse(items=page, total=len(rows), offset=offset, limit=limit)
 
 
@@ -142,6 +147,25 @@ async def revoke_device(
         await service.revoke_device(device_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/alerts/silent/")
+async def notify_silent(
+    _perm: None = Depends(RequirePermission("equipment.update")),
+    service: TelematicsService = Depends(_service),
+) -> dict[str, int]:
+    """Notify project owners about hired machines whose device sent nothing for 24 h."""
+    return await service.notify_silent_devices()
+
+
+@router.post("/maintenance/prune/")
+async def prune_raw(
+    keep_days: int = Query(default=RAW_RETENTION_DAYS, ge=7, le=3650),
+    _perm: None = Depends(RequirePermission("equipment.update")),
+    service: TelematicsService = Depends(_service),
+) -> dict[str, int]:
+    """Delete raw readings older than ``keep_days``; daily utilisation rows are kept."""
+    return {"removed": await service.prune_raw(keep_days)}
 
 
 @router.post("/ingest/")
