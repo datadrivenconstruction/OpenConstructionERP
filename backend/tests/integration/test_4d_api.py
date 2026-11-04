@@ -465,3 +465,24 @@ async def test_dashboard_returns_evm_payload(client: AsyncClient, schedule_id: s
     assert body["spi"] == pytest.approx(0.5, rel=1e-3)
     assert body["cpi"] == pytest.approx(1.25, rel=1e-3)
     assert body["overall_progress_percent"] == pytest.approx(50.0, rel=1e-3)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path", ["snapshot", "snapshot-cost"])
+async def test_snapshot_rejects_model_of_another_project(
+    client: AsyncClient, schedule_id: str, temp_engine_and_factory, path: str
+):
+    _engine, factory = temp_engine_and_factory
+    from app.modules.bim_hub.models import BIMModel
+
+    async with factory() as session:
+        foreign = BIMModel(project_id=uuid.uuid4(), name="Foreign model")
+        own = BIMModel(project_id=PROJECT_ID, name="Own model")
+        session.add_all([foreign, own])
+        await session.commit()
+        foreign_id, own_id = str(foreign.id), str(own.id)
+
+    base = f"/api/v2/schedules/{schedule_id}/{path}"
+    assert (await client.get(base, params={"model_version_id": foreign_id})).status_code == 404
+    assert (await client.get(base, params={"model_version_id": str(uuid.uuid4())})).status_code == 404
+    assert (await client.get(base, params={"model_version_id": own_id})).status_code == 200

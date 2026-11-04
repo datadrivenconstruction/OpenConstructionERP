@@ -124,11 +124,11 @@ def _parse_ubl(root: Any) -> InboundInvoice:
 
 
 def _line(description: str, quantity: str, unit_rate: str, amount: str) -> dict[str, str]:
-    """One invoice line as the inbox stores it; an unreadable figure becomes ``0``."""
+    """One invoice line as the inbox stores it; an unreadable figure becomes ``0``, a negative one is kept."""
 
     def num(text: str, default: str) -> str:
         value = _d(text) if text else Decimal(default)
-        return format(value, "f") if value.is_finite() and value >= 0 else default
+        return format(value, "f") if value.is_finite() else default
 
     return {
         "description": description[:500],
@@ -199,6 +199,16 @@ def _check(inv: InboundInvoice) -> None:
             )
             setattr(inv, name, Decimal("0"))
             unreadable = True
+    for idx, line in enumerate(inv.lines, start=1):
+        if Decimal(line["amount"]) < 0:
+            inv.findings.append(
+                {
+                    "severity": "warning",
+                    "code": "LINE-NEGATIVE",
+                    "field": f"lines[{idx}].amount",
+                    "message": f"line {idx} is a negative amount ({line['amount']}): discount or credit, review it",
+                }
+            )
     if not unreadable and inv.amount_gross and inv.amount_net + inv.amount_tax != inv.amount_gross:
         inv.findings.append(
             {
