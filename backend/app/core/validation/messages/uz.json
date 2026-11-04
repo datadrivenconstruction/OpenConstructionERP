@@ -1793,11 +1793,11 @@
       "suggestion": "Masshtabni tekshiring yoki maʼlum oʻlcham boʻyicha qayta kalibrlang.",
       "fail": "Chizma masshtabi 1:{scale} odatiy oraliqdan tashqarida."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Narx tonnagami yoki kg gami, shuni tanlang yoki massani olib tashlang.",
       "fail": "Bir birlikka {mass} kg massa koʻrsatilgan, ammo narx asosi (tonnaga yoki kg ga) koʻrsatilmagan."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Shaklni yetarli nuqta bilan qayta chizing yoki oʻlchovni oʻchiring.",
       "fail": "{type} turidagi oʻlchovda {count} ta nuqta bor; kamida {needed} ta kerak."
     },

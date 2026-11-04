@@ -1793,11 +1793,11 @@
       "suggestion": "Ellenőrizze a méretarányt, vagy kalibrálja egy ismert méretből.",
       "fail": "Az 1:{scale} rajzi méretarány a szokásos tartományon kívül esik."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Válassza ki, hogy az ár tonnánként vagy kg-onként értendő, vagy törölje a tömeget.",
       "fail": "Meg van adva {mass} kg/egység tömeg, de az ár alapja (tonnánként vagy kg-onként) nincs."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Rajzolja újra az alakzatot elegendő ponttal, vagy törölje a felmérést.",
       "fail": "A(z) {type} típusú felmérésnek {count} pontja van; legalább {needed} szükséges."
     },

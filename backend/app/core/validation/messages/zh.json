@@ -1793,11 +1793,11 @@
       "suggestion": "请检查比例，或根据已知尺寸重新校准。",
       "fail": "图纸比例1:{scale}超出常见范围。"
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "请选择单价按每吨还是每千克计，或清除质量。",
       "fail": "已给出每单位{mass}千克的质量，但未给出单价基准(每吨或每千克)。"
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "请用足够的点重新绘制图形，或删除该测量。",
       "fail": "{type}类型的测量只有{count}个点，至少需要{needed}个。"
     },

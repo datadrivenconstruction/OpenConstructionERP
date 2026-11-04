@@ -1793,11 +1793,11 @@
       "suggestion": "Ölçeği kontrol edin veya bilinen bir ölçüden yeniden kalibre edin.",
       "fail": "1:{scale} çizim ölçeği olağan aralığın dışında."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Fiyatın ton mu kg mı başına olduğunu seçin veya kütleyi kaldırın.",
       "fail": "Birim başına {mass} kg kütle belirtilmiş, ancak fiyat esası (ton veya kg başına) belirtilmemiş."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Şekli yeterli noktayla yeniden çizin veya ölçümü silin.",
       "fail": "{type} türündeki bir ölçümün {count} noktası var; en az {needed} gerekir."
     },

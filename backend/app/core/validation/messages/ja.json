@@ -1793,11 +1793,11 @@
       "suggestion": "縮尺を確認するか、既知の寸法から校正し直してください。",
       "fail": "図面の縮尺1:{scale}は通常の範囲外です。"
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "単価がトンあたりかkgあたりかを選ぶか、質量を解除してください。",
       "fail": "単位あたり{mass} kgの質量が指定されていますが、単価の基準(トンあたりかkgあたり)がありません。"
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "十分な点数で図形を描き直すか、計測を削除してください。",
       "fail": "種類{type}の計測には{count}点しかありません。最低{needed}点が必要です。"
     },

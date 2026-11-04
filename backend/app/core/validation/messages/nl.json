@@ -1793,11 +1793,11 @@
       "suggestion": "Controleer de schaal of kalibreer hem aan de hand van een bekende maat.",
       "fail": "De tekeningschaal 1:{scale} ligt buiten het gebruikelijke bereik."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Kies of de prijs per ton of per kg geldt, of verwijder de massa.",
       "fail": "Er is een massa van {mass} kg per eenheid opgegeven, maar niet de prijsbasis (per ton of per kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Teken de vorm opnieuw met genoeg punten of verwijder de meting.",
       "fail": "Een meting van het type {type} heeft {count} punten; er zijn er minstens {needed} nodig."
     },

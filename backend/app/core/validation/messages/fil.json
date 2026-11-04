@@ -1793,11 +1793,11 @@
       "suggestion": "Suriin ang sukatan o i-calibrate ito mula sa kilalang sukat.",
       "fail": "Wala sa karaniwang saklaw ang sukatan ng drowing na 1:{scale}."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Piliin kung kada tonelada o kada kg ang presyo, o alisin ang bigat.",
       "fail": "May nakasaad na bigat na {mass} kg kada yunit ngunit walang batayan ng presyo (kada tonelada o kada kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Iguhit muli ang hugis na may sapat na punto, o burahin ang sukat.",
       "fail": "Ang sukat na uri ng {type} ay may {count} punto; kailangan ng hindi bababa sa {needed}."
     },

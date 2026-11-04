@@ -1793,11 +1793,11 @@
       "suggestion": "Zkontrolujte měřítko nebo jej zkalibrujte podle známého rozměru.",
       "fail": "Měřítko výkresu 1:{scale} je mimo obvyklý rozsah."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Zvolte, zda je cena za tunu, nebo za kg, nebo hmotnost odstraňte.",
       "fail": "Je uvedena hmotnost {mass} kg na jednotku, ale ne základ ceny (za tunu nebo za kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Nakreslete tvar znovu s dostatkem bodů nebo měření smažte.",
       "fail": "Měření typu {type} má {count} bodů; potřebuje alespoň {needed}."
     },
