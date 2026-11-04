@@ -24,6 +24,8 @@ HUGE = "1e30"
         (c.ContractSecurityCreate, {"contract_id": uuid4(), "amount": HUGE}),
         (c.FeeStructureCreate, {"contract_id": uuid4(), "fee_percent": "101"}),
         (c.LDClauseCreate, {"contract_id": uuid4(), "per_day_amount": HUGE}),
+        (c.ProgressClaimLineUpdate, {"period_completed_value": HUGE}),
+        (c.ProgressClaimLineCreate, {"progress_claim_id": uuid4(), "contract_line_id": uuid4(), "certified_qty": HUGE}),
         (v.VariationRequestUpdate, {"estimated_cost_impact": HUGE}),
         (v.VariationOrderUpdate, {"final_cost_impact": "-" + HUGE}),
         (v.DisruptionClaimCreate, {"cost_amount": HUGE}),
