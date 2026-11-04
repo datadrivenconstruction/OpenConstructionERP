@@ -75,7 +75,7 @@ export function readFieldSession(): FieldSession | null {
   }
 }
 
-function authHeaders(session: FieldSession): Record<string, string> {
+export function authHeaders(session: FieldSession): Record<string, string> {
   return {
     Authorization: `Bearer ${session.token}`,
     'X-Field-PIN': session.pin,

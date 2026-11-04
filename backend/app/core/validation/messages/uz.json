@@ -1430,6 +1430,12 @@
       "suggestion": "Yangi tahrirda ko'chirilgan har bir o'lchovni tekshirib tasdiqlang yoki qayta o'lchang"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Bu yozuv {days} kunlik, qurilmadan sinxronlash chegarasi ({limit} kun) dan oshgan",
+      "suggestion": "Uni onlayn paytda ilovada qayta kiriting, shunda bugungi sanani oladi"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "'{field}' maydoni qurilmada ham, serverda ham o'zgartirilgan va yechim tanlanmagan",

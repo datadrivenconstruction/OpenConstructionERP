@@ -1430,6 +1430,12 @@
       "suggestion": "Controlli ogni misura riportata sulla nuova revisione e la confermi, oppure la misuri di nuovo"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Questa rilevazione ha {days} giorni, oltre il limite di {limit} giorni per la sincronizzazione da dispositivo",
+      "suggestion": "Reinseriscila nell'app online così riporta la data di oggi"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Il campo '{field}' è stato modificato sia sul dispositivo sia sul server e non ha una risoluzione",

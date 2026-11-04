@@ -1430,6 +1430,12 @@
       "suggestion": "Periksa setiap pengukuran yang dibawa pada revisi baru lalu konfirmasi, atau ukur ulang"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Catatan ini berumur {days} hari, melewati batas {limit} hari untuk sinkronisasi dari perangkat",
+      "suggestion": "Masukkan ulang di aplikasi saat online agar memakai tanggal hari ini"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Kolom '{field}' diubah di perangkat dan di server dan belum ada resolusi",

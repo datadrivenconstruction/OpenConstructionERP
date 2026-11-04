@@ -1430,6 +1430,12 @@
       "suggestion": "Tarkista jokainen siirretty mittaus uudella versiolla ja vahvista se tai mittaa uudelleen"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Tämä tallenne on {days} päivän vanha, yli laitteelta synkronoinnin {limit} päivän rajan",
+      "suggestion": "Syötä se uudelleen sovelluksessa verkossa, jotta siinä on tämän päivän päivämäärä"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Kenttää '{field}' on muutettu sekä laitteella että palvelimella eikä ratkaisua ole valittu",

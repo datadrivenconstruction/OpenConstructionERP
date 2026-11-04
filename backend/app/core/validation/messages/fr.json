@@ -1430,6 +1430,12 @@
       "suggestion": "Vérifiez chaque mesure reprise sur le nouvel indice et confirmez-la, ou mesurez-la à nouveau"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Cette saisie date de {days} jours, au-delà de la limite de {limit} jours pour la synchronisation depuis un appareil",
+      "suggestion": "Saisissez-la à nouveau dans l'application en ligne pour qu'elle porte la date du jour"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Le champ '{field}' a été modifié à la fois sur l'appareil et sur le serveur et n'a pas de résolution",

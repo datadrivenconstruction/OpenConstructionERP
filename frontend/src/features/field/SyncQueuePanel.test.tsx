@@ -111,3 +111,28 @@ describe('SyncQueuePanel', () => {
     expect(screen.getByText('2 waiting, 1 need attention')).toBeInTheDocument();
   });
 });
+
+describe('SyncQueuePanel: offline gaps', () => {
+  it('lists crew-time items beside the field queue and keeps them out of dismissal', () => {
+    const state = buildState({
+      pendingOps: [op({ clientOpId: 'a', kind: 'field.ncr' })],
+      extraItems: [
+        { clientOpId: 't1', kind: 'field_time', method: 'POST', path: '/x', queuedAt: NOW - 60_000, retries: 0, status: 'pending' },
+      ],
+    });
+    render(<SyncQueuePanel state={state} now={NOW} />);
+    expect(screen.getAllByTestId('sync-queue-row')).toHaveLength(2);
+    expect(screen.getByTestId('sync-queue-total')).toHaveTextContent('2');
+    expect(screen.getAllByTestId('sync-queue-dismiss')).toHaveLength(1);
+    expect(screen.getByText('Non-conformance')).toBeInTheDocument();
+    expect(screen.getByText('Crew time')).toBeInTheDocument();
+  });
+
+  it('explains an op the server refused as too old', () => {
+    const state = buildState({
+      lastResults: [{ clientOpId: 'z', kind: 'field.ncr', status: 'rejected', detail: 'op_too_old' }],
+    });
+    render(<SyncQueuePanel state={state} now={NOW} />);
+    expect(screen.getByTestId('sync-queue-refused')).toHaveTextContent('Too old to sync (over 30 days)');
+  });
+});

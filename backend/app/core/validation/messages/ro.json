@@ -1430,6 +1430,12 @@
       "suggestion": "Verificați fiecare măsurătoare preluată pe revizia nouă și confirmați-o sau remăsurați-o"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Această înregistrare are {days} zile, peste limita de {limit} zile pentru sincronizarea de pe un dispozitiv",
+      "suggestion": "Introduceți-o din nou în aplicație, online, ca să poarte data de azi"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Câmpul '{field}' a fost modificat atât pe dispozitiv, cât și pe server și nu are o rezolvare",

@@ -22,6 +22,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { canStore, downscalePhoto, readStorageEstimate } from '@/shared/lib/offline/storageQuota';
 import {
   AlertTriangle,
   Camera,
@@ -127,6 +128,7 @@ export function FieldRaiseIssueTab({
   const [priority, setPriority] = useState<PunchPriority>('medium');
   const [note, setNote] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [storageFull, setStorageFull] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [geo, setGeo] = useState<RaiseIssueGeo | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
@@ -218,11 +220,20 @@ export function FieldRaiseIssueTab({
     setPhotoPreview(null);
   }, []);
 
-  const onPickPhoto = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const onPickPhoto = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    const picked = e.target.files?.[0];
     // Reset the input so re-picking the same file still fires onChange.
     e.target.value = '';
-    if (!file) return;
+    if (!picked) return;
+    // Shrink before it is stored, and refuse when the phone is nearly full.
+    const small = await downscalePhoto(picked);
+    const file =
+      small === picked ? picked : new File([small], picked.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+    if (!canStore(file.size, await readStorageEstimate())) {
+      setStorageFull(true);
+      return;
+    }
+    setStorageFull(false);
     setPhotoFile(file);
     // The `[photoPreview]` effect revokes the previous URL when this replaces it.
     setPhotoPreview(URL.createObjectURL(file));
@@ -415,11 +426,18 @@ export function FieldRaiseIssueTab({
               accept="image/*"
               capture="environment"
               className="sr-only"
-              onChange={onPickPhoto}
+              onChange={(e) => void onPickPhoto(e)}
             />
             <Camera size={22} aria-hidden="true" />
             {t('field.issue_photo_take', { defaultValue: 'Take a photo' })}
           </label>
+        )}
+        {storageFull && (
+          <p role="alert" data-testid="photo-storage-full" className="mt-2 text-sm text-rose-600">
+            {t('field.quota.warning', {
+              defaultValue: 'Phone storage is almost full. Sync soon so photos are not lost.',
+            })}
+          </p>
         )}
       </div>
 

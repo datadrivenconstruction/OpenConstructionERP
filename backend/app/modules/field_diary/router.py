@@ -31,6 +31,7 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
+    Response,
     UploadFile,
     status,
 )
@@ -53,13 +54,17 @@ from app.modules.field_diary.schemas import (
     DiaryEntryUpdate,
     FieldCaptureResponse,
     FieldCrewMemberResponse,
+    FieldHaulTicketCreate,
     FieldInspectionCreate,
     FieldMagicLinkConsume,
     FieldMagicLinkRequest,
     FieldMagicLinkRequestResponse,
     FieldModuleGrantCreate,
     FieldModuleGrantResponse,
+    FieldNcrCreate,
+    FieldOfflinePackResponse,
     FieldPunchCreate,
+    FieldSafetyObservationCreate,
     FieldScheduleProgressCreate,
     FieldSessionResponse,
     FieldSyncBatch,
@@ -71,6 +76,9 @@ from app.modules.field_diary.service import (
     FieldSyncService,
     now_utc,
 )
+
+OFFLINE_PACK_PUNCH_CAP = 200
+OFFLINE_PACK_INSPECTION_CAP = 100
 
 router = APIRouter(tags=["field_diary"])
 logger = logging.getLogger(__name__)
@@ -593,6 +601,60 @@ async def field_today(
     )
 
 
+@router.get("/offline-pack/", response_model=FieldOfflinePackResponse)
+async def field_offline_pack(
+    session: SessionDep,
+    svc: Annotated[FieldDiaryService, Depends(_get_service)],
+    field_session=Depends(_require_field_module_grant),
+) -> FieldOfflinePackResponse:
+    """Open punch items, scheduled inspections with their checklists and the crew roster.
+
+    Scoped to the session project like every other field route. Capped, and the
+    response says when it was, so the phone never presents a partial list as the
+    whole one.
+    """
+    from app.modules.inspections.repository import InspectionRepository
+    from app.modules.punchlist.repository import PunchListRepository
+
+    project_id = field_session.project_id
+    punch, punch_total = await PunchListRepository(session).list_for_project(
+        project_id, offset=0, limit=OFFLINE_PACK_PUNCH_CAP, status="open"
+    )
+    insp, insp_total = await InspectionRepository(session).list_for_project(
+        project_id, offset=0, limit=OFFLINE_PACK_INSPECTION_CAP, status="scheduled"
+    )
+    crew = await svc.list_project_crew(project_id)
+    return FieldOfflinePackResponse(
+        project_id=project_id,
+        server_time=now_utc().isoformat(),
+        punch_items=[
+            {
+                "id": str(p.id),
+                "title": p.title,
+                "description": p.description,
+                "priority": p.priority,
+                "status": p.status,
+                "trade": p.trade,
+            }
+            for p in punch
+        ],
+        inspections=[
+            {
+                "id": str(i.id),
+                "title": i.title,
+                "inspection_type": i.inspection_type,
+                "location": i.location,
+                "status": i.status,
+                "checklist_data": list(i.checklist_data or []),
+            }
+            for i in insp
+        ],
+        roster=[FieldCrewMemberResponse.model_validate(c).model_dump(mode="json") for c in crew],
+        punch_truncated=punch_total > len(punch),
+        inspections_truncated=insp_total > len(insp),
+    )
+
+
 @router.get("/roster/", response_model=list[FieldCrewMemberResponse])
 async def field_roster(
     svc: Annotated[FieldDiaryService, Depends(_get_service)],
@@ -642,6 +704,48 @@ async def capture_inspection(
     """
     svc = FieldSyncService(session)
     return await svc.capture_inspection(field_session, payload)
+
+
+@router.post("/capture/ncr/", response_model=FieldCaptureResponse, status_code=201)
+async def capture_ncr(
+    payload: FieldNcrCreate,
+    session: SessionDep,
+    response: Response,
+    field_session=Depends(_require_field_module_grant),
+) -> FieldCaptureResponse:
+    """Raise an NCR from the field, scoped to the session project. Idempotent on ``client_op_id``."""
+    result = await FieldSyncService(session).capture_ncr(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
+
+
+@router.post("/capture/safety-observation/", response_model=FieldCaptureResponse, status_code=201)
+async def capture_safety_observation(
+    payload: FieldSafetyObservationCreate,
+    session: SessionDep,
+    response: Response,
+    field_session=Depends(_require_field_module_grant),
+) -> FieldCaptureResponse:
+    """Raise a safety observation from the field. Idempotent on ``client_op_id``."""
+    result = await FieldSyncService(session).capture_safety_observation(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
+
+
+@router.post("/capture/haul-ticket/", response_model=FieldCaptureResponse, status_code=201)
+async def capture_haul_ticket(
+    payload: FieldHaulTicketCreate,
+    session: SessionDep,
+    response: Response,
+    field_session=Depends(_require_field_module_grant),
+) -> FieldCaptureResponse:
+    """Record a haul ticket or delivery receipt from the gate. Idempotent on ``client_op_id``."""
+    result = await FieldSyncService(session).capture_haul_ticket(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
 
 
 @router.get("/schedule/activities/")
@@ -860,41 +964,27 @@ async def sync_batch(
         "device_hint",
         "target_kind",
     }
+    dispatch = {
+        "punch_item": (FieldPunchCreate, svc.capture_punch),
+        "inspection": (FieldInspectionCreate, svc.capture_inspection),
+        "schedule_progress": (FieldScheduleProgressCreate, svc.capture_schedule_progress),
+        "ncr": (FieldNcrCreate, svc.capture_ncr),
+        "safety_observation": (FieldSafetyObservationCreate, svc.capture_safety_observation),
+        "haul_ticket": (FieldHaulTicketCreate, svc.capture_haul_ticket),
+    }
     for op in payload.ops:
         extra = {k: v for k, v in (op.payload or {}).items() if k not in _envelope_keys}
-        if op.target_kind == "punch_item":
-            body = FieldPunchCreate(
-                client_op_id=op.client_op_id,
-                captured_at=op.captured_at,
-                lat=op.lat,
-                lon=op.lon,
-                accuracy_m=op.accuracy_m,
-                device_hint=op.device_hint,
-                **extra,
-            )
-            results.append(await svc.capture_punch(field_session, body))
-        elif op.target_kind == "inspection":
-            body = FieldInspectionCreate(
-                client_op_id=op.client_op_id,
-                captured_at=op.captured_at,
-                lat=op.lat,
-                lon=op.lon,
-                accuracy_m=op.accuracy_m,
-                device_hint=op.device_hint,
-                **extra,
-            )
-            results.append(await svc.capture_inspection(field_session, body))
-        elif op.target_kind == "schedule_progress":
-            body = FieldScheduleProgressCreate(
-                client_op_id=op.client_op_id,
-                captured_at=op.captured_at,
-                lat=op.lat,
-                lon=op.lon,
-                accuracy_m=op.accuracy_m,
-                device_hint=op.device_hint,
-                **extra,
-            )
-            results.append(await svc.capture_schedule_progress(field_session, body))
+        schema, handler = dispatch[op.target_kind]
+        body = schema(
+            client_op_id=op.client_op_id,
+            captured_at=op.captured_at,
+            lat=op.lat,
+            lon=op.lon,
+            accuracy_m=op.accuracy_m,
+            device_hint=op.device_hint,
+            **extra,
+        )
+        results.append(await handler(field_session, body))
     return results
 
 

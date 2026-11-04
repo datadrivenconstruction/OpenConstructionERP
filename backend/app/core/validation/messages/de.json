@@ -1452,6 +1452,12 @@
       "suggestion": "Die Übernahme-Prüfung öffnen, jedes unsichere Aufmaß auf dem neuen Plan kontrollieren und bestätigen oder neu messen"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "Diese Erfassung ist {days} Tage alt und damit älter als die Grenze von {limit} Tagen für die Synchronisierung vom Gerät",
+      "suggestion": "Online in der App neu erfassen, damit sie das heutige Datum trägt"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "Das Feld '{field}' wurde auf dem Gerät und auf dem Server geändert und hat keine Auflösung",

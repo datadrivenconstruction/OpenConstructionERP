@@ -10068,6 +10068,46 @@ class OfflineSyncMergeComplete(ValidationRule):
         ]
 
 
+class FieldCaptureOpFresh(ValidationRule):
+    """An offline capture older than the sync window is refused, not replayed.
+
+    ERROR: a write that sat on a phone for weeks describes a site that has moved
+    on, and replaying it quietly would overwrite newer facts. The age is judged
+    on the server clock, so a wrong device clock cannot widen or narrow the
+    window. An op with no readable capture time passes: there is nothing to judge.
+    """
+
+    rule_id = "field_diary.offline_op_fresh"
+    name = "Field Capture Op Fresh"
+    standard = "field_diary_capture"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Fails when an offline field capture is older than the sync window."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        data = context.data if isinstance(context.data, dict) else {}
+        from app.modules.field_diary.capture_age import MAX_OP_AGE_DAYS, op_age_days
+
+        limit = data.get("max_age_days")
+        limit = limit if isinstance(limit, int) and limit > 0 else MAX_OP_AGE_DAYS
+        age = op_age_days(data.get("captured_at"))
+        if age is None or age <= limit:
+            return []
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate("field_diary.offline_op_fresh.fail", locale=locale, days=f"{age}", limit=f"{limit}"),
+                element_ref=str(data.get("kind") or ""),
+                suggestion=translate("field_diary.offline_op_fresh.suggestion", locale=locale),
+            )
+        ]
+
+
 class FieldTimeOutdoorHeatBan(ValidationRule):
     """A line whose clock times touch a seasonal midday outdoor work ban.
 
@@ -12744,6 +12784,7 @@ def register_builtin_rules() -> None:
         (FieldTimeOutdoorHeatBan(), None),
         # Offline sync (merge of a device edit against a newer server version)
         (OfflineSyncMergeComplete(), ["offline_sync"]),
+        (FieldCaptureOpFresh(), ["field_diary_capture"]),
         *((rule, None) for rule in FIELD_CLOCK_RULES),
         *((rule, None) for rule in PRODUCTIVITY_RULES),
         # Estimate Audit (curated cross-checks: wrong unit, near-duplicate,

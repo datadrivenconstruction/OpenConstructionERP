@@ -1430,6 +1430,12 @@
       "suggestion": "请在新版本上检查每个沿用的测量值，并确认或重新测量"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "此记录已有 {days} 天，超过设备同步 {limit} 天的期限",
+      "suggestion": "请在联网时于应用中重新录入，使其带上今天的日期"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "字段“{field}”在设备和服务器上都被修改过，且尚未选择处理方式",

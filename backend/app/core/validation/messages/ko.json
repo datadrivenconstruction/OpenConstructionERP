@@ -1430,6 +1430,12 @@
       "suggestion": "새 개정에서 이월된 각 측정값을 확인하여 승인하거나 다시 측정하세요"
     }
   },
+  "field_diary": {
+    "offline_op_fresh": {
+      "fail": "이 기록은 {days}일 지나 기기 동기화 제한 {limit}일을 넘었습니다",
+      "suggestion": "온라인 상태에서 앱에 다시 입력하면 오늘 날짜가 기록됩니다"
+    }
+  },
   "offline_sync": {
     "merge_complete": {
       "fail": "'{field}' 필드가 기기와 서버 양쪽에서 변경되었고 해결 방법이 선택되지 않았습니다",
