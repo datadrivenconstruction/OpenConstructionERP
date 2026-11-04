@@ -496,6 +496,15 @@ export const navGroups: NavGroup[] = [
     // just the core commercial entry point without extra clutter.
     items: [
       { labelKey: 'nav.crm', to: '/crm', icon: Briefcase, advancedOnly: true },
+      {
+        labelKey: 'nav.win_loss',
+        defaultLabel: 'Bid outcomes',
+        to: '/win-loss',
+        icon: Scale,
+        advancedOnly: true,
+        helpKey: 'sidebar.help.win_loss',
+        defaultHelp: 'How each bid ended: winning price, money left on the table, hit rate by client, trade and size.',
+      },
       { labelKey: 'nav.contracts', to: '/contracts', icon: FileSignature },
       { labelKey: 'nav.payment_clock', to: '/payment-clock', icon: Scale },
       { labelKey: 'nav.tax_withholding', to: '/tax-withholding', icon: Percent },
