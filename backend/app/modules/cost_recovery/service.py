@@ -300,7 +300,9 @@ def _rule_context(
 _RULE_FIELDS = ("responsible_party", "gross_amount", "chargeable_pct", "recovered_amount", "status")
 
 
-async def _enforce(project_id: uuid.UUID, ref: str, data: dict[str, Any], operation: str) -> list[dict[str, Any]]:
+async def _enforce(
+    project_id: uuid.UUID, ref: str, data: dict[str, Any], operation: str, before: dict[str, Any] | None = None
+) -> list[dict[str, Any]]:
     from app.core.validation.money_rules import enforce_money_rules  # noqa: PLC0415
     from app.modules.cost_recovery.validators import COST_RECOVERY_RULE_SET  # noqa: PLC0415
 
@@ -311,6 +313,7 @@ async def _enforce(project_id: uuid.UUID, ref: str, data: dict[str, Any], operat
         target_id=ref,
         project_id=str(project_id),
         operation=operation,
+        before=before,
     )
 
 
@@ -472,6 +475,18 @@ async def update_back_charge(
             shares=shares,
         ),
         "update",
+        before=_rule_context(
+            ref=str(back_charge.id),
+            project_id=project_id,
+            responsible_party=back_charge.responsible_party or "",
+            gross=back_charge.gross_amount,
+            pct=back_charge.chargeable_pct,
+            recovered=back_charge.recovered_amount,
+            currency=back_charge.currency or "",
+            status=back_charge.status or "",
+            previous_status=back_charge.status,
+            shares=shares,
+        ),
     )
     if "subcontractor_id" in fields or "contact_id" in fields:
         # Re-link: a new subcontractor without a contact takes the

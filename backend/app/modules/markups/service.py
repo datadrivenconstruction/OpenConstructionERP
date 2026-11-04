@@ -157,20 +157,31 @@ class MarkupsService:
         markup_id: str = "",
         project_id: uuid.UUID | None = None,
         scale: dict[str, Any] | None = None,
+        before: dict[str, Any] | None = None,
         **markup: Any,
     ) -> list[dict[str, Any]]:
-        """Run the markup rules; errors raise a coded 422, the warnings are returned."""
-        from app.core.validation.cost_gate import raise_on_errors, run_rule_set, warnings_of  # noqa: PLC0415
+        """Run the markup rules; errors raise a coded 422, the warnings are returned.
+
+        With ``before`` (the stored markup) only errors the edit introduces block.
+        """
+        from app.core.validation.cost_gate import raise_on_introduced, run_rule_set, warnings_of  # noqa: PLC0415
         from app.modules.markups.validators import MARKUPS_RULE_SET  # noqa: PLC0415
 
-        report = await run_rule_set(
-            MARKUPS_RULE_SET,
-            {"markup": {"id": markup_id, **markup}, "scale": scale or {}},
-            target_type="markup",
-            target_id=markup_id,
-            project_id=str(project_id) if project_id else None,
-        )
-        raise_on_errors(report, error="markups_rules_failed")
+        async def run(state: dict[str, Any]) -> Any:
+            return await run_rule_set(
+                MARKUPS_RULE_SET,
+                {"markup": {"id": markup_id, **state}, "scale": scale or {}},
+                target_type="markup",
+                target_id=markup_id,
+                project_id=str(project_id) if project_id else None,
+            )
+
+        report = await run(markup)
+
+        async def stored() -> Any:
+            return await run({**markup, **(before or {})})
+
+        await raise_on_introduced(report, stored if before is not None else None, error="markups_rules_failed")
         return warnings_of(report)
 
     async def _page_has_scale(self, document_id: str | None, page: int) -> bool | None:
@@ -327,6 +338,11 @@ class MarkupsService:
                 measurement_value=fields.get("measurement_value", item.measurement_value),
                 measurement_unit=fields.get("measurement_unit", item.measurement_unit),
                 has_scale=await self._page_has_scale(item.document_id, item.page),
+                before={
+                    "type": item.type,
+                    "measurement_value": item.measurement_value,
+                    "measurement_unit": item.measurement_unit,
+                },
             )
         if "metadata" in fields:
             _incoming = fields.pop("metadata")

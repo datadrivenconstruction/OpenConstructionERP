@@ -19,10 +19,9 @@ from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from fastapi import HTTPException, status
-
 from app.core.i18n import get_locale
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, validation_engine
+from app.core.validation.failure import introduced_errors, raise_rule_failure
 from app.core.validation.messages import translate
 from app.core.validation.money_rules import MoneyRule, locale_of
 
@@ -87,16 +86,6 @@ class SiteRule(MoneyRule):
         return self.site_fail(context, "future_date", ref=ref, field=field, value=value)
 
 
-def _serialise(r: RuleResult) -> dict[str, Any]:
-    return {
-        "rule_id": r.rule_id,
-        "severity": r.severity.value,
-        "message": r.message,
-        "element_ref": r.element_ref,
-        "suggestion": r.suggestion,
-    }
-
-
 async def check_site_rules(
     rule_set: str,
     register: Callable[[], None],
@@ -105,36 +94,33 @@ async def check_site_rules(
     target_type: str,
     target_id: str = "",
     project_id: Any = None,
+    before: dict[str, Any] | None = None,
 ) -> list[RuleResult]:
     """Run one rule set at a write point.
 
     Errors raise a 422 whose body carries the first blocking rule id as ``code``;
     warnings are logged and returned for the caller to report, never blocking.
+    With ``before`` (the stored record) only errors the edit introduces block.
     """
     register()
-    report = await validation_engine.validate(
-        data=data,
-        rule_sets=[rule_set],
-        target_type=target_type,
-        target_id=target_id,
-        project_id=str(project_id) if project_id else None,
-        metadata={"locale": get_locale()},
-    )
-    if report.errors:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "error": "validation_failed",
-                "code": report.errors[0].rule_id,
-                "rule_set": rule_set,
-                "rule_sets": report.rule_sets_applied,
-                "status": report.status.value,
-                "results": [_serialise(r) for r in report.errors + report.warnings],
-                "message": report.errors[0].message,
-                "errors": [_serialise(r) for r in report.errors],
-                "warnings": [_serialise(r) for r in report.warnings],
-            },
+
+    async def run(payload: dict[str, Any]) -> Any:
+        return await validation_engine.validate(
+            data=payload,
+            rule_sets=[rule_set],
+            target_type=target_type,
+            target_id=target_id,
+            project_id=str(project_id) if project_id else None,
+            metadata={"locale": get_locale()},
         )
+
+    report = await run(data)
+
+    async def stored() -> Any:
+        return await run(before or {})
+
+    blocking = await introduced_errors(report, stored if before is not None else None)
+    raise_rule_failure(report, blocking, error="validation_failed", rule_set=rule_set)
     for w in report.warnings:
         logger.info("%s warning %s: %s", rule_set, w.rule_id, w.message)
     return list(report.warnings)

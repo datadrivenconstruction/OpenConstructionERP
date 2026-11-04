@@ -26,6 +26,7 @@ from app.core.validation.engine import (
     ValidationContext,
     ValidationRule,
 )
+from app.core.validation.failure import finding, introduced_errors, raise_rule_failure
 from app.core.validation.messages import translate
 
 #: Money is stored to two places; one minor unit of slack absorbs rounding of
@@ -204,17 +205,6 @@ class MoneyRule(ValidationRule):
         return [self.fail(context, "status_transition", ref=ref, from_status=previous, to_status=current)]
 
 
-def _finding(r: RuleResult) -> dict[str, Any]:
-    return {
-        "rule_id": r.rule_id,
-        "rule_name": r.rule_name,
-        "severity": r.severity.value,
-        "message": r.message,
-        "element_ref": r.element_ref,
-        "suggestion": r.suggestion,
-    }
-
-
 async def enforce_money_rules(
     rule_set: str,
     data: dict[str, Any],
@@ -223,45 +213,43 @@ async def enforce_money_rules(
     target_id: str,
     project_id: str | None = None,
     operation: str = "write",
+    before: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Run a money rule set at a write point; errors block, warnings are returned.
 
     Raises HTTP 422 with ``error="money_rules_failed"`` and the failed rules when any
     ERROR fires, HTTP 503 when the rule set is not registered. Returns the WARNING
-    findings (possibly empty) for the caller to hand to the client.
+    findings (possibly empty) for the caller to hand to the client. With ``before`` (the
+    stored record) only errors the edit introduces block.
     """
     from fastapi import HTTPException  # noqa: PLC0415
 
     from app.core.i18n import get_locale  # noqa: PLC0415
     from app.core.validation.engine import validation_engine  # noqa: PLC0415
 
-    report = await validation_engine.validate(
-        data=data,
-        rule_sets=[rule_set],
-        target_type=target_type,
-        target_id=target_id,
-        project_id=project_id,
-        metadata={"locale": get_locale(), "workflow": operation},
-    )
+    async def run(payload: dict[str, Any]) -> Any:
+        return await validation_engine.validate(
+            data=payload,
+            rule_sets=[rule_set],
+            target_type=target_type,
+            target_id=target_id,
+            project_id=project_id,
+            metadata={"locale": get_locale(), "workflow": operation},
+        )
+
+    report = await run(data)
     if rule_set in report.unsupported_rule_sets:
         raise HTTPException(
             status_code=503,
             detail=f"The {rule_set} validation rules are not loaded on this deployment.",
         )
-    if report.has_errors:
-        heads = "; ".join(r.message for r in report.errors[:3])
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "error": "money_rules_failed",
-                "message": heads,
-                "rule_set": rule_set,
-                "operation": operation,
-                "errors": [_finding(r) for r in report.errors],
-                "warnings": [_finding(r) for r in report.warnings],
-            },
-        )
-    return [_finding(r) for r in report.warnings]
+
+    async def stored() -> Any:
+        return await run(before or {})
+
+    blocking = await introduced_errors(report, stored if before is not None else None)
+    raise_rule_failure(report, blocking, error="money_rules_failed", rule_set=rule_set, operation=operation)
+    return [finding(r) for r in report.warnings]
 
 
 async def enforce_rule_set(
@@ -294,19 +282,5 @@ async def enforce_rule_set(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"The '{rule_set}' validation rules are not loaded on this deployment.",
         )
-    if report.errors:
-        heads = "; ".join(r.message for r in report.errors[:3])
-        more = len(report.errors) - 3
-        if more > 0:
-            heads = f"{heads} (and {more} more)"
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "error": error_code,
-                "message": heads,
-                "rule_sets": report.rule_sets_applied,
-                "status": report.status.value,
-                "results": [_finding(r) for r in report.errors + report.warnings],
-            },
-        )
-    return [_finding(r) for r in report.warnings]
+    raise_rule_failure(report, error=error_code)
+    return [finding(r) for r in report.warnings]

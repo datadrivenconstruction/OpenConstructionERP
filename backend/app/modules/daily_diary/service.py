@@ -505,7 +505,9 @@ class DailyDiaryService:
         self.signature_repo = DiaryArchiveSignatureRepository(session)
         self.last_warnings: list[Any] = []
 
-    async def _check(self, key: str, record: dict[str, Any], project_id: Any = None) -> None:
+    async def _check(
+        self, key: str, record: dict[str, Any], project_id: Any = None, before: dict[str, Any] | None = None
+    ) -> None:
         """Run the ``daily_diary`` rule set on one record; errors raise a coded 422, warnings are logged."""
         from app.core.validation.site_rules import check_site_rules  # noqa: PLC0415
         from app.modules.daily_diary.validators import (  # noqa: PLC0415
@@ -520,6 +522,7 @@ class DailyDiaryService:
             target_type=f"daily_diary_{key}",
             target_id=str(record.get("id", "")),
             project_id=project_id,
+            before=None if before is None else {key: before},
         )
 
     # ── Diary CRUD ───────────────────────────────────────────────────────
@@ -632,6 +635,11 @@ class DailyDiaryService:
                     "equipment_count": fields.get("equipment_count", diary.equipment_count),
                 },
                 diary.project_id,
+                before={
+                    "id": diary_id,
+                    "labour_count": diary.labour_count,
+                    "equipment_count": diary.equipment_count,
+                },
             )
         await self.diary_repo.update_fields(diary_id, **fields)
         await self.session.refresh(diary)
@@ -1089,6 +1097,7 @@ class DailyDiaryService:
                 "entry",
                 {"id": entry_id, "entry_time": fields["entry_time"], "diary_date": diary.diary_date},
                 diary.project_id,
+                before={"id": entry_id, "entry_time": entry.entry_time, "diary_date": diary.diary_date},
             )
         if fields:
             await self.entry_repo.update_fields(entry_id, **fields)

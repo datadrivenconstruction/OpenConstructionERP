@@ -15,6 +15,7 @@ from typing import Any
 
 from app.core.i18n import get_locale
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, ValidationReport, validation_engine
+from app.core.validation.failure import finding, rule_failure_detail
 from app.core.validation.messages import translate
 from app.core.validation.money_rules import MoneyRule, locale_of
 
@@ -70,24 +71,13 @@ class QualityRule(MoneyRule):
 
 
 def rule_errors_detail(report: Any, message: str, errors: Any = None) -> dict[str, Any]:
-    """The 422 body a gated quality write answers with (same shape as procurement)."""
-    errors = report.errors if errors is None else errors
-    return {
-        "message": message,
-        "report": report.summary(),
-        "errors": [
-            {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
-            for r in errors
-        ],
-    }
+    """The 422 body a gated quality write answers with."""
+    return rule_failure_detail(report, error="quality_rules_failed", errors=errors, message=message)
 
 
 def warning_findings(report: Any) -> list[dict[str, Any]]:
     """Non-blocking findings, in the shape a response carries them."""
-    return [
-        {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
-        for r in report.warnings
-    ]
+    return [finding(r) for r in report.warnings]
 
 
 async def gate_rule_set(

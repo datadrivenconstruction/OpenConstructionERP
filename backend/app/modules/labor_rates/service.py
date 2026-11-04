@@ -171,13 +171,20 @@ class LaborRateService:
         #: Non-blocking findings of the latest write, for the router to report.
         self.warnings: list[dict[str, Any]] = []
 
-    async def _gate(self, context: dict[str, Any], target_id: str) -> None:
-        """Run the labor rate rules; errors raise a coded 422, warnings are kept."""
-        from app.core.validation.cost_gate import raise_on_errors, run_rule_set, warnings_of  # noqa: PLC0415
+    async def _gate(self, context: dict[str, Any], target_id: str, *, before: dict[str, Any] | None = None) -> None:
+        """Run the labor rate rules; errors raise a coded 422, warnings are kept.
+
+        With ``before`` (the stored record's context) only errors the edit introduces block.
+        """
+        from app.core.validation.cost_gate import raise_on_introduced, run_rule_set, warnings_of  # noqa: PLC0415
         from app.modules.labor_rates.validators import LABOR_RATES_RULE_SET  # noqa: PLC0415
 
         report = await run_rule_set(LABOR_RATES_RULE_SET, context, target_type="labor_rate", target_id=target_id)
-        raise_on_errors(report, error="labor_rates_rules_failed")
+
+        async def stored() -> Any:
+            return await run_rule_set(LABOR_RATES_RULE_SET, before, target_type="labor_rate", target_id=target_id)
+
+        await raise_on_introduced(report, stored if before is not None else None, error="labor_rates_rules_failed")
         self.warnings = warnings_of(report)
 
     # ── Compute ─────────────────────────────────────────────────────────────
@@ -311,6 +318,15 @@ class LaborRateService:
                 "components": merged,
             },
             str(template.id),
+            before={
+                "template": {
+                    "id": str(template.id),
+                    "name": template.name,
+                    "base_wage": template.base_wage,
+                    "currency": template.currency,
+                },
+                "components": [{"label": c.label, "kind": c.kind, "value": c.value} for c in template.components],
+            },
         )
 
         if "name" in fields:
