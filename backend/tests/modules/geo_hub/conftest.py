@@ -150,6 +150,14 @@ async def tenant_a(http_client):
 
 
 @pytest_asyncio.fixture(scope="module")
+async def tenant_manager(http_client):
+    """A manager of his own project: holds ``geo_hub.delete`` but owns nothing of tenant A's."""
+    email, password = await _register(http_client, "tenant-m")
+    await _set_role(email, "manager")
+    return {"headers": await _login(http_client, email, password)}
+
+
+@pytest_asyncio.fixture(scope="module")
 async def tenant_b(http_client):
     email, password = await _register(http_client, "tenant-b")
     # editor — NOT admin so IDOR tests can't bypass via role

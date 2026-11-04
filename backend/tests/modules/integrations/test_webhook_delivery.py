@@ -454,6 +454,7 @@ def _body(**over):
 
 
 def test_https_is_required_unless_debug(monkeypatch):
+    monkeypatch.setattr("app.config.get_settings", lambda: SimpleNamespace(app_debug=False))
     with pytest.raises(ValidationError) as exc:
         WebhookCreate(**_body(url="http://hooks.example.com/oe"))
     assert "https" in str(exc.value)

@@ -20,8 +20,13 @@ from app.dependencies import get_optional_user_payload, get_session
 from app.modules.bi_feed.router import router as bi_feed_router
 from app.modules.bi_feed.validators import register_bi_feed_rules
 from app.modules.boq.models import BOQ, Position
+from app.modules.boq.permissions import register_boq_permissions
 from app.modules.finance.models import Invoice
+from app.modules.finance.permissions import register_finance_permissions
+from app.modules.procurement.permissions import register_procurement_permissions
 from app.modules.projects.models import Project
+from app.modules.projects.permissions import register_project_permissions
+from app.modules.schedule.permissions import register_schedule_permissions
 from app.modules.users.models import APIKey, User
 
 PREFIX = "/v1/bi-feed"
@@ -31,6 +36,15 @@ STAMP = datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
 @pytest.fixture(scope="session", autouse=True)
 def _rules_registered() -> None:
     register_bi_feed_rules()
+    # A feed is gated by the read permission of its source module; the app registers these at start-up.
+    for register in (
+        register_project_permissions,
+        register_boq_permissions,
+        register_finance_permissions,
+        register_procurement_permissions,
+        register_schedule_permissions,
+    ):
+        register()
 
 
 @pytest_asyncio.fixture
