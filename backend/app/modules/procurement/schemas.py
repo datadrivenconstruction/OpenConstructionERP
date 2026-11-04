@@ -22,8 +22,8 @@ def _validate_non_negative_decimal(v: str) -> str:
         d = Decimal(v)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise ValueError(f"Invalid decimal value: {v!r}") from exc
-    if d < 0:
-        raise ValueError(f"Value must be non-negative, got {v!r}")
+    if not d.is_finite() or d < 0:
+        raise ValueError(f"Value must be a finite non-negative number, got {v!r}")
     return v
 
 
@@ -471,8 +471,8 @@ class PORetainageReleaseRequest(BaseModel):
             d = Decimal(v)
         except (InvalidOperation, ValueError, TypeError) as exc:
             raise ValueError(f"Invalid decimal value: {v!r}") from exc
-        if d <= 0:
-            raise ValueError(f"Release amount must be positive, got {v!r}")
+        if not d.is_finite() or d <= 0:
+            raise ValueError(f"Release amount must be a finite positive number, got {v!r}")
         return v
 
 
