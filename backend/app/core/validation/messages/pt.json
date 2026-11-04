@@ -1737,5 +1737,47 @@
       "fail": "As datas {earlier} e {later} estão fora de ordem ou fora do período.",
       "suggestion": "Corrija as datas para que a mais antiga venha primeiro e cada entrada fique dentro do período."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} aparece mais de uma vez e por isso é contada duas vezes.",
+      "suggestion": "Mantenha uma só linha somando as quantidades, ou elimine a duplicada."
+    },
+    "burden_high": {
+      "fail": "Os encargos percentuais somam {percent} % do salário base, acima dos {limit} % habituais.",
+      "suggestion": "Verifique as linhas de encargos sociais, seguro e férias: vírgula deslocada ou encargo contado duas vezes."
+    },
+    "empty_assembly": {
+      "fail": "A composição {code} não tem componentes ou tem preço zero; o item seria orçado a zero.",
+      "suggestion": "Adicione componentes com preço antes de aplicar a composição a um orçamento."
+    },
+    "unit_mismatch": {
+      "fail": "A unidade {unit} não serve para esta medição: distância em unidades de comprimento, área em unidades de área, contagem em peças.",
+      "suggestion": "Corrija a unidade ou o tipo de marcação antes de a quantidade seguir para o orçamento."
+    },
+    "link_without_measurement": {
+      "fail": "Esta marcação não tem valor medido, não há quantidade a vincular ao item.",
+      "suggestion": "Meça o elemento com uma marcação de distância, área ou contagem e depois vincule-a."
+    },
+    "scale_unit_not_length": {
+      "fail": "A escala está calibrada em {unit}, que não é um comprimento.",
+      "suggestion": "Calibre sobre uma distância conhecida, por exemplo em metros."
+    },
+    "measurement_without_scale": {
+      "fail": "Esta página não tem escala calibrada, por isso o valor medido não é fiável.",
+      "suggestion": "Calibre a escala da página sobre uma distância conhecida."
+    },
+    "unallocated_share": {
+      "fail": "{share} % do custo direto ({count} itens) não tem elemento NRM 1 utilizável.",
+      "suggestion": "Associe estes itens a um elemento NRM 1 para completar a divisão por elementos."
+    },
+    "gifa_missing": {
+      "fail": "Não foi indicada a área de piso, por isso o custo por m2 não pode ser mostrado.",
+      "suggestion": "Introduza a área no projeto ou para esta leitura."
+    },
+    "markup_load": {
+      "fail": "Os acréscimos somam {percent} % do custo direto.",
+      "suggestion": "Verifique as linhas de custos indiretos, lucro, risco e reajuste: percentagem lançada como valor ou contada duas vezes."
+    }
   }
 }

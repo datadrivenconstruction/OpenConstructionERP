@@ -1737,5 +1737,47 @@
       "fail": "Data {earlier} a {later} jsou v nesprávném pořadí nebo mimo období.",
       "suggestion": "Opravte data tak, aby dřívější šlo první a každý záznam spadal do období."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "Položka {label} je uvedena vícekrát, a proto se počítá dvakrát.",
+      "suggestion": "Ponechte jeden řádek se sečtenými množstvími nebo duplicitu odstraňte."
+    },
+    "burden_high": {
+      "fail": "Procentní příplatky dávají dohromady {percent} % základní mzdy, tedy více než obvyklých {limit} %.",
+      "suggestion": "Zkontrolujte řádky sociálních odvodů, pojištění a dovolené, zda nemají posunutou čárku nebo dvakrát započtenou sazbu."
+    },
+    "empty_assembly": {
+      "fail": "Sestava {code} nemá žádné složky nebo má nulovou cenu, položka by byla oceněna nulou.",
+      "suggestion": "Před použitím sestavy v rozpočtu doplňte oceněné složky."
+    },
+    "unit_mismatch": {
+      "fail": "Jednotka {unit} k tomuto měření nesedí: délka se udává v délkových jednotkách, plocha v plošných, počet v kusech.",
+      "suggestion": "Opravte jednotku nebo typ značky dříve, než množství půjde do rozpočtu."
+    },
+    "link_without_measurement": {
+      "fail": "Tato značka nemá naměřenou hodnotu, takže není co navázat na položku rozpočtu.",
+      "suggestion": "Prvek změřte značkou délky, plochy nebo počtu a pak ji navažte."
+    },
+    "scale_unit_not_length": {
+      "fail": "Měřítko je zkalibrováno v {unit}, což není délka.",
+      "suggestion": "Kalibrujte podle známé vzdálenosti, například v metrech."
+    },
+    "measurement_without_scale": {
+      "fail": "Tato strana nemá zkalibrované měřítko, naměřená hodnota proto není spolehlivá.",
+      "suggestion": "Zkalibrujte měřítko strany podle známé vzdálenosti."
+    },
+    "unallocated_share": {
+      "fail": "{share} % přímých nákladů ({count} položek) nemá použitelný prvek NRM 1.",
+      "suggestion": "Přiřaďte tyto položky k prvku NRM 1, aby bylo členění podle prvků úplné."
+    },
+    "gifa_missing": {
+      "fail": "Není uvedena hrubá podlahová plocha, proto nelze zobrazit náklady na m2.",
+      "suggestion": "Zadejte plochu v projektu nebo pro toto zobrazení."
+    },
+    "markup_load": {
+      "fail": "Přirážky dávají dohromady {percent} % přímých nákladů.",
+      "suggestion": "Zkontrolujte řádky režie, zisku, rizika a valorizace, zda procento nebylo zadáno jako částka nebo započteno dvakrát."
+    }
   }
 }

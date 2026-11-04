@@ -1737,5 +1737,47 @@
       "fail": "Mali ang pagkakasunod ng mga petsang {earlier} at {later} o nasa labas ng panahon.",
       "suggestion": "Ayusin ang mga petsa upang mauna ang mas maaga at nasa loob ng panahon ang bawat entry."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "Ang {label} ay nakalista nang higit sa isang beses kaya dalawang beses itong nabibilang.",
+      "suggestion": "Magtira ng isang linya at pagsamahin ang mga dami, o alisin ang duplicate."
+    },
+    "burden_high": {
+      "fail": "Ang mga porsyentong dagdag na gastos ay umaabot sa {percent} % ng batayang sahod, mas mataas sa karaniwang {limit} %.",
+      "suggestion": "Suriin ang mga linya ng kontribusyon, insurance, at bayad sa bakasyon kung may lumipat na decimal point o singil na nabilang nang dalawang beses."
+    },
+    "empty_assembly": {
+      "fail": "Ang assembly na {code} ay walang bahagi o may presyong zero, kaya zero ang magiging halaga ng item.",
+      "suggestion": "Magdagdag ng mga bahaging may presyo bago ilapat ang assembly sa bill of quantities."
+    },
+    "unit_mismatch": {
+      "fail": "Hindi akma ang yunit na {unit} sa sukat na ito: ang distansya ay sa yunit ng haba, ang lawak sa yunit ng lawak, ang bilang sa piraso.",
+      "suggestion": "Itama ang yunit o uri ng markup bago mapunta ang dami sa bill of quantities."
+    },
+    "link_without_measurement": {
+      "fail": "Walang nasukat na halaga ang markup na ito, kaya walang dami na maiuugnay sa item.",
+      "suggestion": "Sukatin ang elemento gamit ang markup ng distansya, lawak, o bilang, saka iugnay."
+    },
+    "scale_unit_not_length": {
+      "fail": "Ang scale ay na-calibrate sa {unit}, na hindi haba.",
+      "suggestion": "Mag-calibrate sa kilalang distansya, halimbawa sa metro."
+    },
+    "measurement_without_scale": {
+      "fail": "Walang na-calibrate na scale ang pahinang ito, kaya hindi maaasahan ang nasukat na halaga.",
+      "suggestion": "I-calibrate ang scale ng pahina sa kilalang distansya."
+    },
+    "unallocated_share": {
+      "fail": "Ang {share} % ng direktang gastos ({count} item) ay walang magagamit na elemento ng NRM 1.",
+      "suggestion": "Italaga ang mga item na ito sa elemento ng NRM 1 upang kumpleto ang hati ayon sa elemento."
+    },
+    "gifa_missing": {
+      "fail": "Walang nakasaad na gross floor area kaya hindi maipakita ang gastos kada m2.",
+      "suggestion": "Ilagay ang lawak sa proyekto o para sa pagtinging ito."
+    },
+    "markup_load": {
+      "fail": "Ang mga dagdag ay umaabot sa {percent} % ng direktang gastos.",
+      "suggestion": "Suriin ang mga linya ng overhead, tubo, panganib, at eskalasyon kung may porsyentong inilagay bilang halaga o nabilang nang dalawang beses."
+    }
   }
 }

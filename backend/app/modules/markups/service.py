@@ -151,6 +151,34 @@ class MarkupsService:
 
     # ── Markup CRUD ──────────────────────────────────────────────────────
 
+    async def _enforce_rules(
+        self,
+        *,
+        markup_id: str = "",
+        project_id: uuid.UUID | None = None,
+        scale: dict[str, Any] | None = None,
+        **markup: Any,
+    ) -> list[dict[str, Any]]:
+        """Run the markup rules; errors raise a coded 422, the warnings are returned."""
+        from app.core.validation.cost_gate import raise_on_errors, run_rule_set, warnings_of  # noqa: PLC0415
+        from app.modules.markups.validators import MARKUPS_RULE_SET  # noqa: PLC0415
+
+        report = await run_rule_set(
+            MARKUPS_RULE_SET,
+            {"markup": {"id": markup_id, **markup}, "scale": scale or {}},
+            target_type="markup",
+            target_id=markup_id,
+            project_id=str(project_id) if project_id else None,
+        )
+        raise_on_errors(report, error="markups_rules_failed")
+        return warnings_of(report)
+
+    async def _page_has_scale(self, document_id: str | None, page: int) -> bool | None:
+        """Whether the page is calibrated; ``None`` for a markup that sits on no document."""
+        if not document_id:
+            return None
+        return bool(await self.scale_repo.list_for_document(document_id, page=page))
+
     async def create_markup(self, data: MarkupCreate, user_id: str) -> Markup:
         """Create a new markup annotation.
 
@@ -159,6 +187,13 @@ class MarkupsService:
         the markup is on a stale revision (and fade it).
         """
         _validate_geometry(data.geometry, data.type)
+        warnings = await self._enforce_rules(
+            project_id=data.project_id,
+            type=data.type,
+            measurement_value=data.measurement_value,
+            measurement_unit=data.measurement_unit,
+            has_scale=await self._page_has_scale(data.document_id, data.page),
+        )
         file_version_id = await self._resolve_file_version_id(
             project_id=data.project_id,
             document_id=data.document_id,
@@ -188,6 +223,7 @@ class MarkupsService:
             created_by=user_id,
         )
         item = await self.markup_repo.create(item)
+        item.rule_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Markup created: %s type=%s project=%s", item.id, data.type, data.project_id)
         return item
 
@@ -281,6 +317,17 @@ class MarkupsService:
             _validate_geometry(data.geometry, data.type or item.type)
 
         fields = data.model_dump(exclude_unset=True)
+        warnings: list[dict[str, Any]] = []
+        if fields.keys() & {"type", "measurement_value", "measurement_unit"}:
+            # A colour or status edit must not be refused for an older measurement.
+            warnings = await self._enforce_rules(
+                markup_id=str(markup_id),
+                project_id=item.project_id,
+                type=fields.get("type", item.type),
+                measurement_value=fields.get("measurement_value", item.measurement_value),
+                measurement_unit=fields.get("measurement_unit", item.measurement_unit),
+                has_scale=await self._page_has_scale(item.document_id, item.page),
+            )
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (
@@ -296,6 +343,7 @@ class MarkupsService:
 
         await self.markup_repo.update_fields(markup_id, **fields)
         await self.session.refresh(item)
+        item.rule_warnings = warnings  # type: ignore[attr-defined]
 
         # Epic H - universal audit trail. Only emit a status-changed row
         # when status actually moved; ordinary geometry / colour edits
@@ -352,6 +400,12 @@ class MarkupsService:
         """
         resolved_versions: list[uuid.UUID | None] = []
         for data in markups_data:
+            await self._enforce_rules(
+                project_id=data.project_id,
+                type=data.type,
+                measurement_value=data.measurement_value,
+                measurement_unit=data.measurement_unit,
+            )
             resolved_versions.append(
                 await self._resolve_file_version_id(
                     project_id=data.project_id,
@@ -446,6 +500,14 @@ class MarkupsService:
     async def link_to_boq(self, markup_id: uuid.UUID, position_id: str) -> Markup:
         """Link a measurement markup to a BOQ position."""
         item = await self.get_markup(markup_id)
+        await self._enforce_rules(
+            markup_id=str(markup_id),
+            project_id=item.project_id,
+            type=item.type,
+            measurement_value=item.measurement_value,
+            measurement_unit=item.measurement_unit,
+            operation="link",
+        )
 
         await self.markup_repo.update_fields(markup_id, linked_boq_position_id=position_id)
         await self.session.refresh(item)
@@ -457,6 +519,7 @@ class MarkupsService:
 
     async def create_scale(self, data: ScaleConfigCreate, user_id: str) -> ScaleConfig:
         """Create or save a scale calibration config."""
+        await self._enforce_rules(scale={"document_id": data.document_id, "unit_label": data.unit_label})
         item = ScaleConfig(
             document_id=data.document_id,
             page=data.page,

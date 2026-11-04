@@ -1737,5 +1737,47 @@
       "fail": "Tanggal {earlier} dan {later} tidak berurutan atau di luar periode.",
       "suggestion": "Perbaiki tanggal agar yang lebih awal datang lebih dulu dan setiap entri berada dalam periode."
     }
+  },
+  "cost_rules": {
+    "duplicate_line": {
+      "fail": "{label} tercantum lebih dari sekali sehingga dihitung dua kali.",
+      "suggestion": "Pertahankan satu baris dengan volume yang dijumlahkan, atau hapus duplikatnya."
+    },
+    "burden_high": {
+      "fail": "Biaya tambahan persentase berjumlah {percent} % dari upah pokok, di atas kewajaran {limit} %.",
+      "suggestion": "Periksa baris iuran sosial, asuransi, dan cuti apakah ada koma desimal yang bergeser atau biaya yang terhitung dua kali."
+    },
+    "empty_assembly": {
+      "fail": "Analisa harga satuan {code} tidak memiliki komponen atau berharga nol, sehingga item akan dihargai nol.",
+      "suggestion": "Tambahkan komponen berharga sebelum menerapkan analisa ke rencana anggaran biaya."
+    },
+    "unit_mismatch": {
+      "fail": "Satuan {unit} tidak cocok dengan pengukuran ini: jarak dalam satuan panjang, luas dalam satuan luas, jumlah dalam buah.",
+      "suggestion": "Perbaiki satuan atau jenis tanda sebelum volume masuk ke rencana anggaran biaya."
+    },
+    "link_without_measurement": {
+      "fail": "Tanda ini tidak memiliki nilai ukur, sehingga tidak ada volume yang dapat dikaitkan dengan item.",
+      "suggestion": "Ukur elemen dengan tanda jarak, luas, atau hitung, lalu kaitkan."
+    },
+    "scale_unit_not_length": {
+      "fail": "Skala dikalibrasi dalam {unit}, yang bukan satuan panjang.",
+      "suggestion": "Kalibrasi terhadap jarak yang diketahui, misalnya dalam meter."
+    },
+    "measurement_without_scale": {
+      "fail": "Halaman ini belum memiliki skala terkalibrasi, sehingga nilai ukur tidak dapat diandalkan.",
+      "suggestion": "Kalibrasi skala halaman terhadap jarak yang diketahui."
+    },
+    "unallocated_share": {
+      "fail": "{share} % biaya langsung ({count} item) tidak memiliki elemen NRM 1 yang dapat dipakai.",
+      "suggestion": "Petakan item ini ke elemen NRM 1 agar rincian per elemen lengkap."
+    },
+    "gifa_missing": {
+      "fail": "Luas lantai bruto belum dinyatakan, sehingga biaya per m2 tidak dapat ditampilkan.",
+      "suggestion": "Masukkan luas pada proyek atau untuk tampilan ini."
+    },
+    "markup_load": {
+      "fail": "Markup berjumlah {percent} % dari biaya langsung.",
+      "suggestion": "Periksa baris overhead, keuntungan, risiko, dan eskalasi apakah persentase dimasukkan sebagai nominal atau terhitung dua kali."
+    }
   }
 }

@@ -43,7 +43,7 @@ from app.modules.cost_plan.schemas import CostPlanResponse
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["build_nrm1_cost_plan", "parse_gifa"]
+__all__ = ["build_nrm1_cost_plan", "check_cost_plan", "parse_gifa"]
 
 
 def parse_gifa(raw: object) -> Decimal | None:
@@ -198,6 +198,43 @@ async def build_nrm1_cost_plan(
         gifa=gifa,
         gifa_source=gifa_source,
     )
+
+
+async def check_cost_plan(plan: CostPlanResponse, *, block: bool) -> CostPlanResponse:
+    """Run the cost plan rules over a finished plan.
+
+    Warnings are attached to ``plan.findings``. Errors raise the coded 422 when
+    ``block`` is set (the export, which is the figure somebody signs) and are
+    attached too when it is not, so the reading screen can show them.
+    """
+    from app.core.validation.cost_gate import finding, raise_on_errors, run_rule_set, warnings_of  # noqa: PLC0415
+    from app.modules.cost_plan.validators import COST_PLAN_RULE_SET  # noqa: PLC0415
+
+    allocated = sum((g.total for g in [*plan.groups, *plan.addon_groups]), Decimal("0"))
+    report = await run_rule_set(
+        COST_PLAN_RULE_SET,
+        {
+            "plan": {
+                "id": str(plan.boq_id),
+                "currency": plan.currency,
+                "gifa": plan.gifa,
+                "direct_cost": plan.direct_cost.total,
+                "grand_total": plan.grand_total.total,
+                "markups_total": plan.markups_total.total,
+                "allocated_total": allocated,
+                "unallocated_total": plan.unallocated.total,
+                "unallocated_count": plan.unallocated.position_count,
+                "building_works_total": plan.building_works_estimate.total,
+            }
+        },
+        target_type="cost_plan",
+        target_id=str(plan.boq_id),
+        project_id=str(plan.project_id),
+    )
+    if block:
+        raise_on_errors(report, error="cost_plan_rules_failed")
+    plan.findings = [finding(r) for r in report.errors] + warnings_of(report)
+    return plan
 
 
 def _decimal_or_none(raw: Any) -> Decimal | None:

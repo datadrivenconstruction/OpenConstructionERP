@@ -30,7 +30,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.boq.models import BOQ
 from app.modules.cost_plan.export import DEFAULT_LOCALE, EXPORT_LOCALES, build_cost_plan_workbook
 from app.modules.cost_plan.schemas import CostPlanResponse
-from app.modules.cost_plan.service import build_nrm1_cost_plan
+from app.modules.cost_plan.service import build_nrm1_cost_plan, check_cost_plan
 
 router = APIRouter()
 
@@ -62,7 +62,8 @@ async def get_nrm1_cost_plan(
 ) -> CostPlanResponse:
     """Roll a bill up into the NRM 1 elemental structure."""
     await _verify_boq_access(session, boq_id, user_id)
-    return await build_nrm1_cost_plan(session, boq_id, entered_gifa=gifa)
+    plan = await build_nrm1_cost_plan(session, boq_id, entered_gifa=gifa)
+    return await check_cost_plan(plan, block=False)
 
 
 @router.get("/boqs/{boq_id}/nrm1/export.xlsx", dependencies=[_READ], response_class=Response)
@@ -83,6 +84,7 @@ async def export_nrm1_cost_plan(
     """
     await _verify_boq_access(session, boq_id, user_id)
     plan = await build_nrm1_cost_plan(session, boq_id, entered_gifa=gifa)
+    await check_cost_plan(plan, block=True)
     language = resolve_document_locale(locale, accept_language, EXPORT_LOCALES, DEFAULT_LOCALE)
     content = build_cost_plan_workbook(plan, locale=language)
     filename = f"{plan.boq_name or 'BOQ'} - NRM1 cost plan.xlsx"
