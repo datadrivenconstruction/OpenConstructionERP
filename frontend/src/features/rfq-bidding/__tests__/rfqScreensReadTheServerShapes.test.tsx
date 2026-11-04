@@ -231,6 +231,32 @@ describe('RFQ comparison screen', () => {
     expect(screen.getByText('Part of the scope is not priced')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Award to c-gamma/ })).toBeNull();
   });
+
+  it('marks a plugged quote, shows quoted and plug amounts and names the source of each plug', async () => {
+    const plugged: QuoteComparison = {
+      ...quote('b-alpha', 'c-alpha', '1500.00', 1),
+      raw_total: '1200.00',
+      plug_total: '300.00',
+      plugged_total: '1500.00',
+      plugs_applied: true,
+      plug_sources: [
+        { line_id: 'l3', line: '3-A3 (Screed)', amount: '200.00', source: 'median_of_2', reason: 'missing' },
+        { line_id: 'l4', line: '4-A4 (Paint)', amount: '100.00', source: 'none', reason: 'excluded' },
+      ],
+    };
+    mocks.fetchComparison.mockResolvedValue({ ...COMPARISON, ranked: [plugged], excluded: [] });
+    mountPage();
+    await waitFor(() => expect(screen.getByText('Concrete r-open')).toBeTruthy());
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Compare/ })[0]!);
+
+    await waitFor(() => expect(screen.getByText('Alpha Concrete')).toBeTruthy());
+    const row = screen.getByText('Alpha Concrete').closest('tr')!;
+    expect(within(row).getByText('Plugged')).toBeTruthy();
+    expect(screen.getByText(/Market of 2/)).toBeTruthy();
+    expect(screen.getByText(/No basis, counted as 0/)).toBeTruthy();
+    expect(screen.getByText(/3-A3 \(Screed\)/)).toBeTruthy();
+  });
 });
 
 describe('RFQ awards screen', () => {

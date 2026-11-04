@@ -182,6 +182,26 @@ export interface QuoteComparison {
   reasons: string[];
   notes: string[];
   rank: number | null;
+  /** Total before plugs (converted headline plus adjustments). */
+  raw_total?: string | null;
+  /** Sum of the plugs for lines the quote left unpriced. */
+  plug_total?: string;
+  /** Raw total plus plugs; equals normalised_amount when plugs_applied. */
+  plugged_total?: string | null;
+  /** True when the ranking used the plugged total. */
+  plugs_applied?: boolean;
+  plug_sources?: PlugSource[];
+}
+
+/** One gap in a quote and the price that stands in for it. */
+export interface PlugSource {
+  line_id: string;
+  line: string;
+  amount: string;
+  /** median | median_of_2 | estimate | single_bid | none */
+  source: string;
+  /** excluded | missing */
+  reason: string;
 }
 
 /** ComparisonResponse: ranked quotes, and the ones that could not be ranked. */
