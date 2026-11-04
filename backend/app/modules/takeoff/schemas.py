@@ -459,6 +459,8 @@ class TakeoffMeasurementResponse(BaseModel):
     drawing_revision: str | None = None
     is_deduction: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Non-blocking findings of the takeoff rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_by: str = ""
     created_at: datetime
     updated_at: datetime
