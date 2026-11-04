@@ -17,6 +17,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
+from app.core.decimal_types import FiniteDecimal
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 from app.modules.bim_hub.rule_operators import ConditionError, check_property_filter
@@ -396,8 +397,8 @@ class BOQElementLinkBrief(BaseModel):
     boq_position_quantity: float | None = None  # measurement, not money
     boq_position_unit: str | None = None
     # v3 §10 - money as Decimal, serialised to JSON as a plain string.
-    boq_position_unit_rate: Decimal | None = None
-    boq_position_total: Decimal | None = None
+    boq_position_unit_rate: FiniteDecimal | None = None
+    boq_position_total: FiniteDecimal | None = None
     link_type: str
     confidence: str | None = None
 
@@ -779,8 +780,8 @@ class BIMModelBOQLinkAggregate(BaseModel):
     boq_position_quantity: float | None = None  # measurement, not money
     boq_position_unit: str | None = None
     # v3 §10 - money as Decimal, serialised to JSON as a plain string.
-    boq_position_unit_rate: Decimal | None = None
-    boq_position_total: Decimal | None = None
+    boq_position_unit_rate: FiniteDecimal | None = None
+    boq_position_total: FiniteDecimal | None = None
     link_type: str
     confidence: str | None = None
     element_ids: list[UUID] = Field(default_factory=list)

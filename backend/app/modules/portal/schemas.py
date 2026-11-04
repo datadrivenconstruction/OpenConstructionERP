@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 # Upper bound for client-supplied money - a finite-but-absurd claimed_amount
 # (e.g. 1e400) otherwise sums into gross and reaches retention quantize() ->
 # InvalidOperation -> 500. ge=0 already rejects NaN/Infinity. Mirrors the
@@ -338,7 +340,7 @@ class PortalChangeOrderEntry(BaseModel):
     title: str
     description: str = ""
     status: str
-    approved_amount: Decimal | None = None
+    approved_amount: FiniteDecimal | None = None
     approved_time_days: int | None = None
     currency: str = ""
     approved_at: str | None = None
@@ -366,7 +368,7 @@ class PortalInvoiceEntry(BaseModel):
     invoice_date: str = ""
     due_date: str | None = None
     currency_code: str = ""
-    amount_total: Decimal | None = None
+    amount_total: FiniteDecimal | None = None
     status: str = ""
     is_overdue: bool = False
     days_overdue: int | None = Field(default=None, description="Whole days past the due date, when overdue.")
@@ -471,8 +473,8 @@ class PortalPaymentPlanLine(BaseModel):
     id: UUID
     sequence: int
     label: str
-    amount: Decimal
-    percent_of_contract: Decimal | None = None
+    amount: FiniteDecimal
+    percent_of_contract: FiniteDecimal | None = None
     status: str
     milestone_name: str
     forecast_due_date: str | None = None
@@ -492,9 +494,9 @@ class PortalPaymentPlanContract(BaseModel):
     contract_id: UUID
     contract_title: str
     currency: str
-    contract_total: Decimal
-    paid_total: Decimal
-    outstanding_total: Decimal
+    contract_total: FiniteDecimal
+    paid_total: FiniteDecimal
+    outstanding_total: FiniteDecimal
     lines: list[PortalPaymentPlanLine] = Field(default_factory=list)
 
 
@@ -542,8 +544,8 @@ class PaymentApplicationListItem(BaseModel):
     application_number: str
     period_start: date | None = None
     period_end: date | None = None
-    gross_amount: Decimal = Decimal("0")
-    net_amount: Decimal = Decimal("0")
+    gross_amount: FiniteDecimal = Decimal("0")
+    net_amount: FiniteDecimal = Decimal("0")
     currency: str = ""
     status: str = "submitted"
     submitted_at: datetime | None = None
@@ -607,7 +609,7 @@ class PaymentApplicationSubmitLine(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     work_package_id: UUID
-    claimed_amount: Decimal = Field(..., ge=0, le=_MONEY_MAX)
+    claimed_amount: FiniteDecimal = Field(..., ge=0, le=_MONEY_MAX)
 
 
 class PaymentApplicationSubmitPayload(BaseModel):
@@ -632,7 +634,7 @@ class PortalWorkPackageEntry(BaseModel):
 
     id: UUID
     name: str
-    planned_value: Decimal = Decimal("0")
+    planned_value: FiniteDecimal = Decimal("0")
 
     @field_serializer("planned_value")
     def _ser_money(self, value: Decimal) -> str:
@@ -736,7 +738,7 @@ class PortalDeliveryLine(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     po_item_id: UUID
-    quantity: Decimal = Field(..., ge=0, le=_MONEY_MAX)
+    quantity: FiniteDecimal = Field(..., ge=0, le=_MONEY_MAX)
     batch_lot: str | None = Field(default=None, max_length=100)
     certificates: list[PortalDeliveryCertificate] = Field(default_factory=list, max_length=20)
 

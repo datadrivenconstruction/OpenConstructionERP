@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal9_6, Decimal18_4, Decimal18_6, FiniteDecimal
+
 # ── EPD Record ────────────────────────────────────────────────────────────
 
 
@@ -31,12 +33,12 @@ class EPDRecordCreate(BaseModel):
     manufacturer: str | None = Field(default=None, max_length=255)
     region: str = Field(default="", max_length=8)
     declared_unit: str = Field(default="kg", max_length=20)
-    gwp_a1a3: Decimal = Field(default=Decimal("0"))
-    gwp_a4: Decimal | None = None
-    gwp_a5: Decimal | None = None
-    gwp_b_total: Decimal | None = None
-    gwp_c_total: Decimal | None = None
-    gwp_d_credits: Decimal | None = None
+    gwp_a1a3: Decimal18_6 = Field(default=Decimal("0"))
+    gwp_a4: Decimal18_6 | None = None
+    gwp_a5: Decimal18_6 | None = None
+    gwp_b_total: Decimal18_6 | None = None
+    gwp_c_total: Decimal18_6 | None = None
+    gwp_d_credits: Decimal18_6 | None = None
     validity_until: date | None = None
     document_url: str | None = Field(default=None, max_length=1024)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -58,12 +60,12 @@ class EPDRecordUpdate(BaseModel):
     manufacturer: str | None = Field(default=None, max_length=255)
     region: str | None = Field(default=None, max_length=8)
     declared_unit: str | None = Field(default=None, max_length=20)
-    gwp_a1a3: Decimal | None = None
-    gwp_a4: Decimal | None = None
-    gwp_a5: Decimal | None = None
-    gwp_b_total: Decimal | None = None
-    gwp_c_total: Decimal | None = None
-    gwp_d_credits: Decimal | None = None
+    gwp_a1a3: Decimal18_6 | None = None
+    gwp_a4: Decimal18_6 | None = None
+    gwp_a5: Decimal18_6 | None = None
+    gwp_b_total: Decimal18_6 | None = None
+    gwp_c_total: Decimal18_6 | None = None
+    gwp_d_credits: Decimal18_6 | None = None
     validity_until: date | None = None
     document_url: str | None = Field(default=None, max_length=1024)
     metadata: dict[str, Any] | None = None
@@ -107,7 +109,7 @@ class MaterialCarbonFactorCreate(BaseModel):
     factor_set_year: int | None = Field(default=None, ge=1990, le=2100)
     cost_item_id: UUID | None = None
     epd_id: UUID | None = None
-    manual_override_factor: Decimal | None = None
+    manual_override_factor: Decimal18_6 | None = None
     unit_for_factor: str = Field(default="kg", max_length=20)
     region: str = Field(default="", max_length=8)
     last_reviewed_at: date | None = None
@@ -123,7 +125,7 @@ class MaterialCarbonFactorUpdate(BaseModel):
     factor_set_year: int | None = Field(default=None, ge=1990, le=2100)
     cost_item_id: UUID | None = None
     epd_id: UUID | None = None
-    manual_override_factor: Decimal | None = None
+    manual_override_factor: Decimal18_6 | None = None
     unit_for_factor: str | None = Field(default=None, max_length=20)
     region: str | None = Field(default=None, max_length=8)
     last_reviewed_at: date | None = None
@@ -223,11 +225,11 @@ class EmbodiedCarbonEntryCreate(BaseModel):
     element_ref: str | None = Field(default=None, max_length=255)
     element_id: UUID | None = None
     description: str = Field(default="", max_length=10000)
-    quantity: Decimal = Field(default=Decimal("0"))
+    quantity: Decimal18_6 = Field(default=Decimal("0"))
     unit: str = Field(default="kg", max_length=20)
     factor_id: UUID | None = None
-    factor_value_used: Decimal = Field(default=Decimal("0"))
-    carbon_kg: Decimal = Field(default=Decimal("0"))
+    factor_value_used: Decimal18_6 = Field(default=Decimal("0"))
+    carbon_kg: Decimal18_6 = Field(default=Decimal("0"))
     stage: str = Field(default="a1a3", pattern=r"^(a1a3|a4|a5|b|c|d)$")
     source: str = Field(default="manual", pattern=r"^(manual|auto_enriched|boq_derived)$")
     match_confidence: str | None = Field(default=None, pattern=r"^(high|medium|low)$")
@@ -241,11 +243,11 @@ class EmbodiedCarbonEntryUpdate(BaseModel):
     element_ref: str | None = Field(default=None, max_length=255)
     element_id: UUID | None = None
     description: str | None = Field(default=None, max_length=10000)
-    quantity: Decimal | None = None
+    quantity: Decimal18_6 | None = None
     unit: str | None = Field(default=None, max_length=20)
     factor_id: UUID | None = None
-    factor_value_used: Decimal | None = None
-    carbon_kg: Decimal | None = None
+    factor_value_used: Decimal18_6 | None = None
+    carbon_kg: Decimal18_6 | None = None
     stage: str | None = Field(default=None, pattern=r"^(a1a3|a4|a5|b|c|d)$")
     source: str | None = Field(default=None, pattern=r"^(manual|auto_enriched|boq_derived)$")
     match_confidence: str | None = Field(default=None, pattern=r"^(high|medium|low)$")
@@ -296,9 +298,9 @@ class Scope1EntryCreate(BaseModel):
         default="diesel",
         pattern=r"^(diesel|petrol|lpg|natural_gas|other)$",
     )
-    litres_or_m3: Decimal = Field(default=Decimal("0"))
-    emission_factor_kg_co2e_per_unit: Decimal = Field(default=Decimal("0"))
-    total_co2e_kg: Decimal | None = None
+    litres_or_m3: Decimal18_6 = Field(default=Decimal("0"))
+    emission_factor_kg_co2e_per_unit: Decimal18_6 = Field(default=Decimal("0"))
+    total_co2e_kg: Decimal18_6 | None = None
     source: str = Field(
         default="manual",
         pattern=r"^(equipment_telematics|fuel_log|manual)$",
@@ -318,9 +320,9 @@ class Scope1EntryUpdate(BaseModel):
         default=None,
         pattern=r"^(diesel|petrol|lpg|natural_gas|other)$",
     )
-    litres_or_m3: Decimal | None = None
-    emission_factor_kg_co2e_per_unit: Decimal | None = None
-    total_co2e_kg: Decimal | None = None
+    litres_or_m3: Decimal18_6 | None = None
+    emission_factor_kg_co2e_per_unit: Decimal18_6 | None = None
+    total_co2e_kg: Decimal18_6 | None = None
     source: str | None = Field(
         default=None,
         pattern=r"^(equipment_telematics|fuel_log|manual)$",
@@ -363,10 +365,10 @@ class Scope2EntryCreate(BaseModel):
         default="grid_electricity",
         pattern=r"^(grid_electricity|district_heating|cooling)$",
     )
-    kwh: Decimal = Field(default=Decimal("0"))
-    emission_factor_kg_co2e_per_kwh: Decimal = Field(default=Decimal("0"))
+    kwh: Decimal18_6 = Field(default=Decimal("0"))
+    emission_factor_kg_co2e_per_kwh: Decimal18_6 = Field(default=Decimal("0"))
     market_or_location: str = Field(default="location", pattern=r"^(market|location)$")
-    total_co2e_kg: Decimal | None = None
+    total_co2e_kg: Decimal18_6 | None = None
     supplier_name: str | None = Field(default=None, max_length=255)
     notes: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -382,10 +384,10 @@ class Scope2EntryUpdate(BaseModel):
         default=None,
         pattern=r"^(grid_electricity|district_heating|cooling)$",
     )
-    kwh: Decimal | None = None
-    emission_factor_kg_co2e_per_kwh: Decimal | None = None
+    kwh: Decimal18_6 | None = None
+    emission_factor_kg_co2e_per_kwh: Decimal18_6 | None = None
     market_or_location: str | None = Field(default=None, pattern=r"^(market|location)$")
-    total_co2e_kg: Decimal | None = None
+    total_co2e_kg: Decimal18_6 | None = None
     supplier_name: str | None = Field(default=None, max_length=255)
     notes: str | None = None
     metadata: dict[str, Any] | None = None
@@ -425,10 +427,10 @@ class Scope3EntryCreate(BaseModel):
         pattern=r"^(transport_upstream|transport_downstream|waste|business_travel|other)$",
     )
     description: str = Field(default="", max_length=10000)
-    activity_data: Decimal = Field(default=Decimal("0"))
+    activity_data: Decimal18_6 = Field(default=Decimal("0"))
     activity_unit: str = Field(default="tkm", max_length=40)
-    emission_factor: Decimal = Field(default=Decimal("0"))
-    total_co2e_kg: Decimal | None = None
+    emission_factor: Decimal18_6 = Field(default=Decimal("0"))
+    total_co2e_kg: Decimal18_6 | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -443,10 +445,10 @@ class Scope3EntryUpdate(BaseModel):
         pattern=r"^(transport_upstream|transport_downstream|waste|business_travel|other)$",
     )
     description: str | None = Field(default=None, max_length=10000)
-    activity_data: Decimal | None = None
+    activity_data: Decimal18_6 | None = None
     activity_unit: str | None = Field(default=None, max_length=40)
-    emission_factor: Decimal | None = None
-    total_co2e_kg: Decimal | None = None
+    emission_factor: Decimal18_6 | None = None
+    total_co2e_kg: Decimal18_6 | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -485,8 +487,8 @@ class CarbonTargetCreate(BaseModel):
         default="absolute",
         pattern=r"^(intensity_per_m2|intensity_per_unit|absolute)$",
     )
-    baseline_value: Decimal = Field(default=Decimal("0"))
-    target_value: Decimal = Field(default=Decimal("0"))
+    baseline_value: Decimal18_6 = Field(default=Decimal("0"))
+    target_value: Decimal18_6 = Field(default=Decimal("0"))
     baseline_year: int = Field(default=2020, ge=1990, le=2100)
     target_year: int = Field(default=2030, ge=1990, le=2100)
     scope_set: list[str] = Field(default_factory=list)
@@ -506,8 +508,8 @@ class CarbonTargetUpdate(BaseModel):
         default=None,
         pattern=r"^(intensity_per_m2|intensity_per_unit|absolute)$",
     )
-    baseline_value: Decimal | None = None
-    target_value: Decimal | None = None
+    baseline_value: Decimal18_6 | None = None
+    target_value: Decimal18_6 | None = None
     baseline_year: int | None = Field(default=None, ge=1990, le=2100)
     target_year: int | None = Field(default=None, ge=1990, le=2100)
     scope_set: list[str] | None = None
@@ -618,7 +620,7 @@ class SustainabilityReportPayload(BaseModel):
         default="ghg_protocol",
         pattern=r"^(ghg_protocol|gri|issb|custom)$",
     )
-    project_area_m2: Decimal | None = None
+    project_area_m2: FiniteDecimal | None = None
     narrative: str | None = None
 
 
@@ -658,9 +660,9 @@ class AlternativeMaterialOption(BaseModel):
     """A single alternative-material option."""
 
     factor_id: UUID
-    factor_value: Decimal
-    carbon_kg: Decimal
-    savings_kg: Decimal
+    factor_value: FiniteDecimal
+    carbon_kg: Decimal18_6
+    savings_kg: FiniteDecimal
     savings_pct: float
     confidence: str
 
@@ -711,11 +713,11 @@ class OperationalCarbonComputeRequest(BaseModel):
     model_id: UUID | None = None
     grid_country: str = Field(default="", max_length=8)
     grid_year: int = Field(default=2023, ge=2000, le=2100)
-    grid_factor_kg_co2e_per_kwh: Decimal | None = Field(default=None, ge=0)
+    grid_factor_kg_co2e_per_kwh: Decimal18_6 | None = Field(default=None, ge=0)
     study_period_years: int = Field(default=60, ge=1, le=200)
     end_use: str = Field(default="regulated", pattern=r"^(regulated|unregulated|mixed)$")
-    gross_floor_area_m2: Decimal | None = Field(default=None, ge=0)
-    modelled_intensity_kwh_per_m2_year: Decimal | None = Field(default=None, ge=0)
+    gross_floor_area_m2: FiniteDecimal | None = Field(default=None, ge=0)
+    modelled_intensity_kwh_per_m2_year: FiniteDecimal | None = Field(default=None, ge=0)
 
 
 class OperationalCarbonEntryResponse(BaseModel):
@@ -774,11 +776,11 @@ class LCCLineInput(BaseModel):
 
     description: str = Field(default="", max_length=500)
     category: str = Field(default="", max_length=80)
-    capex: Decimal = Field(default=Decimal("0"), ge=0)
-    annual_opex: Decimal | None = Field(default=None, ge=0)
-    replacement_cost: Decimal | None = Field(default=None, ge=0)
+    capex: Decimal18_4 = Field(default=Decimal("0"), ge=0)
+    annual_opex: Decimal18_4 | None = Field(default=None, ge=0)
+    replacement_cost: Decimal18_4 | None = Field(default=None, ge=0)
     service_life_years: int | None = Field(default=None, ge=1, le=200)
-    eol_cost: Decimal | None = Field(default=None, ge=0)
+    eol_cost: Decimal18_4 | None = Field(default=None, ge=0)
 
 
 class LifeCycleCostComputeRequest(BaseModel):
@@ -792,12 +794,12 @@ class LifeCycleCostComputeRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     model_id: UUID | None = None
-    discount_rate: Decimal = Field(default=Decimal("0.035"), ge=0, le=1)
+    discount_rate: Decimal9_6 = Field(default=Decimal("0.035"), ge=0, le=1)
     study_period_years: int = Field(default=60, ge=1, le=200)
     currency: str = Field(default="EUR", max_length=8)
-    default_capex: Decimal | None = Field(default=None, ge=0)
-    opex_rate_pct: Decimal = Field(default=Decimal("2.0"), ge=0, le=100)
-    eol_rate_pct: Decimal = Field(default=Decimal("10.0"), ge=0, le=100)
+    default_capex: FiniteDecimal | None = Field(default=None, ge=0)
+    opex_rate_pct: FiniteDecimal = Field(default=Decimal("2.0"), ge=0, le=100)
+    eol_rate_pct: FiniteDecimal = Field(default=Decimal("10.0"), ge=0, le=100)
     default_service_life_years: int = Field(default=30, ge=1, le=200)
     lines: list[LCCLineInput] = Field(default_factory=list)
 
@@ -858,28 +860,28 @@ class LifeCycleCostComputeResponse(BaseModel):
 class WholeLifeCarbonBreakdown(BaseModel):
     """EN 15978 whole-life carbon A-B-C-D breakdown (kgCO2e)."""
 
-    a1a3: Decimal = Field(default=Decimal("0"))
-    a4: Decimal = Field(default=Decimal("0"))
-    a5: Decimal = Field(default=Decimal("0"))
-    a1a5: Decimal = Field(default=Decimal("0"))
-    b_embodied: Decimal = Field(default=Decimal("0"))
-    b6_operational: Decimal = Field(default=Decimal("0"))
-    b_total: Decimal = Field(default=Decimal("0"))
-    c_end_of_life: Decimal = Field(default=Decimal("0"))
-    d_beyond: Decimal = Field(default=Decimal("0"))
-    whole_life_total: Decimal = Field(default=Decimal("0"))
+    a1a3: FiniteDecimal = Field(default=Decimal("0"))
+    a4: FiniteDecimal = Field(default=Decimal("0"))
+    a5: FiniteDecimal = Field(default=Decimal("0"))
+    a1a5: FiniteDecimal = Field(default=Decimal("0"))
+    b_embodied: FiniteDecimal = Field(default=Decimal("0"))
+    b6_operational: FiniteDecimal = Field(default=Decimal("0"))
+    b_total: FiniteDecimal = Field(default=Decimal("0"))
+    c_end_of_life: FiniteDecimal = Field(default=Decimal("0"))
+    d_beyond: FiniteDecimal = Field(default=Decimal("0"))
+    whole_life_total: FiniteDecimal = Field(default=Decimal("0"))
 
 
 class WholeLifeCostBreakdown(BaseModel):
     """ISO 15686-5 whole-life cost breakdown (present values)."""
 
     currency: str = "EUR"
-    capex: Decimal = Field(default=Decimal("0"))
-    opex_pv: Decimal = Field(default=Decimal("0"))
-    replacement_pv: Decimal = Field(default=Decimal("0"))
-    eol_pv: Decimal = Field(default=Decimal("0"))
-    residual_value_pv: Decimal = Field(default=Decimal("0"))
-    whole_life_cost: Decimal = Field(default=Decimal("0"))
+    capex: Decimal18_4 = Field(default=Decimal("0"))
+    opex_pv: Decimal18_4 = Field(default=Decimal("0"))
+    replacement_pv: Decimal18_4 = Field(default=Decimal("0"))
+    eol_pv: Decimal18_4 = Field(default=Decimal("0"))
+    residual_value_pv: FiniteDecimal = Field(default=Decimal("0"))
+    whole_life_cost: Decimal18_4 = Field(default=Decimal("0"))
     entry_count: int = 0
 
 

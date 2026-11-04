@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import Decimal18_4
+
 # ── Resource ─────────────────────────────────────────────────────────────
 
 
@@ -25,7 +27,7 @@ class ResourceCreate(BaseModel):
     )
     home_project_id: UUID | None = None
     contact_id: UUID | None = None
-    default_cost_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    default_cost_rate: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     # Max concurrent allocation percent the resource can absorb per bucket.
     # None => capacity unknown (leveling will not flag over-allocation).
@@ -52,7 +54,7 @@ class ResourceUpdate(BaseModel):
     )
     home_project_id: UUID | None = None
     contact_id: UUID | None = None
-    default_cost_rate: Decimal | None = Field(default=None, ge=0)
+    default_cost_rate: Decimal18_4 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     capacity_percent: int | None = Field(default=None, ge=0, le=10000)
     status: str | None = Field(
@@ -315,7 +317,7 @@ class AssignmentCreate(BaseModel):
         default="proposed",
         pattern=r"^(proposed|confirmed|in_progress|completed|cancelled)$",
     )
-    cost_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    cost_rate: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     notes: str = Field(default="", max_length=5000)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -337,7 +339,7 @@ class AssignmentUpdate(BaseModel):
         default=None,
         pattern=r"^(proposed|confirmed|in_progress|completed|cancelled)$",
     )
-    cost_rate: Decimal | None = Field(default=None, ge=0)
+    cost_rate: Decimal18_4 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] | None = None
@@ -387,7 +389,7 @@ class AssignmentProposeRequest(BaseModel):
     end_at: datetime
     allocation_percent: int = Field(default=100, ge=0, le=100)
     required_skills: list[UUID] = Field(default_factory=list)
-    cost_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    cost_rate: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     notes: str = Field(default="", max_length=5000)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -618,7 +620,7 @@ class ResourceRequestFulfill(BaseModel):
     """Fulfill a resource request by attaching a resource."""
 
     resource_id: UUID
-    cost_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    cost_rate: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     allocation_percent: int = Field(default=100, ge=0, le=100)
     notes: str = Field(default="", max_length=5000)

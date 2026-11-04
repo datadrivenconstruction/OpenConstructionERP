@@ -11,6 +11,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import FiniteDecimal
+
 CARD_KIND = "^(crew|worker|equipment|rental)$"
 LOCATION_KIND = "^(project|yard|shop|rental_return)$"
 HHMM = r"^([01]\d|2[0-3]):[0-5]\d$"
@@ -239,7 +241,7 @@ class ShareResponse(BaseModel):
 class PrefillRequest(BaseModel):
     location_id: uuid.UUID
     day: date
-    hours: Decimal = Field(default=Decimal("8"), ge=0, le=24)
+    hours: FiniteDecimal = Field(default=Decimal("8"), ge=0, le=24)
 
 
 class PrefillResponse(BaseModel):

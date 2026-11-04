@@ -16,6 +16,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.decimal_types import FiniteDecimal
+
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
 # Mirrors backend/app/modules/boq/schemas.py - money fields are stored /
@@ -121,7 +123,7 @@ class RiskCreate(BaseModel):
         pattern=r"^(technical|financial|schedule|regulatory|environmental|safety|procurement)$",
     )
     probability: float = Field(default=0.5, ge=0.0, le=1.0)
-    impact_cost: Decimal = Field(default=Decimal("0"), ge=0)
+    impact_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     impact_schedule_days: int = Field(default=0, ge=0, le=_DAYS_MAX)
     impact_severity: str = Field(
         default="medium",
@@ -135,7 +137,7 @@ class RiskCreate(BaseModel):
     contingency_plan: str = Field(default="", max_length=5000)
     owner_name: str = Field(default="", max_length=255)
     owner_user_id: UUID | None = None
-    response_cost: Decimal = Field(default=Decimal("0"), ge=0)
+    response_cost: FiniteDecimal = Field(default=Decimal("0"), ge=0)
     # Currency is data-driven: resolved from the owning project at create
     # time (see RiskService.create_risk). An explicit value here overrides
     # the project default; "" means "inherit from project / unknown".
@@ -167,7 +169,7 @@ class RiskUpdate(BaseModel):
         pattern=r"^(technical|financial|schedule|regulatory|environmental|safety|procurement)$",
     )
     probability: float | None = Field(default=None, ge=0.0, le=1.0)
-    impact_cost: Decimal | None = Field(default=None, ge=0)
+    impact_cost: FiniteDecimal | None = Field(default=None, ge=0)
     impact_schedule_days: int | None = Field(default=None, ge=0, le=_DAYS_MAX)
     impact_severity: str | None = Field(
         default=None,
@@ -181,7 +183,7 @@ class RiskUpdate(BaseModel):
     contingency_plan: str | None = Field(default=None, max_length=5000)
     owner_name: str | None = Field(default=None, max_length=255)
     owner_user_id: UUID | None = None
-    response_cost: Decimal | None = Field(default=None, ge=0)
+    response_cost: FiniteDecimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=10)
     escalation_threshold: int | None = Field(default=None, ge=1, le=25)
     metadata: dict[str, Any] | None = None
@@ -366,14 +368,14 @@ class RiskTornadoEntry(BaseModel):
 
     risk_id: UUID
     code: str
-    contribution: Decimal
+    contribution: FiniteDecimal
 
 
 class RiskHistogramBin(BaseModel):
     """One bin in the 10-bin contingency histogram."""
 
-    lower: Decimal
-    upper: Decimal
+    lower: FiniteDecimal
+    upper: FiniteDecimal
     count: int
 
 
@@ -484,20 +486,20 @@ class ContingencyPosition(BaseModel):
     """
 
     currency: str = ""
-    emv: Decimal = Decimal("0")
-    p50: Decimal = Decimal("0")
-    p80: Decimal = Decimal("0")
+    emv: FiniteDecimal = Decimal("0")
+    p50: FiniteDecimal = Decimal("0")
+    p80: FiniteDecimal = Decimal("0")
     percentile_method: Literal["exact", "normal_approximation"] = "exact"
-    emv_by_currency: dict[str, Decimal] = Field(default_factory=dict)
-    allocated: Decimal = Decimal("0")
-    drawn: Decimal = Decimal("0")
-    remaining: Decimal = Decimal("0")
-    coverage_gap: Decimal = Decimal("0")
+    emv_by_currency: dict[str, FiniteDecimal] = Field(default_factory=dict)
+    allocated: FiniteDecimal = Decimal("0")
+    drawn: FiniteDecimal = Decimal("0")
+    remaining: FiniteDecimal = Decimal("0")
+    coverage_gap: FiniteDecimal = Decimal("0")
     state: Literal["no_allocation", "covered", "shortfall", "overdrawn"] = "no_allocation"
     active_risk_count: int = 0
     excluded_closed_count: int = 0
     excluded_drawn_count: int = 0
-    unconverted_emv: dict[str, Decimal] = Field(default_factory=dict)
+    unconverted_emv: dict[str, FiniteDecimal] = Field(default_factory=dict)
     missing_fx_rates: list[str] = Field(default_factory=list)
     lines: list[ContingencyLineOut] = Field(default_factory=list)
     drawdowns: list[ContingencyDrawdownOut] = Field(default_factory=list)
@@ -522,7 +524,7 @@ class ContingencyDrawdownRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    amount: Decimal = Field(..., gt=0)
+    amount: FiniteDecimal = Field(..., gt=0)
     budget_id: UUID | None = None
     note: str = Field(default="", max_length=1000)
 
