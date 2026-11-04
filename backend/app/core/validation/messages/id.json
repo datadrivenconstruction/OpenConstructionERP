@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} selesai dengan selisih {days} hari dari tanggal selesai di berkas impor ({source}).",
       "suggestion": "Bandingkan tanggal hasil hitung ulang dengan berkas sumber, lalu terima atau pulihkan tanggal sumber."
+    },
+    "constraint_date_missing": {
+      "fail": "Aktivitas '{activity}' memiliki kendala {constraint} tetapi tanpa tanggal kendala, sehingga kendala diabaikan.",
+      "suggestion": "Masukkan tanggal kendala atau hapus kendalanya."
+    },
+    "constraint_conflict": {
+      "fail": "Aktivitas '{activity}' dibatasi oleh {constraint} pada {date}, tetapi pendahulunya hanya mengizinkannya {days} hari lebih lambat.",
+      "suggestion": "Geser tanggal kendala, persingkat rantai pendahulu, atau terima float negatif."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Baseline tidak ditemukan",
     "fx_rate_set_locked": "Kurs ECB untuk {date} terkunci, sehingga penyegaran ini tidak menimpanya. Buka kunci set kurs tersebut terlebih dahulu jika harus menerima publikasi baru.",
     "boq_locked": "Daftar kuantitas terkunci dan tidak dapat diubah. Buat revisi untuk melakukan perubahan.",
-    "boq_link_owner_locked": "Kode '{code}' ditetapkan oleh baris dalam daftar kuantitas terkunci '{bill}', dan menautkannya akan mengubah daftar tersebut. Buka kunci daftar itu terlebih dahulu atau masukkan baris dengan kode baru."
+    "boq_link_owner_locked": "Kode '{code}' ditetapkan oleh baris dalam daftar kuantitas terkunci '{bill}', dan menautkannya akan mengubah daftar tersebut. Buka kunci daftar itu terlebih dahulu atau masukkan baris dengan kode baru.",
+    "boq_budget_nothing_budgetable": "Tidak ditemukan item yang dapat dianggarkan dalam daftar kuantitas.",
+    "boq_fix_position_id_required": "position_id diperlukan untuk perbaikan ini",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' harus berupa daftar yang tidak kosong",
+    "boq_budget_requires_lock": "Daftar kuantitas harus dikunci sebelum membuat anggaran. Kunci estimasi terlebih dahulu.",
+    "boq_not_locked": "Daftar kuantitas tidak terkunci.",
+    "boq_fix_unit_required": "Parameter 'unit' yang tidak kosong diperlukan",
+    "project_access_denied": "Anda tidak memiliki akses ke proyek ini",
+    "boq_costmodel_budget_failed": "Gagal membuat baris anggaran model biaya. Modul model biaya mungkin tidak tersedia.",
+    "boq_unlock_role": "Hanya admin atau manajer yang dapat membuka kunci daftar kuantitas.",
+    "boq_bulk_all_failed": "Semua {count} item gagal validasi. Kesalahan pertama: {error}",
+    "boq_position_not_in_boq": "Item {position_id} tidak ditemukan dalam daftar kuantitas {boq_id}",
+    "boq_already_locked": "Daftar kuantitas sudah terkunci.",
+    "boq_budget_failed": "Gagal membuat baris anggaran. Modul keuangan mungkin tidak tersedia.",
+    "boq_bulk_items_required": "Daftar 'items' wajib ada dan tidak boleh kosong",
+    "boq_classification_unavailable": "Layanan klasifikasi tidak tersedia",
+    "boq_budget_no_positions": "Daftar kuantitas tidak memiliki item: tidak ada yang dianggarkan.",
+    "boq_fix_unit_rate_required": "Parameter 'unit_rate' yang tidak negatif diperlukan"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Pos {ordinal}: gambar {drawing} dimasukkan tanpa revisi",
       "suggestion": "Tambahkan revisi gambar yang menjadi dasar harga kuantitas"
+    },
+    "carried_unconfirmed": {
+      "fail": "Item {ordinal}: {count} pengukuran dibawa dari revisi gambar sebelumnya dan belum dikonfirmasi",
+      "suggestion": "Periksa setiap pengukuran yang dibawa pada revisi baru lalu konfirmasi, atau ukur ulang"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Hitung penyetaraan agar lingkup yang hilang sudah dihargai sebelum penunjukan"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Paket {package} terhubung ke tender kontrak utama {tender} dan belum dimenangkan, sehingga tender itu belum memiliki kontrak",
+      "suggestion": "Tetapkan pemenang paket (membuat kontrak) atau putuskan tautan tender agar menyusun kontraknya sendiri"
     }
   },
   "bid_outcome": {
@@ -1539,8 +1568,124 @@
       "capacity": "Kapasitas",
       "client": "Klien",
       "competition": "Persaingan",
-      "margin": "Margin",
+      "margin": "Margin laba",
       "risk": "Risiko"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Halaman {page} tidak memiliki nomor lembar yang terbaca",
+      "suggestion": "Masukkan nomor lembar dari kotak judul; tanpanya lembar tidak dapat ditumpuk di atas revisi sebelumnya"
+    },
+    "number_unique_in_set": {
+      "fail": "Lembar {sheet} revisi {revision} muncul di halaman {first_page} dan {page} pada unggahan yang sama",
+      "suggestion": "Periksa kotak judul kedua halaman dan perbaiki nomor atau revisi salah satunya"
+    },
+    "revision_not_lower": {
+      "fail": "Lembar {sheet} berada di revisi {revision} tetapi lembar saat ini sudah di {current_revision}",
+      "suggestion": "Konfirmasi hasil baca hanya jika ini memang terbitan yang lebih baru; jika tidak, perbaiki revisi atau buang lembar"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Lembar {sheet} dibaca dengan tingkat keyakinan {confidence} dan belum dikonfirmasi",
+      "suggestion": "Bandingkan kolom dengan kotak judul lalu konfirmasi atau perbaiki"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Baris {row}: sel ID Item diawali karakter rumus dan tidak diimpor",
+      "suggestion": "Biarkan kolom ID Item seperti saat diekspor, atau kosongkan sel untuk menambah item baru"
+    },
+    "unknown_id": {
+      "fail": "Baris {row}: ID Item bukan milik daftar ini, sehingga baris diperlakukan sebagai item baru",
+      "suggestion": "Ekspor ulang daftar sebelum mengedit, atau kosongkan sel ID Item jika baris ini memang baru"
+    },
+    "duplicate_id": {
+      "fail": "Baris {row}: ID Item dipakai baris sebelumnya, sehingga baris ini diperlakukan sebagai item baru",
+      "suggestion": "Kosongkan ID Item pada baris salinan, atau hapus salinannya"
+    },
+    "stale_row": {
+      "fail": "Baris {row}: item {ordinal} diubah di aplikasi setelah lembar ini diekspor",
+      "suggestion": "Pertahankan nilai aplikasi, atau pilih nilai Excel untuk baris ini agar menimpanya"
+    },
+    "locked_boq": {
+      "fail": "Daftar ini terkunci, sehingga perubahan dari Excel tidak dapat diterapkan",
+      "suggestion": "Buka kunci daftar terlebih dahulu, atau simpan lembar untuk nanti"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Jalankan ulang analisis risiko biaya dan terapkan lagi cadangan, atau pertahankan baris dan catat alasannya",
+      "fail": "Baris cadangan \"{markup}\" diterapkan pada P{percentile} tanggal {applied_at}, tetapi sumbernya ({source}) telah berubah sejak itu"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Jalankan ulang analisis risiko biaya dan terapkan lagi cadangan, atau pertahankan baris dan catat alasannya",
+      "fail": "Cadangan risiko \"{markup}\" bernilai {amount}, kurang dari estimasi P50 saat ini sebesar {p50}"
+    },
+    "source": {
+      "positions": "total baris daftar kuantitas",
+      "register": "daftar risiko"
+    },
+    "contingency_double_count": {
+      "suggestion": "Nonaktifkan salah satu dari dua baris, atau catat mengapa keduanya diperlukan",
+      "fail": "Baris cadangan \"{markup}\" aktif di samping cadangan risiko \"{risk_markup}\"; ketidakpastian yang sama mungkin dicadangkan dua kali"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Item {ref} memiliki {hours} jam tercatat antara {date_from} dan {date_to} tetapi tanpa kemajuan terukur",
+      "suggestion": "Catat pengukuran atau kemajuan untuk item, atau pindahkan jam ke item yang benar-benar dikerjakan"
+    },
+    "factor_implausible": {
+      "fail": "Faktor produktivitas {factor} item {ref} berada di luar rentang wajar {low} sampai {high}",
+      "suggestion": "Periksa jam yang tercatat, kuantitas terpasang, dan satuan norma estimasi"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Aktivitas {activity} ({project}) memuat tenaga kerja tetapi tidak menyebut keahlian, sehingga kebutuhannya tidak dapat dicocokkan dengan siapa pun",
+      "suggestion": "Tetapkan keahlian pada sumber daya tenaga kerja aktivitas"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Jawaban tersimpan tidak mengutip dokumen proyek mana pun, sehingga tidak ada yang mendukungnya.",
+      "suggestion": "Tanyakan lagi sampai jawaban mengutip dokumen, atau tandai teks sebagai catatan Anda sendiri."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Draf agen '{title}' telah menunggu tinjauan selama {days} hari (batas {limit}).",
+      "suggestion": "Terima atau tolak draf, atau matikan agen jika drafnya tidak digunakan."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Masukkan hari ketika lokasi diterbangi.",
+      "fail": "Tanggal pengambilan {captured_on} berada di masa depan."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Pilih aktivitas dari jadwal proyek ini.",
+      "fail": "Aktivitas tidak termasuk dalam proyek ini."
+    },
+    "georeferenced": {
+      "suggestion": "Ekspor ortofoto sebagai GeoTIFF dengan sistem koordinatnya.",
+      "fail": "Ortofoto tidak memiliki sistem koordinat atau batas, sehingga tidak dapat ditempatkan di globe."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Terbang lebih rendah atau ekspor pada resolusi penuh untuk memeriksa kuantitas.",
+      "fail": "Jarak sampel tanah adalah {gsd_cm} cm per piksel, terlalu kasar untuk memeriksa kuantitas."
+    },
+    "observed_pct_range": {
+      "suggestion": "Masukkan persentase antara 0 dan 100.",
+      "fail": "Kemajuan teramati {observed_pct} berada di luar rentang 0 sampai 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Periksa tanggal penerbangan, atau tanggal mulai dan selesai proyek.",
+      "fail": "Tanggal pengambilan {captured_on} lebih dari 30 hari di luar tanggal proyek."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Periksa sistem koordinat ekspor, atau jangkar proyek.",
+      "fail": "Ortofoto berjarak {distance_km} km dari jangkar proyek."
     }
   }
 }

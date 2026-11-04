@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} päättyy {days} päivän päässä tuodun tiedoston lopusta ({source}).",
       "suggestion": "Vertaa uudelleenlaskettuja päivämääriä lähdetiedostoon ja hyväksy ne tai palauta lähteen päivämäärät."
+    },
+    "constraint_date_missing": {
+      "fail": "Toiminnolla '{activity}' on rajoite {constraint}, mutta ei rajoituspäivää, joten rajoite ohitetaan.",
+      "suggestion": "Anna rajoituspäivä tai poista rajoite."
+    },
+    "constraint_conflict": {
+      "fail": "Toimintoa '{activity}' rajoittaa {constraint} päivään {date}, mutta sen edeltäjät sallivat sen vasta {days} päivää myöhemmin.",
+      "suggestion": "Siirrä rajoituspäivää, lyhennä edeltäjäketjua tai hyväksy negatiivinen väljyys."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Vertailutasoa ei löytynyt",
     "fx_rate_set_locked": "Päivän {date} EKP-kurssit ovat lukittuina, joten tämä päivitys ei korvannut niitä. Avaa kyseisen kurssijoukon lukitus ensin, jos sen tulee vastaanottaa uusi julkaisu.",
     "boq_locked": "Määräluettelo on lukittu eikä sitä voi muokata. Luo revisio muutoksia varten.",
-    "boq_link_owner_locked": "Koodin '{code}' määrittää lukitun määräluettelon '{bill}' rivi, ja siihen yhdistäminen muuttaisi kyseistä määräluetteloa. Avaa ensin sen lukitus tai kirjaa rivi uudella koodilla."
+    "boq_link_owner_locked": "Koodin '{code}' määrittää lukitun määräluettelon '{bill}' rivi, ja siihen yhdistäminen muuttaisi kyseistä määräluetteloa. Avaa ensin sen lukitus tai kirjaa rivi uudella koodilla.",
+    "boq_budget_nothing_budgetable": "Määräluettelosta ei löytynyt budjetoitavia nimikkeitä.",
+    "boq_fix_position_id_required": "position_id vaaditaan tähän korjaukseen",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' on oltava ei-tyhjä luettelo",
+    "boq_budget_requires_lock": "Määräluettelo on lukittava ennen budjetin luomista. Lukitse ensin arvio.",
+    "boq_not_locked": "Määräluetteloa ei ole lukittu.",
+    "boq_fix_unit_required": "Ei-tyhjä parametri 'unit' vaaditaan",
+    "project_access_denied": "Sinulla ei ole pääsyä tähän hankkeeseen",
+    "boq_costmodel_budget_failed": "Kustannusmallin budjettirivien luonti epäonnistui. Kustannusmallimoduuli ei ehkä ole käytettävissä.",
+    "boq_unlock_role": "Vain pääkäyttäjä tai päällikkö voi avata määräluettelon lukituksen.",
+    "boq_bulk_all_failed": "Kaikki {count} nimikettä epäonnistuivat validoinnissa. Ensimmäinen virhe: {error}",
+    "boq_position_not_in_boq": "Nimikettä {position_id} ei löytynyt määräluettelosta {boq_id}",
+    "boq_already_locked": "Määräluettelo on jo lukittu.",
+    "boq_budget_failed": "Budjettirivien luonti epäonnistui. Talousmoduuli ei ehkä ole käytettävissä.",
+    "boq_bulk_items_required": "Luettelo 'items' vaaditaan eikä se saa olla tyhjä",
+    "boq_classification_unavailable": "Luokituspalvelu ei ole käytettävissä",
+    "boq_budget_no_positions": "Määräluettelossa ei ole nimikkeitä: ei mitään budjetoitavaa.",
+    "boq_fix_unit_rate_required": "Ei-negatiivinen parametri 'unit_rate' vaaditaan"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Kohta {ordinal}: piirustus {drawing} on syötetty ilman revisiota",
       "suggestion": "Lisää sen piirustuksen revisio, jonka mukaan määrä on hinnoiteltu"
+    },
+    "carried_unconfirmed": {
+      "fail": "Nimike {ordinal}: {count} mittausta siirrettiin aiemmasta piirustusversiosta eikä niitä ole vielä vahvistettu",
+      "suggestion": "Tarkista jokainen siirretty mittaus uudella versiolla ja vahvista se tai mittaa uudelleen"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Laske tasaus, jotta puuttuva laajuus on hinnoiteltu ennen myöntämistä"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Paketti {package} on linkitetty pääurakan tarjouskilpailuun {tender}, eikä sitä ole vielä myönnetty, joten kilpailulla ei ole sopimusta",
+      "suggestion": "Myönnä paketti (se luo sopimuksen) tai irrota tarjouskilpailu, jotta se laatii oman sopimuksensa"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Kilpailu",
       "margin": "Kate",
       "risk": "Riski"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Sivulla {page} ei ole luettavaa piirustusnumeroa",
+      "suggestion": "Anna piirustusnumero piirustusotsikosta; ilman sitä piirustusta ei voi asettaa aiempien versioiden päälle"
+    },
+    "number_unique_in_set": {
+      "fail": "Piirustus {sheet} versio {revision} esiintyy sivuilla {first_page} ja {page} samassa latauksessa",
+      "suggestion": "Tarkista molempien sivujen piirustusotsikot ja korjaa toisen numero tai versio"
+    },
+    "revision_not_lower": {
+      "fail": "Piirustus {sheet} on versiossa {revision}, mutta nykyinen piirustus on jo versiossa {current_revision}",
+      "suggestion": "Vahvista luku vain, jos kyseessä on todella myöhempi julkaisu; muuten korjaa versio tai hylkää piirustus"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Piirustus {sheet} luettiin varmuudella {confidence} eikä sitä ole vahvistettu",
+      "suggestion": "Vertaa kenttiä piirustusotsikkoon ja vahvista tai korjaa ne"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Rivi {row}: nimikkeen tunnus -solu alkaa kaavamerkillä eikä sitä tuotu",
+      "suggestion": "Jätä nimikkeen tunnus -sarake sellaiseksi kuin se vietiin, tai tyhjennä solu lisätäksesi uuden nimikkeen"
+    },
+    "unknown_id": {
+      "fail": "Rivi {row}: nimikkeen tunnus ei kuulu tähän määräluetteloon, joten rivi käsiteltiin uutena nimikkeenä",
+      "suggestion": "Vie määräluettelo uudelleen ennen muokkausta tai tyhjennä nimikkeen tunnus -solu, jos rivin on tarkoitus olla uusi"
+    },
+    "duplicate_id": {
+      "fail": "Rivi {row}: nimikkeen tunnus on aiemman rivin käytössä, joten tämä rivi käsiteltiin uutena nimikkeenä",
+      "suggestion": "Tyhjennä kopioitujen rivien nimikkeen tunnus tai poista kopiot"
+    },
+    "stale_row": {
+      "fail": "Rivi {row}: nimikettä {ordinal} muutettiin sovelluksessa tämän taulukon viennin jälkeen",
+      "suggestion": "Säilytä sovelluksen arvo tai valitse tämän rivin Excel-arvo ylikirjoittaaksesi sen"
+    },
+    "locked_boq": {
+      "fail": "Tämä määräluettelo on lukittu, joten Excelin muutoksia ei voi ottaa käyttöön",
+      "suggestion": "Avaa ensin määräluettelon lukitus tai tallenna taulukko myöhempää varten"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Suorita kustannusriskianalyysi uudelleen ja ota varaus uudelleen käyttöön tai säilytä rivi ja kirjaa syy",
+      "fail": "Varausrivi \"{markup}\" otettiin käyttöön tasolla P{percentile} {applied_at}, mutta sen lähde ({source}) on sittemmin muuttunut"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Suorita kustannusriskianalyysi uudelleen ja ota varaus uudelleen käyttöön tai säilytä rivi ja kirjaa syy",
+      "fail": "Riskivaraus \"{markup}\" on {amount}, vähemmän kuin nykyinen P50-arvio {p50}"
+    },
+    "source": {
+      "positions": "määräluettelon rivisummat",
+      "register": "riskirekisteri"
+    },
+    "contingency_double_count": {
+      "suggestion": "Poista toinen kahdesta rivistä käytöstä tai kirjaa, miksi molempia tarvitaan",
+      "fail": "Varausrivi \"{markup}\" on käytössä riskivarauksen \"{risk_markup}\" rinnalla; sama epävarmuus voi olla varattu kahdesti"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Nimikkeelle {ref} on kirjattu {hours} h välille {date_from}-{date_to}, mutta mitattua edistymistä ei ole",
+      "suggestion": "Kirjaa nimikkeelle mittaus tai edistyminen tai siirrä tunnit nimikkeelle, jolla todella työskenneltiin"
+    },
+    "factor_implausible": {
+      "fail": "Nimikkeen {ref} tuottavuuskerroin {factor} on uskottavan vaihteluvälin {low}-{high} ulkopuolella",
+      "suggestion": "Tarkista kirjatut tunnit, asennettu määrä ja arvionormin yksikkö"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Toiminto {activity} ({project}) kuormittaa työvoimaa mutta ei nimeä ammattia, joten sen tarvetta ei voi kohdistaa kenellekään",
+      "suggestion": "Aseta toiminnon työvoimaresurssille ammatti"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Tallennettu vastaus ei viittaa yhteenkään hankkeen asiakirjaan, joten mikään ei tue sitä.",
+      "suggestion": "Kysy uudelleen, kunnes vastaus viittaa asiakirjaan, tai merkitse teksti omaksi muistiinpanoksi."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Agentin luonnos '{title}' on odottanut tarkistusta {days} päivää (raja {limit}).",
+      "suggestion": "Hyväksy tai hylkää luonnos tai sammuta agentti, jos sen luonnoksia ei käytetä."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Anna päivä, jolloin työmaan yli lennettiin.",
+      "fail": "Kuvauspäivä {captured_on} on tulevaisuudessa."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Valitse toiminto tämän hankkeen aikataulusta.",
+      "fail": "Toiminto ei kuulu tähän hankkeeseen."
+    },
+    "georeferenced": {
+      "suggestion": "Vie ortokuva GeoTIFF-muodossa koordinaattijärjestelmineen.",
+      "fail": "Ortokuvalla ei ole koordinaattijärjestelmää tai rajauksia, joten sitä ei voi sijoittaa karttapallolle."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Lennä matalammalla tai vie täydellä tarkkuudella määrien tarkistamiseksi.",
+      "fail": "Maastoresoluutio on {gsd_cm} cm pikseliä kohti, liian karkea määrien tarkistamiseen."
+    },
+    "observed_pct_range": {
+      "suggestion": "Anna prosenttiluku väliltä 0-100.",
+      "fail": "Havaittu edistyminen {observed_pct} on alueen 0-100 ulkopuolella."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Tarkista lentopäivä tai hankkeen alku- ja loppupäivät.",
+      "fail": "Kuvauspäivä {captured_on} on yli 30 päivää hankkeen päivämäärien ulkopuolella."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Tarkista viennin koordinaattijärjestelmä tai hankkeen ankkuripiste.",
+      "fail": "Ortokuva sijaitsee {distance_km} km:n päässä hankkeen ankkuripisteestä."
     }
   }
 }

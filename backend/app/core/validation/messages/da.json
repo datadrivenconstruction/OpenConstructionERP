@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} slutter {days} dage fra slutdatoen i den importerede fil ({source}).",
       "suggestion": "Sammenlign de genberegnede datoer med kildefilen, og accepter dem eller gendan kildedatoerne."
+    },
+    "constraint_date_missing": {
+      "fail": "Aktiviteten '{activity}' har begrænsningen {constraint}, men ingen begrænsningsdato, så begrænsningen ignoreres.",
+      "suggestion": "Angiv begrænsningsdatoen, eller fjern begrænsningen."
+    },
+    "constraint_conflict": {
+      "fail": "Aktiviteten '{activity}' er begrænset af {constraint} til {date}, men dens forgængere tillader det først {days} dage senere.",
+      "suggestion": "Flyt begrænsningsdatoen, forkort forgængerkæden, eller accepter den negative slæk."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Basisplanen blev ikke fundet",
     "fx_rate_set_locked": "ECB-kurserne for {date} er låst, så denne opdatering ikke overskrev dem. Lås først kurssættet op, hvis det skal erstattes af den nye offentliggørelse.",
     "boq_locked": "Mængdefortegnelsen er låst og kan ikke ændres. Opret en revision for at foretage ændringer.",
-    "boq_link_owner_locked": "Koden '{code}' er defineret af en linje i den låste mængdefortegnelse '{bill}', og en tilknytning til den ville ændre denne mængdefortegnelse. Lås den først op, eller registrér linjen under en ny kode."
+    "boq_link_owner_locked": "Koden '{code}' er defineret af en linje i den låste mængdefortegnelse '{bill}', og en tilknytning til den ville ændre denne mængdefortegnelse. Lås den først op, eller registrér linjen under en ny kode.",
+    "boq_budget_nothing_budgetable": "Ingen budgetterbare poster fundet i mængdefortegnelsen.",
+    "boq_fix_position_id_required": "position_id er påkrævet for denne rettelse",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' skal være en ikke-tom liste",
+    "boq_budget_requires_lock": "Mængdefortegnelsen skal være låst, før der oprettes et budget. Lås først overslaget.",
+    "boq_not_locked": "Mængdefortegnelsen er ikke låst.",
+    "boq_fix_unit_required": "En ikke-tom parameter 'unit' er påkrævet",
+    "project_access_denied": "Du har ikke adgang til dette projekt",
+    "boq_costmodel_budget_failed": "Kunne ikke oprette budgetlinjer i omkostningsmodellen. Omkostningsmodelmodulet er muligvis ikke tilgængeligt.",
+    "boq_unlock_role": "Kun en administrator eller leder kan låse en mængdefortegnelse op.",
+    "boq_bulk_all_failed": "Alle {count} poster fejlede valideringen. Første fejl: {error}",
+    "boq_position_not_in_boq": "Post {position_id} blev ikke fundet i mængdefortegnelsen {boq_id}",
+    "boq_already_locked": "Mængdefortegnelsen er allerede låst.",
+    "boq_budget_failed": "Kunne ikke oprette budgetlinjer. Økonomimodulet er muligvis ikke tilgængeligt.",
+    "boq_bulk_items_required": "Listen 'items' er påkrævet og må ikke være tom",
+    "boq_classification_unavailable": "Klassifikationstjenesten er ikke tilgængelig",
+    "boq_budget_no_positions": "Mængdefortegnelsen har ingen poster: intet at budgettere.",
+    "boq_fix_unit_rate_required": "En ikke-negativ parameter 'unit_rate' er påkrævet"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Post {ordinal}: tegning {drawing} er indtastet uden revision",
       "suggestion": "Tilføj revisionen af den tegning, mængden blev prissat ud fra"
+    },
+    "carried_unconfirmed": {
+      "fail": "Post {ordinal}: {count} måling(er) blev overført fra en tidligere tegningsrevision og er endnu ikke bekræftet",
+      "suggestion": "Kontroller hver overført måling på den nye revision, og bekræft den, eller mål igen"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Beregn udligningen, så manglende omfang er prissat før tildeling"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Pakken {package} er knyttet til hovedkontraktens udbud {tender} og er endnu ikke tildelt, så det udbud har ingen kontrakt",
+      "suggestion": "Tildel pakken (det opretter kontrakten), eller fjern koblingen til udbuddet, så det udarbejder sin egen"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Konkurrence",
       "margin": "Avance",
       "risk": "Risiko"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Side {page} har intet læsbart tegningsnummer",
+      "suggestion": "Angiv tegningsnummeret fra tegningshovedet; uden det kan tegningen ikke lægges oven på tidligere revisioner"
+    },
+    "number_unique_in_set": {
+      "fail": "Tegning {sheet} revision {revision} optræder på siderne {first_page} og {page} i samme upload",
+      "suggestion": "Kontroller tegningshovederne på begge sider, og ret nummeret eller revisionen på den ene"
+    },
+    "revision_not_lower": {
+      "fail": "Tegning {sheet} er på revision {revision}, men den nuværende tegning er allerede på {current_revision}",
+      "suggestion": "Bekræft aflæsningen kun hvis det virkelig er en senere udgave; ret ellers revisionen eller kassér tegningen"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Tegning {sheet} blev aflæst med sikkerhed {confidence} og er ikke bekræftet",
+      "suggestion": "Sammenlign felterne med tegningshovedet, og bekræft eller ret dem"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Række {row}: cellen Post-ID begynder med et formeltegn og blev ikke importeret",
+      "suggestion": "Lad kolonnen Post-ID stå, som den blev eksporteret, eller tøm cellen for at tilføje en ny post"
+    },
+    "unknown_id": {
+      "fail": "Række {row}: Post-ID hører ikke til denne mængdefortegnelse, så rækken blev behandlet som en ny post",
+      "suggestion": "Eksportér mængdefortegnelsen igen, før du redigerer, eller tøm cellen Post-ID, hvis rækken skal være ny"
+    },
+    "duplicate_id": {
+      "fail": "Række {row}: Post-ID bruges af en tidligere række, så denne række blev behandlet som en ny post",
+      "suggestion": "Tøm Post-ID på kopierede rækker, eller slet kopierne"
+    },
+    "stale_row": {
+      "fail": "Række {row}: post {ordinal} blev ændret i appen, efter at arket blev eksporteret",
+      "suggestion": "Behold værdien fra appen, eller vælg Excel-værdien for denne række for at overskrive den"
+    },
+    "locked_boq": {
+      "fail": "Denne mængdefortegnelse er låst, så ændringer fra Excel kan ikke anvendes",
+      "suggestion": "Lås først mængdefortegnelsen op, eller gem arket til senere"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Kør omkostningsrisikoanalysen igen, og anvend reserven påny, eller behold linjen og notér hvorfor",
+      "fail": "Reservelinjen \"{markup}\" blev anvendt ved P{percentile} den {applied_at}, men dens kilde ({source}) er ændret siden"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Kør omkostningsrisikoanalysen igen, og anvend reserven påny, eller behold linjen og notér hvorfor",
+      "fail": "Risikoreserven \"{markup}\" udgør {amount}, mindre end det aktuelle P50-skøn på {p50}"
+    },
+    "source": {
+      "positions": "linjesummer i mængdefortegnelsen",
+      "register": "risikoregisteret"
+    },
+    "contingency_double_count": {
+      "suggestion": "Deaktivér en af de to linjer, eller notér hvorfor begge er nødvendige",
+      "fail": "Reservelinjen \"{markup}\" er aktiv ved siden af risikoreserven \"{risk_markup}\"; den samme usikkerhed kan være reserveret to gange"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Post {ref} har {hours} t bogført mellem {date_from} og {date_to}, men ingen målt fremdrift",
+      "suggestion": "Registrer en måling eller fremdrift for posten, eller flyt timerne til den post, der faktisk er arbejdet på"
+    },
+    "factor_implausible": {
+      "fail": "Produktivitetsfaktoren {factor} for post {ref} ligger uden for det rimelige bånd {low} til {high}",
+      "suggestion": "Kontroller de bogførte timer, den monterede mængde og enheden i overslagsnormen"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Aktiviteten {activity} ({project}) belaster arbejdskraft, men angiver intet fag, så behovet kan ikke knyttes til nogen",
+      "suggestion": "Angiv et fag på aktivitetens arbejdskraftressource"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Det gemte svar henviser ikke til noget projektdokument, så intet understøtter det.",
+      "suggestion": "Spørg igen, til svaret henviser til et dokument, eller markér teksten som egen note."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Agentudkastet '{title}' har ventet på gennemgang i {days} dage (grænse {limit}).",
+      "suggestion": "Godkend eller afvis udkastet, eller slå agenten fra, hvis dens udkast ikke bruges."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Angiv dagen, hvor pladsen blev overfløjet.",
+      "fail": "Optagelsesdatoen {captured_on} ligger i fremtiden."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Vælg en aktivitet fra dette projekts tidsplan.",
+      "fail": "Aktiviteten hører ikke til dette projekt."
+    },
+    "georeferenced": {
+      "suggestion": "Eksportér ortofotoet som GeoTIFF med dets koordinatsystem.",
+      "fail": "Ortofotoet har intet koordinatsystem eller udstrækning, så det kan ikke placeres på globussen."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Flyv lavere, eller eksportér i fuld opløsning for at kontrollere mængder.",
+      "fail": "Jordopløsningen er {gsd_cm} cm pr. pixel, for grov til at kontrollere mængder."
+    },
+    "observed_pct_range": {
+      "suggestion": "Angiv en procentsats mellem 0 og 100.",
+      "fail": "Observeret fremdrift {observed_pct} ligger uden for 0 til 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Kontroller flyvedatoen eller projektets start- og slutdato.",
+      "fail": "Optagelsesdatoen {captured_on} ligger mere end 30 dage uden for projektets datoer."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Kontroller eksportens koordinatsystem eller projektets forankringspunkt.",
+      "fail": "Ortofotoet ligger {distance_km} km fra projektets forankringspunkt."
     }
   }
 }

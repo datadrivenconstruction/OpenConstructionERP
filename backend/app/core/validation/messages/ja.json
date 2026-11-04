@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} の完了日は、インポートしたファイルの完了日 ({source}) と {days} 日ずれています。",
       "suggestion": "再計算した日付をソースファイルと比較し、承認するかソースの日付に戻してください。"
+    },
+    "constraint_date_missing": {
+      "fail": "アクティビティ「{activity}」には制約 {constraint} がありますが制約日がないため、制約は無視されます。",
+      "suggestion": "制約日を入力するか、制約を解除してください。"
+    },
+    "constraint_conflict": {
+      "fail": "アクティビティ「{activity}」は {constraint} により {date} に制約されていますが、先行作業では {days} 日後でないと可能になりません。",
+      "suggestion": "制約日を動かす、先行作業の連鎖を短くする、または負のフロートを受け入れてください。"
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "ベースラインが見つかりません",
     "fx_rate_set_locked": "{date} の ECB 為替レートはロックされているため、この更新では上書きされませんでした。新しい公表値を反映する場合は、先にそのレートセットのロックを解除してください。",
     "boq_locked": "内訳書はロックされているため変更できません。変更するには改訂版を作成してください。",
-    "boq_link_owner_locked": "コード「{code}」はロック済みの内訳書「{bill}」の項目で定義されており、関連付けるとその内訳書が変更されます。先にその内訳書のロックを解除するか、新しいコードで項目を入力してください。"
+    "boq_link_owner_locked": "コード「{code}」はロック済みの内訳書「{bill}」の項目で定義されており、関連付けるとその内訳書が変更されます。先にその内訳書のロックを解除するか、新しいコードで項目を入力してください。",
+    "boq_budget_nothing_budgetable": "数量表に予算化できる項目が見つかりません。",
+    "boq_fix_position_id_required": "この修正には position_id が必要です",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' は空でないリストである必要があります",
+    "boq_budget_requires_lock": "予算を作成する前に数量表をロックする必要があります。先に見積をロックしてください。",
+    "boq_not_locked": "数量表はロックされていません。",
+    "boq_fix_unit_required": "空でない 'unit' パラメータが必要です",
+    "project_access_denied": "このプロジェクトへのアクセス権がありません",
+    "boq_costmodel_budget_failed": "コストモデルの予算行を作成できませんでした。コストモデルモジュールが利用できない可能性があります。",
+    "boq_unlock_role": "数量表のロックを解除できるのは管理者またはマネージャーのみです。",
+    "boq_bulk_all_failed": "{count} 件すべての項目が検証に失敗しました。最初のエラー: {error}",
+    "boq_position_not_in_boq": "項目 {position_id} が数量表 {boq_id} に見つかりません",
+    "boq_already_locked": "数量表はすでにロックされています。",
+    "boq_budget_failed": "予算行を作成できませんでした。財務モジュールが利用できない可能性があります。",
+    "boq_bulk_items_required": "'items' リストは必須で、空にできません",
+    "boq_classification_unavailable": "分類サービスは利用できません",
+    "boq_budget_no_positions": "数量表に項目がありません。予算化するものがありません。",
+    "boq_fix_unit_rate_required": "負でない 'unit_rate' パラメータが必要です"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "項目 {ordinal}: 図面 {drawing} がリビジョンなしで入力されています",
       "suggestion": "数量の単価根拠となった図面のリビジョンを追加してください"
+    },
+    "carried_unconfirmed": {
+      "fail": "項目 {ordinal}: {count} 件の計測値が以前の図面改訂から引き継がれ、まだ確認されていません",
+      "suggestion": "新しい改訂で引き継がれた各計測値を確認して承認するか、測り直してください"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "発注前に不足範囲が積算されるよう、入札調整を計算してください"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "パッケージ {package} は主契約の入札 {tender} にリンクされていますが、まだ落札されていないため、その入札には契約がありません",
+      "suggestion": "パッケージを落札する (契約が作成されます) か、入札のリンクを解除して独自の契約を作成させてください"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "競合",
       "margin": "利益率",
       "risk": "リスク"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "{page} ページには読み取れる図面番号がありません",
+      "suggestion": "表題欄から図面番号を入力してください。番号がないと図面を以前の改訂版に重ねられません"
+    },
+    "number_unique_in_set": {
+      "fail": "図面 {sheet} の改訂 {revision} が同じアップロードの {first_page} ページと {page} ページに現れています",
+      "suggestion": "両ページの表題欄を確認し、どちらかの番号または改訂を修正してください"
+    },
+    "revision_not_lower": {
+      "fail": "図面 {sheet} は改訂 {revision} ですが、現行の図面はすでに {current_revision} です",
+      "suggestion": "本当に新しい発行である場合にのみ読み取りを確認してください。そうでなければ改訂を修正するか図面を破棄してください"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "図面 {sheet} は信頼度 {confidence} で読み取られ、確認されていません",
+      "suggestion": "各項目を表題欄と照合し、確認または修正してください"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "{row} 行目: 項目 ID のセルが数式文字で始まっているため取り込まれませんでした",
+      "suggestion": "項目 ID 列はエクスポートされたままにするか、新しい項目を追加するにはセルを空にしてください"
+    },
+    "unknown_id": {
+      "fail": "{row} 行目: 項目 ID がこの数量表に属していないため、新しい項目として扱われました",
+      "suggestion": "編集の前に数量表を再エクスポートするか、新規行にする場合は項目 ID のセルを空にしてください"
+    },
+    "duplicate_id": {
+      "fail": "{row} 行目: 項目 ID が前の行で使われているため、この行は新しい項目として扱われました",
+      "suggestion": "コピーした行の項目 ID を空にするか、コピーを削除してください"
+    },
+    "stale_row": {
+      "fail": "{row} 行目: このシートのエクスポート後に、項目 {ordinal} がアプリで変更されました",
+      "suggestion": "アプリの値を維持するか、この行で Excel の値を選んで上書きしてください"
+    },
+    "locked_boq": {
+      "fail": "この数量表はロックされているため、Excel からの変更は適用できません",
+      "suggestion": "先に数量表のロックを解除するか、シートを後で保存してください"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "コストリスク分析を再実行して予備費を再適用するか、行を残して理由を記録してください",
+      "fail": "予備費行「{markup}」は {applied_at} に P{percentile} で適用されましたが、その後ソース ({source}) が変更されました"
+    },
+    "contingency_below_p50": {
+      "suggestion": "コストリスク分析を再実行して予備費を再適用するか、行を残して理由を記録してください",
+      "fail": "リスク予備費「{markup}」は {amount} で、現在の P50 見積 {p50} を下回っています"
+    },
+    "source": {
+      "positions": "数量表の行合計",
+      "register": "リスク登録簿"
+    },
+    "contingency_double_count": {
+      "suggestion": "2 つの行のうち一方を無効にするか、両方が必要な理由を記録してください",
+      "fail": "予備費行「{markup}」がリスク予備費「{risk_markup}」と並んで有効です。同じ不確実性が二重に確保されている可能性があります"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "項目 {ref} には {date_from} から {date_to} の間に {hours} 時間が計上されていますが、計測された進捗がありません",
+      "suggestion": "項目の計測または進捗を記録するか、実際に作業した項目に時間を移してください"
+    },
+    "factor_implausible": {
+      "fail": "項目 {ref} の生産性係数 {factor} が妥当な範囲 {low} から {high} の外にあります",
+      "suggestion": "計上時間、設置数量、積算基準の単位を確認してください"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "アクティビティ {activity} ({project}) は労務を割り当てていますが職種がないため、その需要を誰にも割り当てられません",
+      "suggestion": "アクティビティの労務リソースに職種を設定してください"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "保存された回答はプロジェクト文書を引用していないため、裏付けがありません。",
+      "suggestion": "回答が文書を引用するまで再度質問するか、テキストを自分のメモとしてマークしてください。"
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "エージェントの下書き「{title}」は {days} 日間レビュー待ちです (上限 {limit})。",
+      "suggestion": "下書きを承認または却下するか、下書きが使われていない場合はエージェントをオフにしてください。"
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "現場を空撮した日を入力してください。",
+      "fail": "撮影日 {captured_on} は未来の日付です。"
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "このプロジェクトの工程表からアクティビティを選んでください。",
+      "fail": "このアクティビティはこのプロジェクトに属していません。"
+    },
+    "georeferenced": {
+      "suggestion": "オルソ画像を座標系付きの GeoTIFF としてエクスポートしてください。",
+      "fail": "オルソ画像に座標系または範囲がないため、地球儀上に配置できません。"
+    },
+    "gsd_reasonable": {
+      "suggestion": "数量確認のため、低く飛行するか、フル解像度でエクスポートしてください。",
+      "fail": "地上解像度は 1 ピクセルあたり {gsd_cm} cm で、数量確認には粗すぎます。"
+    },
+    "observed_pct_range": {
+      "suggestion": "0 から 100 の間のパーセンテージを入力してください。",
+      "fail": "観測された進捗 {observed_pct} が 0 から 100 の範囲外です。"
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "飛行日、またはプロジェクトの開始日と終了日を確認してください。",
+      "fail": "撮影日 {captured_on} がプロジェクト期間から 30 日以上外れています。"
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "エクスポートの座標系、またはプロジェクトのアンカーを確認してください。",
+      "fail": "オルソ画像はプロジェクトのアンカーから {distance_km} km 離れています。"
     }
   }
 }

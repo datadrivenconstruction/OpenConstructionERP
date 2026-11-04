@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "ينتهي {activity} بفارق {days} يومًا عن الانتهاء في الملف المستورد ({source}).",
       "suggestion": "قارن التواريخ المعاد حسابها بملف المصدر، ثم اقبلها أو استعد تواريخ المصدر."
+    },
+    "constraint_date_missing": {
+      "fail": "النشاط '{activity}' لديه القيد {constraint} لكن بلا تاريخ قيد، لذلك يُتجاهل القيد.",
+      "suggestion": "أدخل تاريخ القيد أو أزل القيد."
+    },
+    "constraint_conflict": {
+      "fail": "النشاط '{activity}' مقيّد بـ {constraint} عند {date}، لكن الأنشطة السابقة تسمح به بعد {days} يومًا فقط.",
+      "suggestion": "انقل تاريخ القيد أو اختصر سلسلة الأنشطة السابقة أو اقبل الفائض السالب."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "لم يُعثر على خط الأساس",
     "fx_rate_set_locked": "أسعار البنك المركزي الأوروبي بتاريخ {date} مقفلة، لذا لم يستبدلها هذا التحديث. افتح قفل مجموعة الأسعار أولًا إذا كان يجب أن تعتمد النشرة الجديدة.",
     "boq_locked": "جدول الكميات مقفل ولا يمكن تعديله. أنشئ مراجعة لإجراء تغييرات.",
-    "boq_link_owner_locked": "الرمز '{code}' معرّف بواسطة بند في الجدول المقفل '{bill}'، والربط به سيغيّر ذلك الجدول. افتح قفله أولًا أو أدخل البند برمز جديد."
+    "boq_link_owner_locked": "الرمز '{code}' معرّف بواسطة بند في الجدول المقفل '{bill}'، والربط به سيغيّر ذلك الجدول. افتح قفله أولًا أو أدخل البند برمز جديد.",
+    "boq_budget_nothing_budgetable": "لم يتم العثور على بنود قابلة للميزنة في جدول الكميات.",
+    "boq_fix_position_id_required": "position_id مطلوب لهذا التصحيح",
+    "boq_fix_duplicates_required": "يجب أن تكون 'duplicate_position_ids' قائمة غير فارغة",
+    "boq_budget_requires_lock": "يجب قفل جدول الكميات قبل إنشاء ميزانية. اقفل التقدير أولًا.",
+    "boq_not_locked": "جدول الكميات غير مقفل.",
+    "boq_fix_unit_required": "المعامل 'unit' مطلوب ويجب ألا يكون فارغًا",
+    "project_access_denied": "ليس لديك صلاحية الوصول إلى هذا المشروع",
+    "boq_costmodel_budget_failed": "فشل إنشاء أسطر ميزانية نموذج التكلفة. قد تكون وحدة نموذج التكلفة غير متاحة.",
+    "boq_unlock_role": "يمكن للمسؤول أو المدير فقط فتح قفل جدول الكميات.",
+    "boq_bulk_all_failed": "فشل التحقق لجميع العناصر البالغ عددها {count}. أول خطأ: {error}",
+    "boq_position_not_in_boq": "لم يتم العثور على البند {position_id} في جدول الكميات {boq_id}",
+    "boq_already_locked": "جدول الكميات مقفل بالفعل.",
+    "boq_budget_failed": "فشل إنشاء أسطر الميزانية. قد تكون الوحدة المالية غير متاحة.",
+    "boq_bulk_items_required": "القائمة 'items' مطلوبة ويجب ألا تكون فارغة",
+    "boq_classification_unavailable": "خدمة التصنيف غير متاحة",
+    "boq_budget_no_positions": "لا توجد بنود في جدول الكميات: لا شيء للميزنة.",
+    "boq_fix_unit_rate_required": "المعامل 'unit_rate' مطلوب ويجب ألا يكون سالبًا"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "البند {ordinal}: أُدخل الرسم {drawing} دون مراجعة",
       "suggestion": "أضف مراجعة الرسم الذي سُعّرت منه الكمية"
+    },
+    "carried_unconfirmed": {
+      "fail": "البند {ordinal}: تم نقل {count} قياسات من مراجعة رسم سابقة ولم يتم تأكيدها بعد",
+      "suggestion": "راجع كل قياس منقول في المراجعة الجديدة وأكّده أو أعد قياسه"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "احسب المعادلة ليتم تسعير النطاق الناقص قبل الترسية"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "الحزمة {package} مرتبطة بمناقصة العقد الرئيسي {tender} ولم تُرسَّ بعد، لذلك لا يوجد عقد لتلك المناقصة",
+      "suggestion": "أرسِ الحزمة (فتنشئ العقد) أو افصل المناقصة لتعدّ عقدها الخاص"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "المنافسة",
       "margin": "هامش الربح",
       "risk": "المخاطر"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "الصفحة {page} ليس لها رقم لوحة مقروء",
+      "suggestion": "أدخل رقم اللوحة من إطار العنوان؛ بدونه لا يمكن وضع اللوحة فوق المراجعات السابقة"
+    },
+    "number_unique_in_set": {
+      "fail": "اللوحة {sheet} المراجعة {revision} تظهر في الصفحتين {first_page} و{page} من الرفع نفسه",
+      "suggestion": "راجع إطار العنوان في الصفحتين وصحّح رقم إحداهما أو مراجعتها"
+    },
+    "revision_not_lower": {
+      "fail": "اللوحة {sheet} في المراجعة {revision} لكن اللوحة الحالية في المراجعة {current_revision} بالفعل",
+      "suggestion": "أكّد القراءة فقط إذا كان الإصدار فعلًا أحدث؛ وإلا صحّح المراجعة أو تخلَّ عن اللوحة"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "قُرئت اللوحة {sheet} بثقة {confidence} ولم يتم تأكيدها",
+      "suggestion": "قارن الحقول بإطار العنوان ثم أكّدها أو صحّحها"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "الصف {row}: خلية معرّف البند تبدأ برمز صيغة ولم يتم استيرادها",
+      "suggestion": "اترك عمود معرّف البند كما تم تصديره أو امسح الخلية لإضافة بند جديد"
+    },
+    "unknown_id": {
+      "fail": "الصف {row}: معرّف البند لا يخص هذا الجدول، لذلك عومل الصف كبند جديد",
+      "suggestion": "صدّر الجدول مرة أخرى قبل التعديل أو امسح خلية معرّف البند إذا كان الصف جديدًا"
+    },
+    "duplicate_id": {
+      "fail": "الصف {row}: معرّف البند مستخدم في صف سابق، لذلك عومل هذا الصف كبند جديد",
+      "suggestion": "امسح معرّف البند في الصفوف المنسوخة أو احذف النسخ"
+    },
+    "stale_row": {
+      "fail": "الصف {row}: تم تغيير البند {ordinal} في التطبيق بعد تصدير هذه الورقة",
+      "suggestion": "احتفظ بقيمة التطبيق أو اختر قيمة Excel لهذا الصف لاستبدالها"
+    },
+    "locked_boq": {
+      "fail": "هذا الجدول مقفل، لذلك لا يمكن تطبيق تغييرات Excel",
+      "suggestion": "افتح قفل الجدول أولًا أو احفظ الورقة لوقت لاحق"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "أعد تشغيل تحليل مخاطر التكلفة وطبّق الاحتياطي مرة أخرى، أو احتفظ بالسطر ودوّن السبب",
+      "fail": "طُبّق سطر الاحتياطي \"{markup}\" عند P{percentile} في {applied_at}، لكن مصدره ({source}) تغيّر منذ ذلك الحين"
+    },
+    "contingency_below_p50": {
+      "suggestion": "أعد تشغيل تحليل مخاطر التكلفة وطبّق الاحتياطي مرة أخرى، أو احتفظ بالسطر ودوّن السبب",
+      "fail": "احتياطي المخاطر \"{markup}\" يبلغ {amount}، أقل من تقدير P50 الحالي البالغ {p50}"
+    },
+    "source": {
+      "positions": "إجماليات أسطر جدول الكميات",
+      "register": "سجل المخاطر"
+    },
+    "contingency_double_count": {
+      "suggestion": "عطّل أحد السطرين أو دوّن سبب الحاجة إليهما معًا",
+      "fail": "سطر الاحتياطي \"{markup}\" نشط بجانب احتياطي المخاطر \"{risk_markup}\"؛ قد تكون نفس حالة عدم اليقين محجوزة مرتين"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "البند {ref} لديه {hours} ساعة مسجلة بين {date_from} و{date_to} لكن بلا تقدم مقاس",
+      "suggestion": "سجّل قياسًا أو تقدمًا للبند، أو انقل الساعات إلى البند الذي عُمل عليه فعلًا"
+    },
+    "factor_implausible": {
+      "fail": "عامل الإنتاجية {factor} للبند {ref} خارج النطاق المعقول من {low} إلى {high}",
+      "suggestion": "تحقق من الساعات المسجلة والكمية المركّبة ووحدة معيار التقدير"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "النشاط {activity} ({project}) يحمّل عمالة لكنه لا يحدد مهنة، لذلك لا يمكن مطابقة طلبه مع أي شخص",
+      "suggestion": "حدّد مهنة في مورد العمالة الخاص بالنشاط"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "الإجابة المحفوظة لا تستشهد بأي مستند من المشروع، لذلك لا شيء يدعمها.",
+      "suggestion": "اسأل مرة أخرى حتى تستشهد الإجابة بمستند، أو علّم النص كملاحظة خاصة بك."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "مسودة الوكيل '{title}' تنتظر المراجعة منذ {days} يومًا (الحد {limit}).",
+      "suggestion": "اقبل المسودة أو ارفضها، أو أوقف الوكيل إذا لم تُستخدم مسوداته."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "أدخل اليوم الذي حُلّق فيه فوق الموقع.",
+      "fail": "تاريخ الالتقاط {captured_on} في المستقبل."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "اختر نشاطًا من جدول هذا المشروع.",
+      "fail": "النشاط لا ينتمي إلى هذا المشروع."
+    },
+    "georeferenced": {
+      "suggestion": "صدّر الصورة المتعامدة بصيغة GeoTIFF مع نظام إحداثياتها.",
+      "fail": "الصورة المتعامدة بلا نظام إحداثيات أو حدود، لذلك لا يمكن وضعها على الكرة الأرضية."
+    },
+    "gsd_reasonable": {
+      "suggestion": "حلّق على ارتفاع أقل أو صدّر بدقة كاملة للتحقق من الكميات.",
+      "fail": "دقة العينة الأرضية {gsd_cm} سم لكل بكسل، خشنة جدًا للتحقق من الكميات."
+    },
+    "observed_pct_range": {
+      "suggestion": "أدخل نسبة مئوية بين 0 و100.",
+      "fail": "التقدم المرصود {observed_pct} خارج النطاق من 0 إلى 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "تحقق من تاريخ الطيران أو تاريخي بداية المشروع ونهايته.",
+      "fail": "تاريخ الالتقاط {captured_on} خارج تواريخ المشروع بأكثر من 30 يومًا."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "تحقق من نظام إحداثيات التصدير أو نقطة ارتكاز المشروع.",
+      "fail": "تبعد الصورة المتعامدة {distance_km} كم عن نقطة ارتكاز المشروع."
     }
   }
 }

@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} eindigt {days} dagen verschoven van het einde in het geïmporteerde bestand ({source}).",
       "suggestion": "Vergelijk de herberekende datums met het bronbestand en accepteer ze of herstel de brondatums."
+    },
+    "constraint_date_missing": {
+      "fail": "Activiteit '{activity}' heeft de beperking {constraint} maar geen beperkingsdatum, dus de beperking wordt genegeerd.",
+      "suggestion": "Voer de beperkingsdatum in of verwijder de beperking."
+    },
+    "constraint_conflict": {
+      "fail": "Activiteit '{activity}' is door {constraint} beperkt tot {date}, maar de voorgangers staan het pas {days} dagen later toe.",
+      "suggestion": "Verschuif de beperkingsdatum, verkort de keten van voorgangers of accepteer de negatieve speling."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Basisplanning niet gevonden",
     "fx_rate_set_locked": "De ECB-koersen voor {date} zijn vergrendeld en zijn bij deze vernieuwing niet overschreven. Ontgrendel eerst deze koersset als de nieuwe publicatie moet worden overgenomen.",
     "boq_locked": "De hoeveelhedenstaat is vergrendeld en kan niet worden gewijzigd. Maak een revisie om wijzigingen door te voeren.",
-    "boq_link_owner_locked": "Code '{code}' is vastgelegd door een regel in de vergrendelde hoeveelhedenstaat '{bill}'; een koppeling zou die staat wijzigen. Ontgrendel eerst die hoeveelhedenstaat of voer de regel onder een nieuwe code in."
+    "boq_link_owner_locked": "Code '{code}' is vastgelegd door een regel in de vergrendelde hoeveelhedenstaat '{bill}'; een koppeling zou die staat wijzigen. Ontgrendel eerst die hoeveelhedenstaat of voer de regel onder een nieuwe code in.",
+    "boq_budget_nothing_budgetable": "Geen begrotbare posten gevonden in de bestekstaat.",
+    "boq_fix_position_id_required": "position_id is vereist voor deze correctie",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' moet een niet-lege lijst zijn",
+    "boq_budget_requires_lock": "De bestekstaat moet vergrendeld zijn voordat een budget wordt gemaakt. Vergrendel eerst de raming.",
+    "boq_not_locked": "De bestekstaat is niet vergrendeld.",
+    "boq_fix_unit_required": "Een niet-lege parameter 'unit' is vereist",
+    "project_access_denied": "U hebt geen toegang tot dit project",
+    "boq_costmodel_budget_failed": "Kon de budgetregels van het kostenmodel niet aanmaken. De module voor het kostenmodel is mogelijk niet beschikbaar.",
+    "boq_unlock_role": "Alleen een beheerder of manager kan een bestekstaat ontgrendelen.",
+    "boq_bulk_all_failed": "Alle {count} items zijn bij de validatie mislukt. Eerste fout: {error}",
+    "boq_position_not_in_boq": "Post {position_id} niet gevonden in bestekstaat {boq_id}",
+    "boq_already_locked": "De bestekstaat is al vergrendeld.",
+    "boq_budget_failed": "Kon de budgetregels niet aanmaken. De financiënmodule is mogelijk niet beschikbaar.",
+    "boq_bulk_items_required": "De lijst 'items' is vereist en mag niet leeg zijn",
+    "boq_classification_unavailable": "Classificatieservice niet beschikbaar",
+    "boq_budget_no_positions": "De bestekstaat heeft geen posten: niets om te begroten.",
+    "boq_fix_unit_rate_required": "Een niet-negatieve parameter 'unit_rate' is vereist"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Post {ordinal}: tekening {drawing} is ingevoerd zonder revisie",
       "suggestion": "Voeg de revisie toe van de tekening waarop de hoeveelheid is geprijsd"
+    },
+    "carried_unconfirmed": {
+      "fail": "Post {ordinal}: {count} meting(en) zijn overgenomen uit een eerdere tekeningrevisie en nog niet bevestigd",
+      "suggestion": "Controleer elke overgenomen meting op de nieuwe revisie en bevestig die, of meet opnieuw"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Bereken de nivellering zodat ontbrekend werk vóór de gunning is geprijsd"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Pakket {package} is gekoppeld aan de hoofdcontractaanbesteding {tender} en nog niet gegund, dus die aanbesteding heeft geen contract",
+      "suggestion": "Gun het pakket (dat maakt het contract aan) of ontkoppel de aanbesteding zodat die een eigen contract opstelt"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Concurrentie",
       "margin": "Marge",
       "risk": "Risico"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Pagina {page} heeft geen leesbaar bladnummer",
+      "suggestion": "Voer het bladnummer uit het titelblok in; zonder dit kan het blad niet over eerdere revisies heen worden gelegd"
+    },
+    "number_unique_in_set": {
+      "fail": "Blad {sheet} revisie {revision} komt voor op pagina {first_page} en {page} van dezelfde upload",
+      "suggestion": "Controleer de titelblokken van beide pagina's en corrigeer het nummer of de revisie van een van beide"
+    },
+    "revision_not_lower": {
+      "fail": "Blad {sheet} heeft revisie {revision} maar het huidige blad is al op {current_revision}",
+      "suggestion": "Bevestig de uitlezing alleen als dit echt een latere uitgifte is; corrigeer anders de revisie of verwerp het blad"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Blad {sheet} is uitgelezen met betrouwbaarheid {confidence} en is niet bevestigd",
+      "suggestion": "Vergelijk de velden met het titelblok en bevestig of corrigeer ze"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Rij {row}: de cel Post-ID begint met een formuleteken en is niet geïmporteerd",
+      "suggestion": "Laat de kolom Post-ID zoals geëxporteerd, of maak de cel leeg om een nieuwe post toe te voegen"
+    },
+    "unknown_id": {
+      "fail": "Rij {row}: de Post-ID hoort niet bij deze bestekstaat, dus de rij is als nieuwe post behandeld",
+      "suggestion": "Exporteer de bestekstaat opnieuw voordat u bewerkt, of maak de cel Post-ID leeg als de rij nieuw moet zijn"
+    },
+    "duplicate_id": {
+      "fail": "Rij {row}: de Post-ID wordt door een eerdere rij gebruikt, dus deze rij is als nieuwe post behandeld",
+      "suggestion": "Maak de Post-ID van gekopieerde rijen leeg, of verwijder de kopieën"
+    },
+    "stale_row": {
+      "fail": "Rij {row}: post {ordinal} is in de app gewijzigd nadat dit blad was geëxporteerd",
+      "suggestion": "Behoud de waarde uit de app, of kies de Excel-waarde voor deze rij om die te overschrijven"
+    },
+    "locked_boq": {
+      "fail": "Deze bestekstaat is vergrendeld, dus wijzigingen uit Excel kunnen niet worden toegepast",
+      "suggestion": "Ontgrendel eerst de bestekstaat, of bewaar het blad voor later"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Voer de kostenrisicoanalyse opnieuw uit en pas de reservering opnieuw toe, of behoud de regel en noteer waarom",
+      "fail": "Reserveringsregel \"{markup}\" is toegepast op P{percentile} op {applied_at}, maar de bron ({source}) is sindsdien gewijzigd"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Voer de kostenrisicoanalyse opnieuw uit en pas de reservering opnieuw toe, of behoud de regel en noteer waarom",
+      "fail": "Risicoreservering \"{markup}\" bedraagt {amount}, minder dan de huidige P50-raming van {p50}"
+    },
+    "source": {
+      "positions": "totalen van de bestekregels",
+      "register": "risicoregister"
+    },
+    "contingency_double_count": {
+      "suggestion": "Deactiveer een van de twee regels, of noteer waarom beide nodig zijn",
+      "fail": "Reserveringsregel \"{markup}\" is actief naast de risicoreservering \"{risk_markup}\"; dezelfde onzekerheid kan dubbel zijn gereserveerd"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Post {ref} heeft {hours} u geboekt tussen {date_from} en {date_to} maar geen gemeten voortgang",
+      "suggestion": "Registreer een meting of voortgang voor de post, of verplaats de uren naar de post waaraan echt is gewerkt"
+    },
+    "factor_implausible": {
+      "fail": "Productiviteitsfactor {factor} van post {ref} ligt buiten de aannemelijke band {low} tot {high}",
+      "suggestion": "Controleer de geboekte uren, de geplaatste hoeveelheid en de eenheid van de ramingsnorm"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Activiteit {activity} ({project}) laadt arbeid maar noemt geen vak, dus de vraag kan aan niemand worden gekoppeld",
+      "suggestion": "Stel een vak in op de arbeidsresource van de activiteit"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Het opgeslagen antwoord verwijst naar geen enkel projectdocument, dus niets onderbouwt het.",
+      "suggestion": "Vraag opnieuw tot het antwoord een document aanhaalt, of markeer de tekst als eigen notitie."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Conceptagent '{title}' wacht al {days} dagen op beoordeling (limiet {limit}).",
+      "suggestion": "Accepteer of weiger het concept, of schakel de agent uit als de concepten niet worden gebruikt."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Voer de dag in waarop boven het terrein is gevlogen.",
+      "fail": "De opnamedatum {captured_on} ligt in de toekomst."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Kies een activiteit uit de planning van dit project.",
+      "fail": "De activiteit hoort niet bij dit project."
+    },
+    "georeferenced": {
+      "suggestion": "Exporteer de orthofoto als GeoTIFF met het coördinatensysteem.",
+      "fail": "De orthofoto heeft geen coördinatensysteem of begrenzing, dus kan niet op de globe worden geplaatst."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Vlieg lager of exporteer op volle resolutie om hoeveelheden te controleren.",
+      "fail": "De grondresolutie is {gsd_cm} cm per pixel, te grof om hoeveelheden te controleren."
+    },
+    "observed_pct_range": {
+      "suggestion": "Voer een percentage tussen 0 en 100 in.",
+      "fail": "Waargenomen voortgang {observed_pct} ligt buiten 0 tot 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Controleer de vliegdatum, of de start- en einddatum van het project.",
+      "fail": "De opnamedatum {captured_on} ligt meer dan 30 dagen buiten de projectdata."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Controleer het coördinatensysteem van de export, of het ankerpunt van het project.",
+      "fail": "De orthofoto ligt {distance_km} km van het ankerpunt van het project."
     }
   }
 }

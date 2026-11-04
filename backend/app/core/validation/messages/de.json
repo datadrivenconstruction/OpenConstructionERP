@@ -1635,5 +1635,57 @@
       "margin": "Marge",
       "risk": "Risiko"
     }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Zeile {row}: Die Zelle Positions-ID beginnt mit einem Formelzeichen und wurde nicht importiert",
+      "suggestion": "Lassen Sie die Spalte Positions-ID wie exportiert, oder leeren Sie die Zelle, um eine neue Position anzulegen"
+    },
+    "unknown_id": {
+      "fail": "Zeile {row}: Die Positions-ID gehört nicht zu diesem Leistungsverzeichnis, daher wurde die Zeile als neue Position behandelt",
+      "suggestion": "Exportieren Sie das Leistungsverzeichnis vor dem Bearbeiten erneut, oder leeren Sie die Zelle Positions-ID, wenn die Zeile neu sein soll"
+    },
+    "duplicate_id": {
+      "fail": "Zeile {row}: Die Positions-ID wird bereits von einer früheren Zeile verwendet, daher wurde diese Zeile als neue Position behandelt",
+      "suggestion": "Leeren Sie die Positions-ID kopierter Zeilen, oder löschen Sie die Kopien"
+    },
+    "stale_row": {
+      "fail": "Zeile {row}: Position {ordinal} wurde in der App geändert, nachdem dieses Blatt exportiert wurde",
+      "suggestion": "Behalten Sie den Wert aus der App, oder wählen Sie für diese Zeile den Excel-Wert, um ihn zu überschreiben"
+    },
+    "locked_boq": {
+      "fail": "Dieses Leistungsverzeichnis ist gesperrt, daher können Änderungen aus Excel nicht übernommen werden",
+      "suggestion": "Entsperren Sie zuerst das Leistungsverzeichnis, oder speichern Sie das Blatt für später"
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Geben Sie den Tag ein, an dem die Baustelle beflogen wurde.",
+      "fail": "Das Aufnahmedatum {captured_on} liegt in der Zukunft."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Wählen Sie einen Vorgang aus dem Terminplan dieses Projekts.",
+      "fail": "Der Vorgang gehört nicht zu diesem Projekt."
+    },
+    "georeferenced": {
+      "suggestion": "Exportieren Sie das Orthofoto als GeoTIFF mit seinem Koordinatensystem.",
+      "fail": "Das Orthofoto hat kein Koordinatensystem und keine Ausdehnung und kann daher nicht auf dem Globus platziert werden."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Fliegen Sie tiefer oder exportieren Sie in voller Auflösung für Mengenprüfungen.",
+      "fail": "Die Bodenauflösung beträgt {gsd_cm} cm pro Pixel und ist zu grob, um Mengen zu prüfen."
+    },
+    "observed_pct_range": {
+      "suggestion": "Geben Sie einen Prozentwert zwischen 0 und 100 ein.",
+      "fail": "Der beobachtete Fortschritt {observed_pct} liegt außerhalb von 0 bis 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Prüfen Sie das Flugdatum oder Start- und Enddatum des Projekts.",
+      "fail": "Das Aufnahmedatum {captured_on} liegt mehr als 30 Tage außerhalb der Projektdaten."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Prüfen Sie das Koordinatensystem des Exports oder den Projektanker.",
+      "fail": "Das Orthofoto liegt {distance_km} km vom Projektanker entfernt."
+    }
   }
 }

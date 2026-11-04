@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} se termină la {days} zile față de sfârșitul din fișierul importat ({source}).",
       "suggestion": "Comparați datele recalculate cu fișierul sursă, apoi acceptați-le sau restabiliți datele din sursă."
+    },
+    "constraint_date_missing": {
+      "fail": "Activitatea '{activity}' are constrângerea {constraint}, dar nu are dată de constrângere, deci constrângerea este ignorată.",
+      "suggestion": "Introduceți data constrângerii sau eliminați constrângerea."
+    },
+    "constraint_conflict": {
+      "fail": "Activitatea '{activity}' este constrânsă de {constraint} la {date}, dar predecesoarele o permit abia peste {days} zile.",
+      "suggestion": "Mutați data constrângerii, scurtați lanțul de predecesoare sau acceptați marja negativă."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Planul de referință nu a fost găsit",
     "fx_rate_set_locked": "Cursurile BCE pentru {date} sunt blocate, deci această actualizare nu le-a suprascris. Deblocați mai întâi setul de cursuri dacă trebuie să preia noua publicare.",
     "boq_locked": "Lista de cantități este blocată și nu poate fi modificată. Creați o revizie pentru modificări.",
-    "boq_link_owner_locked": "Codul '{code}' este definit de o linie din devizul blocat '{bill}', iar legarea la el ar modifica acel deviz. Deblocați mai întâi devizul sau introduceți linia cu un cod nou."
+    "boq_link_owner_locked": "Codul '{code}' este definit de o linie din devizul blocat '{bill}', iar legarea la el ar modifica acel deviz. Deblocați mai întâi devizul sau introduceți linia cu un cod nou.",
+    "boq_budget_nothing_budgetable": "Nu s-au găsit poziții bugetabile în lista de cantități.",
+    "boq_fix_position_id_required": "position_id este obligatoriu pentru această corecție",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' trebuie să fie o listă nevidă",
+    "boq_budget_requires_lock": "Lista de cantități trebuie blocată înainte de crearea unui buget. Blocați mai întâi devizul.",
+    "boq_not_locked": "Lista de cantități nu este blocată.",
+    "boq_fix_unit_required": "Este necesar un parametru 'unit' nevid",
+    "project_access_denied": "Nu aveți acces la acest proiect",
+    "boq_costmodel_budget_failed": "Crearea liniilor de buget din modelul de costuri a eșuat. Modulul modelului de costuri poate fi indisponibil.",
+    "boq_unlock_role": "Doar un administrator sau un manager poate debloca o listă de cantități.",
+    "boq_bulk_all_failed": "Toate cele {count} elemente au eșuat la validare. Prima eroare: {error}",
+    "boq_position_not_in_boq": "Poziția {position_id} nu a fost găsită în lista de cantități {boq_id}",
+    "boq_already_locked": "Lista de cantități este deja blocată.",
+    "boq_budget_failed": "Crearea liniilor de buget a eșuat. Modulul Financiar poate fi indisponibil.",
+    "boq_bulk_items_required": "Lista 'items' este obligatorie și nu trebuie să fie goală",
+    "boq_classification_unavailable": "Serviciul de clasificare este indisponibil",
+    "boq_budget_no_positions": "Lista de cantități nu are poziții: nimic de bugetat.",
+    "boq_fix_unit_rate_required": "Este necesar un parametru 'unit_rate' nenegativ"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Poziția {ordinal}: planșa {drawing} este introdusă fără revizie",
       "suggestion": "Adăugați revizia planșei din care a fost prețuită cantitatea"
+    },
+    "carried_unconfirmed": {
+      "fail": "Poziția {ordinal}: {count} măsurători au fost preluate dintr-o revizie anterioară a desenului și nu sunt încă confirmate",
+      "suggestion": "Verificați fiecare măsurătoare preluată pe revizia nouă și confirmați-o sau remăsurați-o"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Calculați nivelarea astfel încât sfera lipsă să fie evaluată înainte de atribuire"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Pachetul {package} este legat de licitația contractului principal {tender} și nu este încă atribuit, deci acea licitație nu are contract",
+      "suggestion": "Atribuiți pachetul (se creează contractul) sau desfaceți legătura licitației ca să-și redacteze propriul contract"
     }
   },
   "bid_outcome": {
@@ -1537,10 +1566,126 @@
     },
     "criteria": {
       "capacity": "Capacitate",
-      "client": "Client",
+      "client": "Beneficiar",
       "competition": "Concurență",
       "margin": "Marjă",
       "risk": "Risc"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Pagina {page} nu are un număr de plansă lizibil",
+      "suggestion": "Introduceți numărul planșei din cartuș; fără el planșa nu poate fi suprapusă peste reviziile anterioare"
+    },
+    "number_unique_in_set": {
+      "fail": "Planșa {sheet} revizia {revision} apare pe paginile {first_page} și {page} din aceeași încărcare",
+      "suggestion": "Verificați cartușele ambelor pagini și corectați numărul sau revizia uneia dintre ele"
+    },
+    "revision_not_lower": {
+      "fail": "Planșa {sheet} este la revizia {revision}, dar planșa curentă este deja la {current_revision}",
+      "suggestion": "Confirmați citirea doar dacă este într-adevăr o emitere ulterioară; altfel corectați revizia sau eliminați planșa"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Planșa {sheet} a fost citită cu încredere {confidence} și nu este confirmată",
+      "suggestion": "Comparați câmpurile cu cartușul și confirmați-le sau corectați-le"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Rândul {row}: celula ID poziție începe cu un caracter de formulă și nu a fost importată",
+      "suggestion": "Lăsați coloana ID poziție așa cum a fost exportată sau goliți celula pentru a adăuga o poziție nouă"
+    },
+    "unknown_id": {
+      "fail": "Rândul {row}: ID-ul poziției nu aparține acestei liste, deci rândul a fost tratat ca poziție nouă",
+      "suggestion": "Exportați din nou lista înainte de editare sau goliți celula ID poziție dacă rândul trebuie să fie nou"
+    },
+    "duplicate_id": {
+      "fail": "Rândul {row}: ID-ul poziției este folosit de un rând anterior, deci acest rând a fost tratat ca poziție nouă",
+      "suggestion": "Goliți ID-ul poziției de pe rândurile copiate sau ștergeți copiile"
+    },
+    "stale_row": {
+      "fail": "Rândul {row}: poziția {ordinal} a fost modificată în aplicație după exportul acestei foi",
+      "suggestion": "Păstrați valoarea din aplicație sau alegeți valoarea din Excel pentru acest rând, ca să o suprascrieți"
+    },
+    "locked_boq": {
+      "fail": "Această listă este blocată, deci modificările din Excel nu pot fi aplicate",
+      "suggestion": "Deblocați mai întâi lista sau salvați foaia pentru mai târziu"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Rulați din nou analiza riscului de cost și aplicați din nou rezerva sau păstrați linia și notați motivul",
+      "fail": "Linia de rezervă \"{markup}\" a fost aplicată la P{percentile} pe {applied_at}, dar sursa ei ({source}) s-a schimbat de atunci"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Rulați din nou analiza riscului de cost și aplicați din nou rezerva sau păstrați linia și notați motivul",
+      "fail": "Rezerva de risc \"{markup}\" este de {amount}, mai puțin decât estimarea P50 curentă de {p50}"
+    },
+    "source": {
+      "positions": "totalurile liniilor din lista de cantități",
+      "register": "registrul de riscuri"
+    },
+    "contingency_double_count": {
+      "suggestion": "Dezactivați una dintre cele două linii sau notați de ce sunt necesare ambele",
+      "fail": "Linia de rezervă \"{markup}\" este activă lângă rezerva de risc \"{risk_markup}\"; aceeași incertitudine poate fi rezervată de două ori"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Poziția {ref} are {hours} h pontate între {date_from} și {date_to}, dar niciun progres măsurat",
+      "suggestion": "Înregistrați o măsurătoare sau un progres pentru poziție ori mutați orele pe poziția la care s-a lucrat efectiv"
+    },
+    "factor_implausible": {
+      "fail": "Factorul de productivitate {factor} al poziției {ref} este în afara intervalului plauzibil de la {low} la {high}",
+      "suggestion": "Verificați orele pontate, cantitatea montată și unitatea normei de deviz"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Activitatea {activity} ({project}) încarcă forță de muncă, dar nu menționează meseria, deci cererea ei nu poate fi atribuită nimănui",
+      "suggestion": "Setați o meserie pe resursa de forță de muncă a activității"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Răspunsul salvat nu citează niciun document al proiectului, deci nimic nu îl susține.",
+      "suggestion": "Întrebați din nou până când răspunsul citează un document sau marcați textul ca notă proprie."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Ciorna agentului '{title}' așteaptă revizuirea de {days} zile (limită {limit}).",
+      "suggestion": "Acceptați sau respingeți ciorna ori dezactivați agentul dacă ciornele lui nu sunt folosite."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Introduceți ziua în care s-a survolat șantierul.",
+      "fail": "Data capturii {captured_on} este în viitor."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Alegeți o activitate din graficul acestui proiect.",
+      "fail": "Activitatea nu aparține acestui proiect."
+    },
+    "georeferenced": {
+      "suggestion": "Exportați ortofotoplanul ca GeoTIFF cu sistemul său de coordonate.",
+      "fail": "Ortofotoplanul nu are sistem de coordonate sau limite, deci nu poate fi plasat pe glob."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Zburați mai jos sau exportați la rezoluție completă pentru verificarea cantităților.",
+      "fail": "Distanța de eșantionare la sol este de {gsd_cm} cm pe pixel, prea grosieră pentru verificarea cantităților."
+    },
+    "observed_pct_range": {
+      "suggestion": "Introduceți un procent între 0 și 100.",
+      "fail": "Progresul observat {observed_pct} este în afara intervalului 0–100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Verificați data zborului sau datele de început și de sfârșit ale proiectului.",
+      "fail": "Data capturii {captured_on} este la mai mult de 30 de zile în afara datelor proiectului."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Verificați sistemul de coordonate al exportului sau ancora proiectului.",
+      "fail": "Ortofotoplanul se află la {distance_km} km de ancora proiectului."
     }
   }
 }

@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} 的完成日期与导入文件中的完成日期（{source}）相差 {days} 天。",
       "suggestion": "将重新计算的日期与源文件进行对比，然后接受它们或恢复源文件日期。"
+    },
+    "constraint_date_missing": {
+      "fail": "活动“{activity}”有约束 {constraint} 但没有约束日期，因此该约束被忽略。",
+      "suggestion": "请输入约束日期，或删除该约束。"
+    },
+    "constraint_conflict": {
+      "fail": "活动“{activity}”被 {constraint} 约束在 {date}，但其前置活动要晚 {days} 天才允许。",
+      "suggestion": "请移动约束日期、缩短前置活动链，或接受负浮动。"
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "未找到基准版本。",
     "fx_rate_set_locked": "{date} 的欧洲央行汇率已锁定，本次刷新未覆盖这些汇率。如需采用新发布的汇率，请先解锁该组汇率。",
     "boq_locked": "工程量清单已锁定，无法修改。请创建修订版后再进行更改。",
-    "boq_link_owner_locked": "编码“{code}”由已锁定清单“{bill}”中的一行定义，关联该编码会修改该清单。请先解锁清单，或使用新编码录入此行。"
+    "boq_link_owner_locked": "编码“{code}”由已锁定清单“{bill}”中的一行定义，关联该编码会修改该清单。请先解锁清单，或使用新编码录入此行。",
+    "boq_budget_nothing_budgetable": "在工程量清单中未找到可编制预算的项目。",
+    "boq_fix_position_id_required": "此修复需要 position_id",
+    "boq_fix_duplicates_required": "“duplicate_position_ids”必须是非空列表",
+    "boq_budget_requires_lock": "创建预算之前必须锁定工程量清单。请先锁定估算。",
+    "boq_not_locked": "工程量清单未锁定。",
+    "boq_fix_unit_required": "需要非空的“unit”参数",
+    "project_access_denied": "您没有访问此项目的权限",
+    "boq_costmodel_budget_failed": "创建成本模型预算行失败。成本模型模块可能不可用。",
+    "boq_unlock_role": "只有管理员或经理才能解锁工程量清单。",
+    "boq_bulk_all_failed": "全部 {count} 项均未通过校验。第一个错误：{error}",
+    "boq_position_not_in_boq": "在工程量清单 {boq_id} 中未找到项目 {position_id}",
+    "boq_already_locked": "工程量清单已锁定。",
+    "boq_budget_failed": "创建预算行失败。财务模块可能不可用。",
+    "boq_bulk_items_required": "“items”列表为必填项，且不能为空",
+    "boq_classification_unavailable": "分类服务不可用",
+    "boq_budget_no_positions": "工程量清单没有项目：没有可编制预算的内容。",
+    "boq_fix_unit_rate_required": "需要非负的“unit_rate”参数"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "清单项 {ordinal}：图纸 {drawing} 录入时未填写修订版",
       "suggestion": "补充该工程量据以计价的图纸修订版"
+    },
+    "carried_unconfirmed": {
+      "fail": "项目 {ordinal}：有 {count} 项测量值从早期图纸版本沿用而来，尚未确认",
+      "suggestion": "请在新版本上检查每个沿用的测量值，并确认或重新测量"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "请先计算调平,使漏项在授标前已有定价"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "包 {package} 已关联到主合同招标 {tender}，但尚未授标，因此该招标没有合同",
+      "suggestion": "请授标该包（会创建合同），或取消关联该招标，让它起草自己的合同"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "竞争",
       "margin": "利润率",
       "risk": "风险"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "第 {page} 页没有可读的图纸编号",
+      "suggestion": "请从图框标题栏输入图纸编号；没有编号，图纸无法叠加到早期版本上"
+    },
+    "number_unique_in_set": {
+      "fail": "图纸 {sheet} 版本 {revision} 同时出现在同一次上传的第 {first_page} 页和第 {page} 页",
+      "suggestion": "请检查两页的标题栏，并更正其中一页的编号或版本"
+    },
+    "revision_not_lower": {
+      "fail": "图纸 {sheet} 处于版本 {revision}，但当前图纸已是 {current_revision}",
+      "suggestion": "仅当这确实是较新的发布时才确认读取；否则请更正版本或丢弃该图纸"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "图纸 {sheet} 的读取置信度为 {confidence}，尚未确认",
+      "suggestion": "请将各字段与标题栏对照，然后确认或更正"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "第 {row} 行：项目 ID 单元格以公式字符开头，未导入",
+      "suggestion": "请保持项目 ID 列为导出时的样子，或清空单元格以添加新项目"
+    },
+    "unknown_id": {
+      "fail": "第 {row} 行：项目 ID 不属于此清单，因此该行被视为新项目",
+      "suggestion": "编辑前请重新导出清单；若该行本应是新项目，请清空项目 ID 单元格"
+    },
+    "duplicate_id": {
+      "fail": "第 {row} 行：项目 ID 已被前面的行使用，因此该行被视为新项目",
+      "suggestion": "请清空复制行的项目 ID，或删除这些副本"
+    },
+    "stale_row": {
+      "fail": "第 {row} 行：此工作表导出之后，项目 {ordinal} 已在应用中被修改",
+      "suggestion": "保留应用中的值，或为该行选择 Excel 中的值以覆盖它"
+    },
+    "locked_boq": {
+      "fail": "此清单已锁定，因此无法应用来自 Excel 的更改",
+      "suggestion": "请先解锁清单，或保存工作表以便稍后处理"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "请重新运行成本风险分析并再次应用应急费，或保留该行并记录原因",
+      "fail": "应急费行“{markup}”于 {applied_at} 按 P{percentile} 应用，但其来源 ({source}) 此后已发生变化"
+    },
+    "contingency_below_p50": {
+      "suggestion": "请重新运行成本风险分析并再次应用应急费，或保留该行并记录原因",
+      "fail": "风险应急费“{markup}”为 {amount}，低于当前 P50 估算 {p50}"
+    },
+    "source": {
+      "positions": "工程量清单行合计",
+      "register": "风险登记册"
+    },
+    "contingency_double_count": {
+      "suggestion": "请停用这两行之一，或记录两者都需要的原因",
+      "fail": "应急费行“{markup}”与风险应急费“{risk_markup}”同时启用；同一不确定性可能被重复预留"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "项目 {ref} 在 {date_from} 至 {date_to} 之间记录了 {hours} 小时，但没有测得的进度",
+      "suggestion": "请为该项目记录测量值或进度，或将工时转到实际施工的项目"
+    },
+    "factor_implausible": {
+      "fail": "项目 {ref} 的生产率系数 {factor} 超出合理区间 {low} 至 {high}",
+      "suggestion": "请检查记录的工时、安装数量以及估算定额的单位"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "活动 {activity} ({project}) 分配了人工但未指明工种，因此其需求无法与任何人匹配",
+      "suggestion": "请在该活动的人工资源上设置工种"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "保存的回答没有引用任何项目文档，因此没有依据。",
+      "suggestion": "请重新提问，直到回答引用某份文档，或将该文本标记为您自己的备注。"
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "代理草稿“{title}”已等待审核 {days} 天（上限 {limit}）。",
+      "suggestion": "请接受或拒绝该草稿；若其草稿未被使用，请关闭该代理。"
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "请输入对现场进行航飞的日期。",
+      "fail": "采集日期 {captured_on} 在未来。"
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "请从此项目的进度计划中选择一项活动。",
+      "fail": "该活动不属于此项目。"
+    },
+    "georeferenced": {
+      "suggestion": "请将正射影像连同其坐标系导出为 GeoTIFF。",
+      "fail": "正射影像没有坐标系或范围，因此无法放置到地球上。"
+    },
+    "gsd_reasonable": {
+      "suggestion": "请降低飞行高度，或以完整分辨率导出，以便核对数量。",
+      "fail": "地面采样距离为每像素 {gsd_cm} 厘米，过于粗糙，无法核对数量。"
+    },
+    "observed_pct_range": {
+      "suggestion": "请输入 0 到 100 之间的百分比。",
+      "fail": "观测进度 {observed_pct} 超出 0 到 100 的范围。"
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "请检查飞行日期，或项目的开始和结束日期。",
+      "fail": "采集日期 {captured_on} 超出项目日期 30 天以上。"
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "请检查导出的坐标系，或项目锚点。",
+      "fail": "正射影像距项目锚点 {distance_km} 公里。"
     }
   }
 }

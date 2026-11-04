@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} se termine à {days} jours d'écart de la fin du fichier importé ({source}).",
       "suggestion": "Comparez les dates recalculées avec le fichier source, puis acceptez-les ou rétablissez les dates source."
+    },
+    "constraint_date_missing": {
+      "fail": "L'activité « {activity} » a la contrainte {constraint} mais aucune date de contrainte, elle est donc ignorée.",
+      "suggestion": "Saisissez la date de contrainte ou supprimez la contrainte."
+    },
+    "constraint_conflict": {
+      "fail": "L'activité « {activity} » est contrainte par {constraint} au {date}, mais ses prédécesseurs ne la permettent que {days} jours plus tard.",
+      "suggestion": "Déplacez la date de contrainte, raccourcissez la chaîne de prédécesseurs ou acceptez la marge négative."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Référence initiale introuvable",
     "fx_rate_set_locked": "Les taux de la BCE du {date} sont verrouillés ; cette actualisation ne les a donc pas remplacés. Déverrouillez d'abord ce jeu de taux s'il doit reprendre la nouvelle publication.",
     "boq_locked": "Le bordereau est verrouillé et ne peut pas être modifié. Créez une révision pour apporter des changements.",
-    "boq_link_owner_locked": "Le code « {code} » est défini par une ligne du bordereau verrouillé « {bill} » ; y rattacher une ligne modifierait ce bordereau. Déverrouillez-le d'abord ou saisissez la ligne sous un nouveau code."
+    "boq_link_owner_locked": "Le code « {code} » est défini par une ligne du bordereau verrouillé « {bill} » ; y rattacher une ligne modifierait ce bordereau. Déverrouillez-le d'abord ou saisissez la ligne sous un nouveau code.",
+    "boq_budget_nothing_budgetable": "Aucun poste budgétisable trouvé dans le métré.",
+    "boq_fix_position_id_required": "position_id est requis pour cette correction",
+    "boq_fix_duplicates_required": "« duplicate_position_ids » doit être une liste non vide",
+    "boq_budget_requires_lock": "Le métré doit être verrouillé avant de créer un budget. Verrouillez d'abord l'estimation.",
+    "boq_not_locked": "Le métré n'est pas verrouillé.",
+    "boq_fix_unit_required": "Un paramètre « unit » non vide est requis",
+    "project_access_denied": "Vous n'avez pas accès à ce projet",
+    "boq_costmodel_budget_failed": "Échec de la création des lignes de budget du modèle de coûts. Le module de modèle de coûts est peut-être indisponible.",
+    "boq_unlock_role": "Seul un administrateur ou un responsable peut déverrouiller un métré.",
+    "boq_bulk_all_failed": "Les {count} éléments ont échoué à la validation. Première erreur : {error}",
+    "boq_position_not_in_boq": "Poste {position_id} introuvable dans le métré {boq_id}",
+    "boq_already_locked": "Le métré est déjà verrouillé.",
+    "boq_budget_failed": "Échec de la création des lignes de budget. Le module Finance est peut-être indisponible.",
+    "boq_bulk_items_required": "La liste « items » est requise et ne doit pas être vide",
+    "boq_classification_unavailable": "Service de classification indisponible",
+    "boq_budget_no_positions": "Le métré ne contient aucun poste : rien à budgétiser.",
+    "boq_fix_unit_rate_required": "Un paramètre « unit_rate » non négatif est requis"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Poste {ordinal} : le plan {drawing} est saisi sans indice",
       "suggestion": "Ajouter l'indice du plan à partir duquel la quantité a été chiffrée"
+    },
+    "carried_unconfirmed": {
+      "fail": "Poste {ordinal} : {count} mesure(s) reprise(s) d'un indice de plan antérieur ne sont pas encore confirmées",
+      "suggestion": "Vérifiez chaque mesure reprise sur le nouvel indice et confirmez-la, ou mesurez-la à nouveau"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Calculez le rééquilibrage pour que le périmètre manquant soit chiffré avant l'attribution"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Le lot {package} est lié à l'appel d'offres du contrat principal {tender} et n'est pas encore attribué, cet appel d'offres n'a donc pas de contrat",
+      "suggestion": "Attribuez le lot (cela crée le contrat) ou déliez l'appel d'offres pour qu'il établisse le sien"
     }
   },
   "bid_outcome": {
@@ -1537,10 +1566,126 @@
     },
     "criteria": {
       "capacity": "Capacité",
-      "client": "Client",
+      "client": "Maître d'ouvrage",
       "competition": "Concurrence",
       "margin": "Marge",
       "risk": "Risque"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "La page {page} n'a pas de numéro de planche lisible",
+      "suggestion": "Saisissez le numéro de planche du cartouche ; sans lui, la planche ne peut pas être superposée aux indices précédents"
+    },
+    "number_unique_in_set": {
+      "fail": "La planche {sheet} indice {revision} apparaît aux pages {first_page} et {page} du même dépôt",
+      "suggestion": "Vérifiez les cartouches des deux pages et corrigez le numéro ou l'indice de l'une d'elles"
+    },
+    "revision_not_lower": {
+      "fail": "La planche {sheet} est à l'indice {revision} alors que la planche actuelle est déjà à {current_revision}",
+      "suggestion": "Confirmez la lecture seulement s'il s'agit vraiment d'une émission plus récente ; sinon corrigez l'indice ou écartez la planche"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "La planche {sheet} a été lue avec une confiance {confidence} et n'est pas confirmée",
+      "suggestion": "Comparez les champs avec le cartouche, puis confirmez-les ou corrigez-les"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Ligne {row} : la cellule ID du poste commence par un caractère de formule et n'a pas été importée",
+      "suggestion": "Laissez la colonne ID du poste telle qu'exportée, ou videz la cellule pour ajouter un nouveau poste"
+    },
+    "unknown_id": {
+      "fail": "Ligne {row} : l'ID du poste n'appartient pas à ce métré, la ligne a donc été traitée comme un nouveau poste",
+      "suggestion": "Exportez à nouveau le métré avant de le modifier, ou videz la cellule ID du poste si la ligne doit être nouvelle"
+    },
+    "duplicate_id": {
+      "fail": "Ligne {row} : l'ID du poste est utilisé par une ligne précédente, cette ligne a donc été traitée comme un nouveau poste",
+      "suggestion": "Videz l'ID du poste des lignes copiées, ou supprimez les copies"
+    },
+    "stale_row": {
+      "fail": "Ligne {row} : le poste {ordinal} a été modifié dans l'application après l'export de cette feuille",
+      "suggestion": "Conservez la valeur de l'application, ou choisissez la valeur Excel pour cette ligne afin de l'écraser"
+    },
+    "locked_boq": {
+      "fail": "Ce métré est verrouillé, les modifications venant d'Excel ne peuvent pas être appliquées",
+      "suggestion": "Déverrouillez d'abord le métré, ou enregistrez la feuille pour plus tard"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Relancez l'analyse de risque des coûts et appliquez à nouveau la provision, ou conservez la ligne en notant pourquoi",
+      "fail": "La ligne de provision « {markup} » a été appliquée à P{percentile} le {applied_at}, mais sa source ({source}) a changé depuis"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Relancez l'analyse de risque des coûts et appliquez à nouveau la provision, ou conservez la ligne en notant pourquoi",
+      "fail": "La provision pour risques « {markup} » s'élève à {amount}, soit moins que l'estimation P50 actuelle de {p50}"
+    },
+    "source": {
+      "positions": "totaux des lignes du métré",
+      "register": "registre des risques"
+    },
+    "contingency_double_count": {
+      "suggestion": "Désactivez l'une des deux lignes, ou notez pourquoi les deux sont nécessaires",
+      "fail": "La ligne de provision « {markup} » est active à côté de la provision pour risques « {risk_markup} » ; la même incertitude est peut-être réservée deux fois"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Poste {ref} : {hours} h pointées entre le {date_from} et le {date_to} mais aucun avancement mesuré",
+      "suggestion": "Enregistrez un métré ou un avancement pour le poste, ou reportez les heures sur le poste réellement travaillé"
+    },
+    "factor_implausible": {
+      "fail": "Poste {ref} : le facteur de productivité {factor} est hors de la plage plausible {low} à {high}",
+      "suggestion": "Vérifiez les heures pointées, la quantité posée et l'unité de la norme d'estimation"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "L'activité {activity} ({project}) charge de la main-d'œuvre sans nommer de métier, sa demande ne peut donc être rapprochée de personne",
+      "suggestion": "Définissez un métier sur la ressource main-d'œuvre de l'activité"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "La réponse enregistrée ne cite aucun document du projet, rien ne l'étaye.",
+      "suggestion": "Posez à nouveau la question jusqu'à ce que la réponse cite un document, ou marquez le texte comme votre propre note."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Le brouillon de l'agent « {title} » attend une revue depuis {days} jours (limite {limit}).",
+      "suggestion": "Acceptez ou rejetez le brouillon, ou désactivez l'agent si ses brouillons ne sont pas utilisés."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Saisissez le jour du survol du chantier.",
+      "fail": "La date de capture {captured_on} est dans le futur."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Choisissez une activité du planning de ce projet.",
+      "fail": "L'activité n'appartient pas à ce projet."
+    },
+    "georeferenced": {
+      "suggestion": "Exportez l'orthophoto en GeoTIFF avec son système de coordonnées.",
+      "fail": "L'orthophoto n'a ni système de coordonnées ni emprise, elle ne peut donc pas être placée sur le globe."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Volez plus bas ou exportez à pleine résolution pour contrôler les quantités.",
+      "fail": "La distance d'échantillonnage au sol est de {gsd_cm} cm par pixel, trop grossière pour contrôler les quantités."
+    },
+    "observed_pct_range": {
+      "suggestion": "Saisissez un pourcentage entre 0 et 100.",
+      "fail": "L'avancement observé {observed_pct} est hors de la plage 0 à 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Vérifiez la date du vol, ou les dates de début et de fin du projet.",
+      "fail": "La date de capture {captured_on} est à plus de 30 jours en dehors des dates du projet."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Vérifiez le système de coordonnées de l'export, ou l'ancrage du projet.",
+      "fail": "L'orthophoto se trouve à {distance_km} km de l'ancrage du projet."
     }
   }
 }

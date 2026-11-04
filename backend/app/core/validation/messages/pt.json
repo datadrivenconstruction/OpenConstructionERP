@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "{activity} termina a {days} dias do fim no ficheiro importado ({source}).",
       "suggestion": "Compare as datas recalculadas com o ficheiro de origem e depois aceite-as ou reponha as datas da origem."
+    },
+    "constraint_date_missing": {
+      "fail": "A atividade '{activity}' tem a restrição {constraint} mas nenhuma data de restrição, por isso a restrição é ignorada.",
+      "suggestion": "Introduza a data da restrição ou remova a restrição."
+    },
+    "constraint_conflict": {
+      "fail": "A atividade '{activity}' está restringida por {constraint} a {date}, mas as suas predecessoras só a permitem {days} dias depois.",
+      "suggestion": "Mova a data da restrição, encurte a cadeia de predecessoras ou aceite a folga negativa."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Linha de base não encontrada",
     "fx_rate_set_locked": "As taxas do BCE de {date} estão bloqueadas; esta atualização não as substituiu. Desbloqueie primeiro esse conjunto de taxas se ele deve receber a nova publicação.",
     "boq_locked": "A planilha orçamentária está bloqueada e não pode ser modificada. Crie uma revisão para fazer alterações.",
-    "boq_link_owner_locked": "O código «{code}» é definido por uma linha da planilha bloqueada «{bill}»; criar um vínculo com ele alteraria essa planilha. Desbloqueie-a primeiro ou registre a linha com um novo código."
+    "boq_link_owner_locked": "O código «{code}» é definido por uma linha da planilha bloqueada «{bill}»; criar um vínculo com ele alteraria essa planilha. Desbloqueie-a primeiro ou registre a linha com um novo código.",
+    "boq_budget_nothing_budgetable": "Não foram encontradas posições orçamentáveis no mapa de quantidades.",
+    "boq_fix_position_id_required": "position_id é obrigatório para esta correção",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' tem de ser uma lista não vazia",
+    "boq_budget_requires_lock": "O mapa de quantidades tem de estar bloqueado antes de criar um orçamento. Bloqueie primeiro a estimativa.",
+    "boq_not_locked": "O mapa de quantidades não está bloqueado.",
+    "boq_fix_unit_required": "É necessário um parâmetro 'unit' não vazio",
+    "project_access_denied": "Não tem acesso a este projeto",
+    "boq_costmodel_budget_failed": "Falha ao criar as linhas de orçamento do modelo de custos. O módulo de modelo de custos pode não estar disponível.",
+    "boq_unlock_role": "Apenas um administrador ou gestor pode desbloquear um mapa de quantidades.",
+    "boq_bulk_all_failed": "Todos os {count} itens falharam a validação. Primeiro erro: {error}",
+    "boq_position_not_in_boq": "Posição {position_id} não encontrada no mapa de quantidades {boq_id}",
+    "boq_already_locked": "O mapa de quantidades já está bloqueado.",
+    "boq_budget_failed": "Falha ao criar as linhas de orçamento. O módulo Finanças pode não estar disponível.",
+    "boq_bulk_items_required": "A lista 'items' é obrigatória e não pode estar vazia",
+    "boq_classification_unavailable": "Serviço de classificação indisponível",
+    "boq_budget_no_positions": "O mapa de quantidades não tem posições: nada a orçamentar.",
+    "boq_fix_unit_rate_required": "É necessário um parâmetro 'unit_rate' não negativo"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Item {ordinal}: o desenho {drawing} foi lançado sem revisão",
       "suggestion": "Incluir a revisão do desenho a partir do qual a quantidade foi orçada"
+    },
+    "carried_unconfirmed": {
+      "fail": "Posição {ordinal}: {count} medição(ões) transitaram de uma revisão anterior do desenho e ainda não estão confirmadas",
+      "suggestion": "Verifique cada medição transitada na nova revisão e confirme-a, ou meça-a de novo"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Calcule o nivelamento para que o escopo em falta seja orçado antes da adjudicação"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "O pacote {package} está ligado ao concurso do contrato principal {tender} e ainda não foi adjudicado, por isso esse concurso não tem contrato",
+      "suggestion": "Adjudique o pacote (cria o contrato) ou desligue o concurso para que redija o seu próprio"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Concorrência",
       "margin": "Margem",
       "risk": "Risco"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "A página {page} não tem um número de folha legível",
+      "suggestion": "Introduza o número da folha a partir da legenda; sem ele a folha não pode ser sobreposta às revisões anteriores"
+    },
+    "number_unique_in_set": {
+      "fail": "A folha {sheet} revisão {revision} aparece nas páginas {first_page} e {page} do mesmo carregamento",
+      "suggestion": "Verifique as legendas das duas páginas e corrija o número ou a revisão de uma delas"
+    },
+    "revision_not_lower": {
+      "fail": "A folha {sheet} está na revisão {revision} mas a folha atual já está em {current_revision}",
+      "suggestion": "Confirme a leitura apenas se for realmente uma emissão posterior; caso contrário corrija a revisão ou descarte a folha"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "A folha {sheet} foi lida com confiança {confidence} e não está confirmada",
+      "suggestion": "Compare os campos com a legenda e confirme-os ou corrija-os"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Linha {row}: a célula ID da posição começa com um caractere de fórmula e não foi importada",
+      "suggestion": "Deixe a coluna ID da posição como exportada, ou limpe a célula para adicionar uma posição nova"
+    },
+    "unknown_id": {
+      "fail": "Linha {row}: o ID da posição não pertence a este mapa, por isso a linha foi tratada como posição nova",
+      "suggestion": "Exporte o mapa de novo antes de editar, ou limpe a célula ID da posição se a linha for nova"
+    },
+    "duplicate_id": {
+      "fail": "Linha {row}: o ID da posição é usado por uma linha anterior, por isso esta linha foi tratada como posição nova",
+      "suggestion": "Limpe o ID da posição das linhas copiadas ou elimine as cópias"
+    },
+    "stale_row": {
+      "fail": "Linha {row}: a posição {ordinal} foi alterada na aplicação depois de esta folha ser exportada",
+      "suggestion": "Mantenha o valor da aplicação ou escolha o valor do Excel para esta linha para o substituir"
+    },
+    "locked_boq": {
+      "fail": "Este mapa está bloqueado, por isso as alterações do Excel não podem ser aplicadas",
+      "suggestion": "Desbloqueie primeiro o mapa ou guarde a folha para mais tarde"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Execute de novo a análise de risco de custos e aplique outra vez a contingência, ou mantenha a linha e anote o motivo",
+      "fail": "A linha de contingência \"{markup}\" foi aplicada em P{percentile} a {applied_at}, mas a sua fonte ({source}) mudou desde então"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Execute de novo a análise de risco de custos e aplique outra vez a contingência, ou mantenha a linha e anote o motivo",
+      "fail": "A contingência de risco \"{markup}\" tem {amount}, menos do que a estimativa P50 atual de {p50}"
+    },
+    "source": {
+      "positions": "totais das linhas do mapa de quantidades",
+      "register": "registo de riscos"
+    },
+    "contingency_double_count": {
+      "suggestion": "Desative uma das duas linhas ou anote porque são necessárias ambas",
+      "fail": "A linha de contingência \"{markup}\" está ativa ao lado da contingência de risco \"{risk_markup}\"; a mesma incerteza pode estar reservada duas vezes"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "A posição {ref} tem {hours} h registadas entre {date_from} e {date_to} mas nenhum avanço medido",
+      "suggestion": "Registe uma medição ou avanço para a posição, ou mova as horas para a posição realmente trabalhada"
+    },
+    "factor_implausible": {
+      "fail": "O fator de produtividade {factor} da posição {ref} está fora da faixa plausível de {low} a {high}",
+      "suggestion": "Verifique as horas registadas, a quantidade instalada e a unidade da norma de estimativa"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "A atividade {activity} ({project}) carrega mão de obra mas não indica ofício, por isso a sua procura não pode ser atribuída a ninguém",
+      "suggestion": "Defina um ofício no recurso de mão de obra da atividade"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "A resposta guardada não cita nenhum documento do projeto, por isso nada a sustenta.",
+      "suggestion": "Pergunte de novo até a resposta citar um documento, ou marque o texto como nota própria."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "O rascunho do agente '{title}' aguarda revisão há {days} dias (limite {limit}).",
+      "suggestion": "Aceite ou rejeite o rascunho, ou desligue o agente se os seus rascunhos não são usados."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Introduza o dia em que a obra foi sobrevoada.",
+      "fail": "A data de captura {captured_on} está no futuro."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Escolha uma atividade do cronograma deste projeto.",
+      "fail": "A atividade não pertence a este projeto."
+    },
+    "georeferenced": {
+      "suggestion": "Exporte a ortofoto como GeoTIFF com o seu sistema de coordenadas.",
+      "fail": "A ortofoto não tem sistema de coordenadas nem limites, por isso não pode ser colocada no globo."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Voe mais baixo ou exporte em resolução total para verificar quantidades.",
+      "fail": "A distância de amostragem no solo é de {gsd_cm} cm por pixel, demasiado grosseira para verificar quantidades."
+    },
+    "observed_pct_range": {
+      "suggestion": "Introduza uma percentagem entre 0 e 100.",
+      "fail": "O avanço observado {observed_pct} está fora do intervalo de 0 a 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Verifique a data do voo ou as datas de início e fim do projeto.",
+      "fail": "A data de captura {captured_on} está a mais de 30 dias fora das datas do projeto."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Verifique o sistema de coordenadas da exportação ou a âncora do projeto.",
+      "fail": "A ortofoto fica a {distance_km} km da âncora do projeto."
     }
   }
 }

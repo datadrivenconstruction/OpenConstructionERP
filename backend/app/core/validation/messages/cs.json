@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "Činnost {activity} končí o {days} dní jinak než konec v importovaném souboru ({source}).",
       "suggestion": "Porovnejte přepočtená data se zdrojovým souborem a pak je přijměte, nebo obnovte data ze zdroje."
+    },
+    "constraint_date_missing": {
+      "fail": "Činnost '{activity}' má omezení {constraint}, ale žádné datum omezení, proto se omezení ignoruje.",
+      "suggestion": "Zadejte datum omezení nebo omezení odstraňte."
+    },
+    "constraint_conflict": {
+      "fail": "Činnost '{activity}' je omezena {constraint} na {date}, ale její předchůdci to umožňují až o {days} dní později.",
+      "suggestion": "Posuňte datum omezení, zkraťte řetězec předchůdců nebo přijměte zápornou rezervu."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Výchozí plán nebyl nalezen",
     "fx_rate_set_locked": "Kurzy ECB pro {date} jsou uzamčeny, takže je tato aktualizace nepřepsala. Pokud se má použít nové zveřejnění, nejprve tuto sadu kurzů odemkněte.",
     "boq_locked": "Soupis prací je uzamčen a nelze jej měnit. Pro změny vytvořte revizi.",
-    "boq_link_owner_locked": "Kód '{code}' definuje řádek v uzamčeném soupisu prací '{bill}' a propojení na něj by tento soupis změnilo. Nejprve soupis odemkněte nebo řádek zadejte pod novým kódem."
+    "boq_link_owner_locked": "Kód '{code}' definuje řádek v uzamčeném soupisu prací '{bill}' a propojení na něj by tento soupis změnilo. Nejprve soupis odemkněte nebo řádek zadejte pod novým kódem.",
+    "boq_budget_nothing_budgetable": "Ve výkazu výměr nebyly nalezeny žádné položky k rozpočtování.",
+    "boq_fix_position_id_required": "Pro tuto opravu je vyžadováno position_id",
+    "boq_fix_duplicates_required": "'duplicate_position_ids' musí být neprázdný seznam",
+    "boq_budget_requires_lock": "Výkaz výměr musí být před vytvořením rozpočtu uzamčen. Nejprve uzamkněte odhad.",
+    "boq_not_locked": "Výkaz výměr není uzamčen.",
+    "boq_fix_unit_required": "Je vyžadován neprázdný parametr 'unit'",
+    "project_access_denied": "K tomuto projektu nemáte přístup",
+    "boq_costmodel_budget_failed": "Nepodařilo se vytvořit řádky rozpočtu nákladového modelu. Modul nákladového modelu možná není dostupný.",
+    "boq_unlock_role": "Výkaz výměr může odemknout jen správce nebo manažer.",
+    "boq_bulk_all_failed": "Všech {count} položek neprošlo validací. První chyba: {error}",
+    "boq_position_not_in_boq": "Položka {position_id} nebyla ve výkazu výměr {boq_id} nalezena",
+    "boq_already_locked": "Výkaz výměr je již uzamčen.",
+    "boq_budget_failed": "Nepodařilo se vytvořit řádky rozpočtu. Modul financí možná není dostupný.",
+    "boq_bulk_items_required": "Seznam 'items' je povinný a nesmí být prázdný",
+    "boq_classification_unavailable": "Služba klasifikace není dostupná",
+    "boq_budget_no_positions": "Výkaz výměr nemá žádné položky: není co rozpočtovat.",
+    "boq_fix_unit_rate_required": "Je vyžadován nezáporný parametr 'unit_rate'"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Položka {ordinal}: výkres {drawing} je zadán bez revize",
       "suggestion": "Doplňte revizi výkresu, ze kterého bylo množství oceněno"
+    },
+    "carried_unconfirmed": {
+      "fail": "Položka {ordinal}: {count} měření bylo převzato z dřívější revize výkresu a dosud není potvrzeno",
+      "suggestion": "Zkontrolujte každé převzaté měření na nové revizi a potvrďte je, nebo je změřte znovu"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Vypočtěte vyrovnání, aby byl chybějící rozsah před zadáním oceněn"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Balíček {package} je propojen s výběrovým řízením hlavní smlouvy {tender} a dosud nebyl zadán, proto toto řízení nemá smlouvu",
+      "suggestion": "Zadejte balíček (vytvoří se smlouva) nebo řízení odpojte, aby si vytvořilo vlastní"
     }
   },
   "bid_outcome": {
@@ -1541,6 +1570,122 @@
       "competition": "Konkurence",
       "margin": "Marže",
       "risk": "Riziko"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Strana {page} nemá čitelné číslo výkresu",
+      "suggestion": "Zadejte číslo výkresu z rohového razítka; bez něj nelze výkres navrstvit na dřívější revize"
+    },
+    "number_unique_in_set": {
+      "fail": "Výkres {sheet} revize {revision} se objevuje na stranách {first_page} a {page} stejného nahrání",
+      "suggestion": "Zkontrolujte razítka obou stran a opravte číslo nebo revizi jedné z nich"
+    },
+    "revision_not_lower": {
+      "fail": "Výkres {sheet} je v revizi {revision}, ale aktuální výkres je již v {current_revision}",
+      "suggestion": "Potvrďte načtení jen tehdy, jde-li skutečně o pozdější vydání; jinak opravte revizi nebo výkres zahoďte"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Výkres {sheet} byl načten s jistotou {confidence} a není potvrzen",
+      "suggestion": "Porovnejte pole s razítkem a potvrďte je nebo opravte"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Řádek {row}: buňka ID položky začíná znakem vzorce a nebyla importována",
+      "suggestion": "Ponechte sloupec ID položky tak, jak byl exportován, nebo buňku vymažte pro přidání nové položky"
+    },
+    "unknown_id": {
+      "fail": "Řádek {row}: ID položky nepatří do tohoto výkazu, proto byl řádek zpracován jako nová položka",
+      "suggestion": "Před úpravou výkaz znovu exportujte, nebo vymažte buňku ID položky, má-li být řádek nový"
+    },
+    "duplicate_id": {
+      "fail": "Řádek {row}: ID položky používá dřívější řádek, proto byl tento řádek zpracován jako nová položka",
+      "suggestion": "Vymažte ID položky u zkopírovaných řádků, nebo kopie smažte"
+    },
+    "stale_row": {
+      "fail": "Řádek {row}: položka {ordinal} byla v aplikaci změněna po exportu tohoto listu",
+      "suggestion": "Ponechte hodnotu z aplikace, nebo pro tento řádek zvolte hodnotu z Excelu a přepište ji"
+    },
+    "locked_boq": {
+      "fail": "Tento výkaz je uzamčen, změny z Excelu proto nelze použít",
+      "suggestion": "Nejprve výkaz odemkněte, nebo list uložte na později"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Spusťte analýzu nákladových rizik znovu a použijte rezervu znovu, nebo řádek ponechte a poznamenejte důvod",
+      "fail": "Řádek rezervy \"{markup}\" byl použit na P{percentile} dne {applied_at}, ale jeho zdroj ({source}) se od té doby změnil"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Spusťte analýzu nákladových rizik znovu a použijte rezervu znovu, nebo řádek ponechte a poznamenejte důvod",
+      "fail": "Rizikový příplatek \"{markup}\" činí {amount}, tedy méně než aktuální odhad P50 {p50}"
+    },
+    "source": {
+      "positions": "součty řádků výkazu výměr",
+      "register": "registr rizik"
+    },
+    "contingency_double_count": {
+      "suggestion": "Vypněte jeden ze dvou řádků, nebo poznamenejte, proč jsou potřeba oba",
+      "fail": "Řádek rezervy \"{markup}\" je aktivní vedle rizikové rezervy \"{risk_markup}\"; stejná nejistota může být rezervována dvakrát"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Položka {ref} má zaúčtováno {hours} h mezi {date_from} a {date_to}, ale žádný změřený postup",
+      "suggestion": "Zaznamenejte pro položku měření nebo postup, nebo přesuňte hodiny na položku, na které se skutečně pracovalo"
+    },
+    "factor_implausible": {
+      "fail": "Faktor produktivity {factor} položky {ref} je mimo věrohodné pásmo {low} až {high}",
+      "suggestion": "Zkontrolujte zaúčtované hodiny, zabudované množství a jednotku odhadní normy"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Činnost {activity} ({project}) zatěžuje práci, ale neuvádí profesi, takže její poptávku nelze nikomu přiřadit",
+      "suggestion": "Nastavte profesi u pracovního zdroje činnosti"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Uložená odpověď necituje žádný dokument projektu, takže ji nic nepodporuje.",
+      "suggestion": "Ptejte se znovu, dokud odpověď necituje dokument, nebo text označte jako vlastní poznámku."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Koncept agenta '{title}' čeká na posouzení {days} dní (limit {limit}).",
+      "suggestion": "Koncept přijměte nebo zamítněte, nebo agenta vypněte, pokud se jeho koncepty nepoužívají."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Zadejte den, kdy byla stavba přeletěna.",
+      "fail": "Datum pořízení {captured_on} je v budoucnosti."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Vyberte činnost z harmonogramu tohoto projektu.",
+      "fail": "Činnost nepatří k tomuto projektu."
+    },
+    "georeferenced": {
+      "suggestion": "Exportujte ortofoto jako GeoTIFF se souřadnicovým systémem.",
+      "fail": "Ortofoto nemá souřadnicový systém ani hranice, proto ho nelze umístit na glóbus."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Leťte níže nebo exportujte v plném rozlišení pro kontrolu množství.",
+      "fail": "Rozlišení na zemi je {gsd_cm} cm na pixel, příliš hrubé pro kontrolu množství."
+    },
+    "observed_pct_range": {
+      "suggestion": "Zadejte procento mezi 0 a 100.",
+      "fail": "Pozorovaný postup {observed_pct} je mimo rozsah 0 až 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Zkontrolujte datum letu nebo data zahájení a ukončení projektu.",
+      "fail": "Datum pořízení {captured_on} je více než 30 dní mimo data projektu."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Zkontrolujte souřadnicový systém exportu nebo kotvu projektu.",
+      "fail": "Ortofoto leží {distance_km} km od kotvy projektu."
     }
   }
 }

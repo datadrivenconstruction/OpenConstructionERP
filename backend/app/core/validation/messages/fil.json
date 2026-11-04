@@ -685,6 +685,14 @@
     "dates_match_source": {
       "fail": "Ang {activity} ay nagtatapos nang {days} araw ang layo sa pagtatapos sa inangkat na file ({source}).",
       "suggestion": "Ihambing ang muling kinuwentang petsa sa source file, saka tanggapin ang mga ito o ibalik ang mga petsa ng pinagmulan."
+    },
+    "constraint_date_missing": {
+      "fail": "Ang aktibidad na '{activity}' ay may limitasyong {constraint} ngunit walang petsa ng limitasyon, kaya hindi ito pinapansin.",
+      "suggestion": "Ilagay ang petsa ng limitasyon o alisin ang limitasyon."
+    },
+    "constraint_conflict": {
+      "fail": "Ang aktibidad na '{activity}' ay nililimitahan ng {constraint} sa {date}, ngunit pinapayagan lamang ito ng mga nauna nang {days} araw na mas huli.",
+      "suggestion": "Ilipat ang petsa ng limitasyon, paikliin ang kadena ng mga nauna, o tanggapin ang negatibong float."
     }
   },
   "sheet_completeness": {
@@ -1019,7 +1027,24 @@
     "baseline_not_found": "Hindi nakita ang baseline",
     "fx_rate_set_locked": "Naka-lock ang ECB rates para sa {date}, kaya hindi sila pinalitan ng refresh na ito. I-unlock muna ang rate set na iyon kung dapat nitong tanggapin ang bagong inilathalang rates.",
     "boq_locked": "Naka-lock ang BOQ at hindi maaaring baguhin. Gumawa ng rebisyon upang makapagbago.",
-    "boq_link_owner_locked": "Ang code na '{code}' ay tinukoy ng isang linya sa naka-lock na bill na '{bill}', at mababago ang bill na iyon kapag nag-link dito. I-unlock muna ang bill o ilagay ang linya sa ilalim ng bagong code."
+    "boq_link_owner_locked": "Ang code na '{code}' ay tinukoy ng isang linya sa naka-lock na bill na '{bill}', at mababago ang bill na iyon kapag nag-link dito. I-unlock muna ang bill o ilagay ang linya sa ilalim ng bagong code.",
+    "boq_budget_nothing_budgetable": "Walang nakitang item na maaaring i-budget sa bill of quantities.",
+    "boq_fix_position_id_required": "Kailangan ang position_id para sa pag-aayos na ito",
+    "boq_fix_duplicates_required": "Ang 'duplicate_position_ids' ay dapat na listahang hindi walang laman",
+    "boq_budget_requires_lock": "Dapat naka-lock ang bill of quantities bago gumawa ng budget. I-lock muna ang estimate.",
+    "boq_not_locked": "Hindi naka-lock ang bill of quantities.",
+    "boq_fix_unit_required": "Kailangan ang parameter na 'unit' na hindi walang laman",
+    "project_access_denied": "Wala kang access sa proyektong ito",
+    "boq_costmodel_budget_failed": "Hindi nagawa ang mga linya ng budget ng cost model. Maaaring hindi available ang module ng cost model.",
+    "boq_unlock_role": "Admin o manager lamang ang makakapag-unlock ng bill of quantities.",
+    "boq_bulk_all_failed": "Nabigo sa validation ang lahat ng {count} item. Unang error: {error}",
+    "boq_position_not_in_boq": "Hindi nakita ang item na {position_id} sa bill of quantities na {boq_id}",
+    "boq_already_locked": "Naka-lock na ang bill of quantities.",
+    "boq_budget_failed": "Hindi nagawa ang mga linya ng budget. Maaaring hindi available ang finance module.",
+    "boq_bulk_items_required": "Kailangan ang listahang 'items' at hindi dapat walang laman",
+    "boq_classification_unavailable": "Hindi available ang serbisyo ng klasipikasyon",
+    "boq_budget_no_positions": "Walang item ang bill of quantities: walang ibu-budget.",
+    "boq_fix_unit_rate_required": "Kailangan ang parameter na 'unit_rate' na hindi negatibo"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -1399,6 +1424,10 @@
     "manual_ref_without_revision": {
       "fail": "Item {ordinal}: inilagay ang drowing {drawing} nang walang rebisyon",
       "suggestion": "Idagdag ang rebisyon ng drowing na pinagbatayan ng presyo ng dami"
+    },
+    "carried_unconfirmed": {
+      "fail": "Item {ordinal}: {count} sukat ang dinala mula sa naunang rebisyon ng drowing at hindi pa nakukumpirma",
+      "suggestion": "Suriin ang bawat dinalang sukat sa bagong rebisyon at kumpirmahin ito, o sukatin muli"
     }
   },
   "offline_sync": {
@@ -1496,8 +1525,8 @@
       "suggestion": "Kuwentahin ang leveling para mapresyuhan ang kulang na saklaw bago igawad"
     },
     "linked_tender_awarded": {
-      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
-      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
+      "fail": "Ang package na {package} ay naka-link sa tender ng pangunahing kontrata na {tender} at hindi pa naigagawad, kaya walang kontrata ang tender na iyon",
+      "suggestion": "Igawad ang package (gagawa ito ng kontrata) o i-unlink ang tender para gumawa ito ng sarili nitong kontrata"
     }
   },
   "bid_outcome": {
@@ -1539,8 +1568,124 @@
       "capacity": "Kakayahan",
       "client": "Kliyente",
       "competition": "Kumpetisyon",
-      "margin": "Margin",
+      "margin": "Kita (margin)",
       "risk": "Panganib"
+    }
+  },
+  "sheet_intake": {
+    "number_present": {
+      "fail": "Ang pahina {page} ay walang mababasang numero ng sheet",
+      "suggestion": "Ilagay ang numero ng sheet mula sa title block; kung wala ito, hindi maipapatong ang sheet sa mga naunang rebisyon"
+    },
+    "number_unique_in_set": {
+      "fail": "Ang sheet na {sheet} rebisyon {revision} ay lumalabas sa mga pahina {first_page} at {page} ng parehong upload",
+      "suggestion": "Suriin ang title block ng dalawang pahina at ayusin ang numero o rebisyon ng isa"
+    },
+    "revision_not_lower": {
+      "fail": "Ang sheet na {sheet} ay nasa rebisyon {revision} ngunit ang kasalukuyang sheet ay nasa {current_revision} na",
+      "suggestion": "Kumpirmahin ang pagbasa kung talagang mas bagong labas ito; kung hindi, ayusin ang rebisyon o itapon ang sheet"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Ang sheet na {sheet} ay binasa nang may kumpiyansang {confidence} at hindi pa nakukumpirma",
+      "suggestion": "Ihambing ang mga field sa title block at kumpirmahin o ayusin ang mga ito"
+    }
+  },
+  "boq_roundtrip": {
+    "formula_in_id": {
+      "fail": "Hilera {row}: ang cell ng Item ID ay nagsisimula sa karakter ng pormula at hindi na-import",
+      "suggestion": "Iwanan ang hanay ng Item ID gaya ng na-export, o i-clear ang cell para magdagdag ng bagong item"
+    },
+    "unknown_id": {
+      "fail": "Hilera {row}: ang Item ID ay hindi kabilang sa bill na ito, kaya ang hilera ay itinuring na bagong item",
+      "suggestion": "I-export muli ang bill bago mag-edit, o i-clear ang cell ng Item ID kung bago ang hilera"
+    },
+    "duplicate_id": {
+      "fail": "Hilera {row}: ang Item ID ay ginagamit ng naunang hilera, kaya ang hilerang ito ay itinuring na bagong item",
+      "suggestion": "I-clear ang Item ID ng mga kinopyang hilera, o burahin ang mga kopya"
+    },
+    "stale_row": {
+      "fail": "Hilera {row}: ang item {ordinal} ay binago sa app matapos i-export ang sheet na ito",
+      "suggestion": "Panatilihin ang halaga sa app, o piliin ang halaga sa Excel para sa hilerang ito upang palitan ito"
+    },
+    "locked_boq": {
+      "fail": "Naka-lock ang bill na ito, kaya hindi maipapatupad ang mga pagbabago mula sa Excel",
+      "suggestion": "I-unlock muna ang bill, o i-save ang sheet para sa susunod"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "suggestion": "Patakbuhing muli ang pagsusuri sa panganib ng gastos at ilapat muli ang contingency, o panatilihin ang linya at itala ang dahilan",
+      "fail": "Ang linya ng contingency na \"{markup}\" ay inilapat sa P{percentile} noong {applied_at}, ngunit nagbago na ang pinagmulan nito ({source}) mula noon"
+    },
+    "contingency_below_p50": {
+      "suggestion": "Patakbuhing muli ang pagsusuri sa panganib ng gastos at ilapat muli ang contingency, o panatilihin ang linya at itala ang dahilan",
+      "fail": "Ang contingency sa panganib na \"{markup}\" ay may {amount}, mas mababa sa kasalukuyang P50 na estimate na {p50}"
+    },
+    "source": {
+      "positions": "mga kabuuan ng linya ng bill of quantities",
+      "register": "rehistro ng panganib"
+    },
+    "contingency_double_count": {
+      "suggestion": "I-deactivate ang isa sa dalawang linya, o itala kung bakit kailangan ang dalawa",
+      "fail": "Aktibo ang linya ng contingency na \"{markup}\" sa tabi ng contingency sa panganib na \"{risk_markup}\"; maaaring dalawang beses nang nailaan ang parehong kawalang-katiyakan"
+    }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Ang item {ref} ay may {hours} oras na naitala sa pagitan ng {date_from} at {date_to} ngunit walang nasukat na progreso",
+      "suggestion": "Magtala ng sukat o progreso para sa item, o ilipat ang mga oras sa item na talagang pinagtrabahuhan"
+    },
+    "factor_implausible": {
+      "fail": "Ang productivity factor na {factor} ng item {ref} ay nasa labas ng makatwirang saklaw na {low} hanggang {high}",
+      "suggestion": "Suriin ang mga naitalang oras, ang nakabit na dami, at ang yunit ng estimate norm"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Ang aktibidad na {activity} ({project}) ay naglalagay ng lakas-paggawa ngunit walang pinangalanang trabaho, kaya hindi maitutugma ang pangangailangan nito sa sinuman",
+      "suggestion": "Magtakda ng trabaho sa resource ng lakas-paggawa ng aktibidad"
+    }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Ang nai-save na sagot ay hindi bumabanggit ng anumang dokumento ng proyekto, kaya walang sumusuporta rito.",
+      "suggestion": "Magtanong muli hanggang bumanggit ng dokumento ang sagot, o markahan ang teksto bilang sarili mong tala."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Ang draft ng ahente na '{title}' ay naghintay ng pagsusuri nang {days} araw (limitasyon {limit}).",
+      "suggestion": "Tanggapin o tanggihan ang draft, o patayin ang ahente kung hindi ginagamit ang mga draft nito."
+    }
+  },
+  "geo_hub_survey": {
+    "captured_on_not_future": {
+      "suggestion": "Ilagay ang araw na nilipad ang site.",
+      "fail": "Ang petsa ng pagkuha na {captured_on} ay nasa hinaharap."
+    },
+    "observation_requires_activity_in_project": {
+      "suggestion": "Pumili ng aktibidad mula sa iskedyul ng proyektong ito.",
+      "fail": "Ang aktibidad ay hindi kabilang sa proyektong ito."
+    },
+    "georeferenced": {
+      "suggestion": "I-export ang orthophoto bilang GeoTIFF kasama ang coordinate system nito.",
+      "fail": "Walang coordinate system o hangganan ang orthophoto, kaya hindi ito mailalagay sa globo."
+    },
+    "gsd_reasonable": {
+      "suggestion": "Lumipad nang mas mababa o mag-export sa buong resolution para masuri ang mga dami.",
+      "fail": "Ang ground sample distance ay {gsd_cm} cm bawat pixel, masyadong magaspang para suriin ang mga dami."
+    },
+    "observed_pct_range": {
+      "suggestion": "Maglagay ng porsyento sa pagitan ng 0 at 100.",
+      "fail": "Ang naobserbahang progreso na {observed_pct} ay wala sa saklaw na 0 hanggang 100."
+    },
+    "captured_on_in_project_window": {
+      "suggestion": "Suriin ang petsa ng paglipad, o ang mga petsa ng simula at wakas ng proyekto.",
+      "fail": "Ang petsa ng pagkuha na {captured_on} ay mahigit 30 araw sa labas ng mga petsa ng proyekto."
+    },
+    "bbox_intersects_anchor": {
+      "suggestion": "Suriin ang coordinate system ng export, o ang anchor ng proyekto.",
+      "fail": "Ang orthophoto ay {distance_km} km mula sa anchor ng proyekto."
     }
   }
 }
