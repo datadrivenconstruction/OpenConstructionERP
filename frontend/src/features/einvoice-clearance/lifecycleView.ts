@@ -4,7 +4,7 @@
  * Pure view helpers for the e-invoice card and list: stepper position, deadline
  * tone and wording, and the visibility gate. No React, so vitest covers them.
  */
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 import type { BadgeVariant } from './documentStatus';
 import type { DeadlineState, EInvoiceSetupRow, LifecycleAction, LifecycleDeadline } from './lifecycleApi';
 
@@ -57,7 +57,7 @@ export function formatDuration(seconds: number, locale: string): string {
     return new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'long' }).format(value);
   } catch {
     // An unknown locale tag still gets a unit-correct string in the runtime default.
-    return new Intl.NumberFormat(getIntlLocale(), { style: 'unit', unit, unitDisplay: 'long' }).format(value);
+    return new Intl.NumberFormat(getNumberLocale(), { style: 'unit', unit, unitDisplay: 'long' }).format(value);
   }
 }
 
