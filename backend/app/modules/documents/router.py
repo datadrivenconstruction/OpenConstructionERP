@@ -26,12 +26,17 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.core.demo_placeholders import materialize_placeholder
 from app.core.i18n import get_locale
-from app.core.rate_limiter import upload_limiter
+from app.core.rate_limiter import (
+    SHARE_LINK_TOKEN_MAX_PER_MINUTE,
+    client_identifier,
+    share_link_limiter,
+    upload_limiter,
+)
 from app.core.storage import is_within_safe_root, safe_data_roots
 from app.core.validation.messages import translate
 from app.dependencies import (
@@ -1659,12 +1664,25 @@ async def batch_delete_documents(
 # ══════════════════════════════════════════════════════════════════════════
 
 
+def _throttle_share_link(request: Request, token: str) -> None:
+    """Refuse a public share-link call once the caller or the link is over its budget."""
+    ok_ip, _ = share_link_limiter.is_allowed(f"ip:{client_identifier(request)}:{token}")
+    ok_tok, _ = share_link_limiter.is_allowed(f"tok:{token}", max_requests=SHARE_LINK_TOKEN_MAX_PER_MINUTE)
+    if not (ok_ip and ok_tok):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many attempts. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+
+
 @router.get(
     "/share-links/{token}/",
     response_model=ShareLinkPublicInfo,
 )
 async def get_share_link_info(
     token: str,
+    request: Request,
     session: SessionDep,
 ) -> ShareLinkPublicInfo:
     """Public probe - what the recipient sees BEFORE entering a password.
@@ -1679,6 +1697,7 @@ async def get_share_link_info(
         get_share_link_public,
     )
 
+    _throttle_share_link(request, token)
     link, doc = await get_share_link_public(session, token)
     return ShareLinkPublicInfo(
         filename=doc.name,
@@ -1694,6 +1713,7 @@ async def get_share_link_info(
 async def access_share_link_endpoint(
     token: str,
     body: ShareLinkAccessRequest,
+    request: Request,
     session: SessionDep,
 ) -> ShareLinkAccessResponse:
     """Public unlock - verify password, bump count, return download URL.
@@ -1703,6 +1723,7 @@ async def access_share_link_endpoint(
     """
     from app.modules.documents.share_service import access_share_link
 
+    _throttle_share_link(request, token)
     link, doc = await access_share_link(
         session,
         token=token,
@@ -1719,6 +1740,7 @@ async def access_share_link_endpoint(
 )
 async def serve_share_link_file(
     token: str,
+    request: Request,
     session: SessionDep,
     password: str | None = Query(default=None),
 ) -> FileResponse:
@@ -1734,6 +1756,7 @@ async def serve_share_link_file(
     """
     from app.modules.documents.share_service import access_share_link
 
+    _throttle_share_link(request, token)
     link, doc = await access_share_link(session, token=token, password=password)
 
     upload_base = Path(UPLOAD_BASE).resolve()

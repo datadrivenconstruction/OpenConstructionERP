@@ -196,6 +196,13 @@ upload_limiter = RateLimiter(max_requests=30, window_seconds=60)
 # caller's address is the only key that also slows a token guesser down.
 device_ingest_limiter = RateLimiter(max_requests=120, window_seconds=60)
 
+# Public document share links carry a bcrypt password check and no session, so
+# the link token plus the caller's address is the only thing to count a guesser
+# by. Per-address buckets stop one host, the per-token bucket stops a spread of
+# hosts from walking a short password list.
+share_link_limiter = RateLimiter(max_requests=20, window_seconds=60)
+SHARE_LINK_TOKEN_MAX_PER_MINUTE = 120
+
 
 def _register_hourly_max() -> int:
     try:
