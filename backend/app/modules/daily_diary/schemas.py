@@ -586,10 +586,10 @@ class RealityCaptureCreate(BaseModel):
     captured_at: datetime
     capture_type: str = Field(default="laser_scan", pattern=_CAPTURE_TYPE_RE)
     file_url: str = Field(..., min_length=1, max_length=2000)
-    point_count_estimate: int | None = Field(default=None, ge=0)
+    point_count_estimate: int | None = Field(default=None, ge=0, le=2_000_000_000)
     bbox_min: dict[str, float] | None = None
     bbox_max: dict[str, float] | None = None
-    accuracy_mm: Decimal | None = Field(default=None, ge=0)
+    accuracy_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("999999"))
     notes: str | None = Field(default=None, max_length=20000)
     linked_bim_model_ref: UUID | None = None
 
@@ -603,10 +603,10 @@ class RealityCaptureUpdate(BaseModel):
 
     captured_at: datetime | None = None
     capture_type: str | None = Field(default=None, pattern=_CAPTURE_TYPE_RE)
-    point_count_estimate: int | None = Field(default=None, ge=0)
+    point_count_estimate: int | None = Field(default=None, ge=0, le=2_000_000_000)
     bbox_min: dict[str, float] | None = None
     bbox_max: dict[str, float] | None = None
-    accuracy_mm: Decimal | None = Field(default=None, ge=0)
+    accuracy_mm: Decimal | None = Field(default=None, ge=0, le=Decimal("999999"))
     notes: str | None = Field(default=None, max_length=20000)
     linked_bim_model_ref: UUID | None = None
 
