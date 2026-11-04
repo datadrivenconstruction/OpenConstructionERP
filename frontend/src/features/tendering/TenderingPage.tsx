@@ -35,6 +35,7 @@ import {
   Gavel,
   ShoppingCart,
   Upload,
+  Scale,
   Timer,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
@@ -1514,6 +1515,7 @@ function PackageDetail({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const bidDayEnabled = useModuleStore((st) => st.isModuleEnabled('bid_day'));
+  const bidNoBidEnabled = useModuleStore((st) => st.isModuleEnabled('bid_no_bid'));
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
@@ -1945,6 +1947,20 @@ function PackageDetail({
             </RelatedRecordStrip>
           </div>
           <div className="flex items-center gap-2">
+            {bidNoBidEnabled && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Scale size={14} />}
+                onClick={() => navigate(`/tendering/${pkg.id}/bid-no-bid`)}
+                data-testid="bid-no-bid-open"
+                title={t('bid_no_bid.open_hint', {
+                  defaultValue: 'Score client, capacity, risk, margin and competition, then decide whether to bid',
+                })}
+              >
+                {t('bid_no_bid.open', { defaultValue: 'Bid / no-bid' })}
+              </Button>
+            )}
             {bidDayEnabled && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
               <Button
                 variant="primary"
