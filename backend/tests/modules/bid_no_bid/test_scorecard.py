@@ -144,7 +144,11 @@ def _service() -> tuple[BidNoBidService, _FakeRepo]:
     async def no_name(_uid: str | None) -> str:
         return ""
 
+    async def no_entry(_tender_id: uuid.UUID) -> None:
+        return None
+
     svc._user_name = no_name  # type: ignore[method-assign]
+    svc._entry = no_entry  # type: ignore[method-assign]
     return svc, repo
 
 
@@ -152,7 +156,7 @@ def _card(**kw: Any) -> Any:
     base = {
         "id": uuid.uuid4(), "weights": dict(logic.DEFAULT_WEIGHTS), "scores": dict(ALL5), "notes": {},
         "threshold": 60, "decision": "", "decision_reason": "", "decided_by": None, "decided_at": None,
-        "outcome": "", "outcome_note": "", "version": 1, "opportunity_id": None,
+        "version": 1, "opportunity_id": None, "tender_id": uuid.uuid4(),
     }  # fmt: skip
     return SimpleNamespace(**{**base, **kw})
 
@@ -205,9 +209,69 @@ async def test_outcome_only_for_a_bid_and_cleared_when_decision_flips() -> None:
     with pytest.raises(HTTPException) as exc:
         await svc.set_outcome(_card(decision="no_bid"), OutcomeRequest(outcome="won"), "u1")
     assert exc.value.detail["code"] == "not_bid"
-    card = _card(decision="bid", outcome="won")
+    entry = SimpleNamespace(outcome="won", notes="", version=1)
+    _with_entry(svc, entry)
+    card = _card(decision="bid")
     await svc.decide(card, DecideRequest(decision="no_bid", reason="Client withdrew the invitation"), "u1")
-    assert card.outcome == ""
+    assert (entry.outcome, entry.version) == ("pending", 2)
+
+
+def _with_entry(svc: BidNoBidService, entry: Any) -> None:
+    async def _entry(_tender_id: uuid.UUID) -> Any:
+        return entry
+
+    svc._entry = _entry  # type: ignore[method-assign]
+
+
+async def test_outcome_writes_the_single_ledger_record() -> None:
+    svc, repo = _service()
+    entry = SimpleNamespace(outcome="pending", notes="", version=1)
+    _with_entry(svc, entry)
+    card = _card(decision="bid", tender_id=uuid.uuid4())
+    await svc.set_outcome(card, OutcomeRequest(outcome="won", note=" signed ", version=1), "u1")
+    assert (entry.outcome, entry.notes, entry.version, card.version) == ("won", "signed", 2, 2)
+    assert repo.added[0].kind == "outcome"
+    await svc.set_outcome(card, OutcomeRequest(outcome=""), "u1")
+    assert entry.outcome == "pending"
+
+
+async def test_outcome_with_stale_version_is_a_conflict() -> None:
+    svc, _ = _service()
+    _with_entry(svc, SimpleNamespace(outcome="pending", notes="", version=1))
+    with pytest.raises(HTTPException) as exc:
+        await svc.set_outcome(_card(decision="bid", version=3), OutcomeRequest(outcome="won", version=2), "u1")
+    assert exc.value.detail["code"] == "stale_revision"
+
+
+async def test_open_card_returns_the_winner_of_a_concurrent_open() -> None:
+    from sqlalchemy.exc import IntegrityError
+
+    svc, repo = _service()
+    tender_id, winner = uuid.uuid4(), _card()
+    calls = {"n": 0}
+
+    async def card_for_tender(_tid: uuid.UUID) -> Any:
+        calls["n"] += 1
+        return None if calls["n"] == 1 else winner
+
+    async def add(*_rows: Any) -> None:
+        raise IntegrityError("insert", {}, Exception("duplicate tender_id"))
+
+    class _Nested:
+        async def __aenter__(self) -> None:
+            return None
+
+        async def __aexit__(self, *_exc: Any) -> bool:
+            return False
+
+    async def tender(_tid: uuid.UUID) -> Any:
+        return SimpleNamespace(project_id=uuid.uuid4())
+
+    repo.card_for_tender = card_for_tender  # type: ignore[attr-defined]
+    repo.add = add  # type: ignore[method-assign]
+    svc.tender = tender  # type: ignore[method-assign]
+    svc.session = SimpleNamespace(begin_nested=_Nested)  # type: ignore[assignment]
+    assert await svc.open_card(tender_id, "u1") is winner
 
 
 async def test_opportunity_of_another_project_is_not_found() -> None:
@@ -233,3 +297,16 @@ async def test_opportunity_of_another_project_is_not_found() -> None:
     for key in ("free", "own"):
         await svc.update(card, ScorecardUpdate(opportunity_id=ids[key]), "u1")
         assert card.opportunity_id == ids[key]
+
+
+async def test_rule_messages_follow_the_caller_locale() -> None:
+    from app.core.validation.engine import validation_engine
+
+    report = await validation_engine.validate(
+        data={"weights": {}, "scores": {"client": 5}, "notes": {}},
+        rule_sets=["bid_no_bid"],
+        target_type="bid_no_bid",
+        metadata={"locale": "de"},
+    )
+    messages = [r.message for r in report.results if not r.passed]
+    assert any(m.startswith("Kriterium ") and "nicht bewertet" in m for m in messages)

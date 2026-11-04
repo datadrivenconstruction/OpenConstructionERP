@@ -8,6 +8,7 @@ import uuid
 from typing import Any
 
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.i18n import get_locale
@@ -90,14 +91,26 @@ class WinLossService:
 
     async def create(self, data: BidOutcomeCreate, user_id: str) -> BidOutcome:
         entry = BidOutcome(**data.model_dump(), created_by=uuid.UUID(str(user_id)))
-        return await self.repo.create(entry)
+        try:
+            async with self.session.begin_nested():
+                return await self.repo.create(entry)
+        except IntegrityError as exc:
+            raise HTTPException(status_code=409, detail="This tender already has an outcome record") from exc
+
+    async def for_tender(self, tender_id: uuid.UUID) -> BidOutcome | None:
+        """The single outcome record of a tender, if any."""
+        return await self.repo.get_by_tender(tender_id)
 
     async def update(self, entry_id: uuid.UUID, data: BidOutcomeUpdate, user_id: str) -> BidOutcome:
         entry = await self.get_for_user(entry_id, user_id)
         fields = data.model_dump(exclude_unset=True)
+        expected = fields.pop("version", None)
+        if expected is not None and expected != entry.version:
+            raise HTTPException(status_code=409, detail="The entry was changed by someone else since you loaded it")
         for required in ("title", "outcome", "our_price", "currency", "client_name", "trade", "notes"):
             if required in fields and fields[required] is None:
                 del fields[required]
+        fields["version"] = entry.version + 1
         await self.repo.update_fields(entry_id, **fields)
         await self.repo.session.refresh(entry)
         return entry

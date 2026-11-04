@@ -22,6 +22,10 @@ class BidOutcomeRepository:
     async def get_by_id(self, entry_id: uuid.UUID) -> BidOutcome | None:
         return await self.session.get(BidOutcome, entry_id)
 
+    async def get_by_tender(self, tender_id: uuid.UUID) -> BidOutcome | None:
+        stmt = select(BidOutcome).where(BidOutcome.tender_id == tender_id)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
     async def create(self, entry: BidOutcome) -> BidOutcome:
         self.session.add(entry)
         await self.session.flush()

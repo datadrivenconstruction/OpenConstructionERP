@@ -13,6 +13,8 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.bid_no_bid import logic
@@ -21,6 +23,7 @@ from app.modules.bid_no_bid.models import BidNoBidEvent, BidNoBidScorecard
 from app.modules.bid_no_bid.repository import BidNoBidRepository
 from app.modules.bid_no_bid.schemas import DecideRequest, OutcomeRequest, ScorecardUpdate
 from app.modules.bid_no_bid.validators import evaluate
+from app.modules.win_loss.models import BidOutcome
 
 
 def _conflict(code: str, message: str, **extra: Any) -> HTTPException:
@@ -43,6 +46,11 @@ def _finding(f: Any) -> dict[str, Any]:
 
 def _is_error(f: Any) -> bool:
     return getattr(f.severity, "value", str(f.severity)).lower().endswith("error")
+
+
+def _outcome_of(entry: BidOutcome | None) -> str:
+    """The scorecard's view of the ledger outcome: open states read as no outcome yet."""
+    return entry.outcome if entry is not None and entry.outcome in ("won", "lost", "withdrawn") else ""
 
 
 class BidNoBidService:
@@ -79,9 +87,23 @@ class BidNoBidService:
             threshold=logic.DEFAULT_THRESHOLD,
             created_by=user_id,
         )
-        await self.repo.add(card)
+        try:
+            async with self.session.begin_nested():
+                await self.repo.add(card)
+        except IntegrityError:
+            # A concurrent open won the unique tender_id race: return its card.
+            existing = await self.repo.card_for_tender(tender_id)
+            if existing is None:
+                raise
+            return existing
         await self._log(card, user_id, "created", "Scorecard opened")
         return card
+
+    # ── outcome: the single record lives in the win-loss ledger ───────────
+
+    async def _entry(self, tender_id: uuid.UUID) -> BidOutcome | None:
+        stmt = select(BidOutcome).where(BidOutcome.tender_id == tender_id)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
 
     # ── computation ──────────────────────────────────────────────────────
 
@@ -114,6 +136,7 @@ class BidNoBidService:
         tender = await self.tender(card.tender_id)
         findings = await evaluate(self.validation_input(card), target_id=str(card.id))
         events = await self.repo.events(card.id)
+        entry = await self._entry(card.tender_id)
         return {
             "id": card.id,
             "project_id": card.project_id,
@@ -130,8 +153,8 @@ class BidNoBidService:
             "decision_reason": card.decision_reason,
             "decided_by_name": await self._user_name(card.decided_by),
             "decided_at": card.decided_at,
-            "outcome": card.outcome,
-            "outcome_note": card.outcome_note,
+            "outcome": _outcome_of(entry),
+            "outcome_note": entry.notes if entry else "",
             "version": card.version,
             "findings": [_finding(f) for f in findings],
             "events": events,
@@ -195,7 +218,10 @@ class BidNoBidService:
         card.decided_by = user_id
         card.decided_at = datetime.now(UTC)
         if body.decision != "bid":
-            card.outcome, card.outcome_note = "", ""
+            entry = await self._entry(card.tender_id)
+            if entry is not None and entry.outcome != "pending":
+                entry.outcome = "pending"
+                entry.version += 1
         card.version += 1
         await self.repo.save(card)
         verb = "Changed decision" if previous and previous != body.decision else "Decided"
@@ -206,19 +232,35 @@ class BidNoBidService:
         )  # fmt: skip
 
     async def set_outcome(self, card: BidNoBidScorecard, body: OutcomeRequest, user_id: str | None) -> None:
+        self._check_version(card, body.version)
         if card.decision != "bid":
             raise _conflict("not_bid", "An outcome can be recorded only for a tender that was bid.")
-        card.outcome = body.outcome
-        card.outcome_note = body.note.strip()
+        outcome, note = body.outcome or "pending", body.note.strip()
+        entry = await self._entry(card.tender_id)
+        if entry is None:
+            tender = await self.tender(card.tender_id)
+            entry = BidOutcome(
+                title=tender.name,
+                project_id=card.project_id,
+                tender_id=card.tender_id,
+                outcome=outcome,
+                notes=note,
+                created_by=uuid.UUID(user_id) if user_id else None,
+            )
+            try:
+                async with self.session.begin_nested():
+                    await self.repo.add(entry)
+            except IntegrityError:
+                entry = await self._entry(card.tender_id)
+                if entry is None:
+                    raise
+                entry.outcome, entry.notes, entry.version = outcome, note, entry.version + 1
+        else:
+            entry.outcome, entry.notes, entry.version = outcome, note, entry.version + 1
         card.version += 1
         await self.repo.save(card)
         await self._log(
-            card,
-            user_id,
-            "outcome",
-            f"Outcome: {body.outcome or 'cleared'}",
-            outcome=body.outcome,
-            note=card.outcome_note,
+            card, user_id, "outcome", f"Outcome: {body.outcome or 'cleared'}", outcome=body.outcome, note=note
         )
 
     # ── win-loss ledger ──────────────────────────────────────────────────
@@ -227,10 +269,12 @@ class BidNoBidService:
         cards = await self.repo.cards(project_id)
         crm = await self._crm_status({c.opportunity_id for c in cards if c.opportunity_id}, project_id)
         tenders = {c.tender_id: (await self.tender(c.tender_id)).name for c in cards}
+        entries = await self._entries({c.tender_id for c in cards})
         rows: list[dict[str, Any]] = []
         for card in cards:
             c = self.compute(card)
-            outcome, source = card.outcome, "scorecard" if card.outcome else ""
+            outcome = _outcome_of(entries.get(card.tender_id))
+            source = "ledger" if outcome else ""
             if not outcome and card.decision == "bid" and crm.get(card.opportunity_id) in ("won", "lost"):
                 outcome, source = crm[card.opportunity_id], "crm"
             rows.append(
@@ -250,6 +294,12 @@ class BidNoBidService:
                 }
             )
         return {"summary": logic.win_loss_summary(rows), "rows": rows}
+
+    async def _entries(self, tender_ids: set[uuid.UUID]) -> dict[uuid.UUID, BidOutcome]:
+        if not tender_ids:
+            return {}
+        stmt = select(BidOutcome).where(BidOutcome.tender_id.in_(tender_ids))
+        return {e.tender_id: e for e in (await self.session.execute(stmt)).scalars().all()}
 
     async def _crm_status(self, ids: set[uuid.UUID | None], project_id: uuid.UUID) -> dict[uuid.UUID | None, str]:
         wanted = {i for i in ids if i}

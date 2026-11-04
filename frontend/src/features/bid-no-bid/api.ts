@@ -88,8 +88,8 @@ export const api = {
   update: (id: string, body: ScorecardPatch) => apiPatch<Scorecard>(`${B}/scorecards/${id}`, body),
   decide: (id: string, decision: 'bid' | 'no_bid', reason: string, version: number) =>
     apiPost<Scorecard>(`${B}/scorecards/${id}/decision`, { decision, reason, version }),
-  outcome: (id: string, outcome: string, note: string) =>
-    apiPut<Scorecard>(`${B}/scorecards/${id}/outcome`, { outcome, note }),
+  outcome: (id: string, outcome: string, note: string, version?: number) =>
+    apiPut<Scorecard>(`${B}/scorecards/${id}/outcome`, { outcome, note, version }),
   ledger: (projectId: string) => apiGet<Ledger>(`${B}/ledger?project_id=${projectId}`),
 };
 

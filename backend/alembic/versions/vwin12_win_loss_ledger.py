@@ -44,11 +44,13 @@ def upgrade() -> None:
         sa.Column("competitor_count", sa.Integer(), nullable=True),
         sa.Column("lost_reason", sa.String(30), nullable=True),
         sa.Column("notes", sa.Text(), nullable=False, server_default=""),
+        sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
         sa.Column("created_by", sa.String(36), nullable=True),
         sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
     )
     for col in ("client_name", "trade", "project_id", "outcome"):
         op.create_index(f"ix_{_T}_{col}", _T, [col])
+    op.create_index("ux_win_loss_tender", _T, ["tender_id"], unique=True)
 
 
 def downgrade() -> None:

@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from app.core.i18n import get_locale
 from app.core.validation.engine import (
     RuleCategory,
     RuleResult,
@@ -25,6 +26,7 @@ from app.core.validation.engine import (
     rule_registry,
     validation_engine,
 )
+from app.core.validation.messages import translate
 from app.modules.bid_no_bid.logic import CRITERIA, MAX_RATING, MIN_RATING
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,14 @@ def _result(rule: ValidationRule, passed: bool, message: str, ref: str | None = 
     )
 
 
+def _msg(rule: ValidationRule, context: ValidationContext, **params: Any) -> str:
+    """The rule's failure message in the caller's locale; criterion keys are shown by their translated name."""
+    locale = str((context.metadata or {}).get("locale") or "en")
+    if "criterion" in params:
+        params["criterion"] = translate(f"bid_no_bid.criteria.{params['criterion']}", locale=locale)
+    return translate(f"{rule.rule_id}.fail", locale=locale, **params)
+
+
 class WeightsSum100(ValidationRule):
     rule_id = "bid_no_bid.weights_sum_100"
     name = "Weights Add Up To 100"
@@ -63,7 +73,7 @@ class WeightsSum100(ValidationRule):
         numeric = [v for v in values if isinstance(v, int) and not isinstance(v, bool)]
         total = sum(numeric)
         ok = len(numeric) == len(CRITERIA) and all(v >= 0 for v in numeric) and total == 100
-        return [_result(self, ok, "OK" if ok else f"Weights add up to {total}, not 100.", None, total=total)]
+        return [_result(self, ok, "OK" if ok else _msg(self, context, total=total), None, total=total)]
 
 
 class AllCriteriaRated(ValidationRule):
@@ -80,7 +90,7 @@ class AllCriteriaRated(ValidationRule):
         for key in CRITERIA:
             v = scores.get(key)
             ok = isinstance(v, int) and not isinstance(v, bool) and MIN_RATING <= v <= MAX_RATING
-            out.append(_result(self, ok, "OK" if ok else f"'{key}' is not rated.", key))
+            out.append(_result(self, ok, "OK" if ok else _msg(self, context, criterion=key), key))
         return out
 
 
@@ -98,7 +108,7 @@ class OverrideHasReason(ValidationRule):
         if not decision or not rec or decision == rec:
             return []
         ok = bool(str(data.get("decision_reason") or "").strip())
-        return [_result(self, ok, "OK" if ok else "The decision differs from the recommendation; give a reason.")]
+        return [_result(self, ok, "OK" if ok else _msg(self, context))]
 
 
 class LowRatingHasNote(ValidationRule):
@@ -116,7 +126,7 @@ class LowRatingHasNote(ValidationRule):
             _result(
                 self,
                 bool(str(notes.get(k) or "").strip()),
-                "OK" if str(notes.get(k) or "").strip() else f"'{k}' is rated 1 without a note.",
+                "OK" if str(notes.get(k) or "").strip() else _msg(self, context, criterion=k),
                 k,
             )
             for k in CRITERIA
@@ -137,7 +147,11 @@ async def evaluate(data: dict[str, Any], *, target_id: str = "") -> list[RuleRes
     """Failed findings for one scorecard; an engine failure logs and returns none."""
     try:
         report = await validation_engine.validate(
-            data=data, rule_sets=[RULE_SET], target_type="bid_no_bid", target_id=target_id
+            data=data,
+            rule_sets=[RULE_SET],
+            target_type="bid_no_bid",
+            target_id=target_id,
+            metadata={"locale": get_locale()},
         )
     except Exception:  # noqa: BLE001 - findings augment a read, never break it
         logger.warning("bid / no-bid validation failed for %s", target_id, exc_info=True)
