@@ -172,3 +172,19 @@ describe('useAuthStore', () => {
     });
   });
 });
+
+describe('field data purge on session change', () => {
+  it('purges on logout and on user switch, not on same-user refresh', async () => {
+    const mod = await import('@/shared/lib/offline/fieldSession');
+    const spy = vi.spyOn(mod, 'purgeFieldUserData').mockResolvedValue(undefined);
+    useAuthStore.getState().setTokens('a1', 'r1', true, 'one@example.com');
+    spy.mockClear();
+    useAuthStore.getState().setTokens('a2', 'r2', true, 'one@example.com');
+    expect(spy).not.toHaveBeenCalled();
+    useAuthStore.getState().setTokens('a3', 'r3', true, 'two@example.com');
+    expect(spy).toHaveBeenCalledTimes(1);
+    useAuthStore.getState().logout();
+    expect(spy).toHaveBeenCalledTimes(2);
+    spy.mockRestore();
+  });
+});

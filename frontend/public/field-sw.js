@@ -64,6 +64,14 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// The app asks for the data lane to be emptied on sign-out or user switch: the
+// cache is keyed by URL only, so the next person on a shared phone would
+// otherwise read the previous user's lists offline.
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'oe-field-clear') return;
+  event.waitUntil(caches.delete(DATA_CACHE));
+});
+
 // Lists a site manager opens first. Reads only; the SW never sees a mutation.
 const FIELD_LIST_PREFIXES = [
   '/api/v1/field-diary/',
