@@ -57394,6 +57394,10 @@ const resource = {
     "lessons_learned.open_register": "Open the lessons register",
     "lessons_learned.seen_one": "Seen on {{count}} past project",
     "lessons_learned.seen_other": "Seen on {{count}} past projects",
+    "lessons_learned.finding.title_required": "Add a title.",
+    "lessons_learned.finding.has_tag": "Add a trade, cost code or risk category.",
+    "lessons_learned.finding.has_content": "Describe what happened or what to do.",
+    "lessons_learned.finding.confirmed_has_recommendation": "Add what to do next time.",
   }
 } as { translation: Record<string, string> };
 

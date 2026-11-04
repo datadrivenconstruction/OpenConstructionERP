@@ -109,3 +109,29 @@ def test_route_permissions(path, method, perm):
     assert route is not None
     perms = {getattr(getattr(d, "dependency", None), "permission", None) for d in route.dependencies}
     assert perm in perms
+
+
+@pytest.mark.asyncio
+async def test_confirming_twice_keeps_first_confirmer():
+    from types import SimpleNamespace
+
+    from app.modules.lessons_learned.service import LessonService
+
+    lesson = SimpleNamespace(
+        id=uuid.uuid4(),
+        title="t",
+        description="d",
+        recommendation="r",
+        trade="roofing",
+        cost_code="",
+        risk_category="",
+        status="confirmed",
+        confirmed_by="first",
+        confirmed_at=None,
+        impact="low",
+        project_id=uuid.uuid4(),
+        created_at=None,
+    )
+    svc = LessonService(session=None)  # type: ignore[arg-type]
+    await svc.confirm(lesson, "second")
+    assert lesson.confirmed_by == "first"

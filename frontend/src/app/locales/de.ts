@@ -65473,6 +65473,10 @@ const resource = {
     "lessons_learned.open_register": "Register der Erkenntnisse öffnen",
     "lessons_learned.seen_one": "Auf {{count}} früherem Projekt gesehen",
     "lessons_learned.seen_other": "Auf {{count}} früheren Projekten gesehen",
+    "lessons_learned.finding.title_required": "Titel ergänzen.",
+    "lessons_learned.finding.has_tag": "Gewerk, Kostenkennzahl oder Risikokategorie ergänzen.",
+    "lessons_learned.finding.has_content": "Beschreiben, was passiert ist oder was zu tun ist.",
+    "lessons_learned.finding.confirmed_has_recommendation": "Empfehlung für das nächste Mal ergänzen.",
   }
 } as { translation: Record<string, string> };
 
