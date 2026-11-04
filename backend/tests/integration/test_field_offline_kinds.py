@@ -217,3 +217,19 @@ async def test_single_endpoint_answers_422_for_a_stale_op(app_and_client) -> Non
     assert r.status_code == 422
     assert r.json()["reason_code"] == "op_too_old"
     assert await _count(SessionFactory, NCR, project_id) == 0
+
+
+@pytest.mark.asyncio
+async def test_long_op_ids_sharing_a_prefix_make_two_haul_tickets(app_and_client) -> None:  # noqa: F811
+    _app, client, SessionFactory = app_and_client  # noqa: N806
+    project_id = await _seed_project(SessionFactory)
+    headers = await _session_for(client, SessionFactory, project_id, "+491700000109")
+    prefix = "x" * 100
+    for suffix in ("a" * 10, "b" * 10):
+        r = await client.post(
+            "/v1/field-diary/capture/haul-ticket/",
+            json={**HAUL_BODY, "client_op_id": prefix + suffix},
+            headers=headers,
+        )
+        assert r.status_code == 201, r.text
+    assert await _count(SessionFactory, HaulTicket, project_id) == 2

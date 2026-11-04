@@ -913,6 +913,13 @@ class FieldDiaryService:
 # ── Cross-module field sync dispatcher ─────────────────────────────────────
 
 
+def _haul_op_id(client_op_id: str) -> str:
+    """Fit a capture id into the haul module's 80-char key without letting two long ids collide."""
+    if len(client_op_id) <= 80:
+        return client_op_id
+    return hashlib.sha256(client_op_id.encode()).hexdigest()
+
+
 class FieldSyncService:
     """Hub that routes an offline-captured field write into the target module.
 
@@ -1382,7 +1389,9 @@ class FieldSyncService:
         )
         # The capture id doubles as the haul module's op id, so the row itself
         # also refuses a duplicate if the ledger row were ever lost.
-        create = TicketCreate(project_id=project_id, client_op_id=data.client_op_id[:80], source="field", **fields)
+        create = TicketCreate(
+            project_id=project_id, client_op_id=_haul_op_id(data.client_op_id), source="field", **fields
+        )
         row, created = await HaulTicketService(self.session).create(create, str(field_session.user_id))
         await self.field_svc._record_op(
             data.client_op_id,
