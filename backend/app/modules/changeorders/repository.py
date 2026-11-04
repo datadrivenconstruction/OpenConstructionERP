@@ -75,6 +75,13 @@ class ChangeOrderRepository:
         """Get change order by ID (includes items via selectin)."""
         return await self.session.get(ChangeOrder, order_id)
 
+    async def get_statuses(self, order_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+        """Status of each existing change order in one IN query; missing ids are absent."""
+        if not order_ids:
+            return {}
+        stmt = select(ChangeOrder.id, ChangeOrder.status).where(ChangeOrder.id.in_(order_ids))
+        return {oid: st for oid, st in (await self.session.execute(stmt)).all()}
+
     async def list_for_project(
         self,
         project_id: uuid.UUID,

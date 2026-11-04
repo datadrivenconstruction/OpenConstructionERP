@@ -638,9 +638,10 @@ class PunchListService:
         skipped = 0
         errors: list[dict[str, Any]] = []
 
+        items_by_id = await self.repo.get_many(item_ids)
         for item_id in item_ids:
             try:
-                item = await self.repo.get_by_id(item_id)
+                item = items_by_id.get(item_id)
                 if item is None:
                     errors.append({"id": str(item_id), "error": "not_found"})
                     continue

@@ -31,6 +31,13 @@ class PunchListRepository:
         """Get punch item by ID."""
         return await self.session.get(PunchItem, item_id)
 
+    async def get_many(self, item_ids: list[uuid.UUID]) -> dict[uuid.UUID, PunchItem]:
+        """Load punch items by id in one IN query; missing ids are absent."""
+        if not item_ids:
+            return {}
+        stmt = select(PunchItem).where(PunchItem.id.in_(item_ids))
+        return {i.id: i for i in (await self.session.execute(stmt)).scalars().all()}
+
     async def list_for_project(
         self,
         project_id: uuid.UUID,

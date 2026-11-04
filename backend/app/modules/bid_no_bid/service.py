@@ -276,7 +276,7 @@ class BidNoBidService:
     async def ledger(self, project_id: uuid.UUID) -> dict[str, Any]:
         cards = await self.repo.cards(project_id)
         crm = await self._crm_status({c.opportunity_id for c in cards if c.opportunity_id}, project_id)
-        tenders = {c.tender_id: (await self.tender(c.tender_id)).name for c in cards}
+        tenders = await self._tender_names({c.tender_id for c in cards})
         entries = await self._entries({c.tender_id for c in cards})
         rows: list[dict[str, Any]] = []
         for card in cards:
@@ -302,6 +302,18 @@ class BidNoBidService:
                 }
             )
         return {"summary": logic.win_loss_summary(rows), "rows": rows}
+
+    async def _tender_names(self, tender_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+        if not tender_ids:
+            return {}
+        from app.modules.tendering.models import TenderPackage
+
+        stmt = select(TenderPackage.id, TenderPackage.name).where(TenderPackage.id.in_(tender_ids))
+        names = {tid: name for tid, name in (await self.session.execute(stmt)).all()}
+        if tender_ids - names.keys():
+            # Same contract as tender(): a card whose tender is gone is a 404.
+            raise _not_found("Tender")
+        return names
 
     async def _entries(self, tender_ids: set[uuid.UUID]) -> dict[uuid.UUID, BidOutcome]:
         if not tender_ids:
