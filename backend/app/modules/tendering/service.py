@@ -71,7 +71,8 @@ def _to_decimal(value: object, default: str = "0") -> Decimal:
     try:
         if value is None or value == "":
             return Decimal(default)
-        return Decimal(str(value))
+        d = Decimal(str(value))
+        return d if d.is_finite() else Decimal(default)
     except (InvalidOperation, ValueError, TypeError):
         return Decimal(default)
 
