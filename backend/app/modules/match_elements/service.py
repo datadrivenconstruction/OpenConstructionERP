@@ -3796,7 +3796,7 @@ class MatchElementsService:
         )
         from app.modules.costs.service import _item_rule_row, gate_cost_items  # noqa: PLC0415
 
-        # A custom rate the matcher records is not refused by the cost rules; its findings stay in the log.
+        # A custom rate the matcher records is never refused by the cost rules; the findings are advisory only.
         await gate_cost_items([_item_rule_row(item)], "match_custom_rate", warn_only=True)
         db.add(item)
         await db.flush()

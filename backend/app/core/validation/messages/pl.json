@@ -2029,11 +2029,11 @@
       "suggestion": "Sprawdź skalę albo skalibruj ją na znanym wymiarze.",
       "fail": "Skala rysunku 1:{scale} wykracza poza zwykły zakres."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Wybierz, czy cena jest za tonę, czy za kg, albo usuń masę.",
       "fail": "Podano masę {mass} kg na jednostkę, ale nie podano podstawy ceny (za tonę lub za kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Narysuj kształt ponownie z wystarczającą liczbą punktów albo usuń pomiar.",
       "fail": "Pomiar typu {type} ma {count} punktów; potrzeba co najmniej {needed}."
     },

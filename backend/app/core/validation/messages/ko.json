@@ -2029,11 +2029,11 @@
       "suggestion": "축척을 확인하거나 알려진 치수로 다시 보정하십시오.",
       "fail": "도면 축척 1:{scale}은(는) 일반적인 범위를 벗어났습니다."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "단가가 톤당인지 kg당인지 선택하거나 질량을 해제하십시오.",
       "fail": "단위당 질량 {mass} kg이 지정되었지만 단가 기준(톤당 또는 kg당)이 없습니다."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "점을 충분히 두어 도형을 다시 그리거나 측정을 삭제하십시오.",
       "fail": "{type} 유형의 측정에는 점이 {count}개뿐입니다. 최소 {needed}개가 필요합니다."
     },

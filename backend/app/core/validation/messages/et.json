@@ -2029,11 +2029,11 @@
       "suggestion": "Kontrollige mõõtkava või kalibreerige see teadaoleva mõõdu järgi.",
       "fail": "Joonise mõõtkava 1:{scale} jääb tavapärasest vahemikust välja."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Valige, kas hind on tonni või kg kohta, või eemaldage mass.",
       "fail": "Märgitud on mass {mass} kg ühiku kohta, kuid hinna alus (tonni või kg kohta) puudub."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Joonistage kuju uuesti piisava punktide arvuga või kustutage mõõtmine.",
       "fail": "Tüübi {type} mõõtmisel on {count} punkti; vaja on vähemalt {needed}."
     },

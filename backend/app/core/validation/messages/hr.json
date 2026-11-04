@@ -2029,11 +2029,11 @@
       "suggestion": "Provjerite mjerilo ili ga kalibrirajte prema poznatoj mjeri.",
       "fail": "Mjerilo nacrta 1:{scale} izvan je uobičajenog raspona."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Odaberite je li cijena po toni ili po kg, ili uklonite masu.",
       "fail": "Navedena je masa od {mass} kg po jedinici, ali ne i osnova cijene (po toni ili po kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Ponovno nacrtajte oblik s dovoljno točaka ili izbrišite mjerenje.",
       "fail": "Mjerenje tipa {type} ima {count} točaka; potrebno je najmanje {needed}."
     },

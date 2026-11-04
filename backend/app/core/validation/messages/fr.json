@@ -2029,11 +2029,11 @@
       "suggestion": "Vérifiez l'échelle ou étalonnez-la à partir d'une cote connue.",
       "fail": "L'échelle du plan 1:{scale} sort de la plage habituelle."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Précisez si le prix est à la tonne ou au kg, ou supprimez la masse.",
       "fail": "Une masse de {mass} kg par unité est indiquée, mais pas la base du prix (à la tonne ou au kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Redessinez la forme avec assez de points ou supprimez le métré.",
       "fail": "Un métré de type {type} compte {count} points ; il en faut au moins {needed}."
     },

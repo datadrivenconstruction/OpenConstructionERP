@@ -2029,11 +2029,11 @@
       "suggestion": "Check the scale or recalibrate it from a known dimension.",
       "fail": "The drawing scale 1:{scale} is outside the usual range."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Choose whether the rate is per tonne or per kg, or clear the mass.",
       "fail": "A mass of {mass} kg per unit is stated but the rate basis (per tonne or per kg) is not."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Redraw the shape with enough points, or delete the measurement.",
       "fail": "A {type} measurement has {count} points; it needs at least {needed}."
     },

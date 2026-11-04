@@ -2029,11 +2029,11 @@
       "suggestion": "Revise la escala o calíbrela con una cota conocida.",
       "fail": "La escala del plano 1:{scale} queda fuera del rango habitual."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Elija si el precio es por tonelada o por kg, o elimine la masa.",
       "fail": "Se indica una masa de {mass} kg por unidad pero no la base del precio (por tonelada o por kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Vuelva a dibujar la forma con suficientes puntos o elimine la medición.",
       "fail": "Una medición de tipo {type} tiene {count} puntos; necesita al menos {needed}."
     },

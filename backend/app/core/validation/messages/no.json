@@ -2029,11 +2029,11 @@
       "suggestion": "Kontroller målestokken, eller kalibrer den ut fra et kjent mål.",
       "fail": "Tegningens målestokk 1:{scale} ligger utenfor det vanlige området."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Velg om prisen er pr. tonn eller pr. kg, eller fjern massen.",
       "fail": "Det er oppgitt en masse på {mass} kg pr. enhet, men ikke prisgrunnlaget (pr. tonn eller pr. kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Tegn formen på nytt med nok punkter, eller slett målingen.",
       "fail": "En måling av typen {type} har {count} punkter; det kreves minst {needed}."
     },

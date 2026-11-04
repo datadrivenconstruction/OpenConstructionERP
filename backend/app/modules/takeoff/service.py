@@ -4316,6 +4316,18 @@ class TakeoffService:
             # The DB write is identical for every confirmed row; flip the row to
             # confirmed via the repository, which keeps the ORM identity cache
             # coherent and matches the access pattern the unit tests mock.
+            try:
+                await self._gate(
+                    self._rule_state(prop, review_status="confirmed"),
+                    prop.project_id,
+                    "confirm_proposals",
+                    before=self._rule_state(prop),
+                )
+            except HTTPException as exc:
+                if exc.status_code != 422:
+                    raise
+                blocked += 1
+                continue
             await self.measurement_repo.update_fields(prop.id, review_status="confirmed")
             confirmed_ids.append(mid)
 

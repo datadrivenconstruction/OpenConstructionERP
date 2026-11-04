@@ -2029,11 +2029,11 @@
       "suggestion": "Kiểm tra tỷ lệ hoặc hiệu chuẩn lại theo một kích thước đã biết.",
       "fail": "Tỷ lệ bản vẽ 1:{scale} nằm ngoài phạm vi thông thường."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Chọn đơn giá theo tấn hay theo kg, hoặc bỏ khối lượng.",
       "fail": "Đã nêu khối lượng {mass} kg trên mỗi đơn vị nhưng chưa nêu cơ sở đơn giá (theo tấn hay theo kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Vẽ lại hình với đủ điểm hoặc xóa lần đo.",
       "fail": "Một lần đo loại {type} có {count} điểm; cần ít nhất {needed}."
     },

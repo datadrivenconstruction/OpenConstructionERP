@@ -2029,11 +2029,11 @@
       "suggestion": "Tarkista mittakaava tai kalibroi se tunnetun mitan avulla.",
       "fail": "Piirustuksen mittakaava 1:{scale} on tavallisen vaihteluvälin ulkopuolella."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Valitse, onko hinta tonnia vai kg kohti, tai poista massa.",
       "fail": "Massa {mass} kg yksikköä kohti on annettu, mutta hinnan perustetta (tonnia tai kg kohti) ei."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Piirrä muoto uudelleen riittävällä pistemäärällä tai poista mittaus.",
       "fail": "Tyypin {type} mittauksessa on {count} pistettä; tarvitaan vähintään {needed}."
     },

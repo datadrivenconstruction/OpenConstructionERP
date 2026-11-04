@@ -2029,11 +2029,11 @@
       "suggestion": "Verificați scara sau calibrați-o după o cotă cunoscută.",
       "fail": "Scara desenului 1:{scale} este în afara intervalului obișnuit."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Alegeți dacă prețul este pe tonă sau pe kg, ori eliminați masa.",
       "fail": "S-a indicat o masă de {mass} kg pe unitate, dar nu și baza prețului (pe tonă sau pe kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Redesenați forma cu suficiente puncte sau ștergeți măsurătoarea.",
       "fail": "O măsurătoare de tip {type} are {count} puncte; are nevoie de cel puțin {needed}."
     },

@@ -2029,11 +2029,11 @@
       "suggestion": "Den Maßstab prüfen oder anhand eines bekannten Maßes neu kalibrieren.",
       "fail": "Der Planmaßstab 1:{scale} liegt außerhalb des üblichen Bereichs."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Festlegen, ob der Preis je Tonne oder je kg gilt, oder die Masse löschen.",
       "fail": "Eine Masse von {mass} kg je Einheit ist angegeben, aber nicht die Preisbasis (je Tonne oder je kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Die Form mit genügend Punkten neu zeichnen oder die Messung löschen.",
       "fail": "Eine Messung vom Typ {type} hat {count} Punkte; mindestens {needed} sind nötig."
     },

@@ -2029,11 +2029,11 @@
       "suggestion": "Kontrollera skalan eller kalibrera den med ett känt mått.",
       "fail": "Ritningsskalan 1:{scale} ligger utanför det vanliga intervallet."
     },
-    "geometry_too_few_points": {
+    "mass_needs_basis": {
       "suggestion": "Välj om priset gäller per ton eller per kg, eller ta bort massan.",
       "fail": "En massa på {mass} kg per enhet anges, men inte prisgrunden (per ton eller per kg)."
     },
-    "mass_needs_basis": {
+    "geometry_too_few_points": {
       "suggestion": "Rita formen igen med tillräckligt många punkter, eller ta bort mätningen.",
       "fail": "En mätning av typen {type} har {count} punkter; minst {needed} krävs."
     },
