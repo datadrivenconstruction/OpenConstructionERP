@@ -1737,5 +1737,19 @@
       "fail": "Tanggal {earlier} dan {later} tidak berurutan atau di luar periode.",
       "suggestion": "Perbaiki tanggal agar yang lebih awal datang lebih dulu dan setiap entri berada dalam periode."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status {state} tetapi {field} belum diisi.",
+      "suggestion": "Isi kolom yang kosong atau kembalikan catatan ke status sebelumnya."
+    },
+    "overdue": {
+      "fail": "Masih {status}, padahal tenggatnya {date}.",
+      "suggestion": "Selesaikan atau jadwalkan ulang, atau tutup dengan alasan."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Hasilnya {result}, tetapi {count} butir daftar periksa gagal.",
+      "suggestion": "Perbaiki hasilnya atau tinjau butir yang gagal."
+    }
   }
 }

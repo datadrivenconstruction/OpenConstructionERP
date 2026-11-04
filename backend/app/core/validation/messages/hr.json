@@ -1737,5 +1737,19 @@
       "fail": "Datumi {earlier} i {later} nisu u ispravnom redoslijedu ili su izvan razdoblja.",
       "suggestion": "Ispravite datume tako da raniji dođe prvi i da svaki unos bude unutar razdoblja."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status je {state}, ali nedostaje {field}.",
+      "suggestion": "Popunite polje koje nedostaje ili vratite zapis na raniji status."
+    },
+    "overdue": {
+      "fail": "Još uvijek {status}, iako je rok bio {date}.",
+      "suggestion": "Dovršite ili ponovno zakažite, ili zatvorite uz razlog."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Rezultat je {result}, ali {count} stavki kontrolnog popisa nije prošlo.",
+      "suggestion": "Ispravite rezultat ili pregledajte stavke koje nisu prošle."
+    }
   }
 }

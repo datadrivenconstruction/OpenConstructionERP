@@ -1737,5 +1737,19 @@
       "fail": "Datele {earlier} și {later} sunt în ordine greșită sau în afara perioadei.",
       "suggestion": "Corectați datele astfel încât cea mai veche să fie prima și fiecare intrare să se încadreze în perioadă."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Starea este {state}, dar lipsește {field}.",
+      "suggestion": "Completați câmpul lipsă sau readuceți înregistrarea la o stare anterioară."
+    },
+    "overdue": {
+      "fail": "Încă {status}, deși termenul era {date}.",
+      "suggestion": "Finalizați sau reprogramați, ori închideți cu un motiv."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Rezultatul este {result}, dar {count} puncte din lista de verificare au eșuat.",
+      "suggestion": "Corectați rezultatul sau revizuiți punctele eșuate."
+    }
   }
 }

@@ -14,3 +14,6 @@ async def on_startup() -> None:
 
     register_ncr_permissions()
     register_subscribers()
+    from app.modules.ncr.validators import register_ncr_validation_rules
+
+    register_ncr_validation_rules()

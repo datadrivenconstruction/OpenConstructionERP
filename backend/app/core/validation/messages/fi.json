@@ -1737,5 +1737,19 @@
       "fail": "Päivämäärät {earlier} ja {later} ovat väärässä järjestyksessä tai jakson ulkopuolella.",
       "suggestion": "Korjaa päivämäärät niin, että aiempi tulee ensin ja jokainen merkintä on jaksolla."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Tila on {state}, mutta {field} puuttuu.",
+      "suggestion": "Täytä puuttuva kenttä tai palauta tietue aiempaan tilaan."
+    },
+    "overdue": {
+      "fail": "Edelleen {status}, vaikka määräpäivä oli {date}.",
+      "suggestion": "Viimeistele tai aikatauluta uudelleen tai sulje perustelun kanssa."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa epäonnistui.",
+      "suggestion": "Korjaa tulos tai tarkista epäonnistuneet kohdat."
+    }
   }
 }

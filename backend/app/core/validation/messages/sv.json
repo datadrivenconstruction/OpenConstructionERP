@@ -1737,5 +1737,19 @@
       "fail": "Datumen {earlier} och {later} är i fel ordning eller utanför perioden.",
       "suggestion": "Rätta datumen så att det tidigare kommer först och varje post ligger inom perioden."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status är {state} men {field} saknas.",
+      "suggestion": "Fyll i det saknade fältet eller flytta tillbaka posten till en tidigare status."
+    },
+    "overdue": {
+      "fail": "Fortfarande {status}, trots att förfallodatumet var {date}.",
+      "suggestion": "Slutför eller planera om, eller stäng med en orsak."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Resultatet är {result}, men {count} checklistpunkter misslyckades.",
+      "suggestion": "Rätta resultatet eller granska de misslyckade punkterna."
+    }
   }
 }

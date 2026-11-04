@@ -1737,5 +1737,19 @@
       "fail": "Daty {earlier} i {later} są w złej kolejności lub poza okresem.",
       "suggestion": "Popraw daty tak, aby wcześniejsza była pierwsza, a każdy wpis mieścił się w okresie."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Status to {state}, ale brakuje pola {field}.",
+      "suggestion": "Uzupełnij brakujące pole lub cofnij rekord do wcześniejszego statusu."
+    },
+    "overdue": {
+      "fail": "Nadal {status}, choć termin minął {date}.",
+      "suggestion": "Zakończ lub zmień termin albo zamknij z podaniem powodu."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Wynik to {result}, ale {count} pozycji listy kontrolnej nie przeszło.",
+      "suggestion": "Popraw wynik lub sprawdź niezaliczone pozycje."
+    }
   }
 }

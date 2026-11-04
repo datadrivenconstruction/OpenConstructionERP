@@ -1737,5 +1737,19 @@
       "fail": "Le date {earlier} e {later} sono in ordine errato o fuori dal periodo.",
       "suggestion": "Corregga le date in modo che la prima venga per prima e ogni voce rientri nel periodo."
     }
+  },
+  "quality": {
+    "field_required_for_state": {
+      "fail": "Lo stato è {state} ma manca {field}.",
+      "suggestion": "Compili il campo mancante o riporti il record a uno stato precedente."
+    },
+    "overdue": {
+      "fail": "Ancora {status}, benché la scadenza fosse il {date}.",
+      "suggestion": "Completarlo o riprogrammarlo, oppure chiuderlo indicando il motivo."
+    },
+    "result_contradicts_checklist": {
+      "fail": "Il risultato è {result}, ma {count} voci della checklist non sono superate.",
+      "suggestion": "Correggere il risultato o rivedere le voci non superate."
+    }
   }
 }
