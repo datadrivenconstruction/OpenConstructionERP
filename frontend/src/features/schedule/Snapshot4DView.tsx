@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { CalendarClock, Box, Layers, Info } from 'lucide-react';
 import { formatCurrency } from '@/shared/lib/money';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { Card, Badge, SkeletonText, RecoveryCard, ViewInBIMButton } from '@/shared/ui';
 import { fetchBIMModels } from '@/features/bim/api';
 import { scheduleApi } from './api';
@@ -239,10 +240,10 @@ export function Snapshot4DView({
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge variant={cost.spi != null && cost.spi < 1 ? 'warning' : 'neutral'} size="sm">
-              SPI {cost.spi != null ? cost.spi.toFixed(2) : '-'}
+              SPI {cost.spi != null ? fmtNumber(cost.spi, 2) : '-'}
             </Badge>
             <Badge variant={cost.cpi != null && cost.cpi < 1 ? 'warning' : 'neutral'} size="sm">
-              CPI {cost.cpi != null ? cost.cpi.toFixed(2) : '-'}
+              CPI {cost.cpi != null ? fmtNumber(cost.cpi, 2) : '-'}
             </Badge>
             <span className="text-2xs text-content-tertiary">
               {t('schedule.snapshot.cost_coverage', {
@@ -264,7 +265,7 @@ export function Snapshot4DView({
             )}
             <Link
               to={`/5d?date=${encodeURIComponent(asOf)}`}
-              className="ml-auto text-xs font-medium text-oe-blue hover:underline"
+              className="ms-auto text-xs font-medium text-oe-blue hover:underline"
             >
               {t('schedule.snapshot.cost_open_5d', { defaultValue: 'Open in 5D at this date' })}
             </Link>

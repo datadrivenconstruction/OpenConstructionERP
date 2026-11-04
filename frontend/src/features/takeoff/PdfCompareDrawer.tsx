@@ -586,6 +586,7 @@ function CarryAlignment({
     mutationFn: (map?: Record<number, number>) =>
       takeoffApi.previewCarryOver(projectId, fromId, toId, map),
   });
+  const previewError = previewMutation.isError ? getErrorMessage(previewMutation.error) : '';
   const preview = previewMutation.data;
   const counts = { high: 0, review: 0, remeasure: 0 } as Record<string, number>;
   for (const it of preview?.items ?? []) counts[it.band] = (counts[it.band] ?? 0) + 1;
@@ -611,18 +612,28 @@ function CarryAlignment({
         {previewMutation.isPending && <Loader2 size={14} className="animate-spin" />}
         {t('takeoff_compare.carry_match_pages', { defaultValue: 'Match pages' })}
       </button>
+      {previewError && (
+        <p role="alert" className="mt-2 text-[11px] text-semantic-error" data-testid="takeoff-carry-preview-error">
+          {previewError}
+        </p>
+      )}
+      {preview && preview.pages.length === 0 && (
+        <p className="mt-2 text-[11px] text-content-tertiary">
+          {t('takeoff_compare.carry_no_pages', { defaultValue: 'No pages could be matched between the two revisions.' })}
+        </p>
+      )}
       {preview && (
         <div className="mt-2" data-testid="takeoff-carry-preview-result">
           <table className="w-full text-[11px]">
             <thead>
-              <tr className="text-left text-content-tertiary">
+              <tr className="text-start text-content-tertiary">
                 <th className="py-1 font-medium">
                   {t('takeoff_compare.carry_page_old', { defaultValue: 'Old page' })}
                 </th>
                 <th className="py-1 font-medium">
                   {t('takeoff_compare.carry_page_new', { defaultValue: 'New page' })}
                 </th>
-                <th className="py-1 text-right font-medium">
+                <th className="py-1 text-end font-medium">
                   {t('takeoff_compare.carry_page_score', { defaultValue: 'Match' })}
                 </th>
               </tr>
@@ -652,8 +663,8 @@ function CarryAlignment({
                       ))}
                     </select>
                   </td>
-                  <td className="py-1 text-right tabular-nums text-content-secondary">
-                    {p.new == null ? '-' : `${Math.round(p.score * 100)}% (${p.method})`}
+                  <td className="py-1 text-end tabular-nums text-content-secondary" title={p.method}>
+                    {p.new == null ? '-' : `${Math.round(p.score * 100)}%`}
                   </td>
                 </tr>
               ))}
@@ -736,14 +747,14 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
                   </Badge>
                 )}
               </td>
-              <td className="py-1 text-right tabular-nums text-content-tertiary">
+              <td className="py-1 text-end tabular-nums text-content-tertiary">
                 {d.boq_quantity != null ? fmtFixed(Number(d.boq_quantity), 2) : '—'}
               </td>
-              <td className="py-1 text-right tabular-nums">{fmtFixed(d.old_quantity, 2)}</td>
-              <td className="py-1 text-right tabular-nums">{fmtFixed(d.new_quantity, 2)}</td>
+              <td className="py-1 text-end tabular-nums">{fmtFixed(d.old_quantity, 2)}</td>
+              <td className="py-1 text-end tabular-nums">{fmtFixed(d.new_quantity, 2)}</td>
               <td
                 className={clsx(
-                  'py-1 text-right tabular-nums font-semibold',
+                  'py-1 text-end tabular-nums font-semibold',
                   d.delta_quantity > 0
                     ? 'text-amber-600'
                     : d.delta_quantity < 0
