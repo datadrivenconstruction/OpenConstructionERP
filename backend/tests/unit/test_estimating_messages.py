@@ -47,3 +47,26 @@ def test_uzbek_uses_the_modifier_apostrophe() -> None:
     assert "ʻ" in text
     assert "o'" not in text
     assert "g'" not in text
+
+
+#: The parameters each rule passes, so a message filed under the wrong key is caught.
+PARAMS = {
+    "mass_basis_needs_mass": {"basis"},
+    "mass_needs_basis": {"mass"},
+    "geometry_too_few_points": {"type", "count", "needed"},
+    "link_needs_confirmed": {"status"},
+    "scale_missing": {"type"},
+    "unit_mismatch": {"type", "unit"},
+    "count_not_whole": {"value"},
+    "scale_unusual": {"scale"},
+    "scale_uncalibrated": set(),
+    "accuracy_band_invalid": {"low", "high"},
+    "price_date_stale": {"date"},
+}
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_message_placeholders_match_the_rule_params(locale: str) -> None:
+    section = _section(locale)
+    for key, params in PARAMS.items():
+        assert set(re.findall(r"\{(\w+)\}", section[key]["fail"])) <= params, (locale, key)

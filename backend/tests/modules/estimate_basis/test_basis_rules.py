@@ -49,7 +49,7 @@ CASES = [
     (BasisAccuracyBandRule, _b(), _b(accuracy_low_pct="10")),
     (BasisAccuracyBandRule, _b(), _b(accuracy_high_pct="-5")),
     (BasisBudgetTargetRule, _b(), _b(budget_target={"type": "budget", "amount": "0"})),
-    (BasisBudgetTargetRule, _b(), _b(budget_target={"type": "budget"})),
+    (BasisBudgetTargetRule, _b(), _b(budget_target={"type": "budget", "amount": "abc"})),
     (BasisFinalRationaleRule, _b(), _b(contingency_rationale=" ")),
     (BasisPricingDateCurrentRule, _b(), _b(pricing_date="2025-01-15")),
     (BasisPricingDateCurrentRule, _b(), _b(pricing_date=None)),
@@ -69,6 +69,8 @@ async def test_draft_needs_none_of_the_sign_off_fields() -> None:
     draft = _b(status="draft", estimate_class=None, market_conditions="", pricing_date=None, budget_target=None)
     for rule in (BasisFinalNeedsClassRule, BasisFinalRationaleRule, BasisPricingDateCurrentRule, BasisBudgetTargetRule):
         assert (await _run(rule(), draft))[0].passed
+    noted = _b(status="draft", budget_target={"type": "budget", "amount": "", "notes": "to be agreed"})
+    assert (await _run(BasisBudgetTargetRule(), noted))[0].passed
 
 
 async def test_message_follows_locale() -> None:
