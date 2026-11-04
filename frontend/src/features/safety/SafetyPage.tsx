@@ -684,6 +684,13 @@ function HowSafetyWork() {
   );
 }
 
+// Matches the API bound; a larger value would be rejected with a 422.
+export const DAYS_LOST_MAX = 36500;
+export function clampDaysLost(raw: string): number {
+  const n = Math.trunc(Number(raw));
+  return Number.isFinite(n) && n > 0 ? Math.min(n, DAYS_LOST_MAX) : 0;
+}
+
 export function SafetyPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -1541,8 +1548,9 @@ function IncidentsTab({
                   id="incident-days-lost"
                   type="number"
                   min="0"
+                  max={DAYS_LOST_MAX}
                   value={incidentForm.days_lost || ''}
-                  onChange={(e) => setIncidentForm((f) => ({ ...f, days_lost: Number(e.target.value) || 0 }))}
+                  onChange={(e) => setIncidentForm((f) => ({ ...f, days_lost: clampDaysLost(e.target.value) }))}
                   className={inputCls + ' max-w-[120px]'}
                   placeholder="0"
                 />
