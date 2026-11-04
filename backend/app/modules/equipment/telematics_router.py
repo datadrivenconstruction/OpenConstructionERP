@@ -10,6 +10,7 @@ POST /telematics/import/aemp/           - ISO 15143-3 (AEMP 2.0) Fleet snapshot,
 POST /telematics/import/csv/            - CSV upload
 GET  /telematics/utilisation/           - Worked / idle / off hours per machine
 POST /telematics/allocate/              - Book machine-days to projects and cost codes
+GET  /telematics/cost-board/            - Owning vs operating cost per machine, rent-or-return
 GET  /telematics/validation/            - Rule results (equipment_telematics)
 """
 
@@ -25,6 +26,8 @@ from pydantic import BaseModel, Field
 
 from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.equipment.cost_board import DEFAULT_DAY_HOURS, DEFAULT_MIN_UTILISATION_PCT
+from app.modules.equipment.cost_board_service import CostBoardService
 from app.modules.equipment.telematics import TelematicsParseError, TelematicsSample, parse_aemp, parse_csv
 from app.modules.equipment.telematics_service import DEFAULT_IDLE_THRESHOLD, TelematicsService
 from app.modules.equipment.validators import run_rules
@@ -208,6 +211,24 @@ async def utilisation(
         await verify_project_access(project_id, user_id, session)
     start, end = _window(date_from, date_to)
     return await TelematicsService(session).utilisation(start, end, project_id)
+
+
+@router.get("/cost-board/")
+async def cost_board(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    day_hours: Decimal = Query(default=DEFAULT_DAY_HOURS, gt=0, le=24),
+    min_utilisation_pct: Decimal = Query(default=DEFAULT_MIN_UTILISATION_PCT, ge=0, le=100),
+    _perm: None = Depends(RequirePermission("equipment.read")),
+) -> dict[str, Any]:
+    start, end = _window(date_from, date_to)
+    if end < start:
+        raise HTTPException(status_code=422, detail="date_to_before_date_from")
+    board = await CostBoardService(session).board(start, end, day_hours, min_utilisation_pct)
+    results = await run_rules({"machines": board["machines"]})
+    return {**board, "results": results, "failed": sum(1 for r in results if not r["passed"])}
 
 
 @router.post("/allocate/")

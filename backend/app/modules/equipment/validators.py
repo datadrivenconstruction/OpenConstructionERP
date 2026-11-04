@@ -141,11 +141,50 @@ class IdleBelowThreshold(_MachineRule):
         )
 
 
+class OwningCostKnown(_MachineRule):
+    """A machine on the cost board has an owning cost basis, otherwise its cost reads as zero."""
+
+    key = "owning_cost_known"
+    rule_id = "equipment_telematics.owning_cost_known"
+    name = "Owning Cost Known"
+    description = "The machine has a purchase value with a useful life, or a monthly holding cost or rent."
+    text = "{equipment} has no purchase value with useful life and no holding cost, so its owning cost shows as zero"
+
+    def check(self, machine: dict[str, Any], context: ValidationContext) -> RuleResult | None:
+        known = machine.get("ownership_cost_known")
+        if known is None:
+            return None
+        return self._result(machine, bool(known))
+
+
+class CostPerHourWithinMarket(_MachineRule):
+    """Total cost per used hour stays at or below the market hire rate per hour."""
+
+    key = "cost_within_market"
+    rule_id = "equipment_telematics.cost_within_market"
+    name = "Cost Per Used Hour Within Market"
+    description = "Owning plus operating cost per used hour does not exceed the market hire rate per hour."
+    text = "{equipment} costs {cost_per_hour} per used hour against a market hire rate of {market_per_hour}"
+
+    def check(self, machine: dict[str, Any], context: ValidationContext) -> RuleResult | None:
+        cost, market = machine.get("cost_per_used_hour"), machine.get("market_hour_rate")
+        if cost is None or market is None or machine.get("currency_mismatch"):
+            return None
+        return self._result(
+            machine,
+            Decimal(str(cost)) <= Decimal(str(market)),
+            cost_per_hour=cost,
+            market_per_hour=market,
+        )
+
+
 EQUIPMENT_RULES: tuple[type[_MachineRule], ...] = (
     MachineOnSiteHasAllocation,
     MaintenanceNotOverdue,
     MachineInsideGeofence,
     IdleBelowThreshold,
+    OwningCostKnown,
+    CostPerHourWithinMarket,
 )
 
 

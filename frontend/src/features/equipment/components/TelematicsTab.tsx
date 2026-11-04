@@ -20,6 +20,7 @@ import {
   type AllocateResult,
 } from '../telematicsApi';
 import { barWidth, hoursShares, idleTone, lastDaysWindow } from '../telematicsFormat';
+import { CostBoard } from './CostBoard';
 import { TelematicsImport } from './TelematicsImport';
 import { TelematicsDevices } from './TelematicsDevices';
 
@@ -175,6 +176,8 @@ export function TelematicsTab() {
           )}
         </CardContent>
       </Card>
+
+      <CostBoard />
 
       <TelematicsImport />
       <TelematicsDevices />

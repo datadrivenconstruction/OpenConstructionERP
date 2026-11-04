@@ -66,6 +66,8 @@ export interface Equipment {
   depreciation_method: string;
   useful_life_years?: number | null;
   residual_value?: number | string | null;
+  holding_cost_per_month?: number | string | null;
+  market_hire_rate_per_day?: number | string | null;
   currency: string;
   notes?: string | null;
   /** Certificate types an operator needs for this machine. */
@@ -93,6 +95,8 @@ export interface CreateEquipmentPayload {
   purchase_value?: number;
   useful_life_years?: number;
   residual_value?: number;
+  holding_cost_per_month?: number;
+  market_hire_rate_per_day?: number;
   currency?: string;
   notes?: string;
   required_certificates?: string[];
