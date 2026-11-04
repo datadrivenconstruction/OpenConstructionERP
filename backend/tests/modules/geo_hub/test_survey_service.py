@@ -250,7 +250,7 @@ async def test_patch_revalidates_the_date(http_client, tenant_a, survey) -> None
 
 
 @pytest.mark.asyncio
-async def test_other_tenants_get_404_everywhere(http_client, tenant_a, tenant_b, survey) -> None:
+async def test_other_tenants_get_404_everywhere(http_client, tenant_a, tenant_b, tenant_manager, survey) -> None:
     hb = tenant_b["headers"]
     sid = survey["id"]
     assert (await http_client.get(f"{BASE}/{sid}", headers=hb)).status_code == 404
@@ -260,7 +260,9 @@ async def test_other_tenants_get_404_everywhere(http_client, tenant_a, tenant_b,
     assert (
         await http_client.put(f"{BASE}/{sid}/observations/{uuid.uuid4()}", json={"observed_pct": "1"}, headers=hb)
     ).status_code == 404
-    assert (await http_client.delete(f"{BASE}/{sid}", headers=hb)).status_code == 404
+    # Delete is a manager permission: the editor is stopped at the gate, a manager of another tenant at ownership.
+    assert (await http_client.delete(f"{BASE}/{sid}", headers=hb)).status_code == 403
+    assert (await http_client.delete(f"{BASE}/{sid}", headers=tenant_manager["headers"])).status_code == 404
     assert (await _upload(http_client, hb, tenant_a["project_id"])).status_code == 404
     scan_id = await _seed_scan(tenant_a["project_id"], None)
     assert (await http_client.post(f"{BASE}/from-scan", json={"scan_id": scan_id}, headers=hb)).status_code == 404

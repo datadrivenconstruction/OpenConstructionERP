@@ -24,14 +24,14 @@ from tests.modules.bi_feed.conftest import (
 from app.modules.bi_feed import service as feed_service
 
 
-def _ids(n: int) -> list[uuid.UUID]:
-    return [uuid.UUID(int=0x1000 + i) for i in range(n)]
+def _ids(n: int, base: int = 0x1000) -> list[uuid.UUID]:
+    return [uuid.UUID(int=base + i) for i in range(n)]
 
 
-async def _seed(session, owner, *, positions: int = 1, currency: str = "EUR"):
+async def _seed(session, owner, *, positions: int = 1, currency: str = "EUR", id_base: int = 0x1000):
     project = await make_project(session, owner.id, currency=currency)
     boq = await make_boq(session, project.id)
-    for i, pid in enumerate(_ids(positions)):
+    for i, pid in enumerate(_ids(positions, id_base)):
         await make_position(session, boq.id, ordinal=f"{i + 1:02d}", position_id=pid)
     return project, boq
 
@@ -107,7 +107,7 @@ async def test_json_preview_lists_columns_and_rows(session) -> None:
 async def test_feed_list_counts_only_what_the_caller_can_read(session) -> None:
     a, b = await make_user(session), await make_user(session)
     await _seed(session, a, positions=2)
-    await _seed(session, b, positions=5)
+    await _seed(session, b, positions=5, id_base=0x3000)
     async with http_client(build_app(session)) as client:
         response = await client.get(f"{PREFIX}/feeds", headers={"X-Test-User": str(a.id)})
     counts = {f["id"]: f["row_count"] for f in response.json()}
@@ -122,7 +122,7 @@ async def test_feed_list_counts_only_what_the_caller_can_read(session) -> None:
 async def test_a_key_never_sees_another_owners_rows(session) -> None:
     a, b = await make_user(session), await make_user(session)
     project_a, _ = await _seed(session, a, positions=2)
-    project_b, _ = await _seed(session, b, positions=3)
+    project_b, _ = await _seed(session, b, positions=3, id_base=0x3000)
     await make_invoice(session, project_b.id)
     key_a = await make_key(session, a.id)
     async with http_client(build_app(session)) as client:

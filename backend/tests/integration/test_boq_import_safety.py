@@ -337,7 +337,7 @@ async def test_upload_does_not_block_event_loop(
 
     from app.modules.boq import router as boq_router
 
-    src = inspect.getsource(boq_router.import_boq_excel)
+    src = inspect.getsource(boq_router.import_boq_excel) + inspect.getsource(boq_router._read_excel_upload)
     assert "asyncio.to_thread" in src, (
         "import_boq_excel must call the parse helpers via "
         "asyncio.to_thread (BUG-PERF01) so a 10K-row import does not "
