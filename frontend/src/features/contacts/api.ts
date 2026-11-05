@@ -45,6 +45,7 @@ export interface Contact {
   website: string | null;
   country_code: string | null;
   address: Record<string, unknown> | null;
+  billing_address?: Record<string, unknown> | null;
   prequalification_status: PrequalificationStatus | null;
   payment_terms_days: string | null;
   notes: string | null;
@@ -146,6 +147,7 @@ export interface CreateContactPayload {
   website?: string;
   country_code?: string;
   address?: Record<string, unknown>;
+  billing_address?: Record<string, unknown>;
   payment_terms_days?: string;
   prequalification_status?: PrequalificationStatus;
   notes?: string;
@@ -179,6 +181,7 @@ export interface UpdateContactPayload {
   website?: string | null;
   country_code?: string | null;
   address?: Record<string, unknown> | null;
+  billing_address?: Record<string, unknown> | null;
   payment_terms_days?: string | null;
   prequalification_status?: PrequalificationStatus;
   notes?: string | null;

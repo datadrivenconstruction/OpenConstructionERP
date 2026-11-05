@@ -512,6 +512,23 @@ class OfferService:
         await self._reprice(offer)
         return offer
 
+    async def reset_text(self, offer_id: uuid.UUID, kind: str) -> Offer:
+        """Drop the project override for ``kind`` and put the company text back on this offer."""
+        offer = await self.get(offer_id)
+        self._assert_editable(offer)
+        if kind not in pack_mod.TEXT_KINDS:
+            raise HTTPException(status_code=422, detail="Unknown text kind")
+        lang = (offer.locale or "en").split("-")[0].lower()
+        for block in await self.repo.text_blocks(project_id=offer.project_id, kind=kind, scope="project"):
+            if block.language == lang:
+                await self.repo.delete_text_block(block)
+        project = await self._project(offer.project_id)
+        pack = pack_mod.pack_for(project.country_code, project.subdivision_code)
+        picked = (await self._pick_texts(offer.project_id, pack, offer.locale))[kind]
+        offer.texts = {**(offer.texts or {}), kind: picked}
+        await self._reprice(offer)
+        return offer
+
     async def _save_project_text(self, offer: Offer, kind: str, body: str) -> None:
         lang = (offer.locale or "en").split("-")[0].lower()
         existing = [
