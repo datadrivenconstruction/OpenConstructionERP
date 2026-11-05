@@ -15,9 +15,9 @@ from typing import Any
 from fastapi import HTTPException, status
 
 from app.core.validation.engine import RuleResult, Severity, ValidationReport, rule_registry, validation_engine
+from app.core.validation.failure import finding, introduced_errors, raise_rule_failure
 from app.core.validation.messages import translate
 from app.core.validation.money_rules import MoneyRule, locale_of
-from app.core.validation.quality_rules import rule_errors_detail
 
 _QUALITY_KEYS = frozenset({"field_required_for_state", "overdue"})
 _MONEY_KEYS = frozenset(
@@ -54,16 +54,6 @@ class EstimatingRule(MoneyRule):
             suggestion=translate(f"{section_name}.{key}.suggestion", locale=locale),
             details={k: str(v) for k, v in params.items()},
         )
-
-
-def _finding_key(result: Any) -> tuple[Any, ...]:
-    """Identity of a finding: rule, record and offending values, so a new bad value is never read as the old one."""
-    return (
-        result.rule_id,
-        result.element_ref,
-        result.message,
-        tuple(sorted((str(k), str(v)) for k, v in (result.details or {}).items())),
-    )
 
 
 async def gate_rules(
@@ -108,26 +98,18 @@ async def gate_rules(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"The '{rule_set}' validation rules are not loaded on this deployment.",
         )
-    blocking = list(report.errors)
-    if blocking and before is not None:
-        legacy = {_finding_key(r) for r in (await _run(before)).errors}
-        blocking = [r for r in blocking if _finding_key(r) not in legacy]
+    blocking = await introduced_errors(report, (lambda: _run(before)) if before is not None else None)
     if blocking and warn_only:
         return report
-    if blocking:
-        detail = rule_errors_detail(
-            report,
-            f"This record cannot be saved ({operation}) until the errors listed below are corrected.",
-            blocking[:50],
-        )
-        detail["error"] = f"{rule_set}_rules_failed"
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detail)
+    raise_rule_failure(
+        report,
+        blocking[:50],
+        error=f"{rule_set}_rules_failed",
+        message=f"This record cannot be saved ({operation}) until the errors listed below are corrected.",
+    )
     return report
 
 
 def all_findings(report: ValidationReport) -> list[dict[str, Any]]:
     """Every finding a ``warn_only`` gate saw (errors included), in the response shape of a warning."""
-    return [
-        {"rule_id": r.rule_id, "message": r.message, "element_ref": r.element_ref, "suggestion": r.suggestion}
-        for r in [*report.errors, *report.warnings]
-    ]
+    return [finding(r) for r in [*report.errors, *report.warnings]]
