@@ -3,9 +3,11 @@
     cd backend
     python -m tests.bench.takeoff_vision.run_bench --split train
     python -m tests.bench.takeoff_vision.run_bench --split holdout --pipeline current
+    python -m tests.bench.takeoff_vision.run_bench --split real --belt-file old_plan_read.py
 
 Splits are seed ranges of the plan generator (``plans.TRAIN_SEEDS`` /
-``HOLDOUT_SEEDS``); tune on ``train`` only. ``--no-ledger`` skips the append.
+``HOLDOUT_SEEDS``); tune on ``train`` only. ``real`` runs shipped sample sheets
+(``real_cases``); ``--belt-file`` adds a run of an older ``plan_read.py`` beside it. ``--no-ledger`` skips the append.
 """
 
 from __future__ import annotations
@@ -27,7 +29,17 @@ from .plans import FAST_SEEDS, HOLDOUT_SEEDS, TRAIN_SEEDS, Plan, generate_plan
 from .score import aggregate, baseline_pipeline, catch_injections, current_pipeline, score_plan
 
 LEDGER = Path(__file__).with_name("ledger.jsonl")
-SPLITS = {"train": TRAIN_SEEDS, "holdout": HOLDOUT_SEEDS, "fast": FAST_SEEDS}
+SPLITS = {"train": TRAIN_SEEDS, "holdout": HOLDOUT_SEEDS, "fast": FAST_SEEDS, "real": []}
+
+
+def _load_belt(path: str) -> Any:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("plan_read_compared", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    return mod
 
 
 @cache
@@ -88,17 +100,25 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--pipeline", choices=["baseline", "current", "both"], default="both")
     ap.add_argument("--no-ledger", action="store_true")
     ap.add_argument("--note", default="")
+    ap.add_argument("--belt-file", help="real split: also score this older plan_read.py")
     args = ap.parse_args(argv)
     seeds = SPLITS[args.split]
     t0 = time.monotonic()
-    pipelines = ["baseline", "current"] if args.pipeline == "both" else [args.pipeline]
-    results = {p: evaluate(seeds, p) for p in pipelines}
+    if args.split == "real":
+        from . import real_cases
+
+        results = {"current": real_cases.evaluate()}
+        if args.belt_file:
+            results = {"compared": real_cases.evaluate(_load_belt(args.belt_file)), **results}
+    else:
+        pipelines = ["baseline", "current"] if args.pipeline == "both" else [args.pipeline]
+        results = {p: evaluate(seeds, p) for p in pipelines}
     line = {
         "ts": _dt.datetime.now(_dt.UTC).isoformat(timespec="seconds"),
         "bench": "plan_read",
         "git": _git_sha(),
         "split": args.split,
-        "seeds": [seeds[0], seeds[-1]],
+        "seeds": [seeds[0], seeds[-1]] if seeds else None,
         "model": "mock",
         "note": args.note,
         "seconds": round(time.monotonic() - t0, 1),
