@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import contextlib
 import functools
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from app.core.i18n import get_locale
@@ -41,6 +41,15 @@ def today_of(context: ValidationContext) -> date:
     """The reference day: ``metadata['today']`` when given (tests, back-dated runs), else the UTC day."""
     given = parse_day((context.metadata or {}).get("today"))
     return given or datetime.now(UTC).date()
+
+
+def latest_local_day(context: ValidationContext) -> date:
+    """The latest calendar day that can be "today" anywhere on earth (UTC+14), for not-in-the-future checks.
+
+    A site east of UTC dates its records with a local day that is already tomorrow in UTC; judging
+    against the UTC day alone would refuse that site's same-day record.
+    """
+    return today_of(context) + timedelta(days=1)
 
 
 class QualityRule(MoneyRule):
@@ -191,11 +200,13 @@ async def gate_record(
     error_code: str,
     target_id: str = "",
     warnings_only: bool = False,
+    whole: bool = False,
 ) -> list[dict[str, Any]]:
     """Gate one record write: the rules judge ``record`` with ``changes`` applied; returns the warnings.
 
     A write that edits a stored record passes its ``target_id``; the stored fields are then the
-    ``before`` state, so only the errors this edit introduces block it.
+    ``before`` state, so only the errors this edit introduces block it. ``whole`` judges the record in
+    full instead, for a final step (closing) that must not carry an error forward from a legacy state.
     """
     report = await gate_keyed_rule_set(
         record_snapshot(record, names, changes),
@@ -206,7 +217,7 @@ async def gate_record(
         operation=operation,
         subject=key.replace("_", " "),
         error_code=error_code,
-        before=record_snapshot(record, names) if target_id else None,
+        before=record_snapshot(record, names) if target_id and not whole else None,
         project_id=str(project_id) if project_id else None,
         warnings_only=warnings_only,
     )

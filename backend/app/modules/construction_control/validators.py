@@ -20,7 +20,7 @@ from typing import Any
 
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
 from app.core.validation.money_rules import MoneyRule, blank, section, to_dec
-from app.core.validation.quality_rules import parse_day, today_of
+from app.core.validation.quality_rules import latest_local_day, parse_day, today_of
 
 CONSTRUCTION_CONTROL_RULE_SET = "construction_control"
 
@@ -113,7 +113,7 @@ class EvidenceDatesRule(_ControlRule):
     description = "performed, sampled, tested and survey dates not in the future; tested_at not before sampled_at"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        today = today_of(context)
+        today = latest_local_day(context)
         out: list[RuleResult] = []
         for key, fields in _PAST_DATES:
             rec = section(context, key)
