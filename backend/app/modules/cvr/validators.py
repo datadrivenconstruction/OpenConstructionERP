@@ -21,6 +21,9 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from app.core.validation.engine import RuleResult, ValidationContext, rule_registry
+from app.core.validation.money_rules import MoneyRule, section
+
 
 class CvrValidationError(ValueError):
     """Raised when a hard CVR validation rule is violated (single currency)."""
@@ -65,3 +68,27 @@ def forecast_flags(
     if forecast_value < value_to_date:
         flags.append("forecast_value_below_value_to_date")
     return flags
+
+
+CVR_RULE_SET = "cvr"
+
+
+class CvrCurrencyConsistentRule(MoneyRule):
+    """A line states no currency of its own, or the report's currency."""
+
+    rule_id = "cvr.currency_consistent"
+    name = "CVR line currency matches the report"
+    description = "Every line of a CVR report shares the report currency; a blank line currency inherits it"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        report = normalise_currency(section(context, "report").get("currency"))
+        line = normalise_currency(section(context, "line").get("currency"))
+        if report and line and report != line:
+            ref = str(section(context, "line").get("id", ""))
+            return [self.fail(context, "currency_consistent", ref=ref, currencies=", ".join(sorted({report, line})))]
+        return [self.ok()]
+
+
+def register_cvr_validation_rules() -> None:
+    """Register the CVR rule set (idempotent)."""
+    rule_registry.register(CvrCurrencyConsistentRule(), [CVR_RULE_SET])
