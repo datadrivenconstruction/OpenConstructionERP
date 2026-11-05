@@ -1279,7 +1279,7 @@
         "name": "oe_accounting_sync",
         "version": "1.0.0",
         "display_name": "Accounting Sync",
-        "description": "Connects the platform to the company's accounting: pushes receivable invoices and interim payment certificates, subcontractor and supplier bills and guarantee fees with contacts and a project dimension to Xero or QuickBooks Online and pulls payments back, or exports DATEV EXTF, a generic journal (CSV, Excel) or OECD SAF-T. Account and tax-code mapping per company from country templates, idempotent pushes with a sync log, retry and validation.",
+        "description": "Connects the platform to the company's accounting: pushes receivable invoices and interim payment certificates, subcontractor and supplier bills and guarantee fees with contacts and a project dimension to Xero or QBO and pulls payments back, or exports DATEV EXTF, a generic journal (CSV, Excel) or OECD SAF-T. Account and tax-code mapping per company from country templates, idempotent pushes with a sync log, retry and validation.",
         "author": "OpenConstructionERP Core Team",
         "category": "business",
         "depends": [
@@ -288914,7 +288914,8 @@
         "scale_detect.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "text_analyze.py"
       ],
       "manifest": {
         "name": "oe_takeoff",
@@ -314966,7 +314967,7 @@
     "total_relationships": 261,
     "total_routes": 5166,
     "total_schemas": 4655,
-    "total_python_files": 3315,
+    "total_python_files": 3316,
     "frontend_features": 236,
     "frontend_ts_files": 4096,
     "frontend_backend_mapped": 212
