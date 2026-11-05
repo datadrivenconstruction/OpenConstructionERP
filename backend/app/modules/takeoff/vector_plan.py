@@ -12,7 +12,8 @@ drawn in CAD measures to the CAD geometry rather than to the raster.
 Steps:
 
 1. Parse ``PdfPage.drawings()`` into straight strokes, curves and fills.
-   Dashed strokes (grid axes, hidden lines) and light strokes are not walls.
+   Dashed strokes (grid axes, hidden lines) and light strokes are not walls;
+   hatching, even runs of many parallels, goes before anything is measured on it.
 2. Find the dominant drawing angle and work in a frame rotated by it.
 3. Pair parallel strokes: the length-weighted distances between nearest
    overlapping parallel strokes peak at the wall thicknesses of the sheet; a
@@ -30,7 +31,10 @@ origin, the same space ``drawings()`` uses.
 
 from __future__ import annotations
 
+import bisect
+import heapq
 import math
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -44,6 +48,37 @@ Point = tuple[float, float]
 _PX_BUDGET = 2_500_000  # wall-mask pixels; keeps the peak near 60 MB on any sheet
 _MAX_PX_PER_PT = 3.0
 _AXIS_TOL_DEG = 1.0
+# Widest ordinary opening in a wall: a double door or a strip window. Without a
+# scale it follows the wall thickness, taking a 0.25 m wall.
+_MAX_OPENING_M = 3.0
+_MAX_OPENING_WALLS = 12.0
+_MIN_PASSAGE_M = 0.2
+# A stroke faces few others across a wall. Beyond this many it is in a pattern or
+# lettering, and the nearest of them are all a wall could be.
+_MAX_PARTNERS = 64
+# Single-line drawings: strokes shorter than this do not enclose anything a person stands in.
+_LINE_WALL_MIN_M = 0.6
+_LINE_WALL_MIN_PT = 14.0
+_LINE_WALL_MIN_STROKES = 60
+# What a floor plan's rooms do and a page of windows or table cells does not.
+_MIN_COVERAGE = 0.3
+_MIN_JOINED = 0.5
+_MAX_CROSSINGS = 0.5
+
+
+class TimeBudgetExceeded(Exception):
+    """A page took longer to read than the caller allowed."""
+
+
+class Budget:
+    """A wall-clock allowance for reading one page; ``None`` seconds never runs out."""
+
+    def __init__(self, seconds: float | None = None) -> None:
+        self.deadline = time.perf_counter() + seconds if seconds else math.inf
+
+    def check(self) -> None:
+        if time.perf_counter() > self.deadline:
+            raise TimeBudgetExceeded
 
 
 @dataclass
@@ -76,6 +111,7 @@ class PlanResult:
     counts: list[dict[str, Any]] = field(default_factory=list)
     wall_modes_pt: list[float] = field(default_factory=list)
     found_structure: bool = False
+    out_of_time: bool = False  # rooms and walls may be there, later stages were skipped
 
 
 # ── parsing ──────────────────────────────────────────────────────────────────
@@ -131,14 +167,100 @@ def _bezier(p0: Point, p1: Point, p2: Point, p3: Point, n: int = 8) -> list[Poin
     return out
 
 
-def parse(drawings: list[Any]) -> tuple[list[Seg], list[Fill], list[Curve]]:
-    """Straight strokes, flattened curves and fill polygons of a page."""
+def _in_poly(p: Point, poly: list[Point]) -> bool:
+    x, y = p
+    hit = False
+    x1, y1 = poly[-1]
+    for x2, y2 in poly:
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            hit = not hit
+        x1, y1 = x2, y2
+    return hit
+
+
+def _clip_line(a: Point, b: Point, poly: list[Point]) -> list[tuple[Point, Point]]:
+    """The stretches of a straight stroke that lie inside a clip polygon."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    cuts = [0.0, 1.0]
+    x1, y1 = poly[-1]
+    for x2, y2 in poly:
+        ex, ey = x2 - x1, y2 - y1
+        den = dx * ey - dy * ex
+        if abs(den) > 1e-12:
+            t = ((x1 - a[0]) * ey - (y1 - a[1]) * ex) / den
+            u = ((x1 - a[0]) * dy - (y1 - a[1]) * dx) / den
+            if 0.0 < t < 1.0 and -1e-9 <= u <= 1.0 + 1e-9:
+                cuts.append(t)
+        x1, y1 = x2, y2
+    cuts.sort()
+    out: list[tuple[Point, Point]] = []
+    for t0, t1 in zip(cuts, cuts[1:], strict=False):
+        if t1 - t0 < 1e-6:
+            continue
+        tm = 0.5 * (t0 + t1)
+        if _in_poly((a[0] + tm * dx, a[1] + tm * dy), poly):
+            p, q = (a[0] + t0 * dx, a[1] + t0 * dy), (a[0] + t1 * dx, a[1] + t1 * dy)
+            if out and math.dist(out[-1][1], p) < 1e-6:
+                out[-1] = (out[-1][0], q)
+            else:
+                out.append((p, q))
+    return out
+
+
+def _clip_seg(a: Point, b: Point, clips: list[list[Point]]) -> list[tuple[Point, Point]]:
+    parts = [(a, b)]
+    for poly in clips:
+        parts = [piece for p, q in parts for piece in _clip_line(p, q, poly)]
+    return parts
+
+
+def _clip_fill(pts: list[Point], clips: list[list[Point]]) -> list[Point] | None:
+    """A fill polygon cut by its clip (Sutherland-Hodgman); a concave clip keeps its bounding box."""
+    out = pts
+    for poly in clips:
+        x0, y0, x1, y1 = _bbox(poly)
+        bx0, by0, bx1, by1 = _bbox(out)
+        if bx1 <= x0 or bx0 >= x1 or by1 <= y0 or by0 >= y1:
+            return None
+        if bx0 >= x0 and by0 >= y0 and bx1 <= x1 and by1 <= y1:
+            continue
+        for axis, lim, keep_low in ((0, x0, False), (0, x1, True), (1, y0, False), (1, y1, True)):
+            kept: list[Point] = []
+            prev = out[-1]
+            for cur in out:
+                pin = prev[axis] <= lim if keep_low else prev[axis] >= lim
+                cin = cur[axis] <= lim if keep_low else cur[axis] >= lim
+                if pin != cin:
+                    t = (lim - prev[axis]) / (cur[axis] - prev[axis])
+                    kept.append((prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])))
+                if cin:
+                    kept.append(cur)
+                prev = cur
+            out = kept
+            if len(out) < 3:
+                return None
+    return out
+
+
+def parse(
+    drawings: list[Any], page_size: tuple[float, float] | None = None
+) -> tuple[list[Seg], list[Fill], list[Curve]]:
+    """Straight strokes, flattened curves and fill polygons of a page, as they show.
+
+    Clip paths are applied and anything off the page is dropped: what is clipped
+    away is not on the drawing, however much of the file it takes up.
+    """
     segs: list[Seg] = []
     fills: list[Fill] = []
     curves: list[Curve] = []
+    page = [(0.0, 0.0), (page_size[0], 0.0), (page_size[0], page_size[1]), (0.0, page_size[1])] if page_size else None
     for idx, path in enumerate(drawings or []):
         if not isinstance(path, dict):
             continue
+        clips: list[list[Point]] = list(path.get("clip") or [])
+        if page is not None:
+            clips.append(page)
+        n_segs, n_curves = len(segs), len(curves)
         items = path.get("items") or []
         typ = str(path.get("type") or "s")
         seq = int(path.get("seqno", idx) or idx)
@@ -183,9 +305,17 @@ def parse(drawings: list[Any]) -> tuple[list[Seg], list[Fill], list[Curve]]:
                     if stroked:
                         curves.append(Curve(flat, seq))
         flush()
+        if clips:
+            segs[n_segs:] = [Seg(p, q, sg.lw, sg.seq) for sg in segs[n_segs:] for p, q in _clip_seg(sg.a, sg.b, clips)]
+            curves[n_curves:] = [
+                cv_ for cv_ in curves[n_curves:] if all(_in_poly(cv_.pts[len(cv_.pts) // 2], poly) for poly in clips)
+            ]
         if filled:
             flum = _lum(path.get("fill"))
-            fills.extend(Fill(_open_ring(p), flum, seq) for p in polys)
+            for p in polys:
+                ring = _clip_fill(_open_ring(p), clips) if clips else _open_ring(p)
+                if ring:
+                    fills.append(Fill(ring, flum, seq))
     return segs, fills, curves
 
 
@@ -198,6 +328,89 @@ def _quad_points(obj: Any, op: str) -> list[Point] | None:
         return [p for p in pts if p is not None] if all(pts) else None
     except (AttributeError, TypeError, ValueError):
         return None
+
+
+# ── hatching ─────────────────────────────────────────────────────────────────
+
+# Runs of this many evenly spaced parallels are a pattern. A wall drawn in layers
+# has at most four or five faces, and stair flights lose nothing by going.
+_HATCH_MIN_RUN = 6
+# Pattern pitch on paper. Coarser is a floor grid or a row of party walls, told apart
+# from walls only by scale, so with a scale the limit follows building dimensions.
+_HATCH_MAX_PITCH_PT = 14.0
+_HATCH_MAX_PITCH_M = 0.45
+_HATCH_PITCH_TOL = 0.2
+
+
+def drop_hatching(segs: list[Seg], pt_per_m: float | None = None) -> list[Seg]:
+    """Strokes without the hatching: families of evenly spaced parallels, at any angle."""
+    bins: dict[int, list[int]] = {}
+    for i, sg in enumerate(segs):
+        dx, dy = sg.b[0] - sg.a[0], sg.b[1] - sg.a[1]
+        if dx * dx + dy * dy < 0.25:
+            continue
+        bins.setdefault(round(math.degrees(math.atan2(dy, dx)) % 180.0) % 180, []).append(i)
+    pitch_max = max(_HATCH_MAX_PITCH_PT, _HATCH_MAX_PITCH_M * pt_per_m) if pt_per_m else _HATCH_MAX_PITCH_PT
+    hatch: set[int] = set()
+    for key, members in bins.items():
+        if len(members) < _HATCH_MIN_RUN:
+            continue
+        for shift in (0.0, 1.0):  # a family sitting on a bin edge splits in two; nearby bins share it
+            pool = members + bins.get((key + 1) % 180, []) if shift else members
+            hatch.update(_hatch_runs(segs, pool, math.radians(key + 0.5 * shift), pitch_max))
+    if not hatch:
+        return segs
+    return [sg for i, sg in enumerate(segs) if i not in hatch]
+
+
+def _hatch_runs(segs: list[Seg], members: list[int], ang: float, pitch_max: float) -> list[int]:
+    ca, sa = math.cos(ang), math.sin(ang)
+    rows = []
+    for i in members:
+        (x1, y1), (x2, y2) = segs[i].a, segs[i].b
+        s1, s2 = x1 * ca + y1 * sa, x2 * ca + y2 * sa
+        rows.append((0.5 * ((-x1 * sa + y1 * ca) + (-x2 * sa + y2 * ca)), min(s1, s2), max(s1, s2), i))
+    rows.sort()
+    n = len(rows)
+    # successor: the nearest stroke further across that faces this one along the run
+    nxt = [-1] * n
+    gap = [0.0] * n
+    for a in range(n):
+        ca_, lo, hi, _i = rows[a]
+        slack = max(1.0, 0.5 * (hi - lo))
+        for b in range(a + 1, min(n, a + 40)):
+            cb, lo2, hi2, _j = rows[b]
+            d = cb - ca_
+            if d > pitch_max:
+                break
+            if d < 0.05 or min(hi, hi2) - max(lo, lo2) < -slack:
+                continue
+            nxt[a], gap[a] = b, d
+            break
+    # chains of steady gaps, walked from every stroke nobody points at
+    pointed = {b for b in nxt if b >= 0}
+    out: list[int] = []
+    for start in range(n):
+        if start in pointed or nxt[start] < 0:
+            continue
+        run = [start]
+        cur = start
+        ref = gap[start]
+        while nxt[cur] >= 0:
+            g = gap[cur]
+            if abs(g - ref) <= _HATCH_PITCH_TOL * ref + 0.05:
+                run.append(nxt[cur])
+                ref = 0.8 * ref + 0.2 * g
+                cur = nxt[cur]
+                continue
+            if len(run) >= _HATCH_MIN_RUN:
+                out.extend(rows[x][3] for x in run)
+            run = [cur, nxt[cur]]
+            ref = g
+            cur = nxt[cur]
+        if len(run) >= _HATCH_MIN_RUN:
+            out.extend(rows[x][3] for x in run)
+    return out
 
 
 # ── frame ────────────────────────────────────────────────────────────────────
@@ -328,25 +541,52 @@ def _groups(wsegs: list[tuple[Point, Point]]) -> list[tuple[float, list[_Line1D]
     return out
 
 
-def _candidate_pairs(lines: list[_Line1D], dmax: float) -> list[tuple[int, int, float, float]]:
-    out = []
+def _candidate_pairs(
+    lines: list[_Line1D], dmax: float, budget: Budget | None = None
+) -> list[tuple[int, int, float, float]]:
+    """Parallel strokes up to ``dmax`` apart that overlap along their direction, ``lines`` sorted by c.
+
+    Strokes sit in cells along the direction and only strokes sharing a cell are compared,
+    so a dense sheet costs what it holds rather than the square of it.
+    """
     n = len(lines)
-    for i in range(n):
-        a = lines[i]
-        for j in range(i + 1, n):
-            b = lines[j]
-            d = b.c - a.c
-            if d > dmax:
-                break
-            if d < 0.35:
-                continue
-            ov = min(a.hi, b.hi) - max(a.lo, b.lo)
-            if ov > 0.5:
-                out.append((i, j, d, ov))
+    if n < 2:
+        return []
+    lo_all = min(ln.lo for ln in lines)
+    hi_all = max(ln.hi for ln in lines)
+    size = max(dmax, (hi_all - lo_all) / 512.0, 1.0)
+    cells: dict[int, list[int]] = {}
+    for i, ln in enumerate(lines):
+        for cell in range(int((ln.lo - lo_all) // size), int((ln.hi - lo_all) // size) + 1):
+            cells.setdefault(cell, []).append(i)
+    out: list[tuple[int, int, float, float]] = []
+    for i, a in enumerate(lines):
+        if budget is not None and i % 512 == 0:
+            budget.check()
+        first_a = int((a.lo - lo_all) // size)
+        found: list[tuple[float, int, float]] = []
+        for cell in range(first_a, int((a.hi - lo_all) // size) + 1):
+            members = cells[cell]
+            scanned = 0
+            for pos in range(bisect.bisect_right(members, i), len(members)):
+                j = members[pos]
+                b = lines[j]
+                d = b.c - a.c
+                if d > dmax or scanned >= 4 * _MAX_PARTNERS:
+                    break
+                scanned += 1
+                if d < 0.35 or max(first_a, int((b.lo - lo_all) // size)) != cell:
+                    continue  # a pair is seen once, in the first cell the two share
+                ov = min(a.hi, b.hi) - max(a.lo, b.lo)
+                if ov > 0.5:
+                    found.append((d, j, ov))
+        if len(found) > _MAX_PARTNERS:
+            found = heapq.nsmallest(_MAX_PARTNERS, found)
+        out.extend((i, j, d, ov) for d, j, ov in found)
     return out
 
 
-def wall_modes(groups: list[tuple[float, list[_Line1D]]], dmax: float) -> list[float]:
+def wall_modes(groups: list[tuple[float, list[_Line1D]]], dmax: float, budget: Budget | None = None) -> list[float]:
     """Wall thicknesses: peaks of the distances from each stroke to its nearest parallel.
 
     Each stretch of a stroke counts once, at the distance of the nearest stroke
@@ -356,7 +596,7 @@ def wall_modes(groups: list[tuple[float, list[_Line1D]]], dmax: float) -> list[f
     ds, ws = [], []
     for _ang, lines in groups[:2]:
         near: dict[int, list[tuple[float, float, float]]] = {}
-        for i, j, d, _ov in _candidate_pairs(lines, dmax):
+        for i, j, d, _ov in _candidate_pairs(lines, dmax, budget):
             lo, hi = max(lines[i].lo, lines[j].lo), min(lines[i].hi, lines[j].hi)
             near.setdefault(i, []).append((d, lo, hi))
             near.setdefault(j, []).append((d, lo, hi))
@@ -376,7 +616,7 @@ def _in_modes(d: float, modes: list[float]) -> bool:
 
 
 def wall_pairs(
-    groups: list[tuple[float, list[_Line1D]]], modes: list[float], dmax: float
+    groups: list[tuple[float, list[_Line1D]]], modes: list[float], dmax: float, budget: Budget | None = None
 ) -> list[tuple[list[Point], int, int]]:
     """Wall bands as work-frame quads, with the indices of the two strokes bounding each.
 
@@ -389,7 +629,7 @@ def wall_pairs(
         ca, sa = math.cos(ang), math.sin(ang)
         cands = sorted(
             (d, i, j)
-            for i, j, d, ov in _candidate_pairs(lines, dmax)
+            for i, j, d, ov in _candidate_pairs(lines, dmax, budget)
             if _in_modes(d, modes) and ov >= max(0.8, 0.25 * d)
         )
         taken: dict[int, list[tuple[float, float]]] = {}
@@ -446,14 +686,14 @@ class _Setup:
     evidence: float
 
 
-def _setup(segs: list[Seg], fills: list[Fill], theta: float, dmax: float) -> _Setup:
+def _setup(segs: list[Seg], fills: list[Fill], theta: float, dmax: float, budget: Budget | None = None) -> _Setup:
     """Work frame at ``theta`` with its wall pairs, fills and how much wall they show."""
     fr = Frame(theta)
     wsegs = [(fr.work(sg.a), fr.work(sg.b)) for sg in segs]
     wfills = [([fr.work(p) for p in f.pts], f.lum, f.seq) for f in fills]
     groups = _groups(wsegs)
-    modes = wall_modes(groups, dmax)
-    pairs = wall_pairs(groups, modes, dmax) if modes else []
+    modes = wall_modes(groups, dmax, budget)
+    pairs = wall_pairs(groups, modes, dmax, budget) if modes else []
     modes = _supported_modes(modes, pairs)
     xs = [p[0] for f in wfills for p in f[0]] + [p[0] for sg in wsegs for p in sg] or [0.0]
     ys = [p[1] for f in wfills for p in f[0]] + [p[1] for sg in wsegs for p in sg] or [0.0]
@@ -476,25 +716,41 @@ def _cv(pts: list[Point]) -> np.ndarray:
     return np.round((np.asarray(pts, dtype=np.float64) - 0.5) * 16).astype(np.int32)
 
 
-def read_plan(drawings: list[Any], pt_per_m: float | None = None) -> PlanResult:
+def read_plan(
+    drawings: list[Any],
+    pt_per_m: float | None = None,
+    *,
+    page_size: tuple[float, float] | None = None,
+    budget: Budget | None = None,
+) -> PlanResult:
     """Rooms, wall runs and symbol counts of one vector page."""
-    segs, fills, curves = parse(drawings)
-    return read_parts(segs, fills, curves, pt_per_m)
+    segs, fills, curves = parse(drawings, page_size)
+    return read_parts(segs, fills, curves, pt_per_m, budget=budget)
 
 
-def read_parts(segs: list[Seg], fills: list[Fill], curves: list[Curve], pt_per_m: float | None = None) -> PlanResult:
+def read_parts(
+    segs: list[Seg],
+    fills: list[Fill],
+    curves: list[Curve],
+    pt_per_m: float | None = None,
+    *,
+    budget: Budget | None = None,
+) -> PlanResult:
     """Rooms, wall runs and symbol counts from strokes, fills and arcs in page points."""
     res = PlanResult()
     if not segs and not fills:
         return res
     k = pt_per_m if pt_per_m and pt_per_m > 0 else None
+    segs = drop_hatching(segs, k)
+    if budget is not None:
+        budget.check()
     # Wider than any wall (0.55 m) is furniture, a counter or a dimension offset.
     dmax = min(45.0, 0.55 * k) if k else 45.0
     # A small rotated building can lose the angle vote to an upright title block;
     # the frame that finds the most wall evidence wins.
     best: _Setup | None = None
     for theta in candidate_angles(segs, fills):
-        su = _setup(segs, fills, theta, dmax)
+        su = _setup(segs, fills, theta, dmax, budget)
         if best is None or su.evidence > best.evidence:
             best = su
     if best is None:
@@ -510,7 +766,11 @@ def read_parts(segs: list[Seg], fills: list[Fill], curves: list[Curve], pt_per_m
     )
     res.wall_modes_pt = modes
     if not pairs and not dark:
-        return res
+        # A few outlines are a sketch, which the shape detectors measure exactly.
+        pairs, modes = _line_walls(wsegs, segs, k) if len(segs) > _LINE_WALL_MIN_STROKES else ([], [])
+        res.wall_modes_pt = modes
+        if not pairs:
+            return res
     box = _main_box([q for q, _i, _j in pairs] + [pts for pts, _s in dark], 2.5 * k if k else 60.0)
     if box is None:
         return res
@@ -532,28 +792,40 @@ def read_parts(segs: list[Seg], fills: list[Fill], curves: list[Curve], pt_per_m
     fr.u0, fr.v0, fr.s = u0, v0, min(_MAX_PX_PER_PT, s)
     shape = (int((v1 - v0) * fr.s) + 2, int((u1 - u0) * fr.s) + 2)
     chords = [(fr.work(a), fr.work(b)) for a, b in door_chords(segs, curves, k)]
+    if budget is not None:
+        budget.check()
     rp = _rooms_pass(shape, fr, pairs, dark, light, wsegs, t_pt, k, chords)
     if rp is None:
         return res
     if pairs:
-        # Bands that border no room are dimension offsets or details beside the plan.
+        # Bands that border no room are dimension offsets or details beside the plan,
+        # unless taking them out loses rooms: then they were walls of unclosed rooms.
         keep = [pr for pr in pairs if _borders_room(pr[0], fr, rp.room_lab)]
         if len(keep) < len(pairs):
-            pairs = keep
-            rp = _rooms_pass(shape, fr, pairs, dark, light, wsegs, t_pt, k, chords) or rp
+            again = _rooms_pass(shape, fr, keep, dark, light, wsegs, t_pt, k, chords)
+            if again is not None and sum(r.area_px for r in again.rooms) >= sum(r.area_px for r in rp.rooms):
+                pairs, rp = keep, again
     res.found_structure = True
     t_min = min(rp.t_px)
     faces = _faces(wsegs, wfills, fr)
-    for r in rp.rooms:
+    neighbours = _room_neighbours(rp.room_lab, len(rp.rooms), max(rp.t_px))
+    for n_room, r in enumerate(rp.rooms):
         poly, snapped = _room_polygon(r, faces, t_min)
         if len(poly) < 3:
             continue
+        x, y, bw, bh = cv2.boundingRect(r.contour)
         res.rooms.append(
             {
                 "points": [fr.from_px(p) for p in poly],
                 "snapped": snapped,
                 "vertices": len(poly),
                 "fill_ratio": r.area_px / max(1.0, r.filled_px),
+                "closure": _closure(r, rp.raw),
+                "box_px": (x, y, x + bw, y + bh),
+                "rectangularity": r.filled_px / max(1.0, float(bw * bh)),
+                "aspect": max(bw, bh) / max(1.0, float(min(bw, bh))),
+                "neighbours": neighbours[n_room],
+                "tol_px": max(rp.t_px) + 2.0,
             }
         )
     bands = fp.axis_bands(rp.mask, min_len_px=max(4.0, 1.5 * t_min))
@@ -571,8 +843,119 @@ def read_parts(segs: list[Seg], fills: list[Fill], curves: list[Curve], pt_per_m
             }
         )
     used = {i for _q, a, b in pairs for i in (a, b)}
-    res.counts = _symbols(segs, curves, fills, used, fr, rp.mask, rp.room_lab, k, max(rp.t_px) / fr.s)
+    try:
+        if budget is not None:
+            budget.check()
+        res.counts = _symbols(segs, curves, fills, used, fr, rp.mask, rp.room_lab, k, max(rp.t_px) / fr.s, budget)
+    except TimeBudgetExceeded:
+        res.out_of_time = True
     return res
+
+
+def looks_like_rooms(plan: PlanResult) -> bool:
+    """Whether what was read has the shape of a floor plan, without any text to go on.
+
+    Rooms of a plan share walls and cover their building. Windows of an elevation stand
+    apart with wall between them, and the cells of a table meet four at a time at every
+    crossing, which walls of a building hardly ever do.
+    """
+    rooms = plan.rooms
+    if not rooms:
+        return False
+    if len(rooms) < 3:
+        return True
+    boxes = [r["box_px"] for r in rooms]
+    extent = (
+        (max(b[2] for b in boxes) - min(b[0] for b in boxes)) * (max(b[3] for b in boxes) - min(b[1] for b in boxes))
+    ) or 1
+    covered = sum((b[2] - b[0]) * (b[3] - b[1]) for b in boxes)
+    joined = sum(1 for r in rooms if r["neighbours"]) / len(rooms)
+    return covered / extent >= _MIN_COVERAGE and joined >= _MIN_JOINED and _crossing_share(rooms) < _MAX_CROSSINGS
+
+
+def _crossing_share(rooms: list[dict[str, Any]]) -> float:
+    """Share of the corners shared between rooms where four rooms meet."""
+    tol = max(r["tol_px"] for r in rooms)
+    cells: dict[tuple[int, int], list[tuple[float, float]]] = {}
+    corners = []
+    for r in rooms:
+        x0, y0, x1, y1 = r["box_px"]
+        for x, y in ((x0, y0), (x1, y0), (x0, y1), (x1, y1)):
+            corners.append((x, y))
+            cells.setdefault((int(x // tol), int(y // tol)), []).append((x, y))
+    shared = crossings = 0
+    for x, y in corners:
+        gx, gy = int(x // tol), int(y // tol)
+        near = sum(
+            1
+            for i in range(gx - 1, gx + 2)
+            for j in range(gy - 1, gy + 2)
+            for ox, oy in cells.get((i, j), ())
+            if abs(ox - x) <= tol and abs(oy - y) <= tol
+        )
+        shared += near >= 2
+        crossings += near >= 4
+    return crossings / shared if shared else 0.0
+
+
+def _room_neighbours(room_lab: np.ndarray, n_rooms: int, t_max: float) -> list[int]:
+    """How many other rooms lie across a wall from each room."""
+    out = [0] * n_rooms
+    if n_rooms == 0:
+        return out
+    r = max(2, round(0.5 * t_max) + 2)
+    # Grey dilation spreads the higher label across a wall, erosion the lower one, so any
+    # two rooms a wall apart show up as a pixel whose spread labels differ.
+    kernel = np.ones((2 * r + 1, 2 * r + 1), np.uint8)
+    lab = room_lab.astype(np.float32)
+    hi = cv2.dilate(lab, kernel)
+    filled = np.where(lab > 0, lab, float(n_rooms + 1))
+    lo = cv2.erode(filled, kernel)
+    both = (hi > 0) & (lo <= n_rooms) & (hi != lo)
+    if not both.any():
+        return out
+    pairs = np.unique(np.stack([lo[both], hi[both]], axis=1).astype(np.int32), axis=0)
+    for a, b in pairs:
+        out[int(a) - 1] += 1
+        out[int(b) - 1] += 1
+    return out
+
+
+def _closure(room: fp.MaskRoom, raw: np.ndarray) -> float:
+    """Share of a room's outline that is wall as drawn, before any gap was bridged."""
+    pts = room.contour[:, 0, :]
+    if len(pts) == 0:
+        return 0.0
+    step = max(1, len(pts) // 400)
+    h, w = raw.shape
+    xs = np.clip(pts[::step, 0], 0, w - 1)
+    ys = np.clip(pts[::step, 1], 0, h - 1)
+    return float(np.count_nonzero(raw[ys, xs])) / len(xs)
+
+
+def _line_walls(
+    wsegs: list[tuple[Point, Point]], segs: list[Seg], k: float | None
+) -> tuple[list[tuple[list[Point], int, int]], list[float]]:
+    """Walls of a drawing that has no double lines or fills: its heaviest long strokes."""
+    min_len = _LINE_WALL_MIN_M * k if k else _LINE_WALL_MIN_PT
+    long_ = [i for i, (a, b) in enumerate(wsegs) if math.dist(a, b) >= min_len]
+    if not long_:
+        return [], []
+    heaviest = max(segs[i].lw for i in long_)
+    out: list[tuple[list[Point], int, int]] = []
+    half = max(0.5, 0.5 * heaviest)
+    for i in long_:
+        if segs[i].lw < 0.6 * heaviest:
+            continue
+        (x1, y1), (x2, y2) = wsegs[i]
+        ln = math.hypot(x2 - x1, y2 - y1)
+        nx, ny = -(y2 - y1) / ln * half, (x2 - x1) / ln * half
+        out.append((_quad_about((x1, y1), (x2, y2), nx, ny), i, i))
+    return out, [2.0 * half]
+
+
+def _quad_about(a: Point, b: Point, nx: float, ny: float) -> list[Point]:
+    return [(a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), (b[0] - nx, b[1] - ny), (a[0] - nx, a[1] - ny)]
 
 
 @dataclass
@@ -581,6 +964,7 @@ class _RoomsPass:
     rooms: list[fp.MaskRoom]
     room_lab: np.ndarray
     t_px: list[float]
+    raw: np.ndarray  # wall as drawn: no bridges, no door chords, grown onto room outlines
 
 
 def _rooms_pass(
@@ -614,14 +998,16 @@ def _rooms_pass(
     if not t_px:
         return None
     t_min, t_max = min(t_px), max(t_px)
+    # Finish layers and clearances leave channels between a partition and the wall it
+    # meets, and hollow double-line partitions are channels too. Nobody walks through those.
+    seal = max(3, round((_MIN_PASSAGE_M * k * s) if k else 0.8 * t_max))
+    cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((seal, seal), np.uint8), dst=mask)
     fp.fill_small_holes(mask, (1.6 * t_max + 2) ** 2)
+    raw = cv2.dilate(mask, np.ones((5, 5), np.uint8))
     bands = fp.axis_bands(mask, min_len_px=max(4.0, 1.5 * t_min))
 
     def gap_px(t: float) -> float:
-        if k:
-            return (2.25 if t / (k * s) >= 0.2 else 1.3) * k * s
-        thick = len(t_px) > 1 and t >= 0.7 * t_max
-        return (6.5 if thick else 11.0) * t
+        return _MAX_OPENING_M * k * s if k else _MAX_OPENING_WALLS * t
 
     fp.bridge_gaps(mask, bands, gap_px)
     # After bridging, a wall stub between two openings is joined to its wall;
@@ -633,10 +1019,12 @@ def _rooms_pass(
     closed = mask.copy()
     for a, b in chords:
         cv2.line(closed, _cvpt(fr.px(a)), _cvpt(fr.px(b)), 255, max(2, round(t_min / 2)), cv2.LINE_8, 4)
-    rooms, room_lab = fp.find_rooms(closed, min_area_px=min_area, min_inscribed_px=min_r)
+    rooms, room_lab = fp.find_rooms(
+        closed, min_area_px=min_area, min_inscribed_px=min_r, notch_px=round(1.5 * t_min) | 1
+    )
     if not rooms:
         return None
-    return _RoomsPass(mask, rooms, room_lab, t_px)
+    return _RoomsPass(mask, rooms, room_lab, t_px, raw)
 
 
 def door_chords(segs: list[Seg], curves: list[Curve], k: float | None) -> list[tuple[Point, Point]]:
@@ -722,10 +1110,15 @@ def _peaks(ds: list[float], ws: list[float], lo: float, hi: float) -> list[float
     if not ds:
         return []
     grid = np.arange(lo, hi + 0.01, 0.01)
-    dens = np.zeros_like(grid)
-    for d, w in zip(ds, ws, strict=True):
-        dens += w * np.exp(-0.5 * ((grid - d) / 0.03) ** 2)
+    weights = np.zeros_like(grid)
+    at = np.round((np.asarray(ds) - lo) / 0.01).astype(np.int64)
+    inside = (at >= 0) & (at < len(grid))
+    np.add.at(weights, at[inside], np.asarray(ws)[inside])
+    reach = np.arange(-15, 16) * 0.01
+    dens = np.convolve(weights, np.exp(-0.5 * (reach / 0.03) ** 2), mode="same")
     top = dens.max()
+    if top <= 0:
+        return []
     peaks = [
         i for i in range(1, len(grid) - 1) if dens[i] >= dens[i - 1] and dens[i] > dens[i + 1] and dens[i] >= 0.12 * top
     ]
@@ -876,6 +1269,7 @@ def _symbols(
     room_lab: np.ndarray,
     k: float | None,
     t_max_pt: float,
+    budget: Budget | None = None,
 ) -> list[dict[str, Any]]:
     """Repeated small drawings inside rooms, grouped by a rotation-invariant signature."""
     h, w = mask.shape
@@ -967,19 +1361,28 @@ def _symbols(
     # greedy clustering on exact counts + relative shape tolerance
     insts.sort(key=lambda i: -i.length)
     groups: list[list[_Inst]] = []
-    for inst in insts:
-        for g in groups:
-            ref = g[0]
-            if (ref.n_l, ref.n_c, ref.n_f) == (inst.n_l, inst.n_c, inst.n_f) and _close(ref.sig, inst.sig):
+    by_parts: dict[tuple[int, int, int], list[list[_Inst]]] = {}
+    for n, inst in enumerate(insts):
+        if budget is not None and n % 512 == 0:
+            budget.check()
+        same = by_parts.setdefault((inst.n_l, inst.n_c, inst.n_f), [])
+        for g in same:
+            if _close(g[0].sig, inst.sig):
                 g.append(inst)
                 break
         else:
-            groups.append([inst])
+            g = [inst]
+            same.append(g)
+            groups.append(g)
+    cell = max(4.0, smax)
+    around: dict[tuple[int, int], list[_Inst]] = {}
+    for inst in insts:
+        around.setdefault((int(inst.centre[0] // cell), int(inst.centre[1] // cell)), []).append(inst)
     out = []
     for g in groups:
         if len(g) < 2:
             continue
-        if _texty(g, insts):
+        if _texty(g, around, cell):
             continue
         n = len(g)
         conf = 0.45 if n == 2 else min(0.85, 0.6 + 0.04 * n)
@@ -1014,18 +1417,26 @@ def _close(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
     return all(abs(x - y) <= max(0.4, 0.06 * max(abs(x), abs(y))) for x, y in zip(a, b, strict=True))
 
 
-def _texty(group: list[_Inst], everything: list[_Inst]) -> bool:
+def _texty(group: list[_Inst], around: dict[tuple[int, int], list[_Inst]], cell: float) -> bool:
     """A group whose members mostly sit in a row with differently shaped neighbours is text."""
     members = {id(i) for i in group}
     hits = 0
     for m in group:
-        for o in everything:
-            if id(o) in members:
-                continue
-            if abs(o.centre[1] - m.centre[1]) <= 0.3 * m.size and abs(o.centre[0] - m.centre[0]) <= 1.6 * m.size:
-                hits += 1
+        gx, gy = int(m.centre[0] // cell), int(m.centre[1] // cell)
+        reach = int(1.6 * m.size // cell) + 1
+        hit = False
+        for x in range(gx - reach, gx + reach + 1):
+            for y in range(gy - reach, gy + reach + 1):
+                for o in around.get((x, y), ()):
+                    if id(o) in members:
+                        continue
+                    dx, dy = abs(o.centre[0] - m.centre[0]), abs(o.centre[1] - m.centre[1])
+                    if (dy <= 0.3 * m.size and dx <= 1.6 * m.size) or (dx <= 0.3 * m.size and dy <= 1.6 * m.size):
+                        hit = True
+                        break
+                if hit:
+                    break
+            if hit:
                 break
-            if abs(o.centre[0] - m.centre[0]) <= 0.3 * m.size and abs(o.centre[1] - m.centre[1]) <= 1.6 * m.size:
-                hits += 1
-                break
+        hits += hit
     return hits >= 0.5 * len(group)

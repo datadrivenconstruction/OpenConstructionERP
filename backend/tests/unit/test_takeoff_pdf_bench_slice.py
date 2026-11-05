@@ -31,7 +31,7 @@ def _f1(tp: int, np_: int, ng: int) -> float:
 def _run(pages: list[tuple[bytes, dict]]) -> dict[str, list[int]]:
     tot = {"areas": [0, 0, 0], "walls": [0, 0, 0], "counts": [0, 0, 0], "noise": [0, 0], "scale": [0, 0]}
     for pdf, gt in pages:
-        cands = scorer.detect(pdf, gt["pt_per_m"], trace_memory=False)["candidates"]
+        cands = scorer.detect(pdf, gt["pt_per_m"])["candidates"]
         if gt["kind"] == "noise":
             tot["noise"][0] += bool(cands)
             tot["noise"][1] += 1
@@ -60,3 +60,28 @@ def test_scan_slice_holds_its_accuracy() -> None:
     tot = _run([generator.make_scan(s) for s in _SCAN_SEEDS])
     assert _f1(*tot["areas"]) >= 0.8, tot
     assert _f1(*tot["walls"]) >= 0.75, tot
+
+
+_SHEET_CHECKS = {"A-100": 9, "hollis-A-101": 16}
+_NON_PLANS = ("A-200", "A-600", "hollis-G-001")
+
+
+def _independent(spec_id: str) -> dict:
+    from tests.bench.takeoff_pdf import independent
+
+    if independent.sheets_root() is None:
+        pytest.skip("the drawing sheets are kept outside the repository")
+    spec = next(s for s in independent.load_specs() if s["id"] == spec_id)
+    return independent.score_sheet(spec, scorer.detect, scorer.detect_scale)
+
+
+@pytest.mark.parametrize(("spec_id", "labelled"), _SHEET_CHECKS.items())
+def test_sheets_nobody_generated_keep_their_rooms(spec_id: str, labelled: int) -> None:
+    row = _independent(spec_id)
+    assert row["rooms"]["right"] >= 0.9 * labelled, row
+    assert row["rooms"]["wrong"] == 0, row
+
+
+@pytest.mark.parametrize("spec_id", _NON_PLANS)
+def test_a_sheet_that_is_no_plan_gets_no_rooms(spec_id: str) -> None:
+    assert _independent(spec_id)["non_plan_fp"] == 0
