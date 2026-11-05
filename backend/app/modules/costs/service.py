@@ -989,7 +989,8 @@ class CostItemService:
             after = {**before, **{k: v for k, v in fields.items() if k in before}}
             if "metadata_" in fields:
                 after["metadata"] = fields["metadata_"]
-            findings = await gate_cost_items([after], "update", before=[before])
+            # A finding is identified by the item's code; a rename must not turn an old finding into a new one.
+            findings = await gate_cost_items([after], "update", before=[{**before, "code": after["code"]}])
             await self.repo.update_fields(item_id, **fields)
 
         updated = await self.repo.get_by_id(item_id)

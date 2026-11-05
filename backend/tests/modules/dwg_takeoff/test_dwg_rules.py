@@ -178,3 +178,8 @@ async def test_unusual_drawing_scale_is_reported(client, admin_auth, project_id)
     )
     assert resp.status_code == 200, resp.text
     assert [w["rule_id"] for w in resp.json()["validation_warnings"]] == ["dwg_takeoff.scale_plausible"]
+
+
+async def test_count_off_by_float_noise_is_still_whole() -> None:
+    noisy = _ctx({"annotation_type": "count", "measurement_value": 3.0000000000000004})
+    assert all(r.passed for r in await _run(DwgCountIsWholeRule(), noisy))
