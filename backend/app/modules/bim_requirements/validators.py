@@ -27,6 +27,23 @@ def _bound(value: Any) -> Any:
     return to_dec(value.replace(",", ".") if isinstance(value, str) else value)
 
 
+#: XML Schema regex classes (IDS patterns) that Python's ``re`` does not know.
+_XSD_ESCAPES = re.compile(r"\\[pP]\{[^}]*\}|\\[iIcC]")
+#: Characters only a regular expression uses; a pattern without them is a plain wildcard text.
+_REGEX_ONLY = re.compile(r"[\^$(){}+|\\]")
+
+
+def _runnable_pattern(pattern: str) -> bool:
+    """True when ``pattern`` is a usable wildcard text or a regular expression (XSD classes allowed)."""
+    if not _REGEX_ONLY.search(pattern):
+        return True  # a wildcard such as "*concrete*" is not a regex, and is not meant to be one
+    try:
+        re.compile(_XSD_ESCAPES.sub("x", pattern))
+    except re.error:
+        return False
+    return True
+
+
 class _BimRule(MoneyRule):
     standard = BIM_REQUIREMENTS_RULE_SET
     message_section = "bim_requirements"
@@ -90,9 +107,7 @@ class PatternCompilesRule(_BimRule):
             pattern = cdef.get("pattern") if isinstance(cdef, dict) else None
             if not isinstance(pattern, str) or not pattern:
                 continue
-            try:
-                re.compile(pattern)
-            except re.error:
+            if not _runnable_pattern(pattern):
                 out.append(
                     self.fail(
                         context,

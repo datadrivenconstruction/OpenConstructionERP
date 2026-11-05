@@ -211,6 +211,7 @@ class QMSService:
         project_id: uuid.UUID | None,
         target_id: str = "",
         warnings_only: bool = False,
+        whole: bool = False,
     ) -> None:
         """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422.
 
@@ -227,6 +228,7 @@ class QMSService:
             error_code="qms_rules_failed",
             target_id=target_id,
             warnings_only=warnings_only,
+            whole=whole,
         )
 
     # ── ITP plan ───────────────────────────────────────────────────────
@@ -1432,6 +1434,7 @@ class QMSService:
             operation="close",
             project_id=ncr.project_id,
             target_id=str(ncr_id),
+            whole=True,  # a serious NCR sent to verification by its actions still needs a root cause to close
         )
         await self.repo.update_ncr_fields(ncr_id, status="closed")
         await self.session.flush()
