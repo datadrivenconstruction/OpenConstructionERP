@@ -95,8 +95,8 @@ describe('Videos for this step', () => {
     const toggle = await screen.findByTestId('module-videos-toggle');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(toggle);
-    const region = screen.getByRole('region');
-    expect(within(region).getAllByRole('listitem').length).toBeLessThanOrEqual(3);
+    const region = await screen.findByRole('region');
+    expect(within(region.querySelectorAll('ul')[0] as HTMLElement).getAllByRole('listitem').length).toBeLessThanOrEqual(3);
     const all = within(region).getByRole('link', { name: /on the Videos page/ });
     expect(all.getAttribute('href')).toBe(`/videos?route=${encodeURIComponent('/boq')}`);
   });
@@ -104,7 +104,7 @@ describe('Videos for this step', () => {
   it('plays a video in place, without leaving the screen', async () => {
     renderAt('/boq', <ModuleVideosSlot />);
     fireEvent.click(await screen.findByTestId('module-videos-toggle'));
-    fireEvent.click(within(screen.getByRole('region')).getAllByRole('listitem')[0]!.querySelector('button')!);
+    fireEvent.click(within(await screen.findByRole('region')).getAllByRole('listitem')[0]!.querySelector('button')!);
     expect(screen.getByTestId('video-player')).toBeTruthy();
   });
 
