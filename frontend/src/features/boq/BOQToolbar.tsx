@@ -557,7 +557,7 @@ export function BOQToolbar({
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileDown size={15} className="text-content-tertiary" />
-                    {t('boq.export_format_pdf', { defaultValue: 'PDF' })}
+                    {t('boq.export_format_pdf', { defaultValue: 'Internal estimate (PDF)' })}
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileText size={15} className="text-content-tertiary" />
@@ -610,6 +610,17 @@ export function BOQToolbar({
                       </Link>
                     </>
                   )}
+                  <Link
+                    role="menuitem"
+                    to={`/boq/${encodeURIComponent(boqId)}/offer?project=${encodeURIComponent(projectId)}`}
+                    onClick={() => setShowExportMenu(false)}
+                    className="flex w-full flex-col border-t border-border-light px-3 py-2.5 text-left text-sm leading-snug text-content-primary hover:bg-surface-secondary transition-colors"
+                  >
+                    <span>{t('offers.export_menu_item', { defaultValue: 'Customer offer...' })}</span>
+                    <span className="text-xs text-content-tertiary">
+                      {t('offers.export_menu_hint', { defaultValue: 'Selling prices, terms, signature' })}
+                    </span>
+                  </Link>
                   {ownerScheduleEnabled && (
                     <Link
                       role="menuitem"

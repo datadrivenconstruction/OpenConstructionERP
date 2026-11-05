@@ -337,6 +337,11 @@ const OwnerSchedulePage = lazy(() =>
     default: m.OwnerSchedulePage,
   }))
 );
+const OfferPage = lazy(() =>
+  import('@/features/offers/OfferPage').then((m) => ({
+    default: m.OfferPage,
+  }))
+);
 const QuoteCapturePage = lazy(() =>
   import('@/features/quote-capture/QuoteCapturePage').then((m) => ({
     default: m.QuoteCapturePage,
@@ -1473,6 +1478,7 @@ export default function App() {
 
         <Route path="/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
         <Route path="/boq/:boqId" element={<P title="BOQ Editor"><BOQEditorPage /></P>} />
+        <Route path="/boq/:boqId/offer" element={<P title="Customer offer"><OfferPage /></P>} />
         <Route path="/boq/:boqId/owner-schedule" element={<P title="Owner bid schedule"><OwnerSchedulePage /></P>} />
         <Route path="/templates" element={<P title="BOQ Templates"><TemplatesPage /></P>} />
 

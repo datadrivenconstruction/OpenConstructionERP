@@ -227,3 +227,37 @@ def test_valid_until_and_fingerprint_changes() -> None:
     b = [{**a[0], "unit_rate": "11"}]
     assert pricing.fingerprint(a) != pricing.fingerprint(b)
     assert pricing.fingerprint(a) == pricing.fingerprint([dict(a[0])])
+
+
+def test_acceptance_with_a_ticked_optional_adds_it_to_the_award() -> None:
+    built, _ = _price(de_items(), "EUR", "19")
+    rows = [{"name": "All", "kind": "final", "percent": "100"}]
+    fig = pricing.accepted_figures(built["lines"], rows, {"02.0040"}, currency="EUR")
+    assert fig["totals"]["net"] == "48990.00"
+    assert fig["schedule"][0]["net"] == "48990.00"
+    assert fig["totals"]["not_included"] == []
+
+
+def test_acceptance_with_a_ticked_alternative_replaces_its_base() -> None:
+    items = [
+        {"kind": "item", "ordinal": "1", "description": "Base", "quantity": "1", "unit_rate": "100.00", "role": "base"},
+        {
+            "kind": "item", "ordinal": "2", "description": "Alt", "quantity": "1", "unit_rate": "130.00",
+            "role": "alternative", "alternative_of": "1",
+        },
+    ]  # fmt: skip
+    built = pricing.build_lines(items, currency="EUR")
+    fig = pricing.accepted_figures(built["lines"], [], {"2"}, currency="EUR")
+    assert fig["totals"]["net"] == "130.00"
+    assert pricing.accepted_figures(built["lines"], [], set(), currency="EUR")["totals"]["net"] == "100.00"
+
+
+def test_contract_payload_maps_each_instalment_to_a_milestone() -> None:
+    rows = pricing.schedule(
+        [{"name": "Deposit", "kind": "deposit", "percent": "30"}, {"name": "Final", "kind": "final", "percent": "70"}],
+        net=Decimal("1000.00"), tax_total=Decimal("190.00"), currency="EUR",
+    )  # fmt: skip
+    out = pricing.contract_payload({"instalments": rows, "net": "1000.00", "currency": "EUR"})
+    assert out["total_value"] == "1000.00"
+    assert [m["kind"] for m in out["milestones"]] == ["deposit", "final"]
+    assert [m["percent_of_contract"] for m in out["milestones"]] == ["30.0000", "70.0000"]
