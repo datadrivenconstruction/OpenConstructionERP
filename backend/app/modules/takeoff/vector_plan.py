@@ -347,18 +347,27 @@ def _candidate_pairs(lines: list[_Line1D], dmax: float) -> list[tuple[int, int, 
 
 
 def wall_modes(groups: list[tuple[float, list[_Line1D]]], dmax: float) -> list[float]:
-    """Wall thicknesses: peaks of the overlap-weighted nearest-parallel distances."""
+    """Wall thicknesses: peaks of the distances from each stroke to its nearest parallel.
+
+    Each stretch of a stroke counts once, at the distance of the nearest stroke
+    facing it there, so a face that runs past a window sill still votes for the
+    wall thickness along the rest of its length.
+    """
     ds, ws = [], []
     for _ang, lines in groups[:2]:
-        best: dict[int, tuple[float, float]] = {}
-        for i, j, d, ov in _candidate_pairs(lines, dmax):
-            for k in (i, j):
-                if k not in best or d < best[k][0]:
-                    best[k] = (d, ov)
-        for d, ov in best.values():
-            if ov >= max(2.0 * d, 3.0):
-                ds.append(math.log(d))
-                ws.append(ov)
+        near: dict[int, list[tuple[float, float, float]]] = {}
+        for i, j, d, _ov in _candidate_pairs(lines, dmax):
+            lo, hi = max(lines[i].lo, lines[j].lo), min(lines[i].hi, lines[j].hi)
+            near.setdefault(i, []).append((d, lo, hi))
+            near.setdefault(j, []).append((d, lo, hi))
+        for cands in near.values():
+            taken: list[tuple[float, float]] = []
+            for d, lo, hi in sorted(cands):
+                free = (hi - lo) - sum(max(0.0, min(hi, t1) - max(lo, t0)) for t0, t1 in taken)
+                taken.append((lo, hi))
+                if free >= max(2.0 * d, 3.0):
+                    ds.append(math.log(d))
+                    ws.append(free)
     return _peaks(ds, ws, math.log(0.4), math.log(dmax))
 
 
