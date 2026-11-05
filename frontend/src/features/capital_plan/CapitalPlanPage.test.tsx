@@ -33,7 +33,7 @@ vi.mock('./api', () => ({
 import { capitalPlanApi } from './api';
 import { CapitalPlanPage } from './CapitalPlanPage';
 
-const api = capitalPlanApi as unknown as Record<string, ReturnType<typeof vi.fn>>;
+const api = capitalPlanApi as unknown as Record<'listPlans' | 'listScenarios' | 'listEnvelopes' | 'listItems' | 'summary' | 'patchItem' | 'importProjects' | 'autofund' | 'applyStatuses', ReturnType<typeof vi.fn>>;
 
 const PLAN = { id: 'plan1', node_id: null, name: 'Five-year plan', currency: 'EUR', start_year: 2030, horizon_years: 3 };
 const BASE = { id: 'sc1', plan_id: 'plan1', name: 'Baseline', is_baseline: true, notes: '' };
@@ -141,7 +141,7 @@ describe('CapitalPlanPage', () => {
     expect(await screen.findByText('No projects in this scenario yet')).toBeInTheDocument();
     expect(screen.queryByRole('table')).toBeNull();
     const buttons = screen.getAllByRole('button', { name: 'Import projects' });
-    fireEvent.click(buttons[buttons.length - 1]);
+    fireEvent.click(buttons[buttons.length - 1]!);
     await waitFor(() => expect(api.importProjects).toHaveBeenCalledWith('plan1', 'sc1'));
   });
 

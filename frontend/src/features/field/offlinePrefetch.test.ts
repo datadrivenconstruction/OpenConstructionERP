@@ -20,7 +20,7 @@ describe('downloadForOffline', () => {
     const fetchImpl = vi.fn().mockResolvedValue(new Response(JSON.stringify(pack), { status: 200 }));
     const count = await downloadForOffline(session, fetchImpl as unknown as typeof fetch);
     expect(count).toBe(2);
-    const [url, init] = fetchImpl.mock.calls[0];
+    const [url, init] = fetchImpl.mock.calls[0]!;
     expect(url).toBe('/api/v1/field-diary/offline-pack/');
     expect((init.headers as Record<string, string>)['X-Field-PIN']).toBe('1234');
     expect((await getRef('proj-1', 'punch_items'))?.payload).toHaveLength(1);

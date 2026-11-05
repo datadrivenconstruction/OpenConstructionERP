@@ -77,7 +77,7 @@ interface Props {
 }
 
 export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: Props) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { confirm, ...confirmProps } = useConfirm();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);

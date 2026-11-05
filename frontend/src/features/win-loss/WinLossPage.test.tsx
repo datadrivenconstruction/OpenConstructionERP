@@ -105,15 +105,15 @@ describe('WinLossPage', () => {
     const form = await screen.findByTestId('winloss-form');
     expect(screen.queryByText('Main reason')).toBeNull();
     const inputs = form.querySelectorAll('input');
-    fireEvent.change(inputs[0], { target: { value: 'Bridge' } });
-    fireEvent.change(form.querySelectorAll('select')[0], { target: { value: 'lost' } });
+    fireEvent.change(inputs[0]!, { target: { value: 'Bridge' } });
+    fireEvent.change(form.querySelectorAll('select')[0]!, { target: { value: 'lost' } });
     expect(screen.getByText('Main reason')).toBeTruthy();
     fireEvent.change(form.querySelector('input[type="number"]') as HTMLInputElement, {
       target: { value: '500' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(create).toHaveBeenCalled());
-    expect(create.mock.calls[0][0]).toMatchObject({ title: 'Bridge', outcome: 'lost', our_price: '500' });
+    expect(create.mock.calls[0]![0]).toMatchObject({ title: 'Bridge', outcome: 'lost', our_price: '500' });
   });
 
   it('shows the validation warnings that come back after a save', async () => {

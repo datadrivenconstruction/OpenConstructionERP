@@ -97,8 +97,8 @@ describe('SubcontractChangesPanel', () => {
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '2500' } });
     fireEvent.click(screen.getByText('Create subcontract changes'));
     await waitFor(() => expect(apiPost).toHaveBeenCalled());
-    expect(vi.mocked(apiPost).mock.calls[0][0]).toContain('/changes/from-owner-change/');
-    expect(vi.mocked(apiPost).mock.calls[0][1]).toEqual({
+    expect(vi.mocked(apiPost).mock.calls[0]![0]).toContain('/changes/from-owner-change/');
+    expect(vi.mocked(apiPost).mock.calls[0]![1]).toEqual({
       owner_change_type: 'variation_order',
       owner_change_id: 'vo-1',
       lines: [

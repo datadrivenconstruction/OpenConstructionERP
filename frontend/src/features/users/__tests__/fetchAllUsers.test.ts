@@ -14,6 +14,6 @@ describe('fetchAllUsers', () => {
     apiGet.mockResolvedValueOnce(page(500)).mockResolvedValueOnce(page(120));
     const all = await fetchAllUsers();
     expect(all).toHaveLength(620);
-    expect(apiGet.mock.calls[1][0]).toContain('offset=500');
+    expect(apiGet.mock.calls[1]![0]).toContain('offset=500');
   });
 });

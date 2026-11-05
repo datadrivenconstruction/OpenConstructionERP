@@ -2244,7 +2244,7 @@ function EntriesTimeline({
                     sourceId={e.id}
                     sourceRef={e.title}
                     title={e.title}
-                    description={e.description}
+                    description={e.description ?? undefined}
                     compact
                   />
                 )}

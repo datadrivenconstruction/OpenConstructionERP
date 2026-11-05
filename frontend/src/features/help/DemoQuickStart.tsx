@@ -22,7 +22,7 @@ import {
 import { HexMark } from '@/shared/ui/HexMark';
 import { useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
 import { DEMO_PROFILES } from '@/shared/lib/demoProfiles';
-import { fmtNumber } from '@/shared/lib/formatters';
+import { fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { MODULE_EXPLANATIONS } from './moduleExplanations';
 
 const PRICING_URL = 'https://openconstructionerp.com/pricing';

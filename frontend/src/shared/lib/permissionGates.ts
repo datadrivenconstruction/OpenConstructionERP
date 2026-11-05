@@ -56,6 +56,7 @@ export const PERMISSION_MIN_ROLE = {
   'contracts.submit_claim': 'editor',
   'documents.update': 'editor',
   'boq.delete': 'editor',
+  'boq.import': 'editor',
   'bim.create': 'editor',
   'hse_frame.edit': 'editor',
   'hse_frame.manage': 'manager',

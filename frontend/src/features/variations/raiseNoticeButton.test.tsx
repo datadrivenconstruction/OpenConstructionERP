@@ -61,6 +61,6 @@ describe('RaiseNoticeButton', () => {
     renderIt();
     await waitFor(() => expect(screen.getByTestId('raise-notice-link').textContent).toContain('NOT-0009'));
     expect(screen.queryByTestId('raise-notice-button')).toBeNull();
-    expect(apiGet.mock.calls[0][0]).toBe('/v1/variations/notices/by-source/rfi/r1?project_id=p1');
+    expect(apiGet.mock.calls[0]![0]).toBe('/v1/variations/notices/by-source/rfi/r1?project_id=p1');
   });
 });

@@ -353,7 +353,7 @@ export function Snapshot4DView({
                       </Badge>
                       {showCost && cost?.by_status[bucket.status] && (
                         <span className="text-xs tabular-nums text-content-secondary">
-                          {money(cost.by_status[bucket.status].planned_cost)}
+                          {money(cost.by_status[bucket.status]!.planned_cost)}
                         </span>
                       )}
                       <ViewInBIMButton

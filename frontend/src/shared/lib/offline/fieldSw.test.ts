@@ -13,7 +13,7 @@ describe('field-sw.js clear message', () => {
       delete: del,
     });
     let pending: Promise<unknown> = Promise.resolve();
-    handlers.message({ data: { type: 'oe-field-clear' }, waitUntil: (p: Promise<unknown>) => (pending = p) });
+    handlers.message!({ data: { type: 'oe-field-clear' }, waitUntil: (p: Promise<unknown>) => (pending = p) });
     await pending;
     expect(del).toHaveBeenCalledWith('oe-field-data-v1');
     expect(del).not.toHaveBeenCalledWith('oe-field-shell-v1');
