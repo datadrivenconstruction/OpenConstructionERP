@@ -1,9 +1,9 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""QuickBooks​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ Online accounting API adapter (OAuth2, API v3).
+"""QBO​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ accounting API adapter (OAuth2, API v3).
 
 AR documents post as ``Invoice`` with sales item lines (the mapped account code
-is the QuickBooks Item id, because QuickBooks books revenue through items), AP
+is the QBO Item id, because QBO books revenue through items), AP
 documents as ``Bill`` with account-based expense lines. Each project is a
 ``Class``. Payments come back from ``Payment`` (invoices) and ``BillPayment``
 (bills) through the query endpoint.
@@ -15,25 +15,35 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
+from app.config import get_settings
 from app.modules.accounting_sync.postings import SyncContact, SyncDocument, money
 from app.modules.accounting_sync.providers.base import ProviderAdapter, ProviderError, PushResult, RemotePayment
 
-PROD = "https://quickbooks.api.intuit.com"
-SANDBOX = "https://sandbox-quickbooks.api.intuit.com"
 MINOR_VERSION = "75"
+
+
+def _setting(name: str) -> str:
+    # The API hosts and the OAuth scope carry the vendor's product name, so the deployment supplies them.
+    value = str(getattr(get_settings(), name, "") or "").strip()
+    if not value:
+        raise ProviderError(f"QBO is not configured on this server: set {name.upper()}", retryable=False)
+    return value.rstrip("/")
 
 
 def _q(text: str) -> str:
     return text.replace("\\", "\\\\").replace("'", "\\'")
 
 
-class QuickBooksAdapter(ProviderAdapter):
+class QBOAdapter(ProviderAdapter):
     """Push invoices, bills, customers, vendors and classes; pull payments."""
 
     provider = "qbo"
     authorize_url = "https://appcenter.intuit.com/connect/oauth2"
     token_url = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-    scopes = "com.intuit.quickbooks.accounting"
+
+    @property
+    def scopes(self) -> str:  # type: ignore[override]
+        return _setting("qbo_oauth_scope")
 
     def _headers(self) -> dict[str, str]:
         return {
@@ -43,7 +53,7 @@ class QuickBooksAdapter(ProviderAdapter):
         }
 
     def _url(self, path: str) -> str:
-        base = SANDBOX if self.ctx.sandbox else PROD
+        base = _setting("qbo_sandbox_api_host") if self.ctx.sandbox else _setting("qbo_api_host")
         sep = "&" if "?" in path else "?"
         return f"{base}/v3/company/{self.ctx.tenant_id}/{path.lstrip('/')}{sep}minorversion={MINOR_VERSION}"
 
@@ -53,7 +63,7 @@ class QuickBooksAdapter(ProviderAdapter):
         except ValueError:
             errors = []
         detail = "; ".join(f"{e.get('Message', '')} {e.get('Detail', '')}".strip() for e in errors)
-        return f"QuickBooks {resp.status_code}: {detail}".strip()
+        return f"QBO {resp.status_code}: {detail}".strip()
 
     async def query(self, statement: str) -> dict[str, Any]:
         data = await self.request("GET", "query", params={"query": statement})
@@ -90,7 +100,7 @@ class QuickBooksAdapter(ProviderAdapter):
         return str(data["Class"]["Id"])
 
     def document_body(self, doc: SyncDocument, contact_external_id: str) -> dict[str, Any]:
-        """The QuickBooks Invoice or Bill JSON for a document (exposed for contract tests)."""
+        """The QBO Invoice or Bill JSON for a document (exposed for contract tests)."""
         mapping = self.ctx.mapping
         class_id = self.ctx.tracking.get(doc.project_code or doc.project_name)
         lines = []
@@ -141,7 +151,7 @@ class QuickBooksAdapter(ProviderAdapter):
         )
         row = data.get(entity)
         if not row:
-            raise ProviderError(f"QuickBooks returned no {entity} for {doc.number}", retryable=False)
+            raise ProviderError(f"QBO returned no {entity} for {doc.number}", retryable=False)
         total = row.get("TotalAmt")
         return PushResult(
             external_id=str(row["Id"]),

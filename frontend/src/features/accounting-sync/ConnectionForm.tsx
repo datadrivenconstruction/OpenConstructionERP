@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * One form for creating a connection and for editing its settings. Which fields
- * show depends on the provider: live providers (Xero, QuickBooks) ask for the
+ * show depends on the provider: live providers (Xero, QBO) ask for the
  * app credentials and the tenant, DATEV for the consultant and client numbers,
  * the journal for its column list. The client secret is write-only: it is never
  * filled in, and an empty box on save means "keep the stored secret".

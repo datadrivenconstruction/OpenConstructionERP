@@ -4,7 +4,7 @@
 
 Tables:
     oe_acctsync_connection   - one company ledger in an external accounting system
-                               (Xero, QuickBooks Online) or a file target (DATEV EXTF,
+                               (Xero, QBO) or a file target (DATEV EXTF,
                                generic journal, SAF-T). OAuth secrets are Fernet encrypted.
     oe_acctsync_account_map  - posting category -> account code, per connection.
     oe_acctsync_tax_map      - platform tax code + direction -> external tax key.
@@ -45,7 +45,7 @@ class AccountingConnection(Base):
     # Fernet tokens (app.core.crypto); never returned to the client.
     client_secret_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
     tokens_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # Xero tenant id or QuickBooks realm id.
+    # Xero tenant id or QBO realm id.
     external_tenant_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
     # Books closed through this day: nothing may post on or before it.
     lock_date: Mapped[date | None] = mapped_column(SafeDate(), nullable=True)
@@ -100,7 +100,7 @@ class ExternalRef(Base):
     record_type: Mapped[str] = mapped_column(String(30), nullable=False)
     record_id: Mapped[str] = mapped_column(String(80), nullable=False)
     external_id: Mapped[str] = mapped_column(String(120), nullable=False)
-    # QuickBooks SyncToken for sparse updates.
+    # QBO SyncToken for sparse updates.
     external_version: Mapped[str | None] = mapped_column(String(40), nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
     pushed_total: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)

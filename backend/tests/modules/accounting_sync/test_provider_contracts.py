@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contract​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ tests of the Xero and QuickBooks Online adapters against mocked HTTP.
+"""Contract​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ tests of the Xero and QBO adapters against mocked HTTP.
 
 Each test pins the request the provider documents (URL, headers, JSON shape)
 and the response the adapter reads back. No network, no real credentials.
@@ -16,15 +16,24 @@ from decimal import Decimal
 import httpx
 import pytest
 
+from app.config import get_settings
 from app.modules.accounting_sync.postings import Mapping, SyncContact, SyncDocument, SyncLine
 from app.modules.accounting_sync.providers.base import OAuthTokens, ProviderContext, ProviderError
-from app.modules.accounting_sync.providers.qbo import QuickBooksAdapter
+from app.modules.accounting_sync.providers.qbo import QBOAdapter
 from app.modules.accounting_sync.providers.xero import XeroAdapter
 
 MAPPING = Mapping(
     accounts={"revenue": ("200", "Sales"), "subcontract_cost": ("310", "Subcontractors")},
     tax_keys={("VAT", "sales"): "OUTPUT2", ("VAT", "purchase"): "INPUT2"},
 )
+
+
+@pytest.fixture(autouse=True)
+def _qbo_endpoints(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = get_settings()
+    monkeypatch.setattr(settings, "qbo_api_host", "https://api.qbo.test")
+    monkeypatch.setattr(settings, "qbo_sandbox_api_host", "https://sandbox.qbo.test")
+    monkeypatch.setattr(settings, "qbo_oauth_scope", "qbo.accounting")
 
 
 def _ctx(**kw) -> ProviderContext:
@@ -178,10 +187,10 @@ async def test_qbo_invoice_and_bill_shapes() -> None:
             return httpx.Response(200, json={"Invoice": {"Id": "77", "SyncToken": "0", "TotalAmt": 1200.01, **body}})
         return httpx.Response(200, json={"Bill": {"Id": "88", "SyncToken": "3", "TotalAmt": 1200.01}})
 
-    adapter = QuickBooksAdapter(_ctx(tracking={"PRJ-1": "CL-5"}), transport=httpx.MockTransport(handler))
+    adapter = QBOAdapter(_ctx(tracking={"PRJ-1": "CL-5"}), transport=httpx.MockTransport(handler))
     res = await adapter.push_document(_doc(), "CU-1", None, None)
     req = seen[0]
-    assert str(req.url).startswith("https://sandbox-quickbooks.api.intuit.com/v3/company/T1/invoice?requestid=rec-1-")
+    assert str(req.url).startswith("https://sandbox.qbo.test/v3/company/T1/invoice?requestid=rec-1-")
     assert req.url.params["minorversion"] == "75"
     body = json.loads(req.content)
     line = body["Line"][0]
@@ -205,7 +214,7 @@ async def test_qbo_contact_reuses_an_existing_vendor() -> None:
         assert request.method == "GET" and "DisplayName" in request.url.params["query"]
         return httpx.Response(200, json={"QueryResponse": {"Vendor": [{"Id": "V-9", "SyncToken": "1"}]}})
 
-    adapter = QuickBooksAdapter(_ctx(), transport=httpx.MockTransport(handler))
+    adapter = QBOAdapter(_ctx(), transport=httpx.MockTransport(handler))
     contact = SyncContact("s1", "Steel O'Brien", "supplier")
     assert (await adapter.push_contact(contact, None)).external_id == "V-9"
 
@@ -226,7 +235,7 @@ async def test_qbo_pull_payments_from_payment_and_billpayment() -> None:
                 {"Amount": 50, "LinkedTxn": [{"TxnId": "88", "TxnType": "Bill"}]}]}]}},
         )  # fmt: skip
 
-    adapter = QuickBooksAdapter(_ctx(), transport=httpx.MockTransport(handler))
+    adapter = QBOAdapter(_ctx(), transport=httpx.MockTransport(handler))
     pays = await adapter.pull_payments({"77": "ar_invoice", "88": "ap_bill"}, None)
     assert [(p.external_document_id, p.amount) for p in pays] == [("77", Decimal("1200.01")), ("88", Decimal("50"))]
 
@@ -236,7 +245,7 @@ async def test_qbo_fault_is_retryable_on_5xx_only() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, json={"Fault": {"Error": [{"Message": "Service unavailable"}]}})
 
-    adapter = QuickBooksAdapter(_ctx(), transport=httpx.MockTransport(handler))
+    adapter = QBOAdapter(_ctx(), transport=httpx.MockTransport(handler))
     with pytest.raises(ProviderError) as exc:
         await adapter.ensure_tracking("PRJ-1", "")
     assert exc.value.retryable and "Service unavailable" in exc.value.reason
@@ -246,3 +255,9 @@ def test_authorization_url_carries_scope_and_state() -> None:
     url = XeroAdapter(_ctx()).authorization_url("https://app.example/cb", "conn-1")
     assert url.startswith("https://login.xero.com/identity/connect/authorize?")
     assert "state=conn-1" in url and "offline_access" in url and "client_id=cid" in url
+
+
+def test_qbo_without_endpoints_says_what_to_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(get_settings(), "qbo_oauth_scope", "")
+    with pytest.raises(ProviderError, match="QBO_OAUTH_SCOPE"):
+        QBOAdapter(_ctx()).authorization_url("https://app.test/cb", "state")

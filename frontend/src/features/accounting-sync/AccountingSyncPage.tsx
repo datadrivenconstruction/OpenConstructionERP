@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Accounting sync: connect the platform to the books. Xero and QuickBooks sync
+ * Accounting sync: connect the platform to the books. Xero and QBO sync
  * live through OAuth; DATEV, the journal and SAF-T produce files for an
  * accountant. One screen: the list of connections on top, and for the selected
  * one the Sync, Mapping, Exports and Settings tabs.
@@ -246,7 +246,7 @@ export function AccountingSyncPage() {
             icon={<BookOpen size={28} />}
             title={t('accountingSync.empty.title', { defaultValue: 'No accounting connection yet' })}
             description={t('accountingSync.empty.desc', {
-              defaultValue: 'Connect Xero or QuickBooks for a live sync, or set up DATEV, a journal or SAF-T to export files.',
+              defaultValue: 'Connect Xero or QBO for a live sync, or set up DATEV, a journal or SAF-T to export files.',
             })}
             action={
               isAdmin ? (

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Accounting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ sync module: Xero, QuickBooks Online, DATEV EXTF, journal and SAF-T.
+"""Accounting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ sync module: Xero, QBO, DATEV EXTF, journal and SAF-T.
 
 One neutral provider-adapter interface over the finance document register. The
 platform is master for projects, cost codes, contracts and documents; the

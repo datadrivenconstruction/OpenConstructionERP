@@ -677,7 +677,11 @@ class AccountingSyncService:
     async def authorization_url(self, conn: AccountingConnection, redirect_uri: str) -> str:
         if not conn.client_id or not conn.client_secret_enc:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Enter the client id and secret first")
-        return (await self.adapter(conn)).authorization_url(redirect_uri, str(conn.id))
+        adapter = await self.adapter(conn)
+        try:
+            return adapter.authorization_url(redirect_uri, str(conn.id))
+        except ProviderError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
     async def complete_oauth(
         self, conn: AccountingConnection, code: str, redirect_uri: str, tenant_id: str | None

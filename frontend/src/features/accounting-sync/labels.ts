@@ -16,7 +16,7 @@ interface Label {
 
 const PROVIDER_LABELS: Record<Provider, Label> = {
   xero: { key: 'accountingSync.provider.xero', en: 'Xero' },
-  qbo: { key: 'accountingSync.provider.qbo', en: 'QuickBooks' },
+  qbo: { key: 'accountingSync.provider.qbo', en: 'QBO' },
   datev: { key: 'accountingSync.provider.datev', en: 'DATEV' },
   journal: { key: 'accountingSync.provider.journal', en: 'Journal (CSV / Excel)' },
   saft: { key: 'accountingSync.provider.saft', en: 'SAF-T' },
@@ -29,7 +29,7 @@ const PROVIDER_HELP: Record<Provider, Label> = {
   },
   qbo: {
     key: 'accountingSync.provider.qbo_help',
-    en: 'Live sync with QuickBooks Online through OAuth. Approved invoices and bills are pushed, payments come back.',
+    en: 'Live sync with QBO through OAuth. Approved invoices and bills are pushed, payments come back.',
   },
   datev: {
     key: 'accountingSync.provider.datev_help',

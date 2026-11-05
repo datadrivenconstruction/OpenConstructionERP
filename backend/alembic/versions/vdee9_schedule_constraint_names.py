@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""rewrite raw Primavera constraint codes to the neutral constraint names
+"""rewrite raw P6 constraint codes to the neutral constraint names
 
 XER import used to store ``cstr_type`` verbatim (``CS_MSO``, ``CS_ALAP`` ...)
 while the MSP importer stored neutral names. The scheduler reads the neutral
@@ -43,6 +43,8 @@ _XER_TO_NEUTRAL: dict[str, str | None] = {
 }
 
 
+# data-rewrite-ack: table=oe_schedule_activity growth=tenure rows=every schedule activity on every project
+# boot-repair: gap - activities imported earlier keep their raw XER constraint codes on an install that never runs alembic
 def upgrade() -> None:
     if _TABLE not in sa.inspect(op.get_bind()).get_table_names():
         return

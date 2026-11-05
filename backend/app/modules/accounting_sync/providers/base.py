@@ -83,7 +83,7 @@ class ProviderContext:
 
 
 class ProviderAdapter(ABC):
-    """Base class of the Xero and QuickBooks Online adapters."""
+    """Base class of the Xero and QBO adapters."""
 
     provider: ClassVar[str] = ""
     authorize_url: ClassVar[str] = ""

@@ -41,7 +41,7 @@ def normalize_constraint(value: object, *, strict: bool = False) -> str | None:
     """Fold any stored or imported constraint spelling into :data:`CONSTRAINT_TYPES`.
 
     Args:
-        value: A neutral name, a Primavera XER ``cstr_type`` code, or empty.
+        value: A neutral name, a P6 XER ``cstr_type`` code, or empty.
         strict: Raise on a value that is none of these instead of returning ``None``.
 
     Returns:

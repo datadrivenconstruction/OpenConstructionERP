@@ -11,7 +11,7 @@ manifest = ModuleManifest(
     description=(
         "Connects the platform to the company's accounting: pushes receivable invoices and interim payment "
         "certificates, subcontractor and supplier bills and guarantee fees with contacts and a project "
-        "dimension to Xero or QuickBooks Online and pulls payments back, or exports DATEV EXTF, a generic "
+        "dimension to Xero or QBO and pulls payments back, or exports DATEV EXTF, a generic "
         "journal (CSV, Excel) or OECD SAF-T. Account and tax-code mapping per company from country "
         "templates, idempotent pushes with a sync log, retry and validation."
     ),

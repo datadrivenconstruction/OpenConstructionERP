@@ -3,7 +3,7 @@
 /**
  * Landing page of the accounting provider's OAuth redirect. The provider sends
  * the browser back with `code` and `state` (the connection id, set when the
- * authorisation started); QuickBooks also sends `realmId`, its company id. The
+ * authorisation started); QBO also sends `realmId`, its company id. The
  * page hands them to the backend, which exchanges the code for tokens, and then
  * returns to the connection.
  */

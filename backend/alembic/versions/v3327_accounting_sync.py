@@ -3,7 +3,7 @@
 """accounting_sync​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: connections, mappings, external ids and the sync log
 
 Creates the five tables of the accounting sync module: ``oe_acctsync_connection``
-(one company ledger in Xero, QuickBooks Online or a file target, OAuth secrets
+(one company ledger in Xero, QBO or a file target, OAuth secrets
 encrypted), ``oe_acctsync_account_map`` and ``oe_acctsync_tax_map`` (mapping per
 connection), ``oe_acctsync_external_ref`` (remote id per pushed record, the
 idempotency anchor) and ``oe_acctsync_log`` (one row per record attempt).

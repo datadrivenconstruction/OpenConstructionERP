@@ -735,6 +735,12 @@ class Settings(BaseSettings):
     # converter/pipeline service URL is needed here.
     openweathermap_api_key: str = ""
 
+    # Live QBO accounting sync. The vendor's hosts and OAuth scope name its product, so the
+    # deployment supplies them; the provider refuses to connect while any of the three is empty.
+    qbo_api_host: str = ""
+    qbo_sandbox_api_host: str = ""
+    qbo_oauth_scope: str = ""
+
     # ── Rate Limiting ────────────────────────────────────────────────────
     api_rate_limit: int = Field(
         default=200,
