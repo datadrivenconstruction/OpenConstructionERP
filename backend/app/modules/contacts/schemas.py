@@ -76,6 +76,7 @@ class ContactCreate(BaseModel):
         examples=["DE"],
     )
     address: dict[str, Any] | None = None
+    billing_address: dict[str, Any] | None = None
 
     primary_email: str | None = Field(
         default=None,
@@ -140,6 +141,7 @@ class ContactUpdate(BaseModel):
 
     country_code: str | None = Field(default=None, max_length=2)
     address: dict[str, Any] | None = None
+    billing_address: dict[str, Any] | None = None
 
     primary_email: str | None = Field(default=None, max_length=255)
     primary_phone: str | None = Field(default=None, max_length=50)
@@ -195,6 +197,7 @@ class ContactResponse(BaseModel):
 
     country_code: str | None = None
     address: dict[str, Any] | None = None
+    billing_address: dict[str, Any] | None = None
 
     primary_email: str | None = None
     primary_phone: str | None = None

@@ -53,6 +53,8 @@ class Contact(Base):
         JSON,
         nullable=True,
     )
+    # Where invoices and offers go when it differs from the premises address.
+    billing_address: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Contact info
     primary_email: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)

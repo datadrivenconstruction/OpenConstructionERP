@@ -138,6 +138,7 @@ class ContactService:
             tax_office=data.tax_office,
             country_code=data.country_code,
             address=data.address,
+            billing_address=data.billing_address,
             primary_email=normalised_email,
             primary_phone=data.primary_phone,
             website=data.website,
