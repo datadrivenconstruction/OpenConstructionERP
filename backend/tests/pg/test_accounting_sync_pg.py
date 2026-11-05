@@ -26,16 +26,17 @@ async def test_template_mapping_and_settings_round_trip(pg_session) -> None:
         {"name": "PG DATEV", "provider": "datev", "country_code": "DE", "settings": {"journal_columns": ["account"]}}
     )
     await pg_session.flush()
+    conn_id = conn.id
     pg_session.expire_all()
     taxes = {
         (m.tax_code, m.direction): m
         for m in (
-            await pg_session.execute(select(TaxCodeMapping).where(TaxCodeMapping.connection_id == conn.id))
+            await pg_session.execute(select(TaxCodeMapping).where(TaxCodeMapping.connection_id == conn_id))
         ).scalars()
     }
     assert taxes[("VAT", "purchase")].external_code == "9"
     assert taxes[("VAT", "sales")].rate_pct == Decimal("19.0000")
-    again = await svc.get_connection(conn.id)
+    again = await svc.get_connection(conn_id)
     assert again.settings_ == {"journal_columns": ["account"]}
 
 
@@ -54,9 +55,10 @@ async def test_external_ref_is_unique_per_record(pg_session) -> None:
 async def test_log_amount_keeps_cents_exactly(pg_session) -> None:
     svc = AccountingSyncService(pg_session)
     conn = await svc.create_connection({"name": "PG QBO", "provider": "qbo"})
+    conn_id = conn.id
     pg_session.add(
         SyncLogEntry(
-            connection_id=conn.id,
+            connection_id=conn_id,
             action="push",
             record_type="ar_invoice",
             status="success",
@@ -65,5 +67,5 @@ async def test_log_amount_keeps_cents_exactly(pg_session) -> None:
     )
     await pg_session.flush()
     pg_session.expire_all()
-    row = (await pg_session.execute(select(SyncLogEntry).where(SyncLogEntry.connection_id == conn.id))).scalar_one()
+    row = (await pg_session.execute(select(SyncLogEntry).where(SyncLogEntry.connection_id == conn_id))).scalar_one()
     assert row.amount == Decimal("0.30")

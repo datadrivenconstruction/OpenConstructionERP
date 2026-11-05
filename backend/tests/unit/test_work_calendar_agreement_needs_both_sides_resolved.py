@@ -91,7 +91,10 @@ UNMEASURED = "unmeasured"
 #: FR left when core.calendar gained the French holidays and Monday to Friday week
 #: (Code du travail L3121-27) beside the planning table's FRANCE calendar. Both sides
 #: name the same five days.
-_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "HU", "JP", "NG"})
+#:
+#: PE joined with the Peruvian holiday table and Monday to Friday week in core.calendar;
+#: the planning table has no Peruvian calendar, for the same reason as HU.
+_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "HU", "JP", "NG", "PE"})
 
 
 def _population(core_weeks: Mapping[str, Any], country_map: Mapping[str, Any]) -> list[str]:

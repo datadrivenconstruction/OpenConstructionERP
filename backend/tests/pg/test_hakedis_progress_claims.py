@@ -384,7 +384,7 @@ async def test_the_certificate_and_the_payment_application_state_one_value_of_wo
     second = await _measure(svc, await _claim(session, contract, 2), lines, 2)
 
     view = await svc.hakedis_view(second.id, locale="en")
-    application = await svc._build_payment_application(second.id, locale="en", require_aia=False)
+    application = await svc._build_payment_application(second.id, locale="en", require_form=None)
     summary = application["summary"]
     totals = view["works"]["totals"]
     assert D(totals["cumulative_amount"]) == D(str(summary["total_completed_stored"]))

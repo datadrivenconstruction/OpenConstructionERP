@@ -8,13 +8,13 @@ from types import SimpleNamespace
 import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests._pg import transactional_session
 
 from app.modules.costs.models import CostItem
 from app.modules.rate_feedback.models import RateFeedbackProposal
 from app.modules.rate_feedback.schemas import ConfirmRequest
 from app.modules.rate_feedback.service import HISTORY_KEY, HOURS_KEY, RateFeedbackService, _linked_item_id
 from app.modules.rate_feedback.validators import RateFeedbackError
+from tests._pg import transactional_session
 
 USER = uuid.uuid4()
 

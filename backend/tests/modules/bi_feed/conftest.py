@@ -14,7 +14,6 @@ import pytest_asyncio
 from fastapi import FastAPI, Request
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests._pg import transactional_session
 
 from app.dependencies import get_optional_user_payload, get_session
 from app.modules.bi_feed.router import router as bi_feed_router
@@ -28,6 +27,7 @@ from app.modules.projects.models import Project
 from app.modules.projects.permissions import register_project_permissions
 from app.modules.schedule.permissions import register_schedule_permissions
 from app.modules.users.models import APIKey, User
+from tests._pg import transactional_session
 
 PREFIX = "/v1/bi-feed"
 

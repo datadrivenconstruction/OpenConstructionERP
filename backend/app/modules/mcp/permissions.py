@@ -17,5 +17,7 @@ def register_mcp_permissions() -> None:
         "mcp",
         {
             "mcp.use": Role.VIEWER,
+            "mcp.access": Role.VIEWER,
+            "mcp.propose": Role.EDITOR,
         },
     )

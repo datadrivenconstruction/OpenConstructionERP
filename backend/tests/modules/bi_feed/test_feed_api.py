@@ -9,6 +9,8 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pyarrow.parquet as pq
+
+from app.modules.bi_feed import service as feed_service
 from tests.modules.bi_feed.conftest import (
     PREFIX,
     build_app,
@@ -20,8 +22,6 @@ from tests.modules.bi_feed.conftest import (
     make_project,
     make_user,
 )
-
-from app.modules.bi_feed import service as feed_service
 
 
 def _ids(n: int, base: int = 0x1000) -> list[uuid.UUID]:

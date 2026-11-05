@@ -281,7 +281,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
                   {wouldReplace.every(Boolean)
                     ? t('sheets.held_note', {
                         defaultValue: 'Held: not yet superseding {{sheets}}',
-                        sheets: fmtList(wouldReplace),
+                        sheets: fmtList(wouldReplace.filter((s): s is string => s !== null)),
                       })
                     : t('sheets.held_note_unknown', {
                         defaultValue: 'Held: not yet superseding the current revision',
