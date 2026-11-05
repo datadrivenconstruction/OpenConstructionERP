@@ -21,7 +21,6 @@
    "features/accommodation/AccommodationDetailPage.tsx::placeholder::-180 to 180",
    "features/accommodation/AccommodationDetailPage.tsx::placeholder::-90 to 90",
    "features/boq/CustomColumnsDialog.tsx::placeholder::=quantity * unit_rate * 1.19",
-   "features/boq/CustomColumnsDialog.tsx::placeholder::Approved, Pending, Rejected",
    "features/boq/grid/cellEditors.tsx::placeholder::123  or  =2*PI()^2*3",
    "features/boq/grid/cellRenderers.tsx::placeholder::123  or  =2*PI()*3",
    "features/carbon/CarbonPage.tsx::placeholder::DE, EU…",

@@ -8216,7 +8216,7 @@ const resource = {
     "journey.phase.control.name": "Controleaza și raporteaza",
     "journey.phase.control.desc": "Urmărește costul față de buget, facturează și raportează progresul cu tablouri de bord live.",
     "journey.phase.close.name": "Finalizeaza și exploateaza",
-    "journey.phase.close.desc": "Preda, gestioneaza activele și patrimoniul construit și transmite lectiile invatate.",
+    "journey.phase.close.desc": "Predă, gestionează activele și patrimoniul construit și transmite lecțiile învățate.",
     "presence.active": "Activ",
     "presence.idle": "Inactiv",
     "presence.idle_for": "Inactiv de {{time}}",
