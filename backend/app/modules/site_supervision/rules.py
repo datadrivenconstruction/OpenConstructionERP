@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from app.core.validation.engine import RuleResult, ValidationContext, rule_registry
 from app.core.validation.money_rules import MoneyRule, blank, section
-from app.core.validation.quality_rules import parse_day, today_of
+from app.core.validation.quality_rules import latest_local_day, parse_day
 
 SITE_SUPERVISION_RULE_SET = "site_supervision"
 
@@ -64,7 +64,7 @@ class VisitNotInFutureRule(_SupervisionRule):
         visit = section(context, "visit")
         ref = str(visit.get("id", ""))
         day = parse_day(visit.get("actual_date"))
-        if visit.get("status") in _HELD_VISIT and day is not None and day > today_of(context):
+        if visit.get("status") in _HELD_VISIT and day is not None and day > latest_local_day(context):
             return [self.fail(context, "visit_in_future", ref=ref, status=visit.get("status"), date=day.isoformat())]
         return [self.ok(ref)]
 
