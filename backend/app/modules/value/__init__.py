@@ -27,3 +27,6 @@ async def on_startup() -> None:
     from app.modules.value.permissions import register_value_permissions
 
     register_value_permissions()
+    from app.modules.value.validators import register_value_validation_rules
+
+    register_value_validation_rules()

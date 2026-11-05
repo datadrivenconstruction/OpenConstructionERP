@@ -21,6 +21,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.prefab import events as prefab_events
 from app.modules.prefab.costing import derive_cost
 from app.modules.prefab.guard import (
@@ -46,6 +47,7 @@ from app.modules.prefab.schemas import (
     PrefabUnitUpdate,
     ReceiveByQrRequest,
 )
+from app.modules.prefab.validators import PREFAB_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,16 @@ class PrefabService:
                 detail=f"Unit ref '{data.ref}' already exists in project {data.project_id}",
             )
 
+        report = await self._gate(
+            {
+                "ref": data.ref,
+                "status": data.status,
+                "target_install_date": data.target_install_date,
+                "bim_element_ids": data.bim_element_ids,
+            },
+            project_id=data.project_id,
+            operation="create",
+        )
         unit = PrefabUnit(
             project_id=data.project_id,
             ref=data.ref,
@@ -127,6 +139,7 @@ class PrefabService:
             data.status,
             data.project_id,
         )
+        unit.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return unit
 
     async def get_unit(self, unit_id: uuid.UUID) -> PrefabUnit:
@@ -179,9 +192,18 @@ class PrefabService:
                     detail=f"Unit ref '{new_ref}' already exists in this project",
                 )
 
+        stored = self._rule_view(unit)
+        report = await self._gate(
+            {**stored, **{k: v for k, v in fields.items() if k in stored}},
+            project_id=unit.project_id,
+            operation="update",
+            unit_id=unit_id,
+            before=stored,
+        )
         await self.unit_repo.update_fields(unit_id, **fields)
         await self.session.refresh(unit)
         logger.info("Prefab unit updated: %s (fields=%s)", unit_id, list(fields.keys()))
+        unit.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return unit
 
     async def delete_unit(self, unit_id: uuid.UUID) -> None:
@@ -388,6 +410,14 @@ class PrefabService:
                 detail=reason,
             )
 
+        stored = self._rule_view(unit)
+        report = await self._gate(
+            {**stored, "status": target},
+            project_id=unit.project_id,
+            operation="advance",
+            unit_id=unit_id,
+            before=stored,
+        )
         await self.unit_repo.update_fields(unit_id, status=target)
 
         audit = ProductionEvent(
@@ -437,6 +467,7 @@ class PrefabService:
                 source_module="prefab",
             )
 
+        unit.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return unit
 
     async def receive_by_qr(self, data: ReceiveByQrRequest, user_id: str | None = None) -> PrefabUnit:
@@ -457,6 +488,38 @@ class PrefabService:
             unit.id,
             AdvanceStageRequest(target_status=PrefabStage.DELIVERED.value, note=note),
             user_id=user_id,
+        )
+
+    @staticmethod
+    def _rule_view(unit: PrefabUnit) -> dict[str, Any]:
+        return {
+            "ref": unit.ref,
+            "status": unit.status,
+            "target_install_date": unit.target_install_date,
+            "bim_element_ids": unit.bim_element_ids,
+        }
+
+    async def _gate(
+        self,
+        view: dict[str, Any],
+        *,
+        project_id: uuid.UUID,
+        operation: str,
+        unit_id: uuid.UUID | None = None,
+        before: dict[str, Any] | None = None,
+    ) -> Any:
+        """Run the prefab rules at a write; errors the write introduces answer a coded 422."""
+        uid = str(unit_id or "")
+        return await gate_rule_set(
+            rule_set=PREFAB_RULE_SET,
+            data={"unit": {"id": uid, "operation": operation, **view}},
+            target_type="prefab_unit",
+            target_id=uid,
+            project_id=project_id,
+            operation=operation,
+            subject="prefab unit",
+            before={"unit": {"id": uid, "operation": operation, **before}} if before is not None else None,
+            error="prefab_rules_failed",
         )
 
     async def get_unit_events(self, unit_id: uuid.UUID) -> list[ProductionEvent]:
