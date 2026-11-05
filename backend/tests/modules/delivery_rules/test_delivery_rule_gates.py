@@ -122,7 +122,14 @@ async def test_work_order_legacy_line_stays_editable_and_empty_completion_is_war
     edit = await client.patch(f"/api/v1/service/work-orders/{body['id']}", json={"technician_id": "t-1"}, headers=h)
     assert edit.status_code == 200, edit.text
     empty = await _work_order(client, h, [])
-    done = await client.post(f"/api/v1/service/work-orders/{empty.json()['id']}/complete", json={}, headers=h)
+    for step in ("dispatched", "in_progress"):
+        moved = await client.patch(
+            f"/api/v1/service/work-orders/{empty.json()['id']}", json={"status": step}, headers=h
+        )
+        assert moved.status_code == 200, moved.text
+    done = await client.post(
+        f"/api/v1/service/work-orders/{empty.json()['id']}/complete", json={"debrief": {}}, headers=h
+    )
     assert done.status_code == 200, done.text
     assert _warned(done.json()) == {"service.completed_work_has_items"}
 
@@ -193,7 +200,7 @@ async def test_signing_attestation_in_the_future_is_refused_and_a_stale_hash_is_
     stale = await client.post(
         f"/api/v1/signing/sessions/{sid}/attest", json={**attest, "content_hash": "b" * 64}, headers=h
     )
-    assert stale.status_code == 200, stale.text
+    assert stale.status_code == 201, stale.text
     assert _warned(stale.json()) == {"signing.signed_current_version"}
 
 
