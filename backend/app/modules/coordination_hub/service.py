@@ -36,6 +36,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.coordination_hub.intl import normalise_trade
 from app.modules.coordination_hub.models import (
     DEFAULT_THRESHOLDS,
@@ -60,6 +61,7 @@ from app.modules.coordination_hub.schemas import (
     TradeMatrixCell,
     TradeMatrixResponse,
 )
+from app.modules.coordination_hub.validators import COORDINATION_HUB_RULE_SET, THRESHOLD_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -1159,12 +1161,22 @@ class CoordinationHubService:
         # error tier would never trigger because the warn comparison
         # would always be hit first. Reject explicitly with a 422-able
         # ValueError so the operator sees the mistake.
-        new_warn = warn_value if warn_value is not None else target.warn_value
-        new_error = error_value if error_value is not None else target.error_value
-        if new_warn is not None and new_error is not None and new_warn > new_error:
-            raise ValueError(
-                f"warn_value must be less than or equal to error_value (got warn={new_warn}, error={new_error})"
-            )
+        changes: dict[str, Any] = {
+            k: v
+            for k, v in (("warn_value", warn_value), ("error_value", error_value), ("enabled", enabled))
+            if v is not None
+        }
+        rule_warnings = await gate_record(
+            COORDINATION_HUB_RULE_SET,
+            "threshold",
+            target,
+            THRESHOLD_FIELDS,
+            changes,
+            operation="update",
+            project_id=project_id,
+            error_code="coordination_hub_rules_failed",
+            target_id=metric,
+        )
         if warn_value is not None:
             target.warn_value = warn_value
         if error_value is not None:
@@ -1187,6 +1199,7 @@ class CoordinationHubService:
         # Invalidate the dashboard cache so the new threshold takes
         # effect on the very next poll.
         self.invalidate_cache(project_id)
+        target.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return target
 
     # ── Threshold evaluation ───────────────────────────────────────────────

@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -167,6 +167,8 @@ class RouteResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     steps: list[StepResponse] = Field(default_factory=list)
+    # Non-blocking findings of the approval_routes rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Instance payloads ────────────────────────────────────────────────
@@ -289,6 +291,7 @@ class DelegationResponse(BaseModel):
     created_by: UUID | None
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class EscalationOut(BaseModel):

@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -63,6 +63,8 @@ class TransmittalItemResponse(BaseModel):
     file_version_snapshot: str | None
     canonical_name_snapshot: str
     sort_order: int
+    # Non-blocking findings of the file_transmittals rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class TransmittalRecipientCreate(BaseModel):
@@ -129,6 +131,8 @@ class TransmittalResponse(BaseModel):
     recipients: list[TransmittalRecipientResponse]
     created_at: datetime
     updated_at: datetime
+    # Non-blocking findings of the file_transmittals rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class TransmittalListItem(BaseModel):

@@ -18,3 +18,7 @@ async def on_startup() -> None:
     from app.modules.plan_room.permissions import register_plan_room_permissions
 
     register_plan_room_permissions()
+
+    from app.modules.plan_room.validators import register_plan_room_validation_rules
+
+    register_plan_room_validation_rules()

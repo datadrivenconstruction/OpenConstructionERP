@@ -259,15 +259,17 @@ async def test_expired_delegation_grants_nothing(session: AsyncSession) -> None:
     delegate_b = await _user(session)
 
     # Window already closed.
-    await svc.create_delegation(
+    live = await svc.create_delegation(
         delegator_id=approver_a.id,
         delegate_id=delegate_b.id,
         project_id=None,
         starts_at=datetime.now(UTC) - timedelta(days=10),
-        ends_at=datetime.now(UTC) - timedelta(days=1),
+        ends_at=datetime.now(UTC) + timedelta(days=1),
         reason=None,
         created_by=approver_a.id,
     )
+    live.ends_at = datetime.now(UTC) - timedelta(days=1)
+    await session.flush()
 
     inst = await _route_instance(
         session,

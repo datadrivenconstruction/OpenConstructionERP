@@ -30,6 +30,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.file_transmittals.models import (
     TRANSMITTAL_REASONS,
     FileTransmittal,
@@ -41,6 +42,7 @@ from app.modules.file_transmittals.schemas import (
     TransmittalItemCreate,
     TransmittalRecipientCreate,
 )
+from app.modules.file_transmittals.validators import FILE_TRANSMITTALS_RULE_SET, TRANSMITTAL_FIELDS
 
 if TYPE_CHECKING:  # pragma: no cover
     pass
@@ -322,6 +324,27 @@ def _build_cover_pdf(
 # ── Service ───────────────────────────────────────────────────────────────
 
 
+def _item_view(item: object) -> dict[str, str | None]:
+    """An item (stored row or create payload) as the rules read it."""
+    name = getattr(item, "canonical_name_snapshot", None)
+    return {
+        "file_kind": getattr(item, "file_kind", None),
+        "file_id": getattr(item, "file_id", None),
+        "name": name,
+        "version": getattr(item, "file_version_snapshot", None),
+    }
+
+
+def _rule_state(transmittal: FileTransmittal) -> dict[str, object]:
+    """The stored transmittal as the rules read it."""
+    return {
+        "status": transmittal.status,
+        "reason_code": transmittal.reason_code,
+        "items": [_item_view(i) for i in transmittal.items],
+        "recipients": [r.email for r in transmittal.recipients],
+    }
+
+
 class TransmittalService:
     """Stateless business logic for ``oe_file_transmittal``."""
 
@@ -443,6 +466,20 @@ class TransmittalService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown reason_code '{data.reason_code}'",
             )
+        rule_warnings = await gate_record(
+            FILE_TRANSMITTALS_RULE_SET,
+            "transmittal",
+            {
+                "status": "draft",
+                "reason_code": data.reason_code,
+                "items": [_item_view(i) for i in data.items],
+                "recipients": [str(r.email).lower() for r in data.recipients],
+            },
+            TRANSMITTAL_FIELDS,
+            operation="create",
+            project_id=data.project_id,
+            error_code="file_transmittals_rules_failed",
+        )
         number = await self._next_number(data.project_id)
         now = datetime.now(UTC)
         sender_uuid: uuid.UUID | None = None
@@ -485,7 +522,9 @@ class TransmittalService:
                 )
             )
         await self.session.flush()
-        return await self.get(transmittal.id)
+        created = await self.get(transmittal.id)
+        created.validation_warnings = rule_warnings  # type: ignore[attr-defined]
+        return created
 
     @staticmethod
     def _assert_draft(transmittal: FileTransmittal) -> None:
@@ -507,6 +546,17 @@ class TransmittalService:
         """Append an item to an existing transmittal (draft only)."""
         transmittal = await self.get(transmittal_id)
         self._assert_draft(transmittal)
+        rule_warnings = await gate_record(
+            FILE_TRANSMITTALS_RULE_SET,
+            "transmittal",
+            _rule_state(transmittal),
+            TRANSMITTAL_FIELDS,
+            {"items": [*(_item_view(i) for i in transmittal.items), _item_view(item)]},
+            operation="add_item",
+            project_id=transmittal.project_id,
+            error_code="file_transmittals_rules_failed",
+            target_id=str(transmittal.id),
+        )
         # Compute next sort order.
         next_order = max((it.sort_order for it in transmittal.items), default=-1) + 1
         row = FileTransmittalItem(
@@ -519,6 +569,7 @@ class TransmittalService:
         )
         self.session.add(row)
         await self.session.flush()
+        row.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return row
 
     async def remove_item(self, transmittal_id: uuid.UUID, item_id: uuid.UUID) -> None:
@@ -582,6 +633,18 @@ class TransmittalService:
         if transmittal.status != "draft":
             return transmittal
 
+        rule_warnings = await gate_record(
+            FILE_TRANSMITTALS_RULE_SET,
+            "transmittal",
+            _rule_state(transmittal),
+            TRANSMITTAL_FIELDS,
+            {"status": "sent"},
+            operation="send",
+            project_id=transmittal.project_id,
+            error_code="file_transmittals_rules_failed",
+            target_id=str(transmittal.id),
+        )
+
         now = datetime.now(UTC)
         transmittal.sent_at = now
         transmittal.status = "sent"
@@ -623,6 +686,7 @@ class TransmittalService:
             transmittal,
             attribute_names=["updated_at", "cover_sheet_path", "sent_at", "status"],
         )
+        transmittal.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return transmittal
 
     # ── Acknowledge (public) ──────────────────────────────────────────
