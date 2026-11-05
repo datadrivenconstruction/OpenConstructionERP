@@ -389,6 +389,37 @@ def test_the_25_percent_is_one_number_in_four_places(manifest) -> None:
     )
 
 
+def test_a_direct_cost_of_100_totals_150_the_25_percent_added_once() -> None:
+    """25 percent on the direct cost, then KDV 20 on the cumulative amount."""
+    import uuid
+
+    from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
+    from app.modules.boq.models import BOQMarkup
+    from app.modules.boq.service import _calculate_markup_amounts_scoped
+
+    markups = []
+    for line in DEFAULT_MARKUP_TEMPLATES["TR"]:
+        markup = BOQMarkup(
+            boq_id=uuid.uuid4(),
+            name=line["name"],
+            category=line["category"],
+            markup_type="percentage",
+            percentage=line["percentage"],
+            fixed_amount="0",
+            apply_to=line["apply_to"],
+            sort_order=line["sort_order"],
+            is_active=True,
+            scope_position_id=None,
+            overrides_id=None,
+            metadata_={},
+        )
+        markup.id = uuid.uuid4()
+        markups.append(markup)
+    amounts = [amount for _, amount in _calculate_markup_amounts_scoped(Decimal("100"), markups)]
+    assert amounts == [Decimal("25"), Decimal("25")]
+    assert Decimal("100") + sum(amounts) == Decimal("150")
+
+
 @pytest.mark.parametrize("locale", ["en", "tr"])
 @pytest.mark.parametrize("rule", BIRIMFIYAT_RULES, ids=lambda r: r.rule_id)
 def test_every_message_exists_in_english_and_in_turkish(rule, locale: str) -> None:
