@@ -136,7 +136,9 @@ async def test_legacy_document_with_existing_violation_stays_editable(client, ad
     _, header = admin_auth
     doc_id = await _make_doc(project_id, status="final")
     async with async_session_factory() as session:
-        await session.execute(update(EstimateBasis).where(EstimateBasis.id == uuid.UUID(doc_id)).values(estimate_class=None))
+        await session.execute(
+            update(EstimateBasis).where(EstimateBasis.id == uuid.UUID(doc_id)).values(estimate_class=None)
+        )
         await session.commit()
     resp = await client.put(f"/api/v1/estimate-basis/documents/{doc_id}", json={"title": "Renamed"}, headers=header)
     assert resp.status_code == 200, resp.text
