@@ -43,6 +43,7 @@ from app.modules.qms.schemas import (
     ITPPlanUpdate,
     NCRActionCreate,
     NCRCreate,
+    NCRUpdate,
     PunchItemCreate,
     PunchItemUpdate,
 )
@@ -440,6 +441,7 @@ async def test_close_ncr_requires_all_actions_done(svc: QMSService) -> None:
     with pytest.raises(ValueError, match="every corrective action"):
         await svc.close_ncr(ncr.id)
     await svc.verify_action(a1.id)
+    await svc.update_ncr(ncr.id, NCRUpdate(root_cause="Formwork struck early"))
     with patch(
         "app.modules.qms.service.event_bus.publish_detached",
         new_callable=MagicMock,
@@ -537,7 +539,6 @@ async def test_ncr_illegal_status_transition(svc: QMSService) -> None:
             severity="minor",
         ),
     )
-    from app.modules.qms.schemas import NCRUpdate
 
     # open → verifying is illegal (must walk through action_pending)
     with pytest.raises(ValueError, match="Illegal NCR"):
@@ -548,7 +549,6 @@ async def test_ncr_illegal_status_transition(svc: QMSService) -> None:
 async def test_ncr_patch_cannot_bypass_close_action(svc: QMSService) -> None:
     """PATCH must not close an NCR — that bypasses the corrective-action
     completeness invariant enforced by ``close_ncr``."""
-    from app.modules.qms.schemas import NCRUpdate
 
     ncr = await svc.raise_ncr(
         NCRCreate(
@@ -630,8 +630,6 @@ async def test_cannot_edit_closed_ncr(svc: QMSService) -> None:
     await svc.verify_action(a1.id)
     await svc.close_ncr(ncr.id)
 
-    from app.modules.qms.schemas import NCRUpdate
-
     with pytest.raises(ValueError, match="closed"):
         await svc.update_ncr(ncr.id, NCRUpdate(title="Edit-attempt"))
 
@@ -673,6 +671,7 @@ async def test_cannot_escalate_closed_ncr(svc: QMSService) -> None:
     )
     a1 = await svc.assign_ncr_action(ncr.id, NCRActionCreate(description="Fix"))
     await svc.verify_action(a1.id)
+    await svc.update_ncr(ncr.id, NCRUpdate(root_cause="Wrong mix delivered"))
     await svc.close_ncr(ncr.id)
     with pytest.raises(ValueError, match="terminal status 'closed'"):
         await svc.escalate_ncr_to_variation(ncr.id)
