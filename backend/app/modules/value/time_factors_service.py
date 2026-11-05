@@ -185,10 +185,11 @@ async def set_factors(
         }
         for mod, act, minutes in coerced
     ]
+    # One row per stored pair: the database holds each pair once, so a duplicate in the batch is never legacy.
     stored = [
-        {**r, "minutes": existing[(r["module"], r["action"])].minutes}
-        for r in batch
-        if (r["module"], r["action"]) in existing
+        {**r, "minutes": existing[pair].minutes}
+        for pair, r in {(r["module"], r["action"]): r for r in batch}.items()
+        if pair in existing
     ]
     report = await gate_rule_set(
         rule_set=VALUE_RULE_SET,
