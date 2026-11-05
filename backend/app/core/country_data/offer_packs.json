@@ -1,0 +1,229 @@
+{
+  "_comment": "Customer offer data per market, read by app/modules/offers/pack.py. Legal values are research, not legal advice: every block ships verified=false with its statutory source. Pack rules warn and never block. Default texts are starting points the company edits. A country absent here gets the neutral block under _default: English titles, no legal notice, no caps, no warnings beyond core.",
+  "_default": {
+    "markets": [],
+    "currency": "",
+    "paper": "A4",
+    "validity_days": 30,
+    "validity_source": "Neutral default, not a statute",
+    "titles": { "en": "Offer" },
+    "tax": { "rates": [], "reverse_charge": null, "consumer_gross": false },
+    "consumer": { "gross_total": false, "cancellation_notice": null },
+    "rules": [],
+    "address_window": { "form": "DIN_5008_B", "left_mm": 20, "top_mm": 45, "width_mm": 85, "height_mm": 45, "return_line_mm": 5, "verified": false, "source": "DIN 5008 form B" },
+    "texts": {
+      "intro": { "en": "Thank you for your enquiry. We offer the work described below for {project_name}." },
+      "payment_terms": { "en": "Payment within {payment_days} days of the invoice date, without deduction." },
+      "validity": { "en": "This offer is valid until {valid_until}." },
+      "conditions": { "en": "Prices are fixed for the scope listed. Work outside this scope is priced separately." },
+      "warranty": { "en": "" },
+      "closing": { "en": "We look forward to your order." },
+      "legal_notice": { "en": "" }
+    },
+    "verified": false
+  },
+  "packs": {
+    "DE": {
+      "markets": ["DE", "AT", "CH"],
+      "name": "Germany",
+      "currency": "EUR",
+      "paper": "A4",
+      "validity_days": 30,
+      "validity_source": "BGB 145, 147(2), 148: an offer binds the bidder until the stated deadline; VOB/A 10 caps public tender deadlines at normally 30 calendar days (public only)",
+      "titles": { "de": "Angebot", "en": "Offer" },
+      "tax": {
+        "rates": [
+          { "code": "standard", "rate": "19", "label": "MwSt.", "from": "2007-01-01", "to": null, "source": "UStG 12(1)" },
+          { "code": "reduced", "rate": "7", "label": "MwSt.", "from": "1983-07-01", "to": null, "source": "UStG 12(2)" }
+        ],
+        "reverse_charge": {
+          "requires_customer_vat_id": true,
+          "source": "UStG 13b(2) no. 4, (5); 14a(5)",
+          "note": { "de": "Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG).", "en": "Reverse charge: the recipient of the services is liable for the VAT (section 13b UStG)." }
+        },
+        "consumer_gross": true,
+        "consumer_gross_source": "PAngV 2022 3(1)"
+      },
+      "consumer": { "gross_total": true, "cancellation_notice": null },
+      "rules": [
+        { "id": "de.offer.abschlag_90", "kind": "pre_acceptance_cap_percent", "value": "90", "source": "BGB 650m(1), scope 650i", "consumer_only": true }
+      ],
+      "address_window": { "form": "DIN_5008_B", "left_mm": 20, "top_mm": 45, "width_mm": 85, "height_mm": 45, "return_line_mm": 5, "verified": false, "source": "DIN 5008 form B" },
+      "alternate_title": null,
+      "texts": {
+        "intro": {
+          "de": "vielen Dank für Ihre Anfrage. Wir bieten Ihnen die Arbeiten für {project_name} wie nachstehend beschrieben an.",
+          "en": "Thank you for your enquiry. We offer the work for {project_name} as described below."
+        },
+        "payment_terms": {
+          "de": "Zahlung innerhalb von {payment_days} Tagen nach Rechnungsdatum ohne Abzug. Abschlagszahlungen gemäß Zahlungsplan.",
+          "en": "Payment within {payment_days} days of the invoice date, without deduction. Instalments follow the payment schedule."
+        },
+        "validity": {
+          "de": "Wir halten uns bis zum {valid_until} an dieses Angebot gebunden ({validity_days} Tage ab Angebotsdatum).",
+          "en": "We are bound to this offer until {valid_until} ({validity_days} days from the offer date)."
+        },
+        "conditions": {
+          "de": "Die Preise gelten für den aufgeführten Leistungsumfang. Leistungen außerhalb dieses Umfangs werden gesondert berechnet.",
+          "en": "Prices apply to the listed scope. Work outside this scope is charged separately."
+        },
+        "warranty": {
+          "de": "Es gelten die gesetzlichen Mängelrechte.",
+          "en": "The statutory rights in respect of defects apply."
+        },
+        "closing": {
+          "de": "Wir freuen uns auf Ihren Auftrag.",
+          "en": "We look forward to your order."
+        },
+        "legal_notice": { "de": "", "en": "" }
+      },
+      "verified": false
+    },
+    "GB": {
+      "markets": ["GB"],
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "paper": "A4",
+      "validity_days": 30,
+      "validity_source": "Neutral default, not a statute",
+      "titles": { "en": "Quotation" },
+      "alternate_title": { "en": "Estimate" },
+      "tax": {
+        "rates": [
+          { "code": "standard", "rate": "20", "label": "VAT", "from": "2011-01-04", "to": null, "source": "VATA 1994 s.2" },
+          { "code": "reduced", "rate": "5", "label": "VAT", "from": "1997-09-01", "to": null, "source": "VAT Notice 708 (renovation of homes empty 2+ years)" }
+        ],
+        "reverse_charge": {
+          "requires_customer_vat_id": true,
+          "source": "VATA 1994 s.55A; SI 2019/892",
+          "note": { "en": "Domestic reverse charge: the customer must account to HMRC for the VAT on these services." }
+        },
+        "consumer_gross": false
+      },
+      "consumer": {
+        "gross_total": false,
+        "cancellation_notice": {
+          "days": 14,
+          "source": "SI 2013/3134 (CCR 2013) regs 29-31",
+          "text": { "en": "If this contract is made at your home or away from our premises you have the right to cancel it within 14 days without giving a reason. Ask us for the cancellation form." }
+        }
+      },
+      "rules": [
+        { "id": "uk.offer.cancellation_notice", "kind": "cancellation_notice_required", "source": "SI 2013/3134 (CCR 2013) regs 29-31", "consumer_only": true }
+      ],
+      "address_window": { "form": "DL_window", "left_mm": 20, "top_mm": 45, "width_mm": 85, "height_mm": 45, "return_line_mm": 5, "verified": false, "source": "Common UK DL window position; no statute" },
+      "texts": {
+        "intro": { "en": "Thank you for your enquiry. We quote a fixed price for the work described below at {site_address}." },
+        "payment_terms": { "en": "Payment is due within {payment_days} days of each invoice. Instalments follow the payment schedule." },
+        "validity": { "en": "This quotation is valid until {valid_until}." },
+        "conditions": { "en": "The price is fixed for the scope listed. Provisional sums are adjusted to the actual cost. Variations are agreed in writing before the work starts." },
+        "warranty": { "en": "We will make good defects notified to us within 12 months of completion." },
+        "closing": { "en": "We look forward to hearing from you." },
+        "legal_notice": { "en": "" }
+      },
+      "verified": false
+    },
+    "FR": {
+      "markets": ["FR"],
+      "name": "France",
+      "currency": "EUR",
+      "paper": "A4",
+      "validity_days": 30,
+      "validity_source": "Arrete du 24 janvier 2017: a devis states its validity period; no fixed length",
+      "titles": { "fr": "Devis", "en": "Quotation" },
+      "tax": {
+        "rates": [
+          { "code": "standard", "rate": "20", "label": "TVA", "from": "2014-01-01", "to": null, "source": "CGI art. 278" },
+          { "code": "reduced_10", "rate": "10", "label": "TVA", "from": "2014-01-01", "to": null, "source": "CGI art. 279-0 bis (housing renovation, property over 2 years old)", "needs_attestation": true },
+          { "code": "reduced_55", "rate": "5.5", "label": "TVA", "from": "2014-01-01", "to": null, "source": "CGI art. 278-0 bis A (energy work)", "needs_attestation": true }
+        ],
+        "reverse_charge": {
+          "requires_customer_vat_id": true,
+          "source": "CGI art. 283-2 nonies",
+          "note": { "fr": "Autoliquidation de la TVA par le preneur (art. 283-2 nonies du CGI).", "en": "Reverse charge: VAT is accounted for by the customer (CGI art. 283-2 nonies)." }
+        },
+        "consumer_gross": true,
+        "consumer_gross_source": "Arrete du 24 janvier 2017: prices shown HT and TTC"
+      },
+      "consumer": { "gross_total": true, "cancellation_notice": null },
+      "rules": [
+        { "id": "fr.offer.insurance_named", "kind": "insurance_named_required", "source": "Loi 96-603 art. 22-2", "consumer_only": false },
+        { "id": "fr.offer.reduced_vat_attestation", "kind": "reduced_vat_attestation", "source": "CGI art. 279-0 bis, 278-0 bis A", "consumer_only": false }
+      ],
+      "retention_max_percent": "5",
+      "retention_source": "Loi 71-584 du 16 juillet 1971",
+      "address_window": { "form": "FR_right_window", "left_mm": 110, "top_mm": 50, "width_mm": 90, "height_mm": 45, "return_line_mm": 5, "verified": false, "source": "NF Z 11-001 right-side window, indicative" },
+      "texts": {
+        "intro": {
+          "fr": "Merci de votre demande. Nous vous proposons les travaux décrits ci-dessous pour {project_name}.",
+          "en": "Thank you for your enquiry. We offer the work described below for {project_name}."
+        },
+        "payment_terms": {
+          "fr": "Paiement sous {payment_days} jours à compter de la date de facture, sans escompte. Acomptes selon l'échéancier.",
+          "en": "Payment within {payment_days} days of the invoice date. Instalments follow the payment schedule."
+        },
+        "validity": {
+          "fr": "Ce devis est valable jusqu'au {valid_until}.",
+          "en": "This quotation is valid until {valid_until}."
+        },
+        "conditions": {
+          "fr": "Les prix s'entendent pour le périmètre détaillé. Tout travail supplémentaire fait l'objet d'un avenant.",
+          "en": "Prices apply to the detailed scope. Additional work is covered by a separate amendment."
+        },
+        "warranty": {
+          "fr": "Les garanties légales s'appliquent (parfait achèvement, biennale, décennale).",
+          "en": "The statutory guarantees apply."
+        },
+        "closing": {
+          "fr": "Devis reçu avant l'exécution des travaux. Date et mention « bon pour accord ».",
+          "en": "Quotation received before the work starts. Date and the words \"accepted\"."
+        },
+        "legal_notice": {
+          "fr": "Assurance responsabilité décennale et responsabilité civile : indiquer ici l'assureur, le numéro de contrat et la couverture géographique.",
+          "en": "Ten-year liability and public liability insurance: state the insurer, policy number and geographic cover here."
+        }
+      },
+      "verified": false
+    },
+    "US-CA": {
+      "markets": ["US-CA"],
+      "name": "United States, California",
+      "currency": "USD",
+      "paper": "LETTER",
+      "validity_days": 30,
+      "validity_source": "Neutral default, not a statute",
+      "titles": { "en": "Proposal" },
+      "tax": {
+        "rates": [
+          { "code": "none", "rate": "0", "label": "", "from": "1900-01-01", "to": null, "source": "18 CCR 1521: a lump-sum contractor is the consumer of materials, no sales tax line to the customer" }
+        ],
+        "reverse_charge": null,
+        "consumer_gross": false
+      },
+      "consumer": {
+        "gross_total": false,
+        "cancellation_notice": {
+          "days": 3,
+          "source": "16 CFR Part 429; Cal. Civ. Code 1689.7",
+          "text": { "en": "You may cancel this contract within three business days of signing it, without penalty or obligation. See the attached notice of cancellation." }
+        }
+      },
+      "rules": [
+        { "id": "us_ca.offer.licence_number", "kind": "licence_number_required", "source": "Cal. Bus. & Prof. Code 7030.5", "consumer_only": false },
+        { "id": "payment_plan.consumer_deposit_cap", "kind": "deposit_cap", "jurisdiction": "US-CA", "source": "Cal. Bus. & Prof. Code 7159.5", "consumer_only": true }
+      ],
+      "licence_field": { "label": "Contractor licence no.", "source": "Cal. Bus. & Prof. Code 7030.5" },
+      "address_window": { "form": "US_10_window", "left_mm": 22.225, "top_mm": 50.8, "width_mm": 114.3, "height_mm": 28.575, "return_line_mm": 5, "verified": false, "source": "US #10 double-window envelope: 0.875 in from left, 2.0 in from top, 4.5 x 1.125 in" },
+      "texts": {
+        "intro": { "en": "Thank you for the opportunity to bid. We propose to perform the work below at {site_address}." },
+        "payment_terms": { "en": "Payments follow the payment schedule. Invoices are due within {payment_days} days." },
+        "validity": { "en": "This proposal may be withdrawn if not accepted by {valid_until}." },
+        "conditions": { "en": "This is a lump-sum price for the scope listed. Changes to the scope require a written change order signed by both parties before the work is done." },
+        "warranty": { "en": "" },
+        "closing": { "en": "We appreciate the opportunity to work with you." },
+        "legal_notice": { "en": "Under the Mechanics Lien Law, a contractor, subcontractor, laborer or supplier who is not paid for work or materials may place a lien on your property. Ask for the full notice before you sign." }
+      },
+      "verified": false
+    }
+  }
+}
