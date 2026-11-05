@@ -89,7 +89,7 @@ _WALL_DEDUP_CELL_PX = 14
 _MAX_WALLS = 8
 
 # Never return more than this many candidates total (matches recognize.py).
-_MAX_CANDIDATES = 200
+_MAX_CANDIDATES = 100
 
 Point = tuple[float, float]
 
@@ -352,10 +352,67 @@ def _detect_walls(gray: Any, to_pt, scale: float) -> list[dict[str, Any]]:
 _SCAN_PX_BUDGET = 6_000_000
 # A dark band at most this thick (px) is a pen stroke; thicker is a filled wall.
 _STROKE_MAX_PX = 4.0
-# Scan geometry is less certain than drawn geometry: confidences are scaled
-# into the raster band (never above 0.60).
-_SCAN_CONF_FACTOR = 0.62
+# A scan never measures as exactly as CAD geometry, whatever the outline looks like.
+_SCAN_CONF_FACTOR = 0.9
 _SKETCH_MAX_PARTS = 60
+# Pen weights differ by at least this factor when a drawing keeps cut walls apart from
+# what lies beyond them, which is the usual ratio of two steps in the ISO 128 line series.
+_HEAVY_LINE_RATIO = 1.4
+# Line drawings leave most of the paper bare. A page with this much ink is a photo, a
+# mottled scan or noise, and wall bands found in it would be accidents.
+_MAX_INK_SHARE = 0.35
+
+
+def _ink_map(gray: Any, shape: tuple[int, int]) -> Any:
+    """How much of each work pixel is ink, 0 to 1, in the size of the wall mask.
+
+    A pen line thinner than a pixel survives the threshold at full strength, so the
+    binary mask cannot tell a dimension line from a wall face. Summed across the line,
+    this map still can: JPEG, blur and resizing move ink around without changing how much.
+    """
+    paper = float(np.percentile(gray, 80))
+    black = float(np.percentile(gray, 0.2))
+    span = max(32.0, paper - black)
+    ink = np.clip((paper - gray.astype(np.float32)) / span, 0.0, 1.0)
+    return cv2.resize(ink, (shape[1], shape[0]), interpolation=cv2.INTER_AREA)
+
+
+def _stroke_weight(ink: Any, band: Any) -> float:
+    """Ink across a stroke in pixels: its pen width, median along the stroke."""
+    c, lo, hi = round(band.c), int(band.lo), int(band.hi) + 1
+    if band.axis == "h":
+        patch = ink[max(0, c - 3) : c + 4, lo:hi]
+        across = patch.sum(axis=0)
+    else:
+        patch = ink[lo:hi, max(0, c - 3) : c + 4]
+        across = patch.sum(axis=1)
+    return float(np.median(across)) if across.size else 0.0
+
+
+def _heavy_split(weights: list[float], lengths: list[float]) -> float:
+    """The pen weight separating heavy strokes from light ones, 0.0 when one pen drew them all.
+
+    Otsu on log weight, each stroke counted by its length: lettering is many short
+    strokes and should not get to decide what the pens of a drawing are.
+    """
+    if len(weights) < 8:
+        return 0.0
+    w = np.log(np.maximum(np.asarray(weights), 1e-3))
+    m = np.asarray(lengths)
+    order = np.argsort(w)
+    w, m = w[order], m[order]
+    cum_m = np.cumsum(m)
+    cum_wm = np.cumsum(w * m)
+    total_m, total_wm = cum_m[-1], cum_wm[-1]
+    left = cum_m[:-1]
+    right = total_m - left
+    mean_l = cum_wm[:-1] / left
+    mean_r = (total_wm - cum_wm[:-1]) / np.maximum(right, 1e-9)
+    between = left * right * (mean_r - mean_l) ** 2
+    at = int(np.argmax(between))
+    if math.exp(mean_r[at] - mean_l[at]) < _HEAVY_LINE_RATIO:
+        return 0.0
+    return float(math.exp(0.5 * (w[at] + w[at + 1])))
 
 
 def _dark_mask(gray: Any) -> tuple[Any, float]:
@@ -416,14 +473,26 @@ def _refine_skew(dark: Any, ang: float) -> float:
     return best
 
 
-def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[list[Any], list[Any]]:
-    """Pen strokes and filled wall bands of a scanned page, in page points."""
+def scan_parts(
+    gray: Any, page_width_pt: float, page_height_pt: float, budget: Any = None
+) -> tuple[list[Any], list[Any], int]:
+    """Heavy pen strokes and filled wall bands of a scanned page in page points, and all ink parts found.
+
+    The count says how busy the sheet is; a page too inky to be a line drawing counts as
+    busier than any sketch and yields no parts.
+    """
     from app.modules.takeoff import floorplan as fp
     from app.modules.takeoff import vector_plan as vp
 
     dark, f = _dark_mask(gray)
     h, w = dark.shape
+    if np.count_nonzero(dark) > _MAX_INK_SHARE * h * w:
+        return [], [], _SKETCH_MAX_PARTS + 1
+    if budget is not None:
+        budget.check()
     ang = _skew_deg(dark)
+    if budget is not None:
+        budget.check()
     inv = None
     if abs(ang) >= 0.2:
         # straighten so the walls run along the pixel axes
@@ -441,14 +510,17 @@ def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[
             x, y = inv[0, 0] * x + inv[0, 1] * y + inv[0, 2], inv[1, 0] * x + inv[1, 1] * y + inv[1, 2]
         return (x * sx, y * sy)
 
+    ink = _ink_map(gray, (h, w))
+    if inv is not None:
+        ink = cv2.warpAffine(ink, rot, (nw, nh), flags=cv2.INTER_LINEAR)
     segs: list[Any] = []
     fills: list[Any] = []
+    strokes: list[tuple[Any, float]] = []
     for b in fp.axis_bands(dark, min_len_px=8):
         if b.hi - b.lo < 3:
             continue
         if b.t <= _STROKE_MAX_PX:
-            a, c = ((b.lo, b.c), (b.hi, b.c)) if b.axis == "h" else ((b.c, b.lo), (b.c, b.hi))
-            segs.append(vp.Seg(to_pt(*a), to_pt(*c), 0.35, len(segs)))
+            strokes.append((b, _stroke_weight(ink, b)))
         else:
             # junction bulges widen a band's extent, not its mean thickness
             lo, hi, c0, c1 = b.lo, b.hi, b.c - b.t / 2, b.c + b.t / 2
@@ -456,26 +528,34 @@ def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[
                 [(lo, c0), (hi, c0), (hi, c1), (lo, c1)] if b.axis == "h" else [(c0, lo), (c0, hi), (c1, hi), (c1, lo)]
             )
             fills.append(vp.Fill([to_pt(*p) for p in box], 0.0, len(fills)))
-    return segs, fills
+    split = _heavy_split([wt for _b, wt in strokes], [b.hi - b.lo for b, _wt in strokes])
+    for b, wt in strokes:
+        if wt < split:
+            continue  # dimensions, furniture, door swings: what lies beyond the cut, in a lighter pen
+        a, c = ((b.lo, b.c), (b.hi, b.c)) if b.axis == "h" else ((b.c, b.lo), (b.c, b.hi))
+        segs.append(vp.Seg(to_pt(*a), to_pt(*c), wt * sx, len(segs)))
+    return segs, fills, len(strokes) + len(fills)
 
 
 def _plan_candidates(
-    gray: Any, page_width_pt: float, page_height_pt: float, scale: float
+    gray: Any, page_width_pt: float, page_height_pt: float, scale: float, budget: Any = None
 ) -> tuple[list[dict[str, Any]], int]:
     """Rooms and walls of a scanned plan read like a vector page, and how many ink parts it has."""
     from app.modules.takeoff import recognize, vector_plan
 
-    segs, fills = scan_parts(gray, page_width_pt, page_height_pt)
-    plan = vector_plan.read_parts(segs, fills, [], scale or None)
-    if not plan.found_structure:
-        return [], len(segs) + len(fills)
+    segs, fills, n_parts = scan_parts(gray, page_width_pt, page_height_pt, budget)
+    if not segs and not fills:
+        return [], n_parts
+    plan = vector_plan.read_parts(segs, fills, [], scale or None, budget=budget)
+    if not plan.found_structure or not vector_plan.looks_like_rooms(plan):
+        return [], n_parts
     plan.counts = []  # pen strokes of a scan do not carry symbol identity
     out = recognize.plan_candidates(plan, scale)
     for cand in out:
         cand["confidence"] = round(cand["confidence"] * _SCAN_CONF_FACTOR, 3)
         cand.setdefault("count", None)
         cand["reason"] = cand["reason"].replace("vector layer", "scanned image")
-    return out, len(segs) + len(fills)
+    return out, n_parts
 
 
 def recognize_raster(
@@ -485,6 +565,7 @@ def recognize_raster(
     scale_pixels_per_unit: float | None,
     *,
     max_candidates: int = _MAX_CANDIDATES,
+    budget: Any = None,
 ) -> list[dict[str, Any]]:
     """Detect rooms and walls in a rendered scanned page and rank candidates.
 
@@ -497,6 +578,8 @@ def recognize_raster(
             unit. When ``0`` / ``None`` every ``value`` is returned as ``None``
             (geometry only) so the user can calibrate, then accept.
         max_candidates: Hard cap on returned candidates.
+        budget: Optional :class:`~app.modules.takeoff.vector_plan.Budget`; running
+            out of it raises ``TimeBudgetExceeded`` to the caller.
 
     Returns:
         Candidate dicts in PDF point space, identical in shape to the vector
@@ -515,7 +598,7 @@ def recognize_raster(
     to_pt = _make_px_to_pt(w, h, page_width_pt, page_height_pt)
 
     try:
-        candidates, n_parts = _plan_candidates(gray, page_width_pt, page_height_pt, scale)
+        candidates, n_parts = _plan_candidates(gray, page_width_pt, page_height_pt, scale, budget)
     except (cv2.error, ValueError, MemoryError):
         candidates, n_parts = [], 0
     # A sparse sketch (a few outlined boxes) is read by the outline detectors; on a

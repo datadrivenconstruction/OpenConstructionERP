@@ -1,0 +1,1096 @@
+{
+ "about": "Sheets this benchmark did not generate. Held sheets are never used for tuning. Room truth comes from the answer ledger of each drawing set and from labels on the sheet; positions are label centres in page points.",
+ "sheets": [
+  {
+   "id": "A-100",
+   "file": "training_object/pdf/A-100_revA.pdf",
+   "split": "tune",
+   "kind": "plan",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929,
+   "rooms": [
+    {
+     "label": "G01",
+     "name": "Reception / Waiting",
+     "area_m2": 100.566,
+     "at": [
+      957.5,
+      1044.7
+     ]
+    },
+    {
+     "label": "G02",
+     "name": "Consulting Room 1",
+     "area_m2": 33.408,
+     "at": [
+      447.9,
+      1044.7
+     ]
+    },
+    {
+     "label": "G03",
+     "name": "Treatment Room",
+     "area_m2": 33.408,
+     "at": [
+      447.9,
+      704.6
+     ]
+    },
+    {
+     "label": "G04",
+     "name": "Acc. WC",
+     "area_m2": 5.7,
+     "at": [
+      759.7,
+      647.9
+     ]
+    },
+    {
+     "label": "G05",
+     "name": "Cleaner",
+     "area_m2": 6.004,
+     "at": [
+      666.2,
+      647.9
+     ]
+    },
+    {
+     "label": "G06",
+     "name": "Consulting Room 2",
+     "area_m2": 33.408,
+     "at": [
+      1468.4,
+      1044.7
+     ]
+    },
+    {
+     "label": "G07",
+     "name": "Consulting Room 3",
+     "area_m2": 23.323,
+     "at": [
+      1128.2,
+      761.2
+     ]
+    },
+    {
+     "label": "G08",
+     "name": "Plant / Store",
+     "area_m2": 16.502,
+     "at": [
+      1400.4,
+      693.2
+     ]
+    },
+    {
+     "label": "G09",
+     "name": "Staff Room",
+     "area_m2": 16.184,
+     "at": [
+      1561.9,
+      749.9
+     ]
+    }
+   ],
+   "allowed_unlabelled": 4,
+   "total_room_area_m2": 268.504,
+   "wall_total_m": 140.9,
+   "door_count": 10
+  },
+  {
+   "id": "hollis-A-101",
+   "file": "training_object_hollisyard/pdf/A-101_rev0.pdf",
+   "split": "tune",
+   "kind": "plan",
+   "scale_ratio": 96,
+   "pt_per_m": 29.5276,
+   "rooms": [
+    {
+     "label": "UNIT01",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      362.5,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT02",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      632.0,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT03",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      902.0,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT04",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1442.0,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT05",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1712.0,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT06",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1982.0,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT07",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      2251.4,
+      764.4
+     ]
+    },
+    {
+     "label": "UNIT08",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      362.5,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT09",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      632.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT10",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      902.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT11",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1172.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT12",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1442.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT13",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1712.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT14",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      1982.0,
+      565.7
+     ]
+    },
+    {
+     "label": "UNIT15",
+     "name": "Living room of a unit",
+     "area_m2": null,
+     "at": [
+      2251.4,
+      565.7
+     ]
+    },
+    {
+     "label": "CORRIDOR",
+     "name": "Corridor",
+     "area_m2": null,
+     "at": [
+      1492.9,
+      665.0
+     ]
+    }
+   ],
+   "allowed_unlabelled": 70,
+   "total_room_area_m2": 1281.4,
+   "wall_total_m": 695.8,
+   "door_count": 63
+  },
+  {
+   "id": "A-200",
+   "file": "training_object/pdf/A-200_revA.pdf",
+   "split": "tune",
+   "kind": "elevation",
+   "scale_ratio": 100,
+   "pt_per_m": 28.3465
+  },
+  {
+   "id": "A-600",
+   "file": "training_object/pdf/A-600_revA.pdf",
+   "split": "tune",
+   "kind": "schedule",
+   "scale_ratio": null,
+   "scale_accept": [
+    25,
+    null
+   ]
+  },
+  {
+   "id": "S-100",
+   "file": "training_object/pdf/S-100_revA.pdf",
+   "split": "tune",
+   "kind": "structural_plan",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929
+  },
+  {
+   "id": "hollis-G-001",
+   "file": "training_object_hollisyard/pdf/G-001_rev1.pdf",
+   "split": "tune",
+   "kind": "cover",
+   "scale_ratio": null
+  },
+  {
+   "id": "A-100-scan",
+   "file": "training_object/pdf/A-100_revA.pdf",
+   "split": "tune",
+   "kind": "plan",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929,
+   "scan": true,
+   "scan_seed": 101,
+   "rooms": [
+    {
+     "label": "G01",
+     "name": "Reception / Waiting",
+     "area_m2": 100.566,
+     "at": [
+      957.5,
+      1044.7
+     ]
+    },
+    {
+     "label": "G02",
+     "name": "Consulting Room 1",
+     "area_m2": 33.408,
+     "at": [
+      447.9,
+      1044.7
+     ]
+    },
+    {
+     "label": "G03",
+     "name": "Treatment Room",
+     "area_m2": 33.408,
+     "at": [
+      447.9,
+      704.6
+     ]
+    },
+    {
+     "label": "G04",
+     "name": "Acc. WC",
+     "area_m2": 5.7,
+     "at": [
+      759.7,
+      647.9
+     ]
+    },
+    {
+     "label": "G05",
+     "name": "Cleaner",
+     "area_m2": 6.004,
+     "at": [
+      666.2,
+      647.9
+     ]
+    },
+    {
+     "label": "G06",
+     "name": "Consulting Room 2",
+     "area_m2": 33.408,
+     "at": [
+      1468.4,
+      1044.7
+     ]
+    },
+    {
+     "label": "G07",
+     "name": "Consulting Room 3",
+     "area_m2": 23.323,
+     "at": [
+      1128.2,
+      761.2
+     ]
+    },
+    {
+     "label": "G08",
+     "name": "Plant / Store",
+     "area_m2": 16.502,
+     "at": [
+      1400.4,
+      693.2
+     ]
+    },
+    {
+     "label": "G09",
+     "name": "Staff Room",
+     "area_m2": 16.184,
+     "at": [
+      1561.9,
+      749.9
+     ]
+    }
+   ],
+   "allowed_unlabelled": 4,
+   "total_room_area_m2": 268.504,
+   "wall_total_m": 140.9
+  },
+  {
+   "id": "A-101-revB",
+   "file": "training_object/pdf/A-101_revB.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929,
+   "rooms": [
+    {
+     "label": "F01",
+     "name": "Practice Manager",
+     "area_m2": 33.408,
+     "at": [
+      447.4,
+      1044.8
+     ]
+    },
+    {
+     "label": "F02",
+     "name": "Meeting Room",
+     "area_m2": 34.104,
+     "at": [
+      788.2,
+      1044.8
+     ]
+    },
+    {
+     "label": "F03",
+     "name": "Group Room",
+     "area_m2": 33.986,
+     "at": [
+      1128.4,
+      1044.8
+     ]
+    },
+    {
+     "label": "F04",
+     "name": "Consulting Room 4",
+     "area_m2": 33.408,
+     "at": [
+      1468.5,
+      1044.8
+     ]
+    },
+    {
+     "label": "F05",
+     "name": "Administration",
+     "area_m2": 33.408,
+     "at": [
+      448.1,
+      704.6
+     ]
+    },
+    {
+     "label": "F06",
+     "name": "WC",
+     "area_m2": 5.7,
+     "at": [
+      759.9,
+      647.9
+     ]
+    },
+    {
+     "label": "F07",
+     "name": "Cleaner",
+     "area_m2": 6.004,
+     "at": [
+      666.3,
+      647.9
+     ]
+    },
+    {
+     "label": "F08",
+     "name": "Landing / Corridor",
+     "area_m2": 21.052,
+     "at": [
+      873.3,
+      801.0
+     ]
+    },
+    {
+     "label": "F09",
+     "name": "Office",
+     "area_m2": 23.323,
+     "at": [
+      1128.4,
+      761.3
+     ]
+    },
+    {
+     "label": "F10",
+     "name": "Records Store",
+     "area_m2": 19.97,
+     "at": [
+      1394.8,
+      704.6
+     ]
+    },
+    {
+     "label": "F11",
+     "name": "Kitchen",
+     "area_m2": 12.716,
+     "at": [
+      1581.2,
+      727.2
+     ]
+    }
+   ],
+   "allowed_unlabelled": 3,
+   "total_room_area_m2": 257.08,
+   "wall_total_m": 149.3,
+   "door_count": 10
+  },
+  {
+   "id": "hollis-A-111",
+   "file": "training_object_hollisyard/pdf/A-111_rev0.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": 48,
+   "pt_per_m": 59.0551,
+   "rooms": [
+    {
+     "label": "BATH",
+     "name": "BATH",
+     "area_m2": null,
+     "at": [
+      410.4,
+      636.4
+     ]
+    },
+    {
+     "label": "BEDROOM",
+     "name": "BEDROOM",
+     "area_m2": null,
+     "at": [
+      464.4,
+      945.3
+     ]
+    },
+    {
+     "label": "CLOS.",
+     "name": "CLOS.",
+     "area_m2": null,
+     "at": [
+      536.3,
+      825.4
+     ]
+    },
+    {
+     "label": "LIVING",
+     "name": "LIVING",
+     "area_m2": null,
+     "at": [
+      705.5,
+      825.3
+     ]
+    },
+    {
+     "label": "HALL",
+     "name": "HALL",
+     "area_m2": null,
+     "at": [
+      548.6,
+      762.4
+     ]
+    }
+   ],
+   "allowed_unlabelled": 25
+  },
+  {
+   "id": "LHC-A-120",
+   "file": "training_object_aitakeoff/pdf/LHC-A-120_rev0.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": 200,
+   "pt_per_m": 14.1732,
+   "rooms": [
+    {
+     "label": "S1",
+     "name": "Waiting",
+     "area_m2": 23.503,
+     "at": [
+      146.8,
+      449.1
+     ]
+    },
+    {
+     "label": "S2",
+     "name": "Consulting 1",
+     "area_m2": 23.205,
+     "at": [
+      195.6,
+      449.1
+     ]
+    },
+    {
+     "label": "S3",
+     "name": "Consulting 2",
+     "area_m2": 23.205,
+     "at": [
+      252.3,
+      449.1
+     ]
+    },
+    {
+     "label": "S4",
+     "name": "Consulting 3",
+     "area_m2": 23.205,
+     "at": [
+      309.0,
+      449.1
+     ]
+    },
+    {
+     "label": "S5",
+     "name": "Treatment",
+     "area_m2": 29.155,
+     "at": [
+      376.3,
+      449.1
+     ]
+    },
+    {
+     "label": "S6",
+     "name": "Staff room",
+     "area_m2": 23.205,
+     "at": [
+      438.9,
+      449.1
+     ]
+    },
+    {
+     "label": "S7",
+     "name": "Plant room",
+     "area_m2": 25.883,
+     "at": [
+      498.4,
+      449.1
+     ]
+    },
+    {
+     "label": "N1",
+     "name": "Reception office",
+     "area_m2": 31.433,
+     "at": [
+      166.6,
+      332.2
+     ]
+    },
+    {
+     "label": "N2",
+     "name": "WCs",
+     "area_m2": 31.115,
+     "at": [
+      231.0,
+      332.2
+     ]
+    },
+    {
+     "label": "N3",
+     "name": "Store",
+     "area_m2": 31.115,
+     "at": [
+      298.8,
+      332.2
+     ]
+    },
+    {
+     "label": "N4",
+     "name": "Meeting room",
+     "area_m2": 31.115,
+     "at": [
+      357.4,
+      332.2
+     ]
+    },
+    {
+     "label": "N5",
+     "name": "Sluice and cleaner",
+     "area_m2": 24.765,
+     "at": [
+      443.7,
+      332.2
+     ]
+    },
+    {
+     "label": "N6",
+     "name": "Offices",
+     "area_m2": 33.972,
+     "at": [
+      498.0,
+      332.2
+     ]
+    },
+    {
+     "label": "C1",
+     "name": "Corridor",
+     "area_m2": 55.86,
+     "at": [
+      324.1,
+      392.0
+     ]
+    }
+   ],
+   "allowed_unlabelled": 1,
+   "total_room_area_m2": 410.735,
+   "wall_total_m": 216.8,
+   "door_count": 15
+  },
+  {
+   "id": "A-300",
+   "file": "training_object/pdf/A-300_revA.pdf",
+   "split": "held",
+   "kind": "section",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929
+  },
+  {
+   "id": "A-610",
+   "file": "training_object/pdf/A-610_revB.pdf",
+   "split": "held",
+   "kind": "schedule",
+   "scale_ratio": null
+  },
+  {
+   "id": "hollis-A-301",
+   "file": "training_object_hollisyard/pdf/A-301_rev0.pdf",
+   "split": "held",
+   "kind": "section",
+   "scale_ratio": 96,
+   "pt_per_m": 29.5276
+  },
+  {
+   "id": "hollis-A-501",
+   "file": "training_object_hollisyard/pdf/A-501_rev1.pdf",
+   "split": "held",
+   "kind": "detail",
+   "scale_ratio": null
+  },
+  {
+   "id": "hollis-A-601",
+   "file": "training_object_hollisyard/pdf/A-601_rev0.pdf",
+   "split": "held",
+   "kind": "schedule",
+   "scale_ratio": null
+  },
+  {
+   "id": "house_plans",
+   "asset": "house_plans.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": null,
+   "rooms": [
+    {
+     "label": "CHAMBER-W",
+     "name": "CHAMBER-W",
+     "area_m2": null,
+     "at": [
+      204.0,
+      198.0
+     ]
+    },
+    {
+     "label": "CHAMBER-M",
+     "name": "CHAMBER-M",
+     "area_m2": null,
+     "at": [
+      291.6,
+      198.0
+     ]
+    },
+    {
+     "label": "CHAMBER-E",
+     "name": "CHAMBER-E",
+     "area_m2": null,
+     "at": [
+      360.0,
+      198.0
+     ]
+    },
+    {
+     "label": "SERVANT",
+     "name": "SERVANT",
+     "area_m2": null,
+     "at": [
+      360.0,
+      102.0
+     ]
+    },
+    {
+     "label": "HALL-UP",
+     "name": "HALL-UP",
+     "area_m2": null,
+     "at": [
+      282.0,
+      146.4
+     ]
+    },
+    {
+     "label": "ALCOVE",
+     "name": "ALCOVE",
+     "area_m2": null,
+     "at": [
+      282.0,
+      266.4
+     ]
+    },
+    {
+     "label": "LIVING",
+     "name": "LIVING",
+     "area_m2": null,
+     "at": [
+      228.0,
+      489.6
+     ]
+    },
+    {
+     "label": "DINING",
+     "name": "DINING",
+     "area_m2": null,
+     "at": [
+      348.0,
+      489.6
+     ]
+    },
+    {
+     "label": "KITCHEN",
+     "name": "KITCHEN",
+     "area_m2": null,
+     "at": [
+      342.0,
+      372.0
+     ]
+    },
+    {
+     "label": "PANTRY",
+     "name": "PANTRY",
+     "area_m2": null,
+     "at": [
+      342.0,
+      420.0
+     ]
+    },
+    {
+     "label": "HALL",
+     "name": "HALL",
+     "area_m2": null,
+     "at": [
+      254.4,
+      414.0
+     ]
+    }
+   ],
+   "allowed_unlabelled": 8
+  },
+  {
+   "id": "LHC-A-120-scan",
+   "file": "training_object_aitakeoff/pdf/LHC-A-120_rev0.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": 200,
+   "pt_per_m": 14.1732,
+   "scan": true,
+   "scan_seed": 102,
+   "rooms": [
+    {
+     "label": "S1",
+     "name": "Waiting",
+     "area_m2": 23.503,
+     "at": [
+      146.8,
+      449.1
+     ]
+    },
+    {
+     "label": "S2",
+     "name": "Consulting 1",
+     "area_m2": 23.205,
+     "at": [
+      195.6,
+      449.1
+     ]
+    },
+    {
+     "label": "S3",
+     "name": "Consulting 2",
+     "area_m2": 23.205,
+     "at": [
+      252.3,
+      449.1
+     ]
+    },
+    {
+     "label": "S4",
+     "name": "Consulting 3",
+     "area_m2": 23.205,
+     "at": [
+      309.0,
+      449.1
+     ]
+    },
+    {
+     "label": "S5",
+     "name": "Treatment",
+     "area_m2": 29.155,
+     "at": [
+      376.3,
+      449.1
+     ]
+    },
+    {
+     "label": "S6",
+     "name": "Staff room",
+     "area_m2": 23.205,
+     "at": [
+      438.9,
+      449.1
+     ]
+    },
+    {
+     "label": "S7",
+     "name": "Plant room",
+     "area_m2": 25.883,
+     "at": [
+      498.4,
+      449.1
+     ]
+    },
+    {
+     "label": "N1",
+     "name": "Reception office",
+     "area_m2": 31.433,
+     "at": [
+      166.6,
+      332.2
+     ]
+    },
+    {
+     "label": "N2",
+     "name": "WCs",
+     "area_m2": 31.115,
+     "at": [
+      231.0,
+      332.2
+     ]
+    },
+    {
+     "label": "N3",
+     "name": "Store",
+     "area_m2": 31.115,
+     "at": [
+      298.8,
+      332.2
+     ]
+    },
+    {
+     "label": "N4",
+     "name": "Meeting room",
+     "area_m2": 31.115,
+     "at": [
+      357.4,
+      332.2
+     ]
+    },
+    {
+     "label": "N5",
+     "name": "Sluice and cleaner",
+     "area_m2": 24.765,
+     "at": [
+      443.7,
+      332.2
+     ]
+    },
+    {
+     "label": "N6",
+     "name": "Offices",
+     "area_m2": 33.972,
+     "at": [
+      498.0,
+      332.2
+     ]
+    },
+    {
+     "label": "C1",
+     "name": "Corridor",
+     "area_m2": 55.86,
+     "at": [
+      324.1,
+      392.0
+     ]
+    }
+   ],
+   "allowed_unlabelled": 1,
+   "total_room_area_m2": 410.735
+  },
+  {
+   "id": "A-101-revB-scan",
+   "file": "training_object/pdf/A-101_revB.pdf",
+   "split": "held",
+   "kind": "plan",
+   "scale_ratio": 50,
+   "pt_per_m": 56.6929,
+   "scan": true,
+   "scan_seed": 103,
+   "rooms": [
+    {
+     "label": "F01",
+     "name": "Practice Manager",
+     "area_m2": 33.408,
+     "at": [
+      447.4,
+      1044.8
+     ]
+    },
+    {
+     "label": "F02",
+     "name": "Meeting Room",
+     "area_m2": 34.104,
+     "at": [
+      788.2,
+      1044.8
+     ]
+    },
+    {
+     "label": "F03",
+     "name": "Group Room",
+     "area_m2": 33.986,
+     "at": [
+      1128.4,
+      1044.8
+     ]
+    },
+    {
+     "label": "F04",
+     "name": "Consulting Room 4",
+     "area_m2": 33.408,
+     "at": [
+      1468.5,
+      1044.8
+     ]
+    },
+    {
+     "label": "F05",
+     "name": "Administration",
+     "area_m2": 33.408,
+     "at": [
+      448.1,
+      704.6
+     ]
+    },
+    {
+     "label": "F06",
+     "name": "WC",
+     "area_m2": 5.7,
+     "at": [
+      759.9,
+      647.9
+     ]
+    },
+    {
+     "label": "F07",
+     "name": "Cleaner",
+     "area_m2": 6.004,
+     "at": [
+      666.3,
+      647.9
+     ]
+    },
+    {
+     "label": "F08",
+     "name": "Landing / Corridor",
+     "area_m2": 21.052,
+     "at": [
+      873.3,
+      801.0
+     ]
+    },
+    {
+     "label": "F09",
+     "name": "Office",
+     "area_m2": 23.323,
+     "at": [
+      1128.4,
+      761.3
+     ]
+    },
+    {
+     "label": "F10",
+     "name": "Records Store",
+     "area_m2": 19.97,
+     "at": [
+      1394.8,
+      704.6
+     ]
+    },
+    {
+     "label": "F11",
+     "name": "Kitchen",
+     "area_m2": 12.716,
+     "at": [
+      1581.2,
+      727.2
+     ]
+    }
+   ],
+   "allowed_unlabelled": 3,
+   "total_room_area_m2": 257.08
+  }
+ ]
+}
