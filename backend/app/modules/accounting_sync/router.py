@@ -28,9 +28,11 @@ from app.modules.accounting_sync.models import AccountingConnection, SyncLogEntr
 from app.modules.accounting_sync.schemas import (
     AccountMappingRow,
     ConnectionCreate,
+    ConnectionListResponse,
     ConnectionResponse,
     ConnectionUpdate,
     Finding,
+    FindingListResponse,
     LogEntryResponse,
     LogListResponse,
     MappingsResponse,
@@ -38,6 +40,7 @@ from app.modules.accounting_sync.schemas import (
     OAuthComplete,
     OAuthStartResponse,
     PreviewDocument,
+    PreviewDocumentListResponse,
     PushRequest,
     SyncCounts,
     TaxMappingRow,
@@ -92,9 +95,14 @@ async def list_templates(country_code: str | None = Query(default=None, max_leng
     }
 
 
-@router.get("/connections", response_model=list[ConnectionResponse], dependencies=[_READ])
-async def list_connections(session: SessionDep) -> list[ConnectionResponse]:
-    return [_out(c) for c in await AccountingSyncService(session).list_connections()]
+@router.get("/connections", response_model=ConnectionListResponse, dependencies=[_READ])
+async def list_connections(
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
+) -> ConnectionListResponse:
+    rows, total = await AccountingSyncService(session).list_connections_page(offset=offset, limit=limit)
+    return ConnectionListResponse(items=[_out(c) for c in rows], total=total, offset=offset, limit=limit)
 
 
 @router.post("/connections", response_model=ConnectionResponse, status_code=201, dependencies=[_ADMIN])
@@ -189,19 +197,23 @@ async def apply_template(connection_id: uuid.UUID, body: TemplateApply, session:
     return await get_mappings(connection_id, session)
 
 
-@router.get("/connections/{connection_id}/documents", response_model=list[PreviewDocument], dependencies=[_READ])
+@router.get("/connections/{connection_id}/documents", response_model=PreviewDocumentListResponse, dependencies=[_READ])
 async def preview_documents(
     connection_id: uuid.UUID,
     session: SessionDep,
     date_from: date | None = None,
     date_to: date | None = None,
-) -> list[PreviewDocument]:
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=1000),
+) -> PreviewDocumentListResponse:
     """Documents in scope with the remote id each already has."""
     svc = AccountingSyncService(session)
     conn = await svc.get_connection(connection_id)
     docs = await svc.documents(conn, period=_period(date_from, date_to) if (date_from or date_to) else None)
+    total = len(docs)
+    docs = docs[offset : offset + limit]
     refs = await svc._refs(conn, {d.record_id for d in docs})  # noqa: SLF001
-    return [
+    items = [
         PreviewDocument(
             record_id=d.record_id,
             record_type=d.record_type,
@@ -218,12 +230,21 @@ async def preview_documents(
         )
         for d in docs
     ]
+    return PreviewDocumentListResponse(items=items, total=total, offset=offset, limit=limit)
 
 
-@router.get("/connections/{connection_id}/findings", response_model=list[Finding], dependencies=[_READ])
-async def findings(connection_id: uuid.UUID, session: SessionDep) -> list[Finding]:
+@router.get("/connections/{connection_id}/findings", response_model=FindingListResponse, dependencies=[_READ])
+async def findings(
+    connection_id: uuid.UUID,
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=1000),
+) -> FindingListResponse:
     svc = AccountingSyncService(session)
-    return [Finding(**f) for f in await svc.findings(await svc.get_connection(connection_id))]
+    found = await svc.findings(await svc.get_connection(connection_id))
+    return FindingListResponse(
+        items=[Finding(**f) for f in found[offset : offset + limit]], total=len(found), offset=offset, limit=limit
+    )
 
 
 @router.post("/connections/{connection_id}/push", response_model=SyncCounts, dependencies=[_WRITE])

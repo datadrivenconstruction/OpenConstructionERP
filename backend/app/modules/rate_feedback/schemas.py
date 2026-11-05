@@ -54,6 +54,13 @@ class ProposalResponse(BaseModel):
         return None if value is None else format(value, "f")
 
 
+class ProposalListResponse(BaseModel):
+    items: list[ProposalResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class RefreshRequest(BaseModel):
     tolerance: FiniteDecimal = Field(default=Decimal("0.05"), ge=0, le=1)
     min_projects: int = Field(default=1, ge=1, le=50)

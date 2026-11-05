@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, Query, status
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.lessons_learned.schemas import (
     LessonCreate,
+    LessonListResponse,
     LessonResponse,
     LessonStatus,
     LessonUpdate,
@@ -31,17 +32,21 @@ _CONFIRM = Depends(RequirePermission("lessons_learned.confirm"))
 _DELETE = Depends(RequirePermission("lessons_learned.delete"))
 
 
-@router.get("/", response_model=list[LessonResponse], dependencies=[_READ])
+@router.get("/", response_model=LessonListResponse, dependencies=[_READ])
 async def list_lessons(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID | None = None,
     status_filter: LessonStatus | None = Query(default=None, alias="status"),
-) -> list[LessonResponse]:
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> LessonListResponse:
     """Lessons of one project, or of every project the caller can reach."""
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
-    return await LessonService(session).list_lessons(user_id, project_id=project_id, status_filter=status_filter)
+    return await LessonService(session).list_lessons(
+        user_id, project_id=project_id, status_filter=status_filter, offset=offset, limit=limit
+    )
 
 
 @router.get("/seen", response_model=SeenResponse, dependencies=[_READ])

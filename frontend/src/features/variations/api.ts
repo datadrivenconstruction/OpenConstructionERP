@@ -339,13 +339,16 @@ export function raiseNoticeFromEvent(data: RaiseNoticeFromEventPayload): Promise
   return apiPost<Notice>('/v1/variations/notices/from-field-event/', data);
 }
 
-export function listNoticesBySource(
+export async function listNoticesBySource(
   sourceType: NoticeSourceType,
   sourceId: string,
   projectId: string,
 ): Promise<Notice[]> {
   const qs = new URLSearchParams({ project_id: projectId });
-  return apiGet<Notice[]>(`/v1/variations/notices/by-source/${sourceType}/${sourceId}?${qs.toString()}`);
+  const page = await apiGet<{ items: Notice[] }>(
+    `/v1/variations/notices/by-source/${sourceType}/${sourceId}?${qs.toString()}`,
+  );
+  return page.items;
 }
 
 export function createNotice(data: CreateNoticePayload): Promise<Notice> {

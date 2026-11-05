@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Any, Iterable
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -716,10 +716,12 @@ class ResourcesService:
         cutoff = today + timedelta(days=max(1, days))
         return await self.cert_repo.list_expiring(today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat())
 
-    async def list_certification_types(self) -> list[str]:
+    async def list_certification_types(self, *, offset: int = 0, limit: int = 500) -> tuple[list[str], int]:
         """Distinct certificate types on file: the vocabulary equipment requirements are picked from."""
-        rows = await self.session.execute(select(Certification.cert_type).distinct().order_by(Certification.cert_type))
-        return [r for r in rows.scalars().all() if r]
+        types = select(Certification.cert_type).where(Certification.cert_type != "").distinct()
+        rows = await self.session.execute(types.order_by(Certification.cert_type).offset(offset).limit(limit))
+        total = (await self.session.execute(select(func.count()).select_from(types.subquery()))).scalar()
+        return [r for r in rows.scalars().all() if r], int(total or 0)
 
     async def update_certification(self, cert_id: uuid.UUID, data: CertificationUpdate) -> Certification:
         cert = await self.get_certification(cert_id)

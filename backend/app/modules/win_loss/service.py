@@ -45,10 +45,12 @@ class WinLossService:
         self.session = session
 
     async def list_entries(
-        self, user_id: str, *, outcome: str | None = None, client: str | None = None, limit: int = 500
-    ) -> list[BidOutcome]:
+        self, user_id: str, *, outcome: str | None = None, client: str | None = None, limit: int = 500, offset: int = 0
+    ) -> tuple[list[BidOutcome], int]:
+        """One page of entries the caller may see, and how many matched the filters."""
         ids = await accessible_project_ids(self.session, user_id)
-        return await self.repo.list_all(outcome=outcome, client=client, limit=limit, project_ids=ids)
+        rows = await self.repo.list_all(outcome=outcome, client=client, limit=limit, project_ids=ids, offset=offset)
+        return rows, await self.repo.count_all(outcome=outcome, client=client, project_ids=ids)
 
     async def get_for_user(self, entry_id: uuid.UUID, user_id: str) -> BidOutcome:
         """Load an entry; one linked to a project needs access to that project."""
@@ -125,7 +127,7 @@ class WinLossService:
 
     async def summary(self, currency: str | None, user_id: str) -> LedgerSummary:
         """Hit rate and money left on the table, in one currency (the most used by default)."""
-        rows = await self.list_entries(user_id, limit=10000)
+        rows, _ = await self.list_entries(user_id, limit=10000)
         currencies = sorted({r.currency or "" for r in rows})
         chosen = currency.upper() if currency is not None else dominant_currency(rows)
         stats = summarize([r for r in rows if (r.currency or "") == chosen])

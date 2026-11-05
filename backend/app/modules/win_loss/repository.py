@@ -7,7 +7,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import delete, or_, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.win_loss.models import BidOutcome
@@ -48,14 +48,26 @@ class BidOutcomeRepository:
         client: str | None = None,
         limit: int = 10000,
         project_ids: set[uuid.UUID] | None = None,
+        offset: int = 0,
     ) -> list[BidOutcome]:
         """List entries; ``project_ids`` (non-admin) hides entries linked to other projects."""
-        stmt = select(BidOutcome).order_by(BidOutcome.submitted_on.desc().nullslast(), BidOutcome.created_at.desc())
+        stmt = self._filtered(select(BidOutcome), outcome, client, project_ids)
+        stmt = stmt.order_by(BidOutcome.submitted_on.desc().nullslast(), BidOutcome.created_at.desc(), BidOutcome.id)
+        result = await self.session.execute(stmt.offset(offset).limit(limit))
+        return list(result.scalars().all())
+
+    async def count_all(
+        self, *, outcome: str | None = None, client: str | None = None, project_ids: set[uuid.UUID] | None = None
+    ) -> int:
+        stmt = self._filtered(select(func.count()).select_from(BidOutcome), outcome, client, project_ids)
+        return int((await self.session.execute(stmt)).scalar() or 0)
+
+    @staticmethod
+    def _filtered(stmt: Any, outcome: str | None, client: str | None, project_ids: set[uuid.UUID] | None) -> Any:
         if outcome:
             stmt = stmt.where(BidOutcome.outcome == outcome)
         if client:
             stmt = stmt.where(BidOutcome.client_name == client)
         if project_ids is not None:
             stmt = stmt.where(or_(BidOutcome.project_id.is_(None), BidOutcome.project_id.in_(project_ids)))
-        result = await self.session.execute(stmt.limit(limit))
-        return list(result.scalars().all())
+        return stmt

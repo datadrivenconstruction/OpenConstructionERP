@@ -60,6 +60,7 @@ from app.modules.bid_management.schemas import (
     BidInvitationCreate,
     BidInvitationResponse,
     BidInvitationUpdate,
+    BidLevelingPlugListResponse,
     BidLevelingPlugResponse,
     BidLevelingPlugSet,
     BidLevelingResponse,
@@ -1040,18 +1041,22 @@ async def compute_leveling(
 
 @router.get(
     "/comparisons/{comparison_id}/plugs",
-    response_model=list[BidLevelingPlugResponse],
+    response_model=BidLevelingPlugListResponse,
 )
 async def list_leveling_plugs(
     comparison_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("bid_management.read")),
-) -> list[BidLevelingPlugResponse]:
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=1000, ge=1, le=5000),
+) -> BidLevelingPlugListResponse:
     """Plugs on every gap of every bidder, each with its source (estimate, median, manual, none)."""
     await _verify_comparison_access(session, comparison_id, user_id)
-    rows = await BidManagementService(session).list_plugs(comparison_id)
-    return [BidLevelingPlugResponse.model_validate(r) for r in rows]
+    rows, total = await BidManagementService(session).list_plugs_page(comparison_id, offset=offset, limit=limit)
+    return BidLevelingPlugListResponse(
+        items=[BidLevelingPlugResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.put(

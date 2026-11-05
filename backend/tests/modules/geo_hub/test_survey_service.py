@@ -119,7 +119,8 @@ async def test_orthophoto_upload_returns_the_sniffed_header(http_client, tenant_
     assert png.status_code == 200 and png.content.startswith(b"\x89PNG")
 
     listed = await http_client.get(f"{BASE}/?project_id={tenant_a['project_id']}", headers=tenant_a["headers"])
-    assert listed.status_code == 200 and body["id"] in [r["id"] for r in listed.json()]
+    assert listed.status_code == 200 and body["id"] in [r["id"] for r in listed.json()["items"]]
+    assert listed.json()["total"] == 1
 
 
 @pytest.mark.asyncio
@@ -204,7 +205,9 @@ async def test_progress_interpolates_and_classifies(http_client, tenant_a, surve
         )
         assert res.status_code == 200, res.text
 
-    rows = {r["code"]: r for r in (await http_client.get(f"{BASE}/{survey['id']}/progress", headers=h)).json()}
+    rows = {r["code"]: r for r in (await http_client.get(f"{BASE}/{survey['id']}/progress", headers=h)).json()["items"]}
+    cut = (await http_client.get(f"{BASE}/{survey['id']}/progress?limit=1", headers=h)).json()
+    assert len(cut["items"]) == 1 and cut["total"] == 4
     assert rows["INSIDE"]["planned_pct_on_date"] == 50.0 and rows["INSIDE"]["variance_pct"] == 20.0
     assert rows["INSIDE"]["status"] == "ahead"
     assert rows["LATER"]["planned_pct_on_date"] == 0.0 and rows["LATER"]["status"] == "on_track"
@@ -219,11 +222,15 @@ async def test_progress_prefers_the_baseline_dates(http_client, tenant_b) -> Non
     res = await _upload(http_client, h, pid)
     assert res.status_code == 201, res.text
     acts = await _seed_schedule(pid, [("B1", "Slab", "2026-03-01", "2026-03-31")])
-    before = {r["code"]: r for r in (await http_client.get(f"{BASE}/{res.json()['id']}/progress", headers=h)).json()}
+    before = {
+        r["code"]: r for r in (await http_client.get(f"{BASE}/{res.json()['id']}/progress", headers=h)).json()["items"]
+    }
     assert 30 < before["B1"]["planned_pct_on_date"] < 35  # current plan: 10 of 30 days
 
     await _seed_baseline(pid, acts["_schedule"], acts["B1"], "2026-03-01", "2026-03-21")
-    after = {r["code"]: r for r in (await http_client.get(f"{BASE}/{res.json()['id']}/progress", headers=h)).json()}
+    after = {
+        r["code"]: r for r in (await http_client.get(f"{BASE}/{res.json()['id']}/progress", headers=h)).json()["items"]
+    }
     assert after["B1"]["planned_pct_on_date"] == 50.0  # baseline: 10 of 20 days
 
 

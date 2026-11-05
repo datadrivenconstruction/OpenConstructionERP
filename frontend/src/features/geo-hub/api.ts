@@ -648,10 +648,12 @@ export function purgeGeocodeCache(
 
 /* ── Site survey captures ─────────────────────────────────────────────── */
 
-const SURVEY_BASE = `${BASE}/surveys`;
 
-export function listSurveys(projectId: string): Promise<SurveyCapture[]> {
-  return apiGet<SurveyCapture[]>(`${SURVEY_BASE}/?project_id=${encodeURIComponent(projectId)}`);
+export async function listSurveys(projectId: string): Promise<SurveyCapture[]> {
+  const page = await apiGet<{ items: SurveyCapture[]; total: number }>(
+    `/v1/geo-hub/surveys/?project_id=${encodeURIComponent(projectId)}&limit=500`,
+  );
+  return page.items;
 }
 
 export function uploadOrthophoto(
@@ -665,7 +667,7 @@ export function uploadOrthophoto(
   fd.append('platform', options.platform);
   if (options.name) fd.append('name', options.name);
   fd.append('file', file);
-  return multipartUpload<SurveyCapture>(`${SURVEY_BASE}/orthophoto`, fd);
+  return multipartUpload<SurveyCapture>(`/v1/geo-hub/surveys/orthophoto`, fd);
 }
 
 export function surveyFromScan(body: {
@@ -673,15 +675,16 @@ export function surveyFromScan(body: {
   captured_on?: string | null;
   platform: SurveyPlatform;
 }): Promise<SurveyCapture> {
-  return apiPost<SurveyCapture, typeof body>(`${SURVEY_BASE}/from-scan`, body);
+  return apiPost<SurveyCapture, typeof body>(`/v1/geo-hub/surveys/from-scan`, body);
 }
 
 export function deleteSurvey(id: string): Promise<void> {
-  return apiDelete(`${SURVEY_BASE}/${id}`);
+  return apiDelete(`/v1/geo-hub/surveys/${id}`);
 }
 
-export function getSurveyProgress(id: string): Promise<SurveyProgressRow[]> {
-  return apiGet<SurveyProgressRow[]>(`${SURVEY_BASE}/${id}/progress`);
+export async function getSurveyProgress(id: string): Promise<SurveyProgressRow[]> {
+  const page = await apiGet<{ items: SurveyProgressRow[]; total: number }>(`/v1/geo-hub/surveys/${id}/progress?limit=2000`);
+  return page.items;
 }
 
 export function putSurveyObservation(
@@ -689,5 +692,5 @@ export function putSurveyObservation(
   activityId: string,
   body: { observed_pct: number; note?: string },
 ): Promise<SurveyObservation> {
-  return apiPut<SurveyObservation, typeof body>(`${SURVEY_BASE}/${surveyId}/observations/${activityId}`, body);
+  return apiPut<SurveyObservation, typeof body>(`/v1/geo-hub/surveys/${surveyId}/observations/${activityId}`, body);
 }

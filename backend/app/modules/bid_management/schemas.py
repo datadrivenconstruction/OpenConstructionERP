@@ -569,6 +569,13 @@ class BidLevelingPlugResponse(BaseModel):
     note: str = ""
 
 
+class BidLevelingPlugListResponse(BaseModel):
+    items: list[BidLevelingPlugResponse]
+    total: int
+    offset: int = 0
+    limit: int = 1000
+
+
 class BidLevelingPlugSet(BaseModel):
     """Set a manual plug, or clear it (``amount`` null) to return to the computed one."""
 

@@ -383,8 +383,9 @@ export function updateEquipment(
 }
 
 /** Certificate types on file in the resources module, the vocabulary for machine requirements. */
-export function listCertificationTypes(): Promise<string[]> {
-  return apiGet<string[]>('/v1/resources/certifications/types');
+export async function listCertificationTypes(): Promise<string[]> {
+  const page = await apiGet<{ items: string[] }>('/v1/resources/certifications/types?limit=1000');
+  return page.items;
 }
 
 export function deleteEquipment(id: string): Promise<void> {

@@ -37,10 +37,12 @@ from app.modules.dispatch.schemas import (
     CardListResponse,
     CopyDayRequest,
     CrewCreate,
+    CrewListResponse,
     CrewResponse,
     CrewUpdate,
     DailyPlanResponse,
     LocationCreate,
+    LocationListResponse,
     LocationResponse,
     LocationUpdate,
     MoveRequest,
@@ -49,6 +51,7 @@ from app.modules.dispatch.schemas import (
     PrefillRequest,
     PrefillResponse,
     RemoveRequest,
+    ScheduledMoveListResponse,
     ScheduledMoveResponse,
     ScheduleMoveRequest,
     ShareResponse,
@@ -70,13 +73,21 @@ def _uid(user_id: str | None) -> str | None:
     return str(user_id) if user_id else None
 
 
-@router.get("/locations", response_model=list[LocationResponse])
+@router.get("/locations", response_model=LocationListResponse)
 async def list_locations(
-    session: SessionDep, include_inactive: bool = False, _perm: None = _READ
-) -> list[LocationResponse]:
+    session: SessionDep,
+    include_inactive: bool = False,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=500),
+    _perm: None = _READ,
+) -> LocationListResponse:
     """Board columns in display order."""
-    rows = await DispatchService(session).repo.list_locations(include_inactive=include_inactive)
-    return [LocationResponse.model_validate(r) for r in rows]
+    repo = DispatchService(session).repo
+    rows = await repo.list_locations(include_inactive=include_inactive, limit=limit, offset=offset)
+    total = await repo.count_locations(include_inactive=include_inactive)
+    return LocationListResponse(
+        items=[LocationResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/locations", response_model=LocationResponse, status_code=201)
@@ -107,16 +118,19 @@ async def update_location(
     return LocationResponse.model_validate(await DispatchService(session).update_location(location_id, data))
 
 
-@router.get("/crews", response_model=list[CrewResponse])
+@router.get("/crews", response_model=CrewListResponse)
 async def list_crews(
     session: SessionDep,
     limit: int = Query(default=200, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     _perm: None = _READ,
-) -> list[CrewResponse]:
+) -> CrewListResponse:
     """Active crews."""
-    rows = await DispatchService(session).repo.list_crews(limit=limit, offset=offset)
-    return [CrewResponse.model_validate(r) for r in rows]
+    repo = DispatchService(session).repo
+    rows = await repo.list_crews(limit=limit, offset=offset)
+    return CrewListResponse(
+        items=[CrewResponse.model_validate(r) for r in rows], total=await repo.count_crews(), offset=offset, limit=limit
+    )
 
 
 @router.post("/crews", response_model=CrewResponse, status_code=201)
@@ -205,15 +219,21 @@ async def copy_day(
     return {"copied": await DispatchService(session).copy_day(data, _uid(user_id))}
 
 
-@router.get("/moves", response_model=list[ScheduledMoveResponse])
+@router.get("/moves", response_model=ScheduledMoveListResponse)
 async def list_moves(
     session: SessionDep,
     status: str | None = Query(default="pending", pattern="^(pending|applied|cancelled)$"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=500),
     _perm: None = _READ,
-) -> list[ScheduledMoveResponse]:
+) -> ScheduledMoveListResponse:
     """Moves booked ahead."""
-    rows = await DispatchService(session).repo.list_moves(status=status)
-    return [ScheduledMoveResponse.model_validate(r) for r in rows]
+    repo = DispatchService(session).repo
+    rows = await repo.list_moves(status=status, limit=limit, offset=offset)
+    total = await repo.count_moves(status=status)
+    return ScheduledMoveListResponse(
+        items=[ScheduledMoveResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/moves", response_model=ScheduledMoveResponse, status_code=201)

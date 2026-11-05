@@ -133,11 +133,13 @@ class CapitalPlanService:
 
     # ── Plans ──────────────────────────────────────────────────────────────
 
-    async def list_plans(self, node_id: uuid.UUID | None = None) -> list[CapitalPlan]:
-        """Plans, optionally narrowed to a portfolio node and everything under it."""
+    async def list_plans(
+        self, node_id: uuid.UUID | None = None, *, offset: int = 0, limit: int | None = None
+    ) -> tuple[list[CapitalPlan], int]:
+        """Plans (page, total), optionally narrowed to a portfolio node and everything under it."""
         if node_id is None:
-            return await self.repo.list_plans()
-        return await self.repo.list_plans(await self._node_subtree(node_id))
+            return await self.repo.list_plans(offset=offset, limit=limit)
+        return await self.repo.list_plans(await self._node_subtree(node_id), offset=offset, limit=limit)
 
     async def create_plan(self, data: PlanCreate, user_id: str) -> CapitalPlan:
         if data.node_id is not None:
@@ -173,9 +175,12 @@ class CapitalPlanService:
 
     # ── Envelopes ──────────────────────────────────────────────────────────
 
-    async def list_envelopes(self, plan_id: uuid.UUID) -> list[CapitalPlanEnvelope]:
+    async def list_envelopes(
+        self, plan_id: uuid.UUID, *, offset: int = 0, limit: int | None = None
+    ) -> tuple[list[CapitalPlanEnvelope], int]:
         await self.get_plan(plan_id)
-        return await self.repo.list_envelopes(plan_id)
+        rows = await self.repo.list_envelopes(plan_id, offset=offset, limit=limit)
+        return rows, await self.repo.count_envelopes(plan_id)
 
     async def replace_envelopes(self, plan_id: uuid.UUID, data: EnvelopesReplace) -> list[CapitalPlanEnvelope]:
         await self.get_plan(plan_id)
@@ -190,9 +195,12 @@ class CapitalPlanService:
 
     # ── Scenarios ──────────────────────────────────────────────────────────
 
-    async def list_scenarios(self, plan_id: uuid.UUID) -> list[CapitalPlanScenario]:
+    async def list_scenarios(
+        self, plan_id: uuid.UUID, *, offset: int = 0, limit: int | None = None
+    ) -> tuple[list[CapitalPlanScenario], int]:
         await self.get_plan(plan_id)
-        return await self.repo.list_scenarios(plan_id)
+        rows = await self.repo.list_scenarios(plan_id, offset=offset, limit=limit)
+        return rows, await self.repo.count_scenarios(plan_id)
 
     async def _assert_baseline_free(self, plan_id: uuid.UUID, except_id: uuid.UUID | None = None) -> None:
         for s in await self.repo.list_scenarios(plan_id):
@@ -253,9 +261,12 @@ class CapitalPlanService:
 
     # ── Items ──────────────────────────────────────────────────────────────
 
-    async def list_items(self, scenario_id: uuid.UUID) -> list[CapitalPlanItem]:
+    async def list_items(
+        self, scenario_id: uuid.UUID, *, offset: int = 0, limit: int | None = None
+    ) -> tuple[list[CapitalPlanItem], int]:
         await self.get_scenario(scenario_id)
-        return await self.repo.list_items(scenario_id)
+        rows = await self.repo.list_items(scenario_id, offset=offset, limit=limit)
+        return rows, await self.repo.count_items(scenario_id)
 
     async def _require_project(self, project_id: uuid.UUID | None, user_id: str | None) -> None:
         """A linked project must exist and be reachable by the caller."""

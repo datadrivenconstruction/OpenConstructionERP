@@ -188,6 +188,13 @@ class SubcontractChangeResponse(BaseModel):
         return cls.model_validate(data)
 
 
+class SubcontractChangeListResponse(BaseModel):
+    items: list[SubcontractChangeResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class MarkBilled(BaseModel):
     application_id: uuid.UUID
 
@@ -214,6 +221,13 @@ class SovChangeLine(BaseModel):
             markup_pct=str(row.markup_pct if row.markup_pct is not None else 0),
             time_impact_days=int(row.time_impact_days or 0),
         )
+
+
+class SovChangeLineListResponse(BaseModel):
+    items: list[SovChangeLine]
+    total: int
+    offset: int = 0
+    limit: int = 200
 
 
 class OwnerChangeChainResponse(BaseModel):
@@ -492,6 +506,21 @@ class SubcontractChangeService:
             .order_by(SubcontractChange.created_at)
         )
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def page_for_agreement(
+        self, agreement_id: uuid.UUID, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[SubcontractChange], int]:
+        where = SubcontractChange.agreement_id == agreement_id
+        stmt = (
+            select(SubcontractChange)
+            .where(where)
+            .order_by(SubcontractChange.created_at, SubcontractChange.id)
+            .offset(offset)
+            .limit(limit)
+        )
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = (await self.session.execute(select(func.count()).select_from(SubcontractChange).where(where))).scalar()
+        return rows, int(total or 0)
 
     async def list_for_owner_change(self, owner_type: str, owner_id: uuid.UUID) -> list[SubcontractChange]:
         stmt = (

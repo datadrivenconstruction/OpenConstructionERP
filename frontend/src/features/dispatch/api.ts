@@ -6,7 +6,6 @@
  */
 import { API_BASE, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/dispatch';
 
 export type CardKind = 'crew' | 'worker' | 'equipment' | 'rental';
 export type LocationKind = 'project' | 'yard' | 'shop' | 'rental_return';
@@ -134,49 +133,49 @@ export interface ViewPref {
   settings: Record<string, unknown>;
 }
 
-export const fetchBoard = (day: string) => apiGet<Board>(`${BASE}/board?day=${day}`);
-export const fetchWeek = (start: string) => apiGet<WeekBoard>(`${BASE}/week?start=${start}`);
+export const fetchBoard = (day: string) => apiGet<Board>(`/v1/dispatch/board?day=${day}`);
+export const fetchWeek = (start: string) => apiGet<WeekBoard>(`/v1/dispatch/week?start=${start}`);
 export const fetchCards = (kind: CardKind, q: string, offset = 0) =>
-  apiGet<CardPage>(`${BASE}/cards?kind=${kind}&q=${encodeURIComponent(q)}&limit=50&offset=${offset}`);
-export const fetchPlan = (day: string) => apiGet<DailyPlan>(`${BASE}/plan?day=${day}`);
+  apiGet<CardPage>(`/v1/dispatch/cards?kind=${kind}&q=${encodeURIComponent(q)}&limit=50&offset=${offset}`);
+export const fetchPlan = (day: string) => apiGet<DailyPlan>(`/v1/dispatch/plan?day=${day}`);
 export const fetchUtilisation = (start: string, end: string) =>
-  apiGet<{ start: string; end: string; items: UtilisationRow[] }>(`${BASE}/utilisation?start=${start}&end=${end}`);
-export const fetchPref = () => apiGet<ViewPref>(`${BASE}/preferences`);
-export const savePref = (pref: ViewPref) => apiPut<ViewPref, ViewPref>(`${BASE}/preferences`, pref);
+  apiGet<{ start: string; end: string; items: UtilisationRow[] }>(`/v1/dispatch/utilisation?start=${start}&end=${end}`);
+export const fetchPref = () => apiGet<ViewPref>(`/v1/dispatch/preferences`);
+export const savePref = (pref: ViewPref) => apiPut<ViewPref, ViewPref>(`/v1/dispatch/preferences`, pref);
 
 export const createLocation = (body: { name: string; kind: LocationKind; project_id?: string | null }) =>
-  apiPost<DispatchLocation>(`${BASE}/locations`, body);
+  apiPost<DispatchLocation>(`/v1/dispatch/locations`, body);
 export const createCrew = (body: { name: string; member_ids: string[]; min_size: number; trade?: string }) =>
-  apiPost<{ id: string }>(`${BASE}/crews`, body);
+  apiPost<{ id: string }>(`/v1/dispatch/crews`, body);
 
 export const placeCards = (body: {
   day: string;
   location_id: string;
   cards: { card_kind: CardKind; card_ref: string }[];
   start_time?: string;
-}) => apiPost<{ created: number }>(`${BASE}/placements`, body);
+}) => apiPost<{ created: number }>(`/v1/dispatch/placements`, body);
 export const moveCards = (placement_ids: string[], to_location_id: string) =>
-  apiPost<{ moved: number }>(`${BASE}/placements/move`, { placement_ids, to_location_id });
+  apiPost<{ moved: number }>(`/v1/dispatch/placements/move`, { placement_ids, to_location_id });
 export const updatePlacement = (id: string, body: { start_time?: string; notes?: string; operator_ref?: string | null }) =>
-  apiPatch<unknown>(`${BASE}/placements/${id}`, body);
+  apiPatch<unknown>(`/v1/dispatch/placements/${id}`, body);
 export const removeCards = (placement_ids: string[]) =>
-  apiPost<{ removed: number }>(`${BASE}/placements/remove`, { placement_ids });
+  apiPost<{ removed: number }>(`/v1/dispatch/placements/remove`, { placement_ids });
 export const copyDay = (from_day: string, to_day: string, replace = false) =>
-  apiPost<{ copied: number }>(`${BASE}/copy-day`, { from_day, to_day, replace });
+  apiPost<{ copied: number }>(`/v1/dispatch/copy-day`, { from_day, to_day, replace });
 export const scheduleMove = (body: {
   card_kind: CardKind;
   card_ref: string;
   to_location_id: string;
   effective_date: string;
   start_time?: string;
-}) => apiPost<ScheduledMove>(`${BASE}/moves`, body);
-export const cancelMove = (id: string) => apiPost<ScheduledMove>(`${BASE}/moves/${id}/cancel`, {});
+}) => apiPost<ScheduledMove>(`/v1/dispatch/moves`, body);
+export const cancelMove = (id: string) => apiPost<ScheduledMove>(`/v1/dispatch/moves/${id}/cancel`, {});
 export const sharePlan = (day: string) =>
-  apiPost<{ notified: number; without_user: string[] }>(`${BASE}/plan/share?day=${day}`, {});
+  apiPost<{ notified: number; without_user: string[] }>(`/v1/dispatch/plan/share?day=${day}`, {});
 export const downloadPlanPdf = (day: string) =>
-  downloadWithAuth(`${API_BASE}${BASE}/plan/pdf?day=${day}`, `daily-plan-${day}.pdf`);
+  downloadWithAuth(`${API_BASE}/v1/dispatch/plan/pdf?day=${day}`, `daily-plan-${day}.pdf`);
 export const prefillTimesheet = (location_id: string, day: string) =>
   apiPost<{ timesheet_id: string; reference: string; created: boolean; lines_added: number }>(
-    `${BASE}/timesheet-prefill`,
+    `/v1/dispatch/timesheet-prefill`,
     { location_id, day },
   );

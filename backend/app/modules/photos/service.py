@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -280,10 +280,15 @@ class PhotosService:
             next_cursor = encode_cursor(as_utc(last.taken_at or last.created_at), str(last.id))  # type: ignore[arg-type]
         return {"items": await self.with_links(rows), "next_cursor": next_cursor, "total": total}
 
-    async def timeline(self, project_id: uuid.UUID, filters: PhotoFilters) -> list[dict[str, Any]]:
+    async def timeline(
+        self, project_id: uuid.UUID, filters: PhotoFilters, *, offset: int = 0, limit: int = 500
+    ) -> tuple[list[dict[str, Any]], int]:
+        """One page of day groups, newest first, plus the number of days that matched."""
         rows = await self.repo.all_photos(project_id, filters)
-        outs = {str(o["id"]): o for o in await self.with_links(rows)}
         days = group_timeline([photo_dict(p) for p in rows])
+        page = days[offset : offset + limit]
+        wanted = {p["id"] for d in page for p in d["photos"]}
+        outs = {str(o["id"]): o for o in await self.with_links([r for r in rows if str(r.id) in wanted])}
         return [
             {
                 "date": d["date"],
@@ -291,8 +296,8 @@ class PhotosService:
                 "undated": d["undated"],
                 "photos": [outs[p["id"]] for p in d["photos"]],
             }
-            for d in days
-        ]
+            for d in page
+        ], len(days)
 
     async def geojson(self, project_id: uuid.UUID, filters: PhotoFilters) -> dict[str, Any]:
         rows = await self.repo.all_photos(project_id, filters)
@@ -647,14 +652,21 @@ class PhotosService:
         await self.session.delete(link)
         await self.session.flush()
 
-    async def by_target(self, project_id: uuid.UUID, kind: str, target_id: str) -> list[dict[str, Any]]:
-        rows = await self.repo.all_photos(project_id, PhotoFilters(target_kind=kind, target_id=target_id))
-        return await self.with_links(rows)
+    async def by_target(
+        self, project_id: uuid.UUID, kind: str, target_id: str, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[dict[str, Any]], int]:
+        rows, total = await self.repo.photos_page(
+            project_id, PhotoFilters(target_kind=kind, target_id=target_id), offset=offset, limit=limit
+        )
+        return await self.with_links(rows), total
 
     # ── Albums ──────────────────────────────────────────────────────────
 
-    async def list_albums(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
-        return [_album_out(a, n) for a, n in await self.repo.list_albums(project_id)]
+    async def list_albums(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[dict[str, Any]], int]:
+        rows = await self.repo.list_albums(project_id, offset=offset, limit=limit)
+        return [_album_out(a, n) for a, n in rows], await self.repo.count_albums(project_id)
 
     async def get_album(self, album_id: uuid.UUID) -> PhotoAlbum:
         album = await self.repo.get_album(album_id)
@@ -744,13 +756,16 @@ class PhotosService:
             user_id=user_id,
         )
 
-    async def pins_for(self, photo: ProjectPhoto) -> list[Any]:
+    async def pins_for(self, photo: ProjectPhoto, *, offset: int = 0, limit: int = 200) -> tuple[list[Any], int]:
         try:
             from app.modules.plan_room.models import PlanPin
         except Exception:  # noqa: BLE001 - plan room not installed
-            return []
-        stmt = select(PlanPin).where(PlanPin.project_id == photo.project_id, PlanPin.photo_ref == f"photo:{photo.id}")
-        return list((await self.session.execute(stmt)).scalars().all())
+            return [], 0
+        where = (PlanPin.project_id == photo.project_id, PlanPin.photo_ref == f"photo:{photo.id}")
+        stmt = select(PlanPin).where(*where).order_by(PlanPin.id).offset(offset).limit(limit)
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = (await self.session.execute(select(func.count()).select_from(PlanPin).where(*where))).scalar()
+        return rows, int(total or 0)
 
     # ── Compare ─────────────────────────────────────────────────────────
 

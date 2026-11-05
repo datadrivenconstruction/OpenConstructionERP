@@ -100,9 +100,12 @@ async def test_unknown_proposal_is_404(session):
 async def test_list_orders_by_weighted_change_and_flags_warnings(session):
     _, prop = await seed(session)
     prop.variance_pct = D("20")
-    rows = await RateFeedbackService(session).list_proposals()
+    page = await RateFeedbackService(session).list_proposals()
+    rows = page.items
     assert len(rows) == 1 and rows[0].cost_item_code == "C-1"
     assert "rate_feedback.unit_matches" not in rows[0].warnings
+    cut = await RateFeedbackService(session).list_proposals(offset=1, limit=1)
+    assert cut.items == [] and cut.total == 1
 
 
 def test_linked_item_id_tolerates_garbage_metadata():

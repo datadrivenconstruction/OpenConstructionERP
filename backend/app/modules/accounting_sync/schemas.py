@@ -132,6 +132,20 @@ class LogListResponse(BaseModel):
     total: int
 
 
+class ConnectionListResponse(BaseModel):
+    items: list[ConnectionResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class FindingListResponse(BaseModel):
+    items: list[Finding]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class SyncCounts(BaseModel):
     success: int = 0
     failed: int = 0
@@ -166,3 +180,10 @@ class PreviewDocument(BaseModel):
     tax_total: Money
     gross_total: Money
     external_id: str | None = None
+
+
+class PreviewDocumentListResponse(BaseModel):
+    items: list[PreviewDocument]
+    total: int
+    offset: int = 0
+    limit: int = 50

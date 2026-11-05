@@ -14,7 +14,7 @@ import uuid
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.costs.models import CostItem
@@ -31,7 +31,13 @@ from app.modules.rate_feedback.rate_math import (
     deviates,
     suggested_rate,
 )
-from app.modules.rate_feedback.schemas import ConfirmRequest, ProposalResponse, RefreshRequest, RefreshResponse
+from app.modules.rate_feedback.schemas import (
+    ConfirmRequest,
+    ProposalListResponse,
+    ProposalResponse,
+    RefreshRequest,
+    RefreshResponse,
+)
 from app.modules.rate_feedback.validators import RateFeedbackError, check_confirmable, run_rules
 
 logger = logging.getLogger(__name__)
@@ -166,11 +172,22 @@ class RateFeedbackService:
         )
         return (await self.session.execute(stmt)).scalars().first()
 
-    async def list_proposals(self, status: str | None = STATUS_PENDING) -> list[ProposalResponse]:
+    async def list_proposals(
+        self, status: str | None = STATUS_PENDING, *, offset: int = 0, limit: int = 50
+    ) -> ProposalListResponse:
         """Proposals with the cost item they refer to, biggest confidence-weighted change first."""
         stmt = select(RateFeedbackProposal, CostItem).join(CostItem, CostItem.id == RateFeedbackProposal.cost_item_id)
+        count_stmt = (
+            select(func.count())
+            .select_from(RateFeedbackProposal)
+            .join(CostItem, CostItem.id == RateFeedbackProposal.cost_item_id)
+        )
         if status:
             stmt = stmt.where(RateFeedbackProposal.status == status)
+            count_stmt = count_stmt.where(RateFeedbackProposal.status == status)
+        total = int((await self.session.execute(count_stmt)).scalar() or 0)
+        weight = func.abs(func.coalesce(RateFeedbackProposal.variance_pct, 0)) * RateFeedbackProposal.confidence
+        stmt = stmt.order_by(weight.desc(), RateFeedbackProposal.id).offset(offset).limit(limit)
         rows = (await self.session.execute(stmt)).all()
         out: list[ProposalResponse] = []
         for proposal, item in rows:
@@ -181,8 +198,7 @@ class RateFeedbackService:
                 r.rule_id for r in await run_rules(_as_dict(proposal), {"unit": item.unit, "rate": item.rate})
             ]
             out.append(view)
-        out.sort(key=lambda v: abs(v.variance_pct or Decimal(0)) * v.confidence, reverse=True)
-        return out
+        return ProposalListResponse(items=out, total=total, offset=offset, limit=limit)
 
     async def _load_pending(self, proposal_id: uuid.UUID) -> tuple[RateFeedbackProposal, CostItem | None]:
         proposal = await self.session.get(RateFeedbackProposal, proposal_id)

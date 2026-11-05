@@ -109,6 +109,8 @@ async def test_board_conflicts_and_validation(db_session):
             "/v1/dispatch/crews", json={"name": "Gang 1", "member_ids": [str(w1.id), str(w2.id)], "min_size": 2}
         )
         crew = r.json()["id"]
+        r = await c.get("/v1/dispatch/crews", params={"limit": 1})
+        assert r.json()["total"] >= 1 and len(r.json()["items"]) == 1
         day = TODAY.isoformat()
         r = await c.post(
             "/v1/dispatch/placements",

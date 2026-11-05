@@ -40,6 +40,7 @@ ENVELOPE_FIELDS = {"items", "total", "offset", "limit"}
 
 LIST_ROUTES = [
     "/notices/",
+    "/notices/by-source/{source_type}/{source_id}",
     "/variation-requests/",
     "/variation-orders/",
     "/site-measurements/",

@@ -87,22 +87,21 @@ export interface SettingsResponse extends CheckSettings {
   catalog: KpiCatalogEntry[];
 }
 
-const BASE = '/v1/estimate_checks';
 
 export const estimateChecksApi = {
-  check: (boqId: string) => apiGet<CheckResponse>(`${BASE}/boq/${encodeURIComponent(boqId)}`),
+  check: (boqId: string) => apiGet<CheckResponse>(`/v1/estimate_checks/boq/${encodeURIComponent(boqId)}`),
   accept: (boqId: string, kpiId: string, reason: string) =>
     apiPut<CheckResponse, { reason: string }>(
-      `${BASE}/boq/${encodeURIComponent(boqId)}/accept/${encodeURIComponent(kpiId)}`,
+      `/v1/estimate_checks/boq/${encodeURIComponent(boqId)}/accept/${encodeURIComponent(kpiId)}`,
       { reason },
     ),
   withdraw: (boqId: string, kpiId: string) =>
-    apiDelete<CheckResponse>(`${BASE}/boq/${encodeURIComponent(boqId)}/accept/${encodeURIComponent(kpiId)}`),
-  settings: () => apiGet<SettingsResponse>(`${BASE}/settings`),
-  saveSettings: (body: CheckSettings) => apiPut<SettingsResponse, CheckSettings>(`${BASE}/settings`, body),
-  preference: () => apiGet<{ display_mode: DisplayMode }>(`${BASE}/preference`),
+    apiDelete<CheckResponse>(`/v1/estimate_checks/boq/${encodeURIComponent(boqId)}/accept/${encodeURIComponent(kpiId)}`),
+  settings: () => apiGet<SettingsResponse>(`/v1/estimate_checks/settings`),
+  saveSettings: (body: CheckSettings) => apiPut<SettingsResponse, CheckSettings>(`/v1/estimate_checks/settings`, body),
+  preference: () => apiGet<{ display_mode: DisplayMode }>(`/v1/estimate_checks/preference`),
   savePreference: (mode: DisplayMode) =>
-    apiPut<{ display_mode: DisplayMode }, { display_mode: DisplayMode }>(`${BASE}/preference`, {
+    apiPut<{ display_mode: DisplayMode }, { display_mode: DisplayMode }>(`/v1/estimate_checks/preference`, {
       display_mode: mode,
     }),
 };

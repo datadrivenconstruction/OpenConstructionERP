@@ -20,16 +20,20 @@ from app.modules.capital_plan.schemas import (
     AutofundResponse,
     CloneRequest,
     CompareResponse,
+    EnvelopeListResponse,
     EnvelopeResponse,
     EnvelopesReplace,
     ImportResponse,
     ItemCreate,
+    ItemListResponse,
     ItemPatch,
     ItemResponse,
     PlanCreate,
+    PlanListResponse,
     PlanPatch,
     PlanResponse,
     ScenarioCreate,
+    ScenarioListResponse,
     ScenarioPatch,
     ScenarioResponse,
     SummaryResponse,
@@ -53,9 +57,17 @@ Svc = Depends(_service)
 # ── Plans ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/plans/", response_model=list[PlanResponse], dependencies=_READ, summary="List capital plans")
-async def list_plans(node_id: uuid.UUID | None = None, service: CapitalPlanService = Svc) -> list[PlanResponse]:
-    return [PlanResponse.model_validate(p) for p in await service.list_plans(node_id)]
+@router.get("/plans/", response_model=PlanListResponse, dependencies=_READ, summary="List capital plans")
+async def list_plans(
+    node_id: uuid.UUID | None = None,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    service: CapitalPlanService = Svc,
+) -> PlanListResponse:
+    rows, total = await service.list_plans(node_id, offset=offset, limit=limit)
+    return PlanListResponse(
+        items=[PlanResponse.model_validate(p) for p in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post(
@@ -88,9 +100,17 @@ async def delete_plan(plan_id: uuid.UUID, service: CapitalPlanService = Svc) -> 
 # ── Envelopes ──────────────────────────────────────────────────────────────
 
 
-@router.get("/plans/{plan_id}/envelopes/", response_model=list[EnvelopeResponse], dependencies=_READ)
-async def list_envelopes(plan_id: uuid.UUID, service: CapitalPlanService = Svc) -> list[EnvelopeResponse]:
-    return [EnvelopeResponse.model_validate(e) for e in await service.list_envelopes(plan_id)]
+@router.get("/plans/{plan_id}/envelopes/", response_model=EnvelopeListResponse, dependencies=_READ)
+async def list_envelopes(
+    plan_id: uuid.UUID,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=1000),
+    service: CapitalPlanService = Svc,
+) -> EnvelopeListResponse:
+    rows, total = await service.list_envelopes(plan_id, offset=offset, limit=limit)
+    return EnvelopeListResponse(
+        items=[EnvelopeResponse.model_validate(e) for e in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.put(
@@ -108,9 +128,17 @@ async def replace_envelopes(
 # ── Scenarios ──────────────────────────────────────────────────────────────
 
 
-@router.get("/plans/{plan_id}/scenarios/", response_model=list[ScenarioResponse], dependencies=_READ)
-async def list_scenarios(plan_id: uuid.UUID, service: CapitalPlanService = Svc) -> list[ScenarioResponse]:
-    return [ScenarioResponse.model_validate(s) for s in await service.list_scenarios(plan_id)]
+@router.get("/plans/{plan_id}/scenarios/", response_model=ScenarioListResponse, dependencies=_READ)
+async def list_scenarios(
+    plan_id: uuid.UUID,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    service: CapitalPlanService = Svc,
+) -> ScenarioListResponse:
+    rows, total = await service.list_scenarios(plan_id, offset=offset, limit=limit)
+    return ScenarioListResponse(
+        items=[ScenarioResponse.model_validate(s) for s in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post(
@@ -155,9 +183,17 @@ async def clone_scenario(
 # ── Items ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/scenarios/{scenario_id}/items/", response_model=list[ItemResponse], dependencies=_READ)
-async def list_items(scenario_id: uuid.UUID, service: CapitalPlanService = Svc) -> list[ItemResponse]:
-    return [ItemResponse.model_validate(i) for i in await service.list_items(scenario_id)]
+@router.get("/scenarios/{scenario_id}/items/", response_model=ItemListResponse, dependencies=_READ)
+async def list_items(
+    scenario_id: uuid.UUID,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+    service: CapitalPlanService = Svc,
+) -> ItemListResponse:
+    rows, total = await service.list_items(scenario_id, offset=offset, limit=limit)
+    return ItemListResponse(
+        items=[ItemResponse.model_validate(i) for i in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post(

@@ -86,17 +86,17 @@ vi.mock('@/shared/lib/api', async () => {
 });
 
 function route(path: string): unknown {
-  if (path.endsWith('/connections')) return [CONNECTION];
+  if (path.includes('/connections?')) return { items: [CONNECTION], total: 1, offset: 0, limit: 200 };
   if (path.includes('/templates')) return CATALOG;
   if (path.endsWith('/mappings')) return MAPPINGS;
   if (path.includes('/findings'))
-    return [{ rule_id: 'accounting_sync.unmapped_account', severity: 'error', message: 'No account for bank', element_ref: null, record_id: 'r1' }];
+    return { items: [{ rule_id: 'accounting_sync.unmapped_account', severity: 'error', message: 'No account for bank', element_ref: null, record_id: 'r1' }], total: 1, offset: 0, limit: 1000 };
   if (path.includes('/documents'))
-    return [{
+    return { items: [{
       record_id: 'r1', record_type: 'ar_invoice', source: 'invoice', number: 'INV-001', doc_date: '2026-09-30',
       counterparty: 'ACME', project_code: 'P1', currency: 'EUR', net_total: '1000.00', tax_total: '190.00',
       gross_total: '1190.00', external_id: null,
-    }];
+    }], total: 1, offset: 0, limit: 1000 };
   if (path.includes('/log')) return LOG;
   if (path.endsWith('/status'))
     return {

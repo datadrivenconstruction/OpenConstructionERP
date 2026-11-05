@@ -57,7 +57,7 @@ async def _plan(session, user: str, **kw):
     plan = await service.create_plan(
         PlanCreate(name="Plan", currency="eur", start_year=2030, horizon_years=3, **kw), user
     )
-    (baseline,) = await service.list_scenarios(plan.id)
+    (baseline,), _ = await service.list_scenarios(plan.id)
     return service, plan, baseline
 
 
@@ -89,12 +89,12 @@ async def test_editing_a_clone_leaves_the_baseline_alone(session) -> None:
     road = await _item(service, baseline)
     clone = await service.clone_scenario(plan.id, baseline.id, "Delay roads 1y")
     assert not clone.is_baseline
-    (copy,) = await service.list_items(clone.id)
+    (copy,), _ = await service.list_items(clone.id)
     assert copy.id != road.id and copy.title == "Road"
 
     await service.patch_item(copy.id, ItemPatch(start_year=2031, status="deferred"))
     await service.delete_item(copy.id)
-    (still,) = await service.list_items(baseline.id)
+    (still,), _ = await service.list_items(baseline.id)
     assert still.start_year == 2030 and still.status == "proposed"
 
 
@@ -152,7 +152,7 @@ async def test_compare_two_scenarios_of_one_plan(session) -> None:
     service, plan, baseline = await _plan(session, await _user(session))
     await _item(service, baseline)
     clone = await service.clone_scenario(plan.id, baseline.id, None)
-    (copy,) = await service.list_items(clone.id)
+    (copy,), _ = await service.list_items(clone.id)
     await service.patch_item(copy.id, ItemPatch(start_year=2031))
     out = await service.compare(plan.id, baseline.id, clone.id)
     assert out["changed_items"][0]["start_year_b"] == 2031
@@ -216,8 +216,8 @@ async def test_plans_are_listed_per_node_including_descendants(session) -> None:
         await service.create_plan(
             PlanCreate(name=name, currency="EUR", start_year=2030, node_id=node.id if node else None), user
         )
-    assert {p.name for p in await service.list_plans(parent.id)} == {"on child"}
-    assert {p.name for p in await service.list_plans(None)} >= {"on child", "on sibling", "tenant wide"}
+    assert {p.name for p in (await service.list_plans(parent.id))[0]} == {"on child"}
+    assert {p.name for p in (await service.list_plans(None))[0]} >= {"on child", "on sibling", "tenant wide"}
     with pytest.raises(HTTPException):
         await service.create_plan(PlanCreate(name="x", currency="EUR", start_year=2030, node_id=uuid.uuid4()), user)
 
@@ -248,10 +248,12 @@ async def test_the_demo_has_one_plan_two_scenarios_and_exactly_one_red_year(sess
     assert totals == {"plans": 1, "scenarios": 2, "items": 16}
     assert await seed_capital_plan_demo(session) == {"plans": 0, "scenarios": 0, "items": 0}
     service = CapitalPlanService(session)
-    (plan,) = await service.list_plans()
-    baseline, delayed = await service.list_scenarios(plan.id)
+    (plan,), _ = await service.list_plans()
+    (baseline, delayed), _ = await service.list_scenarios(plan.id)
     assert baseline.is_baseline and not delayed.is_baseline
-    assert len(await service.list_items(baseline.id)) == 8
+    items, total = await service.list_items(baseline.id, limit=3)
+    assert len(items) == 3
+    assert total == 8
     red = [r for r in (await service.summary(baseline.id))["rows"] if Decimal(r["gap"]) < 0]
     assert len(red) == 1
     assert not [r for r in (await service.summary(delayed.id))["rows"] if Decimal(r["gap"]) < 0]

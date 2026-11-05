@@ -7,8 +7,6 @@
  */
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost, getErrorMessage } from '@/shared/lib/api';
 
-const KEYS = '/v1/users/me/api-keys';
-const HOOKS = '/v1/integrations/webhooks';
 
 export interface ApiKey {
   id: string;
@@ -105,24 +103,24 @@ export const developerKeys = {
   deliveries: (webhookId: string) => ['developer', 'deliveries', webhookId] as const,
 };
 
-export const listApiKeys = () => apiGet<ApiKey[]>(`${KEYS}/`);
-export const listApiScopes = () => apiGet<ApiScope[]>(`${KEYS}/scopes/`);
-export const createApiKey = (body: ApiKeyCreate) => apiPost<ApiKeyCreated>(`${KEYS}/`, body);
-export const rotateApiKey = (id: string) => apiPost<ApiKeyCreated>(`${KEYS}/${encodeURIComponent(id)}/rotate/`);
-export const revokeApiKey = (id: string) => apiDelete(`${KEYS}/${encodeURIComponent(id)}`);
+export const listApiKeys = () => apiGet<ApiKey[]>(`/v1/users/me/api-keys/`);
+export const listApiScopes = () => apiGet<ApiScope[]>(`/v1/users/me/api-keys/scopes/`);
+export const createApiKey = (body: ApiKeyCreate) => apiPost<ApiKeyCreated>(`/v1/users/me/api-keys/`, body);
+export const rotateApiKey = (id: string) => apiPost<ApiKeyCreated>(`/v1/users/me/api-keys/${encodeURIComponent(id)}/rotate/`);
+export const revokeApiKey = (id: string) => apiDelete(`/v1/users/me/api-keys/${encodeURIComponent(id)}`);
 
-export const listWebhooks = () => apiGet<Webhook[]>(`${HOOKS}/`);
-export const listWebhookEvents = () => apiGet<WebhookEvent[]>(`${HOOKS}/events/`);
-export const createWebhook = (body: WebhookCreate) => apiPost<WebhookCreated>(`${HOOKS}/`, body);
+export const listWebhooks = () => apiGet<Webhook[]>(`/v1/integrations/webhooks/`);
+export const listWebhookEvents = () => apiGet<WebhookEvent[]>(`/v1/integrations/webhooks/events/`);
+export const createWebhook = (body: WebhookCreate) => apiPost<WebhookCreated>(`/v1/integrations/webhooks/`, body);
 export const setWebhookActive = (id: string, isActive: boolean) =>
-  apiPatch<Webhook>(`${HOOKS}/${encodeURIComponent(id)}`, { is_active: isActive });
-export const deleteWebhook = (id: string) => apiDelete(`${HOOKS}/${encodeURIComponent(id)}`);
+  apiPatch<Webhook>(`/v1/integrations/webhooks/${encodeURIComponent(id)}`, { is_active: isActive });
+export const deleteWebhook = (id: string) => apiDelete(`/v1/integrations/webhooks/${encodeURIComponent(id)}`);
 export const testWebhook = (id: string) =>
-  apiPost<WebhookDelivery>(`${HOOKS}/${encodeURIComponent(id)}/test/`);
+  apiPost<WebhookDelivery>(`/v1/integrations/webhooks/${encodeURIComponent(id)}/test/`);
 export const listDeliveries = (id: string) =>
-  apiGet<WebhookDelivery[]>(`${HOOKS}/${encodeURIComponent(id)}/deliveries/`);
+  apiGet<WebhookDelivery[]>(`/v1/integrations/webhooks/${encodeURIComponent(id)}/deliveries/`);
 export const redeliver = (deliveryId: string) =>
-  apiPost<WebhookDelivery>(`${HOOKS}/deliveries/${encodeURIComponent(deliveryId)}/redeliver/`);
+  apiPost<WebhookDelivery>(`/v1/integrations/webhooks/deliveries/${encodeURIComponent(deliveryId)}/redeliver/`);
 
 /** The server's reason when it gave one (`detail.message`), else the generic error text. */
 export function describeError(err: unknown): string {

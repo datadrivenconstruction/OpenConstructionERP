@@ -18,6 +18,13 @@ class ProfileSummary(BaseModel):
     handled_by: str
 
 
+class ProfileListResponse(BaseModel):
+    items: list[ProfileSummary]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class DetectCandidate(BaseModel):
     profile_key: str
     name: str

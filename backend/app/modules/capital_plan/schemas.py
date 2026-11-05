@@ -203,6 +203,34 @@ class ItemSpend(BaseModel):
     outside_horizon: FiniteDecimal
 
 
+class PlanListResponse(BaseModel):
+    items: list[PlanResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
+class EnvelopeListResponse(BaseModel):
+    items: list[EnvelopeResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
+class ScenarioListResponse(BaseModel):
+    items: list[ScenarioResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
+class ItemListResponse(BaseModel):
+    items: list[ItemResponse]
+    total: int
+    offset: int = 0
+    limit: int = 1000
+
+
 class SummaryResponse(BaseModel):
     years: list[int]
     rows: list[YearRow]

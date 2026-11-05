@@ -104,6 +104,13 @@ class BidOutcomeResponse(BaseModel):
     warnings: list[ValidationFinding] = Field(default_factory=list)
 
 
+class BidOutcomeListResponse(BaseModel):
+    items: list[BidOutcomeResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
 class GroupStat(BaseModel):
     """Hit rate of one client, trade or size band."""
 

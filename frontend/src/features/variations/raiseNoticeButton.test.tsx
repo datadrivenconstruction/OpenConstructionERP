@@ -37,7 +37,7 @@ describe('RaiseNoticeButton', () => {
   });
 
   it('offers the button when no notice exists, posts the event, then links to the notice', async () => {
-    apiGet.mockResolvedValue([]);
+    apiGet.mockResolvedValue({ items: [], total: 0, offset: 0, limit: 50 });
     apiPost.mockResolvedValue({ id: 'n1', code: 'NOT-0003' });
     renderIt();
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
@@ -57,7 +57,7 @@ describe('RaiseNoticeButton', () => {
   });
 
   it('shows the link at once when a notice already exists', async () => {
-    apiGet.mockResolvedValue([{ id: 'n9', code: 'NOT-0009' }]);
+    apiGet.mockResolvedValue({ items: [{ id: 'n9', code: 'NOT-0009' }], total: 1, offset: 0, limit: 50 });
     renderIt();
     await waitFor(() => expect(screen.getByTestId('raise-notice-link').textContent).toContain('NOT-0009'));
     expect(screen.queryByTestId('raise-notice-button')).toBeNull();

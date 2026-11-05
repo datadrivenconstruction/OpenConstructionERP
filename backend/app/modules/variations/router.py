@@ -197,20 +197,26 @@ async def raise_notice_from_field_event(
     return NoticeResponse.model_validate(notice)
 
 
-@router.get("/notices/by-source/{source_type}/{source_id}", response_model=list[NoticeResponse])
+@router.get("/notices/by-source/{source_type}/{source_id}", response_model=NoticeListResponse)
 async def notices_for_field_event(
     source_type: str,
     source_id: uuid.UUID,
     project_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     _perm: None = Depends(RequirePermission("variations.read")),
     service: VariationsService = Depends(_get_service),
-) -> list[NoticeResponse]:
+) -> NoticeListResponse:
     """The notices a field event raised, so the diary or RFI can show its backlink."""
     await verify_project_access(project_id, user_id, session)
-    rows = await service.notice_repo.list_for_source(project_id, source_type, source_id)
-    return [NoticeResponse.model_validate(r) for r in rows]
+    rows, total = await service.notice_repo.page_for_source(
+        project_id, source_type, source_id, offset=offset, limit=limit
+    )
+    return NoticeListResponse(
+        items=[NoticeResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.get("/notices/{notice_id}", response_model=NoticeResponse)

@@ -101,6 +101,9 @@ class AccountingSyncService:
     async def list_connections(self) -> list[AccountingConnection]:
         return await self.repo.list_connections()
 
+    async def list_connections_page(self, *, offset: int, limit: int) -> tuple[list[AccountingConnection], int]:
+        return await self.repo.list_connections_page(offset=offset, limit=limit)
+
     async def get_connection(self, connection_id: uuid.UUID) -> AccountingConnection:
         row = await self.repo.get_connection(connection_id)
         if row is None:

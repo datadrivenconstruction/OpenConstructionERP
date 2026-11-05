@@ -60,15 +60,18 @@ export interface SeenQuery {
   riskCategory?: string;
 }
 
-const BASE = '/v1/lessons_learned';
 
 export const lessonsApi = {
-  list: (projectId?: string) =>
-    apiGet<Lesson[]>(`${BASE}/${projectId ? `?project_id=${encodeURIComponent(projectId)}` : ''}`),
-  create: (body: LessonInput) => apiPost<Lesson, LessonInput>(`${BASE}/`, body),
-  confirm: (id: string) => apiPost<Lesson>(`${BASE}/${id}/confirm`),
-  update: (id: string, body: Partial<LessonInput>) => apiPatch<Lesson, Partial<LessonInput>>(`${BASE}/${id}`, body),
-  remove: (id: string) => apiDelete(`${BASE}/${id}`),
+  list: async (projectId?: string): Promise<Lesson[]> =>
+    (
+      await apiGet<{ items: Lesson[]; total: number }>(
+        `/v1/lessons_learned/${projectId ? `?limit=500&project_id=${encodeURIComponent(projectId)}` : '?limit=500'}`,
+      )
+    ).items,
+  create: (body: LessonInput) => apiPost<Lesson, LessonInput>(`/v1/lessons_learned/`, body),
+  confirm: (id: string) => apiPost<Lesson>(`/v1/lessons_learned/${id}/confirm`),
+  update: (id: string, body: Partial<LessonInput>) => apiPatch<Lesson, Partial<LessonInput>>(`/v1/lessons_learned/${id}`, body),
+  remove: (id: string) => apiDelete(`/v1/lessons_learned/${id}`),
   seen: (q: SeenQuery) => {
     const p = new URLSearchParams();
     if (q.projectId) p.set('project_id', q.projectId);
@@ -76,6 +79,6 @@ export const lessonsApi = {
     if (q.costCode) p.set('cost_code', q.costCode);
     if (q.riskCategory) p.set('risk_category', q.riskCategory);
     const qs = p.toString();
-    return apiGet<SeenResult>(`${BASE}/seen${qs ? `?${qs}` : ''}`);
+    return apiGet<SeenResult>(`/v1/lessons_learned/seen${qs ? `?${qs}` : ''}`);
   },
 };

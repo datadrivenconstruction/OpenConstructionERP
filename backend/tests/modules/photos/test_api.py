@@ -109,7 +109,9 @@ async def test_search_cursor_timeline_and_map(client: AsyncClient, admin_auth, p
     assert nxt.json()["items"][0]["id"] != window.json()["items"][0]["id"]
 
     timeline = (await client.get(f"{BASE}/timeline/?project_id={project_id}&tag=pour-{tag}", headers=header)).json()
-    assert [d["date"] for d in timeline] == ["2026-09-03", "2026-09-02", "2026-09-01"]
+    assert [d["date"] for d in timeline["items"]] == ["2026-09-03", "2026-09-02", "2026-09-01"]
+    cut = (await client.get(f"{BASE}/timeline/?project_id={project_id}&tag=pour-{tag}&limit=1", headers=header)).json()
+    assert len(cut["items"]) == 1 and cut["total"] == 3
 
     geo = (await client.get(f"{BASE}/map/?project_id={project_id}", headers=header)).json()
     assert geo["type"] == "FeatureCollection"
@@ -145,7 +147,8 @@ async def test_links_are_scoped_to_the_project(client: AsyncClient, admin_auth, 
     assert missing.status_code == 404
 
     strip = await client.get(f"{BASE}/by-target/?project_id={project_id}&kind=punch_item&id={own}", headers=header)
-    assert [p["id"] for p in strip.json()] == [photo["id"]]
+    assert [p["id"] for p in strip.json()["items"]] == [photo["id"]]
+    assert strip.json()["total"] == 1
 
     report = (
         await client.get(f"{BASE}/validation/?project_id={project_id}&photo_id={photo['id']}", headers=header)
@@ -277,7 +280,9 @@ async def test_ai_suggestions_stay_pending_until_a_person_accepts(
     assert {s.kind for s in stored} == {"caption", "tags", "hazard"}
     assert "photos.ai.suggested" in [e[0] for e in events]
 
-    listed = (await client.get(f"{BASE}/{photo['id']}/ai/", headers=header)).json()
+    envelope = (await client.get(f"{BASE}/{photo['id']}/ai/?limit=1", headers=header)).json()
+    assert len(envelope["items"]) == 1 and envelope["total"] == 3
+    listed = (await client.get(f"{BASE}/{photo['id']}/ai/", headers=header)).json()["items"]
     assert {s["status"] for s in listed} == {"pending"}
     assert (await client.get(f"{BASE}/{photo['id']}/", headers=header)).json()["caption"] == "Original"
 
@@ -348,9 +353,11 @@ async def test_albums_compare_and_export_access(client: AsyncClient, admin_auth,
         f"{BASE}/albums/{album.json()['id']}/items/", json={"photo_ids": [a["id"], b["id"], a["id"]]}, headers=header
     )
     assert added.json() == {"added": 2, "photo_count": 2}
+    page = (await client.get(f"{BASE}/albums/?project_id={project_id}&limit=1", headers=header)).json()
+    assert len(page["items"]) == 1 and page["total"] >= 1
     listed = [
         x
-        for x in (await client.get(f"{BASE}/albums/?project_id={project_id}", headers=header)).json()
+        for x in (await client.get(f"{BASE}/albums/?project_id={project_id}", headers=header)).json()["items"]
         if x["id"] == album.json()["id"]
     ]
     assert listed[0]["cover_photo_id"] == a["id"]
@@ -369,6 +376,8 @@ async def test_albums_compare_and_export_access(client: AsyncClient, admin_auth,
         headers=header,
     )
     assert cmp.status_code == 201, cmp.text
+    page = (await client.get(f"{BASE}/compare/?project_id={project_id}&limit=1", headers=header)).json()
+    assert [c["id"] for c in page["items"]] == [cmp.json()["id"]] and page["total"] == 1
     got = await client.get(f"{BASE}/compare/{cmp.json()['id']}/", headers=header)
     assert got.json()["before"]["id"] == a["id"] and got.json()["after"]["id"] == b["id"]
     assert (await client.get(f"{BASE}/compare/{cmp.json()['id']}/", headers=other)).status_code == 404

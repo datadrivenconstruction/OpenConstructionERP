@@ -98,3 +98,10 @@ class SavedAnswerOut(BaseModel):
     target_id: str | None
     validation: dict[str, Any]
     created_at: datetime
+
+
+class SavedAnswerListResponse(BaseModel):
+    items: list[SavedAnswerOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

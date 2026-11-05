@@ -6,7 +6,6 @@
 
 import { apiGet, apiPost, apiPatch, apiPut, apiDelete, downloadWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/capital_plan';
 
 export type ItemStatus = 'proposed' | 'funded' | 'deferred';
 
@@ -127,32 +126,37 @@ export type ItemPatchBody = Partial<
 > & { total_cost?: string };
 
 export const capitalPlanApi = {
-  listPlans: () => apiGet<CapitalPlan[]>(`${BASE}/plans/`),
-  createPlan: (body: PlanCreateBody) => apiPost<CapitalPlan, PlanCreateBody>(`${BASE}/plans/`, body),
-  listEnvelopes: (planId: string) => apiGet<Envelope[]>(`${BASE}/plans/${planId}/envelopes/`),
+  listPlans: () => apiGet<{ items: CapitalPlan[]; total: number }>(`/v1/capital_plan/plans/?limit=500`).then((r) => r.items),
+  createPlan: (body: PlanCreateBody) => apiPost<CapitalPlan, PlanCreateBody>(`/v1/capital_plan/plans/`, body),
+  listEnvelopes: (planId: string) =>
+    apiGet<{ items: Envelope[]; total: number }>(`/v1/capital_plan/plans/${planId}/envelopes/?limit=1000`).then((r) => r.items),
   replaceEnvelopes: (planId: string, envelopes: EnvelopeBody[]) =>
-    apiPut<Envelope[], { envelopes: EnvelopeBody[] }>(`${BASE}/plans/${planId}/envelopes/`, { envelopes }),
-  listScenarios: (planId: string) => apiGet<Scenario[]>(`${BASE}/plans/${planId}/scenarios/`),
+    apiPut<Envelope[], { envelopes: EnvelopeBody[] }>(`/v1/capital_plan/plans/${planId}/envelopes/`, { envelopes }),
+  listScenarios: (planId: string) =>
+    apiGet<{ items: Scenario[]; total: number }>(`/v1/capital_plan/plans/${planId}/scenarios/?limit=500`).then((r) => r.items),
   cloneScenario: (planId: string, scenarioId: string, name?: string) =>
-    apiPost<Scenario, { name?: string }>(`${BASE}/plans/${planId}/scenarios/${scenarioId}/clone/`, { name }),
+    apiPost<Scenario, { name?: string }>(`/v1/capital_plan/plans/${planId}/scenarios/${scenarioId}/clone/`, { name }),
   deleteScenario: (planId: string, scenarioId: string) =>
-    apiDelete(`${BASE}/plans/${planId}/scenarios/${scenarioId}/`),
-  listItems: (scenarioId: string) => apiGet<CapitalItem[]>(`${BASE}/scenarios/${scenarioId}/items/`),
+    apiDelete(`/v1/capital_plan/plans/${planId}/scenarios/${scenarioId}/`),
+  listItems: (scenarioId: string) =>
+    apiGet<{ items: CapitalItem[]; total: number }>(`/v1/capital_plan/scenarios/${scenarioId}/items/?limit=5000`).then(
+      (r) => r.items,
+    ),
   patchItem: (itemId: string, body: ItemPatchBody) =>
-    apiPatch<CapitalItem, ItemPatchBody>(`${BASE}/items/${itemId}/`, body),
+    apiPatch<CapitalItem, ItemPatchBody>(`/v1/capital_plan/items/${itemId}/`, body),
   applyStatuses: (scenarioId: string, items: { id: string; status: ItemStatus }[]) =>
     apiPatch<CapitalItem[], { items: { id: string; status: ItemStatus }[] }>(
-      `${BASE}/scenarios/${scenarioId}/items/`,
+      `/v1/capital_plan/scenarios/${scenarioId}/items/`,
       { items },
     ),
   importProjects: (planId: string, scenarioId: string) =>
     apiPost<{ created: CapitalItem[]; skipped: number }>(
-      `${BASE}/plans/${planId}/import-projects/?scenario_id=${scenarioId}`,
+      `/v1/capital_plan/plans/${planId}/import-projects/?scenario_id=${scenarioId}`,
     ),
-  summary: (scenarioId: string) => apiGet<Summary>(`${BASE}/scenarios/${scenarioId}/summary/`),
-  autofund: (scenarioId: string) => apiPost<AutofundResult>(`${BASE}/scenarios/${scenarioId}/autofund/`),
+  summary: (scenarioId: string) => apiGet<Summary>(`/v1/capital_plan/scenarios/${scenarioId}/summary/`),
+  autofund: (scenarioId: string) => apiPost<AutofundResult>(`/v1/capital_plan/scenarios/${scenarioId}/autofund/`),
   compare: (planId: string, a: string, b: string) =>
-    apiGet<CompareResult>(`${BASE}/plans/${planId}/compare/?a=${a}&b=${b}`),
+    apiGet<CompareResult>(`/v1/capital_plan/plans/${planId}/compare/?a=${a}&b=${b}`),
   exportXlsx: (scenarioId: string) =>
-    downloadWithAuth(`/api${BASE}/scenarios/${scenarioId}/export/`, 'capital_plan.xlsx'),
+    downloadWithAuth(`/api/v1/capital_plan/scenarios/${scenarioId}/export/`, 'capital_plan.xlsx'),
 };

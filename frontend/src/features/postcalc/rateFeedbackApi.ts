@@ -35,8 +35,9 @@ export interface RefreshResult {
   unchanged: number;
 }
 
-export function fetchRateProposals(): Promise<RateProposal[]> {
-  return apiGet<RateProposal[]>('/v1/rate_feedback/proposals?status=pending');
+export async function fetchRateProposals(): Promise<RateProposal[]> {
+  const page = await apiGet<{ items: RateProposal[] }>('/v1/rate_feedback/proposals?status=pending&limit=500');
+  return page.items;
 }
 
 export function refreshRateProposals(): Promise<RefreshResult> {

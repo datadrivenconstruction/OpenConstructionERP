@@ -176,6 +176,15 @@ class NoticeRepository(_BaseRepo):
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
+    async def page_for_source(
+        self, project_id: uuid.UUID, source_type: str, source_id: uuid.UUID, *, offset: int = 0, limit: int = 50
+    ) -> tuple[list[Notice], int]:
+        where = (Notice.project_id == project_id, Notice.source_type == source_type, Notice.source_id == source_id)
+        stmt = select(Notice).where(*where).order_by(Notice.created_at, Notice.id).offset(offset).limit(limit)
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = (await self.session.execute(select(func.count()).select_from(Notice).where(*where))).scalar_one()
+        return rows, total
+
 
 class VariationRequestRepository(_BaseRepo):
     model = VariationRequest

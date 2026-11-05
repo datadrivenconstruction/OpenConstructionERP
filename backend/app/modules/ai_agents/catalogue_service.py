@@ -24,7 +24,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.ai_agents.base import (
@@ -365,6 +365,22 @@ class CatalogueService:
             stmt = stmt.where(AgentDraft.status == status)
         stmt = stmt.order_by(AgentDraft.created_at.desc()).limit(limit)
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def drafts_page(
+        self, project_id: uuid.UUID, status: str | None, *, offset: int, limit: int
+    ) -> tuple[list[AgentDraft], int]:
+        cond = [AgentDraft.project_id == project_id]
+        if status:
+            cond.append(AgentDraft.status == status)
+        total = (await self.session.execute(select(func.count()).select_from(AgentDraft).where(*cond))).scalar_one()
+        stmt = select(AgentDraft).where(*cond).order_by(AgentDraft.created_at.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), int(total)
+
+    async def history_page(self, project_id: uuid.UUID, *, offset: int, limit: int) -> tuple[list[AgentRun], int]:
+        cond = [AgentRun.project_id == project_id, AgentRun.agent_name.in_(list(CATALOGUE))]
+        total = (await self.session.execute(select(func.count()).select_from(AgentRun).where(*cond))).scalar_one()
+        stmt = select(AgentRun).where(*cond).order_by(AgentRun.created_at.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), int(total)
 
     async def history(self, project_id: uuid.UUID, limit: int = 50) -> list[AgentRun]:
         stmt = (

@@ -43,22 +43,27 @@ from app.modules.photos.schemas import (
     AcceptIn,
     AlbumIn,
     AlbumItemsIn,
+    AlbumListResponse,
     AlbumOut,
     AlbumPatch,
     CompareIn,
+    CompareListResponse,
     CompareOut,
     ExportIn,
     ExportStatus,
     JobOut,
     LinkIn,
     PhotoLinkOut,
+    PhotoListResponse,
     PhotoOut,
     PhotoPage,
     PhotoPatch,
     PinIn,
+    PinListResponse,
     PinOut,
+    SuggestionListResponse,
     SuggestionOut,
-    TimelineDay,
+    TimelineListResponse,
     UploadResult,
 )
 from app.modules.photos.service import (
@@ -209,7 +214,7 @@ async def list_photos(
     return await PhotosService(session).search(project_id, f, cursor=cursor, limit=limit)
 
 
-@router.get("/timeline/", response_model=list[TimelineDay])
+@router.get("/timeline/", response_model=TimelineListResponse)
 async def photo_timeline(
     session: SessionDep,
     user_id: CurrentUserId,
@@ -222,11 +227,14 @@ async def photo_timeline(
     source: str | None = Query(None),
     category: str | None = Query(None, max_length=100),
     has_gps: bool | None = Query(None),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=1000),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
     f = _filters(q, tag, album, date_from, date_to, source, None, None, has_gps, category=category)
-    return await PhotosService(session).timeline(project_id, f)
+    days, total = await PhotosService(session).timeline(project_id, f, offset=offset, limit=limit)
+    return {"items": days, "total": total, "offset": offset, "limit": limit}
 
 
 @router.get("/map/")
@@ -268,31 +276,37 @@ async def photo_validation(
     return await service.validate(project_id, photos, locale=get_locale())
 
 
-@router.get("/by-target/", response_model=list[PhotoOut])
+@router.get("/by-target/", response_model=PhotoListResponse)
 async def photos_by_target(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
     kind: str = Query(...),
     id: str = Query(..., min_length=1, max_length=64),  # noqa: A002 - public query name
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
-    return await PhotosService(session).by_target(project_id, kind, id)
+    items, total = await PhotosService(session).by_target(project_id, kind, id, offset=offset, limit=limit)
+    return {"items": items, "total": total, "offset": offset, "limit": limit}
 
 
 # ── Albums ──────────────────────────────────────────────────────────────
 
 
-@router.get("/albums/", response_model=list[AlbumOut])
+@router.get("/albums/", response_model=AlbumListResponse)
 async def list_albums(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
-    return await PhotosService(session).list_albums(project_id)
+    items, total = await PhotosService(session).list_albums(project_id, offset=offset, limit=limit)
+    return {"items": items, "total": total, "offset": offset, "limit": limit}
 
 
 @router.post("/albums/", response_model=AlbumOut, status_code=status.HTTP_201_CREATED)
@@ -380,16 +394,20 @@ async def create_compare(
     return await service.compare_out(row)
 
 
-@router.get("/compare/", response_model=list[CompareOut])
+@router.get("/compare/", response_model=CompareListResponse)
 async def list_compares(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
     service = PhotosService(session)
-    return [await service.compare_out(row) for row in await service.repo.list_compares(project_id)]
+    rows, total = await service.repo.list_compares(project_id, offset=offset, limit=limit)
+    items = [await service.compare_out(row) for row in rows]
+    return {"items": items, "total": total, "offset": offset, "limit": limit}
 
 
 @router.get("/compare/{compare_id}/", response_model=CompareOut)
@@ -630,15 +648,18 @@ async def remove_link(
     await service.remove_link(photo, target_kind, target_id)
 
 
-@router.get("/{photo_id}/pins/", response_model=list[PinOut])
+@router.get("/{photo_id}/pins/", response_model=PinListResponse)
 async def list_pins(
     photo_id: uuid.UUID,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     service: PhotosService = Depends(_svc),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[Any]:
+) -> dict[str, Any]:
     photo = await _photo_for(photo_id, user_id, service)
-    return [
+    pins, total = await service.pins_for(photo, offset=offset, limit=limit)
+    items = [
         {
             "id": p.id,
             "document_id": p.document_id,
@@ -648,8 +669,9 @@ async def list_pins(
             "note": p.note,
             "photo_ref": p.photo_ref,
         }
-        for p in await service.pins_for(photo)
+        for p in pins
     ]
+    return {"items": items, "total": total, "offset": offset, "limit": limit}
 
 
 @router.post("/{photo_id}/pins/", response_model=PinOut, status_code=status.HTTP_201_CREATED)
@@ -693,12 +715,15 @@ async def analyze_photo(
     return await _submit(JOB_AI, {"photo_id": str(photo.id), "user_id": user_id, "kinds": wanted})
 
 
-@router.get("/{photo_id}/ai/", response_model=list[SuggestionOut])
+@router.get("/{photo_id}/ai/", response_model=SuggestionListResponse)
 async def list_suggestions(
     photo_id: uuid.UUID,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
     service: PhotosService = Depends(_svc),
     _: None = Depends(RequirePermission("photos.read")),
-) -> list[Any]:
+) -> dict[str, Any]:
     photo = await _photo_for(photo_id, user_id, service)
-    return await service.repo.suggestions_for(photo.id)
+    rows, total = await service.repo.suggestions_page(photo.id, offset=offset, limit=limit)
+    return {"items": rows, "total": total, "offset": offset, "limit": limit}

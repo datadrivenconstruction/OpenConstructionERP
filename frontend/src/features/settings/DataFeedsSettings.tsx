@@ -21,7 +21,6 @@ import { copyToClipboard } from '@/shared/lib/browser';
 import { projectsApi } from '@/features/projects/api';
 import { useToastStore } from '@/stores/useToastStore';
 
-const BASE = '/v1/bi-feed';
 const SCOPE = 'bi:read';
 const PREVIEW_ROWS = 20;
 
@@ -71,7 +70,7 @@ export function feedPath(feedId: string, ext: 'csv' | 'parquet' | 'json', projec
   if (projectId) params.set('project_id', projectId);
   if (limit) params.set('limit', String(limit));
   const query = params.toString();
-  return `${BASE}/feeds/${feedId}.${ext}${query ? `?${query}` : ''}`;
+  return `/v1/bi-feed/feeds/${feedId}.${ext}${query ? `?${query}` : ''}`;
 }
 
 /** Absolute URL of a feed file on this server. */
@@ -101,7 +100,7 @@ export function DataFeedsSettings() {
   const [keyId, setKeyId] = useState('');
   const [created, setCreated] = useState<ApiKeyCreated | null>(null);
 
-  const feedsQuery = useQuery({ queryKey: keys.feeds, queryFn: () => apiGet<FeedInfo[]>(`${BASE}/feeds`) });
+  const feedsQuery = useQuery({ queryKey: keys.feeds, queryFn: () => apiGet<FeedInfo[]>(`/v1/bi-feed/feeds`) });
   const projectsQuery = useQuery({ queryKey: keys.projects, queryFn: () => projectsApi.list() });
   const keysQuery = useQuery({
     queryKey: keys.apiKeys,
@@ -109,7 +108,7 @@ export function DataFeedsSettings() {
   });
   const sqlQuery = useQuery({
     queryKey: keys.sql,
-    queryFn: () => apiGet<SqlStatus>(`${BASE}/sql-status`).catch(() => null),
+    queryFn: () => apiGet<SqlStatus>(`/v1/bi-feed/sql-status`).catch(() => null),
   });
 
   const feeds = feedsQuery.data ?? [];

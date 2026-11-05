@@ -144,6 +144,16 @@ class PhotosRepository:
         total = int((await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar() or 0)
         return rows, total
 
+    async def photos_page(
+        self, project_id: uuid.UUID, f: PhotoFilters, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[ProjectPhoto], int]:
+        """SQL page for filters that need no Python post-filter (no tag)."""
+        base = self._filtered(project_id, f)
+        stmt = base.order_by(_sort_at().desc(), ProjectPhoto.id.desc()).offset(offset).limit(limit)
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = int((await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar() or 0)
+        return rows, total
+
     async def all_photos(self, project_id: uuid.UUID, f: PhotoFilters | None = None) -> list[ProjectPhoto]:
         stmt = self._filtered(project_id, f or PhotoFilters()).order_by(_sort_at().desc(), ProjectPhoto.id.desc())
         rows = list((await self.session.execute(stmt)).scalars().all())
@@ -202,7 +212,13 @@ class PhotosRepository:
 
     # ── Albums ──────────────────────────────────────────────────────────
 
-    async def list_albums(self, project_id: uuid.UUID) -> list[tuple[PhotoAlbum, int]]:
+    async def count_albums(self, project_id: uuid.UUID) -> int:
+        stmt = select(func.count()).select_from(PhotoAlbum).where(PhotoAlbum.project_id == project_id)
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    async def list_albums(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int | None = None
+    ) -> list[tuple[PhotoAlbum, int]]:
         counts = (
             select(photo_album_item.c.album_id, func.count().label("n"))
             .group_by(photo_album_item.c.album_id)
@@ -212,7 +228,9 @@ class PhotosRepository:
             select(PhotoAlbum, func.coalesce(counts.c.n, 0))
             .outerjoin(counts, counts.c.album_id == PhotoAlbum.id)
             .where(PhotoAlbum.project_id == project_id)
-            .order_by(PhotoAlbum.sort_order, PhotoAlbum.name)
+            .order_by(PhotoAlbum.sort_order, PhotoAlbum.name, PhotoAlbum.id)
+            .offset(offset)
+            .limit(limit)
         )
         return [(a, int(n)) for a, n in (await self.session.execute(stmt)).all()]
 
@@ -268,6 +286,20 @@ class PhotosRepository:
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
+    async def suggestions_page(
+        self, photo_id: uuid.UUID, *, offset: int = 0, limit: int = 100
+    ) -> tuple[list[PhotoAISuggestion], int]:
+        stmt = (
+            select(PhotoAISuggestion)
+            .where(PhotoAISuggestion.photo_id == photo_id)
+            .order_by(PhotoAISuggestion.created_at.desc(), PhotoAISuggestion.id)
+            .offset(offset)
+            .limit(limit)
+        )
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        count = select(func.count()).select_from(PhotoAISuggestion).where(PhotoAISuggestion.photo_id == photo_id)
+        return rows, int((await self.session.execute(count)).scalar() or 0)
+
     async def suggestions_for_project(self, project_id: uuid.UUID) -> list[PhotoAISuggestion]:
         stmt = (
             select(PhotoAISuggestion)
@@ -284,8 +316,17 @@ class PhotosRepository:
     async def get_compare(self, compare_id: uuid.UUID) -> PhotoCompare | None:
         return await self.session.get(PhotoCompare, compare_id)
 
-    async def list_compares(self, project_id: uuid.UUID) -> list[PhotoCompare]:
+    async def list_compares(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 100
+    ) -> tuple[list[PhotoCompare], int]:
+        where = PhotoCompare.project_id == project_id
         stmt = (
-            select(PhotoCompare).where(PhotoCompare.project_id == project_id).order_by(PhotoCompare.created_at.desc())
+            select(PhotoCompare)
+            .where(where)
+            .order_by(PhotoCompare.created_at.desc(), PhotoCompare.id)
+            .offset(offset)
+            .limit(limit)
         )
-        return list((await self.session.execute(stmt)).scalars().all())
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = (await self.session.execute(select(func.count()).select_from(PhotoCompare).where(where))).scalar()
+        return rows, int(total or 0)

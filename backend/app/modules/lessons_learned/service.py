@@ -17,6 +17,7 @@ from app.modules.lessons_learned.repository import LessonRepository
 from app.modules.lessons_learned.schemas import (
     Finding,
     LessonCreate,
+    LessonListResponse,
     LessonResponse,
     LessonUpdate,
     SeenLesson,
@@ -100,11 +101,20 @@ class LessonService:
         return await self._out(lesson)
 
     async def list_lessons(
-        self, user_id: str, *, project_id: uuid.UUID | None, status_filter: str | None
-    ) -> list[LessonResponse]:
+        self,
+        user_id: str,
+        *,
+        project_id: uuid.UUID | None,
+        status_filter: str | None,
+        offset: int = 0,
+        limit: int = 200,
+    ) -> LessonListResponse:
         ids = await accessible_project_ids(self.session, user_id)
-        rows = await self.repo.list_lessons(project_ids=ids, project_id=project_id, status=status_filter)
-        return [await self._out(r) for r in rows]
+        rows = await self.repo.list_lessons(
+            project_ids=ids, project_id=project_id, status=status_filter, limit=limit, offset=offset
+        )
+        total = await self.repo.count_lessons(project_ids=ids, project_id=project_id, status=status_filter)
+        return LessonListResponse(items=[await self._out(r) for r in rows], total=total, offset=offset, limit=limit)
 
     async def seen(
         self,

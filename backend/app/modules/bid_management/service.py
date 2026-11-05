@@ -19,7 +19,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.event_effects import bid_award_key
@@ -2324,6 +2324,20 @@ class BidManagementService:
         """Every plug of a comparison, with its source."""
         stmt = select(BidLevelingPlug).where(BidLevelingPlug.comparison_id == comparison_id)
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def list_plugs_page(
+        self, comparison_id: uuid.UUID, *, offset: int, limit: int
+    ) -> tuple[list[BidLevelingPlug], int]:
+        cond = BidLevelingPlug.comparison_id == comparison_id
+        total = (await self.session.execute(select(func.count()).select_from(BidLevelingPlug).where(cond))).scalar_one()
+        stmt = (
+            select(BidLevelingPlug)
+            .where(cond)
+            .order_by(BidLevelingPlug.bidder_id, BidLevelingPlug.line_item_id)
+            .offset(offset)
+            .limit(limit)
+        )
+        return list((await self.session.execute(stmt)).scalars().all()), int(total)
 
     async def set_manual_plug(self, comparison_id: uuid.UUID, data: BidLevelingPlugSet) -> list[BidLevelingPlug]:
         """Type a plug for one gap (or clear it, ``amount`` null) and recompute the leveling."""

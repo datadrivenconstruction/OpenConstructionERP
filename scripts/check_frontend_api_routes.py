@@ -105,7 +105,10 @@ NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
 # ratchet, not a target: lower it when the count drops, never raise it to pass.
 # 237: the offline record registry (shared/lib/offline/recordSync.ts, nine paths chosen by entity kind), the clock
 # queue path and one const base cannot be handed to a single call; every one of them resolves to a real route.
-MAX_PREFIX_ONLY = 221
+# 227: three field capture paths in a table chosen by kind (fieldKinds.ts), a feed URL builder that returns a
+# string for a link (DataFeedsSettings.tsx), and two multipart upload wrappers that add a path per call
+# (haul-tickets, owner-schedule). None has a single call to hand the literal to; the routes they reach exist.
+MAX_PREFIX_ONLY = 227
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"

@@ -171,6 +171,12 @@ async def test_invoice_reconcile_accept_and_summary(client: AsyncClient, admin_a
     refused = await client.post(f"{BASE}/invoices/{body['id']}/accept", headers=header)
     assert refused.status_code == 422
 
+    page = await client.get(f"{BASE}/projects/{project_id}/invoices", params={"limit": 1}, headers=header)
+    assert page.status_code == 200 and page.json()["total"] >= 1
+    assert page.json()["items"][0]["id"] == body["id"]
+    cut = await client.get(f"{BASE}/projects/{project_id}/materials", params={"limit": 2}, headers=header)
+    assert cut.status_code == 200 and len(cut.json()["items"]) == 2 and cut.json()["total"] > 2
+
     summary = await client.get(
         f"{BASE}/projects/{project_id}/summary", params={"group_by": "haulier", "verified_only": True}, headers=header
     )

@@ -78,19 +78,18 @@ export interface Ledger {
   rows: LedgerRow[];
 }
 
-const B = '/v1/bid-no-bid';
 
 export const scorecardKey = (tenderId: string) => ['bid-no-bid', 'scorecard', tenderId] as const;
 export const ledgerKey = (projectId: string) => ['bid-no-bid', 'ledger', projectId] as const;
 
 export const api = {
-  open: (tenderId: string) => apiGet<Scorecard>(`${B}/tenders/${tenderId}/scorecard`),
-  update: (id: string, body: ScorecardPatch) => apiPatch<Scorecard>(`${B}/scorecards/${id}`, body),
+  open: (tenderId: string) => apiGet<Scorecard>(`/v1/bid-no-bid/tenders/${tenderId}/scorecard`),
+  update: (id: string, body: ScorecardPatch) => apiPatch<Scorecard>(`/v1/bid-no-bid/scorecards/${id}`, body),
   decide: (id: string, decision: 'bid' | 'no_bid', reason: string, version: number) =>
-    apiPost<Scorecard>(`${B}/scorecards/${id}/decision`, { decision, reason, version }),
+    apiPost<Scorecard>(`/v1/bid-no-bid/scorecards/${id}/decision`, { decision, reason, version }),
   outcome: (id: string, outcome: string, note: string, version?: number) =>
-    apiPut<Scorecard>(`${B}/scorecards/${id}/outcome`, { outcome, note, version }),
-  ledger: (projectId: string) => apiGet<Ledger>(`${B}/ledger?project_id=${projectId}`),
+    apiPut<Scorecard>(`/v1/bid-no-bid/scorecards/${id}/outcome`, { outcome, note, version }),
+  ledger: (projectId: string) => apiGet<Ledger>(`/v1/bid-no-bid/ledger?project_id=${projectId}`),
 };
 
 export function useScorecard(tenderId: string | undefined) {

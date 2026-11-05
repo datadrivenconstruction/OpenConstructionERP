@@ -12,7 +12,7 @@ import json
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
 
 from app.core.content_disposition import attachment_disposition
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
@@ -26,6 +26,7 @@ from app.modules.owner_schedule.schemas import (
     DetectCandidate,
     ImportResult,
     PreviewResponse,
+    ProfileListResponse,
     ProfileSummary,
     ScheduleStatus,
 )
@@ -53,13 +54,21 @@ async def _access(session: SessionDep, boq_id: uuid.UUID, user_id: str) -> None:
     await verify_project_access(boq.project_id, user_id, session)
 
 
-@router.get("/profiles", dependencies=[_READ], response_model=list[ProfileSummary])
-async def list_profiles(session: SessionDep) -> list[dict[str, Any]]:
+@router.get("/profiles", dependencies=[_READ], response_model=ProfileListResponse)
+async def list_profiles(
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> dict[str, Any]:
     """Platform, pack and saved profiles."""
-    return [
-        p.model_dump(include={"key", "name", "source", "file_type", "handled_by"})
-        for p in await OwnerScheduleService(session).profiles()
-    ]
+    profiles = await OwnerScheduleService(session).profiles()
+    page = profiles[offset : offset + limit]
+    return {
+        "items": [p.model_dump(include={"key", "name", "source", "file_type", "handled_by"}) for p in page],
+        "total": len(profiles),
+        "offset": offset,
+        "limit": limit,
+    }
 
 
 @router.get("/profiles/schema", dependencies=[_READ])

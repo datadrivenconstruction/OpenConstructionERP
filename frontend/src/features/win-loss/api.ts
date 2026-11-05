@@ -91,14 +91,13 @@ export interface LedgerSummary {
   by_size: GroupStat[];
 }
 
-const BASE = '/v1/win-loss';
 
 export const winLossApi = {
-  list: () => apiGet<BidOutcome[]>(`${BASE}/`),
+  list: async () => (await apiGet<{ items: BidOutcome[] }>(`/v1/win-loss/`)).items,
   summary: (currency?: string) =>
-    apiGet<LedgerSummary>(`${BASE}/summary${currency !== undefined ? `?currency=${encodeURIComponent(currency)}` : ''}`),
-  create: (body: BidOutcomeInput) => apiPost<BidOutcome, BidOutcomeInput>(`${BASE}/`, body),
+    apiGet<LedgerSummary>(`/v1/win-loss/summary${currency !== undefined ? `?currency=${encodeURIComponent(currency)}` : ''}`),
+  create: (body: BidOutcomeInput) => apiPost<BidOutcome, BidOutcomeInput>(`/v1/win-loss/`, body),
   update: (id: string, body: Partial<BidOutcomeInput>) =>
-    apiPatch<BidOutcome, Partial<BidOutcomeInput>>(`${BASE}/${id}`, body),
-  remove: (id: string) => apiDelete(`${BASE}/${id}`),
+    apiPatch<BidOutcome, Partial<BidOutcomeInput>>(`/v1/win-loss/${id}`, body),
+  remove: (id: string) => apiDelete(`/v1/win-loss/${id}`),
 };

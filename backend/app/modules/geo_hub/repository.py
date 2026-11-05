@@ -6,7 +6,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
@@ -401,6 +401,10 @@ class SurveyCaptureRepository(_BaseRepo):
             .limit(limit)
         )
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_for_project(self, project_id: uuid.UUID) -> int:
+        stmt = select(func.count()).select_from(SurveyCapture).where(SurveyCapture.project_id == project_id)
+        return int((await self.session.execute(stmt)).scalar_one())
 
     async def count_for_overlay(self, overlay_id: uuid.UUID, *, exclude: uuid.UUID | None = None) -> int:
         stmt = select(SurveyCapture.id).where(SurveyCapture.overlay_id == overlay_id)

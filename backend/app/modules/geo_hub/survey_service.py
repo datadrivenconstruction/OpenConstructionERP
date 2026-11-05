@@ -19,7 +19,7 @@ from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import delete as sql_delete
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -31,11 +31,13 @@ from app.modules.geo_hub.raster_pipeline import MAX_RASTER_PIXELS, ImagePixelBud
 from app.modules.geo_hub.repository import SurveyCaptureRepository, SurveyObservationRepository
 from app.modules.geo_hub.schemas import (
     GeoRasterOverlayCreate,
+    SurveyCaptureListResponse,
     SurveyCapturePatch,
     SurveyCaptureResponse,
     SurveyFinding,
     SurveyFromScan,
     SurveyObservationUpsert,
+    SurveyProgressListResponse,
     SurveyProgressRow,
 )
 from app.modules.geo_hub.service import GeoHubService, _extract_user_id
@@ -322,10 +324,17 @@ class SurveyService:
 
     # ── read / update / delete ──────────────────────────────────────────
 
-    async def list_captures(self, project_id: uuid.UUID, payload: dict[str, Any] | None) -> list[SurveyCaptureResponse]:
+    async def list_captures(
+        self, project_id: uuid.UUID, payload: dict[str, Any] | None, *, offset: int = 0, limit: int = 200
+    ) -> SurveyCaptureListResponse:
         await self._project(project_id, payload)
-        rows = await self.captures.list_for_project(project_id)
-        return [self._response(r, []) for r in rows]
+        rows = await self.captures.list_for_project(project_id, offset=offset, limit=limit)
+        return SurveyCaptureListResponse(
+            items=[self._response(r, []) for r in rows],
+            total=await self.captures.count_for_project(project_id),
+            offset=offset,
+            limit=limit,
+        )
 
     async def get_response(self, capture_id: uuid.UUID, payload: dict[str, Any] | None) -> SurveyCaptureResponse:
         cap = await self.get_capture(capture_id, payload)
@@ -441,7 +450,9 @@ class SurveyService:
 
     # ── progress ────────────────────────────────────────────────────────
 
-    async def progress(self, capture_id: uuid.UUID, payload: dict[str, Any] | None) -> list[SurveyProgressRow]:
+    async def progress(
+        self, capture_id: uuid.UUID, payload: dict[str, Any] | None, *, offset: int = 0, limit: int = 500
+    ) -> SurveyProgressListResponse:
         """Planned vs observed progress for every schedule activity on the capture date."""
         cap = await self.get_capture(capture_id, payload)
         project = await self._project(cap.project_id, payload)
@@ -449,8 +460,15 @@ class SurveyService:
         try:
             from app.modules.schedule.models import Activity, Schedule, ScheduleBaseline
         except ImportError:
-            return []
+            return SurveyProgressListResponse(items=[], total=0, offset=offset, limit=limit)
 
+        total = (
+            await self.session.execute(
+                select(func.count(Activity.id))
+                .join(Schedule, Schedule.id == Activity.schedule_id)
+                .where(Schedule.project_id == cap.project_id)
+            )
+        ).scalar_one()
         acts = (
             await self.session.execute(
                 select(
@@ -463,7 +481,9 @@ class SurveyService:
                 )
                 .join(Schedule, Schedule.id == Activity.schedule_id)
                 .where(Schedule.project_id == cap.project_id)
-                .order_by(Activity.sort_order, Activity.start_date)
+                .order_by(Activity.sort_order, Activity.start_date, Activity.id)
+                .offset(offset)
+                .limit(limit)
             )
         ).all()
         baselines = (
@@ -505,4 +525,4 @@ class SurveyService:
                     note=obs.note if obs is not None else "",
                 )
             )
-        return rows
+        return SurveyProgressListResponse(items=rows, total=int(total), offset=offset, limit=limit)

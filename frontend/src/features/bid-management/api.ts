@@ -617,7 +617,9 @@ export interface LevelingCheck {
 }
 
 export function listPlugs(comparisonId: string): Promise<LevelingPlug[]> {
-  return apiGet<LevelingPlug[]>(`/v1/bid-management/comparisons/${comparisonId}/plugs`);
+  return apiGet<{ items: LevelingPlug[]; total: number }>(
+    `/v1/bid-management/comparisons/${comparisonId}/plugs?limit=5000`,
+  ).then((r) => r.items);
 }
 
 /** amount null clears the manual plug and reverts to the computed one. */

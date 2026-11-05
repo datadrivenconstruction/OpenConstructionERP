@@ -3,7 +3,6 @@
 /** API helpers for haul tickets (/v1/haul_tickets). Decimals travel as strings. */
 import { API_BASE, apiGet, apiPost, apiDelete, downloadWithAuth, fetchWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/haul_tickets';
 
 export type TicketStatus = 'issued' | 'loaded' | 'delivered' | 'verified' | 'invoiced' | 'rejected';
 export type HaulType = 'earthworks' | 'aggregates' | 'concrete' | 'asphalt' | 'waste' | 'other';
@@ -124,36 +123,37 @@ function qs(params: Record<string, string | undefined>): string {
 }
 
 export const fetchTickets = (projectId: string, f: TicketFilter) =>
-  apiGet<TicketList>(`${BASE}/projects/${projectId}/tickets${qs({ ...f, limit: '500' })}`);
+  apiGet<TicketList>(`/v1/haul_tickets/projects/${projectId}/tickets${qs({ ...f, limit: '500' })}`);
 
-export const createTicket = (body: TicketCreate) => apiPost<Ticket>(`${BASE}/tickets/`, body);
+export const createTicket = (body: TicketCreate) => apiPost<Ticket>(`/v1/haul_tickets/tickets/`, body);
 
 export const transitionTicket = (id: string, status: TicketStatus, reason = '') =>
-  apiPost<Ticket>(`${BASE}/tickets/${id}/status`, { status, reason });
+  apiPost<Ticket>(`/v1/haul_tickets/tickets/${id}/status`, { status, reason });
 
-export const deleteTicket = (id: string) => apiDelete(`${BASE}/tickets/${id}`);
+export const deleteTicket = (id: string) => apiDelete(`/v1/haul_tickets/tickets/${id}`);
 
 export const downloadTicketPdf = (id: string, number: string) =>
-  downloadWithAuth(`${API_BASE}${BASE}/tickets/${id}/pdf`, `haul-ticket-${number || id}.pdf`);
+  downloadWithAuth(`${API_BASE}/v1/haul_tickets/tickets/${id}/pdf`, `haul-ticket-${number || id}.pdf`);
 
 export const fetchSummary = (projectId: string, groupBy: GroupBy, verifiedOnly: boolean) =>
   apiGet<Summary>(
-    `${BASE}/projects/${projectId}/summary${qs({ group_by: groupBy, verified_only: verifiedOnly ? 'true' : undefined })}`,
+    `/v1/haul_tickets/projects/${projectId}/summary${qs({ group_by: groupBy, verified_only: verifiedOnly ? 'true' : undefined })}`,
   );
 
-export const fetchInvoices = (projectId: string) => apiGet<Invoice[]>(`${BASE}/projects/${projectId}/invoices`);
+export const fetchInvoices = async (projectId: string): Promise<Invoice[]> =>
+  (await apiGet<{ items: Invoice[]; total: number }>(`/v1/haul_tickets/projects/${projectId}/invoices?limit=500`)).items;
 
-export const reconcileInvoice = (id: string) => apiPost<Invoice>(`${BASE}/invoices/${id}/reconcile`);
+export const reconcileInvoice = (id: string) => apiPost<Invoice>(`/v1/haul_tickets/invoices/${id}/reconcile`);
 
-export const acceptInvoice = (id: string) => apiPost<Invoice>(`${BASE}/invoices/${id}/accept`);
+export const acceptInvoice = (id: string) => apiPost<Invoice>(`/v1/haul_tickets/invoices/${id}/accept`);
 
-export const deleteInvoice = (id: string) => apiDelete(`${BASE}/invoices/${id}`);
+export const deleteInvoice = (id: string) => apiDelete(`/v1/haul_tickets/invoices/${id}`);
 
 export const downloadDisposalRegister = (projectId: string) =>
-  downloadWithAuth(`${API_BASE}${BASE}/projects/${projectId}/disposal-register?format=csv`, 'disposal-register.csv');
+  downloadWithAuth(`${API_BASE}/v1/haul_tickets/projects/${projectId}/disposal-register?format=csv`, 'disposal-register.csv');
 
 async function upload<T>(path: string, form: FormData): Promise<T> {
-  const res = await fetchWithAuth(`${API_BASE}${BASE}${path}`, { method: 'POST', body: form });
+  const res = await fetchWithAuth(`${API_BASE}/v1/haul_tickets${path}`, { method: 'POST', body: form });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return (await res.json()) as T;
 }

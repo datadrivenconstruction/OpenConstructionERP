@@ -113,6 +113,20 @@ class RunOut(BaseModel):
     finished_at: str | None
 
 
+class DraftListResponse(BaseModel):
+    items: list[DraftOut]
+    total: int
+    offset: int = 0
+    limit: int = 100
+
+
+class RunListResponse(BaseModel):
+    items: list[RunOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class RunResult(BaseModel):
     """A run and the draft it produced (none when the run failed)."""
 
@@ -214,7 +228,7 @@ async def run_agent(
 
 @router.get(
     "/projects/{project_id}/drafts",
-    response_model=list[DraftOut],
+    response_model=DraftListResponse,
     dependencies=[Depends(RequirePermission("ai_agents.read"))],
 )
 async def list_drafts(
@@ -222,11 +236,14 @@ async def list_drafts(
     payload: CurrentUserPayload,
     session: SessionDep,
     draft_status: str | None = Query(default=None, alias="status"),
-) -> list[DraftOut]:
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> DraftListResponse:
     """Drafts on the project, newest first."""
     user_id, _ = _identity(payload)
     await verify_project_access(project_id, str(user_id), session)
-    return [DraftOut.model_validate(d) for d in await CatalogueService(session).drafts(project_id, draft_status)]
+    rows, total = await CatalogueService(session).drafts_page(project_id, draft_status, offset=offset, limit=limit)
+    return DraftListResponse(items=[DraftOut.model_validate(d) for d in rows], total=total, offset=offset, limit=limit)
 
 
 @router.post(
@@ -261,14 +278,21 @@ async def review_draft(
 
 @router.get(
     "/projects/{project_id}/runs",
-    response_model=list[RunOut],
+    response_model=RunListResponse,
     dependencies=[Depends(RequirePermission("ai_agents.read"))],
 )
-async def run_history(project_id: uuid.UUID, payload: CurrentUserPayload, session: SessionDep) -> list[RunOut]:
+async def run_history(
+    project_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
+) -> RunListResponse:
     """Catalogue runs on the project, newest first."""
     user_id, _ = _identity(payload)
     await verify_project_access(project_id, str(user_id), session)
-    return [RunOut.model_validate(r) for r in await CatalogueService(session).history(project_id)]
+    rows, total = await CatalogueService(session).history_page(project_id, offset=offset, limit=limit)
+    return RunListResponse(items=[RunOut.model_validate(r) for r in rows], total=total, offset=offset, limit=limit)
 
 
 @router.get("/projects/{project_id}/validation", dependencies=[Depends(RequirePermission("ai_agents.read"))])

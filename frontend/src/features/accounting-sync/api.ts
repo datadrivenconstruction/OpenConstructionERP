@@ -266,7 +266,6 @@ export function oauthRedirectUri(): string {
 
 /* -- Fetchers ------------------------------------------------------------------ */
 
-const BASE = '/v1/accounting_sync';
 
 function qs(params: Record<string, string | number | undefined | null>): string {
   const sp = new URLSearchParams();
@@ -275,37 +274,41 @@ function qs(params: Record<string, string | number | undefined | null>): string 
   return s ? `?${s}` : '';
 }
 
-export const fetchStatus = () => apiGet<SyncStatus>(`${BASE}/status`);
+export const fetchStatus = () => apiGet<SyncStatus>(`/v1/accounting_sync/status`);
 export const fetchTemplates = (countryCode?: string) =>
-  apiGet<TemplateCatalog>(`${BASE}/templates${qs({ country_code: countryCode })}`);
-export const fetchConnections = () => apiGet<Connection[]>(`${BASE}/connections`);
+  apiGet<TemplateCatalog>(`/v1/accounting_sync/templates${qs({ country_code: countryCode })}`);
+export const fetchConnections = () =>
+  apiGet<{ items: Connection[]; total: number }>(`/v1/accounting_sync/connections?limit=200`).then((r) => r.items);
 export const createConnection = (body: ConnectionCreate) =>
-  apiPost<Connection, ConnectionCreate>(`${BASE}/connections`, body);
+  apiPost<Connection, ConnectionCreate>(`/v1/accounting_sync/connections`, body);
 export const updateConnection = (id: string, body: ConnectionUpdate) =>
-  apiPatch<Connection, ConnectionUpdate>(`${BASE}/connections/${id}`, body);
-export const deleteConnection = (id: string) => apiDelete<void>(`${BASE}/connections/${id}`);
+  apiPatch<Connection, ConnectionUpdate>(`/v1/accounting_sync/connections/${id}`, body);
+export const deleteConnection = (id: string) => apiDelete<void>(`/v1/accounting_sync/connections/${id}`);
 
 export const startOAuth = (id: string, redirectUri: string) =>
-  apiPost<{ authorization_url: string }>(`${BASE}/connections/${id}/oauth/start${qs({ redirect_uri: redirectUri })}`);
+  apiPost<{ authorization_url: string }>(`/v1/accounting_sync/connections/${id}/oauth/start${qs({ redirect_uri: redirectUri })}`);
 export const completeOAuth = (id: string, body: { code: string; redirect_uri: string; tenant_id?: string }) =>
-  apiPost<Connection>(`${BASE}/connections/${id}/oauth/complete`, body);
+  apiPost<Connection>(`/v1/accounting_sync/connections/${id}/oauth/complete`, body);
 
-export const fetchMappings = (id: string) => apiGet<Mappings>(`${BASE}/connections/${id}/mappings`);
+export const fetchMappings = (id: string) => apiGet<Mappings>(`/v1/accounting_sync/connections/${id}/mappings`);
 export const saveMappings = (id: string, body: MappingsBody) =>
-  apiPut<Mappings, MappingsBody>(`${BASE}/connections/${id}/mappings`, body);
+  apiPut<Mappings, MappingsBody>(`/v1/accounting_sync/connections/${id}/mappings`, body);
 export const applyTemplate = (id: string, chartTemplate: string) =>
-  apiPost<Mappings>(`${BASE}/connections/${id}/mappings/template`, { chart_template: chartTemplate });
+  apiPost<Mappings>(`/v1/accounting_sync/connections/${id}/mappings/template`, { chart_template: chartTemplate });
 
 export const fetchDocuments = (id: string, range: DateRange) =>
-  apiGet<SyncDocument[]>(`${BASE}/connections/${id}/documents${qs({ ...range })}`);
-export const fetchFindings = (id: string) => apiGet<Finding[]>(`${BASE}/connections/${id}/findings`);
+  apiGet<{ items: SyncDocument[]; total: number }>(
+    `/v1/accounting_sync/connections/${id}/documents${qs({ ...range, limit: 1000 })}`,
+  ).then((r) => r.items);
+export const fetchFindings = (id: string) =>
+  apiGet<{ items: Finding[]; total: number }>(`/v1/accounting_sync/connections/${id}/findings?limit=1000`).then((r) => r.items);
 export const pushRecords = (id: string, body: PushBody = {}) =>
-  apiPost<PushResult, PushBody>(`${BASE}/connections/${id}/push`, body);
-export const pullPayments = (id: string) => apiPost<PushResult>(`${BASE}/connections/${id}/pull-payments`);
+  apiPost<PushResult, PushBody>(`/v1/accounting_sync/connections/${id}/push`, body);
+export const pullPayments = (id: string) => apiPost<PushResult>(`/v1/accounting_sync/connections/${id}/pull-payments`);
 
 export const fetchLog = (id: string, opts: { status?: LogStatus; limit?: number; offset?: number }) =>
-  apiGet<LogPage>(`${BASE}/connections/${id}/log${qs({ ...opts })}`);
-export const retryLogEntry = (entryId: string) => apiPost<LogEntry>(`${BASE}/log/${entryId}/retry`);
+  apiGet<LogPage>(`/v1/accounting_sync/connections/${id}/log${qs({ ...opts })}`);
+export const retryLogEntry = (entryId: string) => apiPost<LogEntry>(`/v1/accounting_sync/log/${entryId}/retry`);
 
 /** Authenticated file download; the server names the file. */
 export function downloadExport(
@@ -314,7 +317,7 @@ export function downloadExport(
   range: DateRange,
   columns?: string[],
 ): Promise<void> {
-  const url = `${API_BASE}${BASE}/connections/${id}/export${qs({
+  const url = `${API_BASE}/v1/accounting_sync/connections/${id}/export${qs({
     kind,
     ...range,
     columns: columns && columns.length > 0 ? columns.join(',') : undefined,

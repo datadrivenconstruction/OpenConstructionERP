@@ -12,12 +12,13 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.geo_hub import survey_service
 from app.modules.geo_hub.schemas import (
+    SurveyCaptureListResponse,
     SurveyCapturePatch,
     SurveyCaptureResponse,
     SurveyFromScan,
     SurveyObservationResponse,
     SurveyObservationUpsert,
-    SurveyProgressRow,
+    SurveyProgressListResponse,
 )
 from app.modules.geo_hub.survey_service import SurveyService
 
@@ -76,14 +77,16 @@ async def survey_from_scan(
     return await service.create_from_scan(body, payload)
 
 
-@survey_router.get("/", response_model=list[SurveyCaptureResponse])
+@survey_router.get("/", response_model=SurveyCaptureListResponse)
 async def list_surveys(
     project_id: uuid.UUID = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     service: SurveyService = Depends(_svc),
     payload: CurrentUserPayload = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("geo_hub.read")),
-) -> list[SurveyCaptureResponse]:
-    return await service.list_captures(project_id, payload)
+) -> SurveyCaptureListResponse:
+    return await service.list_captures(project_id, payload, offset=offset, limit=limit)
 
 
 @survey_router.get("/{survey_id}", response_model=SurveyCaptureResponse)
@@ -132,12 +135,14 @@ async def put_observation(
     return SurveyObservationResponse.model_validate(row)
 
 
-@survey_router.get("/{survey_id}/progress", response_model=list[SurveyProgressRow])
+@survey_router.get("/{survey_id}/progress", response_model=SurveyProgressListResponse)
 async def survey_progress(
     survey_id: uuid.UUID,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=2000),
     service: SurveyService = Depends(_svc),
     payload: CurrentUserPayload = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("geo_hub.read")),
-) -> list[SurveyProgressRow]:
+) -> SurveyProgressListResponse:
     """Planned vs observed progress per schedule activity on the capture date."""
-    return await service.progress(survey_id, payload)
+    return await service.progress(survey_id, payload, offset=offset, limit=limit)

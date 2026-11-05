@@ -35,6 +35,7 @@ from app.modules.resources.schemas import (
     BoardResponse,
     CertificationCreate,
     CertificationResponse,
+    CertificationTypeListResponse,
     CertificationUpdate,
     ConflictDetail,
     PortfolioCapacityResponse,
@@ -286,12 +287,15 @@ async def list_certifications_for_resource(
     return [CertificationResponse.model_validate(r) for r in rows]
 
 
-@router.get("/certifications/types", response_model=list[str])
+@router.get("/certifications/types", response_model=CertificationTypeListResponse)
 async def list_certification_types(
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=1000),
     _perm: None = Depends(RequirePermission("resources.read")),
     service: ResourcesService = Depends(_get_service),
-) -> list[str]:
-    return await service.list_certification_types()
+) -> CertificationTypeListResponse:
+    items, total = await service.list_certification_types(offset=offset, limit=limit)
+    return CertificationTypeListResponse(items=items, total=total, offset=offset, limit=limit)
 
 
 @router.get("/certifications/expiring", response_model=list[CertificationResponse])

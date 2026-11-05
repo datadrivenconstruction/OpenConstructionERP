@@ -59,7 +59,7 @@ async def test_the_whole_what_if_loop_over_http(world) -> None:
     plan = await _plan(client)
     assert plan["currency"] == "EUR" and plan["metadata"] == {}
     pid = plan["id"]
-    (base,) = (await client.get(f"/plans/{pid}/scenarios/")).json()
+    (base,) = (await client.get(f"/plans/{pid}/scenarios/")).json()["items"]
     assert base["is_baseline"]
 
     env = {"envelopes": [{"year": 2030, "amount": "100", "label": "Bond"}]}
@@ -71,6 +71,8 @@ async def test_the_whole_what_if_loop_over_http(world) -> None:
         )
     ).json()
     assert item["phasing"] == [] and item["status"] == "proposed"
+    page = (await client.get(f"/scenarios/{base['id']}/items/", params={"limit": 1, "offset": 1})).json()
+    assert page["items"] == [] and page["total"] == 1
 
     summary = (await client.get(f"/scenarios/{base['id']}/summary/")).json()
     assert summary["rows"][0]["gap"] == "-50.00"
@@ -78,16 +80,16 @@ async def test_the_whole_what_if_loop_over_http(world) -> None:
     assert any(f["rule_id"] == "cp.year_over_envelope" for f in summary["findings"])
 
     clone = (await client.post(f"/plans/{pid}/scenarios/{base['id']}/clone/", json={"name": "Delay"})).json()
-    (copy,) = (await client.get(f"/scenarios/{clone['id']}/items/")).json()
+    (copy,) = (await client.get(f"/scenarios/{clone['id']}/items/")).json()["items"]
     assert (await client.patch(f"/items/{copy['id']}/", json={"start_year": 2031})).json()["start_year"] == 2031
-    assert (await client.get(f"/scenarios/{base['id']}/items/")).json()[0]["start_year"] == 2030
+    assert (await client.get(f"/scenarios/{base['id']}/items/")).json()["items"][0]["start_year"] == 2030
 
     cmp = (await client.get(f"/plans/{pid}/compare/", params={"a": base["id"], "b": clone["id"]})).json()
     assert cmp["changed_items"][0]["start_year_b"] == 2031
 
     suggestion = (await client.post(f"/scenarios/{base['id']}/autofund/")).json()
     assert suggestion["items"][0]["reason"] == "exceeds envelope in 2030"
-    assert (await client.get(f"/scenarios/{base['id']}/items/")).json()[0]["status"] == "proposed"
+    assert (await client.get(f"/scenarios/{base['id']}/items/")).json()["items"][0]["status"] == "proposed"
 
     sheet = await client.get(f"/scenarios/{base['id']}/export/")
     assert sheet.status_code == 200 and sheet.content[:2] == b"PK"
@@ -111,7 +113,7 @@ async def test_bad_input_is_rejected(world) -> None:
     assert (
         await client.post("/plans/", json={"name": "x", "currency": "EUR", "start_year": 2030, "horizon_years": 40})
     ).status_code == 422
-    (base,) = (await client.get(f"/plans/{plan['id']}/scenarios/")).json()
+    (base,) = (await client.get(f"/plans/{plan['id']}/scenarios/")).json()["items"]
     bad = {"title": "t", "start_year": 2030, "priority": 9}
     assert (await client.post(f"/scenarios/{base['id']}/items/", json=bad)).status_code == 422
     assert (await client.get(f"/scenarios/{uuid.uuid4()}/summary/")).status_code == 404

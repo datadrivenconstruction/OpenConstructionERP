@@ -942,6 +942,13 @@ class SurveyCaptureResponse(BaseModel):
     findings: list[SurveyFinding] = Field(default_factory=list)
 
 
+class SurveyCaptureListResponse(BaseModel):
+    items: list[SurveyCaptureResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class SurveyObservationUpsert(BaseModel):
     observed_pct: Decimal5_2 = Field(..., ge=0, le=100)
     note: str = Field(default="", max_length=4000)
@@ -970,6 +977,13 @@ class SurveyProgressRow(BaseModel):
     note: str = ""
 
 
+class SurveyProgressListResponse(BaseModel):
+    items: list[SurveyProgressRow]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
 __all__ = [
     "SurveyCapturePatch",
     "SurveyCaptureResponse",
@@ -977,7 +991,9 @@ __all__ = [
     "SurveyFromScan",
     "SurveyObservationResponse",
     "SurveyObservationUpsert",
+    "SurveyProgressListResponse",
     "SurveyProgressRow",
+    "SurveyCaptureListResponse",
     "AnchorFromAddressRequest",
     "AnchorFromAddressResponse",
     "AnchoredProjectResponse",

@@ -5,8 +5,9 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.lessons_learned.models import Lesson
@@ -40,16 +41,30 @@ class LessonRepository:
         project_id: uuid.UUID | None = None,
         status: str | None = None,
         limit: int = 200,
+        offset: int = 0,
     ) -> list[Lesson]:
         """Lessons of one project, or of every project in ``project_ids`` (``None`` = unrestricted)."""
-        stmt = select(Lesson).order_by(Lesson.created_at.desc()).limit(limit)
+        stmt = select(Lesson).order_by(Lesson.created_at.desc(), Lesson.id).limit(limit).offset(offset)
+        stmt = self._scope(stmt, project_ids, project_id, status)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_lessons(
+        self, *, project_ids: set[uuid.UUID] | None, project_id: uuid.UUID | None = None, status: str | None = None
+    ) -> int:
+        stmt = self._scope(select(func.count()).select_from(Lesson), project_ids, project_id, status)
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    @staticmethod
+    def _scope(
+        stmt: Select[Any], project_ids: set[uuid.UUID] | None, project_id: uuid.UUID | None, status: str | None
+    ) -> Select[Any]:
         if project_id is not None:
             stmt = stmt.where(Lesson.project_id == project_id)
         elif project_ids is not None:
             stmt = stmt.where(Lesson.project_id.in_(project_ids))
         if status:
             stmt = stmt.where(Lesson.status == status)
-        return list((await self.session.execute(stmt)).scalars().all())
+        return stmt
 
     async def confirmed_pool(self, project_ids: set[uuid.UUID] | None) -> list[Lesson]:
         """Confirmed lessons of the projects the caller may see, the pool "seen on" is computed from."""

@@ -84,29 +84,29 @@ export interface DraftFinding {
   draft_id: string | null;
 }
 
-const base = (projectId: string) => `/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}`;
-
 export const catalogueApi = {
-  get: (projectId: string) => apiGet<CatalogueState>(base(projectId)),
+  get: (projectId: string) => apiGet<CatalogueState>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}`),
   configure: (
     projectId: string,
     agent: CatalogueAgentName,
     body: { enabled?: boolean; config?: Record<string, unknown>; max_tokens_per_run?: number },
-  ) => apiPut<CatalogueState>(`${base(projectId)}/agents/${agent}`, body),
+  ) => apiPut<CatalogueState>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/agents/${agent}`, body),
   halt: (projectId: string, halted: boolean, reason = '') =>
-    apiPut<CatalogueState>(`${base(projectId)}/halt`, { halted, reason }),
+    apiPut<CatalogueState>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/halt`, { halted, reason }),
   run: (projectId: string, agent: CatalogueAgentName, inputs: Record<string, string>) =>
-    apiPost<{ run: CatalogueRun; draft: AgentDraft | null }>(`${base(projectId)}/agents/${agent}/run`, { inputs }),
-  drafts: (projectId: string) => apiGet<AgentDraft[]>(`${base(projectId)}/drafts`),
+    apiPost<{ run: CatalogueRun; draft: AgentDraft | null }>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/agents/${agent}/run`, { inputs }),
+  drafts: (projectId: string) =>
+    apiGet<{ items: AgentDraft[]; total: number }>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/drafts?limit=500`).then((r) => r.items),
   review: (
     projectId: string,
     draftId: string,
     body: { decision: 'accepted' | 'rejected'; note?: string; apply?: boolean },
-  ) => apiPost<AgentDraft>(`${base(projectId)}/drafts/${draftId}/review`, body),
-  runs: (projectId: string) => apiGet<CatalogueRun[]>(`${base(projectId)}/runs`),
+  ) => apiPost<AgentDraft>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/drafts/${draftId}/review`, body),
+  runs: (projectId: string) =>
+    apiGet<{ items: CatalogueRun[]; total: number }>(`/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/runs?limit=50`).then((r) => r.items),
   validation: (projectId: string, locale: string) =>
     apiGet<{ checked: number; findings: DraftFinding[] }>(
-      `${base(projectId)}/validation?locale=${encodeURIComponent(locale)}`,
+      `/v1/ai-agents/catalogue/projects/${encodeURIComponent(projectId)}/validation?locale=${encodeURIComponent(locale)}`,
     ),
 };
 

@@ -244,6 +244,13 @@ class CertificationResponse(BaseModel):
     updated_at: datetime
 
 
+class CertificationTypeListResponse(BaseModel):
+    items: list[str]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
 # ── AvailabilityWindow ──────────────────────────────────────────────────
 
 

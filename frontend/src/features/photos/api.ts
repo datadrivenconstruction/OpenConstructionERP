@@ -153,7 +153,6 @@ export interface ValidationReport {
   findings: { rule_id: string; severity: string; message: string; element_ref?: string | null }[];
 }
 
-const BASE = '/v1/photos';
 
 export const photosKeys = {
   all: ['photo-archive'] as const,
@@ -180,55 +179,64 @@ export function listPhotos(projectId: string, filters: PhotoFilters, cursor?: st
   const params = new URLSearchParams(withProject(projectId, filtersToQuery(filters)));
   params.set('limit', String(limit));
   if (cursor) params.set('cursor', cursor);
-  return apiGet<PhotoPage>(`${BASE}/?${params.toString()}`);
+  return apiGet<PhotoPage>(`/v1/photos/?${params.toString()}`);
 }
 
-export const fetchTimeline = (projectId: string, filters: PhotoFilters) =>
-  apiGet<TimelineDay[]>(`${BASE}/timeline/?${withProject(projectId, filtersToQuery(filters))}`);
+export const fetchTimeline = async (projectId: string, filters: PhotoFilters): Promise<TimelineDay[]> => {
+  const params = new URLSearchParams(withProject(projectId, filtersToQuery(filters)));
+  params.set('limit', '1000');
+  return (await apiGet<{ items: TimelineDay[] }>(`/v1/photos/timeline/?${params.toString()}`)).items;
+};
 
 export const fetchMap = (projectId: string, filters: PhotoFilters) =>
-  apiGet<PhotoGeoJSON>(`${BASE}/map/?${withProject(projectId, filtersToQuery(filters))}`);
+  apiGet<PhotoGeoJSON>(`/v1/photos/map/?${withProject(projectId, filtersToQuery(filters))}`);
 
-export const fetchPhoto = (id: string) => apiGet<ArchivePhoto>(`${BASE}/${id}/`);
+export const fetchPhoto = (id: string) => apiGet<ArchivePhoto>(`/v1/photos/${id}/`);
 
 export const patchPhoto = (
   id: string,
   body: { caption?: string | null; category?: string; tags?: string[]; zone?: string | null },
 ) =>
-  apiPatch<ArchivePhoto>(`${BASE}/${id}/`, body);
+  apiPatch<ArchivePhoto>(`/v1/photos/${id}/`, body);
 
-export const deletePhoto = (id: string) => apiDelete<{ result: 'deleted' | 'archived' }>(`${BASE}/${id}/`);
+export const deletePhoto = (id: string) => apiDelete<{ result: 'deleted' | 'archived' }>(`/v1/photos/${id}/`);
 
-export const fetchByTarget = (projectId: string, kind: string, id: string) =>
-  apiGet<ArchivePhoto[]>(
-    `${BASE}/by-target/?project_id=${encodeURIComponent(projectId)}&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`,
-  );
+export const fetchByTarget = async (projectId: string, kind: string, id: string): Promise<ArchivePhoto[]> =>
+  (
+    await apiGet<{ items: ArchivePhoto[] }>(
+      `/v1/photos/by-target/?project_id=${encodeURIComponent(projectId)}&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}&limit=500`,
+    )
+  ).items;
 
 export const addLink = (photoId: string, target_kind: TargetKind, target_id: string) =>
-  apiPost<PhotoLink>(`${BASE}/${photoId}/links/`, { target_kind, target_id });
+  apiPost<PhotoLink>(`/v1/photos/${photoId}/links/`, { target_kind, target_id });
 
 export const removeLink = (photoId: string, target_kind: string, target_id: string) =>
   apiDelete(
-    `${BASE}/${photoId}/links/?target_kind=${encodeURIComponent(target_kind)}&target_id=${encodeURIComponent(target_id)}`,
+    `/v1/photos/${photoId}/links/?target_kind=${encodeURIComponent(target_kind)}&target_id=${encodeURIComponent(target_id)}`,
   );
 
-export const fetchAlbums = (projectId: string) =>
-  apiGet<Album[]>(`${BASE}/albums/?project_id=${encodeURIComponent(projectId)}`);
+export const fetchAlbums = async (projectId: string): Promise<Album[]> =>
+  (
+    await apiGet<{ items: Album[]; total: number }>(
+      `/v1/photos/albums/?project_id=${encodeURIComponent(projectId)}&limit=500`,
+    )
+  ).items;
 export const createAlbum = (projectId: string, name: string, description?: string) =>
-  apiPost<Album>(`${BASE}/albums/`, { project_id: projectId, name, description: description || null });
+  apiPost<Album>(`/v1/photos/albums/`, { project_id: projectId, name, description: description || null });
 export const renameAlbum = (id: string, body: { name?: string; description?: string | null; cover_photo_id?: string }) =>
-  apiPatch<Album>(`${BASE}/albums/${id}/`, body);
-export const deleteAlbum = (id: string) => apiDelete(`${BASE}/albums/${id}/`);
+  apiPatch<Album>(`/v1/photos/albums/${id}/`, body);
+export const deleteAlbum = (id: string) => apiDelete(`/v1/photos/albums/${id}/`);
 export const addToAlbum = (id: string, photo_ids: string[]) =>
-  apiPost<{ added: number; photo_count: number }>(`${BASE}/albums/${id}/items/`, { photo_ids });
+  apiPost<{ added: number; photo_count: number }>(`/v1/photos/albums/${id}/items/`, { photo_ids });
 export const removeFromAlbum = (id: string, photo_ids: string[]) =>
-  apiPost<{ removed: number; photo_count: number }>(`${BASE}/albums/${id}/items/remove/`, { photo_ids });
+  apiPost<{ removed: number; photo_count: number }>(`/v1/photos/albums/${id}/items/remove/`, { photo_ids });
 
-export const fetchCompares = (projectId: string) =>
-  apiGet<Compare[]>(`${BASE}/compare/?project_id=${encodeURIComponent(projectId)}`);
-export const fetchCompare = (id: string) => apiGet<Compare>(`${BASE}/compare/${id}/`);
+export const fetchCompares = async (projectId: string): Promise<Compare[]> =>
+  (await apiGet<{ items: Compare[] }>(`/v1/photos/compare/?project_id=${encodeURIComponent(projectId)}&limit=500`)).items;
+export const fetchCompare = (id: string) => apiGet<Compare>(`/v1/photos/compare/${id}/`);
 export const createCompare = (projectId: string, before: string, after: string, title: string) =>
-  apiPost<Compare>(`${BASE}/compare/`, {
+  apiPost<Compare>(`/v1/photos/compare/`, {
     project_id: projectId,
     before_photo_id: before,
     after_photo_id: after,
@@ -236,22 +244,24 @@ export const createCompare = (projectId: string, before: string, after: string, 
   });
 
 export const analyzePhoto = (photoId: string, kinds: AIKind[]) =>
-  apiPost<Job>(`${BASE}/${photoId}/ai/analyze/?kinds=${kinds.join(',')}`);
-export const fetchSuggestions = (photoId: string) => apiGet<Suggestion[]>(`${BASE}/${photoId}/ai/`);
+  apiPost<Job>(`/v1/photos/${photoId}/ai/analyze/?kinds=${kinds.join(',')}`);
+export const fetchSuggestions = async (photoId: string): Promise<Suggestion[]> =>
+  (await apiGet<{ items: Suggestion[] }>(`/v1/photos/${photoId}/ai/?limit=500`)).items;
 export const acceptSuggestion = (id: string, payload?: Record<string, unknown>) =>
-  apiPost<Suggestion>(`${BASE}/ai/${id}/accept/`, payload ? { payload } : {});
-export const rejectSuggestion = (id: string) => apiPost<Suggestion>(`${BASE}/ai/${id}/reject/`);
+  apiPost<Suggestion>(`/v1/photos/ai/${id}/accept/`, payload ? { payload } : {});
+export const rejectSuggestion = (id: string) => apiPost<Suggestion>(`/v1/photos/ai/${id}/reject/`);
 
-export const fetchPins = (photoId: string) => apiGet<Pin[]>(`${BASE}/${photoId}/pins/`);
+export const fetchPins = async (photoId: string): Promise<Pin[]> =>
+  (await apiGet<{ items: Pin[] }>(`/v1/photos/${photoId}/pins/?limit=500`)).items;
 
 export const startExport = (projectId: string, opts: { photo_ids?: string[]; album_id?: string }) =>
-  apiPost<Job>(`${BASE}/export/`, { project_id: projectId, ...opts });
-export const fetchExport = (jobId: string) => apiGet<ExportStatus>(`${BASE}/export/${jobId}/`);
+  apiPost<Job>(`/v1/photos/export/`, { project_id: projectId, ...opts });
+export const fetchExport = (jobId: string) => apiGet<ExportStatus>(`/v1/photos/export/${jobId}/`);
 export const downloadExport = (jobId: string) =>
-  downloadWithAuth(`/api${BASE}/export/${jobId}/file/`, `photos-${jobId.slice(0, 8)}.zip`);
+  downloadWithAuth(`/api/v1/photos/export/${jobId}/file/`, `photos-${jobId.slice(0, 8)}.zip`);
 
 export const fetchValidation = (projectId: string) =>
-  apiGet<ValidationReport>(`${BASE}/validation/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<ValidationReport>(`/v1/photos/validation/?project_id=${encodeURIComponent(projectId)}`);
 
 /** Map the browser capture onto the `device` JSON the upload endpoint reads. */
 export function deviceJson(capture: DeviceCapture | null | undefined): string | null {
@@ -282,7 +292,7 @@ export async function uploadPhotos(
     form.append('target_kind', opts.target.kind);
     form.append('target_id', opts.target.id);
   }
-  const res = await fetchWithAuth(`/api${BASE}/upload/?project_id=${encodeURIComponent(projectId)}`, {
+  const res = await fetchWithAuth(`/api/v1/photos/upload/?project_id=${encodeURIComponent(projectId)}`, {
     method: 'POST',
     body: form,
   });

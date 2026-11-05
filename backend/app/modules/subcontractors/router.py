@@ -55,9 +55,11 @@ from app.modules.subcontractors.change_chain import (
     MarkBilled,
     OwnerChangeChainResponse,
     SovChangeLine,
+    SovChangeLineListResponse,
     SpawnFromOwnerChange,
     SubcontractChangeCreate,
     SubcontractChangeDecision,
+    SubcontractChangeListResponse,
     SubcontractChangeResponse,
     SubcontractChangeService,
     SubcontractChangeUpdate,
@@ -1904,30 +1906,38 @@ async def _change_service(session: SessionDep, user_id: str, change_id: uuid.UUI
     return svc
 
 
-@router.get("/agreements/{agreement_id}/changes/", response_model=list[SubcontractChangeResponse])
+@router.get("/agreements/{agreement_id}/changes/", response_model=SubcontractChangeListResponse)
 async def list_agreement_changes(
     agreement_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     _perm: None = Depends(RequirePermission("subcontractors.read")),
-) -> list[SubcontractChangeResponse]:
+) -> SubcontractChangeListResponse:
     """Every change to one subcontract agreement, oldest first."""
     await _verify_agreement_project(agreement_id, user_id, session, SubcontractorService(session))
-    rows = await SubcontractChangeService(session).list_for_agreement(agreement_id)
-    return [SubcontractChangeResponse.of(r) for r in rows]
+    rows, total = await SubcontractChangeService(session).page_for_agreement(agreement_id, offset=offset, limit=limit)
+    return SubcontractChangeListResponse(
+        items=[SubcontractChangeResponse.of(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
-@router.get("/agreements/{agreement_id}/changes/sov-lines", response_model=list[SovChangeLine])
+@router.get("/agreements/{agreement_id}/changes/sov-lines", response_model=SovChangeLineListResponse)
 async def agreement_change_sov_lines(
     agreement_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     _perm: None = Depends(RequirePermission("subcontractors.read")),
-) -> list[SovChangeLine]:
+) -> SovChangeLineListResponse:
     """Approved changes not yet billed, as candidate lines for the next payment application."""
     await _verify_agreement_project(agreement_id, user_id, session, SubcontractorService(session))
     rows = await SubcontractChangeService(session).sov_lines(agreement_id)
-    return [SovChangeLine.of(r) for r in rows]
+    return SovChangeLineListResponse(
+        items=[SovChangeLine.of(r) for r in rows[offset : offset + limit]], total=len(rows), offset=offset, limit=limit
+    )
 
 
 @router.post("/changes/{change_id}/mark-billed/", response_model=SubcontractChangeResponse)

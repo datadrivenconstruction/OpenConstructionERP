@@ -71,7 +71,7 @@ beforeEach(() => {
     if (path.includes('/validate/')) {
       return { status: 'warnings', results: [{ rule_id: 'r1', severity: 'warning', passed: false, message: 'Exceeds agreement value' }] };
     }
-    if (path.includes('/agreements/ag-1/changes/')) return [change()];
+    if (path.includes('/agreements/ag-1/changes/')) return { items: [change()], total: 1, offset: 0, limit: 500 };
     if (path.includes('/agreements/')) return [{ id: 'ag-1', title: 'Concrete works', project_id: 'p-1' }];
     return [];
   });

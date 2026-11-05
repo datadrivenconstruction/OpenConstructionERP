@@ -180,35 +180,34 @@ export interface MarkupPatch {
   rev?: number;
 }
 
-const B = '/v1/bid-day';
 
 export const boardKey = (tenderId: string) => ['bid-day', 'board', tenderId] as const;
 
-export const openBoard = (tenderId: string) => apiGet<Board>(`${B}/tenders/${tenderId}/board`);
+export const openBoard = (tenderId: string) => apiGet<Board>(`/v1/bid-day/tenders/${tenderId}/board`);
 export const getVersion = (boardId: string) =>
-  apiGet<{ version: number; status: string }>(`${B}/boards/${boardId}/version`);
+  apiGet<{ version: number; status: string }>(`/v1/bid-day/boards/${boardId}/version`);
 
 export const api = {
   addRow: (boardId: string, body: { name: string; kind: RowKind; plug_amount: string }) =>
-    apiPost<Board>(`${B}/boards/${boardId}/rows`, body),
+    apiPost<Board>(`/v1/bid-day/boards/${boardId}/rows`, body),
   updateRow: (boardId: string, rowId: string, body: { name?: string; kind?: RowKind; plug_amount?: string; rev?: number }) =>
-    apiPatch<Board>(`${B}/boards/${boardId}/rows/${rowId}`, body),
-  deleteRow: (boardId: string, rowId: string) => apiDelete<Board>(`${B}/boards/${boardId}/rows/${rowId}`),
+    apiPatch<Board>(`/v1/bid-day/boards/${boardId}/rows/${rowId}`, body),
+  deleteRow: (boardId: string, rowId: string) => apiDelete<Board>(`/v1/bid-day/boards/${boardId}/rows/${rowId}`),
   choose: (boardId: string, rowId: string, quoteId: string | null, rev?: number) =>
-    apiPut<Board>(`${B}/boards/${boardId}/rows/${rowId}/choice`, { quote_id: quoteId, rev }),
+    apiPut<Board>(`/v1/bid-day/boards/${boardId}/rows/${rowId}/choice`, { quote_id: quoteId, rev }),
   addQuote: (boardId: string, rowId: string, body: QuoteInput) =>
-    apiPost<Board>(`${B}/boards/${boardId}/rows/${rowId}/quotes`, body),
+    apiPost<Board>(`/v1/bid-day/boards/${boardId}/rows/${rowId}/quotes`, body),
   updateQuote: (boardId: string, quoteId: string, body: QuotePatch) =>
-    apiPatch<Board>(`${B}/boards/${boardId}/quotes/${quoteId}`, body),
-  deleteQuote: (boardId: string, quoteId: string) => apiDelete<Board>(`${B}/boards/${boardId}/quotes/${quoteId}`),
-  setMarkups: (boardId: string, body: MarkupPatch) => apiPatch<Board>(`${B}/boards/${boardId}/markups`, body),
-  freeze: (boardId: string, note: string) => apiPost<Board>(`${B}/boards/${boardId}/freeze`, { note }),
-  reopen: (boardId: string) => apiPost<Board>(`${B}/boards/${boardId}/reopen`),
+    apiPatch<Board>(`/v1/bid-day/boards/${boardId}/quotes/${quoteId}`, body),
+  deleteQuote: (boardId: string, quoteId: string) => apiDelete<Board>(`/v1/bid-day/boards/${boardId}/quotes/${quoteId}`),
+  setMarkups: (boardId: string, body: MarkupPatch) => apiPatch<Board>(`/v1/bid-day/boards/${boardId}/markups`, body),
+  freeze: (boardId: string, note: string) => apiPost<Board>(`/v1/bid-day/boards/${boardId}/freeze`, { note }),
+  reopen: (boardId: string) => apiPost<Board>(`/v1/bid-day/boards/${boardId}/reopen`),
   push: (boardId: string, snapshotId: string, dryRun: boolean) =>
-    apiPost<PushPlan>(`${B}/boards/${boardId}/snapshots/${snapshotId}/push`, { dry_run: dryRun }),
+    apiPost<PushPlan>(`/v1/bid-day/boards/${boardId}/snapshots/${snapshotId}/push`, { dry_run: dryRun }),
   exportSnapshot: (boardId: string, snapshotId: string, fmt: 'pdf' | 'xlsx') =>
     downloadWithAuth(
-      `${API_BASE}${B}/boards/${boardId}/snapshots/${snapshotId}/export?fmt=${fmt}`,
+      `${API_BASE}/v1/bid-day/boards/${boardId}/snapshots/${snapshotId}/export?fmt=${fmt}`,
       `submitted-bid.${fmt}`,
     ),
 };

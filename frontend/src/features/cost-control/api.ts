@@ -639,19 +639,18 @@ export interface ModificationBody {
 
 export type LedgerStep = 'submit' | 'approve' | 'reject';
 
-const ledgerBase = (projectId: string) => `/v1/costmodel/projects/${projectId}/budget-ledger`;
 
 export const budgetLedgerApi = {
-  get: (projectId: string) => apiGet<BudgetLedger>(`${ledgerBase(projectId)}/`),
+  get: (projectId: string) => apiGet<BudgetLedger>(`/v1/costmodel/projects/${projectId}/budget-ledger/`),
   createTransfer: (projectId: string, body: TransferBody) =>
-    apiPost<BudgetTransfer, TransferBody>(`${ledgerBase(projectId)}/transfers/`, body),
+    apiPost<BudgetTransfer, TransferBody>(`/v1/costmodel/projects/${projectId}/budget-ledger/transfers/`, body),
   createModification: (projectId: string, body: ModificationBody) =>
-    apiPost<BudgetModification, ModificationBody>(`${ledgerBase(projectId)}/modifications/`, body),
+    apiPost<BudgetModification, ModificationBody>(`/v1/costmodel/projects/${projectId}/budget-ledger/modifications/`, body),
   remove: (projectId: string, kind: LedgerKind, id: string) =>
-    apiDelete(`${ledgerBase(projectId)}/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/`),
+    apiDelete(`/v1/costmodel/projects/${projectId}/budget-ledger/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/`),
   step: (projectId: string, kind: LedgerKind, id: string, step: LedgerStep, note = '') =>
     apiPost<BudgetTransfer | BudgetModification, { note: string }>(
-      `${ledgerBase(projectId)}/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/${step}/`,
+      `/v1/costmodel/projects/${projectId}/budget-ledger/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/${step}/`,
       { note },
     ),
 };

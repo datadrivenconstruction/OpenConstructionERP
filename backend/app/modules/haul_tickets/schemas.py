@@ -246,6 +246,13 @@ class RateOut(_DecimalOut, RateIn):
     id: uuid.UUID
 
 
+class RateListResponse(BaseModel):
+    items: list[RateOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class MaterialIn(BaseModel):
     code: str = Field(min_length=1, max_length=60)
     name: str = Field(default="", max_length=255)
@@ -258,6 +265,13 @@ class MaterialIn(BaseModel):
 class MaterialOut(_DecimalOut, MaterialIn):
     id: uuid.UUID | None = None
     builtin: bool = False
+
+
+class MaterialListResponse(BaseModel):
+    items: list[MaterialOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
 
 
 class InvoiceLineIn(BaseModel):
@@ -293,6 +307,13 @@ class InvoiceOut(_DecimalOut):
     status: str
     result: dict[str, Any]
     findings: list[FindingOut] = []
+
+
+class InvoiceListResponse(BaseModel):
+    items: list[InvoiceOut]
+    total: int
+    offset: int = 0
+    limit: int = 100
 
 
 class ImportPreviewOut(BaseModel):
@@ -338,3 +359,10 @@ class ExpectedDeliveryOut(BaseModel):
     gross_weight_t: str | None
     transport_id: uuid.UUID | None
     ticketed: bool
+
+
+class ExpectedDeliveryListResponse(BaseModel):
+    items: list[ExpectedDeliveryOut]
+    total: int
+    offset: int = 0
+    limit: int = 200

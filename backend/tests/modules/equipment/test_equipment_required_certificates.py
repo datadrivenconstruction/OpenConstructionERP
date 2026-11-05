@@ -62,6 +62,9 @@ async def test_certification_types_list(session: AsyncSession) -> None:
     for t in ("Welding Class A", "First Aid", "First Aid"):
         session.add(Certification(resource_id=res.id, cert_type=t, status="valid"))
     await session.flush()
-    types = await ResourcesService(session).list_certification_types()
+    types, total = await ResourcesService(session).list_certification_types()
     assert {"Welding Class A", "First Aid"} <= set(types)
     assert types.count("First Aid") == 1
+    assert total >= 2
+    cut, cut_total = await ResourcesService(session).list_certification_types(limit=1)
+    assert len(cut) == 1 and cut_total == total

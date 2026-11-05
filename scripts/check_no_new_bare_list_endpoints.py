@@ -75,6 +75,18 @@ MIN_FILES_SCANNED = 500
 # towards zero rather than towards the size of this list.
 CANNOT_TRUNCATE: frozenset[str] = frozenset(
     {
+        # Pay application forms eligible for the project's country, computed in
+        # memory from a static registry; the picker must offer each one.
+        "contracts/router.py::list_payment_forms",
+        # The static feed registry filtered by role; a hidden feed would read as
+        # one the caller may not use.
+        "bi_feed/router.py::list_feeds",
+        # API key scopes generated from the permission registry; a scope cut from
+        # the picker could not be granted.
+        "users/router.py::list_api_key_scopes",
+        # The fixed event catalogue from the event bus names; a subscriber has to
+        # see every name to subscribe to it.
+        "integrations/router.py::list_webhook_events",
         # The shape codes of the data file shape_codes.json, a fixed table per
         # standard compiled into the release; the picker must offer every code.
         "rebar_schedule/router.py::list_shape_codes",

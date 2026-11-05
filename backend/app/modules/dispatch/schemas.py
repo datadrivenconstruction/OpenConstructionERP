@@ -48,6 +48,13 @@ class LocationResponse(_Out):
     is_active: bool
 
 
+class LocationListResponse(BaseModel):
+    items: list[LocationResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
 class CrewCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
@@ -82,6 +89,13 @@ class CrewResponse(_Out):
     trade: str
     labor_crew_id: uuid.UUID | None
     is_active: bool
+
+
+class CrewListResponse(BaseModel):
+    items: list[CrewResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
 
 
 class CardRef(BaseModel):
@@ -146,6 +160,13 @@ class ScheduledMoveResponse(_Out):
     notes: str
     status: str
     applied_at: datetime | None
+
+
+class ScheduledMoveListResponse(BaseModel):
+    items: list[ScheduledMoveResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
 
 
 class PlacementResponse(BaseModel):

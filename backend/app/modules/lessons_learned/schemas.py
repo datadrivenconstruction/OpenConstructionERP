@@ -60,6 +60,13 @@ class LessonResponse(BaseModel):
     findings: list[Finding] = []
 
 
+class LessonListResponse(BaseModel):
+    items: list[LessonResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class SeenLesson(BaseModel):
     id: uuid.UUID
     project_id: uuid.UUID

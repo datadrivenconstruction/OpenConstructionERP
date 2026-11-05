@@ -279,12 +279,12 @@ export function DocAssistantPage() {
             </div>
           )}
 
-          {(saved.data?.length ?? 0) > 0 && (
+          {(saved.data?.items.length ?? 0) > 0 && (
             <section className="space-y-2 pt-2">
               <h2 className="text-2xs font-semibold uppercase text-content-tertiary">
                 {t('doc_assistant.saved_title', { defaultValue: 'Saved answers' })}
               </h2>
-              {saved.data!.map((s) => (
+              {saved.data!.items.map((s) => (
                 <div key={s.id} className="rounded-lg border border-border-light p-2 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-content-primary">{s.question}</span>

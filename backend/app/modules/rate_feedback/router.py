@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.rate_feedback.schemas import (
     ConfirmRequest,
+    ProposalListResponse,
     ProposalResponse,
     RefreshRequest,
     RefreshResponse,
@@ -34,15 +35,19 @@ def _http(exc: RateFeedbackError) -> HTTPException:
 
 @router.get(
     "/proposals",
-    response_model=list[ProposalResponse],
+    response_model=ProposalListResponse,
     dependencies=[Depends(RequirePermission("rate_feedback.read"))],
 )
 async def list_proposals(
     session: SessionDep,
     status: str | None = Query(default="pending", pattern="^(pending|accepted|rejected|superseded|all)$"),
-) -> list[ProposalResponse]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
+) -> ProposalListResponse:
     """Proposals, the largest confidence-weighted change first."""
-    return await RateFeedbackService(session).list_proposals(None if status == "all" else status)
+    return await RateFeedbackService(session).list_proposals(
+        None if status == "all" else status, offset=offset, limit=limit
+    )
 
 
 @router.post(

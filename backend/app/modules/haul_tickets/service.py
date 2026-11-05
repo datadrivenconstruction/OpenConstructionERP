@@ -289,11 +289,13 @@ class HaulTicketService:
         return await get_storage_backend().get(photo["key"]), photo["name"]
 
     # ── expected deliveries (site logistics) ──────────────────────────────
-    async def expected(self, project_id: uuid.UUID, day: date) -> list[dict[str, Any]]:
+    async def expected(
+        self, project_id: uuid.UUID, day: date, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[dict[str, Any]], int]:
         try:
             from app.modules.site_logistics.models import DeliveryBooking
         except ImportError:
-            return []
+            return [], 0
         start = datetime.combine(day, time.min, tzinfo=UTC)
         stmt = (
             select(DeliveryBooking)
@@ -305,17 +307,20 @@ class HaulTicketService:
             )
             .order_by(DeliveryBooking.window_start)
         )
-        bookings = [b for b in (await self.session.execute(stmt)).scalars().all() if b.window_start.date() == day]
+        # The 14 h margin is a time zone allowance, so the calendar-day cut happens here, before paging.
+        day_bookings = [b for b in (await self.session.execute(stmt)).scalars().all() if b.window_start.date() == day]
+        bookings = day_bookings[offset : offset + limit]
         ticketed = set(
             (
                 await self.session.execute(
                     select(HaulTicket.delivery_id).where(
-                        HaulTicket.project_id == project_id, HaulTicket.delivery_id.is_not(None)
+                        HaulTicket.project_id == project_id,
+                        HaulTicket.delivery_id.in_([b.id for b in bookings]),
                     )
                 )
             ).scalars()
         )
-        return [
+        items = [
             {
                 "delivery_id": b.id,
                 "supplier_name": b.supplier_name,
@@ -331,6 +336,7 @@ class HaulTicketService:
             }
             for b in bookings
         ]
+        return items, len(day_bookings)
 
     # ── weighbridge import ────────────────────────────────────────────────
     async def _read_upload(self, file: UploadFile) -> tuple[list[str], list[list[str]]]:
@@ -587,9 +593,14 @@ class HaulTicketService:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Rate not found")
         await self.repo.delete(row)
 
-    async def materials(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
-        own = await self.repo.materials(project_id)
-        codes = {m.code for m in own}
+    async def materials(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 200
+    ) -> tuple[list[dict[str, Any]], int]:
+        """Project materials first, then the built-in ones they do not override; paged as one list."""
+        own_codes = await self.repo.material_codes(project_id)
+        builtin = [m for m in logic.DEFAULT_MATERIALS if m["code"] not in set(own_codes)]
+        own_total = len(own_codes)
+        own = await self.repo.materials(project_id, offset=offset, limit=limit)
         out = [
             {
                 "id": m.id,
@@ -603,12 +614,14 @@ class HaulTicketService:
             }
             for m in own
         ]
-        out += [
-            {**m, "density_t_m3": logic.dec(m.get("density_t_m3")), "waste_code": "", "builtin": True}
-            for m in logic.DEFAULT_MATERIALS
-            if m["code"] not in codes
-        ]
-        return out
+        start = max(0, offset - own_total)
+        room = limit - len(own)
+        if room > 0:
+            out += [
+                {**m, "density_t_m3": logic.dec(m.get("density_t_m3")), "waste_code": "", "builtin": True}
+                for m in builtin[start : start + room]
+            ]
+        return out, own_total + len(builtin)
 
     async def add_material(self, project_id: uuid.UUID, data: MaterialIn) -> HaulMaterial:
         return await self.repo.add(HaulMaterial(project_id=project_id, **data.model_dump()))

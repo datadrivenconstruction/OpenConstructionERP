@@ -25,15 +25,19 @@ from app.dependencies import (
 from app.modules.haul_tickets import logic
 from app.modules.haul_tickets.models import HaulInvoice, HaulTicket
 from app.modules.haul_tickets.schemas import (
+    ExpectedDeliveryListResponse,
     ExpectedDeliveryOut,
     FindingOut,
     ImportCommitOut,
     ImportPreviewOut,
     InvoiceIn,
+    InvoiceListResponse,
     InvoiceOut,
     MaterialIn,
+    MaterialListResponse,
     MaterialOut,
     RateIn,
+    RateListResponse,
     RateOut,
     SettingsIn,
     SettingsOut,
@@ -197,12 +201,20 @@ async def scan(
     return await HaulTicketService(session).scan(project_id, code)
 
 
-@router.get("/projects/{project_id}/expected", response_model=list[ExpectedDeliveryOut], dependencies=[_READ])
+@router.get("/projects/{project_id}/expected", response_model=ExpectedDeliveryListResponse, dependencies=[_READ])
 async def expected(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, day: date | None = Query(default=None)
-) -> list[dict]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    day: date | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> ExpectedDeliveryListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await HaulTicketService(session).expected(project_id, day or date.today())
+    rows, total = await HaulTicketService(session).expected(project_id, day or date.today(), offset=offset, limit=limit)
+    return ExpectedDeliveryListResponse(
+        items=[ExpectedDeliveryOut.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 def _mapping(raw: str | None) -> dict[str, int] | None:
@@ -315,11 +327,23 @@ async def _load_invoice(
     return svc, inv
 
 
-@router.get("/projects/{project_id}/invoices", response_model=list[InvoiceOut], dependencies=[_READ])
-async def list_invoices(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[InvoiceOut]:
+@router.get("/projects/{project_id}/invoices", response_model=InvoiceListResponse, dependencies=[_READ])
+async def list_invoices(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> InvoiceListResponse:
     await verify_project_access(project_id, user_id, session)
-    svc = HaulTicketService(session)
-    return [InvoiceOut.model_validate(i) for i in await svc.repo.invoices(project_id)]
+    repo = HaulTicketService(session).repo
+    rows = await repo.invoices(project_id, offset=offset, limit=limit)
+    return InvoiceListResponse(
+        items=[InvoiceOut.model_validate(i) for i in rows],
+        total=await repo.count_invoices(project_id),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/invoices/", response_model=InvoiceOut, status_code=201, dependencies=[_WRITE])
@@ -386,12 +410,23 @@ async def put_settings(
     return _settings_out(await HaulTicketService(session).save_settings(project_id, data))
 
 
-@router.get("/projects/{project_id}/rates", response_model=list[RateOut], dependencies=[_READ])
-async def list_rates(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[RateOut]:
+@router.get("/projects/{project_id}/rates", response_model=RateListResponse, dependencies=[_READ])
+async def list_rates(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> RateListResponse:
     await verify_project_access(project_id, user_id, session)
-    return [
-        RateOut.model_validate(r, from_attributes=True) for r in await HaulTicketService(session).repo.rates(project_id)
-    ]
+    repo = HaulTicketService(session).repo
+    rows = await repo.rates(project_id, offset=offset, limit=limit)
+    return RateListResponse(
+        items=[RateOut.model_validate(r, from_attributes=True) for r in rows],
+        total=await repo.count_rates(project_id),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/projects/{project_id}/rates", response_model=RateOut, status_code=201, dependencies=[_WRITE])
@@ -410,10 +445,19 @@ async def delete_rate(
     return Response(status_code=204)
 
 
-@router.get("/projects/{project_id}/materials", response_model=list[MaterialOut], dependencies=[_READ])
-async def list_materials(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[MaterialOut]:
+@router.get("/projects/{project_id}/materials", response_model=MaterialListResponse, dependencies=[_READ])
+async def list_materials(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> MaterialListResponse:
     await verify_project_access(project_id, user_id, session)
-    return [MaterialOut.model_validate(m) for m in await HaulTicketService(session).materials(project_id)]
+    rows, total = await HaulTicketService(session).materials(project_id, offset=offset, limit=limit)
+    return MaterialListResponse(
+        items=[MaterialOut.model_validate(m) for m in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/projects/{project_id}/materials", response_model=MaterialOut, status_code=201, dependencies=[_WRITE])

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.accounting_sync.models import AccountingConnection, AccountMapping, TaxCodeMapping
@@ -21,6 +21,13 @@ class AccountingSyncRepository:
     async def list_connections(self) -> list[AccountingConnection]:
         rows = await self.session.execute(select(AccountingConnection).order_by(AccountingConnection.name))
         return list(rows.scalars())
+
+    async def list_connections_page(self, *, offset: int, limit: int) -> tuple[list[AccountingConnection], int]:
+        total = (await self.session.execute(select(func.count()).select_from(AccountingConnection))).scalar_one()
+        rows = await self.session.execute(
+            select(AccountingConnection).order_by(AccountingConnection.name).offset(offset).limit(limit)
+        )
+        return list(rows.scalars()), int(total)
 
     async def get_connection(self, connection_id: uuid.UUID) -> AccountingConnection | None:
         return await self.session.get(AccountingConnection, connection_id)

@@ -14,7 +14,14 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
-from app.modules.doc_assistant.schemas import SOURCE_KINDS, AskRequest, AskResponse, SavedAnswerOut, SaveRequest
+from app.modules.doc_assistant.schemas import (
+    SOURCE_KINDS,
+    AskRequest,
+    AskResponse,
+    SavedAnswerListResponse,
+    SavedAnswerOut,
+    SaveRequest,
+)
 from app.modules.doc_assistant.service import DocAssistantService
 
 router = APIRouter(tags=["doc_assistant"])
@@ -73,14 +80,18 @@ async def save_answer(body: SaveRequest, payload: CurrentUserPayload, session: S
     return SavedAnswerOut.model_validate(row)
 
 
-@router.get("/saved", response_model=list[SavedAnswerOut])
+@router.get("/saved", response_model=SavedAnswerListResponse)
 async def list_saved(
     payload: CurrentUserPayload,
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
-) -> list[SavedAnswerOut]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+) -> SavedAnswerListResponse:
     """The caller's kept answers on a project, newest first."""
     user_id, _ = _identity(payload)
     await verify_project_access(project_id, str(user_id), session)
-    rows = await DocAssistantService(session).list_saved(project_id, user_id)
-    return [SavedAnswerOut.model_validate(r) for r in rows]
+    rows, total = await DocAssistantService(session).list_saved(project_id, user_id, limit=limit, offset=offset)
+    return SavedAnswerListResponse(
+        items=[SavedAnswerOut.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )

@@ -91,13 +91,11 @@ export interface AddendumPreview {
   issues: Issue[];
 }
 
-const BASE = `${API_BASE}/v1/owner_schedule`;
-
 async function send<T>(path: string, file: File, extra: Record<string, string> = {}): Promise<T> {
   const body = new FormData();
   body.append('file', file);
   for (const [k, v] of Object.entries(extra)) body.append(k, v);
-  const response = await fetchWithAuth(`${BASE}${path}`, { method: 'POST', body });
+  const response = await fetchWithAuth(`${API_BASE}/v1/owner_schedule${path}`, { method: 'POST', body });
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
   return payload as T;
@@ -110,12 +108,13 @@ export const previewSchedule = (file: File, profileKey: string) =>
   send<Preview>('/preview', file, { profile_key: profileKey });
 export const previewAddendum = (boqId: string, file: File) =>
   send<AddendumPreview>(`/boqs/${boqId}/addendum/preview`, file);
-export const exportSchedule = (boqId: string) => downloadWithAuth(`${BASE}/boqs/${boqId}/export`, 'bid-schedule');
+export const exportSchedule = (boqId: string) => downloadWithAuth(`${API_BASE}/v1/owner_schedule/boqs/${boqId}/export`, 'bid-schedule');
 
 export function useProfiles() {
   return useQuery({
     queryKey: ['owner-schedule', 'profiles'],
-    queryFn: () => apiGet<ProfileSummary[]>('/v1/owner_schedule/profiles'),
+    queryFn: async () =>
+      (await apiGet<{ items: ProfileSummary[]; total: number }>('/v1/owner_schedule/profiles?limit=500')).items,
   });
 }
 

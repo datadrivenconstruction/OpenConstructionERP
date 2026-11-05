@@ -29,7 +29,7 @@ import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.validation.engine import validation_engine
@@ -320,12 +320,12 @@ class DocAssistantService:
         )
         return str(rfi.id)
 
-    async def list_saved(self, project_id: uuid.UUID, user_id: uuid.UUID, limit: int = 50) -> list[SavedAnswer]:
-        """The caller's kept answers on a project, newest first."""
-        stmt = (
-            select(SavedAnswer)
-            .where(SavedAnswer.project_id == project_id, SavedAnswer.user_id == user_id)
-            .order_by(SavedAnswer.created_at.desc())
-            .limit(limit)
-        )
-        return list((await self.session.execute(stmt)).scalars().all())
+    async def list_saved(
+        self, project_id: uuid.UUID, user_id: uuid.UUID, limit: int = 50, offset: int = 0
+    ) -> tuple[list[SavedAnswer], int]:
+        """The caller's kept answers on a project, newest first, with the full count."""
+        where = (SavedAnswer.project_id == project_id, SavedAnswer.user_id == user_id)
+        stmt = select(SavedAnswer).where(*where).order_by(SavedAnswer.created_at.desc()).limit(limit).offset(offset)
+        rows = list((await self.session.execute(stmt)).scalars().all())
+        total = (await self.session.execute(select(func.count()).select_from(SavedAnswer).where(*where))).scalar_one()
+        return rows, int(total)

@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Query
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.win_loss.schemas import (
     BidOutcomeCreate,
+    BidOutcomeListResponse,
     BidOutcomeResponse,
     BidOutcomeUpdate,
     LedgerSummary,
@@ -34,17 +35,20 @@ async def summary(
     return await svc.summary(currency, user_id)
 
 
-@router.get("/", response_model=list[BidOutcomeResponse])
+@router.get("/", response_model=BidOutcomeListResponse)
 async def list_entries(
     user_id: CurrentUserId,
     outcome: str | None = Query(default=None, max_length=20),
     client: str | None = Query(default=None, max_length=255),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=500, ge=1, le=5000),
     _perm: None = Depends(RequirePermission("win_loss.read")),
     svc: WinLossService = Depends(_service),
-) -> list[BidOutcomeResponse]:
-    rows = await svc.list_entries(user_id, outcome=outcome, client=client, limit=limit)
-    return [await svc.to_response(r) for r in rows]
+) -> BidOutcomeListResponse:
+    rows, total = await svc.list_entries(user_id, outcome=outcome, client=client, limit=limit, offset=offset)
+    return BidOutcomeListResponse(
+        items=[await svc.to_response(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/", response_model=BidOutcomeResponse, status_code=201)

@@ -91,14 +91,46 @@ class HaulRepository:
         stmt = select(HaulSettings).where(HaulSettings.project_id == project_id)
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def rates(self, project_id: uuid.UUID) -> list[HaulRate]:
-        stmt = select(HaulRate).where(HaulRate.project_id == project_id).order_by(HaulRate.haulier_name)
+    async def rates(self, project_id: uuid.UUID, *, offset: int = 0, limit: int | None = None) -> list[HaulRate]:
+        stmt = (
+            select(HaulRate)
+            .where(HaulRate.project_id == project_id)
+            .order_by(HaulRate.haulier_name, HaulRate.id)
+            .offset(offset)
+            .limit(limit)
+        )
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def materials(self, project_id: uuid.UUID) -> list[HaulMaterial]:
-        stmt = select(HaulMaterial).where(HaulMaterial.project_id == project_id).order_by(HaulMaterial.code)
+    async def count_rates(self, project_id: uuid.UUID) -> int:
+        stmt = select(func.count()).select_from(HaulRate).where(HaulRate.project_id == project_id)
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    async def materials(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int | None = None
+    ) -> list[HaulMaterial]:
+        stmt = (
+            select(HaulMaterial)
+            .where(HaulMaterial.project_id == project_id)
+            .order_by(HaulMaterial.code, HaulMaterial.id)
+            .offset(offset)
+            .limit(limit)
+        )
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def invoices(self, project_id: uuid.UUID) -> list[HaulInvoice]:
-        stmt = select(HaulInvoice).where(HaulInvoice.project_id == project_id).order_by(HaulInvoice.created_at.desc())
+    async def material_codes(self, project_id: uuid.UUID) -> list[str]:
+        stmt = select(HaulMaterial.code).where(HaulMaterial.project_id == project_id)
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def invoices(self, project_id: uuid.UUID, *, offset: int = 0, limit: int | None = None) -> list[HaulInvoice]:
+        stmt = (
+            select(HaulInvoice)
+            .where(HaulInvoice.project_id == project_id)
+            .order_by(HaulInvoice.created_at.desc(), HaulInvoice.id)
+            .offset(offset)
+            .limit(limit)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_invoices(self, project_id: uuid.UUID) -> int:
+        stmt = select(func.count()).select_from(HaulInvoice).where(HaulInvoice.project_id == project_id)
+        return int((await self.session.execute(stmt)).scalar_one())

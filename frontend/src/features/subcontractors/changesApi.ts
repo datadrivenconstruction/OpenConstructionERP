@@ -84,18 +84,20 @@ export interface SovChangeLine {
   time_impact_days: number;
 }
 
-const BASE = '/v1/subcontractors/changes';
 
 export function getOwnerRollup(type: OwnerChangeType, id: string): Promise<OwnerChangeRollup> {
-  return apiGet<OwnerChangeRollup>(`${BASE}/by-owner-change/${type}/${id}`);
+  return apiGet<OwnerChangeRollup>(`/v1/subcontractors/changes/by-owner-change/${type}/${id}`);
 }
 
-export function listAgreementChanges(agreementId: string): Promise<SubcontractChange[]> {
-  return apiGet<SubcontractChange[]>(`/v1/subcontractors/agreements/${agreementId}/changes/`);
+export async function listAgreementChanges(agreementId: string): Promise<SubcontractChange[]> {
+  const page = await apiGet<{ items: SubcontractChange[] }>(
+    `/v1/subcontractors/agreements/${agreementId}/changes/?limit=500`,
+  );
+  return page.items;
 }
 
 export function validateSubChange(id: string): Promise<SubChangeValidation> {
-  return apiGet<SubChangeValidation>(`${BASE}/${id}/validate/`);
+  return apiGet<SubChangeValidation>(`/v1/subcontractors/changes/${id}/validate/`);
 }
 
 export function splitOwnerChange(
@@ -103,7 +105,7 @@ export function splitOwnerChange(
   id: string,
   lines: SplitLine[],
 ): Promise<SubcontractChange[]> {
-  return apiPost<SubcontractChange[]>(`${BASE}/from-owner-change/`, {
+  return apiPost<SubcontractChange[]>(`/v1/subcontractors/changes/from-owner-change/`, {
     owner_change_type: type,
     owner_change_id: id,
     lines,
@@ -118,23 +120,26 @@ export function actOnSubChange(
   note?: string,
 ): Promise<SubcontractChange> {
   const body = action === 'approve' || action === 'reject' ? { note: note ?? '' } : undefined;
-  return apiPost<SubcontractChange>(`${BASE}/${id}/${action}/`, body);
+  return apiPost<SubcontractChange>(`/v1/subcontractors/changes/${id}/${action}/`, body);
 }
 
 export function updateSubChange(
   id: string,
   data: Partial<Pick<SubcontractChange, 'title' | 'amount' | 'back_to_back' | 'description' | 'markup_pct' | 'time_impact_days'>>,
 ): Promise<SubcontractChange> {
-  return apiPatch<SubcontractChange>(`${BASE}/${id}`, data);
+  return apiPatch<SubcontractChange>(`/v1/subcontractors/changes/${id}`, data);
 }
 
 /** Approved changes not yet billed: candidate lines for the next payment application. */
-export function listSovChangeLines(agreementId: string): Promise<SovChangeLine[]> {
-  return apiGet<SovChangeLine[]>(`/v1/subcontractors/agreements/${agreementId}/changes/sov-lines`);
+export async function listSovChangeLines(agreementId: string): Promise<SovChangeLine[]> {
+  const page = await apiGet<{ items: SovChangeLine[] }>(
+    `/v1/subcontractors/agreements/${agreementId}/changes/sov-lines?limit=500`,
+  );
+  return page.items;
 }
 
 export function markChangeBilled(id: string, applicationId: string): Promise<SubcontractChange> {
-  return apiPost<SubcontractChange>(`${BASE}/${id}/mark-billed/`, { application_id: applicationId });
+  return apiPost<SubcontractChange>(`/v1/subcontractors/changes/${id}/mark-billed/`, { application_id: applicationId });
 }
 
 export function useOwnerRollup(type: OwnerChangeType, id: string) {

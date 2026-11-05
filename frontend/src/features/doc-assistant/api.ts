@@ -90,7 +90,7 @@ export const docAssistantApi = {
     target: 'note' | 'rfi';
   }) => apiPost<SavedAnswer>('/v1/doc-assistant/saved', body),
   listSaved: (projectId: string) =>
-    apiGet<SavedAnswer[]>(`/v1/doc-assistant/saved?project_id=${encodeURIComponent(projectId)}`),
+    apiGet<{ items: SavedAnswer[]; total: number }>(`/v1/doc-assistant/saved?project_id=${encodeURIComponent(projectId)}`),
 };
 
 /** Where a citation points, as short parts: revision, sheet, page, section. */

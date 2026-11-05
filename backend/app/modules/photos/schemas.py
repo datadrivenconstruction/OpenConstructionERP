@@ -84,6 +84,20 @@ class TimelineDay(BaseModel):
     photos: list[PhotoOut]
 
 
+class TimelineListResponse(BaseModel):
+    items: list[TimelineDay]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
+class PhotoListResponse(BaseModel):
+    items: list[PhotoOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class PhotoPatch(BaseModel):
     caption: str | None = Field(default=None, max_length=2000)
     category: str | None = Field(default=None, max_length=100)
@@ -122,6 +136,13 @@ class AlbumOut(BaseModel):
     created_at: datetime | None = None
 
 
+class AlbumListResponse(BaseModel):
+    items: list[AlbumOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class AlbumItemsIn(BaseModel):
     photo_ids: list[uuid.UUID] = Field(min_length=1, max_length=500)
 
@@ -149,6 +170,13 @@ class PinOut(BaseModel):
     photo_ref: str | None = None
 
 
+class PinListResponse(BaseModel):
+    items: list[PinOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class CompareIn(BaseModel):
     project_id: uuid.UUID
     before_photo_id: uuid.UUID
@@ -165,6 +193,13 @@ class CompareOut(BaseModel):
     created_at: datetime | None = None
 
 
+class CompareListResponse(BaseModel):
+    items: list[CompareOut]
+    total: int
+    offset: int = 0
+    limit: int = 100
+
+
 class SuggestionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -179,6 +214,13 @@ class SuggestionOut(BaseModel):
     reviewed_by: str | None = None
     reviewed_at: datetime | None = None
     created_at: datetime | None = None
+
+
+class SuggestionListResponse(BaseModel):
+    items: list[SuggestionOut]
+    total: int
+    offset: int = 0
+    limit: int = 100
 
 
 class AcceptIn(BaseModel):

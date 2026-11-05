@@ -7,7 +7,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.dispatch.models import (
@@ -30,12 +30,20 @@ class DispatchRepository:
         await self.session.flush()
 
     # Locations
-    async def list_locations(self, *, include_inactive: bool = False) -> list[DispatchLocation]:
+    async def list_locations(
+        self, *, include_inactive: bool = False, limit: int = 500, offset: int = 0
+    ) -> list[DispatchLocation]:
         stmt = select(DispatchLocation)
         if not include_inactive:
             stmt = stmt.where(DispatchLocation.is_active.is_(True))
-        stmt = stmt.order_by(DispatchLocation.sort_order, DispatchLocation.name).limit(500)
+        stmt = stmt.order_by(DispatchLocation.sort_order, DispatchLocation.name).limit(limit).offset(offset)
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_locations(self, *, include_inactive: bool = False) -> int:
+        stmt = select(func.count()).select_from(DispatchLocation)
+        if not include_inactive:
+            stmt = stmt.where(DispatchLocation.is_active.is_(True))
+        return int((await self.session.execute(stmt)).scalar_one())
 
     async def get_location(self, location_id: uuid.UUID) -> DispatchLocation | None:
         return await self.session.get(DispatchLocation, location_id)
@@ -50,6 +58,10 @@ class DispatchRepository:
             .offset(offset)
         )
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_crews(self) -> int:
+        stmt = select(func.count()).select_from(DispatchCrew).where(DispatchCrew.is_active.is_(True))
+        return int((await self.session.execute(stmt)).scalar_one())
 
     async def crews_by_ids(self, ids: set[str]) -> list[DispatchCrew]:
         uuids = [uuid.UUID(i) for i in ids if _is_uuid(i)]
@@ -88,7 +100,13 @@ class DispatchRepository:
 
     # Scheduled moves
     async def list_moves(
-        self, *, status: str | None = None, start: date | None = None, end: date | None = None, limit: int = 500
+        self,
+        *,
+        status: str | None = None,
+        start: date | None = None,
+        end: date | None = None,
+        limit: int = 500,
+        offset: int = 0,
     ) -> list[DispatchScheduledMove]:
         stmt = select(DispatchScheduledMove)
         if status:
@@ -97,8 +115,18 @@ class DispatchRepository:
             stmt = stmt.where(DispatchScheduledMove.effective_date >= start)
         if end:
             stmt = stmt.where(DispatchScheduledMove.effective_date <= end)
-        stmt = stmt.order_by(DispatchScheduledMove.effective_date, DispatchScheduledMove.created_at).limit(limit)
+        stmt = (
+            stmt.order_by(DispatchScheduledMove.effective_date, DispatchScheduledMove.created_at)
+            .limit(limit)
+            .offset(offset)
+        )
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def count_moves(self, *, status: str | None = None) -> int:
+        stmt = select(func.count()).select_from(DispatchScheduledMove)
+        if status:
+            stmt = stmt.where(DispatchScheduledMove.status == status)
+        return int((await self.session.execute(stmt)).scalar_one())
 
     async def get_move(self, move_id: uuid.UUID) -> DispatchScheduledMove | None:
         return await self.session.get(DispatchScheduledMove, move_id)
