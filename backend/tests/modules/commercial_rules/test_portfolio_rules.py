@@ -172,12 +172,12 @@ async def _schedule(client, h, label):
     assert sched.status_code == 201, sched.text
     sid = sched.json()["id"]
     acts = []
-    for n in ("one", "two"):
+    for i, n in enumerate(("one", "two")):
         act = await client.post(
             f"/api/v1/schedule/schedules/{sid}/activities/",
             json={
                 "name": f"{label} {n}",
-                "wbs_code": "01.01",
+                "wbs_code": f"01.0{i}",
                 "start_date": "2026-05-04",
                 "end_date": "2026-05-15",
                 "activity_type": "task",

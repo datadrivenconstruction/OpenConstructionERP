@@ -203,16 +203,18 @@ async def test_convert_lead_is_gated(client, pipeline):
     lead = await client.post("/api/v1/crm/leads/", json={"contact_name": "Site Manager"}, headers=p["h"])
     assert lead.status_code == 201, lead.text
     lead_id = lead.json()["id"]
-    q = await client.post(
-        f"/api/v1/crm/leads/{lead_id}/qualify", json={"qualification_notes": "budget"}, headers=p["h"]
-    )
-    assert q.status_code == 200, q.text
+    for _ in range(2):  # new -> qualifying -> qualified
+        q = await client.post(
+            f"/api/v1/crm/leads/{lead_id}/qualify", json={"qualification_notes": "budget"}, headers=p["h"]
+        )
+        assert q.status_code == 200, q.text
     payload = {"account_id": p["account"], "stage_id": p["stage"], "title": "Car park", "estimated_value": "90000"}
     bad = await client.post(f"/api/v1/crm/leads/{lead_id}/convert", json=payload, headers=p["h"])
     assert bad.status_code == 422 and _codes(bad) == {"crm.value_requires_currency"}
     ok = await client.post(f"/api/v1/crm/leads/{lead_id}/convert", json={**payload, "currency": "EUR"}, headers=p["h"])
     assert ok.status_code == 201, ok.text
-    assert [w["rule_id"] for w in ok.json()["validation_warnings"]] == []
+    # the lead was never assigned, so the new deal has no owner
+    assert [w["rule_id"] for w in ok.json()["validation_warnings"]] == ["crm.open_deal_has_owner"]
 
 
 @pytest.mark.asyncio
