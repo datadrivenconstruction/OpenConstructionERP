@@ -304,7 +304,11 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
                             {getResourceTypeLabel(res.resource_type, t)}
                           </span>
                           {res.category && (
-                            <span className="text-content-quaternary">{res.category}</span>
+                            <span className="text-content-quaternary">
+                              {t(`catalog.category_${res.category.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`, {
+                                defaultValue: res.category,
+                              })}
+                            </span>
                           )}
                         </div>
                       </div>

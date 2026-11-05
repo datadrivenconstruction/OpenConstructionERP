@@ -6810,6 +6810,49 @@ def _stream_cwicr_parquet(parquet: Any, parquet_path: str, db_id: str, db_file: 
     }
 
 
+# Labour resources carry the same opaque code in every regional CWICR base
+# (two letters, six letters, four letters, underscore separated), while the
+# row_type text, the unit and the is_labor flag are translated or left unset in
+# many of them (DE_BERLIN, CS_PRAGUE, IT_ROME, ...). Materials, machines and
+# abstract resources never use this shape.
+_CWICR_LABOR_CODE_RE = r"^[A-Z]{2}_[A-Z]{6}_[A-Z]{4}$"
+
+
+def _cwicr_resource_types(res_df: pd.DataFrame, labor_units: set[str]) -> pd.Series:  # noqa: F821
+    """Classify CWICR resource rows into labor / material / equipment / ... .
+
+    Language independent: the translated ``row_type`` text is only a fallback
+    for bases that carry no ``is_abstract`` flag.
+    """
+
+    import pandas as pd
+
+    def _flag(name: str) -> pd.Series:
+        if name in res_df.columns:
+            return res_df[name].fillna(False).astype(bool)
+        return pd.Series(False, index=res_df.index)
+
+    row_type = (
+        res_df["row_type"].fillna("").astype(str) if "row_type" in res_df.columns else pd.Series("", index=res_df.index)
+    )
+    is_mach = _flag("is_machine")
+    is_mat = _flag("is_material")
+    is_abstract = _flag("is_abstract") | (row_type == "Abstract resource")
+    labor_unit = res_df["_unit"].str.lower().isin(labor_units)
+    is_labor = _flag("is_labor") | res_df["_code"].astype(str).str.match(_CWICR_LABOR_CODE_RE)
+
+    ctype = pd.Series("other", index=res_df.index, dtype=object)
+    ctype = ctype.mask(is_abstract, "material")
+    ctype = ctype.mask(is_mat & ~labor_unit, "material")
+    ctype = ctype.mask(is_mat & labor_unit, "labor")
+    ctype = ctype.mask(is_mach, "equipment")
+    ctype = ctype.mask(is_mach & (row_type == "Machinist"), "operator")
+    ctype = ctype.mask(is_mach & (row_type == "Electricity"), "electricity")
+    # Explicit labour marks win over material/abstract: a labour line is never
+    # a material, whatever the source flagged. Machines stay equipment.
+    return ctype.mask(is_labor & ~is_mach, "labor")
+
+
 def _import_cwicr_codes(df: pd.DataFrame, db_id: str, tally: _CwicrImportTally) -> None:  # noqa: F821
     """Turn the parquet rows of a set of complete work items into cost rows.
 
@@ -7122,42 +7165,7 @@ def _import_cwicr_codes(df: pd.DataFrame, db_id: str, tally: _CwicrImportTally) 
             res_df["_cost_v"] = pd.to_numeric(res_df[_cost_col], errors="coerce").fillna(0.0).round(2)
 
             # Compute ctype vectorized
-            _row_type = res_df.get("row_type", pd.Series([""] * len(res_df), index=res_df.index)).fillna("").astype(str)
-            _is_mach = (
-                res_df.get("is_machine", pd.Series([False] * len(res_df), index=res_df.index))
-                .fillna(False)
-                .astype(bool)
-            )
-            _is_mat = (
-                res_df.get("is_material", pd.Series([False] * len(res_df), index=res_df.index))
-                .fillna(False)
-                .astype(bool)
-            )
-            _unit_lc = res_df["_unit"].str.lower()
-            _is_labor_unit = _unit_lc.isin(_LABOR_UNITS)
-
-            # Default
-            ctype_arr = pd.Series(["other"] * len(res_df), index=res_df.index, dtype=object)
-            # Material via row_type == Abstract resource
-            ctype_arr = ctype_arr.mask(_row_type == "Abstract resource", "material")
-            # is_material branch
-            ctype_arr = ctype_arr.mask(_is_mat & ~_is_labor_unit, "material")
-            ctype_arr = ctype_arr.mask(_is_mat & _is_labor_unit, "labor")
-            # is_machine branch (overrides is_material)
-            ctype_arr = ctype_arr.mask(_is_mach, "equipment")
-            ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Machinist"), "operator")
-            ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Electricity"), "electricity")
-            # Explicit labour flag. Most bases tag the labour line with is_labor
-            # rather than putting a labor unit on a material row, so fill any row
-            # still left "other" that carries is_labor. Guarded on == "other" so
-            # it never overrides a material / equipment / operator classification
-            # already set above. Without this, coefficient bases (Vietnam Dinh
-            # Muc, Indonesia AHSP) and even the priced bases' plain labour lines
-            # fall through unclassified instead of typing as labor.
-            _is_labor = (
-                res_df.get("is_labor", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
-            )
-            ctype_arr = ctype_arr.mask(_is_labor & (ctype_arr == "other"), "labor")
+            ctype_arr = _cwicr_resource_types(res_df, _LABOR_UNITS)
             res_df["_type"] = ctype_arr
 
             # Build records via zip over numpy arrays - much faster than iterrows
