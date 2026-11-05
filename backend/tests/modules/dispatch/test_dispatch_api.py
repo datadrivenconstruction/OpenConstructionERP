@@ -252,3 +252,21 @@ async def test_timesheet_prefill_plan_and_utilisation(db_session):
         r = await c.put("/v1/dispatch/preferences", json={"card_density": "compact"})
         assert r.status_code == 200
         assert (await c.get("/v1/dispatch/preferences")).json()["card_density"] == "compact"
+
+
+async def test_location_edit_is_refused_outside_its_project(db_session) -> None:
+    owner_id, project_id, *_ = await _setup(db_session)
+    outsider = User(email=f"x-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    db_session.add(outsider)
+    await db_session.flush()
+    async with _http(_app(db_session, owner_id)) as owner:
+        loc_id = await _loc(owner, "Yard", project_id=project_id)
+
+    async with _http(_app(db_session, outsider.id)) as other:
+        refused = await other.patch(f"/v1/dispatch/locations/{loc_id}", json={"name": "Taken"})
+    assert refused.status_code == 404, refused.text
+
+    async with _http(_app(db_session, owner_id)) as owner:
+        renamed = await owner.patch(f"/v1/dispatch/locations/{loc_id}", json={"name": "Main yard"})
+    assert renamed.status_code == 200, renamed.text
+    assert renamed.json()["name"] == "Main yard"

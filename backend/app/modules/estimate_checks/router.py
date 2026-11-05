@@ -64,7 +64,7 @@ def _settings_out(settings: dict) -> SettingsResponse:
 async def get_check(boq_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> CheckResponse:
     """Rate every enabled KPI of the estimate."""
     await _verify_boq(session, boq_id, user_id)
-    return CheckResponse(**await EstimateCheckService(session).check(boq_id))
+    return CheckResponse(**await EstimateCheckService(session).check(boq_id, user_id))
 
 
 @router.put("/boq/{boq_id}/accept/{kpi_id}", response_model=CheckResponse, dependencies=[_ACCEPT])

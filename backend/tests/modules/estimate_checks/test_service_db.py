@@ -76,8 +76,8 @@ async def ctx():
 
 @pytest.mark.asyncio
 async def test_check_rates_against_past_estimates(ctx):
-    session, active, _ = ctx
-    res = await EstimateCheckService(session).check(active.id)
+    session, active, user_id = ctx
+    res = await EstimateCheckService(session).check(active.id, user_id)
     kpis = {k["kpi_id"]: k for k in res["kpis"]}
     assert res["comparables_pool"] == 6
     assert kpis["labour_share"]["compared"] == 6
@@ -92,7 +92,7 @@ async def test_check_rates_against_past_estimates(ctx):
 async def test_accept_moves_finding_out_of_counts_and_into_audit(ctx):
     session, active, user_id = ctx
     svc = EstimateCheckService(session)
-    before = await svc.check(active.id)
+    before = await svc.check(active.id, user_id)
     res = await svc.accept(active.id, "labour_share", "Night shifts priced on purpose", user_id)
     labour = next(k for k in res["kpis"] if k["kpi_id"] == "labour_share")
     assert labour["accepted"]["reason"] == "Night shifts priced on purpose"
@@ -118,5 +118,60 @@ async def test_preference_defaults_to_badge_and_settings_disable_a_kpi(ctx):
     assert await svc.preference(user_id) == "badge"
     assert await svc.save_preference(user_id, "off") == "off"
     await svc.save_settings({"kpis": {"labour_share": {"enabled": False}}}, user_id)
-    res = await svc.check(active.id)
+    res = await svc.check(active.id, user_id)
     assert "labour_share" not in {k["kpi_id"] for k in res["kpis"]}
+
+
+async def _second_project(session, viewer_id, past: int):
+    project = Project(name="Annex", owner_id=viewer_id, currency="EUR", region="DACH")
+    session.add(project)
+    await session.flush()
+    for i in range(past):
+        b = BOQ(project_id=project.id, name=f"Annex past {i}")
+        session.add(b)
+        await session.flush()
+        session.add_all([_position(b.id, n, 10, 100) for n in range(1, 4)])
+    own = BOQ(project_id=project.id, name="Annex tender")
+    session.add(own)
+    await session.flush()
+    session.add_all([_position(own.id, n, 10, 100) for n in range(1, 4)])
+    await session.flush()
+    return own
+
+
+async def test_comparables_stay_inside_the_viewers_projects(ctx):
+    session, _active, _owner = ctx
+    viewer = User(email=f"v-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    session.add(viewer)
+    await session.flush()
+    own = await _second_project(session, viewer.id, past=2)
+
+    res = await EstimateCheckService(session).check(own.id, str(viewer.id))
+
+    assert res["comparables_pool"] == 2
+
+
+async def test_a_cached_result_is_never_served_to_a_viewer_with_other_access(ctx):
+    session, _active, _owner = ctx
+    viewer = User(email=f"v-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    admin = User(email=f"a-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="admin")
+    session.add_all([viewer, admin])
+    await session.flush()
+    own = await _second_project(session, viewer.id, past=2)
+    svc = EstimateCheckService(session)
+
+    everything = (await svc.check(own.id, str(admin.id)))["comparables_pool"]
+    assert everything > 2
+    assert (await svc.check(own.id, str(viewer.id)))["comparables_pool"] == 2
+    assert (await svc.check(own.id, str(admin.id)))["comparables_pool"] == everything
+
+
+async def test_an_outsider_gets_no_comparables_at_all(ctx):
+    session, active, _owner = ctx
+    outsider = User(email=f"x-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    session.add(outsider)
+    await session.flush()
+
+    res = await EstimateCheckService(session).check(active.id, str(outsider.id))
+
+    assert res["comparables_pool"] == 0

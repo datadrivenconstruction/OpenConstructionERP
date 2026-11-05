@@ -15,7 +15,13 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    accessible_project_ids,
+    verify_project_access,
+)
 from app.modules.accounting_sync import templates
 from app.modules.accounting_sync.exports.journal import JOURNAL_COLUMNS
 from app.modules.accounting_sync.models import AccountingConnection, SyncLogEntry
@@ -228,6 +234,12 @@ async def push(connection_id: uuid.UUID, body: PushRequest, session: SessionDep,
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Select the reviewed documents to post")
     svc = AccountingSyncService(session)
     conn = await svc.get_connection(connection_id)
+    # record_ids may name documents of any project in the connection's scope when project_id is omitted.
+    allowed = await accessible_project_ids(session, user_id)
+    if allowed is not None:
+        docs = await svc.documents(conn, project_id=body.project_id, record_ids=set(body.record_ids))
+        if any(d.project_id and uuid.UUID(d.project_id) not in allowed for d in docs):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Document not found")
     counts = await svc.push(conn, project_id=body.project_id, record_ids=set(body.record_ids))
     await session.commit()
     return SyncCounts(**counts)

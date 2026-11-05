@@ -293,3 +293,76 @@ async def test_approved_payroll_posts_to_wages_payable(ctx) -> None:
     accounts = {ln.account: (ln.debit, ln.credit) for ln in lines}
     assert accounts["4110"][0] == Decimal("4200.00")
     assert accounts["1740"][1] == Decimal("4200.00")
+
+
+def _push_client(session, caller: uuid.UUID) -> httpx.AsyncClient:
+    from fastapi import FastAPI
+
+    from app.dependencies import get_current_user_id, get_current_user_payload, get_session
+    from app.modules.accounting_sync.router import router
+
+    app = FastAPI()
+    app.include_router(router, prefix="/v1/accounting")
+
+    async def _session():
+        yield session
+
+    async def _uid() -> str:
+        return str(caller)
+
+    async def _payload() -> dict:
+        return {"sub": str(caller), "role": "admin", "permissions": []}
+
+    app.dependency_overrides[get_session] = _session
+    app.dependency_overrides[get_current_user_id] = _uid
+    app.dependency_overrides[get_current_user_payload] = _payload
+    return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
+
+
+async def _outsider(session) -> User:
+    user = User(email=f"x-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    session.add(user)
+    await session.flush()
+    return user
+
+
+def _posted(fake) -> list:
+    return [r for r in fake.requests if r.url.path.endswith("/Invoices")]
+
+
+@pytest.mark.asyncio
+async def test_push_refuses_a_project_the_caller_cannot_reach(ctx) -> None:
+    session, _svc, conn, fake, ar, _ap, project = ctx
+    outsider = await _outsider(session)
+    async with _push_client(session, outsider.id) as client:
+        resp = await client.post(
+            f"/v1/accounting/connections/{conn.id}/push",
+            json={"project_id": str(project.id), "record_ids": [str(ar.id)]},
+        )
+    assert resp.status_code == 404, resp.text
+    assert _posted(fake) == []
+
+
+@pytest.mark.asyncio
+async def test_push_refuses_record_ids_of_a_project_the_caller_cannot_reach(ctx) -> None:
+    session, _svc, conn, fake, ar, _ap, _project = ctx
+    outsider = await _outsider(session)
+    async with _push_client(session, outsider.id) as client:
+        resp = await client.post(f"/v1/accounting/connections/{conn.id}/push", json={"record_ids": [str(ar.id)]})
+    assert resp.status_code == 404, resp.text
+    assert _posted(fake) == []
+
+
+@pytest.mark.asyncio
+async def test_push_lets_the_project_owner_through(ctx) -> None:
+    session, _svc, conn, fake, ar, _ap, project = ctx
+    owner = User(email=f"p-{uuid.uuid4().hex[:6]}@example.com", hashed_password="x", role="editor")
+    session.add(owner)
+    await session.flush()
+    project.owner_id = owner.id
+    await session.flush()
+    async with _push_client(session, owner.id) as client:
+        resp = await client.post(f"/v1/accounting/connections/{conn.id}/push", json={"record_ids": [str(ar.id)]})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["success"] == 1
+    assert len(_posted(fake)) == 1

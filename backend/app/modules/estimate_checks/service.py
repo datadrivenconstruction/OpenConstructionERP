@@ -10,6 +10,7 @@ by estimate revision, so opening the panel twice costs one computation.
 
 from __future__ import annotations
 
+import hashlib
 import time
 import uuid
 from collections import OrderedDict
@@ -19,6 +20,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.dependencies import accessible_project_ids
 from app.modules.boq.models import BOQ, BOQActivityLog, BOQMarkup, Position
 from app.modules.estimate_checks.kpis import (
     KPI_BY_ID,
@@ -38,7 +40,7 @@ from app.modules.projects.models import Project
 WORKSPACE_KEY = ""
 HISTORY_LIMIT = 150
 HISTORY_TTL_S = 900.0
-_RESULT_CACHE: OrderedDict[tuple[str, str], dict[str, Any]] = OrderedDict()
+_RESULT_CACHE: OrderedDict[tuple[str, str, str], dict[str, Any]] = OrderedDict()
 _RESULT_CACHE_MAX = 64
 _HISTORY_CACHE: dict[tuple[str, ...], tuple[float, list[dict[str, Any]]]] = {}
 
@@ -47,6 +49,13 @@ def clear_caches() -> None:
     """Drop every cached rating and comparables pool (tests, settings change)."""
     _RESULT_CACHE.clear()
     _HISTORY_CACHE.clear()
+
+
+def _access_key(allowed: set[uuid.UUID] | None) -> str:
+    """Stable fingerprint of a viewer's project set; ``None`` is the unfiltered admin view."""
+    if allowed is None:
+        return "*"
+    return hashlib.sha256(",".join(sorted(str(i) for i in allowed)).encode()).hexdigest()
 
 
 def _position_dict(p: Position, db_rate: float | None = None) -> dict[str, Any]:
@@ -180,8 +189,12 @@ class EstimateCheckService:
 
     # ── comparables ────────────────────────────────────────────────────
 
-    async def _pool(self, exclude: uuid.UUID, project: Project | None, scope: str) -> list[dict[str, Any]]:
+    async def _pool(
+        self, exclude: uuid.UUID, project: Project | None, scope: str, allowed: set[uuid.UUID] | None
+    ) -> list[dict[str, Any]]:
         stmt = select(BOQ.id).join(Project, Project.id == BOQ.project_id).where(BOQ.id != exclude)
+        if allowed is not None:
+            stmt = stmt.where(Project.id.in_(allowed))
         if project is not None and scope in ("type_currency_region", "currency_region", "currency"):
             stmt = stmt.where(Project.currency == (project.currency or ""))
             if scope in ("type_currency_region", "currency_region"):
@@ -240,11 +253,15 @@ class EstimateCheckService:
         return pool
 
     async def comparables(
-        self, boq_id: uuid.UUID, project: Project | None, settings: dict[str, Any]
+        self,
+        boq_id: uuid.UUID,
+        project: Project | None,
+        settings: dict[str, Any],
+        allowed: set[uuid.UUID] | None,
     ) -> tuple[str, list[dict[str, Any]]]:
         mode = settings.get("comparables", "auto")
         if mode == "all":
-            return "all", await self._pool(boq_id, project, "all")
+            return "all", await self._pool(boq_id, project, "all", allowed)
         scopes = (
             ["currency", "all"]
             if mode == "currency"
@@ -256,19 +273,23 @@ class EstimateCheckService:
         pool: list[dict[str, Any]] = []
         scope = "all"
         for scope in scopes:
-            pool = await self._pool(boq_id, project, scope)
+            pool = await self._pool(boq_id, project, scope, allowed)
             if len(pool) >= need:
                 break
         return scope, pool
 
     # ── the check ──────────────────────────────────────────────────────
 
-    async def check(self, boq_id: uuid.UUID) -> dict[str, Any]:
+    async def check(self, boq_id: uuid.UUID, user_id: str) -> dict[str, Any]:
         boq = await self._boq(boq_id)
         rev = await self.revision(boq_id)
-        cached = _RESULT_CACHE.get((str(boq_id), rev))
+        allowed = await accessible_project_ids(self.session, user_id)
+        # Ratings derive from the viewer's comparables, so viewers with different access never share
+        # a result, and losing access to a project invalidates what was cached before.
+        cache_key = (str(boq_id), rev, _access_key(allowed))
+        cached = _RESULT_CACHE.get(cache_key)
         if cached is not None:
-            _RESULT_CACHE.move_to_end((str(boq_id), rev))
+            _RESULT_CACHE.move_to_end(cache_key)
             return cached
 
         settings = await self.settings()
@@ -276,7 +297,7 @@ class EstimateCheckService:
         snap, by_id = await self.snapshot(boq_id)
         kpis = compute_kpis(snap, db_tolerance_pct=float(settings["database_rate_tolerance_pct"]))
         n_lines = int(kpis.pop("_meta").value or 0)
-        scope, pool = await self.comparables(boq_id, project, settings)
+        scope, pool = await self.comparables(boq_id, project, settings, allowed)
         ratings = await evaluate(
             {"kpis": kpis, "positions": n_lines},
             {"history": pool, "settings": settings},
@@ -320,7 +341,7 @@ class EstimateCheckService:
             "counts": counts,
             "kpis": out_kpis,
         }
-        _RESULT_CACHE[(str(boq_id), rev)] = result
+        _RESULT_CACHE[cache_key] = result
         while len(_RESULT_CACHE) > _RESULT_CACHE_MAX:
             _RESULT_CACHE.popitem(last=False)
         return result
@@ -329,21 +350,21 @@ class EstimateCheckService:
         if kpi_id not in KPI_BY_ID:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Unknown check")
         boq = await self._boq(boq_id)
-        current = next((k for k in (await self.check(boq_id))["kpis"] if k["kpi_id"] == kpi_id), None)
+        current = next((k for k in (await self.check(boq_id, user_id))["kpis"] if k["kpi_id"] == kpi_id), None)
         if current is None or current["status"] not in (STATUS_SUSPECT, STATUS_WARNING):
             raise HTTPException(status.HTTP_409_CONFLICT, "Only a suspect or warning finding can be accepted")
         value = None if current["value"] is None else str(current["value"])
         await self.repo.upsert_acceptance(boq_id, kpi_id, reason.strip(), current["status"], value, user_id)
         self._audit(boq, user_id, "estimate_check.accepted", kpi_id, {"reason": reason.strip(), "value": value})
         await self.session.flush()
-        return await self.check(boq_id)
+        return await self.check(boq_id, user_id)
 
     async def withdraw(self, boq_id: uuid.UUID, kpi_id: str, user_id: str) -> dict[str, Any]:
         boq = await self._boq(boq_id)
         if await self.repo.delete_acceptance(boq_id, kpi_id):
             self._audit(boq, user_id, "estimate_check.acceptance_withdrawn", kpi_id, {})
             await self.session.flush()
-        return await self.check(boq_id)
+        return await self.check(boq_id, user_id)
 
     def _audit(self, boq: BOQ, user_id: str, action: str, kpi_id: str, changes: dict[str, Any]) -> None:
         try:
