@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Dự án này đã có {count} bảng tiên lượng; bảng sơ bộ thêm bên cạnh sẽ tính cùng phạm vi hai lần."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Ngày kết thúc kế hoạch {end} trước ngày bắt đầu kế hoạch {start}.",
+      "suggestion": "Đặt ngày kết thúc kế hoạch vào ngày bắt đầu hoặc sau đó."
+    },
+    "actual_dates_order": {
+      "fail": "Ngày kết thúc thực tế {end} trước ngày bắt đầu thực tế {start}.",
+      "suggestion": "Sửa ngày bắt đầu hoặc kết thúc thực tế."
+    },
+    "actual_end_without_start": {
+      "fail": "Đã ghi ngày kết thúc thực tế {end} nhưng ngày bắt đầu thực tế để trống.",
+      "suggestion": "Nhập ngày bắt đầu thực tế hoặc xóa ngày kết thúc."
+    },
+    "actual_in_future": {
+      "fail": "{field} là {date}, ngày này chưa tới.",
+      "suggestion": "Chỉ nhập ngày thực tế khi sự việc đã xảy ra và giữ kế hoạch ở các ngày kế hoạch."
+    },
+    "money_without_currency": {
+      "fail": "{field} trị giá {value} được nhập mà không có đơn vị tiền tệ của dự án.",
+      "suggestion": "Đặt đơn vị tiền tệ của dự án để có thể cộng tổng số tiền."
+    },
+    "contingency_missing": {
+      "fail": "Ngân sách {budget} chưa có khoản dự phòng.",
+      "suggestion": "Nhập tỷ lệ dự phòng, kể cả khi bằng 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Tệp trống (0 byte).",
+      "suggestion": "Tải tệp lên lại; tệp trống thường là do truyền tải thất bại."
+    },
+    "published_unidentified": {
+      "fail": "Bản vẽ đã phát hành thiếu: {missing}.",
+      "suggestion": "Bổ sung số bản vẽ và mã sửa đổi trước khi phát hành tờ bản vẽ ra công trường."
+    },
+    "archived_current": {
+      "fail": "Tài liệu đã lưu trữ vẫn đang được đánh dấu là bản sửa đổi hiện hành.",
+      "suggestion": "Bỏ dấu bản sửa đổi hiện hành hoặc giữ tài liệu ngoài kho lưu trữ."
+    },
+    "photo_location": {
+      "fail": "Vị trí ảnh ({lat}, {lon}) không phải cặp tọa độ hợp lệ.",
+      "suggestion": "Nhập cả vĩ độ (-90 đến 90) và kinh độ (-180 đến 180), hoặc để trống cả hai."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Mã container '{code}' chứa dấu cách hoặc dấu gạch chéo.",
+      "suggestion": "Dùng chữ cái, chữ số và dấu gạch nối để mã dùng được trong tên tệp và transmittal."
+    },
+    "suitability_missing": {
+      "fail": "Container ở trạng thái {state} nhưng chưa có mã mức độ phù hợp.",
+      "suggestion": "Chọn mã mức độ phù hợp cho biết thông tin được dùng vào việc gì."
+    },
+    "file_size_invalid": {
+      "fail": "Kích thước tệp '{value}' không phải số nguyên byte.",
+      "suggestion": "Nhập kích thước theo byte, chỉ gồm chữ số."
+    },
+    "content_hash_invalid": {
+      "fail": "Mã băm nội dung không phải giá trị SHA-256 (64 ký tự thập lục phân).",
+      "suggestion": "Để trống mã băm để hệ thống tự tính, hoặc nhập đầy đủ giá trị SHA-256."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Ngày bảo trì '{value}' không phải ngày có thật.",
+      "suggestion": "Nhập ngày theo dạng năm-tháng-ngày, ví dụ 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Chi phí bảo trì '{value}' không phải số lớn hơn hoặc bằng không.",
+      "suggestion": "Nhập chi phí là số thông thường, không kèm ký hiệu tiền tệ."
+    },
+    "service_in_future": {
+      "fail": "Lần bảo trì ghi ngày {date}, ngày này chưa tới.",
+      "suggestion": "Chỉ ghi nhật ký bảo trì sau khi đã thực hiện."
+    }
   }
 }

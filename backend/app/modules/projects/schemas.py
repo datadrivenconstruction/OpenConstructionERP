@@ -720,6 +720,8 @@ class ProjectResponse(BaseModel):
     compliance_rule_packs: list[str] = Field(default_factory=lambda: ["universal"])
     status: str
     owner_id: UUID
+    # Non-blocking findings of the projects rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

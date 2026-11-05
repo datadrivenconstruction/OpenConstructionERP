@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Acest proiect are deja {count} listă/liste de cantități; o listă conceptuală adăugată alături numără de două ori același domeniu."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Finalizarea planificată {end} este înaintea începutului planificat {start}.",
+      "suggestion": "Mutați finalizarea planificată la data de început sau mai târziu."
+    },
+    "actual_dates_order": {
+      "fail": "Finalizarea reală {end} este înaintea începutului real {start}.",
+      "suggestion": "Corectați data reală de început sau de final."
+    },
+    "actual_end_without_start": {
+      "fail": "Finalizarea reală {end} este înregistrată, dar începutul real este gol.",
+      "suggestion": "Introduceți data reală de început sau ștergeți finalizarea."
+    },
+    "actual_in_future": {
+      "fail": "{field} este {date}, o dată care încă nu a sosit.",
+      "suggestion": "Înregistrați datele reale după ce au avut loc și păstrați planul în datele planificate."
+    },
+    "money_without_currency": {
+      "fail": "{field} de {value} este introdus fără moneda proiectului.",
+      "suggestion": "Setați moneda proiectului pentru ca suma să poată fi totalizată."
+    },
+    "contingency_missing": {
+      "fail": "Bugetul de {budget} nu are o rezervă pentru cheltuieli neprevăzute.",
+      "suggestion": "Introduceți procentul rezervei, chiar dacă este 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Fișierul este gol (0 octeți).",
+      "suggestion": "Încărcați din nou fișierul; un fișier gol indică de obicei un transfer eșuat."
+    },
+    "published_unidentified": {
+      "fail": "Planșei publicate îi lipsește: {missing}.",
+      "suggestion": "Adăugați numărul planșei și codul de revizie înainte de emiterea foii pe șantier."
+    },
+    "archived_current": {
+      "fail": "Un document arhivat este încă marcat drept revizie curentă.",
+      "suggestion": "Scoateți marcajul de revizie curentă sau lăsați documentul în afara arhivei."
+    },
+    "photo_location": {
+      "fail": "Locația fotografiei ({lat}, {lon}) nu este o pereche de coordonate validă.",
+      "suggestion": "Indicați atât latitudinea (-90 la 90), cât și longitudinea (-180 la 180), sau niciuna."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Codul containerului '{code}' conține un spațiu sau o bară oblică.",
+      "suggestion": "Folosiți litere, cifre și cratime pentru ca codul să funcționeze în nume de fișiere și transmitale."
+    },
+    "suitability_missing": {
+      "fail": "Containerul este în starea {state}, dar nu are cod de adecvare.",
+      "suggestion": "Selectați codul de adecvare care arată pentru ce poate fi folosită informația."
+    },
+    "file_size_invalid": {
+      "fail": "Dimensiunea fișierului '{value}' nu este un număr întreg de octeți.",
+      "suggestion": "Introduceți dimensiunea în octeți, doar cifre."
+    },
+    "content_hash_invalid": {
+      "fail": "Hash-ul conținutului nu este o valoare SHA-256 (64 de caractere hexazecimale).",
+      "suggestion": "Lăsați hash-ul gol pentru a fi calculat sau furnizați valoarea SHA-256 completă."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Data intervenției '{value}' nu este o dată reală.",
+      "suggestion": "Introduceți data ca an-lună-zi, de exemplu 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Costul intervenției '{value}' nu este un număr egal cu zero sau mai mare.",
+      "suggestion": "Introduceți costul ca număr simplu, fără simbol monetar."
+    },
+    "service_in_future": {
+      "fail": "Intervenția are data {date}, o dată care încă nu a sosit.",
+      "suggestion": "Înregistrați intervenția abia după ce a fost efectuată."
+    }
   }
 }

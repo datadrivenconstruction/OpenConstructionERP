@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "该项目已有 {count} 份工程量清单；在旁边再加概念清单会把同一范围计算两次。"
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "计划完成日期 {end} 早于计划开始日期 {start}。",
+      "suggestion": "请将计划完成日期设为开始日期或之后。"
+    },
+    "actual_dates_order": {
+      "fail": "实际完成日期 {end} 早于实际开始日期 {start}。",
+      "suggestion": "请更正实际开始或完成日期。"
+    },
+    "actual_end_without_start": {
+      "fail": "已记录实际完成日期 {end},但实际开始日期为空。",
+      "suggestion": "请填写实际开始日期,或清除完成日期。"
+    },
+    "actual_in_future": {
+      "fail": "{field} 为 {date},该日期尚未到来。",
+      "suggestion": "实际日期请在发生后再记录,计划保留在计划日期中。"
+    },
+    "money_without_currency": {
+      "fail": "金额为 {value} 的 {field} 未填写项目币种。",
+      "suggestion": "请设置项目币种,以便汇总金额。"
+    },
+    "contingency_missing": {
+      "fail": "预算 {budget} 未设置预备费。",
+      "suggestion": "请填写预备费比例,即使为 0。"
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "文件为空(0 字节)。",
+      "suggestion": "请重新上传文件;空文件通常表示传输失败。"
+    },
+    "published_unidentified": {
+      "fail": "已发布的图纸缺少:{missing}。",
+      "suggestion": "在图纸发放到现场之前,请补充图号和版本代码。"
+    },
+    "archived_current": {
+      "fail": "已归档的文档仍被标记为当前版本。",
+      "suggestion": "请取消当前版本标记,或让文档保持在归档之外。"
+    },
+    "photo_location": {
+      "fail": "照片位置 ({lat}, {lon}) 不是有效的坐标对。",
+      "suggestion": "请同时填写纬度(-90 到 90)和经度(-180 到 180),或都不填。"
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "容器编码 '{code}' 含有空格或斜杠。",
+      "suggestion": "请使用字母、数字和连字符,使编码可用于文件名和传送单。"
+    },
+    "suitability_missing": {
+      "fail": "容器处于 {state} 状态,但没有适用性代码。",
+      "suggestion": "请选择说明信息可用于何种用途的适用性代码。"
+    },
+    "file_size_invalid": {
+      "fail": "文件大小 '{value}' 不是整数字节数。",
+      "suggestion": "请以字节为单位输入大小,仅限数字。"
+    },
+    "content_hash_invalid": {
+      "fail": "内容哈希不是 SHA-256 值(64 个十六进制字符)。",
+      "suggestion": "哈希留空则自动计算,或填写完整的 SHA-256 值。"
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "维保日期 '{value}' 不是真实日期。",
+      "suggestion": "请按年-月-日输入日期,例如 2026-11-04。"
+    },
+    "service_cost_invalid": {
+      "fail": "维保费用 '{value}' 不是大于或等于零的数字。",
+      "suggestion": "请将费用输入为不带币种符号的普通数字。"
+    },
+    "service_in_future": {
+      "fail": "维保日期为 {date},该日期尚未到来。",
+      "suggestion": "维保完成后再记录。"
+    }
   }
 }

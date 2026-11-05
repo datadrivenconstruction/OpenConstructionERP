@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Este projeto já tem {count} mapa(s) de quantidades; um mapa conceptual adicionado ao lado conta duas vezes o mesmo âmbito."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "O fim previsto {end} é anterior ao início previsto {start}.",
+      "suggestion": "Coloque o fim previsto na data de início ou depois."
+    },
+    "actual_dates_order": {
+      "fail": "O fim real {end} é anterior ao início real {start}.",
+      "suggestion": "Corrija a data real de início ou de fim."
+    },
+    "actual_end_without_start": {
+      "fail": "O fim real {end} está registado mas o início real está vazio.",
+      "suggestion": "Introduza a data de início real ou apague o fim."
+    },
+    "actual_in_future": {
+      "fail": "{field} é {date}, uma data que ainda não chegou.",
+      "suggestion": "Registe as datas reais quando ocorrerem e mantenha o plano nas datas previstas."
+    },
+    "money_without_currency": {
+      "fail": "{field} de {value} foi introduzido sem moeda do projeto.",
+      "suggestion": "Defina a moeda do projeto para que o valor possa ser totalizado."
+    },
+    "contingency_missing": {
+      "fail": "O orçamento de {budget} não tem verba para contingências.",
+      "suggestion": "Indique a percentagem de contingência, mesmo que seja 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "O ficheiro está vazio (0 bytes).",
+      "suggestion": "Envie o ficheiro de novo; um ficheiro vazio costuma ser uma transferência falhada."
+    },
+    "published_unidentified": {
+      "fail": "Ao desenho publicado falta: {missing}.",
+      "suggestion": "Acrescente o número do desenho e o código de revisão antes de emitir a folha para a obra."
+    },
+    "archived_current": {
+      "fail": "Um documento arquivado continua marcado como revisão atual.",
+      "suggestion": "Retire a marca de revisão atual ou mantenha o documento fora do arquivo."
+    },
+    "photo_location": {
+      "fail": "A localização da foto ({lat}, {lon}) não é um par de coordenadas válido.",
+      "suggestion": "Indique latitude (-90 a 90) e longitude (-180 a 180), ou nenhuma das duas."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "O código do contentor '{code}' contém um espaço ou uma barra.",
+      "suggestion": "Use letras, dígitos e hífenes para que o código funcione em nomes de ficheiro e transmittals."
+    },
+    "suitability_missing": {
+      "fail": "O contentor está no estado {state} mas não tem código de adequação.",
+      "suggestion": "Selecione o código de adequação que indica para que a informação pode ser usada."
+    },
+    "file_size_invalid": {
+      "fail": "O tamanho de ficheiro '{value}' não é um número inteiro de bytes.",
+      "suggestion": "Indique o tamanho em bytes, apenas dígitos."
+    },
+    "content_hash_invalid": {
+      "fail": "O hash do conteúdo não é um valor SHA-256 (64 caracteres hexadecimais).",
+      "suggestion": "Deixe o hash vazio para ser calculado, ou indique o SHA-256 completo."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "A data da intervenção '{value}' não é uma data real.",
+      "suggestion": "Introduza a data como ano-mês-dia, por exemplo 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "O custo da intervenção '{value}' não é um número igual ou superior a zero.",
+      "suggestion": "Introduza o custo como número simples, sem símbolo de moeda."
+    },
+    "service_in_future": {
+      "fail": "A intervenção tem data {date}, que ainda não chegou.",
+      "suggestion": "Registe a intervenção depois de executada."
+    }
   }
 }

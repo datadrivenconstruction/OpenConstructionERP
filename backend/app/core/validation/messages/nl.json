@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Dit project heeft al {count} bestek(ken); een ernaast gemaakt conceptbestek telt hetzelfde werk dubbel."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "De geplande einddatum {end} ligt vóór de geplande start {start}.",
+      "suggestion": "Zet het geplande einde op de startdatum of later."
+    },
+    "actual_dates_order": {
+      "fail": "Het werkelijke einde {end} ligt vóór de werkelijke start {start}.",
+      "suggestion": "Corrigeer de werkelijke start- of einddatum."
+    },
+    "actual_end_without_start": {
+      "fail": "Het werkelijke einde {end} is vastgelegd maar de werkelijke start is leeg.",
+      "suggestion": "Vul de werkelijke startdatum in of wis het einde."
+    },
+    "actual_in_future": {
+      "fail": "{field} is {date}, een datum die nog in de toekomst ligt.",
+      "suggestion": "Leg werkelijke data vast zodra ze zijn gebeurd en houd de planning in de geplande data."
+    },
+    "money_without_currency": {
+      "fail": "{field} van {value} is ingevoerd zonder projectvaluta.",
+      "suggestion": "Stel de projectvaluta in zodat het bedrag kan worden opgeteld."
+    },
+    "contingency_missing": {
+      "fail": "Het budget van {budget} heeft geen post voor onvoorzien.",
+      "suggestion": "Vul het percentage onvoorzien in, ook als het 0 is."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Het bestand is leeg (0 bytes).",
+      "suggestion": "Upload het bestand opnieuw; een leeg bestand wijst meestal op een mislukte overdracht."
+    },
+    "published_unidentified": {
+      "fail": "Op de gepubliceerde tekening ontbreekt: {missing}.",
+      "suggestion": "Voeg het tekeningnummer en de revisiecode toe voordat het blad naar de bouwplaats gaat."
+    },
+    "archived_current": {
+      "fail": "Een gearchiveerd document staat nog als huidige revisie aangemerkt.",
+      "suggestion": "Haal de markering als huidige revisie weg of houd het document buiten het archief."
+    },
+    "photo_location": {
+      "fail": "De fotolocatie ({lat}, {lon}) is geen geldig coördinatenpaar.",
+      "suggestion": "Geef zowel breedtegraad (-90 tot 90) als lengtegraad (-180 tot 180) op, of geen van beide."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "De containercode '{code}' bevat een spatie of een schuine streep.",
+      "suggestion": "Gebruik letters, cijfers en koppeltekens zodat de code werkt in bestandsnamen en transmittals."
+    },
+    "suitability_missing": {
+      "fail": "De container heeft status {state} maar geen geschiktheidscode.",
+      "suggestion": "Kies de geschiktheidscode die aangeeft waarvoor de informatie gebruikt mag worden."
+    },
+    "file_size_invalid": {
+      "fail": "De bestandsgrootte '{value}' is geen geheel aantal bytes.",
+      "suggestion": "Voer de grootte in bytes in, alleen cijfers."
+    },
+    "content_hash_invalid": {
+      "fail": "De inhoudshash is geen SHA-256-waarde (64 hexadecimale tekens).",
+      "suggestion": "Laat de hash leeg om hem te laten berekenen, of geef de volledige SHA-256-waarde op."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "De onderhoudsdatum '{value}' is geen echte datum.",
+      "suggestion": "Voer de datum in als jaar-maand-dag, bijvoorbeeld 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "De onderhoudskosten '{value}' zijn geen getal van nul of meer.",
+      "suggestion": "Voer de kosten in als gewoon getal zonder valutateken."
+    },
+    "service_in_future": {
+      "fail": "Het onderhoud is gedateerd op {date}, een datum die nog in de toekomst ligt.",
+      "suggestion": "Leg onderhoud pas vast nadat het is uitgevoerd."
+    }
   }
 }

@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Tento projekt už má výkazů výměr: {count}; vedle přidaný konceptuální výkaz počítá stejný rozsah dvakrát."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Plánovaný konec {end} je před plánovaným začátkem {start}.",
+      "suggestion": "Nastavte plánovaný konec na datum začátku nebo později."
+    },
+    "actual_dates_order": {
+      "fail": "Skutečný konec {end} je před skutečným začátkem {start}.",
+      "suggestion": "Opravte skutečné datum začátku nebo konce."
+    },
+    "actual_end_without_start": {
+      "fail": "Skutečný konec {end} je zadán, ale skutečný začátek je prázdný.",
+      "suggestion": "Zadejte datum skutečného začátku nebo konec vymažte."
+    },
+    "actual_in_future": {
+      "fail": "{field} je {date}, což je datum, které ještě nenastalo.",
+      "suggestion": "Skutečná data zapisujte, až nastanou, a plán nechte v plánovaných datech."
+    },
+    "money_without_currency": {
+      "fail": "{field} ve výši {value} je zadáno bez měny projektu.",
+      "suggestion": "Nastavte měnu projektu, aby bylo možné částku sčítat."
+    },
+    "contingency_missing": {
+      "fail": "Rozpočet {budget} nemá rezervu na nepředvídané výdaje.",
+      "suggestion": "Zadejte procento rezervy, i když je 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Soubor je prázdný (0 bajtů).",
+      "suggestion": "Nahrajte soubor znovu; prázdný soubor obvykle znamená selhaný přenos."
+    },
+    "published_unidentified": {
+      "fail": "Vydanému výkresu chybí: {missing}.",
+      "suggestion": "Doplňte číslo výkresu a kód revize před vydáním listu na stavbu."
+    },
+    "archived_current": {
+      "fail": "Archivovaný dokument je stále označen jako aktuální revize.",
+      "suggestion": "Zrušte příznak aktuální revize, nebo dokument nechte mimo archiv."
+    },
+    "photo_location": {
+      "fail": "Poloha fotografie ({lat}, {lon}) není platná dvojice souřadnic.",
+      "suggestion": "Zadejte šířku (-90 až 90) i délku (-180 až 180), nebo žádnou z nich."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Kód kontejneru '{code}' obsahuje mezeru nebo lomítko.",
+      "suggestion": "Používejte písmena, číslice a pomlčky, aby kód fungoval v názvech souborů a transmitalech."
+    },
+    "suitability_missing": {
+      "fail": "Kontejner je ve stavu {state}, ale nemá kód vhodnosti.",
+      "suggestion": "Vyberte kód vhodnosti, který říká, k čemu lze informaci použít."
+    },
+    "file_size_invalid": {
+      "fail": "Velikost souboru '{value}' není celé číslo bajtů.",
+      "suggestion": "Zadejte velikost v bajtech, pouze číslice."
+    },
+    "content_hash_invalid": {
+      "fail": "Hash obsahu není hodnota SHA-256 (64 hexadecimálních znaků).",
+      "suggestion": "Nechte hash prázdný, aby se spočítal, nebo zadejte celou hodnotu SHA-256."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Datum servisu '{value}' není skutečné datum.",
+      "suggestion": "Zadejte datum jako rok-měsíc-den, například 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Náklady servisu '{value}' nejsou číslo nula nebo větší.",
+      "suggestion": "Zadejte náklady jako obyčejné číslo bez značky měny."
+    },
+    "service_in_future": {
+      "fail": "Servis je datován {date}, což je datum, které ještě nenastalo.",
+      "suggestion": "Servis zapisujte až po jeho provedení."
+    }
   }
 }

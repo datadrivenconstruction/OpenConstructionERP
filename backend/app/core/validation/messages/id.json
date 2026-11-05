@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Proyek ini sudah punya {count} daftar kuantitas; daftar konseptual di sampingnya menghitung lingkup yang sama dua kali."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Selesai rencana {end} berada sebelum mulai rencana {start}.",
+      "suggestion": "Pindahkan selesai rencana ke tanggal mulai atau sesudahnya."
+    },
+    "actual_dates_order": {
+      "fail": "Selesai aktual {end} berada sebelum mulai aktual {start}.",
+      "suggestion": "Perbaiki tanggal mulai atau selesai aktual."
+    },
+    "actual_end_without_start": {
+      "fail": "Selesai aktual {end} sudah dicatat tetapi mulai aktual kosong.",
+      "suggestion": "Isi tanggal mulai aktual atau hapus tanggal selesai."
+    },
+    "actual_in_future": {
+      "fail": "{field} adalah {date}, tanggal yang belum tiba.",
+      "suggestion": "Catat tanggal aktual setelah terjadi dan biarkan rencana di tanggal rencana."
+    },
+    "money_without_currency": {
+      "fail": "{field} sebesar {value} dimasukkan tanpa mata uang proyek.",
+      "suggestion": "Atur mata uang proyek agar angka dapat dijumlahkan."
+    },
+    "contingency_missing": {
+      "fail": "Anggaran sebesar {budget} tidak memiliki dana cadangan.",
+      "suggestion": "Isi persentase cadangan, meskipun nilainya 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Berkas kosong (0 byte).",
+      "suggestion": "Unggah ulang berkas; berkas kosong biasanya berarti transfer gagal."
+    },
+    "published_unidentified": {
+      "fail": "Gambar yang diterbitkan tidak memiliki: {missing}.",
+      "suggestion": "Tambahkan nomor gambar dan kode revisi sebelum lembar dikeluarkan ke lapangan."
+    },
+    "archived_current": {
+      "fail": "Dokumen yang diarsipkan masih ditandai sebagai revisi terkini.",
+      "suggestion": "Hapus tanda revisi terkini atau biarkan dokumen di luar arsip."
+    },
+    "photo_location": {
+      "fail": "Lokasi foto ({lat}, {lon}) bukan pasangan koordinat yang valid.",
+      "suggestion": "Isi lintang (-90 sampai 90) dan bujur (-180 sampai 180), atau keduanya dikosongkan."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Kode kontainer '{code}' mengandung spasi atau garis miring.",
+      "suggestion": "Gunakan huruf, angka, dan tanda hubung agar kode berfungsi dalam nama berkas dan transmittal."
+    },
+    "suitability_missing": {
+      "fail": "Kontainer berstatus {state} tetapi tidak punya kode kesesuaian.",
+      "suggestion": "Pilih kode kesesuaian yang menyatakan untuk apa informasi boleh digunakan."
+    },
+    "file_size_invalid": {
+      "fail": "Ukuran berkas '{value}' bukan bilangan bulat byte.",
+      "suggestion": "Masukkan ukuran dalam byte, hanya angka."
+    },
+    "content_hash_invalid": {
+      "fail": "Hash isi bukan nilai SHA-256 (64 karakter heksadesimal).",
+      "suggestion": "Kosongkan hash agar dihitung otomatis, atau isi nilai SHA-256 lengkap."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Tanggal servis '{value}' bukan tanggal yang nyata.",
+      "suggestion": "Masukkan tanggal sebagai tahun-bulan-hari, misalnya 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Biaya servis '{value}' bukan angka nol atau lebih.",
+      "suggestion": "Masukkan biaya sebagai angka biasa tanpa tanda mata uang."
+    },
+    "service_in_future": {
+      "fail": "Servis bertanggal {date}, tanggal yang belum tiba.",
+      "suggestion": "Catat servis setelah dilaksanakan."
+    }
   }
 }

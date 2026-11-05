@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Hankkeessa on jo {count} määräluetteloa; viereen lisätty konseptiluettelo laskee saman laajuuden kahdesti."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Suunniteltu päättymispäivä {end} on ennen suunniteltua aloitusta {start}.",
+      "suggestion": "Aseta suunniteltu päättyminen aloituspäivälle tai sen jälkeiseksi."
+    },
+    "actual_dates_order": {
+      "fail": "Toteutunut päättymispäivä {end} on ennen toteutunutta aloitusta {start}.",
+      "suggestion": "Korjaa toteutunut aloitus- tai päättymispäivä."
+    },
+    "actual_end_without_start": {
+      "fail": "Toteutunut päättyminen {end} on kirjattu, mutta toteutunut aloitus puuttuu.",
+      "suggestion": "Anna toteutunut aloituspäivä tai tyhjennä päättyminen."
+    },
+    "actual_in_future": {
+      "fail": "{field} on {date}, joka on vielä tulevaisuudessa.",
+      "suggestion": "Kirjaa toteutuneet päivät vasta kun ne ovat tapahtuneet ja pidä suunnitelma suunnitelluissa päivissä."
+    },
+    "money_without_currency": {
+      "fail": "{field} {value} on annettu ilman projektin valuuttaa.",
+      "suggestion": "Aseta projektin valuutta, jotta summa voidaan laskea yhteen."
+    },
+    "contingency_missing": {
+      "fail": "Budjetilla {budget} ei ole ennakoimattomien menojen varausta.",
+      "suggestion": "Anna varauksen prosenttiosuus, vaikka se olisi 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Tiedosto on tyhjä (0 tavua).",
+      "suggestion": "Lähetä tiedosto uudelleen; tyhjä tiedosto tarkoittaa yleensä epäonnistunutta siirtoa."
+    },
+    "published_unidentified": {
+      "fail": "Julkaistusta piirustuksesta puuttuu: {missing}.",
+      "suggestion": "Lisää piirustusnumero ja revisiokoodi ennen kuin lehti annetaan työmaalle."
+    },
+    "archived_current": {
+      "fail": "Arkistoitu asiakirja on yhä merkitty voimassa olevaksi revisioksi.",
+      "suggestion": "Poista voimassa olevan revision merkintä tai jätä asiakirja arkiston ulkopuolelle."
+    },
+    "photo_location": {
+      "fail": "Valokuvan sijainti ({lat}, {lon}) ei ole kelvollinen koordinaattipari.",
+      "suggestion": "Anna sekä leveysaste (-90...90) että pituusaste (-180...180), tai ei kumpaakaan."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Konttikoodi '{code}' sisältää välilyönnin tai kauttaviivan.",
+      "suggestion": "Käytä kirjaimia, numeroita ja yhdysmerkkejä, jotta koodi toimii tiedostonimissä ja transmittaleissa."
+    },
+    "suitability_missing": {
+      "fail": "Kontin tila on {state}, mutta sillä ei ole soveltuvuuskoodia.",
+      "suggestion": "Valitse soveltuvuuskoodi, joka kertoo mihin tietoa saa käyttää."
+    },
+    "file_size_invalid": {
+      "fail": "Tiedostokoko '{value}' ei ole kokonaisluku tavuja.",
+      "suggestion": "Anna koko tavuina, vain numeroita."
+    },
+    "content_hash_invalid": {
+      "fail": "Sisällön tiiviste ei ole SHA-256-arvo (64 heksadesimaalimerkkiä).",
+      "suggestion": "Jätä tiiviste tyhjäksi, jolloin se lasketaan, tai anna koko SHA-256-arvo."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Huoltopäivä '{value}' ei ole oikea päivämäärä.",
+      "suggestion": "Anna päivämäärä muodossa vuosi-kuukausi-päivä, esimerkiksi 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Huoltokustannus '{value}' ei ole luku, joka on nolla tai suurempi.",
+      "suggestion": "Anna kustannus tavallisena lukuna ilman valuuttamerkkiä."
+    },
+    "service_in_future": {
+      "fail": "Huolto on päivätty {date}, mikä on vielä tulevaisuudessa.",
+      "suggestion": "Kirjaa huolto vasta sen jälkeen, kun se on tehty."
+    }
   }
 }

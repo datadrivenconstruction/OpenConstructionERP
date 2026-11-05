@@ -33,6 +33,7 @@ from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.upload_streaming import stream_upload_to_temp
 from app.core.validation.messages import translate
+from app.core.validation.quality_rules import gate_record
 from app.modules.bim_hub.models import BIMElement
 from app.modules.documents.activity_service import record_activity
 from app.modules.documents.models import Document, DocumentBIMLink, ProjectPhoto, Sheet
@@ -61,6 +62,7 @@ from app.modules.documents.sheet_fields import (
     sheet_chain_key,
 )
 from app.modules.documents.sheet_ocr import OcrUnavailable, ocr_enabled, ocr_title_block
+from app.modules.documents.validators import DOCUMENT_FIELDS, DOCUMENTS_RULE_SET, PHOTO_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -739,6 +741,16 @@ class DocumentService:
                 ),
             )
 
+        rule_warnings = await gate_record(
+            DOCUMENTS_RULE_SET,
+            "document",
+            {"category": category, "file_size": len(content)},
+            DOCUMENT_FIELDS,
+            operation="upload",
+            project_id=project_id,
+            error_code="document_rules_failed",
+        )
+
         # Derive the stored MIME from the detected signature (P0-1).
         # ``file.content_type`` is fully attacker-controlled - an .exe
         # uploaded with header ``image/png`` previously round-tripped
@@ -772,6 +784,7 @@ class DocumentService:
             tags=doc_tags,
         )
         document = await self.repo.create(document)
+        document.validation_warnings = rule_warnings  # type: ignore[attr-defined]
 
         # Write file AFTER DB record so we can rollback cleanly
         try:
@@ -960,6 +973,16 @@ class DocumentService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(f"Uploaded content does not match an allowed format (detected: {detected})."),
             )
+
+        await gate_record(
+            DOCUMENTS_RULE_SET,
+            "document",
+            {"category": document.category, "file_size": len(content)},
+            DOCUMENT_FIELDS,
+            operation="revision",
+            project_id=document.project_id,
+            error_code="document_rules_failed",
+        )
 
         stored_mime = _mime_for_signature(detected)
 
@@ -1263,8 +1286,25 @@ class DocumentService:
                         ),
                     )
 
+        # Archiving retires the revision: unless the caller says otherwise, it stops being current.
+        if fields.get("cde_state") == "archived" and "is_current_revision" not in fields:
+            fields["is_current_revision"] = False
+
+        rule_warnings = await gate_record(
+            DOCUMENTS_RULE_SET,
+            "document",
+            document,
+            DOCUMENT_FIELDS,
+            fields,
+            operation="update",
+            project_id=document.project_id,
+            error_code="document_rules_failed",
+            target_id=str(document_id),
+        )
+
         await self.repo.update_fields(document_id, **fields)
         await self.session.refresh(document)
+        document.validation_warnings = rule_warnings  # type: ignore[attr-defined]
 
         logger.info("Document updated: %s (fields=%s)", document_id, list(fields.keys()))
 
@@ -1730,6 +1770,16 @@ class PhotoService:
             if exif_dt is not None:
                 taken_at = exif_dt
                 ai_meta["taken_at_source"] = "exif"
+
+        await gate_record(
+            DOCUMENTS_RULE_SET,
+            "photo",
+            {"gps_lat": gps_lat, "gps_lon": gps_lon},
+            PHOTO_FIELDS,
+            operation="upload",
+            project_id=project_id,
+            error_code="document_rules_failed",
+        )
 
         # 2) Compute a defect-category SUGGESTION. This is NEVER auto-applied
         #    - it is stored in metadata for the user to confirm in the UI. The
@@ -3126,6 +3176,16 @@ class SheetService:
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail=(f"PDF too large (max {MAX_FILE_SIZE // (1024 * 1024)} MB)."),
             ) from exc
+
+        await gate_record(
+            DOCUMENTS_RULE_SET,
+            "document",
+            {"category": "drawing", "file_size": len(content)},
+            DOCUMENT_FIELDS,
+            operation="split",
+            project_id=project_id,
+            error_code="document_rules_failed",
+        )
 
         # Save the original PDF to uploads
         file_uuid = uuid.uuid4().hex[:12]

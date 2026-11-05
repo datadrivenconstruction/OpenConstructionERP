@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "이 프로젝트에는 내역서가 이미 {count}건 있습니다. 옆에 개념 내역서를 추가하면 같은 범위를 두 번 계산합니다."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "계획 종료일 {end}이(가) 계획 시작일 {start}보다 앞섭니다.",
+      "suggestion": "계획 종료일을 시작일 또는 그 이후로 지정하세요."
+    },
+    "actual_dates_order": {
+      "fail": "실제 종료일 {end}이(가) 실제 시작일 {start}보다 앞섭니다.",
+      "suggestion": "실제 시작일 또는 종료일을 수정하세요."
+    },
+    "actual_end_without_start": {
+      "fail": "실제 종료일 {end}이(가) 기록되어 있지만 실제 시작일이 비어 있습니다.",
+      "suggestion": "실제 시작일을 입력하거나 종료일을 지우세요."
+    },
+    "actual_in_future": {
+      "fail": "{field}은(는) {date}로 아직 오지 않은 날짜입니다.",
+      "suggestion": "실제 날짜는 발생한 뒤에 기록하고 계획은 계획 날짜에 두세요."
+    },
+    "money_without_currency": {
+      "fail": "{value}의 {field}이(가) 프로젝트 통화 없이 입력되었습니다.",
+      "suggestion": "금액을 합산할 수 있도록 프로젝트 통화를 설정하세요."
+    },
+    "contingency_missing": {
+      "fail": "예산 {budget}에 예비비가 설정되어 있지 않습니다.",
+      "suggestion": "0이더라도 예비비 비율을 입력하세요."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "파일이 비어 있습니다(0바이트).",
+      "suggestion": "파일을 다시 업로드하세요. 빈 파일은 보통 전송 실패입니다."
+    },
+    "published_unidentified": {
+      "fail": "발행된 도면에 다음이 없습니다: {missing}.",
+      "suggestion": "시트를 현장에 발행하기 전에 도면 번호와 개정 코드를 추가하세요."
+    },
+    "archived_current": {
+      "fail": "보관된 문서가 아직 현재 개정으로 표시되어 있습니다.",
+      "suggestion": "현재 개정 표시를 해제하거나 문서를 보관하지 마세요."
+    },
+    "photo_location": {
+      "fail": "사진 위치({lat}, {lon})가 유효한 좌표 쌍이 아닙니다.",
+      "suggestion": "위도(-90~90)와 경도(-180~180)를 모두 입력하거나 둘 다 비워 두세요."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "컨테이너 코드 '{code}'에 공백이나 슬래시가 있습니다.",
+      "suggestion": "코드가 파일 이름과 전달서에서 작동하도록 문자, 숫자, 하이픈을 사용하세요."
+    },
+    "suitability_missing": {
+      "fail": "컨테이너가 {state} 상태이지만 적합성 코드가 없습니다.",
+      "suggestion": "정보를 어떤 용도로 쓸 수 있는지 나타내는 적합성 코드를 선택하세요."
+    },
+    "file_size_invalid": {
+      "fail": "파일 크기 '{value}'은(는) 정수 바이트가 아닙니다.",
+      "suggestion": "크기를 바이트 단위의 숫자로만 입력하세요."
+    },
+    "content_hash_invalid": {
+      "fail": "콘텐츠 해시가 SHA-256 값(16진수 64자)이 아닙니다.",
+      "suggestion": "해시를 비워 두면 계산됩니다. 또는 전체 SHA-256 값을 입력하세요."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "정비 날짜 '{value}'은(는) 실제 날짜가 아닙니다.",
+      "suggestion": "날짜를 연-월-일 형식으로 입력하세요(예: 2026-11-04)."
+    },
+    "service_cost_invalid": {
+      "fail": "정비 비용 '{value}'은(는) 0 이상의 숫자가 아닙니다.",
+      "suggestion": "비용을 통화 기호 없이 일반 숫자로 입력하세요."
+    },
+    "service_in_future": {
+      "fail": "정비 날짜가 {date}로 아직 오지 않았습니다.",
+      "suggestion": "정비는 수행한 뒤에 기록하세요."
+    }
   }
 }

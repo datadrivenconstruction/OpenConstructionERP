@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "このプロジェクトには数量書が既に {count} 件あります。隣に概算の数量書を足すと同じ範囲を二重に数えます。"
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "計画終了日 {end} が計画開始日 {start} より前です。",
+      "suggestion": "計画終了日を開始日以降にしてください。"
+    },
+    "actual_dates_order": {
+      "fail": "実績終了日 {end} が実績開始日 {start} より前です。",
+      "suggestion": "実績の開始日または終了日を修正してください。"
+    },
+    "actual_end_without_start": {
+      "fail": "実績終了日 {end} は入力されていますが、実績開始日が空です。",
+      "suggestion": "実績開始日を入力するか、終了日を消してください。"
+    },
+    "actual_in_future": {
+      "fail": "{field} は {date} で、まだ来ていない日付です。",
+      "suggestion": "実績日は発生してから記録し、計画は計画日に残してください。"
+    },
+    "money_without_currency": {
+      "fail": "{value} の {field} がプロジェクトの通貨なしで入力されています。",
+      "suggestion": "金額を合計できるよう、プロジェクトの通貨を設定してください。"
+    },
+    "contingency_missing": {
+      "fail": "予算 {budget} に予備費の設定がありません。",
+      "suggestion": "予備費の率を入力してください(0でも構いません)。"
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "ファイルが空です(0バイト)。",
+      "suggestion": "ファイルをもう一度アップロードしてください。空のファイルは通常、転送の失敗です。"
+    },
+    "published_unidentified": {
+      "fail": "発行済みの図面に次がありません: {missing}。",
+      "suggestion": "現場へシートを発行する前に、図面番号と改訂コードを追加してください。"
+    },
+    "archived_current": {
+      "fail": "アーカイブ済みの文書が現行改訂のままになっています。",
+      "suggestion": "現行改訂の印を外すか、文書をアーカイブしないでください。"
+    },
+    "photo_location": {
+      "fail": "写真の位置 ({lat}, {lon}) は有効な座標の組ではありません。",
+      "suggestion": "緯度(-90〜90)と経度(-180〜180)を両方指定するか、どちらも指定しないでください。"
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "コンテナコード '{code}' に空白またはスラッシュが含まれています。",
+      "suggestion": "コードがファイル名や送付書で使えるよう、英数字とハイフンを使ってください。"
+    },
+    "suitability_missing": {
+      "fail": "コンテナは {state} の状態ですが、適合性コードがありません。",
+      "suggestion": "情報の利用目的を示す適合性コードを選択してください。"
+    },
+    "file_size_invalid": {
+      "fail": "ファイルサイズ '{value}' はバイトの整数ではありません。",
+      "suggestion": "サイズをバイト単位の数字のみで入力してください。"
+    },
+    "content_hash_invalid": {
+      "fail": "内容ハッシュが SHA-256 の値(16進64文字)ではありません。",
+      "suggestion": "ハッシュを空にすると自動計算されます。または SHA-256 の全体を入力してください。"
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "整備日 '{value}' は実在する日付ではありません。",
+      "suggestion": "日付は年-月-日の形式で入力してください(例: 2026-11-04)。"
+    },
+    "service_cost_invalid": {
+      "fail": "整備費用 '{value}' は0以上の数値ではありません。",
+      "suggestion": "費用は通貨記号なしの通常の数値で入力してください。"
+    },
+    "service_in_future": {
+      "fail": "整備の日付は {date} で、まだ来ていません。",
+      "suggestion": "整備は実施した後に記録してください。"
+    }
   }
 }
