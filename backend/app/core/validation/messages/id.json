@@ -1953,5 +1953,63 @@
     "required_when": "{field} harus diisi bila {other_field} bernilai {other_value}.",
     "limit_exceeded": "{field} ({value}) melebihi batas {limit} yang ditetapkan oleh {limit_field}.",
     "suggestion": "Periksa catatan dan perbaiki nilai atau tanggal yang salah sebelum menyimpan."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Akhir {end} tidak setelah awal {start}.",
+      "suggestion": "Perbaiki tanggal agar akhir berada setelah awal."
+    },
+    "period_outside_stay": {
+      "fail": "Periode tagihan {start} sampai {end} berada di luar masa menginap {stay_start} sampai {stay_end}.",
+      "suggestion": "Bandingkan periode penagihan dengan tanggal pemesanan."
+    },
+    "currency_missing": {
+      "fail": "Jumlah {amount} dicantumkan tanpa mata uang.",
+      "suggestion": "Setel mata uang pada catatan, tarif kamar, atau proyek."
+    },
+    "capacity_exceeded": {
+      "fail": "Kamar berjumlah {total} tempat tidur, lebih dari kapasitas nominal {capacity}.",
+      "suggestion": "Naikkan kapasitas nominal atau periksa kapasitas kamar."
+    },
+    "camp_room_charged": {
+      "fail": "Kamar {label} di kamp pekerja memiliki tarif {rate}.",
+      "suggestion": "Akomodasi kamp biasanya gratis untuk regu; pastikan tarif ini disengaja."
+    },
+    "nothing_recorded": {
+      "fail": "Statusnya {state} tetapi laporan tidak mencatat pekerjaan, keterlambatan, catatan, atau tenaga kerja.",
+      "suggestion": "Jelaskan hari itu sebelum diajukan, atau biarkan laporan sebagai draf."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} jam keterlambatan dicatat tanpa penyebab.",
+      "suggestion": "Jelaskan penyebab keterlambatan, misalnya cuaca, pengiriman terlambat, atau akses."
+    },
+    "date_in_future": {
+      "fail": "Catatan bertanggal {date}, yang belum terjadi.",
+      "suggestion": "Perbaiki tanggal atau masukkan catatan setelah hari berakhir."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} jam per orang atau alat dalam satu hari, lebih dari 24 jam sehari.",
+      "suggestion": "Periksa apakah total regu dimasukkan sebagai jam per orang, atau ada kesalahan satuan."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} jam kerja dicatat tetapi jumlah tenaga kerja nol.",
+      "suggestion": "Masukkan jumlah orang di lokasi."
+    },
+    "incident_undescribed": {
+      "fail": "Sebuah insiden dicatat tanpa deskripsi.",
+      "suggestion": "Jelaskan apa yang terjadi, siapa yang terlibat, dan apa yang dilakukan."
+    },
+    "delay_undescribed": {
+      "fail": "Keterlambatan {hours} jam dicatat tanpa alasan.",
+      "suggestion": "Tambahkan penyebab keterlambatan."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} jam dicatat dalam rentang hanya {span} jam.",
+      "suggestion": "Perbaiki jam atau waktu mulai dan selesai."
+    },
+    "crew_without_record": {
+      "fail": "Regu {headcount} orang ada di lokasi tetapi tidak ada pekerjaan, inspeksi, atau keterlambatan yang dicatat.",
+      "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
+    }
   }
 }

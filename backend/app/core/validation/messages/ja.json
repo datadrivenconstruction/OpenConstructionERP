@@ -1953,5 +1953,63 @@
     "required_when": "{other_field} が {other_value} の場合は {field} の入力が必要です。",
     "limit_exceeded": "{field}（{value}）が {limit_field} で定められた上限 {limit} を超えています。",
     "suggestion": "記録を確認し、保存する前に誤った値または日付を修正してください。"
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "終了 {end} が開始 {start} より後になっていません。",
+      "suggestion": "終了が開始より後になるよう日付を修正してください。"
+    },
+    "period_outside_stay": {
+      "fail": "請求期間 {start} から {end} が滞在期間 {stay_start} から {stay_end} の外にあります。",
+      "suggestion": "請求期間を予約日と照合してください。"
+    },
+    "currency_missing": {
+      "fail": "金額 {amount} が通貨なしで記載されています。",
+      "suggestion": "記録、部屋の料金、またはプロジェクトに通貨を設定してください。"
+    },
+    "capacity_exceeded": {
+      "fail": "部屋の合計は {total} ベッドで、定格収容数 {capacity} を超えています。",
+      "suggestion": "定格収容数を引き上げるか、各部屋の収容数を見直してください。"
+    },
+    "camp_room_charged": {
+      "fail": "作業員宿舎の部屋 {label} に料金 {rate} が設定されています。",
+      "suggestion": "宿舎は通常、班に無償で提供されます。意図した料金か確認してください。"
+    },
+    "nothing_recorded": {
+      "fail": "ステータスは {state} ですが、報告に作業、遅延、メモ、人員の記載がありません。",
+      "suggestion": "提出前にその日の内容を記入するか、下書きのままにしてください。"
+    },
+    "delay_unexplained": {
+      "fail": "遅延 {hours} 時間が原因なしで記録されています。",
+      "suggestion": "天候、納品遅れ、アクセスなど遅延の原因を記入してください。"
+    },
+    "date_in_future": {
+      "fail": "記録の日付 {date} はまだ来ていません。",
+      "suggestion": "日付を修正するか、その日の終了後に入力してください。"
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: 1日に1人または1台あたり {hours} 時間で、1日の24時間を超えています。",
+      "suggestion": "班の合計が1人あたり時間として入力されていないか、単位の誤りがないか確認してください。"
+    },
+    "hours_without_crew": {
+      "fail": "作業時間 {hours} 時間が記録されていますが、人数がゼロです。",
+      "suggestion": "現場にいた人数を入力してください。"
+    },
+    "incident_undescribed": {
+      "fail": "事案が説明なしで記録されています。",
+      "suggestion": "何が起きたか、関係者、対応内容を記入してください。"
+    },
+    "delay_undescribed": {
+      "fail": "遅延 {hours} 時間が理由なしで記録されています。",
+      "suggestion": "遅延の原因を追加してください。"
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} 時間がわずか {span} 時間の枠内に記録されています。",
+      "suggestion": "時間または開始・終了時刻を修正してください。"
+    },
+    "crew_without_record": {
+      "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
+      "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
+    }
   }
 }

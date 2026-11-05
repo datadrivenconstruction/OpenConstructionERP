@@ -1953,5 +1953,63 @@
     "required_when": "Dapat tukuyin ang {field} kapag ang {other_field} ay {other_value}.",
     "limit_exceeded": "Ang {field} ({value}) ay lumampas sa limitasyong {limit} na itinakda ng {limit_field}.",
     "suggestion": "Suriin ang tala at itama ang maling halaga o petsa bago i-save."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Ang wakas na {end} ay hindi pagkatapos ng simula na {start}.",
+      "suggestion": "Ayusin ang mga petsa para ang wakas ay pagkatapos ng simula."
+    },
+    "period_outside_stay": {
+      "fail": "Ang panahon ng singil na {start} hanggang {end} ay labas sa pananatili na {stay_start} hanggang {stay_end}.",
+      "suggestion": "Ihambing ang panahon ng singil sa mga petsa ng booking."
+    },
+    "currency_missing": {
+      "fail": "May halagang {amount} na walang currency.",
+      "suggestion": "Itakda ang currency sa record, sa rate ng kuwarto, o sa proyekto."
+    },
+    "capacity_exceeded": {
+      "fail": "Ang mga kuwarto ay may kabuuang {total} kama, higit sa nakatakdang kapasidad na {capacity}.",
+      "suggestion": "Taasan ang nakatakdang kapasidad o suriin ang kapasidad ng mga kuwarto."
+    },
+    "camp_room_charged": {
+      "fail": "Ang kuwarto {label} sa kampo ng mga manggagawa ay may rate na {rate}.",
+      "suggestion": "Karaniwang libre ang tirahan sa kampo para sa grupo; tiyaking sinadya ang rate."
+    },
+    "nothing_recorded": {
+      "fail": "Ang status ay {state} pero walang naitalang gawa, pagkaantala, tala, o lakas-paggawa sa ulat.",
+      "suggestion": "Ilarawan ang araw bago isumite, o panatilihing draft ang ulat."
+    },
+    "delay_unexplained": {
+      "fail": "Naitala ang {hours} oras ng pagkaantala nang walang sanhi.",
+      "suggestion": "Ilarawan ang sanhi ng pagkaantala, halimbawa panahon, huling delivery, o access."
+    },
+    "date_in_future": {
+      "fail": "Ang record ay may petsang {date}, na hindi pa dumarating.",
+      "suggestion": "Ayusin ang petsa o ilagay ang record kapag tapos na ang araw."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} oras bawat tao o makina sa isang araw, higit sa 24 oras ng isang araw.",
+      "suggestion": "Tingnan kung ang kabuuan ng grupo ay inilagay bilang oras bawat tao, o may mali sa yunit."
+    },
+    "hours_without_crew": {
+      "fail": "Naitala ang {hours} oras ng trabaho pero zero ang bilang ng tao.",
+      "suggestion": "Ilagay kung ilang tao ang nasa site."
+    },
+    "incident_undescribed": {
+      "fail": "May naitalang insidente na walang paglalarawan.",
+      "suggestion": "Ilarawan ang nangyari, sino ang kasangkot, at ano ang ginawa."
+    },
+    "delay_undescribed": {
+      "fail": "May naitalang pagkaantala na {hours} oras nang walang dahilan.",
+      "suggestion": "Idagdag ang sanhi ng pagkaantala."
+    },
+    "hours_exceed_window": {
+      "fail": "Naitala ang {hours} oras sa loob lang ng {span} oras.",
+      "suggestion": "Ayusin ang mga oras o ang oras ng simula at tapos."
+    },
+    "crew_without_record": {
+      "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
+      "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
+    }
   }
 }

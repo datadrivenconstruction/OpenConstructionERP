@@ -16,3 +16,10 @@ A field-first diary distinct from the legacy ``daily_diary`` module:
 Other field modules (timesheet, photos, deliveries) will reuse the same
 grant + auth dependencies that live here.
 """
+
+
+async def on_startup() -> None:
+    """Module startup hook - register the diary validation rules."""
+    from app.modules.field_diary.validators import register_field_diary_validation_rules
+
+    register_field_diary_validation_rules()

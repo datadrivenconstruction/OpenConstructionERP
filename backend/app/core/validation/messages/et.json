@@ -1953,5 +1953,63 @@
     "required_when": "Väli {field} tuleb täita, kui {other_field} on {other_value}.",
     "limit_exceeded": "{field} ({value}) ületab piirmäära {limit}, mille määrab {limit_field}.",
     "suggestion": "Kontrollige kirjet ja parandage enne salvestamist vigane väärtus või kuupäev."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Lõpp {end} ei ole alguse {start} järel.",
+      "suggestion": "Parandage kuupäevad nii, et lõpp oleks pärast algust."
+    },
+    "period_outside_stay": {
+      "fail": "Arveldusperiood {start} kuni {end} jääb väljapoole viibimist {stay_start} kuni {stay_end}.",
+      "suggestion": "Võrrelge arveldusperioodi broneeringu kuupäevadega."
+    },
+    "currency_missing": {
+      "fail": "Summa {amount} on antud ilma valuutata.",
+      "suggestion": "Määrake valuuta kirjel, toa hinnal või projektil."
+    },
+    "capacity_exceeded": {
+      "fail": "Toad annavad kokku {total} voodikohta, rohkem kui nimivõimsus {capacity}.",
+      "suggestion": "Suurendage nimivõimsust või vaadake üle tubade mahutavus."
+    },
+    "camp_room_charged": {
+      "fail": "Töölisalevi toal {label} on hind {rate}.",
+      "suggestion": "Alevi majutus on tavaliselt brigaadile tasuta; kinnitage, et hind on kavatsetud."
+    },
+    "nothing_recorded": {
+      "fail": "Olek on {state}, kuid aruandes pole töid, viivitusi, märkmeid ega tööjõudu.",
+      "suggestion": "Kirjeldage päeva enne esitamist või jätke aruanne mustandiks."
+    },
+    "delay_unexplained": {
+      "fail": "Viivitustunde {hours} on kirjendatud ilma põhjuseta.",
+      "suggestion": "Kirjeldage viivituse põhjust, nt ilm, hiline tarne või juurdepääs."
+    },
+    "date_in_future": {
+      "fail": "Kirje kuupäev on {date}, mis pole veel saabunud.",
+      "suggestion": "Parandage kuupäev või sisestage kirje pärast päeva lõppu."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} tundi inimese või masina kohta päevas, rohkem kui ööpäeva 24 tundi.",
+      "suggestion": "Kontrollige, kas brigaadi kogusumma on sisestatud tundidena inimese kohta või on ühik vale."
+    },
+    "hours_without_crew": {
+      "fail": "Tööd on kirjendatud {hours} tundi, kuid töötajate arv on null.",
+      "suggestion": "Sisestage, kui palju inimesi objektil oli."
+    },
+    "incident_undescribed": {
+      "fail": "Juhtum on kirjendatud ilma kirjelduseta.",
+      "suggestion": "Kirjeldage, mis juhtus, kes olid kaasatud ja mida tehti."
+    },
+    "delay_undescribed": {
+      "fail": "Viivitus {hours} h on kirjendatud ilma põhjuseta.",
+      "suggestion": "Lisage viivituse põhjus."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} tundi on kirjendatud vaid {span} tunni aknasse.",
+      "suggestion": "Parandage tunnid või algus- ja lõppaeg."
+    },
+    "crew_without_record": {
+      "fail": "Objektil oli {headcount} liikmeline brigaad, kuid tööd, kontrolli ega viivitust pole kirjendatud.",
+      "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
+    }
   }
 }

@@ -26,3 +26,6 @@ async def on_startup() -> None:
     )
 
     register_accommodation_permissions()
+    from app.modules.accommodation.validators import register_accommodation_validation_rules
+
+    register_accommodation_validation_rules()

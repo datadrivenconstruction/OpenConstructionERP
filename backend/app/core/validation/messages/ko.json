@@ -1953,5 +1953,63 @@
     "required_when": "{other_field}이(가) {other_value}인 경우 {field}을(를) 입력해야 합니다.",
     "limit_exceeded": "{field}({value})이(가) {limit_field}에서 정한 한도 {limit}을(를) 초과합니다.",
     "suggestion": "기록을 확인하고 저장하기 전에 잘못된 값이나 날짜를 수정하십시오."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "종료 {end}이(가) 시작 {start} 이후가 아닙니다.",
+      "suggestion": "종료가 시작 이후가 되도록 날짜를 수정하세요."
+    },
+    "period_outside_stay": {
+      "fail": "청구 기간 {start} ~ {end}이(가) 숙박 기간 {stay_start} ~ {stay_end}을(를) 벗어납니다.",
+      "suggestion": "청구 기간을 예약 날짜와 대조하세요."
+    },
+    "currency_missing": {
+      "fail": "금액 {amount}이(가) 통화 없이 기재되었습니다.",
+      "suggestion": "기록, 객실 요금 또는 프로젝트에 통화를 설정하세요."
+    },
+    "capacity_exceeded": {
+      "fail": "객실 합계가 {total}개 침상으로 정격 수용 인원 {capacity}명보다 많습니다.",
+      "suggestion": "정격 수용 인원을 올리거나 객실 수용 인원을 검토하세요."
+    },
+    "camp_room_charged": {
+      "fail": "근로자 숙소의 객실 {label}에 요금 {rate}이(가) 설정되어 있습니다.",
+      "suggestion": "숙소는 보통 작업반에 무료로 제공됩니다. 의도한 요금인지 확인하세요."
+    },
+    "nothing_recorded": {
+      "fail": "상태는 {state}이지만 보고서에 작업, 지연, 메모, 인력이 기록되어 있지 않습니다.",
+      "suggestion": "제출 전에 당일 내용을 작성하거나 보고서를 초안으로 유지하세요."
+    },
+    "delay_unexplained": {
+      "fail": "지연 {hours}시간이 사유 없이 기록되었습니다.",
+      "suggestion": "날씨, 납품 지연, 진입 등 지연 사유를 작성하세요."
+    },
+    "date_in_future": {
+      "fail": "기록 날짜 {date}은(는) 아직 오지 않았습니다.",
+      "suggestion": "날짜를 수정하거나 하루가 끝난 뒤 입력하세요."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: 하루에 1인 또는 1대당 {hours}시간으로 하루 24시간을 초과합니다.",
+      "suggestion": "작업반 합계가 1인당 시간으로 입력되지 않았는지, 단위 오류가 없는지 확인하세요."
+    },
+    "hours_without_crew": {
+      "fail": "작업 시간 {hours}시간이 기록되었지만 인원이 0입니다.",
+      "suggestion": "현장 인원 수를 입력하세요."
+    },
+    "incident_undescribed": {
+      "fail": "사고가 설명 없이 기록되었습니다.",
+      "suggestion": "무슨 일이 있었는지, 관련자와 조치 내용을 작성하세요."
+    },
+    "delay_undescribed": {
+      "fail": "{hours}시간 지연이 사유 없이 기록되었습니다.",
+      "suggestion": "지연 사유를 추가하세요."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours}시간이 {span}시간뿐인 구간에 기록되었습니다.",
+      "suggestion": "시간 또는 시작·종료 시각을 수정하세요."
+    },
+    "crew_without_record": {
+      "fail": "현장에 {headcount}명의 작업반이 있었지만 작업, 검사, 지연이 기록되지 않았습니다.",
+      "suggestion": "작업반이 한 일 또는 작업을 멈춘 지연을 추가하세요."
+    }
   }
 }

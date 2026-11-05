@@ -1953,5 +1953,63 @@
     "required_when": "{field} må oppgis når {other_field} er {other_value}.",
     "limit_exceeded": "{field} ({value}) overskrider grensen {limit} satt av {limit_field}.",
     "suggestion": "Kontroller posten og rett den feilaktige verdien eller datoen før du lagrer."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Slutten {end} kommer ikke etter starten {start}.",
+      "suggestion": "Rett datoene slik at slutten kommer etter starten."
+    },
+    "period_outside_stay": {
+      "fail": "Faktureringsperioden {start} til {end} ligger utenfor oppholdet {stay_start} til {stay_end}.",
+      "suggestion": "Sammenlign faktureringsperioden med bookingdatoene."
+    },
+    "currency_missing": {
+      "fail": "Et beløp på {amount} er oppgitt uten valuta.",
+      "suggestion": "Angi valuta på posten, romprisen eller prosjektet."
+    },
+    "capacity_exceeded": {
+      "fail": "Rommene utgjør til sammen {total} senger, mer enn oppgitt kapasitet på {capacity}.",
+      "suggestion": "Øk oppgitt kapasitet eller gå gjennom romkapasitetene."
+    },
+    "camp_room_charged": {
+      "fail": "Rom {label} i en brakkerigg har en pris på {rate}.",
+      "suggestion": "Rigginnkvartering stilles normalt gratis til laget; bekreft at prisen er tilsiktet."
+    },
+    "nothing_recorded": {
+      "fail": "Status er {state}, men rapporten har hverken arbeid, forsinkelser, notater eller bemanning.",
+      "suggestion": "Beskriv dagen før innsending, eller behold rapporten som utkast."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} timer forsinkelse er registrert uten oppgitt årsak.",
+      "suggestion": "Beskriv årsaken til forsinkelsen, for eksempel vær, sen levering eller adkomst."
+    },
+    "date_in_future": {
+      "fail": "Posten er datert {date}, som ennå ikke har inntruffet.",
+      "suggestion": "Rett datoen, eller registrer posten når dagen er over."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} timer per person eller maskin på en dag, mer enn døgnets 24 timer.",
+      "suggestion": "Kontroller om lagets sum er skrevet inn som timer per person, eller om enheten er feil."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} arbeidstimer er registrert, men bemanningen er null.",
+      "suggestion": "Oppgi hvor mange personer som var på plassen."
+    },
+    "incident_undescribed": {
+      "fail": "En hendelse er registrert uten beskrivelse.",
+      "suggestion": "Beskriv hva som skjedde, hvem som var involvert og hva som ble gjort."
+    },
+    "delay_undescribed": {
+      "fail": "En forsinkelse på {hours} t er registrert uten årsak.",
+      "suggestion": "Legg til årsaken til forsinkelsen."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} timer er registrert i et vindu på bare {span} timer.",
+      "suggestion": "Rett timene eller start- og sluttidene."
+    },
+    "crew_without_record": {
+      "fail": "Et lag på {headcount} var på plassen, men ingen arbeid, kontroll eller forsinkelse er registrert.",
+      "suggestion": "Legg til hva laget gjorde, eller forsinkelsen som stoppet arbeidet."
+    }
   }
 }

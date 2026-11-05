@@ -118,6 +118,7 @@ def _report_to_response(report: object) -> FieldReportResponse:
         metadata=getattr(report, "metadata_", {}),  # type: ignore[attr-defined]
         created_at=report.created_at,  # type: ignore[attr-defined]
         updated_at=report.updated_at,  # type: ignore[attr-defined]
+        validation_warnings=getattr(report, "validation_warnings", []),
     )
 
 
@@ -1279,7 +1280,18 @@ async def create_workforce_log(
     from app.modules.fieldreports.models import SiteWorkforceLog
 
     # IDOR guard: the parent report must belong to a project the caller owns.
-    await _verify_report_access(report_id, user_id, session, service)
+    report = await _verify_report_access(report_id, user_id, session, service)
+    await service.check_log_write(
+        report,  # type: ignore[arg-type]
+        kind="workforce",
+        row={
+            "id": "",
+            "item": data.worker_type,
+            "count": data.headcount,
+            "hours": service.log_hours(data.hours_worked, data.overtime_hours),
+        },
+        operation="workforce_create",
+    )
 
     entry = SiteWorkforceLog(
         field_report_id=report_id,
@@ -1340,9 +1352,26 @@ async def update_workforce_log(
     from app.modules.fieldreports.models import SiteWorkforceLog
 
     # IDOR guard: gate on the owning project before any mutation.
-    await _verify_workforce_entry_access(entry_id, user_id, session, service)
+    current = await _verify_workforce_entry_access(entry_id, user_id, session, service)
 
     updates = data.model_dump(exclude_unset=True)
+    if updates:
+        parent = await service.get_report(current.field_report_id)  # type: ignore[attr-defined]
+        await service.check_log_write(
+            parent,
+            kind="workforce",
+            row={
+                "id": str(entry_id),
+                "item": updates.get("worker_type", current.worker_type),  # type: ignore[attr-defined]
+                "count": updates.get("headcount", current.headcount),  # type: ignore[attr-defined]
+                "hours": service.log_hours(
+                    updates.get("hours_worked", current.hours_worked),  # type: ignore[attr-defined]
+                    updates.get("overtime_hours", current.overtime_hours),  # type: ignore[attr-defined]
+                ),
+            },
+            replace_id=entry_id,
+            operation="workforce_update",
+        )
     if "metadata" in updates:
         updates["metadata_"] = updates.pop("metadata")
     if updates:
@@ -1389,7 +1418,19 @@ async def create_equipment_log(
     from app.modules.fieldreports.models import SiteEquipmentLog
 
     # IDOR guard: the parent report must belong to a project the caller owns.
-    await _verify_report_access(report_id, user_id, session, service)
+    report = await _verify_report_access(report_id, user_id, session, service)
+    await service.check_log_write(
+        report,  # type: ignore[arg-type]
+        kind="equipment",
+        row={
+            "id": "",
+            "item": data.equipment_description,
+            "hours_operational": data.hours_operational,
+            "hours_standby": data.hours_standby,
+            "hours_breakdown": data.hours_breakdown,
+        },
+        operation="equipment_create",
+    )
 
     entry = SiteEquipmentLog(
         field_report_id=report_id,
@@ -1449,9 +1490,24 @@ async def update_equipment_log(
     from app.modules.fieldreports.models import SiteEquipmentLog
 
     # IDOR guard: gate on the owning project before any mutation.
-    await _verify_equipment_entry_access(entry_id, user_id, session, service)
+    current = await _verify_equipment_entry_access(entry_id, user_id, session, service)
 
     updates = data.model_dump(exclude_unset=True)
+    if updates:
+        parent = await service.get_report(current.field_report_id)  # type: ignore[attr-defined]
+        await service.check_log_write(
+            parent,
+            kind="equipment",
+            row={
+                "id": str(entry_id),
+                "item": updates.get("equipment_description", current.equipment_description),  # type: ignore[attr-defined]
+                "hours_operational": updates.get("hours_operational", current.hours_operational),  # type: ignore[attr-defined]
+                "hours_standby": updates.get("hours_standby", current.hours_standby),  # type: ignore[attr-defined]
+                "hours_breakdown": updates.get("hours_breakdown", current.hours_breakdown),  # type: ignore[attr-defined]
+            },
+            replace_id=entry_id,
+            operation="equipment_update",
+        )
     if "metadata" in updates:
         updates["metadata_"] = updates.pop("metadata")
     if updates:
