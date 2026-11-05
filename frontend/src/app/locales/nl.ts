@@ -60973,6 +60973,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Vul eerst de hoeveelheid van de post in: middelen voor de hele post worden erdoor gedeeld.",
     "boq.resource_basis_per_unit_hint": "Hoeveelheden van middelen gelden per 1 {{unit}} van deze post: eenheidsprijs = som van middelen, totaal = hoeveelheid x eenheidsprijs. Klik om ze voor de hele post in te voeren.",
     "boq.resource_basis_per_position_hint": "Hoeveelheden van middelen gelden voor de hele post ({{quantity}} {{unit}}): eenheidsprijs = totaal middelen / hoeveelheid. Klik om ze per 1 {{unit}} in te voeren.",
+    "boq.priced_from_published_rates": "Prijzen zijn gepubliceerde eenheidsprijzen",
+    "boq.priced_from_published_rates_hint": "Ze bevatten al algemene kosten en winst. Validatie waarschuwt als een opslag ze opnieuw toevoegt.",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

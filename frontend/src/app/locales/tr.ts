@@ -60973,6 +60973,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Önce poz miktarını girin: tüm poz için kaynaklar bu miktara bölünür.",
     "boq.resource_basis_per_unit_hint": "Kaynak miktarları bu pozun 1 {{unit}} başınadır: birim fiyat = kaynakların toplamı, toplam = miktar x birim fiyat. Bunları tüm poz için girmek için tıklayın.",
     "boq.resource_basis_per_position_hint": "Kaynak miktarları tüm poz içindir ({{quantity}} {{unit}}): birim fiyat = kaynak toplamı / miktar. Bunları 1 {{unit}} başına girmek için tıklayın.",
+    "boq.priced_from_published_rates": "Fiyatlar yayımlanmış birim fiyatlardır",
+    "boq.priced_from_published_rates_hint": "Genel gider ve kâr zaten dahildir. Bir kâr marjı bunları yeniden eklerse doğrulama uyarır.",
     "guide.cost_control.title": "Maliyet kontrolü",
     "guide.cost_control.intro": "Maliyet kontrolü tek bir soruya cevap verir: proje sonunda neye mal olacak ve neden. Bütçeyi, keşfi, sözleşmeleri, değişiklikleri, ölçülen işi ve faturaları, zaten kendi modüllerinde durdukları yerden okur; böylece hiçbir şey iki kez girilmez.",
     "guide.cost_control.methods.title": "Tahmini okumanın dört yolu",

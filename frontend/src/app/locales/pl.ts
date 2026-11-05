@@ -61630,6 +61630,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Najpierw wpisz ilość pozycji: zasoby na całą pozycję są przez nią dzielone.",
     "boq.resource_basis_per_unit_hint": "Ilości zasobów podano na 1 {{unit}} tej pozycji: cena jednostkowa = suma zasobów, wartość = ilość x cena jednostkowa. Kliknij, aby wpisywać je na całą pozycję.",
     "boq.resource_basis_per_position_hint": "Ilości zasobów podano na całą pozycję ({{quantity}} {{unit}}): cena jednostkowa = suma zasobów / ilość. Kliknij, aby wpisywać je na 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Ceny to opublikowane ceny jednostkowe",
+    "boq.priced_from_published_rates_hint": "Zawierają już koszty ogólne i zysk. Walidacja ostrzega, jeśli narzut doda je ponownie.",
     "guide.cost_control.title": "Kontrola kosztów",
     "guide.cost_control.intro": "Kontrola kosztów odpowiada na jedno pytanie: ile projekt będzie kosztował na koniec i dlaczego. Czyta budżet, kosztorys, umowy, zmiany, roboty obmierzone i faktury, które już są w swoich modułach, więc nic nie jest wpisywane dwa razy.",
     "guide.cost_control.methods.title": "Cztery sposoby odczytu prognozy",

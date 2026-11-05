@@ -61307,6 +61307,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Inserisci prima la quantità della voce: le risorse per l'intera voce vengono divise per essa.",
     "boq.resource_basis_per_unit_hint": "Le quantità delle risorse sono per 1 {{unit}} di questa voce: prezzo unitario = somma delle risorse, totale = quantità x prezzo unitario. Fai clic per inserirle per l'intera voce.",
     "boq.resource_basis_per_position_hint": "Le quantità delle risorse sono per l'intera voce ({{quantity}} {{unit}}): prezzo unitario = totale risorse / quantità. Fai clic per inserirle per 1 {{unit}}.",
+    "boq.priced_from_published_rates": "I prezzi sono prezzi unitari pubblicati",
+    "boq.priced_from_published_rates_hint": "Includono già spese generali e utile. La validazione avvisa se un ricarico li aggiunge di nuovo.",
     "guide.cost_control.title": "Controllo dei costi",
     "guide.cost_control.intro": "Il controllo dei costi risponde a una domanda: quanto costerà il progetto alla fine e perché. Legge budget, stima, contratti, varianti, lavori misurati e fatture che vivono già nei loro moduli, così nulla viene scritto due volte.",
     "guide.cost_control.methods.title": "Quattro modi di leggere la previsione",

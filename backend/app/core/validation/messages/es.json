@@ -547,6 +547,10 @@
       "fail": "El beneficio industrial y los gastos generales del contratista se aplican en {count} líneas, {total} por ciento en conjunto, por encima del {limit} por ciento único",
       "suggestion": "El 25 por ciento se añade una sola vez. Conserve una línea, y quítela del todo cuando los precios sean precios unitarios publicados, que ya lo incluyen"
     },
+    "overheads_not_applied_twice": {
+      "fail": "El presupuesto está valorado con precios unitarios publicados, que ya incluyen el beneficio del contratista y los gastos generales, y aun así se vuelven a añadir ({percent} por ciento)",
+      "suggestion": "Quite de este presupuesto la línea de beneficio y gastos generales, o desactive el ajuste «Los precios son precios unitarios publicados» si sus precios van sin ellos"
+    },
     "unit_matches_poz_definition": {
       "fail": "El poz '{code}' de la posición {ordinal} está medido en '{unit}', pero el libro de precios unitarios instalado lo define en '{book_unit}'",
       "suggestion": "Un número de poz se define en una sola unidad. Mida la línea en la unidad del libro o numere el trabajo distinto como partida propia (ÖZEL-1)",

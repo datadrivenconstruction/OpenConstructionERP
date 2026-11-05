@@ -60460,6 +60460,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "먼저 항목 수량을 입력하세요. 항목 전체 자원은 이 수량으로 나뉩니다.",
     "boq.resource_basis_per_unit_hint": "자원 수량은 이 항목 1 {{unit}}당 기준입니다. 단가 = 자원 합계, 합계 = 수량 x 단가. 클릭하면 항목 전체 기준으로 입력합니다.",
     "boq.resource_basis_per_position_hint": "자원 수량은 항목 전체 ({{quantity}} {{unit}}) 기준입니다. 단가 = 자원 합계 / 수량. 클릭하면 1 {{unit}}당 기준으로 입력합니다.",
+    "boq.priced_from_published_rates": "가격은 공시된 단가입니다",
+    "boq.priced_from_published_rates_hint": "공시 단가에는 이미 간접비와 이윤이 포함되어 있습니다. 할증이 이를 다시 더하면 검증에서 경고합니다.",
     "guide.cost_control.title": "원가 관리",
     "guide.cost_control.intro": "원가 관리는 한 가지 질문에 답합니다. 프로젝트가 결국 얼마가 들고, 그 이유는 무엇인가. 예산, 견적, 계약, 변경, 실측 물량, 청구서는 각자의 모듈에 이미 있는 것을 읽어 오므로 두 번 입력할 필요가 없습니다.",
     "guide.cost_control.methods.title": "예측을 보는 네 가지 방법",

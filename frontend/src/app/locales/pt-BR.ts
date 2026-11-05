@@ -50353,6 +50353,8 @@ const resource = {
     "boq.provis_badge": "Eventual",
     "boq.provis_without_total_tip": "Item eventual sem total: orçado, mas não entra em nenhum total.",
     "boq.provis_with_total_tip": "Item eventual com total: entra nos totais.",
+    "boq.priced_from_published_rates": "Os preços são preços unitários publicados",
+    "boq.priced_from_published_rates_hint": "Já incluem BDI (despesas indiretas e lucro). A validação avisa se uma margem os adiciona de novo.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",

@@ -529,6 +529,10 @@
       "fail": "Zysk i koszty ogólne wykonawcy naliczono w {count} wierszach, łącznie {total} procent, ponad jednorazowe {limit} procent",
       "suggestion": "Te 25 procent dolicza się raz. Zostaw jeden wiersz i usuń go całkiem, gdy stawki są opublikowanymi cenami jednostkowymi, które już go zawierają"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Kosztorys wyceniono na podstawie opublikowanych cen jednostkowych, które już zawierają zysk wykonawcy i koszty ogólne, a mimo to są dodawane ponownie ({percent} procent)",
+      "suggestion": "Usuń z kosztorysu pozycję zysku i kosztów ogólnych albo wyłącz ustawienie „Ceny to opublikowane ceny jednostkowe”, jeśli stawki są podane bez nich"
+    },
     "unit_matches_poz_definition": {
       "fail": "Numer poz '{code}' w pozycji {ordinal} jest obmierzony w '{unit}', ale zainstalowany katalog cen jednostkowych definiuje go w '{book_unit}'",
       "suggestion": "Numer poz jest zdefiniowany w jednej jednostce. Obmierz wiersz w jednostce katalogu albo ponumeruj odmienną robotę jako własną pozycję (ÖZEL-1)",

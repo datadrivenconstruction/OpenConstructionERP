@@ -62313,6 +62313,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "请先输入清单项数量：整个清单项的资源将除以该数量。",
     "boq.resource_basis_per_unit_hint": "资源数量按本清单项每 1 {{unit}} 计：单价 = 资源之和，合价 = 数量 x 单价。点击改为按整个清单项输入。",
     "boq.resource_basis_per_position_hint": "资源数量按整个清单项（{{quantity}} {{unit}}）计：单价 = 资源合计 / 数量。点击改为按每 1 {{unit}} 输入。",
+    "boq.priced_from_published_rates": "价格为已公布的单价",
+    "boq.priced_from_published_rates_hint": "这些单价已包含管理费和利润。若加价再次计入，验证会发出警告。",
     "guide.cost_control.title": "成本控制",
     "guide.cost_control.intro": "成本控制回答一个问题：项目最终要花多少钱，为什么。它直接读取各模块中已有的预算、估算、合同、变更、实测工程量和发票，不需要重复录入。",
     "guide.cost_control.methods.title": "四种预测口径",

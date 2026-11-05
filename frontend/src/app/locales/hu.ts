@@ -62657,6 +62657,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Előbb adja meg a tétel mennyiségét: a teljes tételre vonatkozó erőforrásokat ezzel osztjuk.",
     "boq.resource_basis_per_unit_hint": "Az erőforrás-mennyiségek a tétel 1 {{unit}} egységére vonatkoznak: egységár = erőforrások összege, összesen = mennyiség x egységár. Kattintson, hogy a teljes tételre adja meg őket.",
     "boq.resource_basis_per_position_hint": "Az erőforrás-mennyiségek a teljes tételre vonatkoznak ({{quantity}} {{unit}}): egységár = erőforrások összege / mennyiség. Kattintson, hogy 1 {{unit}} egységre adja meg őket.",
+    "boq.priced_from_published_rates": "Az árak közzétett egységárak",
+    "boq.priced_from_published_rates_hint": "Ezek már tartalmazzák a rezsit és a nyereséget. Az ellenőrzés figyelmeztet, ha egy felár újra hozzáadja őket.",
     "guide.cost_control.title": "Költségkövetés",
     "guide.cost_control.intro": "A költségkövetés egy kérdésre válaszol: mennyibe fog kerülni a projekt a végén, és miért. A költségvetést, a költségbecslést, a szerződéseket, a módosításokat, a felmért munkát és a számlákat olvassa, amelyek már a saját moduljukban vannak, így semmit nem kell kétszer beírni.",
     "guide.cost_control.methods.title": "Az előrejelzés négy olvasata",

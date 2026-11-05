@@ -61024,6 +61024,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Avval pozitsiya miqdorini kiriting: butun pozitsiya resurslari unga bo'linadi.",
     "boq.resource_basis_per_unit_hint": "Resurs miqdorlari ushbu pozitsiyaning 1 {{unit}} uchun: birlik narxi = resurslar yig'indisi, jami = miqdor x birlik narxi. Ularni butun pozitsiya uchun kiritish uchun bosing.",
     "boq.resource_basis_per_position_hint": "Resurs miqdorlari butun pozitsiya uchun ({{quantity}} {{unit}}): birlik narxi = resurslar jami / miqdor. Ularni 1 {{unit}} uchun kiritish uchun bosing.",
+    "boq.priced_from_published_rates": "Narxlar – e'lon qilingan birlik narxlar",
+    "boq.priced_from_published_rates_hint": "Ularga ustama xarajatlar va foyda allaqachon kiritilgan. Agar ustama ularni qayta qo'shsa, validatsiya ogohlantiradi.",
     "guide.cost_control.title": "Xarajatlarni nazorat qilish",
     "guide.cost_control.intro": "Xarajatlarni nazorat qilish bitta savolga javob beradi: loyiha oxirida qancha turadi va nima uchun. U oʻz modullarida allaqachon turgan byudjet, smeta, shartnomalar, oʻzgartirishlar, oʻlchangan ish va hisob-fakturalarni oʻqiydi, shuning uchun hech narsa ikki marta kiritilmaydi.",
     "guide.cost_control.methods.title": "Prognozni oʻqishning toʻrt usuli",

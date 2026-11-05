@@ -60707,6 +60707,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Ange postens mängd först: resurser för hela posten divideras med den.",
     "boq.resource_basis_per_unit_hint": "Resursmängderna gäller per 1 {{unit}} av denna post: à-pris = summa resurser, summa = mängd x à-pris. Klicka för att ange dem för hela posten i stället.",
     "boq.resource_basis_per_position_hint": "Resursmängderna gäller för hela posten ({{quantity}} {{unit}}): à-pris = resurser totalt / mängd. Klicka för att ange dem per 1 {{unit}} i stället.",
+    "boq.priced_from_published_rates": "Priserna är publicerade enhetspriser",
+    "boq.priced_from_published_rates_hint": "De innehåller redan omkostnader och vinst. Valideringen varnar om ett påslag lägger till dem igen.",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

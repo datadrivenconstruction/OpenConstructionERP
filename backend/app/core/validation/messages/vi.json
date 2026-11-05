@@ -529,6 +529,10 @@
       "fail": "Lợi nhuận và chi phí chung của nhà thầu được áp dụng trên {count} dòng, tổng cộng {total} phần trăm, vượt mức {limit} phần trăm duy nhất",
       "suggestion": "Mức 25 phần trăm chỉ cộng một lần. Giữ lại một dòng, và bỏ hẳn khi đơn giá là đơn giá đã công bố, vốn đã bao gồm khoản này"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Bảng khối lượng được tính theo đơn giá đã công bố, vốn đã bao gồm lợi nhuận nhà thầu và chi phí chung, nhưng vẫn bị cộng thêm lần nữa ({percent} phần trăm)",
+      "suggestion": "Xóa dòng lợi nhuận và chi phí chung khỏi bảng khối lượng này, hoặc tắt cài đặt „Giá là đơn giá đã công bố“ nếu đơn giá của bạn chưa bao gồm các khoản này"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' ở công tác {ordinal} được đo bằng '{unit}', nhưng sách đơn giá đã cài đặt định nghĩa nó bằng '{book_unit}'",
       "suggestion": "Một số poz chỉ được định nghĩa bằng một đơn vị. Hãy đo dòng này theo đơn vị của sách, hoặc đánh số công việc khác biệt thành công tác riêng của bạn (ÖZEL-1)",

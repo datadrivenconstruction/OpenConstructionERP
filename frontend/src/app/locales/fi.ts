@@ -60096,6 +60096,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Syötä ensin nimikkeen määrä: koko nimikkeen resurssit jaetaan sillä.",
     "boq.resource_basis_per_unit_hint": "Resurssien määrät ovat tämän nimikkeen 1 {{unit}} kohden: yksikköhinta = resurssien summa, yhteensä = määrä x yksikköhinta. Napsauta syöttääksesi ne koko nimikkeelle.",
     "boq.resource_basis_per_position_hint": "Resurssien määrät ovat koko nimikkeelle ({{quantity}} {{unit}}): yksikköhinta = resurssit yhteensä / määrä. Napsauta syöttääksesi ne 1 {{unit}} kohden.",
+    "boq.priced_from_published_rates": "Hinnat ovat julkaistuja yksikköhintoja",
+    "boq.priced_from_published_rates_hint": "Ne sisältävät jo yleiskulut ja voiton. Validointi varoittaa, jos lisäkate lisää ne uudelleen.",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

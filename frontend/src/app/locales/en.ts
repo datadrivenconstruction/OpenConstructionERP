@@ -54412,6 +54412,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Enter the position quantity first: resources for the whole position are divided by it.",
     "boq.resource_basis_per_unit_hint": "Resource quantities are per 1 {{unit}} of this position: unit rate = sum of resources, total = quantity x unit rate. Click to enter them for the whole position instead.",
     "boq.resource_basis_per_position_hint": "Resource quantities are for the whole position ({{quantity}} {{unit}}): unit rate = resources total / quantity. Click to enter them per 1 {{unit}} instead.",
+    "boq.priced_from_published_rates": "Prices are published unit prices",
+    "boq.priced_from_published_rates_hint": "They already contain overhead and profit. Validation warns if a markup adds them again.",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

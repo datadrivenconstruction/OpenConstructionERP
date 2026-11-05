@@ -60050,6 +60050,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Ilagay muna ang dami ng item: hinahati rito ang mga resource para sa buong item.",
     "boq.resource_basis_per_unit_hint": "Ang dami ng mga resource ay bawat 1 {{unit}} ng item na ito: unit rate = kabuuan ng mga resource, kabuuan = dami x unit rate. I-click para ilagay ang mga ito para sa buong item.",
     "boq.resource_basis_per_position_hint": "Ang dami ng mga resource ay para sa buong item ({{quantity}} {{unit}}): unit rate = kabuuan ng resource / dami. I-click para ilagay ang mga ito bawat 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Ang mga presyo ay nai-publish na unit price",
+    "boq.priced_from_published_rates_hint": "Kasama na rito ang overhead at tubo. Magbababala ang validation kapag muli itong idinagdag ng markup.",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Isang tanong ang sinasagot ng cost control: magkano ang aabutin ng proyekto sa huli, at bakit. Binabasa nito ang budget, estimate, mga kontrata, mga pagbabago, nasukat na trabaho at mga invoice na nasa sarili nilang module na, kaya walang tina-type nang dalawang beses.",
     "guide.cost_control.methods.title": "Apat na paraan ng pagbasa sa forecast",

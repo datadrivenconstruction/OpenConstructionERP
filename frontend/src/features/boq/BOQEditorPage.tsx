@@ -5939,6 +5939,8 @@ export function BOQEditorPage() {
             locale={locale}
             fmt={fmt}
             openSignal={markupOpenSignal}
+            pricedFromPublishedRates={boq?.metadata?.priced_from_published_rates === true}
+            readOnly={Boolean(boq?.is_locked)}
           />
         </div>
       )}

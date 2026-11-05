@@ -529,6 +529,10 @@
       "fail": "Zisk a režie zhotovitele jsou uplatněny na {count} řádcích, dohromady {total} procent, nad jednorázových {limit} procent",
       "suggestion": "Těch 25 procent se přičítá jednou. Ponechte jeden řádek a zcela jej odstraňte, jsou-li sazby zveřejněné jednotkové ceny, které je již obsahují"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Výkaz výměr je oceněn zveřejněnými jednotkovými cenami, které již obsahují zisk zhotovitele a režijní náklady, přesto jsou přidány znovu ({percent} procent)",
+      "suggestion": "Odstraňte z výkazu výměr řádek zisku a režií, nebo vypněte nastavení „Ceny jsou zveřejněné jednotkové ceny“, pokud jsou vaše sazby bez nich"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' na položce {ordinal} je měřen v '{unit}', ale nainstalovaný jednotkový ceník jej definuje v '{book_unit}'",
       "suggestion": "Číslo poz je definováno v jedné jednotce. Změřte řádek v jednotce ceníku, nebo odlišnou práci očíslujte jako vlastní položku (ÖZEL-1)",

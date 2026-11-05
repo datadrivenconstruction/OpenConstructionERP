@@ -60092,6 +60092,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Angi postens mengde først: ressurser for hele posten deles på den.",
     "boq.resource_basis_per_unit_hint": "Ressursmengdene gjelder per 1 {{unit}} av denne posten: enhetspris = sum av ressurser, sum = mengde x enhetspris. Klikk for å angi dem for hele posten i stedet.",
     "boq.resource_basis_per_position_hint": "Ressursmengdene gjelder for hele posten ({{quantity}} {{unit}}): enhetspris = ressurser totalt / mengde. Klikk for å angi dem per 1 {{unit}} i stedet.",
+    "boq.priced_from_published_rates": "Prisene er publiserte enhetspriser",
+    "boq.priced_from_published_rates_hint": "De inkluderer allerede generelle kostnader og fortjeneste. Validering advarer hvis et påslag legger dem til igjen.",
     "guide.cost_control.title": "Kostnadsstyring",
     "guide.cost_control.intro": "Kostnadsstyring svarer på ett spørsmål: hva kommer prosjektet til å koste til slutt, og hvorfor. Den leser budsjett, kalkyle, kontrakter, endringer, målt arbeid og fakturaer som allerede ligger i sine egne moduler, så ingenting skrives inn to ganger.",
     "guide.cost_control.methods.title": "Fire måter å lese prognosen på",

@@ -59852,6 +59852,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Hãy nhập khối lượng hạng mục trước: tài nguyên cho toàn bộ hạng mục được chia cho nó.",
     "boq.resource_basis_per_unit_hint": "Số lượng tài nguyên tính trên 1 {{unit}} của hạng mục này: đơn giá = tổng tài nguyên, thành tiền = khối lượng x đơn giá. Nhấp để nhập cho toàn bộ hạng mục.",
     "boq.resource_basis_per_position_hint": "Số lượng tài nguyên tính cho toàn bộ hạng mục ({{quantity}} {{unit}}): đơn giá = tổng tài nguyên / khối lượng. Nhấp để nhập trên 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Giá là đơn giá đã công bố",
+    "boq.priced_from_published_rates_hint": "Đơn giá đã bao gồm chi phí chung và lợi nhuận. Kiểm tra sẽ cảnh báo nếu hệ số cộng thêm lại cộng chúng một lần nữa.",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

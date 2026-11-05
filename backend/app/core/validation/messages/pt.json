@@ -529,6 +529,10 @@
       "fail": "O lucro e as despesas gerais do empreiteiro são aplicados em {count} linhas, {total} por cento no conjunto, acima do {limit} por cento único",
       "suggestion": "Os 25 por cento são acrescentados uma só vez. Mantenha uma linha, e retire-a por completo quando os preços forem preços unitários publicados, que já o incluem"
     },
+    "overheads_not_applied_twice": {
+      "fail": "O orçamento está precificado com preços unitários publicados, que já incluem o lucro do empreiteiro e as despesas gerais, mas eles são adicionados novamente ({percent} por cento)",
+      "suggestion": "Remova deste orçamento a linha de lucro e despesas gerais, ou desative a configuração „Os preços são preços unitários publicados“ se as taxas vierem sem eles"
+    },
     "unit_matches_poz_definition": {
       "fail": "O poz '{code}' do item {ordinal} está medido em '{unit}', mas o livro de preços unitários instalado o define em '{book_unit}'",
       "suggestion": "Um número de poz é definido numa só unidade. Meça a linha na unidade do livro, ou numere o trabalho diferente como item próprio (ÖZEL-1)",

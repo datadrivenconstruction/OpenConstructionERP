@@ -60423,6 +60423,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Introduceți mai întâi cantitatea poziției: resursele pentru întreaga poziție se împart la ea.",
     "boq.resource_basis_per_unit_hint": "Cantitățile de resurse sunt pe 1 {{unit}} din această poziție: preț unitar = suma resurselor, total = cantitate x preț unitar. Faceți clic pentru a le introduce pentru întreaga poziție.",
     "boq.resource_basis_per_position_hint": "Cantitățile de resurse sunt pentru întreaga poziție ({{quantity}} {{unit}}): preț unitar = total resurse / cantitate. Faceți clic pentru a le introduce pe 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Prețurile sunt prețuri unitare publicate",
+    "boq.priced_from_published_rates_hint": "Includ deja cheltuielile generale și profitul. Validarea avertizează dacă un adaos le adaugă din nou.",
     "guide.cost_control.title": "Controlul costurilor",
     "guide.cost_control.intro": "Controlul costurilor răspunde la o singură întrebare: cât va costa proiectul la final și de ce. Citește bugetul, devizul, contractele, modificările, lucrările măsurate și facturile care există deja în modulele lor, așa că nimic nu se introduce de două ori.",
     "guide.cost_control.methods.title": "Patru moduri de a citi prognoza",

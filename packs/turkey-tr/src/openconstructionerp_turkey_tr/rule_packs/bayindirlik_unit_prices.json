@@ -101,6 +101,7 @@
     "birimfiyat.poz_rate_consistent",
     "birimfiyat.own_item_analysed",
     "birimfiyat.profit_overhead_once",
+    "birimfiyat.overheads_not_applied_twice",
     "birimfiyat.unit_matches_poz_definition",
     "birimfiyat.unit_rate_within_published_price"
   ],

@@ -529,6 +529,10 @@
       "fail": "Pudratchining foydasi va umumiy xarajatlari {count} qatorga qo'llangan, jami {total} foiz, yagona {limit} foizdan yuqori",
       "suggestion": "Bu 25 foiz bir marta qo'shiladi. Bitta qatorni qoldiring, narxlar uni o'z ichiga olgan e'lon qilingan birlik narxlar bo'lsa, uni butunlay olib tashlang"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Smeta e'lon qilingan birlik narxlar bo'yicha hisoblangan, ular pudratchi foydasi va umumiy xarajatlarni allaqachon o'z ichiga oladi, shunga qaramay ular qayta qo'shilgan ({percent} foiz)",
+      "suggestion": "Ushbu smetadan foyda va umumiy xarajatlar qatorini olib tashlang yoki stavkalaringiz ularsiz bo'lsa, „Narxlar – e'lon qilingan birlik narxlar“ sozlamasini o'chiring"
+    },
     "unit_matches_poz_definition": {
       "fail": "{ordinal}-pozitsiyadagi '{code}' poz '{unit}' birligida oʻlchangan, lekin oʻrnatilgan birlik narxlari kitobi uni '{book_unit}' birligida belgilaydi",
       "suggestion": "Poz raqami bitta oʻlchov birligida belgilanadi. Qatorni kitobning birligida oʻlchang yoki boshqacha ishni oʻzingizning pozitsiyangiz (ÖZEL-1) sifatida raqamlang",

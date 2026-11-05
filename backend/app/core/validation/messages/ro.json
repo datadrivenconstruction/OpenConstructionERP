@@ -529,6 +529,10 @@
       "fail": "Profitul și cheltuielile generale ale constructorului sunt aplicate pe {count} linii, {total} la sută în total, peste cele {limit} la sută unice",
       "suggestion": "Cele 25 la sută se adaugă o singură dată. Păstrați o linie și eliminați-o complet când tarifele sunt prețuri unitare publicate, care le conțin deja"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Devizul este prețuit cu prețuri unitare publicate, care includ deja profitul antreprenorului și cheltuielile generale, dar sunt adăugate din nou ({percent} la sută)",
+      "suggestion": "Eliminați din deviz rândul pentru profit și cheltuieli generale sau dezactivați setarea „Prețurile sunt prețuri unitare publicate” dacă tarifele sunt fără ele"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' de la poziția {ordinal} este măsurat în '{unit}', dar cartea de prețuri unitare instalată îl definește în '{book_unit}'",
       "suggestion": "Un număr poz este definit într-o singură unitate. Măsurați linia în unitatea cărții sau numerotați lucrarea diferită ca articol propriu (ÖZEL-1)",

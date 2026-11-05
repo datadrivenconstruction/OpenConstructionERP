@@ -529,6 +529,10 @@
       "fail": "Töövõtja kasum ja üldkulud on rakendatud {count} real, kokku {total} protsenti, üle ühekordse {limit} protsendi",
       "suggestion": "25 protsenti lisatakse üks kord. Jäta üks rida ja eemalda see täielikult, kui hinnad on avaldatud ühikuhinnad, mis seda juba sisaldavad"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Ehitusmaht on hinnatud avaldatud ühikhindadega, mis sisaldavad juba töövõtja kasumit ja üldkulusid, ometi lisatakse need uuesti ({percent} protsenti)",
+      "suggestion": "Eemaldage sellest kogusearvest kasumi ja üldkulude rida või lülitage seade „Hinnad on avaldatud ühikhinnad“ välja, kui teie hinnad on nende arvestuseta"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' real {ordinal} on mõõdetud ühikus '{unit}', kuid paigaldatud ühikuhinnaraamat määratleb selle ühikus '{book_unit}'",
       "suggestion": "Poz-number on määratletud ühes ühikus. Mõõtke rida raamatu ühikus või nummerdage erinev töö oma kirjena (ÖZEL-1)",

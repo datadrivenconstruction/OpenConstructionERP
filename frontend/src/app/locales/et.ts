@@ -60042,6 +60042,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Sisestage kõigepealt positsiooni kogus: kogu positsiooni ressursid jagatakse sellega.",
     "boq.resource_basis_per_unit_hint": "Ressursside kogused on selle positsiooni 1 {{unit}} kohta: ühikuhind = ressursside summa, kokku = kogus x ühikuhind. Klõpsake, et sisestada need kogu positsiooni kohta.",
     "boq.resource_basis_per_position_hint": "Ressursside kogused on kogu positsiooni kohta ({{quantity}} {{unit}}): ühikuhind = ressursid kokku / kogus. Klõpsake, et sisestada need 1 {{unit}} kohta.",
+    "boq.priced_from_published_rates": "Hinnad on avaldatud ühikhinnad",
+    "boq.priced_from_published_rates_hint": "Need sisaldavad juba üldkulusid ja kasumit. Valideerimine hoiatab, kui lisand need uuesti lisab.",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

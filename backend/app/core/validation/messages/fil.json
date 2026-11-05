@@ -529,6 +529,10 @@
       "fail": "Ang tubo at pangkalahatang gastos ng kontratista ay inilapat sa {count} linya, {total} porsyento sa kabuuan, higit sa iisang {limit} porsyento",
       "suggestion": "Ang 25 porsyento ay idinadagdag nang isang beses. Magtira ng isang linya, at alisin ito nang buo kapag ang mga rate ay nailathalang presyo kada yunit na naglalaman na nito"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Ang BOQ ay pinresyuhan gamit ang mga nai-publish na unit price na kasama na ang tubo ng kontratista at pangkalahatang gastos, pero muli pa rin itong idinagdag ({percent} porsyento)",
+      "suggestion": "Alisin ang linya ng tubo at pangkalahatang gastos sa BOQ na ito, o i-off ang setting na „Ang mga presyo ay nai-publish na unit price“ kung walang kasama ang iyong rate"
+    },
     "unit_matches_poz_definition": {
       "fail": "Ang poz '{code}' sa posisyong {ordinal} ay sinukat sa '{unit}', pero ang naka-install na unit-price book ay nagtatakda nito sa '{book_unit}'",
       "suggestion": "Isang unit lang ang itinatakda sa isang poz number. Sukatin ang linya sa unit ng book, o bigyan ng sariling numero ang naiibang gawain bilang sarili mong item (ÖZEL-1)",

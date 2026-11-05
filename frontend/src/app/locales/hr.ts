@@ -60433,6 +60433,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Najprije unesite količinu stavke: resursi za cijelu stavku dijele se njome.",
     "boq.resource_basis_per_unit_hint": "Količine resursa su po 1 {{unit}} ove stavke: jedinična cijena = zbroj resursa, ukupno = količina x jedinična cijena. Kliknite za unos za cijelu stavku.",
     "boq.resource_basis_per_position_hint": "Količine resursa su za cijelu stavku ({{quantity}} {{unit}}): jedinična cijena = ukupno resursi / količina. Kliknite za unos po 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Cijene su objavljene jedinične cijene",
+    "boq.priced_from_published_rates_hint": "Već sadrže režije i dobit. Validacija upozorava ako ih marža ponovno doda.",
     "guide.cost_control.title": "Kontrola troškova",
     "guide.cost_control.intro": "Kontrola troškova odgovara na jedno pitanje: koliko će projekt na kraju koštati i zašto. Čita proračun, troškovnik, ugovore, izmjene, izmjerene radove i račune koji već postoje u svojim modulima, pa se ništa ne unosi dvaput.",
     "guide.cost_control.methods.title": "Četiri načina čitanja prognoze",

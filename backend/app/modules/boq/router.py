@@ -4154,6 +4154,12 @@ async def validate_boq(
     from app.modules.boq.markup_rule_inputs import markup_amounts_for_rules
 
     markup_context = await markup_amounts_for_rules(service, boq_id, markups_data)
+    # The estimator's statement that the rates are published list prices, which
+    # already contain overhead and profit (bill setting, or the project's).
+    markup_context["priced_from_published_rates"] = any(
+        isinstance(meta, dict) and meta.get("priced_from_published_rates") is True
+        for meta in (getattr(boq_data, "metadata", None), getattr(project, "metadata_", None))
+    )
     from app.modules.boq.embedding import embed_enabled
 
     # The sale-rate export's rounding gap, for boq.export.embedding_rounding_gap.

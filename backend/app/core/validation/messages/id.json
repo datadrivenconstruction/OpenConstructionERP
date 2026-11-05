@@ -529,6 +529,10 @@
       "fail": "Keuntungan dan biaya umum kontraktor diterapkan pada {count} baris, total {total} persen, melebihi satu kali {limit} persen",
       "suggestion": "Angka 25 persen ditambahkan sekali. Pertahankan satu baris, dan hapus seluruhnya bila harganya adalah harga satuan terbit yang sudah memuatnya"
     },
+    "overheads_not_applied_twice": {
+      "fail": "BoQ ini dihargai dengan harga satuan yang dipublikasikan, yang sudah mencakup laba kontraktor dan biaya umum, namun tetap ditambahkan lagi ({percent} persen)",
+      "suggestion": "Hapus baris laba dan biaya umum dari BoQ ini, atau nonaktifkan pengaturan „Harga adalah harga satuan yang dipublikasikan“ jika tarif Anda tidak termasuk keduanya"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' pada item {ordinal} diukur dalam '{unit}', tetapi buku harga satuan yang terpasang mendefinisikannya dalam '{book_unit}'",
       "suggestion": "Satu nomor poz didefinisikan dalam satu satuan. Ukur baris dalam satuan buku, atau beri nomor tersendiri pada pekerjaan yang berbeda sebagai item Anda sendiri (ÖZEL-1)",

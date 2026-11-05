@@ -62999,6 +62999,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Introduza primeiro a quantidade da posição: os recursos para toda a posição são divididos por ela.",
     "boq.resource_basis_per_unit_hint": "As quantidades de recursos são por 1 {{unit}} desta posição: preço unitário = soma dos recursos, total = quantidade x preço unitário. Clique para introduzi-las para toda a posição.",
     "boq.resource_basis_per_position_hint": "As quantidades de recursos são para toda a posição ({{quantity}} {{unit}}): preço unitário = total dos recursos / quantidade. Clique para introduzi-las por 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Os preços são preços unitários publicados",
+    "boq.priced_from_published_rates_hint": "Já incluem despesas gerais e lucro. A validação avisa se uma margem os adiciona novamente.",
     "guide.cost_control.title": "Controlo de custos",
     "guide.cost_control.intro": "O controlo de custos responde a uma pergunta: quanto vai custar o projeto no fim e porquê. Lê o orçamento, a estimativa, os contratos, as alterações, o trabalho medido e as faturas que já vivem nos seus módulos, por isso nada é escrito duas vezes.",
     "guide.cost_control.methods.title": "Quatro formas de ler a previsão",

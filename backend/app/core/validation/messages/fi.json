@@ -529,6 +529,10 @@
       "fail": "Urakoitsijan voitto ja yleiskustannukset on lisätty {count} riville, yhteensä {total} prosenttia, yli yksittäisen {limit} prosentin",
       "suggestion": "25 prosenttia lisätään vain kerran. Jätä yksi rivi ja poista se kokonaan, kun hinnat ovat julkaistuja yksikköhintoja, jotka sisältävät sen jo"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Urakkaluettelo on hinnoiteltu julkaistuilla yksikköhinnoilla, jotka sisältävät jo urakoitsijan voiton ja yleiskulut, mutta ne lisätään silti uudelleen ({percent} prosenttia)",
+      "suggestion": "Poista voiton ja yleiskulujen rivi tästä urakkaluettelosta tai poista asetus „Hinnat ovat julkaistuja yksikköhintoja“ käytöstä, jos hintasi ovat ilman niitä"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' nimikkeellä {ordinal} on mitattu yksiköllä '{unit}', mutta asennettu yksikköhintakirja määrittelee sen yksiköllä '{book_unit}'",
       "suggestion": "Poz-numero määritellään yhdellä yksiköllä. Mittaa rivi kirjan yksiköllä tai numeroi poikkeava työ omaksi nimikkeeksi (ÖZEL-1)",

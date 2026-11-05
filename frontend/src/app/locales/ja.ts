@@ -61376,6 +61376,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "先に項目の数量を入力してください。項目全体の資源はこの数量で割られます。",
     "boq.resource_basis_per_unit_hint": "資源数量はこの項目の 1 {{unit}} あたりです。単価 = 資源の合計、合計 = 数量 x 単価。クリックすると項目全体の数量で入力できます。",
     "boq.resource_basis_per_position_hint": "資源数量は項目全体（{{quantity}} {{unit}}）の分です。単価 = 資源合計 / 数量。クリックすると 1 {{unit}} あたりで入力できます。",
+    "boq.priced_from_published_rates": "価格は公表単価です",
+    "boq.priced_from_published_rates_hint": "公表単価には既に諸経費と利益が含まれています。マークアップで再度加算すると検証で警告されます。",
     "guide.cost_control.title": "原価管理",
     "guide.cost_control.intro": "原価管理が答えるのは一つの問いです。最終的にプロジェクトはいくらかかるのか、そしてなぜか。予算、見積、契約、変更、実測した出来高、請求書は、それぞれのモジュールにすでにあるものを読み込むので、二重に入力する必要はありません。",
     "guide.cost_control.methods.title": "予測の見方は4通り",

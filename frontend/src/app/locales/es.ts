@@ -63011,6 +63011,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Introduzca primero la cantidad de la partida: los recursos para toda la partida se dividen entre ella.",
     "boq.resource_basis_per_unit_hint": "Las cantidades de recursos son por 1 {{unit}} de esta partida: precio unitario = suma de recursos, total = cantidad x precio unitario. Haga clic para introducirlas para toda la partida.",
     "boq.resource_basis_per_position_hint": "Las cantidades de recursos son para toda la partida ({{quantity}} {{unit}}): precio unitario = total de recursos / cantidad. Haga clic para introducirlas por 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Los precios son precios unitarios publicados",
+    "boq.priced_from_published_rates_hint": "Ya incluyen gastos generales y beneficio. La validación avisa si un recargo los vuelve a añadir.",
     "guide.cost_control.title": "Control de costes",
     "guide.cost_control.intro": "El control de costes responde a una pregunta: cuánto costará el proyecto al final y por qué. Lee el presupuesto, la estimación, los contratos, los cambios, la obra medida y las facturas que ya viven en sus propios módulos, así que nada se escribe dos veces.",
     "guide.cost_control.methods.title": "Cuatro formas de leer la previsión",

@@ -61369,6 +61369,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Nejprve zadejte množství položky: zdroje na celou položku se jím dělí.",
     "boq.resource_basis_per_unit_hint": "Množství zdrojů jsou na 1 {{unit}} této položky: jednotková cena = součet zdrojů, celkem = množství x jednotková cena. Klikněte pro zadání na celou položku.",
     "boq.resource_basis_per_position_hint": "Množství zdrojů jsou na celou položku ({{quantity}} {{unit}}): jednotková cena = součet zdrojů / množství. Klikněte pro zadání na 1 {{unit}}.",
+    "boq.priced_from_published_rates": "Ceny jsou zveřejněné jednotkové ceny",
+    "boq.priced_from_published_rates_hint": "Už obsahují režie a zisk. Validace upozorní, pokud je přirážka přidá znovu.",
     "guide.cost_control.title": "Řízení nákladů",
     "guide.cost_control.intro": "Řízení nákladů odpovídá na jednu otázku: kolik bude projekt nakonec stát a proč. Čte rozpočet, odhad, smlouvy, změny, naměřené práce a faktury, které už jsou ve svých modulech, takže se nic nezadává dvakrát.",
     "guide.cost_control.methods.title": "Čtyři způsoby, jak číst prognózu",

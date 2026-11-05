@@ -62735,6 +62735,8 @@ const resource = {
     "boq.resource_basis_needs_quantity": "Geben Sie zuerst die Positionsmenge ein: Ressourcen für die gesamte Position werden durch sie geteilt.",
     "boq.resource_basis_per_unit_hint": "Ressourcenmengen gelten je 1 {{unit}} dieser Position: Einheitspreis = Summe der Ressourcen, Gesamt = Menge x Einheitspreis. Klicken, um sie stattdessen für die gesamte Position einzugeben.",
     "boq.resource_basis_per_position_hint": "Ressourcenmengen gelten für die gesamte Position ({{quantity}} {{unit}}): Einheitspreis = Ressourcensumme / Menge. Klicken, um sie stattdessen je 1 {{unit}} einzugeben.",
+    "boq.priced_from_published_rates": "Preise sind veröffentlichte Einheitspreise",
+    "boq.priced_from_published_rates_hint": "Sie enthalten bereits Gemeinkosten und Gewinn. Die Validierung warnt, wenn ein Aufschlag beides erneut hinzufügt.",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",
