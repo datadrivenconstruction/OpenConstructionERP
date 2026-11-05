@@ -833,6 +833,9 @@ class VectorLayer:
     words: list[tuple[float, float, float, float, str]] = field(default_factory=list)
     #: Outlines of dark filled paths (solid wall fills, columns), as closed rings.
     fills: list[list[Point]] = field(default_factory=list)
+    #: Every filled ring in painting order, ``(dark, ring)``: a light ring painted
+    #: over a dark one (a white room mask over a solid wall slab) clears it.
+    fill_ops: list[tuple[bool, list[Point]]] = field(default_factory=list)
     #: Derived structures (wall index, raster) built once per page.
     cache: dict[str, Any] = field(default_factory=dict, repr=False, compare=False)
 
@@ -872,11 +875,18 @@ def vector_layer_from_drawings(
                 ink.append((x1 + (x2 - x1) * t, y1 + (y2 - y1) * t))
 
     fills: list[list[Point]] = []
+    fill_ops: list[tuple[bool, list[Point]]] = []
+    dark_boxes: list[tuple[float, float, float, float]] = []
     for path in drawings:
         fill = path.get("fill")
         stroke_w = float(path.get("width") or 0.0) if path.get("color") is not None else 0.0
         filled = fill is not None and _is_dark(fill)
-        weight = max(stroke_w, _FILLED_EDGE_WEIGHT if filled else 0.0, 0.05)
+        light = fill is not None and not filled
+        # A light fill painted over a dark slab cuts the room out of it: its
+        # outline is the wall's inner face, though no stroke draws it.
+        masks_wall = light and _box_inside_any(_path_box(path), dark_boxes)
+        weight = max(stroke_w, _FILLED_EDGE_WEIGHT if filled or masks_wall else 0.0, 0.05)
+        rings: list[list[Point]] = []
         ring: list[Point] = []
         for item in path.get("items") or ():
             op = item[0]
@@ -884,8 +894,8 @@ def vector_layer_from_drawings(
                 add(item[1], item[2], weight)
                 start = (float(item[1][0]), float(item[1][1]))
                 if ring and math.dist(ring[-1], start) > 1e-3:
-                    if filled and len(ring) >= 3:
-                        fills.append(ring)
+                    if len(ring) >= 3:
+                        rings.append(ring)
                     ring = []
                 if not ring:
                     ring.append(start)
@@ -904,18 +914,49 @@ def vector_layer_from_drawings(
                 continue
             for i in range(4):
                 add(corners[i], corners[(i + 1) % 4], weight)
+            rings.append([(float(c[0]), float(c[1])) for c in corners])
+        if len(ring) >= 3:
+            rings.append(ring)
+        if filled or light:
+            for rg in rings:
+                fill_ops.append((filled, rg))
             if filled:
-                fills.append([(float(c[0]), float(c[1])) for c in corners])
-        if filled and len(ring) >= 3:
-            fills.append(ring)
+                fills.extend(rings)
+                dark_boxes.extend(_bbox(rg) for rg in rings)
     return VectorLayer(
         page_width_pt=page_width_pt,
         page_height_pt=page_height_pt,
         segments=segments,
         ink=ink,
         fills=fills,
+        fill_ops=fill_ops,
         words=[(float(w[0]), float(w[1]), float(w[2]), float(w[3]), str(w[4])) for w in words],
     )
+
+
+def _path_box(path: dict[str, Any]) -> tuple[float, float, float, float] | None:
+    pts: list[tuple[float, float]] = []
+    for item in path.get("items") or ():
+        if item[0] == "l":
+            pts += [(float(item[1][0]), float(item[1][1])), (float(item[2][0]), float(item[2][1]))]
+        elif item[0] == "re":
+            r = item[1]
+            pts += [(float(r[0]), float(r[1])), (float(r[2]), float(r[3]))]
+        elif item[0] == "qu":
+            pts += [(float(q[0]), float(q[1])) for q in item[1]]
+    if not pts:
+        return None
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _box_inside_any(
+    box: tuple[float, float, float, float] | None, boxes: list[tuple[float, float, float, float]]
+) -> bool:
+    if box is None:
+        return False
+    e = 0.5
+    return any(b[0] - e <= box[0] and b[1] - e <= box[1] and box[2] <= b[2] + e and box[3] <= b[3] + e for b in boxes)
 
 
 def _is_dark(color: Any) -> bool:
@@ -1475,18 +1516,27 @@ class WallRaster:
     """
 
     def __init__(
-        self, walls: _WallIndex, width_pt: float, height_pt: float, fills: list[list[Point]] | None = None
+        self,
+        walls: _WallIndex,
+        width_pt: float,
+        height_pt: float,
+        fills: list[list[Point]] | None = None,
+        fill_ops: list[tuple[bool, list[Point]]] | None = None,
     ) -> None:
         import cv2  # noqa: PLC0415 - base dependency, heavy import kept off module load
         import numpy as np  # noqa: PLC0415
 
         self.cell = max(width_pt, height_pt) / RASTER_CELLS
         self.grid = np.zeros((int(height_pt / self.cell) + 3, int(width_pt / self.cell) + 3), np.uint8)
+        # Fills in painting order (a light mask clears the slab under it), then strokes on top.
+        if fill_ops:
+            for dark, ring in fill_ops:
+                cv2.fillPoly(self.grid, [np.round(np.asarray(ring) / self.cell).astype(np.int32)], 1 if dark else 0)
+        elif fills:
+            cv2.fillPoly(self.grid, [np.round(np.asarray(f) / self.cell).astype(np.int32) for f in fills], 1)
         if walls.count:
             ends = np.round(walls.arr[:, :4] / self.cell).astype(np.int32).reshape(-1, 2, 2)
             cv2.polylines(self.grid, list(ends), False, 1, 1, cv2.LINE_8)
-        if fills:
-            cv2.fillPoly(self.grid, [np.round(np.asarray(f) / self.cell).astype(np.int32) for f in fills], 1)
         self._network: Any = None
         # Main wall direction (radians, mod pi/2): plans are mostly orthogonal.
         self.axis: float | None = None
@@ -2003,6 +2053,10 @@ class RefinedRoom:
     wall_support: float | None = None
     snapped: bool = False
     area_label_m2: float | None = None
+    #: The cleaned model ring before snapping, kept to undo an unconfirmed snap.
+    raw_points: list[Point] = field(default_factory=list, repr=False)
+    #: An area label printed inside the ring agrees with its area.
+    corroborated: bool = False
 
 
 @dataclass
@@ -2094,7 +2148,7 @@ def refine_plan_read(
     if has_walls:
         if "walls" not in vector.cache:  # type: ignore[union-attr]
             vector.cache["walls"] = w = _wall_index(vector)  # type: ignore[union-attr]
-            vector.cache["raster"] = WallRaster(w, page_width_pt, page_height_pt, vector.fills)  # type: ignore[union-attr]
+            vector.cache["raster"] = WallRaster(w, page_width_pt, page_height_pt, vector.fills, vector.fill_ops)  # type: ignore[union-attr]
         walls, raster = vector.cache["walls"], vector.cache["raster"]  # type: ignore[union-attr]
     elif vector is not None and "image_raster" in vector.cache:
         # A scanned sheet: no drawn lines, but its dark pixels still bound rooms.
@@ -2143,6 +2197,7 @@ def refine_plan_read(
             continue
         support: float | None = None
         snapped = False
+        raw_pts = pts
         if walls is not None:
             snap = snap_ring_to_walls(pts, walls, tol=tol, max_wall=max_wall, min_wall=min_wall, raster=raster)
             support = snap.support
@@ -2163,16 +2218,21 @@ def refine_plan_read(
                 flags=flags,
                 wall_support=support,
                 snapped=snapped,
+                raw_points=raw_pts,
             )
         )
 
     rooms = _drop_duplicate_rooms(rooms, dropped)
-    _flag_overlaps_and_isolation(rooms, gap=3 * max_wall + tol, raster=raster)
+    scanned = walls is not None and walls.count == 0
     if vector is not None and vector.words:
         _read_area_labels(rooms, vector)
+    _confirm_snaps(rooms, ratio, _dimension_values(vector) if vector is not None else [])
+    _flag_overlaps_and_isolation(rooms, gap=3 * max_wall + tol, raster=None if scanned else raster)
+    if vector is not None and vector.words:
+        _flag_unlabelled(rooms, vector)
     for r in rooms:
         if r.verdict != "error":
-            r.confidence = _room_confidence(r, scale, ratio, scanned=walls is not None and walls.count == 0)
+            r.confidence = _room_confidence(r, scale, ratio, scanned=scanned)
             if r.flags and r.verdict == "ok":
                 r.verdict = "warning"
 
@@ -2215,18 +2275,24 @@ def _bbox_area(pts: list[Point]) -> float:
 
 
 def _flag_overlaps_and_isolation(rooms: list[RefinedRoom], *, gap: float, raster: WallRaster | None = None) -> None:
-    """Flag rings that swallow another ring and rings apart from the building.
-
-    Returns the id of the building's wall network when the page has one.
-    """
+    """Flag the weaker ring of a nested pair and rings apart from every plan."""
+    inside: dict[int, list[int]] = {}
     for i, r in enumerate(rooms):
         for j, o in enumerate(rooms):
             if i == j or shoelace_area(r.points) > shoelace_area(o.points):
                 continue
-            # The larger ring swallowed a room another ring traces on its own:
-            # two rooms read as one, or a trace over the wrong walls.
-            if polygon_containment(r.points, o.points) >= _CONTAINED_SHARE and "room:overlaps" not in o.flags:
-                o.flags.append("room:overlaps")
+            if polygon_containment(r.points, o.points) >= _CONTAINED_SHARE:
+                inside.setdefault(j, []).append(i)
+    for j, nested in inside.items():
+        # A ring around two or more rooms reads them as one. Around a single
+        # one, the ring with less page evidence is the suspect, the inner one on a tie.
+        if len(nested) >= 2:
+            suspect = rooms[j]
+        else:
+            outer, inner = rooms[j], rooms[nested[0]]
+            suspect = outer if _evidence(outer) < _evidence(inner) else inner
+        if "room:overlaps" not in suspect.flags:
+            suspect.flags.append("room:overlaps")
     if raster is not None:
         nets = [raster.network_of(r.points) for r in rooms]
         frames = raster.frame_networks()
@@ -2255,16 +2321,28 @@ def _flag_overlaps_and_isolation(rooms: list[RefinedRoom], *, gap: float, raster
     groups: dict[int, int] = {}
     for i in range(len(rooms)):
         groups[find(i)] = groups.get(find(i), 0) + 1
-    main = max(groups, key=lambda g: groups[g])
+    # A sheet may hold several plans (floors side by side): only a ring alone,
+    # apart from every cluster of rooms, is isolated.
     for i, r in enumerate(rooms):
-        if find(i) != main and "room:isolated" not in r.flags:
+        if groups[find(i)] == 1 and "room:isolated" not in r.flags:
             r.flags.append("room:isolated")
 
 
+def _evidence(r: RefinedRoom) -> float:
+    label_off = r.area_label_m2 is not None and not r.corroborated
+    return 2.0 * r.corroborated - 1.0 * label_off + (r.wall_support or 0.0)
+
+
 def _read_area_labels(rooms: list[RefinedRoom], vector: VectorLayer) -> None:
-    lines = _label_lines(vector)
-    for r in rooms:
-        labels = [(t, _area_label(t)) for cx, cy, t in lines if point_in_polygon(cx, cy, r.points)]
+    """Give each text line to the smallest ring that holds it (a nested ring wins)."""
+    owned: dict[int, list[tuple[str, float | None]]] = {}
+    areas = [shoelace_area(r.points) for r in rooms]
+    for cx, cy, t in _label_lines(vector):
+        holders = [i for i, r in enumerate(rooms) if r.verdict != "error" and point_in_polygon(cx, cy, r.points)]
+        if holders:
+            owned.setdefault(min(holders, key=lambda i: areas[i]), []).append((t, _area_label(t)))
+    for i, labels in owned.items():
+        r = rooms[i]
         values = [v for _t, v in labels if v is not None]
         if len(values) == 1:
             r.area_label_m2 = values[0]
@@ -2274,13 +2352,84 @@ def _read_area_labels(rooms: list[RefinedRoom], vector: VectorLayer) -> None:
                 r.name = names[0][:200]
 
 
-def _room_confidence(r: RefinedRoom, scale: ScaleDecision, ratio: float | None, *, scanned: bool = False) -> float:
-    """Confidence from what the page confirmed; the model's own score barely counts.
+#: An area label within this share of the ring's area confirms the ring.
+LABEL_AGREE = 0.015
+#: A snap may move the area this much without a label or dimension confirming it.
+SNAP_MAX_SHIFT = 0.04
 
-    Calibrated on the training split of the plan benchmark: a ring snapped onto
-    drawn walls with a fifth or more of its perimeter on them is right almost
-    always; a ring snapped onto a scan's dark pixels is right about a third of
-    the time; an unsnapped ring is not verified at all.
+
+def _dimension_values(vector: VectorLayer) -> list[float]:
+    if "dims" not in vector.cache:
+        vals = sorted({v for w in vector.words for v in length_text_options(w[4]) if 0.5 <= v <= 100})
+        vector.cache["dims"] = vals
+    return vector.cache["dims"]
+
+
+def _label_agrees(points: list[Point], label: float | None, ratio: float | None) -> bool:
+    return bool(label and ratio) and abs(shoelace_area(points) / (ratio * ratio) - label) / label <= LABEL_AGREE
+
+
+def _dimensioned_sides(points: list[Point], ratio: float, dims: list[float]) -> int:
+    """How many of horizontal / vertical edge directions carry a printed length (0-2)."""
+    found = set()
+    n = len(points)
+    for i in range(n):
+        (x0, y0), (x1, y1) = points[i], points[(i + 1) % n]
+        length = math.hypot(x1 - x0, y1 - y0) / ratio
+        if length >= 0.8 and any(abs(length - d) <= 0.005 * d for d in dims):
+            found.add(abs(x1 - x0) >= abs(y1 - y0))
+    return len(found)
+
+
+def _confirm_snaps(rooms: list[RefinedRoom], ratio: float | None, dims: list[float]) -> None:
+    """Undo a snap that moved the area a lot when nothing on the sheet confirms it.
+
+    Snapping trusts the drawing over the model; when the two disagree by more
+    than :data:`SNAP_MAX_SHIFT` only an area label, or dimensions that fit the
+    snapped ring and not the model's, can say which is right; without them the
+    model's ring is kept and flagged for a human to check.
+    """
+    for r in rooms:
+        if r.verdict == "error":
+            continue
+        r.corroborated = _label_agrees(r.points, r.area_label_m2, ratio)
+        if not r.snapped or not r.raw_points or r.corroborated:
+            continue
+        a_raw, a_snap = shoelace_area(r.raw_points), shoelace_area(r.points)
+        if a_raw <= 0 or abs(a_snap - a_raw) / a_raw <= SNAP_MAX_SHIFT:
+            continue
+        # Dimensions back the snap only when they fit the snapped ring and not the model's.
+        if (
+            ratio
+            and dims
+            and _dimensioned_sides(r.points, ratio, dims) == 2 > _dimensioned_sides(r.raw_points, ratio, dims)
+        ):
+            continue
+        r.points, r.snapped = r.raw_points, False
+        r.flags.append("room:snap_unconfirmed")
+        r.corroborated = _label_agrees(r.points, r.area_label_m2, ratio)
+
+
+def _flag_unlabelled(rooms: list[RefinedRoom], vector: VectorLayer) -> None:
+    """On a sheet whose rooms carry names, a ring with no text inside is suspect."""
+    lines = _label_lines(vector)
+    live = [r for r in rooms if r.verdict != "error"]
+    has_text = [any(point_in_polygon(cx, cy, r.points) for cx, cy, _t in lines) for r in live]
+    if len(live) < 3 or sum(has_text) < 0.6 * len(live):
+        return
+    for r, ok in zip(live, has_text, strict=True):
+        if not ok:
+            r.flags.append("room:no_text")
+
+
+def _room_confidence(r: RefinedRoom, scale: ScaleDecision, ratio: float | None, *, scanned: bool = False) -> float:
+    """Confidence from what the page confirmed, never above the model's own score
+    unless an area label printed in the ring agrees with its area.
+
+    Wall evidence (calibrated on the generator's training split) caps it: a
+    ring snapped onto drawn walls with a fifth or more of its perimeter on them
+    is usually right, one snapped onto a scan's dark pixels about a third of the
+    time. A label that disagrees lowers it continuously with the mismatch.
     """
     if r.wall_support is None:
         geom = min(r.model_confidence, UNVERIFIED_ROOM_MAX_CONFIDENCE)
@@ -2290,14 +2439,22 @@ def _room_confidence(r: RefinedRoom, scale: ScaleDecision, ratio: float | None, 
         geom = 0.3 + 0.2 * min(1.0, r.wall_support)
     else:
         geom = 0.6 + 0.37 * min(1.0, max(0.0, r.wall_support - MIN_WALL_SUPPORT) / 0.3)
-    if r.area_label_m2 and ratio:
+    if r.corroborated:
+        geom = max(geom, 0.95)
+    else:
+        # Nothing printed on the sheet confirms the ring: never surer than the model.
+        geom = min(geom, r.model_confidence)
+    if r.area_label_m2 and ratio and not r.corroborated:
         area = shoelace_area(r.points) / (ratio * ratio)
         rel = abs(area - r.area_label_m2) / r.area_label_m2
-        if rel <= 0.025:
-            geom = max(geom, 0.95)
-        elif rel > 0.08:
+        if rel > 2 * LABEL_AGREE:
             r.flags.append("room:area_label_mismatch")
-            geom = min(geom, 0.45)
+        geom = min(geom, max(0.05, 0.6 * (1.0 - rel / 0.1)))
+    if "room:no_text" in r.flags:
+        geom = min(geom, 0.5)
+    if "room:snap_unconfirmed" in r.flags:
+        # Ring and drawing disagree by over SNAP_MAX_SHIFT: such a ring is right 3% of the time on train.
+        geom = min(geom, 0.12)
     if "room:overlaps" in r.flags:
         geom = min(geom, 0.5)
     if "room:crosses_wall" in r.flags:
