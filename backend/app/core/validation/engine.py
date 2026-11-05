@@ -511,12 +511,19 @@ class ValidationEngine:
         # then printed "Duration: 0.0ms" as though the run had been measured.
         start = time.perf_counter()
 
+        # Rules read metadata["locale"]; a caller that did not pass one gets the request language,
+        # so rule messages reach the UI in the reader's locale instead of English.
+        from app.core.i18n import get_locale
+
+        meta = dict(metadata or {})
+        if not meta.get("locale"):
+            meta["locale"] = get_locale() or "en"
         context = ValidationContext(
             data=data,
             project_id=project_id,
             region=region,
             standard=standard,
-            metadata=metadata or {},
+            metadata=meta,
         )
 
         _supported, unsupported = self.registry.resolve_rule_sets(rule_sets)
