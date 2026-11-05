@@ -85,6 +85,8 @@ class SupervisionVisitResponse(BaseModel):
     """Visit returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -146,6 +148,8 @@ class SupervisionEntryResponse(BaseModel):
     """Entry returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     visit_id: UUID

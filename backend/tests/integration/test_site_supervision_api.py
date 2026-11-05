@@ -262,7 +262,13 @@ async def test_hidden_works_register(http_client, two_tenants):
     vid = visit["id"]
     await http_client.post(
         "/api/v1/site-supervision/entries/",
-        json={"visit_id": vid, "category": "hidden_works", "observation": "Rebar", "status": "closed"},
+        json={
+            "visit_id": vid,
+            "category": "hidden_works",
+            "observation": "Rebar",
+            "status": "closed",
+            "structured_fields": {"element": "Slab S1", "location": "Level 2"},
+        },
         headers=a["headers"],
     )
     await http_client.post(
