@@ -46542,6 +46542,7 @@ const resource = {
     "validation.light_passed": "کامیاب",
     "validation.light_warning": "انتباہات",
     "validation.no_results": "ابھی جانچنے کو کچھ نہیں۔ ڈیٹا آتے ہی قواعد چلنے لگتے ہیں۔",
+    "validation.saved_with_warnings": "انتباہات کے ساتھ محفوظ ہو گیا",
     "cost_match.tier_exact": "بالکل درست",
     "cost_match.tier_high_confidence": "پراعتماد",
     "cost_match.tier_needs_review": "نظرثانی درکار",

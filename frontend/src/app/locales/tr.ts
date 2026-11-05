@@ -46472,6 +46472,7 @@ const resource = {
   "validation.light_passed": "Geçti",
   "validation.light_warning": "Uyarılar",
   "validation.no_results": "Henüz kontrol edilecek bir şey yok. Kurallar veri gelir gelmez çalışır.",
+  "validation.saved_with_warnings": "Uyarılarla kaydedildi",
     "modules.tab_profiles": "Şirket Profilleri",
     "modules.tab_packs": "Paketler",
     "modules.tab_data_packages": "Veri Paketleri",

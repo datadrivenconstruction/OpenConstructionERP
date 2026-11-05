@@ -44700,6 +44700,7 @@ const resource = {
   "validation.light_passed": "Aprovado",
   "validation.light_warning": "Avisos",
   "validation.no_results": "Ainda não há nada para verificar. As regras rodam assim que houver dados.",
+  "validation.saved_with_warnings": "Salvo com avisos",
     "modules.tab_profiles": "Perfis da empresa",
     "modules.tab_packs": "Pacotes",
     "modules.tab_data_packages": "Pacotes de dados",

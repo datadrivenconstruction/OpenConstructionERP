@@ -1299,6 +1299,7 @@ const resource = {
     "takeoff_compare.carry_recheck": "Re-check with my pages",
     "takeoff_compare.carry_accept_high": "Carry high confidence only",
     "takeoff_compare.carry_accept_matched": "Carry matched, review each",
+    "validation.saved_with_warnings": "Saved with warnings",
   }
 } as { translation: Record<string, string> };
 

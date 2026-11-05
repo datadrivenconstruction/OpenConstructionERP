@@ -46435,6 +46435,7 @@ const resource = {
     "validation.light_passed": "Pasado",
     "validation.light_warning": "Mga babala",
     "validation.no_results": "Wala pang susuriin. Tatakbo ang mga panuntunan sa sandaling may data.",
+    "validation.saved_with_warnings": "Na-save na may mga babala",
     "cost_match.action_close": "Isara ang review",
     "cost_match.action_confirm": "Kumpirmahin",
     "cost_match.action_override": "Presyuhan laban sa iba",

@@ -46058,6 +46058,7 @@ const resource = {
   "validation.light_passed": "Geslaagd",
   "validation.light_warning": "Waarschuwingen",
   "validation.no_results": "Nog niets te controleren. Regels draaien zodra er gegevens zijn.",
+  "validation.saved_with_warnings": "Opgeslagen met waarschuwingen",
     "modules.tab_profiles": "Bedrijfsprofielen",
     "modules.tab_packs": "Pakketten",
     "modules.tab_data_packages": "Gegevenspakketten",

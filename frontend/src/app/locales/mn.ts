@@ -47264,6 +47264,7 @@ const resource = {
     "validation.light_passed": "Тэнцсэн",
     "validation.light_warning": "Анхааруулга",
     "validation.no_results": "Шалгах зүйл хараахан алга. Өгөгдөл ирмэгц дүрмүүд ажиллана.",
+    "validation.saved_with_warnings": "Анхааруулгатай хадгалагдлаа",
     "boq.price_analysis_currency": "Валют",
     "boq.price_analysis_col_resource": "Нөөц",
     "boq.price_analysis_col_unit_cost": "Нэгжийн үнэ",

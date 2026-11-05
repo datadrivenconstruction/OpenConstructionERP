@@ -46972,6 +46972,7 @@ const resource = {
   "validation.light_passed": "Zaliczone",
   "validation.light_warning": "Ostrzeżenia",
   "validation.no_results": "Na razie nie ma czego sprawdzać. Reguły ruszą, gdy pojawią się dane.",
+  "validation.saved_with_warnings": "Zapisano z ostrzeżeniami",
     "modules.tab_profiles": "Profile firmy",
     "modules.tab_packs": "Pakiety",
     "modules.tab_data_packages": "Pakiety danych",

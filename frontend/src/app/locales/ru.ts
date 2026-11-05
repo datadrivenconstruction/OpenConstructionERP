@@ -46533,6 +46533,7 @@ const resource = {
   "validation.light_passed": "Пройдено",
   "validation.light_warning": "Предупреждения",
   "validation.no_results": "Пока нечего проверять. Правила сработают, как только появятся данные.",
+  "validation.saved_with_warnings": "Сохранено с предупреждениями",
     "modules.tab_profiles": "Профили компании",
     "modules.tab_packs": "Пакеты",
     "modules.tab_data_packages": "Пакеты данных",

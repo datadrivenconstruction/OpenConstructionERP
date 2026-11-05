@@ -45887,6 +45887,7 @@ const resource = {
   "validation.light_passed": "Đạt",
   "validation.light_warning": "Cảnh báo",
   "validation.no_results": "Chưa có gì để kiểm tra. Các quy tắc sẽ chạy ngay khi có dữ liệu.",
+  "validation.saved_with_warnings": "Đã lưu kèm cảnh báo",
     "modules.tab_profiles": "Hồ sơ công ty",
     "modules.tab_packs": "Gói",
     "modules.tab_data_packages": "Gói dữ liệu",

@@ -45735,6 +45735,7 @@ const resource = {
   "validation.light_passed": "Lulus",
   "validation.light_warning": "Peringatan",
   "validation.no_results": "Belum ada yang perlu diperiksa. Aturan berjalan begitu ada data.",
+  "validation.saved_with_warnings": "Disimpan dengan peringatan",
     "modules.tab_profiles": "Profil Perusahaan",
     "modules.tab_packs": "Paket",
     "modules.tab_data_packages": "Paket Data",

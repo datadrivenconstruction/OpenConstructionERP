@@ -45833,6 +45833,7 @@ const resource = {
   "validation.light_passed": "통과",
   "validation.light_warning": "경고",
   "validation.no_results": "아직 검사할 항목이 없습니다. 데이터가 들어오면 규칙이 실행됩니다.",
+  "validation.saved_with_warnings": "경고와 함께 저장되었습니다",
     "modules.tab_profiles": "회사 프로필",
     "modules.tab_packs": "팩",
     "modules.tab_data_packages": "데이터 패키지",

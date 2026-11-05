@@ -16,6 +16,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
 import { logApiError, logError } from './errorLogger';
 import { getDigitSystem } from './intlLocale';
+import { joinFindings, surfaceValidationWarnings } from './validationFindings';
 
 const BASE_URL = '/api';
 
@@ -272,6 +273,11 @@ export function extractErrorMessageFromBody(body: unknown): string | null {
   // caller's `${detail}` / `new Error(detail)` renders "[object Object]".
   if (obj.detail && typeof obj.detail === 'object' && !Array.isArray(obj.detail)) {
     const d = obj.detail as Record<string, unknown>;
+    // The rule gate's 422 lists every blocking finding: show each one's own text.
+    if (Array.isArray(d.errors) && d.errors.length > 0) {
+      const joined = joinFindings(d.errors);
+      if (joined) return joined;
+    }
     // A coded refusal `{code, message, params}`: the UI shows its own text for
     // the code, filled from `params`. `message` is the English fallback for a
     // code this build has no text for.
@@ -769,6 +775,8 @@ async function request<TResponse>(
   }
 
   const data = (await response.json()) as TResponse;
+
+  if (!isRead) surfaceValidationWarnings(data);
 
   // Cache successful reads for offline use
   if (isRead) {

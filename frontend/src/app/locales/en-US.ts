@@ -1457,6 +1457,7 @@ const resource = {
     "validation.rs_boq_quality": "Universal bid schedule hygiene: missing quantities/rates, duplicate ordinals, outlier rates.",
     "validation.intro_link_boq": "Open Bid Schedule editor",
     "validation.intro_body": "Validation is a first-class step in the Import → Validate → Enrich → Estimate pipeline. It checks a Bid Schedule (and its linked canonical/BIM elements) against the rule sets configured for the project - these are derived automatically from the project’s region and classification standard (DIN 276, GAEB, NRM, MasterFormat, boq_quality, …). Each finding links back to the exact bid schedule position so you can fix it at the source.",
+    "validation.saved_with_warnings": "Saved with warnings",
     "variations.flow_4_title": "Track time and materials & EoT",
     "variations.flow_4_desc": "Log daily work and time claims through to the final payment.",
     "variations.mod_boq": "Bid Schedule",

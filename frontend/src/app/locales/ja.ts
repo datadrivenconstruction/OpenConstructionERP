@@ -45833,6 +45833,7 @@ const resource = {
   "validation.light_passed": "合格",
   "validation.light_warning": "警告",
   "validation.no_results": "まだ確認するものはありません。データが入り次第、ルールが実行されます。",
+  "validation.saved_with_warnings": "警告付きで保存しました",
     "modules.tab_profiles": "会社プロファイル",
     "modules.tab_packs": "パック",
     "modules.tab_data_packages": "データパッケージ",

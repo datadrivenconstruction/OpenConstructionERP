@@ -46254,6 +46254,7 @@ const resource = {
   "validation.light_passed": "Prošlo",
   "validation.light_warning": "Upozorenja",
   "validation.no_results": "Još nema ničega za provjeru. Pravila se pokreću čim ima podataka.",
+  "validation.saved_with_warnings": "Spremljeno s upozorenjima",
     "modules.tab_profiles": "Profili tvrtke",
     "modules.tab_packs": "Paketi",
     "modules.tab_data_packages": "Paketi podataka",
