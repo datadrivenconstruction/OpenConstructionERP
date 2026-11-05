@@ -92,9 +92,9 @@ class CrossLinkEndpointsRule(_PortfolioRule):
         if blank(link.get("predecessor_activity_id")):
             return [self.ok(ref)]
         if str(link.get("predecessor_activity_id")) == str(link.get("successor_activity_id")):
-            return [self.fail(context, "link_same_activity", ref=ref)]
+            return [self.fail(context, "link_endpoints", ref=ref)]
         if str(link.get("predecessor_schedule_id")) == str(link.get("successor_schedule_id")):
-            return [self.fail(context, "link_same_schedule", ref=ref, severity=Severity.WARNING)]
+            return [self.fail(context, "link_endpoints", ref=ref, severity=Severity.WARNING)]
         return [self.ok(ref)]
 
 
@@ -109,9 +109,9 @@ class CrossLinkNoLoopRule(_PortfolioRule):
         link = section(context, "cross_link")
         ref = str(link.get("id", ""))
         if link.get("duplicate"):
-            return [self.fail(context, "link_duplicate", ref=ref)]
+            return [self.fail(context, "link_repeats", ref=ref)]
         if link.get("reverse_exists"):
-            return [self.fail(context, "link_loop", ref=ref)]
+            return [self.fail(context, "link_repeats", ref=ref)]
         return [self.ok(ref)]
 
 
