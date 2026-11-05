@@ -20,3 +20,6 @@ async def on_startup() -> None:
     from app.modules.preliminaries.permissions import register_preliminaries_permissions
 
     register_preliminaries_permissions()
+    from app.modules.preliminaries.validators import register_preliminaries_validation_rules
+
+    register_preliminaries_validation_rules()

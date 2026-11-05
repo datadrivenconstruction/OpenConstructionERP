@@ -3,6 +3,7 @@
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Off-site / Prefab / DfMA Pydantic schemas (request/response models)."""
 
 from datetime import date, datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -86,6 +87,7 @@ class PrefabUnitResponse(BaseModel):
     element_ref: str | None = None
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     # ── Spine 4: optional cost links + derived cost view ─────────────────
     boq_position_id: UUID | None = None
