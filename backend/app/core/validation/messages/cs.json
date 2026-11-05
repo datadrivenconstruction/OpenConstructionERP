@@ -1763,5 +1763,63 @@
       "fail": "Výsledek je {result}, ale nevyhovělo bodů kontrolního seznamu: {count}.",
       "suggestion": "Opravte výsledek nebo zkontrolujte nevyhovující body."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Konec {end} nenásleduje po začátku {start}.",
+      "suggestion": "Opravte data tak, aby konec následoval po začátku."
+    },
+    "period_outside_stay": {
+      "fail": "Fakturované období {start} až {end} leží mimo pobyt {stay_start} až {stay_end}.",
+      "suggestion": "Porovnejte fakturační období s daty rezervace."
+    },
+    "currency_missing": {
+      "fail": "Částka {amount} je uvedena bez měny.",
+      "suggestion": "Nastavte měnu u záznamu, sazby pokoje nebo projektu."
+    },
+    "capacity_exceeded": {
+      "fail": "Pokoje dávají dohromady {total} lůžek, více než jmenovitá kapacita {capacity}.",
+      "suggestion": "Zvyšte jmenovitou kapacitu nebo zkontrolujte kapacity pokojů."
+    },
+    "camp_room_charged": {
+      "fail": "Pokoj {label} v ubytovně pro dělníky má sazbu {rate}.",
+      "suggestion": "Ubytování v táboře bývá pro četu zdarma; potvrďte, že sazba je záměrná."
+    },
+    "nothing_recorded": {
+      "fail": "Stav je {state}, ale hlášení neobsahuje žádné práce, prostoje, poznámky ani pracovníky.",
+      "suggestion": "Popište den před odesláním, nebo nechte hlášení jako koncept."
+    },
+    "delay_unexplained": {
+      "fail": "Je zapsáno {hours} h prostoje bez uvedené příčiny.",
+      "suggestion": "Popište příčinu prostoje, například počasí, pozdní dodávka, přístup."
+    },
+    "date_in_future": {
+      "fail": "Záznam je datován {date}, což ještě nenastalo.",
+      "suggestion": "Opravte datum nebo záznam zadejte po skončení dne."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} h na osobu nebo stroj za den, více než 24 hodin dne.",
+      "suggestion": "Zkontrolujte, zda nebyl součet čety zadán jako hodiny na osobu, nebo zda nejde o chybu jednotek."
+    },
+    "hours_without_crew": {
+      "fail": "Je zapsáno {hours} h práce, ale počet pracovníků je nula.",
+      "suggestion": "Zadejte, kolik lidí bylo na stavbě."
+    },
+    "incident_undescribed": {
+      "fail": "Událost je zapsána bez popisu.",
+      "suggestion": "Popište, co se stalo, kdo byl zapojen a co bylo uděláno."
+    },
+    "delay_undescribed": {
+      "fail": "Prostoj {hours} h je zapsán bez důvodu.",
+      "suggestion": "Doplňte příčinu prostoje."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} h je zapsáno v okně pouhých {span} h.",
+      "suggestion": "Opravte hodiny nebo čas začátku a konce."
+    },
+    "crew_without_record": {
+      "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
+      "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
+    }
   }
 }

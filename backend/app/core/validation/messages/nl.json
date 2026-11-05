@@ -1763,5 +1763,63 @@
       "fail": "Het resultaat is {result}, maar {count} checklistpunten zijn afgekeurd.",
       "suggestion": "Corrigeer het resultaat of controleer de afgekeurde punten."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Het einde {end} ligt niet na het begin {start}.",
+      "suggestion": "Corrigeer de data zodat het einde na het begin ligt."
+    },
+    "period_outside_stay": {
+      "fail": "De factuurperiode {start} tot {end} valt buiten het verblijf {stay_start} tot {stay_end}.",
+      "suggestion": "Vergelijk de factuurperiode met de boekingsdata."
+    },
+    "currency_missing": {
+      "fail": "Een bedrag van {amount} is vermeld zonder valuta.",
+      "suggestion": "Stel de valuta in op het record, het kamertarief of het project."
+    },
+    "capacity_exceeded": {
+      "fail": "De kamers tellen op tot {total} bedden, meer dan de opgegeven capaciteit van {capacity}.",
+      "suggestion": "Verhoog de opgegeven capaciteit of controleer de kamercapaciteiten."
+    },
+    "camp_room_charged": {
+      "fail": "Kamer {label} in een arbeiderskamp heeft een tarief van {rate}.",
+      "suggestion": "Kampverblijf wordt de ploeg normaal gratis geboden; bevestig dat het tarief bedoeld is."
+    },
+    "nothing_recorded": {
+      "fail": "De status is {state} maar het rapport bevat geen werk, vertragingen, notities of personeel.",
+      "suggestion": "Beschrijf de dag voor het indienen, of laat het rapport een concept."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} vertragingsuren zijn vastgelegd zonder oorzaak.",
+      "suggestion": "Beschrijf de oorzaak van de vertraging, bijvoorbeeld weer, late levering of toegang."
+    },
+    "date_in_future": {
+      "fail": "Het record is gedateerd op {date}, dat nog niet is geweest.",
+      "suggestion": "Corrigeer de datum of voer het record in na afloop van de dag."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} uur per persoon of machine op één dag, meer dan de 24 uur van een dag.",
+      "suggestion": "Controleer of een ploegtotaal als uren per persoon is ingevoerd, of dat er een eenheidsfout is."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} werkuren zijn vastgelegd maar de bezetting is nul.",
+      "suggestion": "Voer in hoeveel mensen op de bouwplaats waren."
+    },
+    "incident_undescribed": {
+      "fail": "Een incident is vastgelegd zonder beschrijving.",
+      "suggestion": "Beschrijf wat er gebeurde, wie erbij betrokken was en wat is gedaan."
+    },
+    "delay_undescribed": {
+      "fail": "Een vertraging van {hours} u is vastgelegd zonder reden.",
+      "suggestion": "Voeg de oorzaak van de vertraging toe."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} uur is vastgelegd in een venster van slechts {span} uur.",
+      "suggestion": "Corrigeer de uren of de begin- en eindtijd."
+    },
+    "crew_without_record": {
+      "fail": "Een ploeg van {headcount} was op de bouwplaats, maar er is geen werk, keuring of vertraging vastgelegd.",
+      "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
+    }
   }
 }

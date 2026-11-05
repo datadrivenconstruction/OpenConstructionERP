@@ -1763,5 +1763,63 @@
       "fail": "Kết quả là {result} nhưng {count} mục trong danh sách kiểm tra không đạt.",
       "suggestion": "Sửa kết quả hoặc xem lại các mục không đạt."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Ngày kết thúc {end} không sau ngày bắt đầu {start}.",
+      "suggestion": "Sửa ngày để kết thúc sau bắt đầu."
+    },
+    "period_outside_stay": {
+      "fail": "Kỳ tính phí {start} đến {end} nằm ngoài thời gian lưu trú {stay_start} đến {stay_end}.",
+      "suggestion": "Đối chiếu kỳ tính phí với ngày đặt phòng."
+    },
+    "currency_missing": {
+      "fail": "Số tiền {amount} được ghi mà không có đơn vị tiền tệ.",
+      "suggestion": "Đặt tiền tệ trên bản ghi, giá phòng hoặc dự án."
+    },
+    "capacity_exceeded": {
+      "fail": "Các phòng cộng lại có {total} giường, nhiều hơn sức chứa danh định {capacity}.",
+      "suggestion": "Tăng sức chứa danh định hoặc kiểm tra sức chứa các phòng."
+    },
+    "camp_room_charged": {
+      "fail": "Phòng {label} trong khu lán trại công nhân có giá {rate}.",
+      "suggestion": "Chỗ ở tại lán trại thường miễn phí cho tổ đội; hãy xác nhận giá này là có chủ ý."
+    },
+    "nothing_recorded": {
+      "fail": "Trạng thái là {state} nhưng báo cáo không ghi công việc, chậm trễ, ghi chú hay nhân lực.",
+      "suggestion": "Mô tả ngày làm việc trước khi gửi, hoặc giữ báo cáo ở dạng nháp."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} giờ chậm trễ được ghi mà không nêu nguyên nhân.",
+      "suggestion": "Mô tả nguyên nhân chậm trễ, ví dụ thời tiết, giao hàng muộn, mặt bằng."
+    },
+    "date_in_future": {
+      "fail": "Bản ghi mang ngày {date}, chưa tới.",
+      "suggestion": "Sửa ngày hoặc nhập bản ghi sau khi hết ngày."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} giờ cho mỗi người hoặc máy trong một ngày, nhiều hơn 24 giờ của một ngày.",
+      "suggestion": "Kiểm tra xem tổng của tổ có bị nhập thành giờ mỗi người không, hoặc sai đơn vị."
+    },
+    "hours_without_crew": {
+      "fail": "Có {hours} giờ công được ghi nhưng quân số bằng không.",
+      "suggestion": "Nhập số người có mặt tại công trường."
+    },
+    "incident_undescribed": {
+      "fail": "Một sự cố được ghi mà không có mô tả.",
+      "suggestion": "Mô tả điều đã xảy ra, ai liên quan và đã xử lý thế nào."
+    },
+    "delay_undescribed": {
+      "fail": "Chậm trễ {hours} giờ được ghi mà không có lý do.",
+      "suggestion": "Thêm nguyên nhân chậm trễ."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} giờ được ghi trong khoảng chỉ {span} giờ.",
+      "suggestion": "Sửa số giờ hoặc giờ bắt đầu và kết thúc."
+    },
+    "crew_without_record": {
+      "fail": "Tổ đội {headcount} người có mặt nhưng không ghi công việc, kiểm tra hay chậm trễ.",
+      "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
+    }
   }
 }

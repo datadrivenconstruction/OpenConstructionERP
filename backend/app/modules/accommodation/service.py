@@ -13,20 +13,25 @@ of a UUID the caller is not allowed to see.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.accommodation.models import (
     Accommodation,
     Booking,
     Charge,
     Room,
 )
+
+logger = logging.getLogger(__name__)
 
 # ── State machine ─────────────────────────────────────────────────────────
 
@@ -297,6 +302,80 @@ async def assert_no_booking_overlap(
         )
 
 
+# ── Validation rules ─────────────────────────────────────────────────────
+
+
+def accommodation_view(accom: Accommodation, beds: int | None = None) -> dict[str, Any]:
+    """Rule-context view of an accommodation; ``beds`` is the sum of its room capacities."""
+    return {
+        "id": str(accom.id or ""),
+        "kind": accom.kind,
+        "capacity_total": accom.capacity_total,
+        "rooms_capacity_total": beds,
+    }
+
+
+def room_view(room: Room) -> dict[str, Any]:
+    """Rule-context view of a room."""
+    return {
+        "id": str(room.id or ""),
+        "label": room.label,
+        "base_rate": room.base_rate,
+        "currency": room.base_rate_currency,
+    }
+
+
+def booking_view(booking: Booking) -> dict[str, Any]:
+    """Rule-context view of a booking."""
+    return {"id": str(booking.id or ""), "check_in": booking.check_in, "check_out": booking.check_out}
+
+
+def charge_view(charge: Charge, booking: Booking) -> dict[str, Any]:
+    """Rule-context view of a charge, with the stay it is billed to."""
+    return {
+        "id": str(charge.id or ""),
+        "amount": charge.amount,
+        "currency": charge.currency,
+        "period_start": charge.period_start,
+        "period_end": charge.period_end,
+        "stay_start": booking.check_in,
+        "stay_end": booking.check_out,
+    }
+
+
+async def rooms_beds(session: AsyncSession, accommodation_id: uuid.UUID, *, skip: set[uuid.UUID] | None = None) -> int:
+    """Sum of room capacities of an accommodation, leaving out the rooms in ``skip``."""
+    stmt = select(func.coalesce(func.sum(Room.capacity), 0)).where(Room.accommodation_id == accommodation_id)
+    if skip:
+        stmt = stmt.where(Room.id.not_in(skip))
+    return int((await session.execute(stmt)).scalar_one())
+
+
+async def gate_accommodation_rules(
+    accom: Accommodation,
+    *,
+    operation: str,
+    subject: str,
+    data: dict[str, Any],
+    before: dict[str, Any] | None = None,
+    target_id: str = "",
+    warnings_only: bool = False,
+) -> list[dict[str, Any]]:
+    """Run the ``accommodation`` rules at a write point; errors answer a coded 422, warnings are returned."""
+    report = await gate_rule_set(
+        rule_set="accommodation",
+        data=data,
+        before=before,
+        target_type="accommodation",
+        target_id=target_id or str(accom.id or ""),
+        project_id=accom.project_id,
+        operation=operation,
+        subject=subject,
+        warnings_only=warnings_only,
+    )
+    return warning_findings(report)
+
+
 # ── PropDev bootstrap ────────────────────────────────────────────────────
 
 
@@ -391,6 +470,16 @@ async def bootstrap_from_propdev_block(
     accommodation.property_dev_block_id = block_id
 
     await session.flush()
+    # Rooms made from plots are system-created: capacity findings are logged, never refused.
+    sys_warnings = await gate_accommodation_rules(
+        accommodation,
+        operation="bootstrap",
+        subject="accommodation",
+        data={"accommodation": accommodation_view(accommodation, await rooms_beds(session, accommodation.id))},
+        warnings_only=True,
+    )
+    if sys_warnings:
+        logger.warning("Accommodation %s bootstrap: %s", accommodation.id, [w["rule_id"] for w in sys_warnings])
     return {
         "accommodation_id": accommodation.id,
         "block_id": block_id,

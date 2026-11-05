@@ -1763,5 +1763,63 @@
       "fail": "Wynik to {result}, ale niezaliczonych pozycji listy kontrolnej: {count}.",
       "suggestion": "Popraw wynik lub sprawdź niezaliczone pozycje."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Koniec {end} nie następuje po początku {start}.",
+      "suggestion": "Popraw daty tak, aby koniec następował po początku."
+    },
+    "period_outside_stay": {
+      "fail": "Okres rozliczenia od {start} do {end} wykracza poza pobyt od {stay_start} do {stay_end}.",
+      "suggestion": "Porównaj okres rozliczeniowy z datami rezerwacji."
+    },
+    "currency_missing": {
+      "fail": "Kwota {amount} jest podana bez waluty.",
+      "suggestion": "Ustaw walutę w rekordzie, stawce pokoju lub projekcie."
+    },
+    "capacity_exceeded": {
+      "fail": "Pokoje dają łącznie {total} miejsc, więcej niż pojemność nominalna {capacity}.",
+      "suggestion": "Zwiększ pojemność nominalną lub sprawdź pojemności pokoi."
+    },
+    "camp_room_charged": {
+      "fail": "Pokój {label} w obozie dla pracowników ma stawkę {rate}.",
+      "suggestion": "Zakwaterowanie w obozie zwykle jest dla brygady bezpłatne; potwierdź, że stawka jest zamierzona."
+    },
+    "nothing_recorded": {
+      "fail": "Status to {state}, ale raport nie zawiera robót, opóźnień, notatek ani obsady.",
+      "suggestion": "Opisz dzień przed zgłoszeniem lub zostaw raport jako szkic."
+    },
+    "delay_unexplained": {
+      "fail": "Zapisano {hours} godz. opóźnienia bez podanej przyczyny.",
+      "suggestion": "Opisz przyczynę opóźnienia, np. pogoda, spóźniona dostawa, dostęp."
+    },
+    "date_in_future": {
+      "fail": "Rekord ma datę {date}, która jeszcze nie nadeszła.",
+      "suggestion": "Popraw datę lub wprowadź rekord po zakończeniu dnia."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} godz. na osobę lub maszynę w ciągu doby, więcej niż 24 godziny doby.",
+      "suggestion": "Sprawdź, czy suma brygady nie została wpisana jako godziny na osobę, lub czy nie ma błędu jednostek."
+    },
+    "hours_without_crew": {
+      "fail": "Zapisano {hours} godz. pracy, ale liczebność załogi wynosi zero.",
+      "suggestion": "Wpisz, ile osób było na budowie."
+    },
+    "incident_undescribed": {
+      "fail": "Zdarzenie zapisano bez opisu.",
+      "suggestion": "Opisz, co się stało, kto brał udział i co zrobiono."
+    },
+    "delay_undescribed": {
+      "fail": "Opóźnienie {hours} godz. zapisano bez powodu.",
+      "suggestion": "Dodaj przyczynę opóźnienia."
+    },
+    "hours_exceed_window": {
+      "fail": "Zapisano {hours} godz. w przedziale zaledwie {span} godz.",
+      "suggestion": "Popraw godziny lub czas rozpoczęcia i zakończenia."
+    },
+    "crew_without_record": {
+      "fail": "Na budowie była brygada {headcount} osób, ale nie zapisano ani robót, ani kontroli, ani opóźnienia.",
+      "suggestion": "Dodaj, co robiła brygada, lub opóźnienie, które wstrzymało roboty."
+    }
   }
 }

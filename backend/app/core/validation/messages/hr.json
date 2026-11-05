@@ -1763,5 +1763,63 @@
       "fail": "Rezultat je {result}, ali nije prošlo stavki kontrolnog popisa: {count}.",
       "suggestion": "Ispravite rezultat ili pregledajte stavke koje nisu prošle."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Kraj {end} nije nakon početka {start}.",
+      "suggestion": "Ispravite datume tako da kraj slijedi nakon početka."
+    },
+    "period_outside_stay": {
+      "fail": "Razdoblje obračuna {start} do {end} izvan je boravka {stay_start} do {stay_end}.",
+      "suggestion": "Usporedite razdoblje obračuna s datumima rezervacije."
+    },
+    "currency_missing": {
+      "fail": "Iznos {amount} naveden je bez valute.",
+      "suggestion": "Postavite valutu na zapisu, cijeni sobe ili projektu."
+    },
+    "capacity_exceeded": {
+      "fail": "Sobe zbrojeno imaju {total} ležajeva, više od nazivnog kapaciteta {capacity}.",
+      "suggestion": "Povećajte nazivni kapacitet ili provjerite kapacitete soba."
+    },
+    "camp_room_charged": {
+      "fail": "Soba {label} u radničkom kampu ima cijenu {rate}.",
+      "suggestion": "Smještaj u kampu obično je za ekipu besplatan; potvrdite da je cijena namjerna."
+    },
+    "nothing_recorded": {
+      "fail": "Status je {state}, ali izvješće ne sadrži radove, zastoje, bilješke ni radnu snagu.",
+      "suggestion": "Opišite dan prije predaje ili ostavite izvješće kao skicu."
+    },
+    "delay_unexplained": {
+      "fail": "Zapisano je {hours} sati zastoja bez navedenog uzroka.",
+      "suggestion": "Opišite uzrok zastoja, primjerice vrijeme, kasna isporuka, pristup."
+    },
+    "date_in_future": {
+      "fail": "Zapis je datiran {date}, što se još nije dogodilo.",
+      "suggestion": "Ispravite datum ili unesite zapis nakon završetka dana."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} sati po osobi ili stroju u jednom danu, više od 24 sata koliko dan ima.",
+      "suggestion": "Provjerite je li zbroj ekipe unesen kao sati po osobi ili je pogreška u jedinicama."
+    },
+    "hours_without_crew": {
+      "fail": "Zapisano je {hours} radnih sati, ali broj radnika je nula.",
+      "suggestion": "Unesite koliko je ljudi bilo na gradilištu."
+    },
+    "incident_undescribed": {
+      "fail": "Incident je zabilježen bez opisa.",
+      "suggestion": "Opišite što se dogodilo, tko je sudjelovao i što je učinjeno."
+    },
+    "delay_undescribed": {
+      "fail": "Zastoj od {hours} h zabilježen je bez razloga.",
+      "suggestion": "Dodajte uzrok zastoja."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} sati zapisano je u rasponu od samo {span} sati.",
+      "suggestion": "Ispravite sate ili vrijeme početka i završetka."
+    },
+    "crew_without_record": {
+      "fail": "Na gradilištu je bila ekipa od {headcount}, ali nisu zabilježeni radovi, pregled ni zastoj.",
+      "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
+    }
   }
 }

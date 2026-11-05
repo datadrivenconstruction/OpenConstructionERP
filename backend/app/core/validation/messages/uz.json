@@ -1763,5 +1763,63 @@
       "fail": "Natija {result}, lekin tekshiruv roʻyxatining {count} bandi oʻtmadi.",
       "suggestion": "Natijani toʻgʻrilang yoki oʻtmagan bandlarni koʻrib chiqing."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Tugash {end} boshlanish {start}dan keyin emas.",
+      "suggestion": "Sanalarni tugash boshlanishdan keyin boʻlishi uchun toʻgʻrilang."
+    },
+    "period_outside_stay": {
+      "fail": "Hisob davri {start} - {end} turish davri {stay_start} - {stay_end}dan tashqarida.",
+      "suggestion": "Hisob davrini bron sanalari bilan solishtiring."
+    },
+    "currency_missing": {
+      "fail": "{amount} summasi valyutasiz koʻrsatilgan.",
+      "suggestion": "Valyutani yozuvda, xona tarifida yoki loyihada belgilang."
+    },
+    "capacity_exceeded": {
+      "fail": "Xonalar jami {total} oʻrin, nominal sigʻimdan {capacity} koʻp.",
+      "suggestion": "Nominal sigʻimni oshiring yoki xonalar sigʻimini tekshiring."
+    },
+    "camp_room_charged": {
+      "fail": "Ishchilar lagerdagi {label} xonasiga {rate} tarif qoʻyilgan.",
+      "suggestion": "Lagerda turish odatda brigada uchun bepul; tarif ataylab qoʻyilganini tasdiqlang."
+    },
+    "nothing_recorded": {
+      "fail": "Holati {state}, ammo hisobotda ish, toʻxtab qolish, qaydlar yoki xodimlar yoʻq.",
+      "suggestion": "Yuborishdan oldin kunni tavsiflang yoki hisobotni qoralama holatida qoldiring."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} soat toʻxtab qolish sababsiz yozilgan.",
+      "suggestion": "Toʻxtab qolish sababini tavsiflang: ob-havo, kechikkan yetkazib berish, kirish."
+    },
+    "date_in_future": {
+      "fail": "Yozuv sanasi {date}, u hali kelmagan.",
+      "suggestion": "Sanani toʻgʻrilang yoki yozuvni kun tugagach kiriting."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: bir kunda bir kishi yoki mashinaga {hours} soat, sutkadagi 24 soatdan koʻp.",
+      "suggestion": "Brigada yigʻindisi kishi boshiga soat sifatida kiritilmaganini yoki birlik xatosi yoʻqligini tekshiring."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} ish soati yozilgan, ammo xodimlar soni nol.",
+      "suggestion": "Obyektda necha kishi boʻlganini kiriting."
+    },
+    "incident_undescribed": {
+      "fail": "Hodisa tavsifsiz yozilgan.",
+      "suggestion": "Nima boʻlganini, kim ishtirok etganini va nima qilinganini tavsiflang."
+    },
+    "delay_undescribed": {
+      "fail": "{hours} soatlik toʻxtab qolish sababsiz yozilgan.",
+      "suggestion": "Toʻxtab qolish sababini qoʻshing."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} soat atigi {span} soatlik oraliqda yozilgan.",
+      "suggestion": "Soatlarni yoki boshlanish va tugash vaqtini toʻgʻrilang."
+    },
+    "crew_without_record": {
+      "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
+      "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
+    }
   }
 }

@@ -1763,5 +1763,63 @@
       "fail": "Sonuç {result}, ancak kontrol listesindeki {count} madde uygun bulunmadı.",
       "suggestion": "Sonucu düzeltin veya uygun bulunmayan maddeleri inceleyin."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Bitiş {end}, başlangıç {start} tarihinden sonra değil.",
+      "suggestion": "Bitişin başlangıçtan sonra gelmesi için tarihleri düzeltin."
+    },
+    "period_outside_stay": {
+      "fail": "{start} - {end} fatura dönemi, {stay_start} - {stay_end} konaklamasının dışında kalıyor.",
+      "suggestion": "Fatura dönemini rezervasyon tarihleriyle karşılaştırın."
+    },
+    "currency_missing": {
+      "fail": "{amount} tutarı para birimi olmadan belirtilmiş.",
+      "suggestion": "Para birimini kayıtta, oda ücretinde veya projede belirleyin."
+    },
+    "capacity_exceeded": {
+      "fail": "Odalar toplam {total} yatak yapıyor, anma kapasitesi olan {capacity} değerinden fazla.",
+      "suggestion": "Anma kapasitesini artırın veya oda kapasitelerini gözden geçirin."
+    },
+    "camp_room_charged": {
+      "fail": "İşçi kampındaki {label} odasının ücreti {rate}.",
+      "suggestion": "Kamp barınması genellikle ekibe ücretsizdir; ücretin bilerek girildiğini doğrulayın."
+    },
+    "nothing_recorded": {
+      "fail": "Durum {state} ancak raporda iş, gecikme, not veya işgücü kaydı yok.",
+      "suggestion": "Göndermeden önce günü açıklayın veya raporu taslak olarak tutun."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} saatlik gecikme nedeni belirtilmeden kaydedilmiş.",
+      "suggestion": "Gecikmenin nedenini açıklayın; örneğin hava, geç teslimat veya erişim."
+    },
+    "date_in_future": {
+      "fail": "Kayıt henüz gelmemiş {date} tarihli.",
+      "suggestion": "Tarihi düzeltin veya kaydı gün bittikten sonra girin."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: bir günde kişi veya makine başına {hours} saat, bir günün 24 saatinden fazla.",
+      "suggestion": "Ekip toplamının kişi başı saat olarak girilip girilmediğini veya birim hatası olup olmadığını kontrol edin."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} çalışma saati kaydedilmiş ancak ekip sayısı sıfır.",
+      "suggestion": "Sahada kaç kişi olduğunu girin."
+    },
+    "incident_undescribed": {
+      "fail": "Bir olay açıklama olmadan kaydedilmiş.",
+      "suggestion": "Ne olduğunu, kimlerin dahil olduğunu ve neler yapıldığını açıklayın."
+    },
+    "delay_undescribed": {
+      "fail": "{hours} saatlik bir gecikme nedensiz kaydedilmiş.",
+      "suggestion": "Gecikmenin nedenini ekleyin."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} saat, yalnızca {span} saatlik bir aralıkta kaydedilmiş.",
+      "suggestion": "Saatleri veya başlangıç ve bitiş zamanlarını düzeltin."
+    },
+    "crew_without_record": {
+      "fail": "Sahada {headcount} kişilik bir ekip vardı ancak iş, kontrol veya gecikme kaydı yok.",
+      "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
+    }
   }
 }

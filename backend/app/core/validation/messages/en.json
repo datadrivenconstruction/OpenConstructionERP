@@ -1763,5 +1763,63 @@
       "fail": "The result is {result}, but {count} checklist items failed.",
       "suggestion": "Correct the result, or review the failed checklist items."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "The end {end} does not come after the start {start}.",
+      "suggestion": "Correct the dates so the end follows the start."
+    },
+    "period_outside_stay": {
+      "fail": "The charge period {start} to {end} lies outside the stay {stay_start} to {stay_end}.",
+      "suggestion": "Check the billing period against the booking dates."
+    },
+    "currency_missing": {
+      "fail": "An amount of {amount} is stated without a currency.",
+      "suggestion": "Set the currency on the record, the room rate or the project."
+    },
+    "capacity_exceeded": {
+      "fail": "The rooms add up to {total} beds, more than the rated capacity of {capacity}.",
+      "suggestion": "Raise the rated capacity or review the room capacities."
+    },
+    "camp_room_charged": {
+      "fail": "Room {label} in a worker camp carries a rate of {rate}.",
+      "suggestion": "Camp housing is normally provided free to the crew; confirm the rate is intended."
+    },
+    "nothing_recorded": {
+      "fail": "Status is {state} but the report records no work, delays, notes or workforce.",
+      "suggestion": "Describe the day before submitting, or keep the report as a draft."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} delay hours are recorded without a stated cause.",
+      "suggestion": "Describe what caused the delay, for example weather, late delivery or access."
+    },
+    "date_in_future": {
+      "fail": "The record is dated {date}, which has not happened yet.",
+      "suggestion": "Correct the date, or enter the record once the day is over."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} hours per person or machine in one day, more than the 24 hours a day has.",
+      "suggestion": "Check for a crew total typed as hours per person, or a unit slip."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} work hours are logged but the crew count is zero.",
+      "suggestion": "Enter how many people were on site."
+    },
+    "incident_undescribed": {
+      "fail": "An incident is logged without a description.",
+      "suggestion": "Describe what happened, who was involved and what was done."
+    },
+    "delay_undescribed": {
+      "fail": "A delay of {hours} h is logged without a reason.",
+      "suggestion": "Add the cause of the delay."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} hours are logged in a window of only {span} hours.",
+      "suggestion": "Correct the hours or the start and end times."
+    },
+    "crew_without_record": {
+      "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
+      "suggestion": "Add what the crew did, or record the delay that stopped work."
+    }
   }
 }

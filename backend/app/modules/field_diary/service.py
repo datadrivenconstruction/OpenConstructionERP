@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.events import event_bus
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.field_diary.models import (
     DiaryActivity,
     DiaryAttachment,
@@ -268,6 +269,53 @@ class FieldDiaryService:
 
     # ── Diary entry FSM ───────────────────────────────────────────────────
 
+    @staticmethod
+    def _activity_view(act: DiaryActivity) -> dict[str, Any]:
+        return {
+            "id": str(act.id or ""),
+            "activity_type": act.activity_type,
+            "description": act.description,
+            "hours": act.hours,
+            "started_at": act.started_at,
+            "ended_at": act.ended_at,
+        }
+
+    @staticmethod
+    def _entry_view(entry: DiaryEntry, activities: list[dict[str, Any]], **over: Any) -> dict[str, Any]:
+        view = {
+            "entry": {
+                "id": str(entry.id or ""),
+                "entry_date": entry.entry_date,
+                "status": entry.status,
+                "headcount": entry.headcount,
+                "activities": activities,
+            }
+        }
+        view["entry"].update(over)
+        return view
+
+    async def _gate(
+        self,
+        entry: DiaryEntry,
+        data: dict[str, Any],
+        *,
+        operation: str,
+        before: dict[str, Any] | None = None,
+        warnings_only: bool = False,
+    ) -> list[dict[str, Any]]:
+        report = await gate_rule_set(
+            rule_set="field_diary",
+            data=data,
+            before=before,
+            target_type="diary_entry",
+            target_id=str(entry.id or ""),
+            project_id=entry.project_id,
+            operation=operation,
+            subject="diary entry",
+            warnings_only=warnings_only,
+        )
+        return warning_findings(report)
+
     async def create_diary_entry(
         self,
         data: DiaryEntryCreate,
@@ -296,7 +344,9 @@ class FieldDiaryService:
             metadata_=data.metadata or {},
             status="draft",
         )
+        warnings = await self._gate(entry, self._entry_view(entry, []), operation="create")
         entry = await self.entry_repo.create(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
         return entry
 
     async def get_diary_entry(self, entry_id: uuid.UUID) -> DiaryEntry:
@@ -322,8 +372,16 @@ class FieldDiaryService:
             )
         fields = data.model_dump(exclude_unset=True)
         if fields:
+            acts = [self._activity_view(a) for a in await self.activity_repo.list_for_entry(entry_id)]
+            warnings = await self._gate(
+                entry,
+                self._entry_view(entry, acts, **{k: v for k, v in fields.items() if k == "headcount"}),
+                operation="update",
+                before=self._entry_view(entry, acts),
+            )
             await self.entry_repo.update_fields(entry_id, **fields)
             await self.session.refresh(entry)
+            entry.validation_warnings = warnings  # type: ignore[attr-defined]
         return entry
 
     async def submit_diary_entry(
@@ -352,6 +410,11 @@ class FieldDiaryService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=("Diary entry is empty - add notes, activities, or attachments before submitting"),
             )
+        warnings = await self._gate(
+            entry,
+            self._entry_view(entry, [self._activity_view(a) for a in activities], status="submitted"),
+            operation="submit",
+        )
         project_id_s = str(entry.project_id)
         author_id_s = str(entry.author_id)
         entry_date_s = entry.entry_date
@@ -363,6 +426,7 @@ class FieldDiaryService:
             submitted_at=now,
         )
         await self.session.refresh(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
         event_bus.publish_detached(
             "field_diary.entry.submitted",
             {
@@ -448,6 +512,13 @@ class FieldDiaryService:
         # ORM state. Each work/inspection activity with positive hours becomes
         # a labour row; delays, visits and incidents carry no payable hours.
         activities = await self.activity_repo.list_for_entry(entry_id)
+        acts = [self._activity_view(a) for a in activities]
+        warnings = await self._gate(
+            entry,
+            self._entry_view(entry, acts, status="approved"),
+            operation="approve",
+            before=self._entry_view(entry, acts),
+        )
         labour_rows = self._diary_labour_rows(activities)
         already_published = entry.labour_published_at is not None
         project_id_s = str(entry.project_id)
@@ -462,6 +533,7 @@ class FieldDiaryService:
             approved_by=approver_id,
         )
         await self.session.refresh(entry)
+        entry.validation_warnings = warnings  # type: ignore[attr-defined]
 
         # Feed diary work hours into the shared labour-cost / payroll flow.
         # Best-effort: a rollup failure must not undo an approval the manager
@@ -622,7 +694,15 @@ class FieldDiaryService:
             ended_at=data.ended_at,
             metadata_=data.metadata or {},
         )
+        stored = [self._activity_view(a) for a in await self.activity_repo.list_for_entry(entry_id)]
+        warnings = await self._gate(
+            entry,
+            self._entry_view(entry, [*stored, self._activity_view(activity)]),
+            operation="activity",
+            before=self._entry_view(entry, stored),
+        )
         activity = await self.activity_repo.create(activity)
+        activity.validation_warnings = warnings  # type: ignore[attr-defined]
 
         if client_op_id:
             await self._record_op(

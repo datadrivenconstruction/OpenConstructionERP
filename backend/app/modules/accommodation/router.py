@@ -51,11 +51,15 @@ from app.modules.accommodation.schemas import (
 from app.modules.accommodation.service import (
     _accessible_project_ids,
     _verify_project_access,
+    accommodation_view,
     active_bookings_count,
     assert_charge_mutable,
     assert_no_booking_overlap,
     assert_room_bookable,
+    booking_view,
     bootstrap_from_propdev_block,
+    charge_view,
+    gate_accommodation_rules,
     get_accommodation_or_404,
     get_booking_or_404,
     get_charge_or_404,
@@ -66,6 +70,8 @@ from app.modules.accommodation.service import (
     list_bookings_for_accommodation,
     list_bookings_for_room,
     resolve_charge_currency,
+    room_view,
+    rooms_beds,
     suggest_room_for_employee,
 )
 
@@ -176,9 +182,16 @@ async def create_accommodation(
         created_by=str(user_id),
         metadata_=payload.metadata,
     )
+    warnings = await gate_accommodation_rules(
+        accom,
+        operation="create",
+        subject="accommodation",
+        data={"accommodation": accommodation_view(accom, 0)},
+    )
     session.add(accom)
     await session.flush()
     await session.refresh(accom)
+    accom.validation_warnings = warnings  # type: ignore[attr-defined]
     return AccommodationResponse.model_validate(accom)
 
 
@@ -223,6 +236,8 @@ async def update_accommodation(
     accom = await get_accommodation_or_404(session, accommodation_id, user_id)
     data = payload.model_dump(exclude_unset=True)
     metadata = data.pop("metadata", None)
+    beds = await rooms_beds(session, accom.id)
+    before = {"accommodation": accommodation_view(accom, beds)}
     for key, value in data.items():
         setattr(accom, key, value)
     if isinstance(metadata, dict):
@@ -230,10 +245,18 @@ async def update_accommodation(
         accom.metadata_ = merge_metadata(getattr(accom, "metadata_", None), metadata)
     elif metadata is not None:
         accom.metadata_ = metadata
+    warnings = await gate_accommodation_rules(
+        accom,
+        operation="update",
+        subject="accommodation",
+        data={"accommodation": accommodation_view(accom, beds)},
+        before=before,
+    )
     await session.flush()
     # Re-load so ``updated_at`` (server-side ``onupdate=func.now()``) is
     # populated without Pydantic tripping a lazy-IO MissingGreenlet on access.
     await session.refresh(accom)
+    accom.validation_warnings = warnings  # type: ignore[attr-defined]
     return AccommodationResponse.model_validate(accom)
 
 
@@ -354,10 +377,21 @@ async def bulk_create_rooms(
             detail=f"Label(s) already exist: {', '.join(collisions)}",
         )
 
+    beds = await rooms_beds(session, accom.id) + sum(r.capacity for r in new_rooms)
+    warnings = await gate_accommodation_rules(
+        accom,
+        operation="rooms_bulk",
+        subject="room batch",
+        data={
+            "accommodation": accommodation_view(accom, beds),
+            "rooms": [room_view(r) for r in new_rooms],
+        },
+    )
     session.add_all(new_rooms)
     await session.flush()
     for room in new_rooms:
         await session.refresh(room)
+        room.validation_warnings = warnings  # type: ignore[attr-defined]
     return [RoomResponse.model_validate(r) for r in new_rooms]
 
 
@@ -396,6 +430,11 @@ async def update_room(
     room, _accom = await get_room_or_404(session, room_id, user_id)
     data = payload.model_dump(exclude_unset=True)
     metadata = data.pop("metadata", None)
+    others = await rooms_beds(session, _accom.id, skip={room.id})
+    before = {
+        "accommodation": accommodation_view(_accom, others + room.capacity),
+        "rooms": [room_view(room)],
+    }
     for key, value in data.items():
         setattr(room, key, value)
     if isinstance(metadata, dict):
@@ -403,8 +442,16 @@ async def update_room(
         room.metadata_ = merge_metadata(getattr(room, "metadata_", None), metadata)
     elif metadata is not None:
         room.metadata_ = metadata
+    warnings = await gate_accommodation_rules(
+        _accom,
+        operation="room_update",
+        subject="room",
+        data={"accommodation": accommodation_view(_accom, others + room.capacity), "rooms": [room_view(room)]},
+        before=before,
+    )
     await session.flush()
     await session.refresh(room)
+    room.validation_warnings = warnings  # type: ignore[attr-defined]
     return RoomResponse.model_validate(room)
 
 
@@ -493,6 +540,12 @@ async def create_booking(
         created_by=str(user_id),
         metadata_=payload.metadata,
     )
+    warnings = await gate_accommodation_rules(
+        _accom,
+        operation="booking_create",
+        subject="booking",
+        data={"booking": booking_view(booking)},
+    )
     session.add(booking)
 
     # When the booking lands in an active state, flip the room to
@@ -505,6 +558,7 @@ async def create_booking(
 
     await session.flush()
     await session.refresh(booking)
+    booking.validation_warnings = warnings  # type: ignore[attr-defined]
     return BookingResponse.model_validate(booking)
 
 
@@ -551,6 +605,7 @@ async def update_booking(
         booking_id,
         user_id,
     )
+    before = {"booking": booking_view(booking)}
     data = payload.model_dump(exclude_unset=True)
     metadata = data.pop("metadata", None)
 
@@ -586,6 +641,13 @@ async def update_booking(
 
     for key, value in data.items():
         setattr(booking, key, value)
+    warnings = await gate_accommodation_rules(
+        _accom,
+        operation="booking_update",
+        subject="booking",
+        data={"booking": booking_view(booking)},
+        before=before,
+    )
     if isinstance(metadata, dict):
         # Merge into the existing column so a partial PATCH keeps other keys.
         booking.metadata_ = merge_metadata(getattr(booking, "metadata_", None), metadata)
@@ -601,6 +663,7 @@ async def update_booking(
 
     await session.flush()
     await session.refresh(booking)
+    booking.validation_warnings = warnings  # type: ignore[attr-defined]
     return BookingResponse.model_validate(booking)
 
 
@@ -641,9 +704,16 @@ async def create_charge(
         status=payload.status,
         metadata_=payload.metadata,
     )
+    warnings = await gate_accommodation_rules(
+        accom,
+        operation="charge_create",
+        subject="charge",
+        data={"charge": charge_view(charge, booking)},
+    )
     session.add(charge)
     await session.flush()
     await session.refresh(charge)
+    charge.validation_warnings = warnings  # type: ignore[attr-defined]
     return ChargeResponse.model_validate(charge)
 
 
@@ -700,6 +770,7 @@ async def update_charge(
 
     data = payload.model_dump(exclude_unset=True)
     metadata = data.pop("metadata", None)
+    before = {"charge": charge_view(charge, _booking)}
 
     # State-machine gate - only legal target labels reach here (regex), so
     # we just check the transition itself is allowed.
@@ -725,6 +796,13 @@ async def update_charge(
 
     for key, value in data.items():
         setattr(charge, key, value)
+    warnings = await gate_accommodation_rules(
+        accom,
+        operation="charge_update",
+        subject="charge",
+        data={"charge": charge_view(charge, _booking)},
+        before=before,
+    )
     if isinstance(metadata, dict):
         # Merge into the existing column so a partial PATCH keeps other keys.
         charge.metadata_ = merge_metadata(getattr(charge, "metadata_", None), metadata)
@@ -733,6 +811,7 @@ async def update_charge(
 
     await session.flush()
     await session.refresh(charge)
+    charge.validation_warnings = warnings  # type: ignore[attr-defined]
     return ChargeResponse.model_validate(charge)
 
 

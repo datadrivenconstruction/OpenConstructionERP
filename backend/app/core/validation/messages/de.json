@@ -1763,5 +1763,63 @@
       "fail": "Das Ergebnis ist {result}, aber {count} Prüfpunkte wurden nicht bestanden.",
       "suggestion": "Ergebnis korrigieren oder die nicht bestandenen Prüfpunkte kontrollieren."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Das Ende {end} liegt nicht nach dem Beginn {start}.",
+      "suggestion": "Daten so korrigieren, dass das Ende auf den Beginn folgt."
+    },
+    "period_outside_stay": {
+      "fail": "Der Abrechnungszeitraum {start} bis {end} liegt außerhalb des Aufenthalts {stay_start} bis {stay_end}.",
+      "suggestion": "Abrechnungszeitraum mit den Buchungsdaten abgleichen."
+    },
+    "currency_missing": {
+      "fail": "Ein Betrag von {amount} ist ohne Währung angegeben.",
+      "suggestion": "Währung am Datensatz, am Zimmerpreis oder am Projekt setzen."
+    },
+    "capacity_exceeded": {
+      "fail": "Die Zimmer ergeben {total} Betten, mehr als die ausgewiesene Kapazität von {capacity}.",
+      "suggestion": "Kapazität erhöhen oder die Zimmerkapazitäten prüfen."
+    },
+    "camp_room_charged": {
+      "fail": "Zimmer {label} in einer Arbeiterunterkunft hat einen Preis von {rate}.",
+      "suggestion": "Unterkünfte werden der Mannschaft üblicherweise kostenlos gestellt; Preis auf Absicht prüfen."
+    },
+    "nothing_recorded": {
+      "fail": "Der Status ist {state}, aber der Bericht enthält weder Arbeiten, Behinderungen, Notizen noch Personal.",
+      "suggestion": "Den Tag vor dem Einreichen beschreiben oder den Bericht als Entwurf belassen."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} Behinderungsstunden sind ohne Ursache erfasst.",
+      "suggestion": "Ursache der Behinderung angeben, z. B. Witterung, verspätete Lieferung oder Zugang."
+    },
+    "date_in_future": {
+      "fail": "Der Datensatz ist auf {date} datiert, das noch nicht eingetreten ist.",
+      "suggestion": "Datum korrigieren oder den Eintrag nach Tagesende erfassen."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} Stunden je Person oder Gerät an einem Tag, mehr als die 24 Stunden eines Tages.",
+      "suggestion": "Prüfen, ob eine Kolonnensumme als Stunden je Person eingetragen wurde, oder ein Einheitenfehler vorliegt."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} Arbeitsstunden sind erfasst, aber die Mannschaftsstärke ist null.",
+      "suggestion": "Anzahl der Personen auf der Baustelle eintragen."
+    },
+    "incident_undescribed": {
+      "fail": "Ein Vorfall ist ohne Beschreibung erfasst.",
+      "suggestion": "Beschreiben, was geschah, wer beteiligt war und was unternommen wurde."
+    },
+    "delay_undescribed": {
+      "fail": "Eine Behinderung von {hours} h ist ohne Grund erfasst.",
+      "suggestion": "Ursache der Behinderung ergänzen."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} Stunden sind in einem Zeitfenster von nur {span} Stunden erfasst.",
+      "suggestion": "Stunden oder Anfangs- und Endzeit korrigieren."
+    },
+    "crew_without_record": {
+      "fail": "Eine Mannschaft von {headcount} war auf der Baustelle, aber weder Arbeit, Prüfung noch Behinderung ist erfasst.",
+      "suggestion": "Ergänzen, was die Mannschaft getan hat, oder die Behinderung erfassen, die die Arbeit stoppte."
+    }
   }
 }

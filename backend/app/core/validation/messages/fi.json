@@ -1763,5 +1763,63 @@
       "fail": "Tulos on {result}, mutta {count} tarkistuslistan kohtaa hylättiin.",
       "suggestion": "Korjaa tulos tai tarkista hylätyt kohdat."
     }
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Loppu {end} ei ole alun {start} jälkeen.",
+      "suggestion": "Korjaa päivämäärät niin, että loppu on alun jälkeen."
+    },
+    "period_outside_stay": {
+      "fail": "Laskutusjakso {start}-{end} on oleskelun {stay_start}-{stay_end} ulkopuolella.",
+      "suggestion": "Vertaa laskutusjaksoa varauksen päivämääriin."
+    },
+    "currency_missing": {
+      "fail": "Summa {amount} on annettu ilman valuuttaa.",
+      "suggestion": "Aseta valuutta tietueelle, huoneen hintaan tai hankkeelle."
+    },
+    "capacity_exceeded": {
+      "fail": "Huoneet antavat yhteensä {total} vuodepaikkaa, enemmän kuin mitoituskapasiteetti {capacity}.",
+      "suggestion": "Nosta mitoituskapasiteettia tai tarkista huoneiden kapasiteetit."
+    },
+    "camp_room_charged": {
+      "fail": "Työmaaleirin huoneella {label} on hinta {rate}.",
+      "suggestion": "Leirimajoitus on yleensä työryhmälle maksutonta; vahvista, että hinta on tarkoituksellinen."
+    },
+    "nothing_recorded": {
+      "fail": "Tila on {state}, mutta raportissa ei ole töitä, viivästyksiä, merkintöjä eikä työvoimaa.",
+      "suggestion": "Kuvaa päivä ennen lähettämistä tai jätä raportti luonnokseksi."
+    },
+    "delay_unexplained": {
+      "fail": "Viivästystunteja {hours} on kirjattu ilman syytä.",
+      "suggestion": "Kuvaa viivästyksen syy, esimerkiksi sää, myöhästynyt toimitus tai pääsy."
+    },
+    "date_in_future": {
+      "fail": "Tietueen päiväys on {date}, joka ei ole vielä koittanut.",
+      "suggestion": "Korjaa päiväys tai kirjaa tietue päivän päätyttyä."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} tuntia henkilöä tai konetta kohti vuorokaudessa, yli vuorokauden 24 tuntia.",
+      "suggestion": "Tarkista, onko ryhmän summa kirjattu tunteina henkilöä kohti tai onko yksikkö virheellinen."
+    },
+    "hours_without_crew": {
+      "fail": "Työtunteja {hours} on kirjattu, mutta työvoiman määrä on nolla.",
+      "suggestion": "Anna työmaalla olleiden henkilöiden määrä."
+    },
+    "incident_undescribed": {
+      "fail": "Tapaus on kirjattu ilman kuvausta.",
+      "suggestion": "Kuvaa, mitä tapahtui, ketkä olivat mukana ja mitä tehtiin."
+    },
+    "delay_undescribed": {
+      "fail": "Viivästys {hours} h on kirjattu ilman syytä.",
+      "suggestion": "Lisää viivästyksen syy."
+    },
+    "hours_exceed_window": {
+      "fail": "Tunteja {hours} on kirjattu vain {span} tunnin ajalle.",
+      "suggestion": "Korjaa tunnit tai alkamis- ja päättymisajat."
+    },
+    "crew_without_record": {
+      "fail": "Työmaalla oli {headcount} hengen ryhmä, mutta työtä, tarkastusta tai viivästystä ei ole kirjattu.",
+      "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
+    }
   }
 }
