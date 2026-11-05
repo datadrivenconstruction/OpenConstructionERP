@@ -45881,6 +45881,7 @@ const resource = {
   "validation.light_passed": "通过",
   "validation.light_warning": "警告",
   "validation.no_results": "暂无可检查的内容。有数据后规则会立即运行。",
+  "validation.saved_with_warnings": "已保存，但有警告",
     "modules.tab_profiles": "公司档案",
     "modules.tab_packs": "包",
     "modules.tab_data_packages": "数据包",

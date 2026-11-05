@@ -46065,6 +46065,7 @@ const resource = {
   "validation.light_passed": "Bestået",
   "validation.light_warning": "Advarsler",
   "validation.no_results": "Intet at kontrollere endnu. Reglerne kører, så snart der er data.",
+  "validation.saved_with_warnings": "Gemt med advarsler",
     "modules.tab_profiles": "Virksomhedsprofiler",
     "modules.tab_packs": "Pakker",
     "modules.tab_data_packages": "Datapakker",

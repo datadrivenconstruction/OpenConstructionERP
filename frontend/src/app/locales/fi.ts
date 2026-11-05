@@ -46074,6 +46074,7 @@ const resource = {
   "validation.light_passed": "Hyväksytty",
   "validation.light_warning": "Varoitukset",
   "validation.no_results": "Tarkistettavaa ei ole vielä. Säännöt ajetaan heti, kun dataa on.",
+  "validation.saved_with_warnings": "Tallennettu varoituksin",
     "modules.tab_profiles": "Yritysprofiilit",
     "modules.tab_packs": "Paketit",
     "modules.tab_data_packages": "Datapaketit",

@@ -46392,6 +46392,7 @@ const resource = {
     "validation.light_passed": "Өтті",
     "validation.light_warning": "Ескертулер",
     "validation.no_results": "Тексеретін ештеңе жоқ. Деректер пайда болысымен ережелер іске қосылады.",
+    "validation.saved_with_warnings": "Ескертулермен сақталды",
     "cost_match.tier_exact": "Дәл сай",
     "cost_match.tier_high_confidence": "Сенімді",
     "cost_match.tier_needs_review": "Қарауды қажет етеді",

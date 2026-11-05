@@ -46101,6 +46101,7 @@ const resource = {
   "validation.light_passed": "Godkänt",
   "validation.light_warning": "Varningar",
   "validation.no_results": "Inget att kontrollera ännu. Reglerna körs så fort det finns data.",
+  "validation.saved_with_warnings": "Sparat med varningar",
     "modules.tab_profiles": "Företagsprofiler",
     "modules.tab_packs": "Paket",
     "modules.tab_data_packages": "Datapaket",

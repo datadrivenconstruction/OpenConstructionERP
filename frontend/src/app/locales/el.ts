@@ -46417,6 +46417,7 @@ const resource = {
     "validation.light_passed": "Επιτυχία",
     "validation.light_warning": "Προειδοποιήσεις",
     "validation.no_results": "Δεν υπάρχει ακόμη κάτι προς έλεγχο. Οι κανόνες εκτελούνται μόλις υπάρξουν δεδομένα.",
+    "validation.saved_with_warnings": "Αποθηκεύτηκε με προειδοποιήσεις",
     "cost_match.tier_exact": "Ακριβές",
     "cost_match.tier_high_confidence": "Με εμπιστοσύνη",
     "cost_match.tier_needs_review": "Χρειάζεται έλεγχο",

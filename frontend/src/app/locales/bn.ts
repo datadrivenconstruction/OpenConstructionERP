@@ -46435,6 +46435,7 @@ const resource = {
     "validation.light_passed": "উত্তীর্ণ",
     "validation.light_warning": "সতর্কবার্তা",
     "validation.no_results": "এখনও যাচাই করার কিছু নেই। ডেটা এলেই নিয়মগুলো চলবে।",
+    "validation.saved_with_warnings": "সতর্কতা সহ সংরক্ষিত",
     "tax_withholding.verification_col": "যাচাই প্রয়োজন",
     "tax_withholding.unnamed_party": "নামহীন পক্ষ",
     "tax_withholding.taxable_base_label": "করযোগ্য ভিত্তি",

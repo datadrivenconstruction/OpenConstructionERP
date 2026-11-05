@@ -46476,6 +46476,7 @@ const resource = {
     "validation.light_passed": "قبول",
     "validation.light_warning": "هشدارها",
     "validation.no_results": "هنوز چیزی برای بررسی نیست. قاعده‌ها به محض رسیدن داده اجرا می‌شوند.",
+    "validation.saved_with_warnings": "با هشدار ذخیره شد",
     "cost_match.tier_exact": "دقیق",
     "cost_match.tier_high_confidence": "قابل‌اطمینان",
     "cost_match.tier_needs_review": "نیاز به بازبینی",

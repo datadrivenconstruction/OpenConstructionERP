@@ -45987,6 +45987,7 @@ const resource = {
     "validation.light_passed": "O‘tdi",
     "validation.light_warning": "Ogohlantirishlar",
     "validation.no_results": "Tekshiriladigan narsa hozircha yo‘q. Maʼlumot paydo bo‘lishi bilan qoidalar ishga tushadi.",
+    "validation.saved_with_warnings": "Ogohlantirishlar bilan saqlandi",
     "modules.tab_profiles": "Kompaniya profillari",
     "modules.tab_packs": "Paketlar",
     "modules.tab_data_packages": "Maʼlumotlar paketlari",

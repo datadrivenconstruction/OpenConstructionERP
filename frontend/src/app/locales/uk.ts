@@ -46776,6 +46776,7 @@ const resource = {
     "validation.light_passed": "Пройдено",
     "validation.light_warning": "Попередження",
     "validation.no_results": "Поки нічого перевіряти. Правила спрацюють, щойно з’являться дані.",
+    "validation.saved_with_warnings": "Збережено з попередженнями",
     "modules.tab_profiles": "Профілі компанії",
     "modules.tab_packs": "Пакети",
     "modules.tab_data_packages": "Пакети даних",

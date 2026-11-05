@@ -46348,6 +46348,7 @@ const resource = {
   "validation.light_passed": "Conforme",
   "validation.light_warning": "Avertissements",
   "validation.no_results": "Rien à contrôler pour le moment. Les règles s’exécutent dès qu’il y a des données.",
+  "validation.saved_with_warnings": "Enregistré avec avertissements",
     "modules.tab_profiles": "Profils d'entreprise",
     "modules.tab_packs": "Packs",
     "modules.tab_data_packages": "Packs de données",

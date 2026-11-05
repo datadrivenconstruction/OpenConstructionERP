@@ -46757,6 +46757,7 @@ const resource = {
     "validation.light_passed": "עבר",
     "validation.light_warning": "אזהרות",
     "validation.no_results": "עדיין אין מה לבדוק. הכללים רצים ברגע שיש נתונים.",
+    "validation.saved_with_warnings": "נשמר עם אזהרות",
     "cost_match.tier_exact": "מדויק",
     "cost_match.tier_high_confidence": "ביטחון גבוה",
     "cost_match.tier_needs_review": "דורש בדיקה",

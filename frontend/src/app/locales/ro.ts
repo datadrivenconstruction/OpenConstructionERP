@@ -46338,6 +46338,7 @@ const resource = {
   "validation.light_passed": "Trecut",
   "validation.light_warning": "Avertismente",
   "validation.no_results": "Încă nu este nimic de verificat. Regulile rulează de îndată ce există date.",
+  "validation.saved_with_warnings": "Salvat cu avertismente",
     "modules.tab_profiles": "Profiluri companie",
     "modules.tab_packs": "Pachete",
     "modules.tab_data_packages": "Pachete de date",

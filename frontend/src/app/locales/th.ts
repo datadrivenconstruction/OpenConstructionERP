@@ -45879,6 +45879,7 @@ const resource = {
   "validation.light_passed": "ผ่าน",
   "validation.light_warning": "คำเตือน",
   "validation.no_results": "ยังไม่มีอะไรให้ตรวจสอบ กฎจะทำงานทันทีที่มีข้อมูล",
+  "validation.saved_with_warnings": "บันทึกแล้วพร้อมคำเตือน",
     "modules.tab_profiles": "โปรไฟล์บริษัท",
     "modules.tab_packs": "แพ็ก",
     "modules.tab_data_packages": "แพ็กข้อมูล",

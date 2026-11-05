@@ -46391,6 +46391,7 @@ const resource = {
   "validation.light_passed": "Superati",
   "validation.light_warning": "Avvisi",
   "validation.no_results": "Ancora nulla da controllare. Le regole vengono eseguite appena ci sono dati.",
+  "validation.saved_with_warnings": "Salvato con avvisi",
     "modules.tab_profiles": "Profili aziendali",
     "modules.tab_packs": "Pacchetti",
     "modules.tab_data_packages": "Pacchetti di dati",

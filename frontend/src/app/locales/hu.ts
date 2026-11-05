@@ -45837,6 +45837,7 @@ const resource = {
     "validation.light_passed": "Megfelelt",
     "validation.light_warning": "Figyelmeztetések",
     "validation.no_results": "Még nincs mit ellenőrizni. A szabályok adat érkeztekor futnak le.",
+    "validation.saved_with_warnings": "Mentve figyelmeztetésekkel",
     "modules.tab_profiles": "Cégprofilok",
     "modules.tab_packs": "Csomagok",
     "modules.tab_data_packages": "Adatcsomagok",

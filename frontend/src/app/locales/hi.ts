@@ -46106,6 +46106,7 @@ const resource = {
   "validation.light_passed": "उत्तीर्ण",
   "validation.light_warning": "चेतावनियाँ",
   "validation.no_results": "अभी जाँचने के लिए कुछ नहीं है। डेटा आते ही नियम चलने लगते हैं।",
+  "validation.saved_with_warnings": "चेतावनियों के साथ सहेजा गया",
     "modules.tab_profiles": "कंपनी प्रोफ़ाइल",
     "modules.tab_packs": "पैक",
     "modules.tab_data_packages": "डेटा पैकेज",

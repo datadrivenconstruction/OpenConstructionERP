@@ -47375,6 +47375,7 @@ const resource = {
     "validation.light_passed": "Läbitud",
     "validation.light_warning": "Hoiatused",
     "validation.no_results": "Kontrollida pole veel midagi. Reeglid käivituvad niipea, kui andmed tekivad.",
+    "validation.saved_with_warnings": "Salvestatud hoiatustega",
     "boq.price_analysis_currency": "Valuuta",
     "boq.price_analysis_col_resource": "Ressurss",
     "boq.price_analysis_col_unit_cost": "Ühikuhind",

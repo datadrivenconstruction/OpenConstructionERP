@@ -46081,6 +46081,7 @@ const resource = {
   "validation.light_passed": "Өттү",
   "validation.light_warning": "Эскертүүлөр",
   "validation.no_results": "Текшере турган эч нерсе жок. Маалымат пайда болору менен эрежелер иштейт.",
+  "validation.saved_with_warnings": "Эскертүүлөр менен сакталды",
     "modules.tab_profiles": "Компания профилдери",
     "modules.tab_packs": "Пакеттер",
     "modules.tab_data_packages": "Дайындар пакеттери",

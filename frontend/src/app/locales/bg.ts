@@ -46074,6 +46074,7 @@ const resource = {
   "validation.light_passed": "Преминало",
   "validation.light_warning": "Предупреждения",
   "validation.no_results": "Още няма какво да се проверява. Правилата се изпълняват щом има данни.",
+  "validation.saved_with_warnings": "Запазено с предупреждения",
     "modules.tab_profiles": "Фирмени профили",
     "modules.tab_packs": "Пакети",
     "modules.tab_data_packages": "Пакети с данни",

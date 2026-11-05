@@ -40151,6 +40151,7 @@ const resource = {
   "validation.light_passed": "Passed",
   "validation.light_warning": "Warnings",
   "validation.no_results": "Nothing to check yet. Rules run as soon as there is data.",
+  "validation.saved_with_warnings": "Saved with warnings",
     "modules.tab_profiles": "Company Profiles",
     "modules.tab_packs": "Packs",
     "modules.tab_data_packages": "Data Packages",

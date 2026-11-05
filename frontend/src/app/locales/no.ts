@@ -46101,6 +46101,7 @@ const resource = {
   "validation.light_passed": "Bestått",
   "validation.light_warning": "Advarsler",
   "validation.no_results": "Ingenting å kontrollere ennå. Reglene kjøres så snart det finnes data.",
+  "validation.saved_with_warnings": "Lagret med advarsler",
     "modules.tab_profiles": "Firmaprofiler",
     "modules.tab_packs": "Pakker",
     "modules.tab_data_packages": "Datapakker",
