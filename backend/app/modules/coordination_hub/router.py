@@ -257,7 +257,7 @@ async def update_threshold(
     evaluated = await service.evaluate_thresholds(project_id)
     for tr in evaluated.thresholds:
         if tr.metric == row.metric:
-            return tr
+            return tr.model_copy(update={"validation_warnings": list(getattr(row, "validation_warnings", None) or [])})
     # Fallback - return the persisted row with neutral evaluation state.
     return ThresholdRow(
         metric=row.metric,
@@ -267,4 +267,5 @@ async def update_threshold(
         current_value=row.warn_value,
         level="ok",
         message="",
+        validation_warnings=list(getattr(row, "validation_warnings", None) or []),
     )

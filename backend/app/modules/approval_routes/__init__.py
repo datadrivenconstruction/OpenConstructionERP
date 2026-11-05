@@ -36,6 +36,10 @@ async def on_startup() -> None:
 
     register_approval_route_permissions()
 
+    from app.modules.approval_routes.validators import register_approval_routes_validation_rules
+
+    register_approval_routes_validation_rules()
+
     try:
         from app.database import async_session_factory
         from app.modules.approval_routes.seed import seed_approval_route_presets

@@ -594,7 +594,9 @@ async def bulk_update_results(
         severity=data.severity,
         actor=str(user_id),
     )
-    return ClashBulkUpdateResponse(updated=updated, requested=len(data.result_ids))
+    return ClashBulkUpdateResponse(
+        updated=updated, requested=len(data.result_ids), validation_warnings=list(service.findings)
+    )
 
 
 @router.post(

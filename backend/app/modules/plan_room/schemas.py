@@ -55,6 +55,8 @@ class PlanPinResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    # Non-blocking findings of the plan_room rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # -- Overlay composite pieces -----------------------------------------------
