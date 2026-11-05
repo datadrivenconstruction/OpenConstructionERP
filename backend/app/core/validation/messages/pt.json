@@ -2366,5 +2366,83 @@
       "fail": "A intervenção tem data {date}, que ainda não chegou.",
       "suggestion": "Registe a intervenção depois de executada."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "A data do contrato {value} não é uma data real.",
+      "suggestion": "Introduza uma data válida no formato AAAA-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "O contrato continua ativo, mas o seu período terminou em {date}.",
+      "suggestion": "Encerre o contrato por termo ou renove-o com uma nova data final."
+    },
+    "completed_without_items": {
+      "fail": "A ordem de serviço está concluída, mas as suas linhas somam zero e não há nada a faturar.",
+      "suggestion": "Adicione as linhas de mão de obra e materiais ou corrija o estado da ordem de serviço."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Nenhum signatário está marcado como obrigatório, por isso a sessão nunca ficará totalmente assinada.",
+      "suggestion": "Marque pelo menos um signatário como obrigatório."
+    },
+    "expiry_past": {
+      "fail": "A sessão expira em {date}, data que já passou.",
+      "suggestion": "Defina uma data de expiração futura ou deixe o campo vazio."
+    },
+    "signed_in_future": {
+      "fail": "A assinatura está datada de {date}, que é no futuro.",
+      "suggestion": "Verifique a data e a hora do dispositivo de assinatura e introduza a hora real da assinatura."
+    },
+    "signed_other_version": {
+      "fail": "O signatário com a função {role} assinou uma versão do documento diferente da da sessão.",
+      "suggestion": "Peça ao signatário que volte a assinar a versão atual."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "O fator de {module} / {action} aparece mais de uma vez nesta atualização.",
+      "suggestion": "Envie cada par de módulo e ação apenas uma vez."
+    },
+    "factor_unknown_action": {
+      "fail": "Nenhuma ação registada corresponde a {module} / {action}, por isso este fator nunca é usado.",
+      "suggestion": "Compare os nomes do módulo e da ação com a lista de fatores de tempo."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minutos poupados por ação excedem um dia de trabalho ({max} minutos).",
+      "suggestion": "Verifique o valor; provavelmente foram introduzidas horas como minutos."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "A unidade {unit} está registada como expedida, entregue ou instalada, pelo que o seu controlo de qualidade seria ignorado.",
+      "suggestion": "Registe a unidade na primeira etapa e faça-a avançar passo a passo."
+    },
+    "bim_ids_invalid": {
+      "fail": "Os identificadores dos elementos BIM associados contêm uma entrada vazia ou repetida.",
+      "suggestion": "Remova os identificadores vazios e duplicados para que cada elemento do modelo fique associado uma só vez."
+    },
+    "install_date_passed": {
+      "fail": "A data prevista de instalação {date} já passou, mas a unidade ainda não está instalada.",
+      "suggestion": "Defina uma nova data prevista de instalação ou registe a instalação."
+    },
+    "dispatch_without_date": {
+      "fail": "A unidade foi expedida mas não tem data prevista de instalação, pelo que a obra não consegue planear a entrega e a grua.",
+      "suggestion": "Introduza a data em que a unidade vai ser instalada."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Esta é uma linha de preço global, mas foi indicada uma taxa ou uma duração; não entram no total.",
+      "suggestion": "Apague a taxa e a duração ou mude a linha para por tempo."
+    },
+    "timed_carries_fixed": {
+      "fail": "Esta é uma linha por tempo, mas foi indicado um valor fixo; não entra no total.",
+      "suggestion": "Apague o valor fixo ou mude a linha para preço global."
+    },
+    "line_unpriced": {
+      "fail": "A linha custa zero e fica fora do total dos trabalhos preliminares.",
+      "suggestion": "Introduza a taxa e o número de períodos, ou o valor fixo."
+    }
   }
 }

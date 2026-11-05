@@ -2366,5 +2366,83 @@
       "fail": "Het onderhoud is gedateerd op {date}, een datum die nog in de toekomst ligt.",
       "suggestion": "Leg onderhoud pas vast nadat het is uitgevoerd."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "De contractdatum {value} is geen echte datum.",
+      "suggestion": "Voer een geldige datum in met de notatie JJJJ-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Het contract is nog actief, maar de looptijd eindigde op {date}.",
+      "suggestion": "Laat het contract aflopen of verleng het met een nieuwe einddatum."
+    },
+    "completed_without_items": {
+      "fail": "De werkbon is afgerond, maar de regels tellen op tot nul; er is niets te factureren.",
+      "suggestion": "Voeg de arbeids- en materiaalregels toe of corrigeer de status van de werkbon."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Er is geen ondertekenaar als verplicht gemarkeerd, dus de sessie kan nooit volledig ondertekend worden.",
+      "suggestion": "Markeer minstens één ondertekenaar als verplicht."
+    },
+    "expiry_past": {
+      "fail": "De sessie verloopt op {date}, een datum die al voorbij is.",
+      "suggestion": "Stel een vervaldatum in de toekomst in of laat het veld leeg."
+    },
+    "signed_in_future": {
+      "fail": "De handtekening is gedateerd op {date}, in de toekomst.",
+      "suggestion": "Controleer datum en tijd van het ondertekenapparaat en voer het werkelijke tijdstip in."
+    },
+    "signed_other_version": {
+      "fail": "De ondertekenaar met rol {role} heeft een andere versie van het document ondertekend dan die van de sessie.",
+      "suggestion": "Vraag de ondertekenaar de huidige versie opnieuw te ondertekenen."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "De factor voor {module} / {action} komt meer dan eens voor in deze wijziging.",
+      "suggestion": "Stuur elk paar van module en actie slechts één keer."
+    },
+    "factor_unknown_action": {
+      "fail": "Geen vastgelegde actie komt overeen met {module} / {action}, dus deze factor wordt nooit gebruikt.",
+      "suggestion": "Vergelijk de namen van module en actie met de lijst met tijdfactoren."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} bespaarde minuten per actie is meer dan een werkdag ({max} minuten).",
+      "suggestion": "Controleer de waarde; waarschijnlijk zijn uren als minuten ingevoerd."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Eenheid {unit} is geregistreerd als verzonden, geleverd of geplaatst, waardoor de kwaliteitscontrole zou worden overgeslagen.",
+      "suggestion": "Registreer de eenheid in de eerste fase en laat haar stap voor stap doorlopen."
+    },
+    "bim_ids_invalid": {
+      "fail": "De gekoppelde BIM-element-id's bevatten een lege of dubbele invoer.",
+      "suggestion": "Verwijder de lege en dubbele id's zodat elk modelelement één keer is gekoppeld."
+    },
+    "install_date_passed": {
+      "fail": "De geplande plaatsingsdatum {date} is verstreken, maar de eenheid is nog niet geplaatst.",
+      "suggestion": "Stel een nieuwe geplande plaatsingsdatum in of registreer de plaatsing."
+    },
+    "dispatch_without_date": {
+      "fail": "De eenheid is verzonden maar heeft geen geplande plaatsingsdatum, dus de bouwplaats kan levering en kraanplanning niet regelen.",
+      "suggestion": "Voer de datum in waarop de eenheid geplaatst moet worden."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Dit is een regel voor een vast bedrag, maar er is een tarief of duur ingevuld; die tellen niet mee in het totaal.",
+      "suggestion": "Wis tarief en duur of zet de regel op tijdgebonden."
+    },
+    "timed_carries_fixed": {
+      "fail": "Dit is een tijdgebonden regel, maar er is een vast bedrag ingevuld; dat telt niet mee in het totaal.",
+      "suggestion": "Wis het vaste bedrag of zet de regel op vast bedrag."
+    },
+    "line_unpriced": {
+      "fail": "De regel komt uit op nul en valt weg uit het totaal van de algemene kosten.",
+      "suggestion": "Voer het tarief en het aantal perioden in, of het vaste bedrag."
+    }
   }
 }

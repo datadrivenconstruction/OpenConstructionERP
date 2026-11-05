@@ -2366,5 +2366,83 @@
       "fail": "维保日期为 {date},该日期尚未到来。",
       "suggestion": "维保完成后再记录。"
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "合同日期 {value} 不是真实存在的日期。",
+      "suggestion": "请按 YYYY-MM-DD 格式输入有效日期。"
+    },
+    "contract_lapsed": {
+      "fail": "合同仍处于生效状态，但其期限已于 {date} 结束。",
+      "suggestion": "请让合同到期终止，或以新的结束日期续签。"
+    },
+    "completed_without_items": {
+      "fail": "工单已完工，但各行合计为零，无可结算的内容。",
+      "suggestion": "请补充人工和材料行，或更正工单状态。"
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "没有任何签署人被标记为必需，因此该签署会话永远无法完成全部签署。",
+      "suggestion": "请至少将一名签署人标记为必需。"
+    },
+    "expiry_past": {
+      "fail": "该会话于 {date} 到期，此日期已过。",
+      "suggestion": "请设置未来的到期日期，或将该字段留空。"
+    },
+    "signed_in_future": {
+      "fail": "签名日期为 {date}，晚于当前时间。",
+      "suggestion": "请检查签署设备的日期和时间，并填写实际签署时间。"
+    },
+    "signed_other_version": {
+      "fail": "角色为 {role} 的签署人签署的文件版本与会话中的版本不同。",
+      "suggestion": "请让签署人重新签署当前版本。"
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "{module} / {action} 的系数在本次更新中出现多次。",
+      "suggestion": "每个模块与操作的组合只提交一次。"
+    },
+    "factor_unknown_action": {
+      "fail": "没有任何已记录的操作与 {module} / {action} 对应，因此该系数永远不会被使用。",
+      "suggestion": "请对照时间系数列表核对模块和操作名称。"
+    },
+    "factor_over_workday": {
+      "fail": "每次操作节省 {minutes} 分钟，超过了一个工作日（{max} 分钟）。",
+      "suggestion": "请核对数值；很可能把小时误填成了分钟。"
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "构件 {unit} 被登记为已发运、已交付或已安装，其质量检验将被跳过。",
+      "suggestion": "请在第一阶段登记构件，并逐步推进。"
+    },
+    "bim_ids_invalid": {
+      "fail": "关联的 BIM 构件编号中含有空项或重复项。",
+      "suggestion": "请删除空编号和重复编号，使每个模型构件只关联一次。"
+    },
+    "install_date_passed": {
+      "fail": "计划安装日期 {date} 已过，但构件尚未安装。",
+      "suggestion": "请设定新的计划安装日期，或记录安装情况。"
+    },
+    "dispatch_without_date": {
+      "fail": "构件已发运但没有计划安装日期，工地无法安排到货和吊车时段。",
+      "suggestion": "请填写构件的安装日期。"
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "这是总价包干行，但填写了单价或工期，二者不计入合计。",
+      "suggestion": "请清除单价和工期，或将该行改为按时间计价。"
+    },
+    "timed_carries_fixed": {
+      "fail": "这是按时间计价行，但填写了固定金额，该金额不计入合计。",
+      "suggestion": "请清除固定金额，或将该行改为总价包干。"
+    },
+    "line_unpriced": {
+      "fail": "该行报价为零，不会计入开办费合计。",
+      "suggestion": "请填写单价和期数，或填写固定金额。"
+    }
   }
 }

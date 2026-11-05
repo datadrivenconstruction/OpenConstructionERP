@@ -2366,5 +2366,83 @@
       "fail": "The service is dated {date}, which is still in the future.",
       "suggestion": "Log a service once it has been carried out."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "The contract date {value} is not a real date.",
+      "suggestion": "Enter a valid date in the format YYYY-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "The contract is still active, but its period ended on {date}.",
+      "suggestion": "Expire the contract or renew it with a new end date."
+    },
+    "completed_without_items": {
+      "fail": "The work order is completed, but its lines total nothing, so nothing can be billed.",
+      "suggestion": "Add the labour and material lines, or correct the work order status."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "No signatory is marked as required, so the session can never be fully signed.",
+      "suggestion": "Mark at least one signatory as required."
+    },
+    "expiry_past": {
+      "fail": "The session expires on {date}, which has already passed.",
+      "suggestion": "Set an expiry date in the future, or leave it empty."
+    },
+    "signed_in_future": {
+      "fail": "The signature is dated {date}, which is in the future.",
+      "suggestion": "Check the date and time of the signing device and enter the real signing time."
+    },
+    "signed_other_version": {
+      "fail": "The {role} signed a different version of the document than the one in the session.",
+      "suggestion": "Ask the signatory to sign the current version again."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "The factor for {module} / {action} appears more than once in this update.",
+      "suggestion": "Send each module and action pair once."
+    },
+    "factor_unknown_action": {
+      "fail": "No recorded action matches {module} / {action}, so this factor is never used.",
+      "suggestion": "Check the module and action names against the list of time factors."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minutes saved per action is more than a working day ({max} minutes).",
+      "suggestion": "Check the figure; hours were probably entered as minutes."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "The unit {unit} is registered as dispatched, delivered or installed, so its quality check would be skipped.",
+      "suggestion": "Register the unit at the first stage and advance it step by step."
+    },
+    "bim_ids_invalid": {
+      "fail": "The linked BIM element ids contain a blank or repeated entry.",
+      "suggestion": "Remove the empty and duplicate ids so each model element is linked once."
+    },
+    "install_date_passed": {
+      "fail": "The target install date {date} has passed, but the unit is not installed yet.",
+      "suggestion": "Set a new target install date or record the installation."
+    },
+    "dispatch_without_date": {
+      "fail": "The unit is dispatched but has no target install date, so site cannot plan the delivery and crane slot.",
+      "suggestion": "Enter the date on which the unit is to be installed."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "This is a fixed-sum line, but a rate or a duration is entered; they are not counted in the total.",
+      "suggestion": "Clear the rate and duration, or change the line to time-related."
+    },
+    "timed_carries_fixed": {
+      "fail": "This is a time-related line, but a fixed amount is entered; it is not counted in the total.",
+      "suggestion": "Clear the fixed amount, or change the line to fixed."
+    },
+    "line_unpriced": {
+      "fail": "The line prices to nothing, so it drops out of the preliminaries total.",
+      "suggestion": "Enter the rate and the number of periods, or the fixed amount."
+    }
   }
 }

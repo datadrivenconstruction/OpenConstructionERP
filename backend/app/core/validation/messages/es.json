@@ -2366,5 +2366,83 @@
       "fail": "El mantenimiento tiene fecha {date}, que aún no ha llegado.",
       "suggestion": "Registre el mantenimiento una vez realizado."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "La fecha del contrato {value} no es una fecha real.",
+      "suggestion": "Introduzca una fecha válida con el formato AAAA-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "El contrato sigue activo, pero su vigencia terminó el {date}.",
+      "suggestion": "Dé el contrato por vencido o renuévelo con una nueva fecha de fin."
+    },
+    "completed_without_items": {
+      "fail": "La orden de trabajo está completada, pero sus líneas suman cero y no se puede facturar nada.",
+      "suggestion": "Añada las líneas de mano de obra y materiales o corrija el estado de la orden de trabajo."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Ningún firmante está marcado como obligatorio, por lo que la sesión nunca podrá quedar firmada del todo.",
+      "suggestion": "Marque al menos un firmante como obligatorio."
+    },
+    "expiry_past": {
+      "fail": "La sesión caduca el {date}, fecha que ya ha pasado.",
+      "suggestion": "Fije una fecha de caducidad futura o deje el campo vacío."
+    },
+    "signed_in_future": {
+      "fail": "La firma lleva fecha del {date}, que está en el futuro.",
+      "suggestion": "Compruebe la fecha y la hora del dispositivo de firma e introduzca la hora real de la firma."
+    },
+    "signed_other_version": {
+      "fail": "El firmante con el rol {role} firmó una versión del documento distinta de la de la sesión.",
+      "suggestion": "Pida al firmante que vuelva a firmar la versión actual."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "El factor de {module} / {action} aparece más de una vez en esta actualización.",
+      "suggestion": "Envíe cada pareja de módulo y acción una sola vez."
+    },
+    "factor_unknown_action": {
+      "fail": "Ninguna acción registrada coincide con {module} / {action}, así que este factor nunca se usa.",
+      "suggestion": "Compare los nombres de módulo y acción con la lista de factores de tiempo."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minutos ahorrados por acción superan una jornada laboral ({max} minutos).",
+      "suggestion": "Revise la cifra; probablemente se escribieron horas como minutos."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "La unidad {unit} está registrada como despachada, entregada o instalada, de modo que se omitiría su control de calidad.",
+      "suggestion": "Registre la unidad en la primera etapa y hágala avanzar paso a paso."
+    },
+    "bim_ids_invalid": {
+      "fail": "Los identificadores de elementos BIM vinculados contienen una entrada vacía o repetida.",
+      "suggestion": "Elimine los identificadores vacíos y duplicados para que cada elemento del modelo se vincule una sola vez."
+    },
+    "install_date_passed": {
+      "fail": "La fecha prevista de instalación {date} ya pasó, pero la unidad aún no está instalada.",
+      "suggestion": "Fije una nueva fecha prevista de instalación o registre la instalación."
+    },
+    "dispatch_without_date": {
+      "fail": "La unidad está despachada pero no tiene fecha prevista de instalación, así que la obra no puede planificar la entrega ni el turno de grúa.",
+      "suggestion": "Introduzca la fecha en que se instalará la unidad."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Es una partida a suma alzada, pero se ha indicado una tarifa o una duración; no se cuentan en el total.",
+      "suggestion": "Borre la tarifa y la duración o cambie la partida a por tiempo."
+    },
+    "timed_carries_fixed": {
+      "fail": "Es una partida por tiempo, pero se ha indicado un importe fijo; no se cuenta en el total.",
+      "suggestion": "Borre el importe fijo o cambie la partida a suma alzada."
+    },
+    "line_unpriced": {
+      "fail": "La partida se valora en cero y queda fuera del total de gastos generales.",
+      "suggestion": "Introduzca la tarifa y el número de periodos, o el importe fijo."
+    }
   }
 }

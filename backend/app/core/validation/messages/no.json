@@ -2366,5 +2366,83 @@
       "fail": "Servicen er datert {date}, en dato som ennå ikke har inntruffet.",
       "suggestion": "Før inn service først når den er utført."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Kontraktsdatoen {value} er ikke en ekte dato.",
+      "suggestion": "Oppgi en gyldig dato i formatet ÅÅÅÅ-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Kontrakten er fortsatt aktiv, men perioden endte {date}.",
+      "suggestion": "La kontrakten utløpe eller forny den med ny sluttdato."
+    },
+    "completed_without_items": {
+      "fail": "Arbeidsordren er ferdigstilt, men linjene summerer til null; ingenting kan faktureres.",
+      "suggestion": "Legg til linjer for arbeid og materialer, eller rett statusen på arbeidsordren."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Ingen signatar er merket som påkrevd, så økten kan aldri bli fullt signert.",
+      "suggestion": "Merk minst én signatar som påkrevd."
+    },
+    "expiry_past": {
+      "fail": "Økten utløper {date}, en dato som allerede er passert.",
+      "suggestion": "Sett en utløpsdato i fremtiden, eller la feltet stå tomt."
+    },
+    "signed_in_future": {
+      "fail": "Signaturen er datert {date}, som ligger i fremtiden.",
+      "suggestion": "Kontroller dato og tid på signeringsenheten og oppgi det faktiske tidspunktet."
+    },
+    "signed_other_version": {
+      "fail": "Signataren i rollen {role} har signert en annen versjon av dokumentet enn den i økten.",
+      "suggestion": "Be signataren signere gjeldende versjon på nytt."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Faktoren for {module} / {action} forekommer flere ganger i denne endringen.",
+      "suggestion": "Send hvert par av modul og handling bare én gang."
+    },
+    "factor_unknown_action": {
+      "fail": "Ingen registrert handling samsvarer med {module} / {action}, så faktoren brukes aldri.",
+      "suggestion": "Sammenlign modul- og handlingsnavn med listen over tidsfaktorer."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} sparte minutter per handling er mer enn en arbeidsdag ({max} minutter).",
+      "suggestion": "Kontroller verdien; timer er trolig oppgitt som minutter."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Enheten {unit} er registrert som sendt, levert eller montert, så kvalitetskontrollen ville bli hoppet over.",
+      "suggestion": "Registrer enheten i første trinn og før den videre trinn for trinn."
+    },
+    "bim_ids_invalid": {
+      "fail": "De tilknyttede BIM-element-ID-ene inneholder en tom eller gjentatt post.",
+      "suggestion": "Fjern tomme og doble ID-er slik at hvert modellelement kobles én gang."
+    },
+    "install_date_passed": {
+      "fail": "Planlagt monteringsdato {date} er passert, men enheten er ikke montert ennå.",
+      "suggestion": "Sett en ny planlagt monteringsdato eller registrer monteringen."
+    },
+    "dispatch_without_date": {
+      "fail": "Enheten er sendt, men har ingen planlagt monteringsdato, så byggeplassen kan ikke planlegge levering og kranbruk.",
+      "suggestion": "Oppgi datoen enheten skal monteres."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Dette er en fastpris-linje, men en sats eller varighet er oppgitt; de teller ikke med i summen.",
+      "suggestion": "Fjern sats og varighet, eller endre linjen til tidsrelatert."
+    },
+    "timed_carries_fixed": {
+      "fail": "Dette er en tidsrelatert linje, men et fast beløp er oppgitt; det teller ikke med i summen.",
+      "suggestion": "Fjern det faste beløpet, eller endre linjen til fastpris."
+    },
+    "line_unpriced": {
+      "fail": "Linjen prises til null og faller ut av summen for rigg og drift.",
+      "suggestion": "Oppgi sats og antall perioder, eller det faste beløpet."
+    }
   }
 }

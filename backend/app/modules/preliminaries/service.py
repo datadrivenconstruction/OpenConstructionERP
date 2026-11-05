@@ -22,9 +22,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.preliminaries import prelim_math
 from app.modules.preliminaries.models import PrelimItem
 from app.modules.preliminaries.schemas import PrelimItemCreate, PrelimItemUpdate
+from app.modules.preliminaries.validators import PRELIMINARIES_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,19 @@ class PreliminariesService:
     # ── Create ───────────────────────────────────────────────────────────────
 
     async def create_item(self, data: PrelimItemCreate) -> PrelimItem:
-        """Create a preliminaries item on a project."""
+        """Create a preliminaries item on a project (rules run first; errors answer a coded 422)."""
+        report = await self._gate(
+            {
+                "label": data.label or "",
+                "category": data.category,
+                "item_type": prelim_math.normalize_item_type(data.item_type),
+                "rate_per_period": data.rate_per_period,
+                "periods": data.periods,
+                "fixed_amount": data.fixed_amount,
+            },
+            project_id=data.project_id,
+            operation="create",
+        )
         item = PrelimItem(
             project_id=data.project_id,
             label=data.label or "",
@@ -52,6 +66,7 @@ class PreliminariesService:
         self.session.add(item)
         await self.session.flush()
         await self.session.refresh(item)
+        item.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Preliminaries item created: %s for project %s", item.id, data.project_id)
         return item
 
@@ -92,11 +107,17 @@ class PreliminariesService:
             fields["category"] = prelim_math.normalize_category(fields["category"])
         if "item_type" in fields and fields["item_type"] is not None:
             fields["item_type"] = prelim_math.normalize_item_type(fields["item_type"])
+        stored = self.to_mapping(item)
+        merged = {**stored, **{k: v for k, v in fields.items() if v is not None}}
+        report = await self._gate(
+            merged, project_id=item.project_id, operation="update", item_id=item.id, before=stored
+        )
         for key, value in fields.items():
             if value is not None:
                 setattr(item, key, value)
         await self.session.flush()
         await self.session.refresh(item)
+        item.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return item
 
     # ── Delete ───────────────────────────────────────────────────────────────
@@ -109,6 +130,28 @@ class PreliminariesService:
         logger.info("Preliminaries item deleted: %s", item_id)
 
     # ── Helpers ──────────────────────────────────────────────────────────────
+
+    async def _gate(
+        self,
+        record: dict[str, Any],
+        *,
+        project_id: uuid.UUID,
+        operation: str,
+        item_id: uuid.UUID | None = None,
+        before: dict[str, Any] | None = None,
+    ) -> Any:
+        """Run the preliminaries rules over ``record``; errors the write introduces answer a coded 422."""
+        return await gate_rule_set(
+            rule_set=PRELIMINARIES_RULE_SET,
+            data={"item": {"id": str(item_id or ""), **record}},
+            target_type="preliminaries_item",
+            target_id=str(item_id or ""),
+            project_id=project_id,
+            operation=operation,
+            subject="preliminaries item",
+            before={"item": {"id": str(item_id or ""), **before}} if before is not None else None,
+            error="preliminaries_rules_failed",
+        )
 
     @staticmethod
     def to_mapping(item: PrelimItem) -> dict[str, Any]:

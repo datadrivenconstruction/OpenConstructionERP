@@ -2366,5 +2366,83 @@
       "fail": "L'intervento è datato {date}, una data ancora futura.",
       "suggestion": "Registri l'intervento dopo averlo eseguito."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "La data del contratto {value} non è una data reale.",
+      "suggestion": "Inserire una data valida nel formato AAAA-MM-GG."
+    },
+    "contract_lapsed": {
+      "fail": "Il contratto è ancora attivo, ma il suo periodo è terminato il {date}.",
+      "suggestion": "Far scadere il contratto o rinnovarlo con una nuova data di fine."
+    },
+    "completed_without_items": {
+      "fail": "L'ordine di lavoro è completato, ma le sue righe sommano zero: non si può fatturare nulla.",
+      "suggestion": "Aggiungere le righe di manodopera e materiali o correggere lo stato dell'ordine di lavoro."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Nessun firmatario è indicato come obbligatorio, quindi la sessione non potrà mai essere firmata del tutto.",
+      "suggestion": "Indicare almeno un firmatario come obbligatorio."
+    },
+    "expiry_past": {
+      "fail": "La sessione scade il {date}, data già trascorsa.",
+      "suggestion": "Impostare una scadenza futura oppure lasciare il campo vuoto."
+    },
+    "signed_in_future": {
+      "fail": "La firma è datata {date}, che è nel futuro.",
+      "suggestion": "Controllare data e ora del dispositivo di firma e inserire l'ora reale della firma."
+    },
+    "signed_other_version": {
+      "fail": "Il firmatario con ruolo {role} ha firmato una versione del documento diversa da quella della sessione.",
+      "suggestion": "Chiedere al firmatario di firmare di nuovo la versione attuale."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Il fattore per {module} / {action} compare più volte in questo aggiornamento.",
+      "suggestion": "Inviare ogni coppia di modulo e azione una sola volta."
+    },
+    "factor_unknown_action": {
+      "fail": "Nessuna azione registrata corrisponde a {module} / {action}, quindi questo fattore non viene mai usato.",
+      "suggestion": "Confrontare i nomi di modulo e azione con l'elenco dei fattori di tempo."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minuti risparmiati per azione superano una giornata lavorativa ({max} minuti).",
+      "suggestion": "Controllare il valore: probabilmente sono state inserite ore al posto dei minuti."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "L'unità {unit} è registrata come spedita, consegnata o installata, quindi il suo controllo qualità verrebbe saltato.",
+      "suggestion": "Registrare l'unità alla prima fase e farla avanzare passo dopo passo."
+    },
+    "bim_ids_invalid": {
+      "fail": "Gli identificatori degli elementi BIM collegati contengono una voce vuota o ripetuta.",
+      "suggestion": "Rimuovere gli identificatori vuoti e duplicati, così ogni elemento del modello è collegato una sola volta."
+    },
+    "install_date_passed": {
+      "fail": "La data prevista di installazione {date} è passata, ma l'unità non è ancora installata.",
+      "suggestion": "Impostare una nuova data prevista di installazione o registrare l'installazione."
+    },
+    "dispatch_without_date": {
+      "fail": "L'unità è spedita ma non ha una data prevista di installazione, quindi il cantiere non può pianificare la consegna e l'uso della gru.",
+      "suggestion": "Inserire la data in cui l'unità deve essere installata."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Questa è una voce a corpo, ma sono indicati una tariffa o una durata; non entrano nel totale.",
+      "suggestion": "Cancellare tariffa e durata oppure impostare la voce a tempo."
+    },
+    "timed_carries_fixed": {
+      "fail": "Questa è una voce a tempo, ma è indicato un importo fisso; non entra nel totale.",
+      "suggestion": "Cancellare l'importo fisso oppure impostare la voce a corpo."
+    },
+    "line_unpriced": {
+      "fail": "La voce vale zero e esce dal totale degli oneri generali di cantiere.",
+      "suggestion": "Inserire la tariffa e il numero di periodi, oppure l'importo fisso."
+    }
   }
 }

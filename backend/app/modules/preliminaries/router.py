@@ -57,6 +57,7 @@ def _to_response(item: PrelimItem) -> PrelimItemResponse:
         fixed_amount=item.fixed_amount if item.fixed_amount is not None else prelim_math.to_decimal(0),
         sort_order=item.sort_order or 0,
         line_total=line_total,
+        validation_warnings=getattr(item, "validation_warnings", []),
         created_at=item.created_at,
         updated_at=item.updated_at,
     )

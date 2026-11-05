@@ -37,8 +37,10 @@ from decimal import Decimal, InvalidOperation
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.value.models import TimeSavedFactor
 from app.modules.value.time_saved import DEFAULT_FACTORS, merge_factors
+from app.modules.value.validators import VALUE_RULE_SET
 
 #: Upper bound on a single factor (minutes). A day of manual work for one action
 #: is already implausible; the cap stops a fat-fingered entry from making the
@@ -140,6 +142,8 @@ async def set_factors(
     session: AsyncSession,
     tenant_id: str,
     updates: list[tuple[str, str, object]],
+    *,
+    warnings_out: list[dict] | None = None,
 ) -> list[FactorRow]:
     """Upsert a batch of the tenant's factor overrides and return the new surface.
 
@@ -150,7 +154,9 @@ async def set_factors(
     duplicating it. ``minutes`` is validated by :func:`_coerce_minutes` (non
     -negative, finite, capped); an invalid value raises :class:`ValueError`
     before anything is written, so a bad batch is rejected atomically. Returns the
-    full :func:`list_factors` surface after the change.
+    full :func:`list_factors` surface after the change. The ``value`` rule set then runs over the
+    batch: an error it introduces answers a coded 422 and writes nothing, warnings are appended to
+    ``warnings_out`` when given.
     """
     # Validate and normalise the whole batch first, so one bad row rejects the
     # entire request before any mutation (all-or-nothing).
@@ -168,6 +174,35 @@ async def set_factors(
             await session.execute(select(TimeSavedFactor).where(TimeSavedFactor.tenant_id == tenant_id))
         ).scalars()
     }
+
+    batch = [
+        {
+            "module": mod,
+            "action": act,
+            "minutes": minutes,
+            "default_minutes": DEFAULT_FACTORS.get((mod, act)),
+            "known": (mod, act) in DEFAULT_FACTORS or (mod, act) in existing,
+        }
+        for mod, act, minutes in coerced
+    ]
+    stored = [
+        {**r, "minutes": existing[(r["module"], r["action"])].minutes}
+        for r in batch
+        if (r["module"], r["action"]) in existing
+    ]
+    report = await gate_rule_set(
+        rule_set=VALUE_RULE_SET,
+        data={"factors": batch},
+        target_type="time_factors",
+        target_id=tenant_id,
+        project_id=None,
+        operation="update",
+        subject="set of time factors",
+        before={"factors": stored},
+        error="value_rules_failed",
+    )
+    if warnings_out is not None:
+        warnings_out.extend(warning_findings(report))
 
     for mod, act, minutes in coerced:
         default = DEFAULT_FACTORS.get((mod, act))

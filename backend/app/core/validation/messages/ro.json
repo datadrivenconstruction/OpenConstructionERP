@@ -2366,5 +2366,83 @@
       "fail": "Intervenția are data {date}, o dată care încă nu a sosit.",
       "suggestion": "Înregistrați intervenția abia după ce a fost efectuată."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Data contractului {value} nu este o dată reală.",
+      "suggestion": "Introduceți o dată validă în formatul AAAA-LL-ZZ."
+    },
+    "contract_lapsed": {
+      "fail": "Contractul este încă activ, dar perioada sa s-a încheiat la {date}.",
+      "suggestion": "Închideți contractul la termen sau reînnoiți-l cu o nouă dată de sfârșit."
+    },
+    "completed_without_items": {
+      "fail": "Ordinul de lucru este finalizat, dar liniile sale însumează zero, deci nu se poate factura nimic.",
+      "suggestion": "Adăugați liniile de manoperă și materiale sau corectați starea ordinului de lucru."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Niciun semnatar nu este marcat ca obligatoriu, deci sesiunea nu va fi niciodată semnată complet.",
+      "suggestion": "Marcați cel puțin un semnatar ca obligatoriu."
+    },
+    "expiry_past": {
+      "fail": "Sesiunea expiră la {date}, dată care a trecut deja.",
+      "suggestion": "Setați o dată de expirare în viitor sau lăsați câmpul gol."
+    },
+    "signed_in_future": {
+      "fail": "Semnătura are data {date}, care este în viitor.",
+      "suggestion": "Verificați data și ora dispozitivului de semnare și introduceți ora reală a semnării."
+    },
+    "signed_other_version": {
+      "fail": "Semnatarul cu rolul {role} a semnat altă versiune a documentului decât cea din sesiune.",
+      "suggestion": "Rugați semnatarul să semneze din nou versiunea curentă."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Factorul pentru {module} / {action} apare de mai multe ori în această actualizare.",
+      "suggestion": "Trimiteți fiecare pereche de modul și acțiune o singură dată."
+    },
+    "factor_unknown_action": {
+      "fail": "Nicio acțiune înregistrată nu corespunde cu {module} / {action}, deci acest factor nu este folosit niciodată.",
+      "suggestion": "Comparați numele modulului și ale acțiunii cu lista factorilor de timp."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minute economisite pe acțiune înseamnă mai mult decât o zi de lucru ({max} minute).",
+      "suggestion": "Verificați valoarea; probabil orele au fost introduse ca minute."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Unitatea {unit} este înregistrată ca expediată, livrată sau montată, deci controlul ei de calitate ar fi sărit.",
+      "suggestion": "Înregistrați unitatea la prima etapă și avansați-o pas cu pas."
+    },
+    "bim_ids_invalid": {
+      "fail": "Identificatorii elementelor BIM legate conțin o intrare goală sau repetată.",
+      "suggestion": "Eliminați identificatorii goi și duplicați, astfel încât fiecare element al modelului să fie legat o singură dată."
+    },
+    "install_date_passed": {
+      "fail": "Data țintă de montaj {date} a trecut, dar unitatea nu este încă montată.",
+      "suggestion": "Setați o nouă dată țintă de montaj sau înregistrați montajul."
+    },
+    "dispatch_without_date": {
+      "fail": "Unitatea este expediată, dar nu are dată țintă de montaj, deci șantierul nu poate planifica livrarea și macaraua.",
+      "suggestion": "Introduceți data la care unitatea urmează să fie montată."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Aceasta este o linie la sumă forfetară, dar sunt introduse un tarif sau o durată; ele nu intră în total.",
+      "suggestion": "Ștergeți tariful și durata sau schimbați linia în bazată pe timp."
+    },
+    "timed_carries_fixed": {
+      "fail": "Aceasta este o linie bazată pe timp, dar este introdusă o sumă fixă; ea nu intră în total.",
+      "suggestion": "Ștergeți suma fixă sau schimbați linia în sumă forfetară."
+    },
+    "line_unpriced": {
+      "fail": "Linia se evaluează la zero și iese din totalul cheltuielilor generale de șantier.",
+      "suggestion": "Introduceți tariful și numărul de perioade sau suma fixă."
+    }
   }
 }

@@ -2366,5 +2366,83 @@
       "fail": "Huolto on päivätty {date}, mikä on vielä tulevaisuudessa.",
       "suggestion": "Kirjaa huolto vasta sen jälkeen, kun se on tehty."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Sopimuksen päivämäärä {value} ei ole todellinen päivämäärä.",
+      "suggestion": "Anna kelvollinen päivämäärä muodossa VVVV-KK-PP."
+    },
+    "contract_lapsed": {
+      "fail": "Sopimus on yhä voimassa, mutta sen jakso päättyi {date}.",
+      "suggestion": "Päätä sopimus määräajan umpeutuessa tai uusi se uudella päättymispäivällä."
+    },
+    "completed_without_items": {
+      "fail": "Työmääräys on valmis, mutta sen rivien summa on nolla, eikä mitään voi laskuttaa.",
+      "suggestion": "Lisää työ- ja materiaalirivit tai korjaa työmääräyksen tila."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Yhtäkään allekirjoittajaa ei ole merkitty pakolliseksi, joten istuntoa ei voi koskaan allekirjoittaa kokonaan.",
+      "suggestion": "Merkitse vähintään yksi allekirjoittaja pakolliseksi."
+    },
+    "expiry_past": {
+      "fail": "Istunto vanhenee {date}, ja tämä päivä on jo mennyt.",
+      "suggestion": "Aseta vanhenemispäivä tulevaisuuteen tai jätä kenttä tyhjäksi."
+    },
+    "signed_in_future": {
+      "fail": "Allekirjoitus on päivätty {date}, mikä on tulevaisuudessa.",
+      "suggestion": "Tarkista allekirjoituslaitteen päivä ja aika ja anna todellinen allekirjoitusaika."
+    },
+    "signed_other_version": {
+      "fail": "Rooli {role} allekirjoitti eri version asiakirjasta kuin istunnossa oleva.",
+      "suggestion": "Pyydä allekirjoittajaa allekirjoittamaan nykyinen versio uudelleen."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Kerroin kohteelle {module} / {action} esiintyy tässä päivityksessä useammin kuin kerran.",
+      "suggestion": "Lähetä jokainen moduulin ja toiminnon pari vain kerran."
+    },
+    "factor_unknown_action": {
+      "fail": "Mikään kirjattu toiminto ei vastaa kohdetta {module} / {action}, joten kerrointa ei käytetä koskaan.",
+      "suggestion": "Vertaa moduulin ja toiminnon nimiä aikakertoimien luetteloon."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} säästettyä minuuttia toimintoa kohti on enemmän kuin työpäivä ({max} minuuttia).",
+      "suggestion": "Tarkista arvo; tunnit on todennäköisesti syötetty minuutteina."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Yksikkö {unit} on kirjattu lähetetyksi, toimitetuksi tai asennetuksi, joten sen laadunvarmistus ohitettaisiin.",
+      "suggestion": "Kirjaa yksikkö ensimmäiseen vaiheeseen ja etene vaihe vaiheelta."
+    },
+    "bim_ids_invalid": {
+      "fail": "Linkitetyissä BIM-elementtitunnuksissa on tyhjä tai toistuva merkintä.",
+      "suggestion": "Poista tyhjät ja kaksoistunnukset, jotta jokainen mallielementti linkitetään kerran."
+    },
+    "install_date_passed": {
+      "fail": "Tavoiteasennuspäivä {date} on mennyt, mutta yksikköä ei ole vielä asennettu.",
+      "suggestion": "Aseta uusi tavoiteasennuspäivä tai kirjaa asennus."
+    },
+    "dispatch_without_date": {
+      "fail": "Yksikkö on lähetetty, mutta tavoiteasennuspäivää ei ole, joten työmaa ei voi suunnitella toimitusta ja nosturia.",
+      "suggestion": "Anna päivä, jona yksikkö asennetaan."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Tämä on kiinteähintainen rivi, mutta siihen on syötetty hinta tai kesto; ne eivät kuulu summaan.",
+      "suggestion": "Tyhjennä hinta ja kesto tai muuta rivi aikaperusteiseksi."
+    },
+    "timed_carries_fixed": {
+      "fail": "Tämä on aikaperusteinen rivi, mutta siihen on syötetty kiinteä summa; se ei kuulu summaan.",
+      "suggestion": "Tyhjennä kiinteä summa tai muuta rivi kiinteähintaiseksi."
+    },
+    "line_unpriced": {
+      "fail": "Rivin hinta on nolla, ja se putoaa pois työmaan yleiskustannusten summasta.",
+      "suggestion": "Anna hinta ja jaksojen määrä tai kiinteä summa."
+    }
   }
 }

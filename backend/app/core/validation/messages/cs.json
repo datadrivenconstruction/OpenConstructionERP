@@ -2366,5 +2366,83 @@
       "fail": "Servis je datován {date}, což je datum, které ještě nenastalo.",
       "suggestion": "Servis zapisujte až po jeho provedení."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Datum smlouvy {value} není skutečné datum.",
+      "suggestion": "Zadejte platné datum ve formátu RRRR-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Smlouva je stále aktivní, ale její doba skončila {date}.",
+      "suggestion": "Smlouvu ukončete uplynutím doby, nebo ji prodlužte s novým koncovým datem."
+    },
+    "completed_without_items": {
+      "fail": "Zakázkový list je dokončen, ale jeho položky dávají nulu, není co fakturovat.",
+      "suggestion": "Doplňte položky práce a materiálu nebo opravte stav zakázkového listu."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Žádný podepisující není označen jako povinný, takže relace nebude nikdy plně podepsána.",
+      "suggestion": "Označte alespoň jednoho podepisujícího jako povinného."
+    },
+    "expiry_past": {
+      "fail": "Relace vyprší {date}, což už uplynulo.",
+      "suggestion": "Nastavte datum vypršení v budoucnosti, nebo pole nechte prázdné."
+    },
+    "signed_in_future": {
+      "fail": "Podpis je datován {date}, tedy v budoucnosti.",
+      "suggestion": "Zkontrolujte datum a čas podpisového zařízení a zadejte skutečný čas podpisu."
+    },
+    "signed_other_version": {
+      "fail": "Podepisující v roli {role} podepsal jinou verzi dokumentu, než je v relaci.",
+      "suggestion": "Požádejte podepisujícího, aby znovu podepsal aktuální verzi."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Faktor pro {module} / {action} se v této změně vyskytuje vícekrát.",
+      "suggestion": "Každou dvojici modulu a akce odešlete jen jednou."
+    },
+    "factor_unknown_action": {
+      "fail": "Žádná evidovaná akce neodpovídá {module} / {action}, takže se tento faktor nikdy nepoužije.",
+      "suggestion": "Porovnejte názvy modulu a akce se seznamem časových faktorů."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} ušetřených minut na akci je víc než pracovní den ({max} minut).",
+      "suggestion": "Zkontrolujte hodnotu; hodiny byly pravděpodobně zadány jako minuty."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Prvek {unit} je evidován jako odeslaný, dodaný nebo namontovaný, takže by se přeskočila jeho kontrola kvality.",
+      "suggestion": "Prvek zaevidujte v prvním kroku a posouvejte ho krok za krokem."
+    },
+    "bim_ids_invalid": {
+      "fail": "Propojené ID prvků BIM obsahují prázdný nebo opakovaný záznam.",
+      "suggestion": "Odstraňte prázdná a duplicitní ID, aby byl každý prvek modelu propojen jednou."
+    },
+    "install_date_passed": {
+      "fail": "Plánované datum montáže {date} uplynulo, ale prvek ještě není namontován.",
+      "suggestion": "Nastavte nové plánované datum montáže, nebo montáž zaznamenejte."
+    },
+    "dispatch_without_date": {
+      "fail": "Prvek je odeslán, ale nemá plánované datum montáže, takže stavba nemůže naplánovat dodávku a jeřáb.",
+      "suggestion": "Zadejte datum, kdy má být prvek namontován."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Je to paušální položka, ale je zadána sazba nebo doba trvání; do součtu se nezapočítávají.",
+      "suggestion": "Vymažte sazbu a dobu trvání, nebo položku změňte na časovou."
+    },
+    "timed_carries_fixed": {
+      "fail": "Je to časová položka, ale je zadána paušální částka; do součtu se nezapočítává.",
+      "suggestion": "Vymažte paušální částku, nebo položku změňte na paušální."
+    },
+    "line_unpriced": {
+      "fail": "Položka se oceňuje nulou a vypadává ze součtu zařízení staveniště.",
+      "suggestion": "Zadejte sazbu a počet období, nebo paušální částku."
+    }
   }
 }

@@ -2366,5 +2366,83 @@
       "fail": "A karbantartás dátuma {date}, ez még a jövőben van.",
       "suggestion": "A karbantartást csak az elvégzése után rögzítse."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "A szerződés dátuma ({value}) nem létező dátum.",
+      "suggestion": "Adjon meg érvényes dátumot ÉÉÉÉ-HH-NN formátumban."
+    },
+    "contract_lapsed": {
+      "fail": "A szerződés még aktív, de időszaka {date} napon véget ért.",
+      "suggestion": "Zárja le a szerződést lejárattal, vagy hosszabbítsa meg új befejező dátummal."
+    },
+    "completed_without_items": {
+      "fail": "A munkalap kész, de tételeinek összege nulla, így nincs mit számlázni.",
+      "suggestion": "Adja hozzá a munkadíj- és anyagtételeket, vagy javítsa a munkalap állapotát."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Egyetlen aláíró sincs kötelezőként megjelölve, így a munkamenet soha nem lehet teljesen aláírt.",
+      "suggestion": "Jelöljön meg legalább egy aláírót kötelezőként."
+    },
+    "expiry_past": {
+      "fail": "A munkamenet lejárata {date}, ez a nap már elmúlt.",
+      "suggestion": "Adjon meg jövőbeli lejárati dátumot, vagy hagyja üresen a mezőt."
+    },
+    "signed_in_future": {
+      "fail": "Az aláírás dátuma {date}, ami a jövőben van.",
+      "suggestion": "Ellenőrizze az aláíró eszköz dátumát és időpontját, és adja meg a valós aláírási időt."
+    },
+    "signed_other_version": {
+      "fail": "A(z) {role} szerepű aláíró a munkamenetben lévőtől eltérő dokumentumverziót írt alá.",
+      "suggestion": "Kérje meg az aláírót, hogy írja alá újra az aktuális verziót."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "A(z) {module} / {action} tényező többször szerepel ebben a módosításban.",
+      "suggestion": "Minden modul és művelet párt csak egyszer küldjön."
+    },
+    "factor_unknown_action": {
+      "fail": "Egyetlen rögzített művelet sem felel meg a(z) {module} / {action} párnak, így ez a tényező soha nem kerül felhasználásra.",
+      "suggestion": "Vesse össze a modul- és műveletneveket az időtényezők listájával."
+    },
+    "factor_over_workday": {
+      "fail": "A műveletenként megtakarított {minutes} perc több egy munkanapnál ({max} perc).",
+      "suggestion": "Ellenőrizze az értéket; az órákat valószínűleg percként adták meg."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "A(z) {unit} egység feladottként, kiszállítottként vagy beépítettként van rögzítve, így a minőség-ellenőrzése kimaradna.",
+      "suggestion": "Az egységet az első szakaszban rögzítse, és lépésenként léptesse tovább."
+    },
+    "bim_ids_invalid": {
+      "fail": "A kapcsolt BIM-elemazonosítók üres vagy ismétlődő bejegyzést tartalmaznak.",
+      "suggestion": "Távolítsa el az üres és a kétszeres azonosítókat, hogy minden modellelem egyszer legyen kapcsolva."
+    },
+    "install_date_passed": {
+      "fail": "A tervezett beépítési dátum ({date}) elmúlt, de az egység még nincs beépítve.",
+      "suggestion": "Adjon meg új tervezett beépítési dátumot, vagy rögzítse a beépítést."
+    },
+    "dispatch_without_date": {
+      "fail": "Az egység feladva, de nincs tervezett beépítési dátuma, így az építési terület nem tudja megtervezni a szállítást és a darut.",
+      "suggestion": "Adja meg a beépítés dátumát."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Ez átalánydíjas tétel, de díjtétel vagy időtartam van megadva; ezek nem számítanak bele az összegbe.",
+      "suggestion": "Törölje a díjtételt és az időtartamot, vagy váltson a tételt időalapúra."
+    },
+    "timed_carries_fixed": {
+      "fail": "Ez időalapú tétel, de fix összeg van megadva; ez nem számít bele az összegbe.",
+      "suggestion": "Törölje a fix összeget, vagy váltson a tételt átalányra."
+    },
+    "line_unpriced": {
+      "fail": "A tétel nulla értéket kap, és kiesik az általános költségek összegéből.",
+      "suggestion": "Adja meg a díjtételt és az időszakok számát, vagy a fix összeget."
+    }
   }
 }

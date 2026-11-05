@@ -2366,5 +2366,83 @@
       "fail": "Servis je datiran {date}, datum koji tek dolazi.",
       "suggestion": "Upišite servis tek nakon što je obavljen."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Datum ugovora {value} nije stvaran datum.",
+      "suggestion": "Unesite valjan datum u obliku GGGG-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Ugovor je još aktivan, ali je njegovo razdoblje završilo {date}.",
+      "suggestion": "Završite ugovor istekom roka ili ga obnovite s novim datumom završetka."
+    },
+    "completed_without_items": {
+      "fail": "Radni nalog je dovršen, ali stavke daju zbroj nula pa se ništa ne može fakturirati.",
+      "suggestion": "Dodajte stavke rada i materijala ili ispravite status radnog naloga."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Nijedan potpisnik nije označen kao obavezan pa sesija nikada neće biti potpuno potpisana.",
+      "suggestion": "Označite barem jednog potpisnika kao obaveznog."
+    },
+    "expiry_past": {
+      "fail": "Sesija istječe {date}, a taj je datum već prošao.",
+      "suggestion": "Postavite datum isteka u budućnosti ili ostavite polje prazno."
+    },
+    "signed_in_future": {
+      "fail": "Potpis nosi datum {date}, koji je u budućnosti.",
+      "suggestion": "Provjerite datum i vrijeme uređaja za potpisivanje i unesite stvarno vrijeme potpisa."
+    },
+    "signed_other_version": {
+      "fail": "Potpisnik u ulozi {role} potpisao je drugu verziju dokumenta od one u sesiji.",
+      "suggestion": "Zatražite od potpisnika da ponovno potpiše aktualnu verziju."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Faktor za {module} / {action} pojavljuje se više puta u ovoj izmjeni.",
+      "suggestion": "Svaki par modula i radnje pošaljite samo jednom."
+    },
+    "factor_unknown_action": {
+      "fail": "Nijedna evidentirana radnja ne odgovara paru {module} / {action} pa se ovaj faktor nikada ne koristi.",
+      "suggestion": "Usporedite nazive modula i radnje s popisom vremenskih faktora."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} ušteđenih minuta po radnji više je od radnog dana ({max} minuta).",
+      "suggestion": "Provjerite vrijednost; sati su vjerojatno uneseni kao minute."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Jedinica {unit} evidentirana je kao otpremljena, isporučena ili ugrađena pa bi se njezina kontrola kvalitete preskočila.",
+      "suggestion": "Evidentirajte jedinicu u prvoj fazi i pomičite je korak po korak."
+    },
+    "bim_ids_invalid": {
+      "fail": "Povezani identifikatori BIM elemenata sadrže prazan ili ponovljen unos.",
+      "suggestion": "Uklonite prazne i dvostruke identifikatore da svaki element modela bude povezan jednom."
+    },
+    "install_date_passed": {
+      "fail": "Planirani datum ugradnje {date} je prošao, a jedinica još nije ugrađena.",
+      "suggestion": "Postavite novi planirani datum ugradnje ili evidentirajte ugradnju."
+    },
+    "dispatch_without_date": {
+      "fail": "Jedinica je otpremljena, ali nema planirani datum ugradnje pa gradilište ne može planirati isporuku i rad dizalice.",
+      "suggestion": "Unesite datum kada se jedinica treba ugraditi."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Ovo je paušalna stavka, ali je unesena cijena ili trajanje; oni se ne ubrajaju u zbroj.",
+      "suggestion": "Obrišite cijenu i trajanje ili stavku promijenite u vremensku."
+    },
+    "timed_carries_fixed": {
+      "fail": "Ovo je vremenska stavka, ali je unesen fiksni iznos; on se ne ubraja u zbroj.",
+      "suggestion": "Obrišite fiksni iznos ili stavku promijenite u paušalnu."
+    },
+    "line_unpriced": {
+      "fail": "Stavka se vrednuje nulom i ispada iz zbroja općih troškova gradilišta.",
+      "suggestion": "Unesite cijenu i broj razdoblja ili fiksni iznos."
+    }
   }
 }
