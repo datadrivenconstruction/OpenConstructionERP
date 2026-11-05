@@ -48,6 +48,7 @@ from __future__ import annotations
 import hashlib
 import io
 import logging
+import threading
 from typing import Any
 
 import numpy as np
@@ -95,6 +96,11 @@ DEFAULT_MAX_DEPTH = 7
 # only and is cheap, and the expensive GLB export happens once, afterwards.
 MAX_TILES_PER_MODEL = 256
 
+# One bake at a time per process: a bake peaks at several times the GLB size in
+# RAM, so concurrent bakes from the thread pool would multiply that peak on a
+# small server (principle 1).
+_BAKE_LOCK = threading.Lock()
+
 
 def build_tileset(
     glb_bytes: bytes,
@@ -118,6 +124,13 @@ def build_tileset(
         model is too small to benefit from tiling or too large to tile safely -
         the caller should serve the monolithic GLB instead.
     """
+    with _BAKE_LOCK:
+        return _build_tileset(glb_bytes, max_meshes_per_tile, max_depth)
+
+
+def _build_tileset(
+    glb_bytes: bytes, max_meshes_per_tile: int, max_depth: int
+) -> tuple[dict[str, Any], dict[str, bytes]] | None:
     if not glb_bytes:
         return None
     if len(glb_bytes) > MAX_GLB_BYTES:
@@ -137,6 +150,7 @@ def build_tileset(
         return None
 
     meshes = _flatten_scene(loaded)
+    del loaded  # baked copies carry the geometry; free the parsed scene before exporting
     if len(meshes) < MIN_NODES_TO_TILE:
         logger.info(
             "tiler: %d meshes below tiling threshold %d - skipping",
