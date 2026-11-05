@@ -129,6 +129,8 @@ async def test_api_blocks_duplicate_period_with_code(ctx) -> None:
     assert dup.status_code == 422, dup.text
     assert dup.json()["detail"]["code"] == "price_index.period_unique"
     assert dup.json()["detail"]["error"] == "price_index_rules_failed"
+    assert "2026-01" in dup.text
+    assert "duplicate_" not in dup.text
 
 
 @pytest.mark.asyncio
@@ -150,6 +152,8 @@ async def test_api_region_duplicate_blocks_and_outlier_warns(ctx) -> None:
     dup = await client.post("/v1/price-index/location-factors/", json={"region_code": "BY", "factor": "1.1"})
     assert dup.status_code == 422, dup.text
     assert dup.json()["detail"]["code"] == "price_index.region_unique"
+    assert "BY" in dup.text
+    assert "duplicate_" not in dup.text
     odd = await client.post("/v1/price-index/location-factors/", json={"region_code": "NRW", "factor": "9"})
     assert odd.status_code == 201, odd.text
     assert [w["rule_id"] for w in odd.json()["warnings"]] == ["price_index.location_factor_band"]

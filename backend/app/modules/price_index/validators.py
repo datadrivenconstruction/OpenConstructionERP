@@ -51,7 +51,7 @@ class _PriceIndexRule(MoneyRule):
     standard = PRICE_INDEX_RULE_SET
     message_section = "price_index"
     own_message_keys = frozenset(
-        {"duplicate_key", "jump_implausible", "location_factor_outlier", "index_source_missing"}
+        {"duplicate_period", "duplicate_region", "jump_implausible", "location_factor_outlier", "index_source_missing"}
     )
     suggestion_key = "price_index.suggestion"
 
@@ -68,7 +68,7 @@ class PeriodUniqueRule(_PriceIndexRule):
         ref = str(point.get("id", ""))
         period = str(point.get("period") or "").strip()
         if period and any(str(p.get("period") or "").strip() == period for p in rows(context, "points")):
-            return [self.fail(context, "duplicate_key", ref=ref, what="period", value=period)]
+            return [self.fail(context, "duplicate_period", ref=ref, value=period)]
         return [self.ok(ref)]
 
 
@@ -84,7 +84,7 @@ class RegionUniqueRule(_PriceIndexRule):
         ref = str(loc.get("id", ""))
         code = str(loc.get("region_code") or "").strip()
         if code and any(str(r.get("region_code") or "").strip() == code for r in rows(context, "locations")):
-            return [self.fail(context, "duplicate_key", ref=ref, what="region code", value=code)]
+            return [self.fail(context, "duplicate_region", ref=ref, value=code)]
         return [self.ok(ref)]
 
 
