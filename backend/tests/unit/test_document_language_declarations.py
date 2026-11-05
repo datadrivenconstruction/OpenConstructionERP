@@ -52,6 +52,7 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/boq/router.py": {"export_boq_pdf", "export_boq_excel"},
     "modules/carbon/lifecycle_router.py": {"export_report"},
     "modules/wip_report/router.py": {"export_portfolio"},
+    "modules/offers/router.py": {"download_pdf"},
     "modules/commitment_release/router.py": {"export_matrix"},
     "modules/contracts/router.py": {"export_form_application_pdf", "export_claim_hakedis_pdf"},
     "modules/costmodel/router.py": {"export_cost_control"},
