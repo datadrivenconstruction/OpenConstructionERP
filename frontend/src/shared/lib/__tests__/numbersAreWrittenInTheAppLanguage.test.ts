@@ -398,6 +398,21 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
     why: 'The same record-payment request. Grouping it would reach the server as a different number.',
   },
   {
+    file: 'features/cost-control/BudgetLedgerPanel.tsx',
+    snippet: '{ cost_line_id: from, amount: (-value).toFixed(2) },',
+    why: 'Body of the budget-ledger POST (the first leg of a transfer), which the server parses as a decimal.',
+  },
+  {
+    file: 'features/cost-control/BudgetLedgerPanel.tsx',
+    snippet: '{ cost_line_id: to, amount: value.toFixed(2) },',
+    why: 'Body of the budget-ledger POST (the second leg of a transfer), which the server parses as a decimal.',
+  },
+  {
+    file: 'features/cost-control/BudgetLedgerPanel.tsx',
+    snippet: 'amount: value.toFixed(2),',
+    why: 'Body of the budget-ledger POST (a budget modification), which the server parses as a decimal.',
+  },
+  {
     file: 'features/procurement/ProcurementPage.tsx',
     snippet: 'amount_subtotal: String(poSubtotal.toFixed(2)),',
     why: 'Body of the purchase order POST, read by the server rather than by a person.',
@@ -679,7 +694,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Nineteen entries covering twenty-one sites in twelve files, against 139
+    // Twenty-two entries covering twenty-four sites in thirteen files, against 139
     // exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
@@ -688,6 +703,9 @@ describe('every number and date is written in the language the reader picked', (
       "features/finance/invoiceLines.ts :: return Number.isFinite(value) ? value.toFixed(decimals) : '';",
       'features/finance/markInvoicePaid.ts :: amount: cash.toFixed(2),',
       'features/finance/markInvoicePaid.ts :: withholding_amount: withheld.toFixed(2),',
+      'features/cost-control/BudgetLedgerPanel.tsx :: { cost_line_id: from, amount: (-value).toFixed(2) },',
+      'features/cost-control/BudgetLedgerPanel.tsx :: { cost_line_id: to, amount: value.toFixed(2) },',
+      'features/cost-control/BudgetLedgerPanel.tsx :: amount: value.toFixed(2),',
       'features/procurement/ProcurementPage.tsx :: amount_subtotal: String(poSubtotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: amount_total: String(poTotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: updated.amount = (qty * rate).toFixed(2);',

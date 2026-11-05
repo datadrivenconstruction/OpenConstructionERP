@@ -40,6 +40,7 @@ import {
 import { Badge, Button, Card, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
 import {
@@ -874,7 +875,7 @@ function PlanPanel({ day, onClose }: { day: string; onClose: () => void }) {
         type: 'success',
         title: t('dispatch.shared', { defaultValue: 'Sent to {{count}} foremen', count: r.notified }),
         message: r.without_user.length
-          ? t('dispatch.shared_missing', { defaultValue: 'No platform account for: {{names}}', names: r.without_user.join(', ') })
+          ? t('dispatch.shared_missing', { defaultValue: 'No platform account for: {{names}}', names: fmtList(r.without_user) })
           : undefined,
       }),
     onError: (e) => addToast({ type: 'error', title: t('dispatch.action_failed', { defaultValue: 'That did not work' }), message: getErrorMessage(e) }),

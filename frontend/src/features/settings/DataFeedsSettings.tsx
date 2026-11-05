@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, KeyRound } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { projectsApi } from '@/features/projects/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -400,7 +401,7 @@ export function DataFeedsSettings() {
               {t('bi_feed.sql_role', { defaultValue: 'Role' })}: {sqlQuery.data.role}
             </p>
             <p className="font-mono text-xs">
-              {t('bi_feed.sql_views', { defaultValue: 'Views' })}: {sqlQuery.data.views.map((v) => `${sqlQuery.data?.schema_name}.${v}`).join(', ')}
+              {t('bi_feed.sql_views', { defaultValue: 'Views' })}: {fmtList(sqlQuery.data.views.map((v) => `${sqlQuery.data?.schema_name}.${v}`))}
             </p>
           </CardContent>
         </Card>

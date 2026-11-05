@@ -3,6 +3,7 @@
 //
 // Pure helpers for the capital plan grid.
 
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 import type { CapitalItem, Envelope, EnvelopeBody } from './api';
 
 /** A negative gap is a shortfall: the envelope does not cover the demand. */
@@ -17,13 +18,13 @@ export function formatMoney(value: string | number, currency: string): string {
   const n = Number(value);
   if (!Number.isFinite(n)) return '-';
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(getNumberLocale(), {
       style: 'currency',
       currency,
       maximumFractionDigits: 0,
     }).format(n);
   } catch {
-    return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    return n.toLocaleString(getNumberLocale(), { maximumFractionDigits: 0 });
   }
 }
 

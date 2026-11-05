@@ -13,6 +13,7 @@
  * "unknown" (and therefore "allow") when the platform does not offer them.
  */
 
+import { fmtFixed } from '../formatters';
 import type { QueuedOp } from './mutationQueue';
 
 /** Longest edge of a stored photo, in pixels. */
@@ -101,10 +102,10 @@ export function formatBytes(bytes: number): string {
   if (!(bytes > 0)) return '0 B';
   if (bytes < 1024) return `${Math.round(bytes)} B`;
   const kb = bytes / 1024;
-  if (kb < 1024) return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`;
+  if (kb < 1024) return `${kb < 10 ? fmtFixed(kb, 1) : Math.round(kb)} KB`;
   const mb = kb / 1024;
-  if (mb < 1024) return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
-  return `${(mb / 1024).toFixed(1)} GB`;
+  if (mb < 1024) return `${mb < 10 ? fmtFixed(mb, 1) : Math.round(mb)} MB`;
+  return `${fmtFixed(mb / 1024, 1)} GB`;
 }
 
 /* ── Browser wrappers ──────────────────────────────────────────────────── */

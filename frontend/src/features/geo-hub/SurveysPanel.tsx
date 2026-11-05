@@ -3,6 +3,7 @@
 // globe through the existing raster overlay layer, and record the observed
 // progress per schedule activity next to the planned one.
 
+import { fmtFixed } from '@/shared/lib/formatters';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -564,7 +565,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
                   <td className="max-w-[9rem] truncate py-1 pr-1" title={`${row.code} ${row.name}`}>
                     <span className="text-content-tertiary">{row.code}</span> {row.name}
                   </td>
-                  <td className="px-1 text-right tabular-nums">{row.planned_pct_on_date.toFixed(0)}</td>
+                  <td className="px-1 text-right tabular-nums">{fmtFixed(row.planned_pct_on_date, 0)}</td>
                   <td className="px-1 text-right">
                     <input
                       type="text"

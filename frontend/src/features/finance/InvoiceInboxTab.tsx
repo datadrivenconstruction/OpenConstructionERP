@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { fmtNumber } from '@/shared/lib/formatters';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -413,7 +414,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
 
 function amountText(v: string | undefined): string {
   const n = Number(v);
-  return Number.isFinite(n) ? new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) : (v ?? '-');
+  return Number.isFinite(n) ? fmtNumber(n, 2) : (v ?? '-');
 }
 
 /* ── Detail modal ──────────────────────────────────────────────────────── */
