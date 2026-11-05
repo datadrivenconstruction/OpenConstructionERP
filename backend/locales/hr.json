@@ -2588,6 +2588,19 @@
     }
   },
   "capital_plan": {
-    "export": "Izvezi"
+    "export": {
+      "sheet": "Kapitalni plan",
+      "col": {
+        "title": "Projekt",
+        "priority": "Prioritet",
+        "status": "Status",
+        "total": "Ukupni trošak"
+      },
+      "row": {
+        "envelope": "Proračunski okvir",
+        "demand": "Potreba",
+        "gap": "Manjak"
+      }
+    }
   }
 }

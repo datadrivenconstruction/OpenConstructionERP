@@ -2565,6 +2565,19 @@
     }
   },
   "capital_plan": {
-    "export": "Eksportuj"
+    "export": {
+      "sheet": "Plan inwestycyjny",
+      "col": {
+        "title": "Projekt",
+        "priority": "Priorytet",
+        "status": "Status",
+        "total": "Koszt całkowity"
+      },
+      "row": {
+        "envelope": "Limit budżetu",
+        "demand": "Zapotrzebowanie",
+        "gap": "Niedobór"
+      }
+    }
   }
 }
