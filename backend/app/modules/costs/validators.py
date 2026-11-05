@@ -42,7 +42,17 @@ class CostRateInRangeRule(EstimatingRule):
             rate = to_dec(row.get("rate"))
             ref = _ref(row)
             if rate is None:
-                out.append(self.fail(context, "value_in_range", ref=ref, field="rate", value=row.get("rate"), low=0, high=MAX_SANE_AMOUNT))
+                out.append(
+                    self.fail(
+                        context,
+                        "value_in_range",
+                        ref=ref,
+                        field="rate",
+                        value=row.get("rate"),
+                        low=0,
+                        high=MAX_SANE_AMOUNT,
+                    )
+                )
                 continue
             bad = self.out_of_range(context, ref, "rate", rate, Decimal("0"), MAX_SANE_AMOUNT)
             if bad:
@@ -96,7 +106,9 @@ class CostAssemblyMatchesComponentsRule(EstimatingRule):
     name = "Assembly rate matches its components"
     standard = COSTS_RULE_SET
     severity = Severity.WARNING
-    description = "rate should equal the sum of component costs (within 1%) unless the item is mass-priced or has variants"
+    description = (
+        "rate should equal the sum of component costs (within 1%) unless the item is mass-priced or has variants"
+    )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         out: list[RuleResult] = []

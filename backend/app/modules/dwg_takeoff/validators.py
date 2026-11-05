@@ -43,7 +43,12 @@ class DwgMeasurementInRangeRule(EstimatingRule):
         a = section(context, "annotation")
         ref = str(a.get("id", ""))
         bad = self.out_of_range(
-            context, ref, "measurement_value", to_dec(a.get("measurement_value")), Decimal("0"), Decimal(MAX_MEASUREMENT)
+            context,
+            ref,
+            "measurement_value",
+            to_dec(a.get("measurement_value")),
+            Decimal("0"),
+            Decimal(MAX_MEASUREMENT),
         )
         return [bad] if bad else [self.ok(ref)]
 
@@ -60,7 +65,11 @@ class DwgCountIsWholeRule(EstimatingRule):
         a = section(context, "annotation")
         ref = str(a.get("id", ""))
         value = to_dec(a.get("measurement_value"))
-        if a.get("annotation_type") == "count" and value is not None and (value < 0 or value != value.to_integral_value()):
+        if (
+            a.get("annotation_type") == "count"
+            and value is not None
+            and (value < 0 or value != value.to_integral_value())
+        ):
             return [self.fail(context, "count_not_whole", ref=ref, value=value)]
         return [self.ok(ref)]
 

@@ -29,7 +29,9 @@ MIN_POINTS = {"distance": 2, "polyline": 2, "area": 3, "volume": 3}
 
 UNIT_FAMILY = {
     **dict.fromkeys(("m", "lm", "mm", "cm", "km", "ft", "in", "yd", "mi", "rm"), "length"),
-    **dict.fromkeys(("m2", "sqm", "sm", "mm2", "cm2", "km2", "ha", "sf", "sqft", "ft2", "yd2", "sy", "sqyd", "ac"), "area"),
+    **dict.fromkeys(
+        ("m2", "sqm", "sm", "mm2", "cm2", "km2", "ha", "sf", "sqft", "ft2", "yd2", "sy", "sqyd", "ac"), "area"
+    ),
     **dict.fromkeys(("m3", "cum", "cbm", "l", "cf", "cuft", "ft3", "yd3", "cy", "cuyd"), "volume"),
     **dict.fromkeys(("pcs", "pc", "ea", "each", "nr", "no", "stk", "st", "unit", "units", "set", "ls"), "count"),
 }
@@ -61,7 +63,11 @@ class TakeoffValueInRangeRule(EstimatingRule):
         out = [
             bad
             for field in ("measurement_value", "volume")
-            if (bad := self.out_of_range(context, ref, field, to_dec(m.get(field)), Decimal("0"), Decimal(MAX_MEASUREMENT)))
+            if (
+                bad := self.out_of_range(
+                    context, ref, field, to_dec(m.get(field)), Decimal("0"), Decimal(MAX_MEASUREMENT)
+                )
+            )
         ]
         return out or [self.ok(ref)]
 
@@ -81,7 +87,9 @@ class TakeoffGeometryMatchesTypeRule(EstimatingRule):
         points = m.get("points") or []
         needed = MIN_POINTS.get(mtype)
         if needed is not None and 0 < len(points) < needed:
-            return [self.fail(context, "geometry_too_few_points", ref=ref, type=mtype, count=len(points), needed=needed)]
+            return [
+                self.fail(context, "geometry_too_few_points", ref=ref, type=mtype, count=len(points), needed=needed)
+            ]
         return [self.ok(ref)]
 
 

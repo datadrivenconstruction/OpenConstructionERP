@@ -75,7 +75,7 @@ def test_message_placeholders_match_the_rule_params(locale: str) -> None:
 def test_legacy_key_tells_a_new_bad_value_from_the_old_one() -> None:
     from types import SimpleNamespace  # noqa: PLC0415
 
-    from app.core.validation.estimating_rules import _finding_key  # noqa: PLC0415
+    from app.core.validation.failure import finding_key as _finding_key  # noqa: PLC0415
 
     def finding(value: str, ref: str = "a") -> SimpleNamespace:
         return SimpleNamespace(rule_id="r", element_ref=ref, message="same", details={"value": value})
