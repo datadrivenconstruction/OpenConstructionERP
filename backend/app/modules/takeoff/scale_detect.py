@@ -288,6 +288,15 @@ def _line_bounds(text: str, pos: int) -> tuple[int, int]:
     return start, len(text) if end < 0 else end
 
 
+def _named_callout(text: str, start: int, cap: float | None) -> bool:
+    """A detail ratio labelled with a full scale word on its own line ("Detail scale 1:1")."""
+    if cap != _CONF_DETAIL:
+        return False
+    line_start, _line_end = _line_bounds(text, start)
+    before = text[max(line_start, start - _SCALE_KEYWORD_WINDOW) : start].lower()
+    return any(w in before for w in _LONG_SCALE_WORDS)
+
+
 def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
     """Keyword evidence for the token at ``start:end``: (near a scale word, confidence cap)."""
     line_start, _line_end = _line_bounds(text, start)
@@ -302,10 +311,11 @@ def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
     if word in _SCALE_WORDS or any(w in before for w in _LONG_SCALE_WORDS):
         return True, cap
     if line_start > 0:
-        # A title block prints the label on the line above its value.
+        # A title block prints the label at the end of the line above its value;
+        # "Do not scale from this drawing" mentions the word but labels nothing.
         prev_start = text.rfind("\n", 0, line_start - 1) + 1
         prev = text[prev_start : line_start - 1].lower()
-        if any(re.search(r"(?<!\w)" + re.escape(w) + r"(?!\w)", prev) for w in _LONG_SCALE_WORDS):
+        if any(re.search(r"(?<!\w)" + re.escape(w) + r"\s*:?\s*$", prev) for w in _LONG_SCALE_WORDS):
             if not _RATIO_RE.search(prev):
                 return True, cap if cap is not None else _CONF_LABEL_ABOVE
     return False, cap
@@ -350,7 +360,11 @@ def _scan_ratios(text: str, page: int) -> list[ScaleCandidate]:
                 page=page,
                 evidence=m.group(0).strip(),
                 source="ratio",
-                detail={"near_keyword": near_keyword, "antecedent": left, "callout": cap == _CONF_DETAIL},
+                detail={
+                    "near_keyword": near_keyword,
+                    "antecedent": left,
+                    "callout": _named_callout(text, m.start(), cap),
+                },
             )
         )
     for m in _SLASH_RE.finditer(text):
@@ -368,7 +382,12 @@ def _scan_ratios(text: str, page: int) -> list[ScaleCandidate]:
                 page=page,
                 evidence=m.group(0).strip(),
                 source="ratio",
-                detail={"near_keyword": True, "antecedent": 1, "slash": True, "callout": cap == _CONF_DETAIL},
+                detail={
+                    "near_keyword": True,
+                    "antecedent": 1,
+                    "slash": True,
+                    "callout": _named_callout(text, m.start(), cap),
+                },
             )
         )
     return out

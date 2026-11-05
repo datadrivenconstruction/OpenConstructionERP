@@ -390,7 +390,30 @@ def _skew_deg(dark: Any) -> float:
     if lines is None:
         return 0.0
     segs = [vp.Seg((float(x1), float(y1)), (float(x2), float(y2)), 1.0, 0) for x1, y1, x2, y2 in lines.reshape(-1, 4)]
-    return math.degrees(vp.dominant_angle(segs, []))
+    return _refine_skew(dark, math.degrees(vp.dominant_angle(segs, [])))
+
+
+def _refine_skew(dark: Any, ang: float) -> float:
+    """Sharpen a skew estimate to a few hundredths of a degree.
+
+    A long pen line drifting by a pixel breaks into steps; the angle at which the
+    ink's row and column profiles are sharpest is the one that keeps it whole.
+    """
+    ys, xs = np.nonzero(dark)
+    if xs.size < 100:
+        return ang
+    step = max(1, xs.size // 300_000)
+    xs, ys = xs[::step].astype(np.float64), ys[::step].astype(np.float64)
+    best, best_score = ang, -1.0
+    for a in ang + np.arange(-0.5, 0.501, 0.025):
+        t = math.radians(a)
+        c, sn = math.cos(t), math.sin(t)
+        rows = np.rint(ys * c - xs * sn).astype(np.int64)
+        cols = np.rint(xs * c + ys * sn).astype(np.int64)
+        score = float(np.square(np.bincount(rows - rows.min())).sum() + np.square(np.bincount(cols - cols.min())).sum())
+        if score > best_score:
+            best, best_score = float(a), score
+    return best
 
 
 def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[list[Any], list[Any]]:
@@ -426,7 +449,8 @@ def scan_parts(gray: Any, page_width_pt: float, page_height_pt: float) -> tuple[
         if b.t <= _STROKE_MAX_PX:
             a, c = ((b.lo, b.c), (b.hi, b.c)) if b.axis == "h" else ((b.c, b.lo), (b.c, b.hi))
             segs.append(vp.Seg(to_pt(*a), to_pt(*c), 0.35, len(segs)))
-        elif fp.is_straight(b):
+        else:
+            # junction bulges widen a band's extent, not its mean thickness
             lo, hi, c0, c1 = b.lo, b.hi, b.c - b.t / 2, b.c + b.t / 2
             box = (
                 [(lo, c0), (hi, c0), (hi, c1), (lo, c1)] if b.axis == "h" else [(c0, lo), (c0, hi), (c1, hi), (c1, lo)]
