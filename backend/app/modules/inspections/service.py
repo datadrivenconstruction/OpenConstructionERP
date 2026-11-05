@@ -355,12 +355,15 @@ class InspectionService:
         self,
         inspection_id: uuid.UUID,
         result: str,
+        completed_by: str | None = None,
     ) -> QualityInspection:
         """Mark an inspection as completed with a required result.
 
         Args:
             inspection_id: Inspection to complete.
             result: Must be one of ``pass``, ``fail``, or ``partial``.
+            completed_by: User completing it. Becomes the inspector when none
+                was named, because the sign-off dialog has no inspector field.
 
         Emits ``inspection.completed.failed`` event when result is ``fail``
         or ``partial`` to trigger punchlist item creation flow, and
@@ -405,17 +408,17 @@ class InspectionService:
                 ),
             )
 
+        fields: dict[str, Any] = {"status": "completed", "result": result}
+        if completed_by and not inspection.inspector_id:
+            fields["inspector_id"] = completed_by
+
         report = await self._check_rules(
-            {**self._state_of(inspection), "status": "completed", "result": result},
+            {**self._state_of(inspection), **fields},
             inspection_id=str(inspection_id),
             project_id=inspection.project_id,
             operation="complete",
         )
-        await self.repo.update_fields(
-            inspection_id,
-            status="completed",
-            result=result,
-        )
+        await self.repo.update_fields(inspection_id, **fields)
         await self.session.refresh(inspection)
         inspection.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Inspection completed: %s (result=%s)", inspection_id, result)

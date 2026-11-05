@@ -192,6 +192,37 @@ async def test_complete_inspection_pass() -> None:
 
 
 @pytest.mark.asyncio
+async def test_complete_without_inspector_names_the_user_completing_it() -> None:
+    service = _make_service()
+    inspection = await service.create_inspection(
+        InspectionCreate(project_id=uuid.uuid4(), inspection_type="structural", title="Beam Inspection")
+    )
+    inspection.status = "in_progress"
+    user_id = "22222222-2222-4222-8222-222222222222"
+
+    result = await service.complete_inspection(inspection.id, "pass", completed_by=user_id)
+
+    assert result.status == "completed"
+    assert str(result.inspector_id) == user_id
+
+
+@pytest.mark.asyncio
+async def test_complete_keeps_the_inspector_already_named() -> None:
+    service = _make_service()
+    named = "11111111-1111-4111-8111-111111111111"
+    inspection = await service.create_inspection(
+        InspectionCreate(project_id=uuid.uuid4(), inspection_type="structural", title="Beam", inspector_id=named)
+    )
+    inspection.status = "in_progress"
+
+    result = await service.complete_inspection(
+        inspection.id, "pass", completed_by="22222222-2222-4222-8222-222222222222"
+    )
+
+    assert str(result.inspector_id) == named
+
+
+@pytest.mark.asyncio
 async def test_complete_inspection_fail_with_checklist_items() -> None:
     service = _make_service()
     inspection = await service.create_inspection(

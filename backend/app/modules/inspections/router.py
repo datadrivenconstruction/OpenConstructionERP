@@ -634,7 +634,7 @@ async def complete_inspection(
     await verify_project_access(existing.project_id, str(user_id), session)
 
     result = body.result if body else "pass"
-    inspection = await service.complete_inspection(inspection_id, result=result)
+    inspection = await service.complete_inspection(inspection_id, result=result, completed_by=str(user_id))
     bump(inspection)
     await session.flush()
     return (await _to_response_many(session, [inspection]))[0]
