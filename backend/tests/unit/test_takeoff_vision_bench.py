@@ -25,16 +25,18 @@ def results() -> dict[str, Any]:
 def test_vector_sheets_measure_rooms_exactly(results: dict[str, Any]) -> None:
     m = results["current"]["realistic_vector_pdf"]
     assert m["area_err_median_pct"] <= 0.5
-    # Unlabelled rings whose snap moves the area over 4% stay as the model drew them, flagged.
-    assert m["area_within_2pct"] >= 0.6
+    # A ring the drawing leaves open stays as the model drew it, flagged, when its snap moves the area over 4%.
+    assert m["area_within_2pct"] >= 0.8
     assert m["scale_within_1pct"] == 1.0
     assert m["room_precision"] >= 0.82
 
 
 def test_confidence_is_calibrated(results: dict[str, Any]) -> None:
     m = results["current"]["realistic_vector_pdf"]
-    assert m["confident_precision"] >= 0.9
-    assert m["ece"] <= 0.16  # six plans: the full train split is the sharper measure
+    assert m["confident_precision"] >= 0.95
+    assert m["confident_share"] >= 0.7
+    # Almost all of this is under-confidence: a room without a label stays at or below the model's score.
+    assert m["ece"] <= 0.16
 
 
 def test_belt_keeps_adversarial_items_out_of_the_confident_set(results: dict[str, Any]) -> None:
@@ -45,7 +47,7 @@ def test_belt_keeps_adversarial_items_out_of_the_confident_set(results: dict[str
 
 def test_belt_beats_the_unrefined_answer(results: dict[str, Any]) -> None:
     cur, base = results["current"]["realistic"], results["baseline"]["realistic"]
-    assert cur["area_within_2pct"] > base["area_within_2pct"] + 0.3
+    assert cur["area_within_2pct"] > base["area_within_2pct"] + 0.4
     assert cur["ece"] < base["ece"]
     assert cur["room_recall"] >= base["room_recall"] - 0.05
 
@@ -85,6 +87,21 @@ def test_text_analyzer_reads_number_styles(text: str, value: float) -> None:
     from app.modules.takeoff.text_analyze import source_numbers
 
     assert any(abs(v - value) < 1e-9 for v, *_span in source_numbers(text))
+
+
+def test_text_analyzer_needs_the_numbers_line_to_describe_the_item() -> None:
+    from app.modules.takeoff.text_analyze import check_items
+
+    text = "01 Floor screed 50 mm 140.00 m2\n02 Brick wall\n86.50 m2\n"
+    rows = check_items(
+        [
+            {"description": "Excavation invented", "quantity": 140.0, "unit": "m2", "confidence": 0.9},
+            {"description": "Brick wall", "quantity": 86.5, "unit": "m2", "confidence": 0.8},
+        ],
+        text,
+    )
+    assert [r.grounded for r in rows] == [False, True]
+    assert rows[0].confidence < 0.62
 
 
 def test_text_analyzer_ignores_a_number_from_a_date() -> None:

@@ -118,18 +118,6 @@ def evaluate(seeds: list[int], pipeline: str = "current") -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import datetime as _dt
-
-    from .run_bench import LEDGER, _git_sha
-
     seeds = list(range(60))
-    line = {
-        "ts": _dt.datetime.now(_dt.UTC).isoformat(timespec="seconds"),
-        "bench": "text_analyze",
-        "git": _git_sha(),
-        "results": {"baseline": evaluate(seeds, "baseline"), "current": evaluate(seeds, "current")},
-    }
-    print(json.dumps(line, indent=1))
-    with LEDGER.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(line, separators=(",", ":")) + "\n")
+    print(json.dumps({"baseline": evaluate(seeds, "baseline"), "current": evaluate(seeds, "current")}, indent=1))
     sys.exit(0)

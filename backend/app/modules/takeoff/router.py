@@ -4400,8 +4400,8 @@ async def analyze_document(
             }
         )
 
-    # Ground every quantity in the source text, merge repeats, normalise units;
-    # an item whose quantity the text does not contain stays below medium.
+    # Ground every quantity in the source text, keep repeats, normalise units;
+    # an item whose quantity the text does not back stays below medium.
     for idx, row in enumerate(check_items(candidates, extracted_text)):
         category, unit, quantity = row.category, row.unit, row.quantity
         elements.append(

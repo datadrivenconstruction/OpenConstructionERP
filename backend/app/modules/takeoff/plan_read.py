@@ -25,7 +25,9 @@ from __future__ import annotations
 
 import math
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import partial
 from typing import Any
 
 # ── Vision capability ────────────────────────────────────────────────────────
@@ -1537,6 +1539,7 @@ class WallRaster:
         if walls.count:
             ends = np.round(walls.arr[:, :4] / self.cell).astype(np.int32).reshape(-1, 2, 2)
             cv2.polylines(self.grid, list(ends), False, 1, 1, cv2.LINE_8)
+        self._line_ends = list(ends) if walls.count else []
         self._network: Any = None
         # Main wall direction (radians, mod pi/2): plans are mostly orthogonal.
         self.axis: float | None = None
@@ -1593,6 +1596,28 @@ class WallRaster:
                     out.add(int(n))
             self.__dict__["frames"] = out
         return self.__dict__["frames"]
+
+    def open_edge(self, a: Point, b: Point, *, reach: float, min_on_wall: float = 0.25) -> bool:
+        """Whether almost no drawn wall follows the ring edge ``a``-``b``.
+
+        A wall with doors still follows most of a real room's side; the cut side
+        of half a room or the end of a corridor slice has nothing along it.
+        """
+        import cv2  # noqa: PLC0415
+        import numpy as np  # noqa: PLC0415
+
+        r = max(1, round(reach / self.cell))
+        if self.__dict__.get("thick_r") != r:
+            # Lines only: a tinted floor is a fill too, and would cover every side of a room.
+            lines = np.zeros(self.grid.shape, np.uint8)
+            cv2.polylines(lines, self._line_ends, False, 1, 1, cv2.LINE_8)
+            self.__dict__["thick"] = cv2.dilate(lines, np.ones((2 * r + 1, 2 * r + 1), np.uint8))
+            self.__dict__["thick_r"] = r
+        thick = self.__dict__["thick"]
+        n = max(2, int(math.dist(a, b) / self.cell))
+        xs = np.clip(np.round(np.linspace(a[0], b[0], n) / self.cell).astype(int), 0, thick.shape[1] - 1)
+        ys = np.clip(np.round(np.linspace(a[1], b[1], n) / self.cell).astype(int), 0, thick.shape[0] - 1)
+        return float(thick[ys, xs].mean()) < min_on_wall
 
     def near_wall(self, p: Point, reach: float) -> bool:
         """Whether a building wall (not the sheet frame) passes within ``reach`` of ``p``."""
@@ -1936,6 +1961,39 @@ def _agree(a: float, b: float, tol: float) -> bool:
     return abs(a - b) <= tol * max(a, b)
 
 
+#: Scale sources this factor apart: at most one of them can be right.
+SCALE_WIDE_GAP = 2.0
+
+
+def _unconfirmed_scale(
+    dim: float | None,
+    dim_conf: float,
+    note: float | None,
+    model: float | None,
+    *,
+    verified: bool,
+    flags: list[str],
+) -> ScaleDecision:
+    """No two scale sources agree: pick one, flag it, and let the gap set the confidence."""
+    present = [v for v in (dim, note, model) if v is not None]
+    gap = max(present) / min(present)
+    if gap >= SCALE_WIDE_GAP:
+        flags.append("scale:sources_far_apart")
+    else:
+        flags.append("scale:sources_disagree")
+    conf = 0.3 if gap >= SCALE_WIDE_GAP else (0.5 if gap >= 1.25 else min(dim_conf, 0.7))
+    # A reference pinned to a printed value on a drawn line is the most direct reading.
+    if model is not None and verified and (gap >= SCALE_WIDE_GAP or dim is None):
+        return ScaleDecision(ratio=model, confidence=conf, source="vision_read", flags=flags)
+    # A dimension reading can be off by a unit (mm for cm); a printed note states the intent.
+    if note is not None and (dim is None or gap >= SCALE_WIDE_GAP):
+        return ScaleDecision(ratio=note, confidence=conf, source="page_text", flags=flags)
+    chosen = dim if dim is not None else model
+    return ScaleDecision(
+        ratio=chosen, confidence=conf, source="page_text" if dim is not None else "vision_read", flags=flags
+    )
+
+
 def decide_scale(
     calibrated_ratio: float | None,
     model_scale: Any,
@@ -1945,12 +2003,12 @@ def decide_scale(
 ) -> ScaleDecision:
     """Pick the scale from the user's calibration, the sheet and the model.
 
-    Order of trust: a plausible user calibration; the sheet's own dimension
-    lines; a ``1:N`` note on the sheet; the model's reference. The model's
-    reading is checked against the sheet: its endpoints are snapped onto the
-    drawn dimension line when there is one, and a value that appears nowhere in
-    the sheet's text marks the reading as unsupported. Disagreements are kept as
-    flags and lower the confidence; they never silently pick a side.
+    A plausible user calibration wins outright. Otherwise three sources vote:
+    the sheet's dimension lines, a ``1:N`` note and the model's reference, whose
+    endpoints are snapped onto the drawn dimension line when there is one. Any
+    two that agree beat the third. A source alone against another leaves the
+    scale unconfirmed: confidence falls with the gap, and a gap of a factor of
+    :data:`SCALE_WIDE_GAP` or more gives none, whichever side is taken.
     """
     flags: list[str] = []
     if calibrated_ratio is not None:
@@ -1991,23 +2049,29 @@ def decide_scale(
     if dim is not None:
         ratio, votes = dim
         conf = 0.9 if votes >= 3 else 0.8
-        if decl is not None and _agree(decl, ratio, _SCALE_AGREE):
+        note_agrees = decl is not None and _agree(decl, ratio, _SCALE_AGREE)
+        model_agrees = model_ratio is not None and _agree(model_ratio, ratio, 0.06)
+        if note_agrees:
             conf = 0.97
-        if model_ratio is not None:
-            if _agree(model_ratio, ratio, 0.06):
-                conf = max(conf, 0.95)
-            else:
-                flags.append("scale:model_disagrees_with_sheet")
-        return ScaleDecision(ratio=ratio, confidence=conf, source="page_text", flags=flags)
+        if model_agrees:
+            conf = max(conf, 0.95)
+        if note_agrees or (model_agrees and decl is None):
+            return ScaleDecision(ratio=ratio, confidence=conf, source="page_text", flags=flags)
+        if model_agrees:
+            flags.append("scale:note_disagrees_with_sheet")
+            return ScaleDecision(ratio=ratio, confidence=min(conf, 0.85), source="page_text", flags=flags)
+        if decl is not None and model_ratio is not None and _agree(model_ratio, decl, 0.08):
+            flags.append("scale:dimension_reading_disagrees")
+            return ScaleDecision(ratio=decl, confidence=0.85, source="page_text", flags=flags)
+        if decl is None and model_ratio is None:
+            return ScaleDecision(ratio=ratio, confidence=conf, source="page_text", flags=flags)
+        return _unconfirmed_scale(ratio, conf, decl, model_ratio, verified=verified, flags=flags)
 
     if decl is not None:
         if model_ratio is not None and _agree(model_ratio, decl, 0.08):
             return ScaleDecision(ratio=decl, confidence=0.92, source="page_text", flags=flags)
-        if model_ratio is not None and verified:
-            flags.append("scale:note_disagrees_with_dimension")
-            return ScaleDecision(ratio=model_ratio, confidence=0.5, source="vision_read", flags=flags)
         if model_ratio is not None:
-            flags.append("scale:model_disagrees_with_sheet")
+            return _unconfirmed_scale(None, 0.8, decl, model_ratio, verified=verified, flags=flags)
         return ScaleDecision(ratio=decl, confidence=0.8, source="page_text", flags=flags)
 
     if model_ratio is None:
@@ -2226,10 +2290,26 @@ def refine_plan_read(
     scanned = walls is not None and walls.count == 0
     if vector is not None and vector.words:
         _read_area_labels(rooms, vector)
-    _confirm_snaps(rooms, ratio, _dimension_values(vector) if vector is not None else [])
+    evidence = None
+    if vector is not None and raster is not None and not scanned:
+        import numpy as np  # noqa: PLC0415
+
+        metre = ratio or 0.01 * max(vector.page_width_pt, vector.page_height_pt)
+        segments = np.asarray(vector.segments, dtype=float) if vector.segments else None
+        evidence = partial(_ring_evidence, segments=segments, raster=raster, metre=metre)
+    _confirm_snaps(
+        rooms, ratio, _dimension_values(vector) if vector is not None else [], max_wall=max_wall, evidence=evidence
+    )
     _flag_overlaps_and_isolation(rooms, gap=3 * max_wall + tol, raster=None if scanned else raster)
     if vector is not None and vector.words:
         _flag_unlabelled(rooms, vector)
+        if sheet_is_not_a_plan(vector):
+            for r in rooms:
+                r.flags.append("room:sheet_not_a_plan")
+    if evidence is not None:
+        for r in rooms:
+            if r.verdict != "error" and not r.corroborated:
+                r.flags.extend(evidence(r.points))
     for r in rooms:
         if r.verdict != "error":
             r.confidence = _room_confidence(r, scale, ratio, scanned=scanned)
@@ -2274,6 +2354,203 @@ def _bbox_area(pts: list[Point]) -> float:
     return (b[2] - b[0]) * (b[3] - b[1])
 
 
+#: This many separate lines across a ring are ruling, not partitions.
+_MANY_LINES = 4
+
+
+def _ring_section(ru: Any, rv: Any, u: float) -> tuple[float, float] | None:
+    """The widest stretch of the ring along ``v`` at position ``u``."""
+    n = len(ru)
+    hits = sorted(
+        float(rv[i] + (u - ru[i]) / (ru[(i + 1) % n] - ru[i]) * (rv[(i + 1) % n] - rv[i]))
+        for i in range(n)
+        if (ru[i] - u) * (ru[(i + 1) % n] - u) < 0
+    )
+    spans = list(zip(hits[::2], hits[1::2], strict=False))
+    return max(spans, key=lambda t: t[1] - t[0]) if spans else None
+
+
+def _lines_side_to_side(
+    u0: Any, u1: Any, v0: Any, v1: Any, ru: Any, rv: Any, *, margin: float, min_side: float, door: float, cover: float
+) -> tuple[list[float], list[float]]:
+    """Drawn lines along ``v`` across the ring: where any cross it, and which of them could be walls."""
+    import numpy as np  # noqa: PLC0415
+
+    n = len(ru)
+    own = [ru[i] for i in range(n) if abs(ru[(i + 1) % n] - ru[i]) <= 0.02 * abs(rv[(i + 1) % n] - rv[i])]
+    um = (u0 + u1) / 2
+    lo, hi = np.minimum(v0, v1), np.maximum(v0, v1)
+    keep = (np.abs(u1 - u0) <= 0.02 * np.abs(v1 - v0)) & (um > ru.min() + min_side) & (um < ru.max() - min_side)
+    rows = sorted((float(um[i]), float(lo[i]), float(hi[i])) for i in np.nonzero(keep)[0])
+    crossing: list[float] = []
+    walls: list[float] = []
+    i = 0
+    while i < len(rows):
+        j = i
+        while j < len(rows) and rows[j][0] - rows[i][0] <= 0.1 * margin:
+            j += 1
+        u, parts = rows[i][0], sorted((t[1], t[2]) for t in rows[i:j])
+        i = j
+        section = None if any(abs(u - e) < min_side for e in own) else _ring_section(ru, rv, u)
+        if section is None or section[1] - section[0] <= 2 * margin:
+            continue
+        vlo, vhi = section[0] + margin, section[1] - margin
+        inside = [(max(x, vlo), min(y, vhi)) for x, y in parts if y > vlo and x < vhi]
+        covered, end = 0.0, vlo
+        for x, y in inside:
+            if y > end:
+                covered += y - max(x, end)
+                end = y
+        if covered < cover * (vhi - vlo):
+            continue
+        crossing.append(u)
+        lines: list[list[float]] = []
+        for x, y in parts:
+            if lines and x <= lines[-1][1] + 0.5 * door:  # dashes of one line
+                lines[-1][1] = max(lines[-1][1], y)
+            else:
+                lines.append([x, y])
+        # A line running on past the ring is a grid axis, not a partition.
+        if any((x < vlo - door and y > vlo) or (y > vhi + door and x < vhi) for x, y in lines):
+            continue
+        near, far = sorted((inside[0][0] - vlo, vhi - end))
+        # A partition reaches a side and stops at the other or one door short; furniture does neither.
+        if near <= 1e-6 and (far <= 1e-6 or 0.5 * door <= far + margin <= door):
+            walls.append(u)
+    return crossing, walls
+
+
+def _groups(values: list[float], gap: float) -> list[list[float]]:
+    out: list[list[float]] = []
+    for v in values:
+        if out and v - out[-1][-1] <= gap:
+            out[-1].append(v)
+        else:
+            out.append([v])
+    return out
+
+
+def interior_lines(
+    ring: list[Point], segments: Any, *, margin: float, min_side: float, merge: float, door: float, cover: float = 0.6
+) -> str | None:
+    """What the drawn lines crossing a ring say about it: ``"partition"``, ``"ruled"`` or nothing.
+
+    Any lineweight counts, since a merged room is often split by a line too thin
+    for the wall index. Lines close together are one wall; a wide band of them
+    in one direction only is a flight of stairs, in both directions a tiled floor.
+    """
+    import numpy as np  # noqa: PLC0415
+
+    pts = np.asarray(ring, dtype=float)
+    edges = np.roll(pts, -1, axis=0) - pts
+    k = int(np.argmax(np.hypot(edges[:, 0], edges[:, 1])))
+    ang = math.atan2(edges[k, 1], edges[k, 0])
+    c, sn = math.cos(ang), math.sin(ang)
+    px, py = pts[:, 0] * c + pts[:, 1] * sn, -pts[:, 0] * sn + pts[:, 1] * c
+    x0, y0 = segments[:, 0] * c + segments[:, 1] * sn, -segments[:, 0] * sn + segments[:, 1] * c
+    x1, y1 = segments[:, 2] * c + segments[:, 3] * sn, -segments[:, 2] * sn + segments[:, 3] * c
+    walls, bands = 0, 0
+    for u0, u1, v0, v1, ru, rv in ((x0, x1, y0, y1, px, py), (y0, y1, x0, x1, py, px)):
+        crossing, kept = _lines_side_to_side(
+            u0, u1, v0, v1, ru, rv, margin=margin, min_side=min_side, door=door, cover=cover
+        )
+        bands += any(g[-1] - g[0] > merge for g in _groups(crossing, merge))
+        walls = max(walls, len(_groups(kept, merge)))
+    if bands == 2:
+        return None
+    if bands == 1 or walls >= _MANY_LINES:
+        return "ruled"
+    return "partition" if walls else None
+
+
+def _ring_evidence(ring: list[Point], segments: Any, raster: WallRaster, metre: float) -> list[str]:
+    """What the drawing says against a ring whose perimeter lies on walls."""
+    out: list[str] = []
+    n = len(ring)
+    if any(
+        math.dist(ring[i], ring[(i + 1) % n]) >= 0.6 * metre
+        and raster.open_edge(ring[i], ring[(i + 1) % n], reach=0.06 * metre)
+        for i in range(n)
+    ):
+        out.append("room:open_side")
+    if segments is not None:
+        seen = interior_lines(
+            ring, segments, margin=0.2 * metre, min_side=1.0 * metre, merge=0.6 * metre, door=1.2 * metre
+        )
+        if seen == "ruled":
+            out.append("room:lines_across")
+        elif seen == "partition":
+            out.append("room:partition_inside")
+    return out
+
+
+_NOT_PLAN_WORDS = frozenset(
+    [
+        "elevation",
+        "elevations",
+        "facade",
+        "facades",
+        "façade",
+        "façades",
+        "ansicht",
+        "ansichten",
+        "fassade",
+        "fassaden",
+        "schnitt",
+        "schnitte",
+        "section",
+        "sections",
+        "coupe",
+        "coupes",
+        "élévation",
+        "élévations",
+        "alzado",
+        "alzados",
+        "sección",
+        "secciones",
+        "prospetto",
+        "prospetti",
+        "sezione",
+        "sezioni",
+        "фасад",
+        "фасады",
+        "разрез",
+        "разрезы",
+        "gevel",
+        "gevels",
+        "doorsnede",
+    ]
+)
+_PLAN_WORDS = frozenset(
+    [
+        "plan",
+        "plans",
+        "floor",
+        "floorplan",
+        "grundriss",
+        "grundrisse",
+        "geschoss",
+        "obergeschoss",
+        "erdgeschoss",
+        "étage",
+        "planta",
+        "plano",
+        "pianta",
+        "plattegrond",
+        "план",
+        "планы",
+        "этаж",
+    ]
+)
+
+
+def sheet_is_not_a_plan(vector: VectorLayer) -> bool:
+    """Whether the sheet's words call it an elevation or section rather than a floor plan."""
+    tokens = [re.sub(r"[^\w]+", "", w[4].casefold()) for w in vector.words]
+    other = sum(t in _NOT_PLAN_WORDS for t in tokens)
+    return other >= 2 and other > sum(t in _PLAN_WORDS for t in tokens)
+
+
 def _flag_overlaps_and_isolation(rooms: list[RefinedRoom], *, gap: float, raster: WallRaster | None = None) -> None:
     """Flag the weaker ring of a nested pair and rings apart from every plan."""
     inside: dict[int, list[int]] = {}
@@ -2296,9 +2573,11 @@ def _flag_overlaps_and_isolation(rooms: list[RefinedRoom], *, gap: float, raster
     if raster is not None:
         nets = [raster.network_of(r.points) for r in rooms]
         frames = raster.frame_networks()
-        for r, net in zip(rooms, nets, strict=True):
-            if net in frames:
-                r.flags.append("room:isolated")
+        # Walls can touch the frame through title-block lines; most rooms there means it is the building.
+        if 2 * sum(net in frames for net in nets) < len(rooms):
+            for r, net in zip(rooms, nets, strict=True):
+                if net in frames:
+                    r.flags.append("room:isolated")
     if len(rooms) < 3:
         return
     # Apart from every other room by more than a missed room could explain.
@@ -2356,6 +2635,10 @@ def _read_area_labels(rooms: list[RefinedRoom], vector: VectorLayer) -> None:
 LABEL_AGREE = 0.015
 #: A snap may move the area this much without a label or dimension confirming it.
 SNAP_MAX_SHIFT = 0.04
+#: A ring the drawing closes on every side may move the area this much; beyond it the model traced something else.
+SNAP_CLOSED_MAX_SHIFT = 0.2
+#: A ring pulled inward by at most a wall's width must lie this much on walls to stay snapped.
+SNAP_INWARD_MIN_SUPPORT = 0.4
 
 
 def _dimension_values(vector: VectorLayer) -> list[float]:
@@ -2381,13 +2664,31 @@ def _dimensioned_sides(points: list[Point], ratio: float, dims: list[float]) -> 
     return len(found)
 
 
-def _confirm_snaps(rooms: list[RefinedRoom], ratio: float | None, dims: list[float]) -> None:
+def _snapped_inward(r: RefinedRoom, max_wall: float) -> bool:
+    """Whether the snap only pulled a ring traced on its walls back onto their room side."""
+    if (r.wall_support or 0.0) < SNAP_INWARD_MIN_SUPPORT or polygon_containment(r.points, r.raw_points) < 0.98:
+        return False
+    return all(min(math.dist(p, q) for q in r.raw_points) <= 2 * max_wall for p in r.points)
+
+
+def _confirm_snaps(
+    rooms: list[RefinedRoom],
+    ratio: float | None,
+    dims: list[float],
+    *,
+    max_wall: float,
+    evidence: Callable[[list[Point]], list[str]] | None = None,
+) -> None:
     """Undo a snap that moved the area a lot when nothing on the sheet confirms it.
 
     Snapping trusts the drawing over the model; when the two disagree by more
     than :data:`SNAP_MAX_SHIFT` only an area label, or dimensions that fit the
     snapped ring and not the model's, can say which is right; without them the
-    model's ring is kept and flagged for a human to check.
+    model's ring is kept and flagged for a human to check. A ring pulled inward
+    by a wall's width is the exception: floor cannot lie beyond its wall, while
+    growing past a face is how a missing inner face shows up. A snapped ring the
+    drawing closes on every side also stays, at a confidence capped to what such
+    rings measure, unless it moved more than :data:`SNAP_CLOSED_MAX_SHIFT`.
     """
     for r in rooms:
         if r.verdict == "error":
@@ -2404,6 +2705,11 @@ def _confirm_snaps(rooms: list[RefinedRoom], ratio: float | None, dims: list[flo
             and dims
             and _dimensioned_sides(r.points, ratio, dims) == 2 > _dimensioned_sides(r.raw_points, ratio, dims)
         ):
+            continue
+        if _snapped_inward(r, max_wall):
+            continue
+        if abs(a_snap - a_raw) / a_raw <= SNAP_CLOSED_MAX_SHIFT and evidence is not None and not evidence(r.points):
+            r.flags.append("room:snap_large_shift")
             continue
         r.points, r.snapped = r.raw_points, False
         r.flags.append("room:snap_unconfirmed")
@@ -2452,6 +2758,12 @@ def _room_confidence(r: RefinedRoom, scale: ScaleDecision, ratio: float | None, 
         geom = min(geom, max(0.05, 0.6 * (1.0 - rel / 0.1)))
     if "room:no_text" in r.flags:
         geom = min(geom, 0.5)
+    if "room:snap_large_shift" in r.flags:
+        geom = min(geom, 0.72)
+    if any(f in r.flags for f in ("room:open_side", "room:partition_inside", "room:lines_across")):
+        geom = min(geom, 0.45)
+    if "room:sheet_not_a_plan" in r.flags:
+        geom = min(geom, 0.3)
     if "room:snap_unconfirmed" in r.flags:
         # Ring and drawing disagree by over SNAP_MAX_SHIFT: such a ring is right 3% of the time on train.
         geom = min(geom, 0.12)

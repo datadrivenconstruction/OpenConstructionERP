@@ -675,5 +675,5 @@ def _flatten_to_raster(pdf: bytes, pw: float, ph: float) -> bytes:
 #: Seeds the pipeline is tuned on, and the held-out seeds it is never tuned on.
 TRAIN_SEEDS = list(range(0, 24))
 HOLDOUT_SEEDS = list(range(500, 524))
-#: The fast CI slice: a few plans from each split.
-FAST_SEEDS = [0, 3, 7, 500, 505, 511]
+#: The fast CI slice: four plans from each split, whose vector-sheet metrics sit within 1% of both splits together.
+FAST_SEEDS = [9, 12, 17, 22, 502, 505, 512, 521]

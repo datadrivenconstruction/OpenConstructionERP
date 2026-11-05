@@ -2,7 +2,7 @@
 
 The model reads the text and proposes items; this module decides how much of
 each proposal the text actually supports. A quantity that appears nowhere in
-the source (next to its unit, or on a line sharing the item's words) is the
+the source (on a line that describes the item, with no other unit) is the
 typical hallucination, so it caps the item below the medium confidence band.
 Finding the number never raises the model's score. Repeated rows are kept (the
 same door on two floors is two doors) and flagged; unit spellings are
@@ -160,7 +160,7 @@ def _norm_desc(text: str) -> str:
     return re.sub(r"[^\w]+", " ", text.casefold()).strip()
 
 
-_UNIT_AFTER = re.compile(r"\s*([^\W\d_][\w.²³^/ ]{0,7})")
+_UNIT_AFTER = re.compile(r"[ \t]*([^\W\d_][\w.²³^/ ]{0,7})")
 
 
 def _unit_after(text: str, end: int) -> str | None:
@@ -176,27 +176,47 @@ def _unit_after(text: str, end: int) -> str | None:
     return None
 
 
-def _line_at(text: str, pos: int) -> str:
-    a = text.rfind("\n", 0, pos) + 1
-    b = text.find("\n", pos)
-    return text[a : b if b >= 0 else len(text)]
+def _words(text: str) -> set[str]:
+    """Words that can tie a line to an item; short ones only when nothing longer exists."""
+    folded = text.casefold()
+    return set(re.findall(r"[^\W\d_]{4,}", folded)) or set(re.findall(r"[^\W\d_]{2,}", folded))
+
+
+def _share_a_word(a: set[str], b: set[str]) -> bool:
+    # A shared stem counts: Mauerwerk / Mauerwerks, door / doors.
+    return any(x.startswith(y) or y.startswith(x) for x in a for y in b if min(len(x), len(y)) >= 4) or bool(a & b)
+
+
+def _context_line(text: str, start: int, end: int) -> str:
+    """The line describing a number: its own, or the one above when it holds only the number.
+
+    PDF text often breaks a table row into one line per cell.
+    """
+    a = text.rfind("\n", 0, start) + 1
+    b = text.find("\n", end)
+    b = b if b >= 0 else len(text)
+    own = text[a:start] + " " + text[end:b]
+    if any(normalize_unit(w) not in _UNIT_ALIASES.values() for w in re.findall(r"[^\W\d_]{2,}", own)):
+        return own
+    above = text[:a].rstrip()
+    return above[above.rfind("\n") + 1 :]
 
 
 def _grounding(qty: float, unit: str, desc: str, text: str, numbers: list[tuple[float, int, int]]) -> int | None:
     """Offset of the source number that backs ``qty``, or ``None``.
 
-    The number must carry the item's unit right after it, or sit on a line that
-    shares a word of four or more letters with the description. A bare ``12``
-    from a date or a drawing number backs nothing.
+    The number's line must describe the item (share a word with it) and must not
+    carry a different unit. A matching value and unit alone back nothing: an
+    invented item can copy ``140.00 m2`` from another row.
     """
-    words = {w for w in re.findall(r"[^\W\d_]{4,}", desc.casefold())}
+    words = _words(desc)
     for v, start, end in numbers:
         if abs(v - qty) > _REL_TOL * max(abs(qty), 1e-9):
             continue
-        if _unit_after(text, end) == unit:
-            return start
-        line_words = set(re.findall(r"[^\W\d_]{4,}", _line_at(text, start).casefold()))
-        if words & line_words:
+        found_unit = _unit_after(text, end)
+        if found_unit is not None and found_unit != unit:
+            continue
+        if _share_a_word(words, _words(_context_line(text, start, end))):
             return start
     return None
 
