@@ -97,22 +97,22 @@ def test_big_snap_needs_a_label_or_dimensions_that_fit_it() -> None:
         return pr.RefinedRoom("x", snapped, 0.8, 0.0, "ok", snapped=True, wall_support=1.0, raw_points=raw)
 
     alone = room()
-    pr._confirm_snaps([alone], 1.0, [])
+    pr._confirm_snaps([alone], 1.0, [], max_wall=0.1)
     assert not alone.snapped
     assert "room:snap_unconfirmed" in alone.flags
 
     dimensioned = room()
-    pr._confirm_snaps([dimensioned], 1.0, [3.0, 4.0])
+    pr._confirm_snaps([dimensioned], 1.0, [3.0, 4.0], max_wall=0.1)
     assert dimensioned.snapped
 
     # Dimensions that fit the model's ring instead (axis to axis) do not back the snap.
     axis = room()
-    pr._confirm_snaps([axis], 1.0, [3.0, 3.4, 4.0, 4.4])
+    pr._confirm_snaps([axis], 1.0, [3.0, 3.4, 4.0, 4.4], max_wall=0.1)
     assert not axis.snapped
 
     labelled = room()
     labelled.area_label_m2 = 12.0
-    pr._confirm_snaps([labelled], 1.0, [])
+    pr._confirm_snaps([labelled], 1.0, [], max_wall=0.1)
     assert labelled.snapped
     assert labelled.corroborated
 
