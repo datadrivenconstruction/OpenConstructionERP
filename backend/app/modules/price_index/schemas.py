@@ -154,6 +154,8 @@ class CostIndexPointResponse(BaseModel):
     factor: DecimalStr = Decimal("1")
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
 
 class CostIndexSeriesDetail(CostIndexSeriesResponse):
@@ -206,6 +208,7 @@ class LocationFactorResponse(BaseModel):
     factor: DecimalStr = Decimal("1")
     created_at: datetime
     updated_at: datetime
+    warnings: list[dict] = Field(default_factory=list)
 
 
 # ── Adjust ───────────────────────────────────────────────────────────────────
