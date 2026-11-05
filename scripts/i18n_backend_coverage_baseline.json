@@ -1,21 +1,21 @@
 {
-  "english_keys": 2008,
+  "english_keys": 2000,
   "locales": {
     "ar": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
     "bg": {
-      "missing": 8,
-      "digest": "578c802675e24dc0"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "bn": {
       "missing": 427,
       "digest": "300825b3d12ec927"
     },
     "cs": {
-      "missing": 8,
-      "digest": "578c802675e24dc0"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "da": {
       "missing": 0,
@@ -62,8 +62,8 @@
       "digest": "e3b0c44298fc1c14"
     },
     "hr": {
-      "missing": 8,
-      "digest": "578c802675e24dc0"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "hu": {
       "missing": 0,
@@ -102,8 +102,8 @@
       "digest": "e3b0c44298fc1c14"
     },
     "pl": {
-      "missing": 8,
-      "digest": "578c802675e24dc0"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "pt": {
       "missing": 0,
@@ -130,8 +130,8 @@
       "digest": "59ea43be1eb9524d"
     },
     "uk": {
-      "missing": 8,
-      "digest": "578c802675e24dc0"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "ur": {
       "missing": 0,
