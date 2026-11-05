@@ -49,6 +49,7 @@ import { fileToDataUrl } from '@/app/layout/CustomBranding';
 import { isSvgDataUrl, rasteriseSvgToPng } from './rasteriseSvg';
 import { DocumentAppearancePanel } from '@/features/property-dev/DocumentAppearancePanel';
 import { DocumentTemplatesPanel } from './DocumentTemplatesPanel';
+import { OfferSettingsPanel } from '@/features/offers/OfferSettingsPanel';
 import { getDocumentAppearance, type DocumentAppearance } from '@/features/property-dev/api';
 import {
   pageNumberSample,
@@ -626,6 +627,7 @@ export function CompanyDocumentsSettings() {
 
       {/* ── Per-document look ── */}
       <DocumentTemplatesPanel />
+      <OfferSettingsPanel />
     </div>
   );
 }

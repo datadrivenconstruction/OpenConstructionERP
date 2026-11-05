@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { ProjectOffersWidget } from '@/features/offers/ProjectOffersWidget';
 import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -2410,6 +2411,7 @@ export function ProjectDetailPage() {
             <BudgetBurnWidget projectId={projectId!} currency={currency ?? ''} />
           )}
           {!isWidgetHidden('lps-ppc') && <LpsPpcWidget projectId={projectId!} />}
+          <ProjectOffersWidget projectId={projectId!} />
         </WidgetSection>
 
         {/* Activity, files and AI: the cross-module event stream gets the
