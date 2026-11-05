@@ -22,6 +22,7 @@ the transforms to page points. Pure numpy/OpenCV, no I/O.
 
 from __future__ import annotations
 
+import bisect
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -118,15 +119,48 @@ def is_straight(b: Band) -> bool:
     return b.span <= 1.35 * b.t + 2.0 and b.hi - b.lo >= 0.6 * b.t
 
 
+def _end_is_free(mask: np.ndarray, b: Band, past_hi: bool, perp: list[Band], perp_c: list[float], reach: float) -> bool:
+    """True when nothing continues past a band's end: a jamb, not a wall running into another.
+
+    A crossing wall counts even where a door takes the stretch right at this end: the
+    wall it would have met still runs on either side of that door.
+    """
+    end = b.hi if past_hi else b.lo
+    near = max(2.0, b.t)
+    for i in range(bisect.bisect_left(perp_c, end - near - 40.0), bisect.bisect_right(perp_c, end + near + 40.0)):
+        p = perp[i]
+        ahead = p.c - end if past_hi else end - p.c
+        if -0.5 * p.t <= ahead <= 0.5 * p.t + near and p.lo - reach <= b.c <= p.hi + reach and p.hi - p.lo >= reach:
+            return False
+    h, w = mask.shape
+    size = h if b.axis == "h" else w
+    span = w if b.axis == "h" else h
+    c0, c1 = max(0, round(b.c - b.t / 4)), min(size, round(b.c + b.t / 4) + 1)
+    lo, hi = (round(b.hi), round(b.hi) + 3) if past_hi else (round(b.lo) - 3, round(b.lo))
+    lo, hi = max(0, lo), min(span, hi)
+    if hi <= lo or c1 <= c0:
+        return True
+    win = mask[c0:c1, lo:hi] if b.axis == "h" else mask[lo:hi, c0:c1]
+    return float(np.count_nonzero(win)) / win.size < 0.5
+
+
 def bridge_gaps(mask: np.ndarray, bands: list[Band], gap_px: Callable[[float], float]) -> int:
     """Fill short gaps between collinear bands of equal thickness (doors, windows).
+
+    An opening is framed by jambs: wall ends with nothing past them. Two walls that
+    each run into a crossing wall line up across whatever lies between them, typically
+    a corridor, and are not an opening. One jamb and one such end is a door beside a
+    corner, which is never as wide as the widest opening, so it gets half the reach.
 
     Each band end is bridged at most once, to its nearest partner. Returns the
     number of bridges painted into ``mask`` (in place).
     """
     painted = 0
+    source = mask.copy()
     for axis in ("h", "v"):
         bs = sorted((b for b in bands if b.axis == axis and is_straight(b)), key=lambda b: b.c)
+        perp = sorted((b for b in bands if b.axis != axis and is_straight(b)), key=lambda b: b.c)
+        perp_c = [b.c for b in perp]
         cands: list[tuple[float, int, int]] = []
         for i, a in enumerate(bs):
             for j in range(i + 1, len(bs)):
@@ -137,7 +171,17 @@ def bridge_gaps(mask: np.ndarray, bands: list[Band], gap_px: Callable[[float], f
                     continue
                 left, right = (i, j) if a.lo < b.lo else (j, i)
                 g = bs[right].lo - bs[left].hi
-                if 0 < g <= gap_px(0.5 * (a.t + b.t)):
+                reach = gap_px(0.5 * (a.t + b.t))
+                if not 0 < g <= reach:
+                    continue
+                if g <= max(3.0, 0.5 * min(a.t, b.t)):  # narrower than any opening
+                    cands.append((g, left, right))
+                    continue
+                door = 0.5 * reach
+                free = _end_is_free(source, bs[left], True, perp, perp_c, door) + _end_is_free(
+                    source, bs[right], False, perp, perp_c, door
+                )
+                if free == 2 or (free == 1 and g <= door):
                     cands.append((g, left, right))
         cands.sort()
         used_r: set[int] = set()
@@ -169,10 +213,14 @@ def fill_small_holes(mask: np.ndarray, max_area_px: float) -> None:
     mask[small[labels]] = 255
 
 
-def find_rooms(mask: np.ndarray, *, min_area_px: float, min_inscribed_px: float) -> tuple[list[MaskRoom], np.ndarray]:
+def find_rooms(
+    mask: np.ndarray, *, min_area_px: float, min_inscribed_px: float, notch_px: int = 0
+) -> tuple[list[MaskRoom], np.ndarray]:
     """Enclosed free regions of ``mask`` that qualify as rooms, plus the room label image.
 
-    The label image holds the room's index + 1 on its pixels and 0 elsewhere.
+    The label image holds the room's index + 1 on its pixels and 0 elsewhere. Slits up to
+    ``notch_px`` wide stay out of the outline: a door leaf or a stray stroke that reaches
+    into a room from its wall takes nothing away from the room's floor.
     """
     h, w = mask.shape
     free = (mask == 0).astype(np.uint8)
@@ -188,7 +236,10 @@ def find_rooms(mask: np.ndarray, *, min_area_px: float, min_inscribed_px: float)
         inscribed = float(cv2.distanceTransform(crop, cv2.DIST_L2, 3).max())
         if inscribed < min_inscribed_px:
             continue
-        contours, _ = cv2.findContours(crop, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        outline = crop
+        if notch_px > 1:
+            outline = cv2.morphologyEx(crop, cv2.MORPH_CLOSE, np.ones((notch_px, notch_px), np.uint8))
+        contours, _ = cv2.findContours(outline, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if not contours:
             continue
         cnt = max(contours, key=cv2.contourArea) + np.array([[[x - 1, y - 1]]], dtype=np.int32)

@@ -39,6 +39,9 @@ from app.modules.takeoff.schemas import (
 
 logger = logging.getLogger(__name__)
 
+# Sheets read at once. One reading peaks at a few hundred MB on the 3 GB server.
+_RECOGNIZE_SLOTS = asyncio.Semaphore(2)
+
 
 # ── Vision-LLM plan-read cost cap (issue #194) ──────────────────────────────
 
@@ -2325,7 +2328,9 @@ class TakeoffService:
         act by a human (CLAUDE.md rule 7), and the unreviewed-proposals
         validation rule blocks a bill push while any are still pending.
 
-        Returns ``{candidates, page, source, notes}``. Honest failure modes:
+        Returns ``{candidates, page, source, notes, truncated}``. A sheet that says it is
+        no floor plan (``notes='not_a_floor_plan'``) or that takes too long to read
+        (``notes='time_budget'``) comes back without guesses. Honest failure modes:
         The PDF reader unimportable -> a 400 naming a broken install, since it
         is a base dependency and not an optional extra; no vector layer and no
         raster fallback (a scanned/raster PDF) -> an empty candidate set with
@@ -2355,7 +2360,7 @@ class TakeoffService:
             )
 
         try:
-            from app.core import pdf_reader  # noqa: PLC0415 - lazy so a broken wheel degrades to a clear 400
+            from app.core import pdf_reader  # noqa: F401, PLC0415 - a broken wheel degrades to a clear 400
         except ImportError as exc:
             # The bundle ships the PDF reader, and "reinstall openconstructionerp"
             # is a pip command a frozen reader cannot run. Same reading, routed.
@@ -2377,31 +2382,14 @@ class TakeoffService:
                 ),
             ) from exc
 
-        # Render DPI for the raster fallback. The raster detector's morphology
-        # kernel is tuned in absolute pixels for ~150 DPI, so keep this in sync
-        # with app.modules.takeoff.raster_recognize.
-        raster_dpi = 150
-        raster_payload: tuple[bytes, int, int, int] | None = None
-        page_w_pt = page_h_pt = 0.0
+        # Reading a sheet is seconds of CPU and hundreds of MB: it stays off the event
+        # loop, and only a couple of sheets are read at once on a small server.
+        def _read() -> dict[str, Any]:
+            return _recognize.recognize_pdf_page(file_path.read_bytes(), page, scale_pixels_per_unit)
+
         try:
-            content = file_path.read_bytes()
-            pdf = pdf_reader.open_pdf(content)
-            try:
-                pg = pdf[page - 1]
-                drawings = pg.drawings()
-                page_w_pt = float(pg.rect.width)
-                page_h_pt = float(pg.rect.height)
-                # No vector layer => scanned/raster page. Rasterise it so the
-                # OpenCV-based detector can still find rooms and walls.
-                if not drawings:
-                    try:
-                        pix = pg.render(dpi=raster_dpi)
-                        raster_payload = (pix.samples, pix.height, pix.width, pix.n)
-                    except Exception:
-                        logger.exception("takeoff.recognize raster render failed for doc %s page %s", doc_id, page)
-                        raster_payload = None
-            finally:
-                pdf.close()
+            async with _RECOGNIZE_SLOTS:
+                result = await asyncio.to_thread(_read)
         except HTTPException:
             raise
         except Exception:
@@ -2411,73 +2399,22 @@ class TakeoffService:
                 detail="Could not read this page. The PDF may be corrupt or password-protected.",
             ) from None
 
-        # Vector layer present -> deterministic vector detector.
-        if drawings:
-            candidates = _recognize.recognize_candidates(drawings, scale_pixels_per_unit)
+        candidates = result["candidates"]
+        if candidates:
             candidates = await self._persist_proposals(
                 doc,
                 page,
                 candidates,
-                detector="vector_recognize",
+                detector=result["source"],
                 scale_pixels_per_unit=scale_pixels_per_unit,
                 user_id=user_id,
             )
-            return {
-                "candidates": candidates,
-                "page": page,
-                "source": "vector_recognize",
-                "notes": None if candidates else "no_features",
-            }
-
-        # Scanned / raster page -> OpenCV room + wall detection. OpenCV and
-        # numpy are base dependencies, so this runs in every default install;
-        # only the OCR engine sits behind the optional 'cv' extra.
-        if raster_payload is not None:
-            try:
-                import numpy as np  # noqa: PLC0415 - base dep; lazy so a broken wheel degrades instead of failing at import
-
-                from app.modules.takeoff import raster_recognize as _raster  # noqa: PLC0415
-
-                samples, height, width, channels = raster_payload
-                arr = np.frombuffer(samples, dtype=np.uint8).reshape(height, width, channels)
-                # The render is RGB; OpenCV wants contiguous BGR.
-                if channels >= 3:
-                    image_bgr = np.ascontiguousarray(arr[:, :, 2::-1])
-                else:
-                    image_bgr = arr.reshape(height, width)
-                candidates = _raster.recognize_raster(image_bgr, page_w_pt, page_h_pt, scale_pixels_per_unit)
-                candidates = await self._persist_proposals(
-                    doc,
-                    page,
-                    candidates,
-                    detector="raster_recognize",
-                    scale_pixels_per_unit=scale_pixels_per_unit,
-                    user_id=user_id,
-                )
-                return {
-                    "candidates": candidates,
-                    "page": page,
-                    "source": "raster_recognize",
-                    "notes": None if candidates else "raster_no_features",
-                }
-            except ImportError:
-                # OpenCV / numpy ship with the platform, so an ImportError here
-                # means a broken install rather than a missing extra. Degrade
-                # honestly instead of pretending nothing was found.
-                return {
-                    "candidates": [],
-                    "page": page,
-                    "source": "raster_recognize",
-                    "notes": "raster_cv_unavailable",
-                }
-            except Exception:
-                logger.exception("takeoff.recognize raster detection failed for doc %s page %s", doc_id, page)
-
         return {
-            "candidates": [],
+            "candidates": candidates,
             "page": page,
-            "source": "vector_recognize",
-            "notes": "no_vector_layer",
+            "source": result["source"],
+            "notes": result["notes"],
+            "truncated": result.get("truncated", 0),
         }
 
     async def find_similar_symbols(
@@ -2522,7 +2459,7 @@ class TakeoffService:
             )
 
         try:
-            from app.core import pdf_reader  # noqa: PLC0415 - lazy so a broken wheel degrades to a clear 400
+            from app.core import pdf_reader  # noqa: F401, PLC0415 - a broken wheel degrades to a clear 400
         except ImportError as exc:
             from app.core.self_upgrade import repair_hint  # noqa: PLC0415
 

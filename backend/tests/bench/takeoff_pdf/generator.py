@@ -40,12 +40,15 @@ FONT = "BenchSans"
 _FONTS_READY = False
 
 HOLDOUT_OFFSET = 1_000_000
-SPLITS = ("train", "holdout")
+# Pages nobody looked at while fixing anything. ``holdout`` lost that standing when a fix
+# was made after seeing it; these stay unseen until a change is finished.
+FRESH_OFFSET = 2_000_000
+SPLITS = ("train", "holdout", "fresh")
 
 
 def split_seeds(split: str, n: int) -> list[int]:
-    """Seeds of a split. Train and holdout never overlap."""
-    base = 0 if split == "train" else HOLDOUT_OFFSET
+    """Seeds of a split. Splits never overlap."""
+    base = {"train": 0, "holdout": HOLDOUT_OFFSET, "fresh": FRESH_OFFSET}[split]
     return [base + i for i in range(n)]
 
 
@@ -1507,8 +1510,11 @@ def _scale_bar(c: Any, s: Sheet, x: float, y: float) -> None:
 # ── scanned variant ───────────────────────────────────────────────────────────
 
 
-def make_scan(seed: int, *, dpi: int = 150, force_kind: str | None = None) -> tuple[bytes, dict[str, Any]]:
-    """Rasterise a page, degrade it like a scan, embed it as the only page content."""
+def degrade_to_scan(pdf: bytes, seed: int, *, dpi: int = 150) -> tuple[bytes, Any, float]:
+    """Rasterise a page, degrade it like a scan, embed it as the only page content.
+
+    Returns the new PDF, a function moving page points along with the skew, and the skew in degrees.
+    """
     import cv2
     import numpy as np
     from reportlab.lib.utils import ImageReader
@@ -1516,7 +1522,6 @@ def make_scan(seed: int, *, dpi: int = 150, force_kind: str | None = None) -> tu
 
     from app.core import pdf_reader
 
-    pdf, gt = make_page(seed, scan=True, force_kind=force_kind)
     rng = random.Random(seed * 31 + 5)
     with pdf_reader.open_pdf(pdf) as doc:
         page = doc[0]
@@ -1556,6 +1561,13 @@ def make_scan(seed: int, *, dpi: int = 150, force_kind: str | None = None) -> tu
             round((M[1, 0] * x + M[1, 1] * y + M[1, 2]) / px, 3),
         ]
 
+    return buf.getvalue(), tf, skew
+
+
+def make_scan(seed: int, *, dpi: int = 150, force_kind: str | None = None) -> tuple[bytes, dict[str, Any]]:
+    """A generated page with its ground truth, degraded like a scan."""
+    pdf, gt = make_page(seed, scan=True, force_kind=force_kind)
+    scan, tf, skew = degrade_to_scan(pdf, seed, dpi=dpi)
     for room in gt["rooms"]:
         room["polygon"] = [tf(p) for p in room["polygon"]]
     for wall in gt["walls"]:
@@ -1563,7 +1575,7 @@ def make_scan(seed: int, *, dpi: int = 150, force_kind: str | None = None) -> tu
     gt["symbols"] = {k: [tf(p) for p in v] for k, v in gt["symbols"].items()}
     gt["variant"] = "scan"
     gt["scan"] = {"dpi": dpi, "skew_deg": round(skew, 3)}
-    return buf.getvalue(), gt
+    return scan, gt
 
 
 def dump(out_dir: Path, split: str, n: int, *, scans: bool = True) -> None:

@@ -158,6 +158,8 @@ class RecognizeResponse(BaseModel):
     page: int
     source: str = "vector_recognize"
     notes: str | None = None
+    # Proposals held back by the per-sheet ceiling, weakest first.
+    truncated: int = 0
 
 
 class SimilarSymbolHit(BaseModel):

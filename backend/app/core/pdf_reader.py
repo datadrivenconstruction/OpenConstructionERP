@@ -340,7 +340,7 @@ class PdfPage:
         return rendered
 
     # ── vector layer ────────────────────────────────────────────────────
-    def drawings(self) -> list[dict[str, Any]]:
+    def drawings(self, *, with_clip: bool = False) -> list[dict[str, Any]]:
         """Vector paths of the page, one dict per painted path.
 
         Each dict carries ``items`` (``('l', p1, p2)``, ``('c', p1, c1, c2,
@@ -351,11 +351,12 @@ class PdfPage:
         ``layer``. A fill immediately followed by a stroke of the same path
         is merged into one ``'fs'`` entry. Fills and strokes painted with a
         pattern or a shading are left out, as hatching and gradients are not
-        drawn geometry.
+        drawn geometry. ``with_clip`` adds ``clip``: the clip polygons of the path
+        in page space, or ``None``.
         """
         plan = self._paint_plan(self.index) if self._paint_plan else None
         with _LOCK:
-            return _Tracer(self._to_top_left()).run(self._page.raw, plan)
+            return _Tracer(self._to_top_left(), with_clip).run(self._page.raw, plan)
 
 
 def _norm_box(box: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
@@ -410,8 +411,9 @@ class _Tracer:
     closing line explicitly.
     """
 
-    def __init__(self, page_ctm: Matrix) -> None:
+    def __init__(self, page_ctm: Matrix, with_clip: bool = False) -> None:
         self.page_ctm = page_ctm
+        self.with_clip = with_clip
         self.out: list[dict[str, Any]] = []
         self.seqno = 0
         self._x = ctypes.c_float()
@@ -449,7 +451,7 @@ class _Tracer:
             if kind == _OBJ_PATH:
                 paint = plan.paints[paths] if plan is not None else None
                 paths += 1
-                self._path(obj, _concat(self._matrix(obj), parent), paint)
+                self._path(obj, _concat(self._matrix(obj), parent), paint, parent)
             elif kind == _OBJ_FORM:
                 child = plan.forms[forms] if plan is not None else None
                 forms += 1
@@ -479,7 +481,38 @@ class _Tracer:
             append((get_type(seg), x.value, y.value, get_close(seg) != 0))
         return segs
 
-    def _path(self, obj: Any, ctm: Matrix, paint: tuple[bool, bool, tuple[int, ...]] | None = None) -> None:
+    def _clip(self, obj: Any, parent: Matrix) -> list[list[tuple[float, float]]] | None:
+        """Clip polygons of an object in page space; everything drawn must lie inside all of them.
+
+        A CAD plot draws hatching as long lines clipped to the hatched area and a
+        viewport as a clip over the whole model, so the path alone overstates what shows.
+        """
+        clip = pdfium_c.FPDFPageObj_GetClipPath(obj)
+        if not clip:
+            return None
+        n = pdfium_c.FPDFClipPath_CountPaths(clip)
+        if n <= 0:
+            return None
+        a, b, c, d, e, f = parent
+        x, y = self._x, self._y
+        polys: list[list[tuple[float, float]]] = []
+        for i in range(n):
+            pts: list[tuple[float, float]] = []
+            for k in range(pdfium_c.FPDFClipPath_CountPathSegments(clip, i)):
+                seg = pdfium_c.FPDFClipPath_GetPathSegment(clip, i, k)
+                if seg and pdfium_c.FPDFPathSegment_GetPoint(seg, x, y):
+                    pts.append((a * x.value + c * y.value + e, b * x.value + d * y.value + f))
+            if len(pts) >= 3:
+                polys.append(pts)
+        return polys or None
+
+    def _path(
+        self,
+        obj: Any,
+        ctm: Matrix,
+        paint: tuple[bool, bool, tuple[int, ...]] | None = None,
+        parent: Matrix | None = None,
+    ) -> None:
         fm, st = self._fm, self._st
         if not pdfium_c.FPDFPath_GetDrawMode(obj, fm, st):
             return
@@ -496,6 +529,7 @@ class _Tracer:
         segs = self._segments(obj)
         if not segs:
             return
+        clip = self._clip(obj, parent) if self.with_clip and parent is not None else None
         if fill_mode:
             fill, alpha = self._color(pdfium_c.FPDFPageObj_GetFillColor, obj)
             items, rect, fill_close = _trace(segs, ctm, stroke_path=False, closes=closes)
@@ -510,6 +544,8 @@ class _Tracer:
                     "seqno": self.seqno,
                     "layer": "",
                 }
+                if self.with_clip:
+                    pathdict["clip"] = clip
                 # A fill carries closePath only when a close reached the walker.
                 if fill_close is not None:
                     pathdict["closePath"] = fill_close
@@ -536,6 +572,8 @@ class _Tracer:
                     "layer": "",
                     "seqno": self.seqno,
                 }
+                if self.with_clip:
+                    pathdict["clip"] = clip
                 self._append(pathdict)
             self.seqno += 1
 

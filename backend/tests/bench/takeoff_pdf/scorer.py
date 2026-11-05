@@ -31,7 +31,6 @@ import statistics
 import subprocess
 import tempfile
 import time
-import tracemalloc
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -44,24 +43,34 @@ REAL_ASSETS = Path(__file__).resolve().parents[3] / "app" / "scripts" / "flagshi
 # ── detection, mirroring TakeoffService.recognize_candidates ─────────────────
 
 
-def detect(pdf: bytes, scale_ppu: float, *, trace_memory: bool = True) -> dict[str, Any]:
-    """Run the offline recognizer on page 1 the way the service does."""
+def peak_rss_mb() -> float:
+    """Peak resident memory of this process so far, what the 3 GB server rule is about.
+
+    Native allocations (OpenCV, PDFium) count here; a Python-level tracer misses them.
+    """
+    try:
+        import psutil
+
+        info = psutil.Process().memory_info()
+        return round(float(getattr(info, "peak_wset", info.rss)) / 1e6, 1)
+    except ImportError:
+        import resource  # noqa: PLC0415 - not on Windows, where psutil is the way in
+
+        return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e3, 1)
+
+
+def detect(pdf: bytes, scale_ppu: float) -> dict[str, Any]:
+    """Run the offline recognizer on page 1 the way the service does, with no time limit.
+
+    The limit is wall-clock and would make a score depend on how busy the machine is.
+    """
     from app.modules.takeoff import recognize
 
     run = getattr(recognize, "recognize_pdf_page", None)
-
-    def once() -> dict[str, Any]:
-        return run(pdf, 1, scale_ppu) if run is not None else _legacy_detect(pdf, scale_ppu)
-
     t0 = time.perf_counter()
-    result = once()
+    result = run(pdf, 1, scale_ppu, budget_s=None) if run is not None else _legacy_detect(pdf, scale_ppu)
     result["ms"] = (time.perf_counter() - t0) * 1000
-    result["peak_mb"] = 0.0
-    if trace_memory:
-        tracemalloc.start()
-        once()
-        result["peak_mb"] = tracemalloc.get_traced_memory()[1] / 1e6
-        tracemalloc.stop()
+    result["peak_rss_mb"] = peak_rss_mb()
     return result
 
 
@@ -301,7 +310,7 @@ def score_page(task: tuple[str, int, str]) -> dict[str, Any]:
         "kind": gt["kind"],
         "source": res.get("source"),
         "ms": res["ms"],
-        "peak_mb": res["peak_mb"],
+        "peak_rss_mb": res["peak_rss_mb"],
         "n_cands": len(cands),
     }
     if gt["kind"] == "noise":
@@ -429,7 +438,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         block["confidence"] = {"auc": _auc(conf_all), "bands": _bands(conf_all)}
         ms = sorted(r["ms"] for r in rs)
         block["runtime_ms"] = {"mean": round(statistics.fmean(ms), 1), "p95": round(ms[int(0.95 * (len(ms) - 1))], 1)}
-        block["peak_mb_max"] = round(max(r["peak_mb"] for r in rs), 1)
+        block["peak_rss_mb_max"] = round(max(r["peak_rss_mb"] for r in rs), 1)
         out[variant] = block
     return out
 
@@ -443,7 +452,32 @@ def tasks_for(split: str, n: int, scans: int) -> list[tuple[str, int, str]]:
     return [(split, s, "vector") for s in seeds[:n]] + [(split, s, "scan") for s in seeds[:scans]]
 
 
+def _score_independent(spec: dict[str, Any]) -> dict[str, Any]:
+    from tests.bench.takeoff_pdf import independent
+
+    return independent.score_sheet(spec, detect, detect_scale)
+
+
+def evaluate_independent(split: str, workers: int = 1) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Score the sheets this benchmark did not generate; ``split`` is ``tune`` or ``held``."""
+    from tests.bench.takeoff_pdf import independent
+
+    specs = independent.load_specs(split)
+    if workers > 1:
+        with ProcessPoolExecutor(workers) as ex:
+            rows = list(ex.map(_score_independent, specs))
+    else:
+        rows = [_score_independent(s) for s in specs]
+    missing = [r["id"] for r in rows if r.get("missing")]
+    present = [r for r in rows if not r.get("missing")]
+    block = independent.summarize(present)
+    block["missing"] = missing
+    return block, present
+
+
 def evaluate(split: str, n: int, scans: int, workers: int = 1) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if split in ("tune", "held"):
+        return evaluate_independent(split, workers)
     tasks = tasks_for(split, n, scans)
     if workers > 1:
         with ProcessPoolExecutor(workers) as ex:
@@ -466,7 +500,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--n", type=int, default=40, help="vector pages per split")
     ap.add_argument("--scans", type=int, default=16, help="scanned pages per split")
-    ap.add_argument("--splits", default="train,holdout,real")
+    ap.add_argument("--splits", default="train,holdout,fresh,real,tune,held")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--label", default="")
     ap.add_argument("--no-ledger", action="store_true")
