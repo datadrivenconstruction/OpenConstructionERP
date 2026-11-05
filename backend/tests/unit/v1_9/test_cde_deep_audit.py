@@ -64,6 +64,7 @@ class _StubSession:
             scalars=lambda: SimpleNamespace(all=lambda: []),
             scalar_one_or_none=lambda: None,
             all=lambda: [],
+            first=lambda: None,
         )
 
 

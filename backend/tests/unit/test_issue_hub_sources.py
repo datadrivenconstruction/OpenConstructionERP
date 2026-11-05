@@ -71,6 +71,10 @@ _SOURCE_TO_MODULE = {
 # Modules holding a defect register the hub does not read. Each line is a work
 # item, so each carries what the register is and why it is still outside.
 KNOWN_ABSENT_FROM_HUB: dict[str, str] = {
+    "geo_hub": (
+        "SurveyObservation is a surveyor's percent-complete reading for one activity on one capture, "
+        "not a defect. The census matches it by name only; the module holds no defect register."
+    ),
     "site_sensors": (
         "ConcreteMix is a concrete mix design with its maturity calibration, not a defect. "
         "The census matches it by name only; sensor alerts are threshold readings, not a defect register."

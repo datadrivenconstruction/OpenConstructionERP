@@ -311,7 +311,7 @@ async def test_full_access_grant_lifts_the_package_gate(monkeypatch: pytest.Monk
     from app.modules.users import router as users_router
 
     meta, _ = sp.install({}, ["estimate_quote"])
-    user = SimpleNamespace(id=uuid.UUID(USER_ID), metadata_=meta)
+    user = SimpleNamespace(id=uuid.UUID(USER_ID), role="estimator", metadata_=meta)
     saved: dict[str, Any] = {}
 
     class _Svc:
@@ -324,7 +324,7 @@ async def test_full_access_grant_lifts_the_package_gate(monkeypatch: pytest.Monk
     payload = users_router.UserModuleAccessPayload(
         modules={"ai": users_router.ModuleAccessLevel(visible=True, access="full")}
     )
-    await users_router.set_user_module_access(uuid.UUID(USER_ID), payload, _Svc())  # type: ignore[arg-type]
+    await users_router.set_user_module_access(uuid.UUID(USER_ID), payload, {"role": "admin"}, _Svc())  # type: ignore[arg-type]
     assert not sp.is_blocked(saved, "ai")
 
 

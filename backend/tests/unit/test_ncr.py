@@ -247,7 +247,10 @@ async def test_close_ncr_success() -> None:
     svc = _make_service()
     with patch("app.modules.ncr.service.event_bus.publish", new_callable=AsyncMock):
         ncr = await svc.create_ncr(
-            _create_data(corrective_action="Replace all affected concrete"),
+            _create_data(
+                corrective_action="Replace all affected concrete",
+                root_cause="Wrong mix design delivered to site",
+            ),
             user_id="u1",
         )
 

@@ -298,6 +298,12 @@ async def test_record_entry_triggers_earned_value_sync(monkeypatch: pytest.Monke
         async def create_entry(self, entry: object) -> object:
             return entry
 
+        async def get_latest_for_position(self, project_id: uuid.UUID, boq_position_id: uuid.UUID) -> None:
+            return None
+
+        async def get_latest_project_entry(self, project_id: uuid.UUID) -> None:
+            return None
+
     progress_service.repo = _FakeProgressRepo()
 
     position_id = uuid.uuid4()
@@ -331,6 +337,12 @@ async def test_record_entry_without_position_skips_sync(monkeypatch: pytest.Monk
     class _FakeProgressRepo:
         async def create_entry(self, entry: object) -> object:
             return entry
+
+        async def get_latest_for_position(self, project_id: uuid.UUID, boq_position_id: uuid.UUID) -> None:
+            return None
+
+        async def get_latest_project_entry(self, project_id: uuid.UUID) -> None:
+            return None
 
     progress_service.repo = _FakeProgressRepo()
 

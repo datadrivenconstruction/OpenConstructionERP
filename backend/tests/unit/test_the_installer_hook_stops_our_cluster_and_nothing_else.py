@@ -110,8 +110,12 @@ def test_the_hook_looks_where_the_backend_actually_keeps_its_data(postmaster_com
         f"installer would look for the cluster in the wrong directory"
     )
 
-    default_dir = re.search(r"DEFAULT_DATA_DIR = Path\.home\(\) / \"([^\"]+)\"", DEMO_SEED.read_text(encoding="utf-8"))
-    assert default_dir is not None, "demo_seed.py no longer declares DEFAULT_DATA_DIR"
+    assert "DEFAULT_DATA_DIR = legacy_home_dir(HOME_ROOT)" in DEMO_SEED.read_text(encoding="utf-8"), (
+        "demo_seed.py no longer declares DEFAULT_DATA_DIR from the home root"
+    )
+    home_state = DEMO_SEED.with_name("home_state.py").read_text(encoding="utf-8")
+    default_dir = re.search(r"^HOME_ROOT = \"([^\"]+)\"", home_state, re.M)
+    assert default_dir is not None, "home_state.py no longer declares HOME_ROOT"
     assert f"'{default_dir.group(1)}'" in postmaster_command, (
         f"the hook does not fall back to {default_dir.group(1)}, which is where "
         f"an install with no overrides set actually keeps its cluster"

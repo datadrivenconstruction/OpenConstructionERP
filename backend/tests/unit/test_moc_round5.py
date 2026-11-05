@@ -273,7 +273,7 @@ class TestMoCAuditTrail:
 
         entry = await svc.transition(entry.id, "reviewed", user_id=str(user))
         await session.commit()
-        entry = await svc.transition(entry.id, "declined", user_id=str(user))
+        entry = await svc.transition(entry.id, "declined", user_id=str(user), notes="Cost exceeds the benefit")
         await session.commit()
 
         rows = (
@@ -498,7 +498,7 @@ class TestMoCEditLock:
 
         entry = await svc.transition(entry.id, "reviewed", user_id=str(user))
         await session.commit()
-        entry = await svc.transition(entry.id, "declined", user_id=str(user))
+        entry = await svc.transition(entry.id, "declined", user_id=str(user), notes="Cost exceeds the benefit")
         await session.commit()
 
         with pytest.raises(HTTPException) as exc_info:

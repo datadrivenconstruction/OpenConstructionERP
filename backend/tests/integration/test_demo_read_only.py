@@ -57,6 +57,7 @@ from app.core.demo_read_only import (
 )
 from app.database import async_session_factory
 from app.main import create_app
+from app.modules.scim.schemas import ERROR_SCHEMA as SCIM_ERROR_SCHEMA
 
 #: Tables the guard deliberately lets a permitted request write. Taken from the
 #: module rather than restated here: a second copy of the decision would let
@@ -483,7 +484,13 @@ async def test_demo_read_only_refuses_every_write_and_moves_no_rows(app_client, 
             continue
         response = await client.request(method, concrete, headers=headers, json={})
         swept += 1
-        if response.status_code != 403 or response.json().get("detail", {}).get("error") != DEMO_READ_ONLY_ERROR:
+        if template.startswith("/scim/v2/"):
+            # An identity provider reads the RFC 7644 error envelope, not the demo screen's contract.
+            refused = response.status_code == 403 and SCIM_ERROR_SCHEMA in response.json().get("schemas", [])
+        else:
+            detail = response.json().get("detail") if response.status_code == 403 else None
+            refused = isinstance(detail, dict) and detail.get("error") == DEMO_READ_ONLY_ERROR
+        if not refused:
             unexpected.append(f"{method} {template} -> {response.status_code}")
 
     after = await _census()

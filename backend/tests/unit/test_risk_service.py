@@ -232,7 +232,6 @@ async def test_summary_aggregates_correctly(session):
             probability=0.9,
             impact_severity="critical",
             impact_cost=200_000.0,
-            mitigation_strategy="Survey first",
         )
     )
     r2 = await svc.create_risk(
@@ -241,6 +240,7 @@ async def test_summary_aggregates_correctly(session):
             probability=0.1,
             impact_severity="low",
             impact_cost=10_000.0,
+            mitigation_strategy="Survey first",
         )
     )
     await svc.update_risk(r2.id, RiskUpdate(status="mitigating"))

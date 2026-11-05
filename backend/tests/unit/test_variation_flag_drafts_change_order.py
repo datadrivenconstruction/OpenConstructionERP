@@ -142,6 +142,7 @@ async def _ncr(
             ncr_type="workmanship",
             severity="major",
             status=status,
+            root_cause="Poor compaction around the openings.",
             corrective_action="Break out and recast.",
             cost_impact=cost,
             schedule_impact_days=days,
@@ -575,13 +576,19 @@ async def test_a_code_collision_keeps_the_source_locked_until_the_link_is_writte
         await s.commit()
         other_id = other.id
 
-    real_count = ChangeOrderRepository.count_for_project
+    real_create = ChangeOrderRepository.create
     probes: list[str] = []
 
-    async def stale_then_real(self: ChangeOrderRepository, pid: uuid.UUID) -> int:
-        if not probes:
-            probes.append("stale count")
-            return 0  # mints CO-001, which the unrelated order already holds
+    async def stale_count(self: ChangeOrderRepository, pid: uuid.UUID) -> int:
+        probes.append("stale count")
+        return 0  # mints CO-001, which the unrelated order already holds
+
+    attempts: list[str] = []
+
+    async def probe_on_retry(self: ChangeOrderRepository, order: ChangeOrder) -> ChangeOrder:
+        attempts.append(order.code)
+        if len(attempts) == 1:
+            return await real_create(self, order)
         async with factory() as probe:
             try:
                 await probe.execute(select(NCR.id).where(NCR.id == ncr_id).with_for_update(nowait=True))
@@ -589,9 +596,10 @@ async def test_a_code_collision_keeps_the_source_locked_until_the_link_is_writte
             except DBAPIError:
                 probes.append("source row locked")
             await probe.rollback()
-        return await real_count(self, pid)
+        return await real_create(self, order)
 
-    monkeypatch.setattr(ChangeOrderRepository, "count_for_project", stale_then_real)
+    monkeypatch.setattr(ChangeOrderRepository, "count_for_project", stale_count)
+    monkeypatch.setattr(ChangeOrderRepository, "create", probe_on_retry)
 
     await _on_variation_flagged(_flag("ncr", ncr_id, project_id))
 

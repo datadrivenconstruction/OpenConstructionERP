@@ -703,6 +703,8 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "get_document_references",
         "get_photo",
         "get_sheet",
+        "get_sheet_thumbnail",
+        "confirm_sheet_extraction",
         "get_sheet_versions",
         "list_document_activity",
         "list_document_share_links",

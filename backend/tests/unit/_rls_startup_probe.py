@@ -32,7 +32,7 @@ async def run() -> None:
     assert make_url(settings.database_url) == engine.url == make_url(os.environ["DATABASE_URL"])
     assert async_session_factory.kw["bind"] is engine
     assert settings.database_sync_url == os.environ["DATABASE_SYNC_URL"]
-    assert _resolve_data_dir().resolve() == private_home / ".openestimate"
+    assert _resolve_data_dir().resolve() == Path(os.environ["DATA_DIR"]).resolve()
     assert _resolve_state_dir().resolve() == Path.cwd().resolve()
     app = main.create_app()
     startup = next(handler for handler in app.router.on_startup if handler.__name__ == "startup")

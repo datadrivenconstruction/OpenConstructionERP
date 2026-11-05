@@ -180,6 +180,7 @@ async def test_complete_inspection_pass() -> None:
             project_id=uuid.uuid4(),
             inspection_type="structural",
             title="Beam Inspection",
+            inspector_id="11111111-1111-4111-8111-111111111111",
         )
     )
     inspection.status = "in_progress"
@@ -198,6 +199,7 @@ async def test_complete_inspection_fail_with_checklist_items() -> None:
             project_id=uuid.uuid4(),
             inspection_type="fire_safety",
             title="Fire Stopping Check",
+            inspector_id="11111111-1111-4111-8111-111111111111",
         )
     )
     inspection.status = "in_progress"

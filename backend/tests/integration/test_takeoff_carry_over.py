@@ -22,6 +22,7 @@ from app.database import async_session_factory
 @pytest_asyncio.fixture(scope="module", autouse=True)
 async def _schema():
     import app.modules.boq.models  # noqa: F401
+    import app.modules.catalog.models  # noqa: F401
     import app.modules.documents.models  # noqa: F401
     import app.modules.projects.models  # noqa: F401
     import app.modules.takeoff.models  # noqa: F401

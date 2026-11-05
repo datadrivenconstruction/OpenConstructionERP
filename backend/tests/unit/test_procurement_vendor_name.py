@@ -61,6 +61,7 @@ async def _list_pos(session: AsyncSession, project_id: uuid.UUID):
         project_id=project_id,
         status=None,
         vendor_contact_id=None,
+        search=None,
         offset=0,
         limit=50,
         service=ProcurementService(session),

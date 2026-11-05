@@ -39,6 +39,11 @@ class _StubSession:
     async def refresh(self, obj: Any) -> None:
         pass
 
+    async def execute(self, stmt: Any) -> Any:  # noqa: ARG002
+        from types import SimpleNamespace
+
+        return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: []))
+
 
 class _StubFieldReportRepo:
     def __init__(self) -> None:
@@ -176,7 +181,9 @@ async def test_list_reports_project_scoped() -> None:
 @pytest.mark.asyncio
 async def test_submit_draft_report_succeeds() -> None:
     service = _make_service()
-    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
+    report = await service.create_report(
+        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13), work_performed="Poured level 2 slab")
+    )
     result = await service.submit_report(report.id)
     assert result.status == "submitted"
 
@@ -197,7 +204,9 @@ async def test_submit_non_draft_raises_400() -> None:
 @pytest.mark.asyncio
 async def test_approve_submitted_report_succeeds() -> None:
     service = _make_service()
-    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
+    report = await service.create_report(
+        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13), work_performed="Poured level 2 slab")
+    )
     report.status = "submitted"
 
     result = await service.approve_report(report.id, user_id="mgr-1")

@@ -59,6 +59,8 @@ async def _ncr(session: AsyncSession, project_id: uuid.UUID, *, status: str = "c
             ncr_type="workmanship",
             severity="major",
             status=status,
+            root_cause="Poor compaction at the column heads.",
+            corrective_action="Break out and recast the column heads.",
             cost_impact="EUR 8400",
         )
     )

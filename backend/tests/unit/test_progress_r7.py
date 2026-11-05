@@ -121,6 +121,20 @@ class _StubProgressRepo:
             rows = [e for e in rows if e.period_label == period_label]
         return sorted(rows, key=lambda e: e.recorded_at)[offset : offset + limit]
 
+    async def get_latest_for_position(
+        self,
+        project_id: uuid.UUID,
+        boq_position_id: uuid.UUID,
+        *,
+        as_of: datetime | None = None,
+    ) -> Any:
+        rows = [e for e in self._rows_for(project_id) if getattr(e, "boq_position_id", None) == boq_position_id]
+        return self._latest_first(rows)[0] if rows else None
+
+    async def get_latest_project_entry(self, project_id: uuid.UUID) -> Any:
+        rows = [e for e in self._rows_for(project_id) if getattr(e, "boq_position_id", None) is None]
+        return self._latest_first(rows)[0] if rows else None
+
     def _rows_for(self, project_id: uuid.UUID) -> list[Any]:
         return [e for e in self.entries if e.project_id == project_id]
 

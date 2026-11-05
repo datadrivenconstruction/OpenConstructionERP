@@ -152,6 +152,17 @@ async def other_user_auth(
 
 
 @pytest_asyncio.fixture(scope="module")
+async def outsider_auth(
+    client: AsyncClient,
+    request,
+) -> tuple[str, dict[str, str]]:
+    """A non-admin caller with no membership in any project; an admin would bypass the project check."""
+    mod_tag = request.module.__name__.rsplit(".", 1)[-1][-12:]
+    uid, _email, header = await _register_user(client, role="editor", tag=f"out-{mod_tag}")
+    return uid, header
+
+
+@pytest_asyncio.fixture(scope="module")
 async def other_project_id(
     client: AsyncClient,
     other_user_auth: tuple[str, dict[str, str]],

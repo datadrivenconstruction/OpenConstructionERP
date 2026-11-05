@@ -188,9 +188,9 @@ async def test_invoice_reconcile_accept_and_summary(client: AsyncClient, admin_a
 
 
 @pytest.mark.asyncio
-async def test_project_isolation(client: AsyncClient, admin_auth, project_id, other_user_auth):
+async def test_project_isolation(client: AsyncClient, admin_auth, project_id, outsider_auth):
     _, header = admin_auth
-    _, other = other_user_auth
+    _, other = outsider_auth
     t = await _create(client, header, project_id)
     resp = await client.get(f"{BASE}/tickets/{t['id']}", headers=other)
     assert resp.status_code in (403, 404)

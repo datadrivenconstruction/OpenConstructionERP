@@ -80,7 +80,7 @@ async def test_offline_withdraw_cannot_delete_a_draft_in_a_locked_period(monkeyp
         def __init__(self, _session):
             pass
 
-        async def get_by_client_op_id(self, _key):
+        async def get_by_client_op_id(self, _key, _project_id):
             return ledger
 
     monkeypatch.setattr("app.modules.field_time.service.FieldSyncLedgerRepository", _Ledger)

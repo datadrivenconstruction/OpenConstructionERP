@@ -106,6 +106,7 @@ async def test_complete_from_scheduled_allowed_shortcut() -> None:
             project_id=uuid.uuid4(),
             inspection_type="general",
             title="Shortcut path",
+            inspector_id="11111111-1111-4111-8111-111111111111",
         )
     )
     assert inspection.status == "scheduled"
@@ -124,6 +125,7 @@ async def test_complete_from_in_progress_allowed_canonical() -> None:
             project_id=uuid.uuid4(),
             inspection_type="general",
             title="Canonical path",
+            inspector_id="11111111-1111-4111-8111-111111111111",
         )
     )
     inspection.status = "in_progress"

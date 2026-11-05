@@ -116,7 +116,7 @@ async def test_update_and_list_echo_are_redacted_in_demo_mode(monkeypatch: pytes
     other = _user_row("bob@corp.io", "Bob Private")
     svc = _FakeUserService(other)
     viewer = str(uuid.uuid4())
-    patched = await update_user(other.id, UserAdminUpdate(), viewer_id=viewer, service=svc)
+    patched = await update_user(other.id, UserAdminUpdate(), viewer_id=viewer, payload={"role": "admin"}, service=svc)
     listed = await list_users(viewer_id=viewer, service=svc, offset=0, limit=50, is_active=None)
     for resp in (patched, listed[0]):
         assert resp.email == anonymize_email("bob@corp.io")

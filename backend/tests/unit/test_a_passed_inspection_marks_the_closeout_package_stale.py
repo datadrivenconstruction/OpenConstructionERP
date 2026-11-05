@@ -119,6 +119,8 @@ async def _complete(result: str) -> Any:
     inspection = await service.create_inspection(
         InspectionCreate(project_id=PROJECT, inspection_type="handover", title="Final walk")
     )
+    # Named after scheduling so the only events published are the completion ones.
+    inspection.inspector_id = "11111111-1111-4111-8111-111111111111"
     return await service.complete_inspection(inspection.id, result)
 
 

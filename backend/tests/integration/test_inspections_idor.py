@@ -220,6 +220,7 @@ async def test_tenant_b_cannot_create_defect_from_inspection(http_client, two_te
             "project_id": a["project_id"],
             "inspection_type": "concrete_pour",
             "title": "A failed pour — used for defect IDOR test",
+            "inspector_id": "11111111-1111-4111-8111-111111111111",
             "checklist_data": [
                 {"question": "Rebar OK?", "response": "fail", "critical": True},
             ],
@@ -266,6 +267,7 @@ async def test_tenant_b_cannot_create_ncr_from_inspection(http_client, two_tenan
             "project_id": a["project_id"],
             "inspection_type": "concrete_pour",
             "title": "A failed pour — used for NCR IDOR test",
+            "inspector_id": "11111111-1111-4111-8111-111111111111",
             "checklist_data": [
                 {"question": "Rebar OK?", "response": "fail", "critical": True},
             ],
@@ -351,6 +353,7 @@ async def test_owner_can_still_complete_inspection(http_client, two_tenants):
             "project_id": a["project_id"],
             "inspection_type": "general",
             "title": "A owner-flow inspection",
+            "inspector_id": "11111111-1111-4111-8111-111111111111",
         },
         headers=a["headers"],
     )
