@@ -2143,5 +2143,60 @@
     "en_value": "SUNAT UBL 2.1 (factura electrónica)",
     "note": "official name of the Peruvian electronic invoice profile, a standard name kept in its own language",
     "reason_category": "standard_code"
+  },
+  "accountingSync.export.saft": {
+    "en_value": "SAF-T XML",
+    "note": "SAF-T is the OECD Standard Audit File for Tax and XML its file format, cited by its published name in every locale",
+    "reason_category": "standard_code"
+  },
+  "accountingSync.provider.saft": {
+    "en_value": "SAF-T",
+    "note": "OECD Standard Audit File for Tax, cited by its published name in every locale",
+    "reason_category": "standard_code"
+  },
+  "accountingSync.provider.datev": {
+    "en_value": "DATEV",
+    "note": "name of the DATEV accounting exchange format and provider, identical in every script",
+    "reason_category": "product_name"
+  },
+  "accountingSync.provider.qbo": {
+    "en_value": "QBO",
+    "note": "neutral short name of the online-ledger provider connector (the long product name is deliberately not used), identical in every script",
+    "reason_category": "product_name"
+  },
+  "accountingSync.provider.xero": {
+    "en_value": "Xero",
+    "note": "name of the cloud-ledger provider the connector talks to, identical in every script",
+    "reason_category": "product_name"
+  },
+  "geo_hub.surveys.chip.crs": {
+    "en_value": "EPSG:{{code}}",
+    "note": "EPSG registry code of a coordinate reference system plus a template variable, nothing else to translate",
+    "reason_category": "standard_code"
+  },
+  "geo_hub.surveys.chip.gsd": {
+    "en_value": "GSD {{value}}",
+    "note": "GSD (ground sampling distance), the photogrammetry term of art used as an abbreviation in every locale including ru, plus a template variable",
+    "reason_category": "abbreviation"
+  },
+  "geo_hub.surveys.chip.size": {
+    "en_value": "{{value}}",
+    "note": "entirely a template variable, no literal word to translate",
+    "reason_category": "template_placeholder"
+  },
+  "geo_hub.surveys.upload.file_hint": {
+    "en_value": "GeoTIFF (.tif, .tiff)",
+    "note": "name of the GeoTIFF raster format and its file extensions, identical in every locale",
+    "reason_category": "standard_code"
+  },
+  "scim.source_oidc": {
+    "en_value": "OIDC",
+    "note": "OpenID Connect, an identity standard cited by its acronym in every locale",
+    "reason_category": "standard_code"
+  },
+  "scim.source_scim": {
+    "en_value": "SCIM",
+    "note": "System for Cross-domain Identity Management, an identity standard cited by its acronym in every locale",
+    "reason_category": "standard_code"
   }
 }
