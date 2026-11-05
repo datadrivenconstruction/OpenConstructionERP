@@ -33,7 +33,7 @@ from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.costmodel.elemental import (
@@ -655,12 +655,42 @@ class RomEstimateService:
 
     session: AsyncSession
     _computed: object = field(default=None, compare=False)
+    #: Non-blocking rule findings of the latest write, for the router to report.
+    warnings: list[dict] = field(default_factory=list, compare=False)
+
+    async def _gate(self, project_id: uuid.UUID, result: RomEstimateResult, operation: str) -> None:
+        """Run the ROM estimate rules on the estimate about to be saved: errors raise a coded 422."""
+        from app.modules.boq.models import BOQ  # noqa: PLC0415
+        from app.modules.rom_estimate.validators import gate  # noqa: PLC0415
+
+        saved = (
+            await self.session.execute(
+                select(func.count()).select_from(RomEstimate).where(RomEstimate.project_id == project_id)
+            )
+        ).scalar_one()
+        boqs = (
+            await self.session.execute(select(func.count()).select_from(BOQ).where(BOQ.project_id == project_id))
+        ).scalar_one()
+        self.warnings = await gate(
+            {
+                "estimate": {
+                    "id": "",
+                    "gfa_m2": result.gfa_canonical_m2,
+                    "currency": result.currency,
+                    "localized": result.accuracy.localized,
+                    "operation": operation,
+                },
+                "project": {"saved_estimates": saved, "boqs": boqs},
+            },
+            target_id=str(project_id),
+        )
 
     async def create_estimate(
         self,
         project_id: uuid.UUID,
         request: RomEstimateRequest,
         created_by: uuid.UUID | None,
+        operation: str = "save",
     ) -> RomEstimate:
         """Compute a ROM estimate and persist it against a project.
 
@@ -669,6 +699,7 @@ class RomEstimateService:
                 estimator so the router can turn it into a 422).
         """
         result = build_rom_estimate(request)
+        await self._gate(project_id, result, operation)
         row = RomEstimate(
             **rom_result_to_row_kwargs(
                 result,
@@ -866,7 +897,7 @@ class RomEstimateService:
                 pure estimator so the router can turn it into a 422).
         """
         # (a) Persist the conceptual estimate as the project baseline.
-        row = await self.create_estimate(project_id, request, created_by)
+        row = await self.create_estimate(project_id, request, created_by, operation="create_boq")
 
         # Local imports: the BOQ models/repositories are only needed on this
         # write path, and a module-level import would couple module load order
@@ -981,4 +1012,5 @@ class RomEstimateService:
             estimate_id=str(row.id),
             sections_created=sections_created,
             positions_created=positions_created,
+            warnings=self.warnings,
         )

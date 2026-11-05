@@ -2239,5 +2239,56 @@
       "fail": "Hidden works were accepted without naming: {missing}.",
       "suggestion": "Record the element and its location before the entry is closed."
     }
+  },
+  "allowances": {
+    "suggestion": "Check the held amount, the currency and the drawdown notes of this allowance, then save again.",
+    "overdrawn": {
+      "fail": "{label}: drawdowns of {drawn} exceed the {held} held, so the estimate is short by {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} drawdown(s) have no note saying which package or instruction the money was released to."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Keep one factor per material category, spelled the way the bills of quantities spell it.",
+    "duplicate_category": {
+      "fail": "A waste factor for the category {category} already exists, so the gross quantity would depend on which one is read last."
+    },
+    "category_case_variant": {
+      "fail": "The category {category} differs only in spelling from {existing}; categories are matched exactly, so lines will not find the same factor."
+    },
+    "factor_high": {
+      "fail": "The factor {factor} for {category} orders {pct} % on top of the drawn quantity, more than waste usually explains."
+    }
+  },
+  "price_index": {
+    "suggestion": "Check the period, the value and its source against the published index, then save again.",
+    "duplicate_period": {
+      "fail": "The series already has a value for the period {value}."
+    },
+    "duplicate_region": {
+      "fail": "A location factor for the region {value} already exists."
+    },
+    "jump_implausible": {
+      "fail": "{label} is {value}, which changes by {pct} % against {other_label} ({other}); a leap that large is usually a typing or unit error."
+    },
+    "location_factor_outlier": {
+      "fail": "The location factor {factor} for {region} is outside the usual band of {low} to {high} around the national baseline of 1."
+    },
+    "index_source_missing": {
+      "fail": "The index {label} has no source, so it cannot be checked against the published letter."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Review the area, the currency and the region of the concept estimate, then save again.",
+    "region_not_set": {
+      "fail": "No region is selected, so no regional cost factor is applied and the accuracy range stays wide."
+    },
+    "baseline_replaced": {
+      "fail": "This project already has {count} saved concept estimate(s); the newest one becomes the baseline for reconciliation."
+    },
+    "boq_beside_detailed": {
+      "fail": "This project already has {count} bill(s) of quantities; a concept bill added beside them counts the same scope twice."
+    }
   }
 }

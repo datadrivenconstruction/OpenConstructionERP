@@ -2239,5 +2239,56 @@
       "fail": "Skjulte arbejder blev godkendt uden angivelse af: {missing}.",
       "suggestion": "Registrer bygningsdel og placering, før posten lukkes."
     }
+  },
+  "allowances": {
+    "suggestion": "Kontroller det tilbageholdte beløb, valutaen og noterne ved træk på posten, og gem igen.",
+    "overdrawn": {
+      "fail": "{label}: træk på {drawn} overstiger de tilbageholdte {held}, så overslaget er {excess} for lavt."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} træk mangler en note om, hvilken pakke eller instruks pengene blev frigivet til."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Hav én faktor pr. materialekategori, stavet som i tilbudslisterne.",
+    "duplicate_category": {
+      "fail": "Der findes allerede en spildfaktor for kategorien {category}, så bruttomængden ville afhænge af, hvilken der læses sidst."
+    },
+    "category_case_variant": {
+      "fail": "Kategorien {category} adskiller sig kun i stavning fra {existing}; kategorier matches præcist, så linjerne finder ikke samme faktor."
+    },
+    "factor_high": {
+      "fail": "Faktoren {factor} for {category} bestiller {pct} % ud over den tegnede mængde, mere end spild plejer at forklare."
+    }
+  },
+  "price_index": {
+    "suggestion": "Kontroller periode, værdi og kilde mod det offentliggjorte indeks, og gem igen.",
+    "duplicate_period": {
+      "fail": "Serien har allerede en værdi for perioden {value}."
+    },
+    "duplicate_region": {
+      "fail": "Der findes allerede en lokalitetsfaktor for regionen {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} er {value}, en afvigelse på {pct} % fra {other_label} ({other}); et så stort spring er oftest en tastefejl eller enhedsfejl."
+    },
+    "location_factor_outlier": {
+      "fail": "Lokalitetsfaktoren {factor} for {region} ligger uden for det sædvanlige interval {low} til {high} omkring national basis 1."
+    },
+    "index_source_missing": {
+      "fail": "Indekset {label} har ingen kilde og kan derfor ikke kontrolleres mod den offentliggjorte meddelelse."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Kontroller areal, valuta og region i det konceptuelle overslag, og gem igen.",
+    "region_not_set": {
+      "fail": "Ingen region er valgt, så der anvendes ingen regional omkostningsfaktor, og nøjagtighedsintervallet forbliver bredt."
+    },
+    "baseline_replaced": {
+      "fail": "Projektet har allerede {count} gemt(e) konceptuelt(e) overslag; det nyeste bliver basis for afstemningen."
+    },
+    "boq_beside_detailed": {
+      "fail": "Projektet har allerede {count} tilbudsliste(r); en konceptuel liste ved siden af tæller samme omfang to gange."
+    }
   }
 }

@@ -23,3 +23,6 @@ async def on_startup() -> None:
     from app.modules.allowances.permissions import register_allowances_permissions
 
     register_allowances_permissions()
+    from app.modules.allowances.validators import register_allowances_validation_rules
+
+    register_allowances_validation_rules()

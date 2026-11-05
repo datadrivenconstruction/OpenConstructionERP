@@ -2239,5 +2239,56 @@
       "fail": "Pekerjaan tersembunyi diterima tanpa menyebut: {missing}.",
       "suggestion": "Catat elemen dan lokasinya sebelum entri ditutup."
     }
+  },
+  "allowances": {
+    "suggestion": "Periksa jumlah yang ditahan, mata uang, dan catatan pencairan pos ini, lalu simpan lagi.",
+    "overdrawn": {
+      "fail": "{label}: pencairan sebesar {drawn} melebihi {held} yang ditahan, sehingga estimasi kurang {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} pencairan tidak punya catatan paket atau instruksi mana yang menerima dana."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Pakai satu faktor per kategori material, dieja seperti di daftar kuantitas.",
+    "duplicate_category": {
+      "fail": "Faktor susut untuk kategori {category} sudah ada, sehingga kuantitas bruto bergantung pada mana yang dibaca terakhir."
+    },
+    "category_case_variant": {
+      "fail": "Kategori {category} hanya berbeda ejaan dari {existing}; kategori dicocokkan persis, sehingga baris tidak menemukan faktor yang sama."
+    },
+    "factor_high": {
+      "fail": "Faktor {factor} untuk {category} memesan {pct} % di atas kuantitas gambar, lebih dari yang biasa dijelaskan susut."
+    }
+  },
+  "price_index": {
+    "suggestion": "Cocokkan periode, nilai, dan sumber dengan indeks yang dipublikasikan, lalu simpan lagi.",
+    "duplicate_period": {
+      "fail": "Seri sudah punya nilai untuk periode {value}."
+    },
+    "duplicate_region": {
+      "fail": "Faktor lokasi untuk wilayah {value} sudah ada."
+    },
+    "jump_implausible": {
+      "fail": "{label} bernilai {value}, berbeda {pct} % dari {other_label} ({other}); lonjakan sebesar itu biasanya salah ketik atau salah satuan."
+    },
+    "location_factor_outlier": {
+      "fail": "Faktor lokasi {factor} untuk {region} di luar rentang lazim {low} sampai {high} di sekitar basis nasional 1."
+    },
+    "index_source_missing": {
+      "fail": "Indeks {label} tidak punya sumber, sehingga tidak dapat dicocokkan dengan publikasi resmi."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Periksa luas, mata uang, dan wilayah estimasi konseptual, lalu simpan lagi.",
+    "region_not_set": {
+      "fail": "Wilayah belum dipilih, sehingga faktor biaya regional tidak diterapkan dan rentang akurasi tetap lebar."
+    },
+    "baseline_replaced": {
+      "fail": "Proyek ini sudah punya {count} estimasi konseptual tersimpan; yang terbaru menjadi dasar rekonsiliasi."
+    },
+    "boq_beside_detailed": {
+      "fail": "Proyek ini sudah punya {count} daftar kuantitas; daftar konseptual di sampingnya menghitung lingkup yang sama dua kali."
+    }
   }
 }

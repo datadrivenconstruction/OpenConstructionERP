@@ -2239,5 +2239,56 @@
       "fail": "Skriveni radovi prihvaćeni su bez navođenja: {missing}.",
       "suggestion": "Upišite element i njegov položaj prije zatvaranja zapisa."
     }
+  },
+  "allowances": {
+    "suggestion": "Provjerite zadržani iznos, valutu i bilješke uz povlačenja ove stavke pa ponovno spremite.",
+    "overdrawn": {
+      "fail": "{label}: povlačenja od {drawn} premašuju zadržanih {held}, pa je troškovnik kratak za {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} povlačenja nemaju bilješku za koji su paket ili nalog novci odobreni."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Zadržite jedan koeficijent po kategoriji materijala, pisanoj kao u troškovnicima.",
+    "duplicate_category": {
+      "fail": "Koeficijent otpada za kategoriju {category} već postoji pa bi bruto količina ovisila o tome koji se pročita zadnji."
+    },
+    "category_case_variant": {
+      "fail": "Kategorija {category} razlikuje se od {existing} samo u pisanju; kategorije se uspoređuju točno pa stavke neće pronaći isti koeficijent."
+    },
+    "factor_high": {
+      "fail": "Koeficijent {factor} za {category} naručuje {pct} % više od nacrtane količine, više nego što otpad obično objašnjava."
+    }
+  },
+  "price_index": {
+    "suggestion": "Provjerite razdoblje, vrijednost i izvor prema objavljenom indeksu pa ponovno spremite.",
+    "duplicate_period": {
+      "fail": "Niz već ima vrijednost za razdoblje {value}."
+    },
+    "duplicate_region": {
+      "fail": "Lokacijski koeficijent za regiju {value} već postoji."
+    },
+    "jump_implausible": {
+      "fail": "{label} iznosi {value}, što se razlikuje za {pct} % od {other_label} ({other}); tako velik skok obično je tipfeler ili pogreška jedinica."
+    },
+    "location_factor_outlier": {
+      "fail": "Lokacijski koeficijent {factor} za {region} izvan je uobičajenog raspona od {low} do {high} oko nacionalne baze 1."
+    },
+    "index_source_missing": {
+      "fail": "Indeks {label} nema izvor pa se ne može provjeriti prema objavljenom priopćenju."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Provjerite površinu, valutu i regiju konceptualne procjene pa ponovno spremite.",
+    "region_not_set": {
+      "fail": "Regija nije odabrana, pa se regionalni koeficijent troška ne primjenjuje i raspon točnosti ostaje širok."
+    },
+    "baseline_replaced": {
+      "fail": "Ovaj projekt već ima spremljenih konceptualnih procjena: {count}; najnovija postaje osnova za usklađenje."
+    },
+    "boq_beside_detailed": {
+      "fail": "Ovaj projekt već ima troškovnika: {count}; konceptualni troškovnik dodan uz njih dvaput broji isti opseg."
+    }
   }
 }

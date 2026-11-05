@@ -17,6 +17,7 @@ always populated before it is read (no async lazy-load surprise).
 import logging
 import uuid
 from decimal import Decimal
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -54,6 +55,36 @@ class AllowanceService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking findings of the latest write, for the router to report.
+        self.warnings: list[dict[str, Any]] = []
+
+    async def _gate(self, context: dict[str, Any], before: dict[str, Any] | None, target_id: str) -> None:
+        """Run the allowance rules: errors the write introduces raise a coded 422, warnings are kept."""
+        from app.core.validation.cost_gate import raise_on_introduced, run_rule_set, warnings_of  # noqa: PLC0415
+        from app.modules.allowances.validators import ALLOWANCES_RULE_SET  # noqa: PLC0415
+
+        def run(payload: dict[str, Any]):
+            return run_rule_set(ALLOWANCES_RULE_SET, payload, target_type="allowance", target_id=target_id)
+
+        report = await run(context)
+        await raise_on_introduced(
+            report, (lambda: run(before)) if before is not None else None, error="allowances_rules_failed"
+        )
+        self.warnings = warnings_of(report)
+
+    @staticmethod
+    def _context(allowance: Allowance, *, extra: list[dict[str, Any]] | None = None, **over: Any) -> dict[str, Any]:
+        """The rule payload of an allowance as it would stand after the write."""
+        head = {
+            "id": str(allowance.id) if allowance.id else "",
+            "label": allowance.label,
+            "allowance_type": allowance.allowance_type,
+            "held_amount": allowance.held_amount,
+            "currency": allowance.currency,
+        }
+        head.update(over)
+        drawdowns = [{"id": str(d.id), "amount": d.amount, "note": d.note} for d in allowance.drawdowns]
+        return {"allowance": head, "drawdowns": [*drawdowns, *(extra or [])]}
 
     # ── Allowances ────────────────────────────────────────────────────────
 
@@ -73,6 +104,8 @@ class AllowanceService:
             notes=data.notes,
             created_by=user_id,
         )
+        allowance.drawdowns = []
+        await self._gate(self._context(allowance), None, data.label)
         self.session.add(allowance)
         await self.session.flush()
         logger.info(
@@ -106,6 +139,18 @@ class AllowanceService:
         """Apply a partial update to an allowance and return it fully loaded."""
         allowance = await self.get_allowance(allowance_id)
         fields = data.model_dump(exclude_unset=True)
+        before = self._context(allowance)
+        after = {
+            "label": fields.get("label") if fields.get("label") is not None else allowance.label,
+            "allowance_type": fields.get("allowance_type") or allowance.allowance_type,
+            "held_amount": _money(fields["held_amount"])
+            if fields.get("held_amount") is not None
+            else allowance.held_amount,
+            "currency": _norm_currency(fields["currency"])
+            if fields.get("currency") is not None
+            else allowance.currency,
+        }
+        await self._gate(self._context(allowance, **after), before, str(allowance_id))
         if "label" in fields and fields["label"] is not None:
             allowance.label = fields["label"]
         if "allowance_type" in fields and fields["allowance_type"] is not None:
@@ -139,12 +184,17 @@ class AllowanceService:
         surfaces it as an advisory flag, never a hard error, so a provisional sum
         that turned out too small can still be tracked honestly.
         """
-        await self.get_allowance(allowance_id)
+        allowance = await self.get_allowance(allowance_id)
         drawdown = AllowanceDrawdown(
             allowance_id=allowance_id,
             amount=_money(data.amount),
             note=data.note,
             created_by=user_id,
+        )
+        await self._gate(
+            self._context(allowance, extra=[{"id": "", "amount": drawdown.amount, "note": drawdown.note}]),
+            self._context(allowance),
+            str(allowance_id),
         )
         self.session.add(drawdown)
         await self.session.flush()

@@ -85,6 +85,8 @@ class AllowanceResponse(BaseModel):
     created_by: str | None = None
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
 
 # ── Drawdown ───────────────────────────────────────────────────────────────
@@ -110,6 +112,7 @@ class DrawdownResponse(BaseModel):
     note: str | None = None
     created_by: str | None = None
     created_at: datetime
+    warnings: list[dict] = Field(default_factory=list)
 
 
 # ── Register summary ───────────────────────────────────────────────────────

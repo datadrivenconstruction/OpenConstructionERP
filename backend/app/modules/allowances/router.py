@@ -157,6 +157,7 @@ async def create_allowance(
     await verify_project_access(project_id, user_id, session)
     allowance = await service.create_allowance(project_id, data, user_id=user_id)
     resp = _allowance_out(allowance)
+    resp.warnings = service.warnings
     await session.commit()
     return resp
 
@@ -215,6 +216,7 @@ async def update_allowance(
     await verify_project_access(existing.project_id, user_id, session)
     allowance = await service.update_allowance(allowance_id, data)
     resp = _allowance_out(allowance)
+    resp.warnings = service.warnings
     await session.commit()
     return resp
 
@@ -276,6 +278,7 @@ async def create_drawdown(
     await verify_project_access(allowance.project_id, user_id, session)
     drawdown = await service.add_drawdown(allowance_id, data, user_id=user_id)
     resp = DrawdownResponse.model_validate(drawdown)
+    resp.warnings = service.warnings
     await session.commit()
     return resp
 

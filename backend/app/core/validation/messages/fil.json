@@ -2239,5 +2239,56 @@
       "fail": "Tinanggap ang mga nakatagong gawa nang hindi tinutukoy ang: {missing}.",
       "suggestion": "Itala ang elemento at lokasyon nito bago isara ang entry."
     }
+  },
+  "allowances": {
+    "suggestion": "Suriin ang nakaipit na halaga, ang currency, at ang mga tala sa pag-withdraw ng item na ito, at i-save muli.",
+    "overdrawn": {
+      "fail": "{label}: ang mga withdrawal na {drawn} ay lampas sa nakaipit na {held}, kaya kulang ng {excess} ang tantiya."
+    },
+    "drawdown_unexplained": {
+      "fail": "Ang {count} withdrawal ay walang tala kung para saan na package o utos inilabas ang pera."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Magtago ng isang factor bawat kategorya ng materyales, na isinulat gaya sa bill of quantities.",
+    "duplicate_category": {
+      "fail": "May waste factor na para sa kategoryang {category}, kaya aasa ang gross na dami sa kung alin ang huling mababasa."
+    },
+    "category_case_variant": {
+      "fail": "Ang kategoryang {category} ay iba lamang sa baybay kumpara sa {existing}; eksaktong itinutugma ang mga kategorya, kaya hindi makakahanap ng parehong factor ang mga linya."
+    },
+    "factor_high": {
+      "fail": "Ang factor na {factor} para sa {category} ay nag-oorder ng {pct} % na higit sa iginuhit na dami, higit sa karaniwang ipinapaliwanag ng waste."
+    }
+  },
+  "price_index": {
+    "suggestion": "Itugma ang panahon, halaga, at pinagmulan sa nailathalang index, at i-save muli.",
+    "duplicate_period": {
+      "fail": "May halaga na ang serye para sa panahong {value}."
+    },
+    "duplicate_region": {
+      "fail": "May location factor na para sa rehiyong {value}."
+    },
+    "jump_implausible": {
+      "fail": "Ang {label} ay {value}, na {pct} % ang pagkakaiba sa {other_label} ({other}); ang ganito kalaking talon ay kadalasang mali sa pagta-type o unit."
+    },
+    "location_factor_outlier": {
+      "fail": "Ang location factor na {factor} para sa {region} ay labas sa karaniwang saklaw na {low} hanggang {high} sa paligid ng pambansang batayan na 1."
+    },
+    "index_source_missing": {
+      "fail": "Walang pinagmulan ang index na {label}, kaya hindi ito maitutugma sa nailathalang paunawa."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Suriin ang lawak, currency, at rehiyon ng konseptwal na tantiya, at i-save muli.",
+    "region_not_set": {
+      "fail": "Walang napiling rehiyon, kaya walang rehiyonal na cost factor na ilalapat at nananatiling malawak ang saklaw ng katumpakan."
+    },
+    "baseline_replaced": {
+      "fail": "May {count} nang nakasave na konseptwal na tantiya ang proyektong ito; ang pinakabago ang magiging batayan ng reconciliation."
+    },
+    "boq_beside_detailed": {
+      "fail": "May {count} nang bill of quantities ang proyektong ito; ang konseptwal na bill na idinagdag sa tabi ay dalawang beses bibilangin ang parehong saklaw."
+    }
   }
 }

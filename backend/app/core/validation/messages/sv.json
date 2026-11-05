@@ -2239,5 +2239,56 @@
       "fail": "Dolda arbeten godkändes utan att ange: {missing}.",
       "suggestion": "Registrera byggdelen och platsen innan posten stängs."
     }
+  },
+  "allowances": {
+    "suggestion": "Kontrollera det innehållna beloppet, valutan och anteckningarna vid uttagen för posten och spara igen.",
+    "overdrawn": {
+      "fail": "{label}: uttag på {drawn} överstiger de innehållna {held}, så kalkylen räcker inte med {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} uttag saknar anteckning om vilket paket eller vilken order pengarna frigjordes för."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Ha en faktor per materialkategori, skriven som i mängdförteckningarna.",
+    "duplicate_category": {
+      "fail": "En spillfaktor för kategorin {category} finns redan, så bruttomängden skulle bero på vilken som läses sist."
+    },
+    "category_case_variant": {
+      "fail": "Kategorin {category} skiljer sig från {existing} bara i stavning; kategorier matchas exakt, så raderna hittar inte samma faktor."
+    },
+    "factor_high": {
+      "fail": "Faktorn {factor} för {category} beställer {pct} % utöver ritad mängd, mer än spill brukar förklara."
+    }
+  },
+  "price_index": {
+    "suggestion": "Kontrollera period, värde och källa mot det publicerade indexet och spara igen.",
+    "duplicate_period": {
+      "fail": "Serien har redan ett värde för perioden {value}."
+    },
+    "duplicate_region": {
+      "fail": "En ortsfaktor för regionen {value} finns redan."
+    },
+    "jump_implausible": {
+      "fail": "{label} är {value}, en skillnad på {pct} % mot {other_label} ({other}); ett så stort hopp är oftast ett skrivfel eller enhetsfel."
+    },
+    "location_factor_outlier": {
+      "fail": "Ortsfaktorn {factor} för {region} ligger utanför det vanliga intervallet {low} till {high} kring nationell bas 1."
+    },
+    "index_source_missing": {
+      "fail": "Indexet {label} saknar källa och kan därför inte kontrolleras mot den publicerade skrivelsen."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Kontrollera yta, valuta och region i den konceptuella uppskattningen och spara igen.",
+    "region_not_set": {
+      "fail": "Ingen region är vald, så ingen regional kostnadsfaktor tillämpas och noggrannhetsintervallet förblir brett."
+    },
+    "baseline_replaced": {
+      "fail": "Projektet har redan {count} sparad(e) konceptuell(a) uppskattning(ar); den senaste blir bas för avstämningen."
+    },
+    "boq_beside_detailed": {
+      "fail": "Projektet har redan {count} mängdförteckning(ar); en konceptuell förteckning bredvid räknar samma omfattning två gånger."
+    }
   }
 }

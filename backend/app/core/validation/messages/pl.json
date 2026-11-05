@@ -2239,5 +2239,56 @@
       "fail": "Roboty zanikowe przyjęto bez wskazania: {missing}.",
       "suggestion": "Zapisz element i jego lokalizację przed zamknięciem wpisu."
     }
+  },
+  "allowances": {
+    "suggestion": "Sprawdź kwotę rezerwy, walutę i notatki do rozliczeń tej pozycji, a następnie zapisz ponownie.",
+    "overdrawn": {
+      "fail": "{label}: rozliczenia na {drawn} przekraczają zatrzymane {held}, więc kosztorys jest niedoszacowany o {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} rozliczeń nie ma notatki, na jaki pakiet lub polecenie przeznaczono środki."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Utrzymuj jeden współczynnik na kategorię materiału, zapisaną jak w przedmiarach.",
+    "duplicate_category": {
+      "fail": "Współczynnik strat dla kategorii {category} już istnieje, więc ilość brutto zależałaby od tego, który zostanie odczytany jako ostatni."
+    },
+    "category_case_variant": {
+      "fail": "Kategoria {category} różni się od {existing} tylko zapisem; kategorie są dopasowywane dokładnie, więc pozycje nie znajdą tego samego współczynnika."
+    },
+    "factor_high": {
+      "fail": "Współczynnik {factor} dla {category} zamawia o {pct} % więcej niż ilość z rysunku, więcej, niż zwykle tłumaczą straty."
+    }
+  },
+  "price_index": {
+    "suggestion": "Sprawdź okres, wartość i źródło z opublikowanym wskaźnikiem, a następnie zapisz ponownie.",
+    "duplicate_period": {
+      "fail": "Seria ma już wartość dla okresu {value}."
+    },
+    "duplicate_region": {
+      "fail": "Współczynnik lokalizacyjny dla regionu {value} już istnieje."
+    },
+    "jump_implausible": {
+      "fail": "{label} wynosi {value}, co różni się o {pct} % od {other_label} ({other}); taki skok to zwykle literówka lub błąd jednostek."
+    },
+    "location_factor_outlier": {
+      "fail": "Współczynnik lokalizacyjny {factor} dla {region} wykracza poza zwykły zakres od {low} do {high} wokół krajowej bazy 1."
+    },
+    "index_source_missing": {
+      "fail": "Wskaźnik {label} nie ma źródła, więc nie można go zweryfikować z opublikowanym komunikatem."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Sprawdź powierzchnię, walutę i region oszacowania koncepcyjnego, a następnie zapisz ponownie.",
+    "region_not_set": {
+      "fail": "Nie wybrano regionu, więc nie zastosowano regionalnego współczynnika kosztów, a przedział dokładności pozostaje szeroki."
+    },
+    "baseline_replaced": {
+      "fail": "Ten projekt ma już zapisanych oszacowań koncepcyjnych: {count}; najnowsze staje się bazą do uzgodnienia."
+    },
+    "boq_beside_detailed": {
+      "fail": "Ten projekt ma już przedmiarów: {count}; dodany obok przedmiar koncepcyjny liczy ten sam zakres dwukrotnie."
+    }
   }
 }

@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.waste_factors.models import WasteFactor
@@ -33,6 +34,44 @@ class WasteFactorService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking findings of the latest write, for the router to report.
+        self.warnings: list[dict[str, Any]] = []
+
+    async def _context(
+        self, *, factor_id: uuid.UUID | None, category: str, label: str, factor: Decimal, tenant_id: uuid.UUID | None
+    ) -> dict[str, Any]:
+        """The rule payload: the row as it would be stored plus the other rows of the same category."""
+        stmt = select(WasteFactor.id, WasteFactor.category, WasteFactor.tenant_id).where(
+            func.lower(func.trim(WasteFactor.category)) == category.strip().lower()
+        )
+        if factor_id is not None:
+            stmt = stmt.where(WasteFactor.id != factor_id)
+        siblings = [
+            {"id": str(i), "category": c, "tenant_id": str(t) if t else ""}
+            for i, c, t in (await self.session.execute(stmt)).all()
+        ]
+        head = {
+            "id": str(factor_id) if factor_id else "",
+            "category": category,
+            "label": label,
+            "factor": factor,
+            "tenant_id": str(tenant_id) if tenant_id else "",
+        }
+        return {"factor": head, "siblings": siblings}
+
+    async def _gate(self, context: dict[str, Any], before: dict[str, Any] | None, target_id: str) -> None:
+        """Run the waste factor rules: errors the write introduces raise a coded 422, warnings are kept."""
+        from app.core.validation.cost_gate import raise_on_introduced, run_rule_set, warnings_of  # noqa: PLC0415
+        from app.modules.waste_factors.validators import WASTE_FACTORS_RULE_SET  # noqa: PLC0415
+
+        def run(payload: dict[str, Any]):
+            return run_rule_set(WASTE_FACTORS_RULE_SET, payload, target_type="waste_factor", target_id=target_id)
+
+        report = await run(context)
+        await raise_on_introduced(
+            report, (lambda: run(before)) if before is not None else None, error="waste_factors_rules_failed"
+        )
+        self.warnings = warnings_of(report)
 
     # -- CRUD --------------------------------------------------------------
 
@@ -58,6 +97,13 @@ class WasteFactorService:
     async def create(self, data: WasteFactorCreate) -> WasteFactor:
         """Insert a new factor row from a validated create payload."""
         obj = WasteFactor(**data.model_dump())
+        await self._gate(
+            await self._context(
+                factor_id=None, category=obj.category, label=obj.label, factor=obj.factor, tenant_id=obj.tenant_id
+            ),
+            None,
+            obj.category,
+        )
         self.session.add(obj)
         await self.session.flush()
         return obj
@@ -75,9 +121,21 @@ class WasteFactorService:
         obj = await self.session.get(WasteFactor, factor_id)
         if obj is None:
             return None
-        for field_name, value in data.model_dump(exclude_unset=True).items():
-            if value is None and field_name in _REQUIRED_FIELDS:
-                continue
+        changes = {
+            k: v for k, v in data.model_dump(exclude_unset=True).items() if not (v is None and k in _REQUIRED_FIELDS)
+        }
+
+        async def context(**over: Any) -> dict[str, Any]:
+            return await self._context(
+                factor_id=obj.id,
+                category=over.get("category", obj.category),
+                label=over.get("label", obj.label),
+                factor=over.get("factor", obj.factor),
+                tenant_id=over.get("tenant_id", obj.tenant_id),
+            )
+
+        await self._gate(await context(**changes), await context(), str(factor_id))
+        for field_name, value in changes.items():
             setattr(obj, field_name, value)
         await self.session.flush()
         return obj

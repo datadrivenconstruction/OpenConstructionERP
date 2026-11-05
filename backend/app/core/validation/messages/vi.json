@@ -2239,5 +2239,56 @@
       "fail": "Công việc bị che khuất được nghiệm thu mà không nêu: {missing}.",
       "suggestion": "Ghi cấu kiện và vị trí trước khi đóng mục."
     }
+  },
+  "allowances": {
+    "suggestion": "Kiểm tra số tiền giữ lại, loại tiền và ghi chú các lần rút của hạng mục này rồi lưu lại.",
+    "overdrawn": {
+      "fail": "{label}: các lần rút {drawn} vượt quá {held} đang giữ lại, nên dự toán thiếu {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} lần rút không có ghi chú tiền được giải phóng cho gói hay chỉ thị nào."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Giữ một hệ số cho mỗi nhóm vật liệu, viết giống như trong bảng tiên lượng.",
+    "duplicate_category": {
+      "fail": "Nhóm {category} đã có hệ số hao hụt, nên khối lượng gộp sẽ phụ thuộc vào hệ số nào được đọc sau cùng."
+    },
+    "category_case_variant": {
+      "fail": "Nhóm {category} chỉ khác {existing} về cách viết; các nhóm được so khớp chính xác nên các dòng sẽ không tìm thấy cùng một hệ số."
+    },
+    "factor_high": {
+      "fail": "Hệ số {factor} của {category} đặt thêm {pct} % so với khối lượng bản vẽ, nhiều hơn mức hao hụt thường giải thích."
+    }
+  },
+  "price_index": {
+    "suggestion": "Đối chiếu kỳ, giá trị và nguồn với chỉ số đã công bố rồi lưu lại.",
+    "duplicate_period": {
+      "fail": "Chuỗi đã có giá trị cho kỳ {value}."
+    },
+    "duplicate_region": {
+      "fail": "Đã có hệ số vị trí cho khu vực {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} là {value}, lệch {pct} % so với {other_label} ({other}); bước nhảy lớn như vậy thường là lỗi gõ hoặc sai đơn vị."
+    },
+    "location_factor_outlier": {
+      "fail": "Hệ số vị trí {factor} của {region} nằm ngoài khoảng thường gặp từ {low} đến {high} quanh mốc quốc gia 1."
+    },
+    "index_source_missing": {
+      "fail": "Chỉ số {label} không có nguồn nên không thể đối chiếu với công bố chính thức."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Kiểm tra diện tích, loại tiền và khu vực của ước tính sơ bộ rồi lưu lại.",
+    "region_not_set": {
+      "fail": "Chưa chọn khu vực nên không áp dụng hệ số chi phí vùng và khoảng độ chính xác vẫn rộng."
+    },
+    "baseline_replaced": {
+      "fail": "Dự án này đã có {count} ước tính sơ bộ được lưu; bản mới nhất trở thành cơ sở đối chiếu."
+    },
+    "boq_beside_detailed": {
+      "fail": "Dự án này đã có {count} bảng tiên lượng; bảng sơ bộ thêm bên cạnh sẽ tính cùng phạm vi hai lần."
+    }
   }
 }

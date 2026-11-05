@@ -2239,5 +2239,56 @@
       "fail": "다음을 명시하지 않고 은폐 공사를 승인했습니다: {missing}.",
       "suggestion": "기록을 종결하기 전에 부위와 위치를 기록하세요."
     }
+  },
+  "allowances": {
+    "suggestion": "이 항목의 유보 금액, 통화, 인출 메모를 확인한 뒤 다시 저장하세요.",
+    "overdrawn": {
+      "fail": "{label}: 인출 {drawn}이(가) 유보액 {held}을(를) 초과하여 견적이 {excess}만큼 부족합니다."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count}건의 인출에는 어느 패키지나 지시에 자금을 풀었는지 적은 메모가 없습니다."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "자재 구분마다 계수는 하나만 두고, 물량 내역서와 같은 표기를 쓰세요.",
+    "duplicate_category": {
+      "fail": "구분 {category}에는 이미 로스 계수가 있어, 총수량이 어느 것을 마지막에 읽는지에 따라 달라집니다."
+    },
+    "category_case_variant": {
+      "fail": "구분 {category}은(는) {existing}과(와) 표기만 다릅니다. 구분은 정확히 일치해야 맞춰지므로 항목이 같은 계수를 찾지 못합니다."
+    },
+    "factor_high": {
+      "fail": "{category}의 계수 {factor}은(는) 도면 수량보다 {pct} % 더 주문하며, 보통 로스로 설명되는 범위를 넘습니다."
+    }
+  },
+  "price_index": {
+    "suggestion": "기간, 값, 출처를 공표된 지수와 대조한 뒤 다시 저장하세요.",
+    "duplicate_period": {
+      "fail": "이 계열에는 기간 {value}의 값이 이미 있습니다."
+    },
+    "duplicate_region": {
+      "fail": "지역 {value}의 지역 계수가 이미 있습니다."
+    },
+    "jump_implausible": {
+      "fail": "{label}은(는) {value}로, {other_label}({other})과(와) {pct} % 차이가 납니다. 이렇게 큰 도약은 대개 입력 오류나 단위 오류입니다."
+    },
+    "location_factor_outlier": {
+      "fail": "{region}의 지역 계수 {factor}은(는) 전국 기준 1 주변의 통상 범위 {low}~{high}를 벗어났습니다."
+    },
+    "index_source_missing": {
+      "fail": "지수 {label}에는 출처가 없어 공표 자료와 대조할 수 없습니다."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "개념 견적의 면적, 통화, 지역을 확인한 뒤 다시 저장하세요.",
+    "region_not_set": {
+      "fail": "지역이 선택되지 않아 지역별 비용 계수가 적용되지 않고 정확도 범위가 넓게 유지됩니다."
+    },
+    "baseline_replaced": {
+      "fail": "이 프로젝트에는 저장된 개념 견적이 이미 {count}건 있습니다. 가장 최근 것이 대조의 기준이 됩니다."
+    },
+    "boq_beside_detailed": {
+      "fail": "이 프로젝트에는 물량 내역서가 이미 {count}건 있습니다. 옆에 개념 내역서를 추가하면 같은 범위를 두 번 계산합니다."
+    }
   }
 }

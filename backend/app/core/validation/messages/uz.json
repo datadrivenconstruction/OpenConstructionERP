@@ -2239,5 +2239,56 @@
       "fail": "Yashirin ishlar quyidagilar koʻrsatilmasdan qabul qilindi: {missing}.",
       "suggestion": "Yozuvni yopishdan oldin elementni va uning joyini yozing."
     }
+  },
+  "allowances": {
+    "suggestion": "Ushbu bandning ushlab qolingan summasi, valyutasi va yechib olish izohlarini tekshirib, qayta saqlang.",
+    "overdrawn": {
+      "fail": "{label}: {drawn} yechib olish ushlab qolingan {held} dan oshadi, shu sababli smeta {excess} ga kam."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} ta yechib olishda pul qaysi paketga yoki qaysi topshiriqqa ajratilgani haqida izoh yoʻq."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Har bir material toifasi uchun bitta koeffitsiyent saqlang, hajmlar qaydnomasidagi yozuvda.",
+    "duplicate_category": {
+      "fail": "{category} toifasi uchun yoʻqotish koeffitsiyenti allaqachon bor, shuning uchun yalpi hajm qaysi biri oxirida oʻqilishiga bogʻliq boʻlardi."
+    },
+    "category_case_variant": {
+      "fail": "{category} toifasi {existing} dan faqat yozilishi bilan farq qiladi; toifalar aniq solishtiriladi, shuning uchun satrlar bir xil koeffitsiyentni topmaydi."
+    },
+    "factor_high": {
+      "fail": "{category} uchun {factor} koeffitsiyenti chizma hajmidan {pct} % koʻp buyurtma beradi, bu odatda yoʻqotish tushuntiradigandan koʻp."
+    }
+  },
+  "price_index": {
+    "suggestion": "Davr, qiymat va manbani eʻlon qilingan indeks bilan solishtirib, qayta saqlang.",
+    "duplicate_period": {
+      "fail": "Qatorda {value} davri uchun qiymat allaqachon bor."
+    },
+    "duplicate_region": {
+      "fail": "{value} hududi uchun joylashuv koeffitsiyenti allaqachon mavjud."
+    },
+    "jump_implausible": {
+      "fail": "{label} qiymati {value}, bu {other_label} ({other}) dan {pct} % farq qiladi; bunday sakrash odatda terish yoki oʻlchov birligi xatosi."
+    },
+    "location_factor_outlier": {
+      "fail": "{region} uchun {factor} joylashuv koeffitsiyenti milliy baza 1 atrofidagi odatiy {low}–{high} oraligʻidan tashqarida."
+    },
+    "index_source_missing": {
+      "fail": "{label} indeksining manbasi yoʻq, shuning uchun uni eʻlon qilingan xabar bilan solishtirib boʻlmaydi."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Konseptual baholashning maydoni, valyutasi va hududini tekshirib, qayta saqlang.",
+    "region_not_set": {
+      "fail": "Hudud tanlanmagan, shu sababli hududiy narx koeffitsiyenti qoʻllanmaydi va aniqlik oraligʻi keng qoladi."
+    },
+    "baseline_replaced": {
+      "fail": "Loyihada saqlangan konseptual baholash allaqachon {count} ta; eng yangisi solishtirish asosi boʻlib qoladi."
+    },
+    "boq_beside_detailed": {
+      "fail": "Loyihada hajmlar qaydnomasi allaqachon {count} ta; yoniga qoʻshilgan konseptual qaydnoma oʻsha hajmni ikki marta hisoblaydi."
+    }
   }
 }

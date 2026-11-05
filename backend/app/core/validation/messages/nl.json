@@ -2239,5 +2239,56 @@
       "fail": "Verborgen werk is geaccepteerd zonder te vermelden: {missing}.",
       "suggestion": "Leg het element en de locatie vast voordat de registratie wordt afgesloten."
     }
+  },
+  "allowances": {
+    "suggestion": "Controleer het aangehouden bedrag, de valuta en de notities bij de opnames van deze post en sla opnieuw op.",
+    "overdrawn": {
+      "fail": "{label}: opnames van {drawn} overschrijden de aangehouden {held}, waardoor de raming {excess} te krap is."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} opname(s) hebben geen notitie voor welk pakket of welke opdracht het geld is vrijgegeven."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Houd één factor per materiaalcategorie aan, geschreven zoals in de bestekken.",
+    "duplicate_category": {
+      "fail": "Er bestaat al een afvalfactor voor de categorie {category}; de bruto hoeveelheid zou afhangen van welke het laatst wordt gelezen."
+    },
+    "category_case_variant": {
+      "fail": "De categorie {category} verschilt alleen in spelling van {existing}; categorieën worden exact vergeleken, dus regels vinden niet dezelfde factor."
+    },
+    "factor_high": {
+      "fail": "De factor {factor} voor {category} bestelt {pct} % bovenop de getekende hoeveelheid, meer dan afval gewoonlijk verklaart."
+    }
+  },
+  "price_index": {
+    "suggestion": "Controleer periode, waarde en bron aan de hand van de gepubliceerde index en sla opnieuw op.",
+    "duplicate_period": {
+      "fail": "De reeks heeft al een waarde voor de periode {value}."
+    },
+    "duplicate_region": {
+      "fail": "Er bestaat al een locatiefactor voor de regio {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} is {value}, een verschil van {pct} % met {other_label} ({other}); zo'n sprong is meestal een typefout of eenhedenfout."
+    },
+    "location_factor_outlier": {
+      "fail": "De locatiefactor {factor} voor {region} valt buiten de gebruikelijke bandbreedte van {low} tot {high} rond de landelijke basis 1."
+    },
+    "index_source_missing": {
+      "fail": "De index {label} heeft geen bron en kan dus niet worden gecontroleerd aan de gepubliceerde brief."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Controleer oppervlakte, valuta en regio van de conceptraming en sla opnieuw op.",
+    "region_not_set": {
+      "fail": "Er is geen regio gekozen, dus er wordt geen regionale kostenfactor toegepast en de nauwkeurigheidsmarge blijft ruim."
+    },
+    "baseline_replaced": {
+      "fail": "Dit project heeft al {count} opgeslagen conceptraming(en); de nieuwste wordt de basis voor de afstemming."
+    },
+    "boq_beside_detailed": {
+      "fail": "Dit project heeft al {count} bestek(ken); een ernaast gemaakt conceptbestek telt hetzelfde werk dubbel."
+    }
   }
 }

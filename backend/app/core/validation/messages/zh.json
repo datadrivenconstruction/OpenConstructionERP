@@ -2239,5 +2239,56 @@
       "fail": "隐蔽工程在未注明以下内容的情况下被验收：{missing}。",
       "suggestion": "在关闭记录之前记录构件及其位置。"
     }
+  },
+  "allowances": {
+    "suggestion": "请检查该项的预留金额、币种和提取备注，然后重新保存。",
+    "overdrawn": {
+      "fail": "{label}：提取 {drawn} 超过预留的 {held}，估算因此短缺 {excess}。"
+    },
+    "drawdown_unexplained": {
+      "fail": "有 {count} 笔提取没有备注，看不出款项划拨给了哪个包或哪项指令。"
+    }
+  },
+  "waste_factors": {
+    "suggestion": "每个材料类别只保留一个系数，写法与工程量清单一致。",
+    "duplicate_category": {
+      "fail": "类别 {category} 已有损耗系数，毛量将取决于最后读取的是哪一个。"
+    },
+    "category_case_variant": {
+      "fail": "类别 {category} 与 {existing} 仅写法不同；类别按完全匹配，因此各行找不到同一个系数。"
+    },
+    "factor_high": {
+      "fail": "{category} 的系数 {factor} 在图纸量之上多订 {pct} %，超出损耗通常能解释的范围。"
+    }
+  },
+  "price_index": {
+    "suggestion": "请对照已发布的指数核对期间、数值和来源，然后重新保存。",
+    "duplicate_period": {
+      "fail": "该序列已有 {value} 期的数值。"
+    },
+    "duplicate_region": {
+      "fail": "地区 {value} 已有地区系数。"
+    },
+    "jump_implausible": {
+      "fail": "{label} 为 {value}，与 {other_label}（{other}）相差 {pct} %；这么大的跳变多半是输入或单位错误。"
+    },
+    "location_factor_outlier": {
+      "fail": "{region} 的地区系数 {factor} 超出以全国基准 1 为中心的常见范围 {low} 至 {high}。"
+    },
+    "index_source_missing": {
+      "fail": "指数 {label} 没有来源，无法与已发布的公告核对。"
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "请检查概念估算的面积、币种和地区，然后重新保存。",
+    "region_not_set": {
+      "fail": "未选择地区，因此不套用地区成本系数，精度区间仍然较宽。"
+    },
+    "baseline_replaced": {
+      "fail": "该项目已有 {count} 份已保存的概念估算；最新的一份将作为对账基准。"
+    },
+    "boq_beside_detailed": {
+      "fail": "该项目已有 {count} 份工程量清单；在旁边再加概念清单会把同一范围计算两次。"
+    }
   }
 }
