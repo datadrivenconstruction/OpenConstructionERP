@@ -14,8 +14,8 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live (sha256 c70c15b2b8ef7a3738affebcee4c698c6330b1de0b04e946731dd28442d3422e)
-# Segments: 228
+# Extracted from: Caddyfile.live (sha256 af336bc96186eea19f2077fce9c218dc0aff8c0a3dea96b70f752a8f05c0d257)
+# Segments: 229
 5d
 about
 accommodation
@@ -74,6 +74,7 @@ cost-control
 cost-explorer
 cost-match
 costs
+courses
 credentials
 crm
 cutting
