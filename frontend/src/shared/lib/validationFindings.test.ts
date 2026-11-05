@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useToastStore } from '@/stores/useToastStore';
-import { ApiError, extractErrorMessageFromBody } from './api';
+import { ApiError, apiGet, apiPost, extractErrorMessageFromBody } from './api';
 import { findingText, joinFindings, surfaceValidationWarnings } from './validationFindings';
 
 const catalogue: Record<string, string> = { 'api_errors.demo_rule': 'Cost {{cost}} exceeds the budget.' };
@@ -16,6 +16,7 @@ vi.mock('i18next', () => ({
 }));
 
 beforeEach(() => {
+  vi.unstubAllGlobals();
   useToastStore.setState({ toasts: [], history: [] });
 });
 
@@ -64,5 +65,31 @@ describe('rule 422 body', () => {
   });
   it('still uses detail.message when there is no errors list', () => {
     expect(extractErrorMessageFromBody({ detail: { error: 'e', message: 'Plain.' } })).toBe('Plain.');
+  });
+});
+
+describe('through the request layer', () => {
+  const reply = (body: unknown, status = 200) =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
+    );
+  const body = { id: 'r1', validation_warnings: [{ rule_id: 'x.y', code: 'x.y', message: 'Check unit.', params: {} }] };
+
+  it('a successful write still resolves and raises one warning toast', async () => {
+    reply(body);
+    await expect(apiPost('/v1/things/', { a: 1 })).resolves.toMatchObject({ id: 'r1' });
+    const toasts = useToastStore.getState().toasts;
+    expect(toasts).toHaveLength(1);
+    expect(toasts[0]).toMatchObject({ type: 'warning', message: 'Check unit.' });
+  });
+  it('a read never toasts', async () => {
+    reply(body);
+    await apiGet('/v1/things/r1');
+    expect(useToastStore.getState().toasts).toHaveLength(0);
+  });
+  it('a pydantic 422 keeps its field message', async () => {
+    reply({ detail: [{ loc: ['body', 'name'], msg: 'Field required' }] }, 422);
+    await expect(apiPost('/v1/things/', {})).rejects.toMatchObject({ message: 'name: Field required' });
   });
 });
