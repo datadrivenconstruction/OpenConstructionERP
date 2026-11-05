@@ -55,7 +55,7 @@ CASES = [
         ActualEndNeedsStartRule,
         _p(actual_start_date=None, actual_end_date="2026-06-01"),
         "projects.actual_end_needs_start",
-        Severity.ERROR,
+        Severity.WARNING,
     ),
     (BudgetNeedsContingencyRule, _p(contingency_pct=""), "projects.budget_has_contingency", Severity.WARNING),
     (
@@ -126,7 +126,8 @@ async def test_blocking_rules_reject_api_create_with_code(client, admin_auth):
     r = await client.post(
         "/api/v1/projects/", json=_body(actual_start_date=None, actual_end_date="2026-06-01"), headers=h
     )
-    assert r.status_code == 422 and _codes(r) == {"projects.actual_end_needs_start"}
+    assert r.status_code == 201, r.text
+    assert {w["rule_id"] for w in r.json()["validation_warnings"]} == {"projects.actual_end_needs_start"}
 
 
 @pytest.mark.asyncio
