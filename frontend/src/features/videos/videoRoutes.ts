@@ -4,12 +4,14 @@
 // The light half of "Videos for this step": which catalogue route a screen
 // belongs to, and whether the reader has hidden the hint. The app shell loads
 // this on every screen, so it imports the route counts and nothing else; the
-// catalogue and the panel load only on a screen that has videos.
+// catalogues and the popover load only when the reader opens it.
 
 import { create } from 'zustand';
-import { VIDEO_COUNT_BY_ROUTE } from './academyIndex.generated';
+import { ITEM_COUNT_BY_ROUTE, VIDEO_COUNT_BY_ROUTE } from './academyIndex.generated';
 
-const ROUTES = Object.keys(VIDEO_COUNT_BY_ROUTE).sort((a, b) => b.length - a.length);
+const ROUTES = [...new Set([...Object.keys(VIDEO_COUNT_BY_ROUTE), ...Object.keys(ITEM_COUNT_BY_ROUTE)])].sort(
+  (a, b) => b.length - a.length,
+);
 // `/projects/<id>/boq` is the project-scoped form of `/boq`; `/projects/new`
 // is a route of its own.
 const PROJECT_SCOPE = /^\/projects\/(?!new(?:\/|$))[^/]+(?=\/)/;
@@ -22,6 +24,12 @@ export function videoRouteFor(pathname: string): string | null {
 
 export function videoCountForRoute(route: string): number {
   return VIDEO_COUNT_BY_ROUTE[route] ?? 0;
+}
+
+/** Courses, checklists and guides every reader sees on a route (market-bound
+ *  ones are counted only once the popover opens, so the badge never moves). */
+export function itemCountForRoute(route: string): number {
+  return ITEM_COUNT_BY_ROUTE[route] ?? 0;
 }
 
 const KEY = 'oe_videos_hints';

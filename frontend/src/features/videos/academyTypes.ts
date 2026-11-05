@@ -117,3 +117,28 @@ export interface AcademyCatalog {
   videos: AcademyVideo[];
   cases: Record<string, AcademyCaseRef>;
 }
+
+export type AcademyItemKind = 'course' | 'lesson' | 'checklist' | 'article';
+
+/** A course, checklist or guide on the Academy site. Generated into
+ *  academyItems.generated.ts; the title is data and stays as on the site. */
+export interface AcademyItem {
+  id: string;
+  kind: AcademyItemKind;
+  title: string;
+  /** English canonical URL; `academyUrlFor` adds the reader's language. */
+  url: string;
+  /** Interface languages the site has this item in. */
+  languages: string[];
+  /** ISO code of the language the content itself is written in. */
+  contentLanguage: string;
+  access: 'free' | 'paid';
+  durationMin?: number;
+  topics: string[];
+  track?: string;
+  /** ISO 3166-1 alpha-2 market whose rules the item teaches. */
+  market?: string;
+  routes: string[];
+  parentCourse?: string;
+  relatedVideoIds?: string[];
+}
