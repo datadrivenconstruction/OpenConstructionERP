@@ -46787,6 +46787,7 @@ const resource = {
   "validation.light_passed": "Vyhovuje",
   "validation.light_warning": "Varování",
   "validation.no_results": "Zatím není co kontrolovat. Pravidla se spustí, jakmile budou data.",
+  "validation.saved_with_warnings": "Uloženo s upozorněními",
     "modules.tab_profiles": "Firemní profily",
     "modules.tab_packs": "Balíčky",
     "modules.tab_data_packages": "Datové balíčky",
