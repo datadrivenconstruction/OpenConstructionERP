@@ -79,7 +79,7 @@ class ContactPaymentTermsRule(_ContactRule):
         if blank(value):
             return [self.ok(ref)]
         text = str(value).strip()
-        if not text.isdigit() or int(text) > MAX_PAYMENT_TERMS_DAYS:
+        if not (text.isascii() and text.isdigit()) or int(text) > MAX_PAYMENT_TERMS_DAYS:
             return [self.fail(context, "payment_terms_invalid", ref=ref, value=text, max=MAX_PAYMENT_TERMS_DAYS)]
         return [self.ok(ref)]
 
