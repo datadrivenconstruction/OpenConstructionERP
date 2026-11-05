@@ -61,7 +61,12 @@ class ScimRoute(APIRoute):
             except RequestValidationError:
                 return _error(400, "Malformed request.", "invalidSyntax")
             except HTTPException as exc:
-                detail = exc.detail if isinstance(exc.detail, str) else "Request failed."
+                if isinstance(exc.detail, str):
+                    detail = exc.detail
+                elif isinstance(exc.detail, dict) and isinstance(exc.detail.get("message"), str):
+                    detail = exc.detail["message"]
+                else:
+                    detail = "Request failed."
                 keep = {k: v for k, v in (exc.headers or {}).items() if k.lower() == "www-authenticate"}
                 return _error(exc.status_code, detail, None, keep or None)
 

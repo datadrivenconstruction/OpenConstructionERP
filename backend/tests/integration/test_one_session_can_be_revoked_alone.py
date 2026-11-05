@@ -363,7 +363,10 @@ def test_every_token_pair_is_minted_inside_the_session_helper() -> None:
                 if name not in _MINTERS:
                     continue
                 call_sites += 1
-                if func.name != _ISSUER:
+                # A single access token that names the caller's existing session
+                # (``sid=``) is revocable with that session; it opens no new one.
+                bound = name == "create_access_token" and any(k.arg == "sid" for k in node.keywords)
+                if func.name != _ISSUER and not bound:
                     offenders.append(f"{path.relative_to(app_root.parent)}:{node.lineno} in {func.name}()")
 
     # Control. Every assertion below is satisfied by finding nothing at all, so
