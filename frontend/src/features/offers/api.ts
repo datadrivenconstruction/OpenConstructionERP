@@ -3,7 +3,7 @@
  * Money is a decimal STRING on the wire and stays a string here.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type { ScheduleRow } from './schedule';
 
 export type OfferStatus = 'draft' | 'sent' | 'accepted' | 'declined' | 'expired' | 'superseded';
@@ -36,6 +36,7 @@ export interface OfferPack {
   alternate_title: string | null;
   tax_modes: string[];
   consumer_rule: boolean;
+  country?: string;
   [key: string]: unknown;
 }
 
@@ -189,4 +190,147 @@ export function fetchPreview(id: string) {
 
 export function numberTaken(number: string, groupId: string) {
   return apiGet<{ number: string; taken: boolean }>(`${base}/number-check?number=${encodeURIComponent(number)}&group_id=${groupId}`);
+}
+
+export interface AcceptBody {
+  accepted_on?: string;
+  optional_ordinals?: string[];
+  create_contract?: boolean;
+}
+
+export interface AcceptResult {
+  offer: Offer;
+  contract_id: string | null;
+  milestones: number;
+  /** Set to the missing permission when the contract could not be created. */
+  contract_blocked: string | null;
+}
+
+export function useAcceptOffer(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AcceptBody) => apiPost<AcceptResult>(`${base}/${id}/accept`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
+  });
+}
+
+export function useResetOfferText(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (kind: string) => apiPost<Offer>(`${base}/${id}/texts/${kind}/reset`, {}),
+    onSuccess: (offer) => qc.setQueryData(['offers', 'offer', id], offer),
+  });
+}
+
+/** The placeholders a text may use, as the server whitelists them. */
+export const TEXT_PLACEHOLDERS = [
+  'offer_number', 'revision', 'issue_date', 'valid_until', 'validity_days', 'payment_days', 'customer_name',
+  'project_name', 'site_address', 'net_total', 'gross_total', 'currency', 'retention_percent', 'advance_percent',
+] as const;
+
+/** Insert `token` into `text` at the caret, replacing any selection. */
+export function insertAt(text: string, start: number, end: number, token: string): { text: string; caret: number } {
+  return { text: `${text.slice(0, start)}${token}${text.slice(end)}`, caret: start + token.length };
+}
+
+export interface CreatedContact {
+  id: string;
+  company_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+}
+
+/** Create the customer in place and optionally make it the project's client. */
+export async function createCustomer(input: {
+  name: string;
+  email: string;
+  country: string;
+  projectId: string;
+  setAsProjectClient: boolean;
+}): Promise<CreatedContact> {
+  const isPerson = !/\b(gmbh|ltd|llc|inc|ag|sarl|sas|bv|co)\b/i.test(input.name);
+  const [first = '', ...rest] = input.name.trim().split(/\s+/);
+  const contact = await apiPost<CreatedContact>('/v1/contacts/', {
+    contact_type: 'client',
+    party_kind: isPerson ? 'person' : 'company',
+    ...(isPerson ? { first_name: first, last_name: rest.join(' ') || undefined } : { company_name: input.name.trim() }),
+    primary_email: input.email || undefined,
+    country_code: input.country || undefined,
+  });
+  if (input.setAsProjectClient) await apiPatch(`/v1/projects/${input.projectId}`, { client_id: contact.id });
+  return contact;
+}
+
+export interface OfferSettings {
+  number_pattern: string;
+  validity_days: number | null;
+  payment_days: number | null;
+  markup_presentation: 'spread' | 'lines' | 'section';
+  schedule_templates: { name: string; rows: ScheduleRow[] }[];
+  default_schedule: string;
+  next_number: string;
+}
+
+export interface TextBlock {
+  id: string;
+  scope: 'company' | 'project';
+  project_id: string | null;
+  kind: TextKind;
+  name: string;
+  language: string;
+  body: string;
+  is_default: boolean;
+  pack_key: string | null;
+}
+
+export function useOfferSettings() {
+  return useQuery({ queryKey: ['offers', 'settings'], queryFn: () => apiGet<OfferSettings>(`${base}/settings`) });
+}
+
+export function useSaveOfferSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: Partial<Omit<OfferSettings, 'next_number'>>) => apiPatch<OfferSettings>(`${base}/settings`, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
+  });
+}
+
+export function useTextBlocks(projectId?: string, country?: string) {
+  const qs = new URLSearchParams();
+  if (projectId) qs.set('project_id', projectId);
+  if (country) qs.set('country', country);
+  return useQuery({ queryKey: ['offers', 'texts', projectId, country], queryFn: () => apiGet<TextBlock[]>(`${base}/texts?${qs.toString()}`) });
+}
+
+export function useSaveTextBlock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: Partial<TextBlock> & { id?: string; kind: TextKind }) =>
+      id ? apiPatch<TextBlock>(`${base}/texts/${id}`, body) : apiPost<TextBlock>(`${base}/texts`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
+  });
+}
+
+export function useDeleteTextBlock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiDelete(`${base}/texts/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
+  });
+}
+
+export function useRestoreTexts() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (country: string) => apiPost<{ restored: number }>(`${base}/texts/restore?country=${country}`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
+  });
+}
+
+export function useProjectOffers(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ['offers', 'project', projectId],
+    queryFn: () => apiGet<OfferSummary[]>(`${base}/?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
 }

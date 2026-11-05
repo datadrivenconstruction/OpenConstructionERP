@@ -557,7 +557,7 @@ export function BOQToolbar({
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileDown size={15} className="text-content-tertiary" />
-                    {t('boq.export_format_pdf', { defaultValue: 'Internal estimate (PDF)' })}
+                    {t('offers.export_internal_pdf', { defaultValue: 'Internal estimate (PDF)' })}
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileText size={15} className="text-content-tertiary" />

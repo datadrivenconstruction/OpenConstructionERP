@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Download, Send } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Download } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
@@ -15,7 +15,10 @@ import {
   TEXT_KINDS,
   fetchPreview,
   numberTaken,
+  useAcceptOffer,
   useCreateOffer,
+  useResetOfferText,
+  insertAt,
   useOffer,
   useOfferAction,
   useOfferContext,
@@ -28,6 +31,7 @@ import {
   type OfferStatus,
 } from './api';
 import { OfferScheduleEditor } from './OfferScheduleEditor';
+import { AcceptDialog, CustomerEmpty, PlaceholderChips, SendAction } from './offerParts';
 
 const SECTIONS: OfferSection[] = ['customer', 'details', 'items', 'schedule', 'texts', 'layout'];
 const STATUS_VARIANT: Record<OfferStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
@@ -99,7 +103,8 @@ export function OfferPage() {
   const send = useOfferAction(offerId ?? '', 'send');
   const revise = useOfferAction(offerId ?? '', 'revise');
   const decline = useOfferAction(offerId ?? '', 'decline');
-  const accept = useOfferAction(offerId ?? '', 'accept');
+  const accept = useAcceptOffer(offerId ?? '');
+  const [accepting, setAccepting] = useState(false);
 
   const save = useCallback(
     (change: OfferPatch) => {
@@ -151,16 +156,12 @@ export function OfferPage() {
             {offer.status === 'draft' ? t('offers.download_draft', { defaultValue: 'Download draft' }) : t('offers.download', { defaultValue: 'Download' })}
           </Button>
           {offer.status === 'draft' && (
-            <span title={valQ.data?.can_send === false ? valQ.data.first_error ?? '' : ''}>
-              <Button
-                size="sm"
-                icon={<Send size={14} />}
-                disabled={valQ.data?.can_send === false || send.isPending}
-                onClick={() => run(send, t('offers.send', { defaultValue: 'Send offer' }), (r) => void downloadPdf(r as Offer))}
-              >
-                {t('offers.download_mark_sent', { defaultValue: 'Download and mark sent' })}
-              </Button>
-            </span>
+            <SendAction
+              canSend={valQ.data?.can_send !== false}
+              firstError={valQ.data?.first_error ?? null}
+              pending={send.isPending}
+              onSend={() => run(send, t('offers.send', { defaultValue: 'Send offer' }), (r) => void downloadPdf(r as Offer))}
+            />
           )}
         </div>
       </div>
@@ -176,7 +177,7 @@ export function OfferPage() {
             </Button>
             {offer.status === 'sent' && (
               <>
-                <Button size="sm" onClick={() => run(accept, t('offers.mark_accepted', { defaultValue: 'Mark accepted' }))}>
+                <Button size="sm" onClick={() => setAccepting(true)}>
                   {t('offers.mark_accepted', { defaultValue: 'Mark accepted' })}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => run(decline, t('offers.mark_declined', { defaultValue: 'Mark declined' }))}>
@@ -205,12 +206,16 @@ export function OfferPage() {
           </nav>
 
           <SectionCard id="customer" title={t('offers.section.customer', { defaultValue: 'Customer' })} findings={bySection('customer')}>
-            <ContactSearchInput
-              value={offer.contact_id ?? ''}
-              displayValue={String(offer.customer?.name ?? '')}
-              onChange={(id) => save({ contact_id: id || null })}
-              placeholder={t('offers.customer_empty', { defaultValue: 'Who is this offer for?' })}
-            />
+            {offer.contact_id ? (
+              <ContactSearchInput
+                value={offer.contact_id}
+                displayValue={String(offer.customer?.name ?? '')}
+                onChange={(id) => save({ contact_id: id || null })}
+                placeholder={t('offers.customer_empty', { defaultValue: 'Who is this offer for?' })}
+              />
+            ) : (
+              <CustomerEmpty projectId={projectId} country={String(ctxQ.data?.pack.country ?? '')} onCreated={(id) => save({ contact_id: id })} />
+            )}
             {ctxQ.data?.pack.consumer_rule === true && (
               <div className="mt-3" role="group" aria-label={t('offers.customer_kind_label', { defaultValue: 'Customer type' })}>
                 <div className="flex gap-2">
@@ -280,6 +285,20 @@ export function OfferPage() {
           </SectionCard>
         </div>
 
+        {accepting && (
+          <AcceptDialog
+            offer={offer}
+            canCreateContract={ctxQ.data?.permissions?.create_contract !== false}
+            pending={accept.isPending}
+            onCancel={() => setAccepting(false)}
+            onConfirm={(body) =>
+              accept.mutate(body, {
+                onSuccess: () => setAccepting(false),
+                onError: (e) => addToast({ type: 'error', title: t('offers.mark_accepted', { defaultValue: 'Mark accepted' }), message: getErrorMessage(e) }),
+              })
+            }
+          />
+        )}
         <OfferPreview offerId={offer.id} version={`${offer.totals.gross}|${JSON.stringify(offer.texts)}|${offer.status}|${offer.number}|${offer.valid_until}|${offer.locale}|${offer.instalments.length}`} />
       </div>
     </div>
@@ -367,32 +386,47 @@ function TextCard({ offer, kind, readOnly, onSave }: { offer: Offer; kind: strin
   const { t } = useTranslation();
   const entry = offer.texts[kind];
   const [body, setBody] = useState(entry?.body ?? '');
+  const [forProject, setForProject] = useState(entry?.source === 'project');
   const area = useRef<HTMLTextAreaElement>(null);
+  const reset = useResetOfferText(offer.id);
+  useEffect(() => {
+    setBody(entry?.body ?? '');
+    setForProject(entry?.source === 'project');
+  }, [entry?.body, entry?.source]);
   const commit = () => {
-    if (body !== (entry?.body ?? '')) onSave({ texts: { [kind]: { source: 'offer', body, block_id: null } } });
+    if (body !== (entry?.body ?? '') || (forProject && entry?.source !== 'project')) {
+      onSave({ texts: { [kind]: { source: forProject ? 'project' : 'offer', body, block_id: null } } });
+    }
   };
   const insert = (token: string) => {
     const el = area.current;
-    const at = el ? el.selectionStart : body.length;
-    setBody(`${body.slice(0, at)}${token}${body.slice(at)}`);
+    const next = insertAt(body, el?.selectionStart ?? body.length, el?.selectionEnd ?? body.length, token);
+    setBody(next.text);
   };
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium">{t(`offers.texts.kind.${kind}`, { defaultValue: kind })}</h3>
-        {entry && <Badge size="sm">{t(`offers.texts.source.${entry.source}`, { defaultValue: entry.source })}</Badge>}
-      </div>
-      {!readOnly && (
-        <div className="mb-1 flex flex-wrap gap-1 text-xs">
-          <span className="text-content-tertiary">{t('offers.texts.insert', { defaultValue: 'Insert' })}:</span>
-          {['{valid_until}', '{payment_days}', '{project_name}', '{gross_total}'].map((p) => (
-            <button key={p} type="button" className="rounded border border-border-light px-1.5" onClick={() => insert(p)}>
-              {p}
+        <span className="flex items-center gap-2">
+          {entry && <Badge size="sm">{t(`offers.texts.source.${entry.source}`, { defaultValue: entry.source })}</Badge>}
+          {!readOnly && entry && entry.source !== 'company' && (
+            <button type="button" className="text-xs underline" onClick={() => reset.mutate(kind)}>
+              {t('offers.texts.reset', { defaultValue: 'Reset to company text' })}
             </button>
-          ))}
-        </div>
-      )}
+          )}
+        </span>
+      </div>
+      {!readOnly && <PlaceholderChips onInsert={insert} />}
       <textarea ref={area} className={`${inputCls} h-24 py-2`} value={body} disabled={readOnly} onChange={(e) => setBody(e.target.value)} onBlur={commit} />
+      {!readOnly && (
+        <label className="mt-1 flex items-center gap-2 text-xs">
+          <input type="checkbox" checked={forProject} onChange={(e) => setForProject(e.target.checked)} />
+          {t('offers.texts.use_for_project', { defaultValue: 'Use for all offers in this project' })}
+        </label>
+      )}
+      {kind === 'payment_terms' && !body.trim() && (
+        <p className="mt-1 text-xs text-semantic-warning">{t('offers.texts.missing_payment', { defaultValue: 'The customer will not see payment terms.' })}</p>
+      )}
       {entry?.resolved && <p className="mt-1 text-xs text-content-tertiary">{entry.resolved}</p>}
     </div>
   );
