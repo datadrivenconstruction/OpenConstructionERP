@@ -55,7 +55,15 @@ class BasisAccuracyBandRule(EstimatingRule):
         ref = str(b.get("id", ""))
         low, high = to_dec(b.get("accuracy_low_pct")), to_dec(b.get("accuracy_high_pct"))
         if (low is not None and low > 0) or (high is not None and high < 0):
-            return [self.fail(context, "accuracy_band_invalid", ref=ref, low=low if low is not None else "", high=high if high is not None else "")]
+            return [
+                self.fail(
+                    context,
+                    "accuracy_band_invalid",
+                    ref=ref,
+                    low=low if low is not None else "",
+                    high=high if high is not None else "",
+                )
+            ]
         return [self.ok(ref)]
 
 
@@ -77,7 +85,17 @@ class BasisBudgetTargetRule(EstimatingRule):
             return [self.ok(ref)]  # notes or currency entered first: a draft target without an amount yet
         amount = to_dec(target.get("amount"))
         if amount is None or not Decimal("0.01") <= amount <= MAX_SANE_AMOUNT:
-            return [self.fail(context, "value_in_range", ref=ref, field="budget_target.amount", value=target.get("amount") or "", low="0.01", high=MAX_SANE_AMOUNT)]
+            return [
+                self.fail(
+                    context,
+                    "value_in_range",
+                    ref=ref,
+                    field="budget_target.amount",
+                    value=target.get("amount") or "",
+                    low="0.01",
+                    high=MAX_SANE_AMOUNT,
+                )
+            ]
         return [self.ok(ref)]
 
 

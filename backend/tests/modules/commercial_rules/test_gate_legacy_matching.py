@@ -6,7 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
-from app.core.validation.quality_rules import QualityRule, gate_rule_set
+from app.core.validation.quality_rules import QualityRule, gate_keyed_rule_set
 
 SET = "gate_probe"
 
@@ -40,8 +40,8 @@ async def test_a_new_bad_item_is_not_masked_by_an_old_one_with_the_same_text():
     }
     before = {"items": [{"ref": "a", "bad": True}, {"ref": "b", "bad": False}]}
     same = {"items": [{"ref": "a", "bad": True}, {"ref": "b", "bad": False}]}
-    await gate_rule_set(same, before=before, **kw)  # legacy error on a stays editable
+    await gate_keyed_rule_set(same, before=before, **kw)  # legacy error on a stays editable
     worse = {"items": [{"ref": "a", "bad": True}, {"ref": "b", "bad": True}]}
     with pytest.raises(HTTPException) as exc:
-        await gate_rule_set(worse, before=before, **kw)
+        await gate_keyed_rule_set(worse, before=before, **kw)
     assert exc.value.status_code == 422
