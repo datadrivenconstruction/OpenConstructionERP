@@ -74,6 +74,7 @@ class ActualEndNeedsStartRule(_ProjectRule):
     """A project cannot have finished before it has started."""
 
     rule_id = "projects.actual_end_needs_start"
+    severity = Severity.WARNING
     name = "Actual finish has an actual start"
     description = "actual_end_date requires actual_start_date"
 
