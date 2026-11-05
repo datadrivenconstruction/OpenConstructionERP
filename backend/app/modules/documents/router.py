@@ -188,6 +188,7 @@ def _doc_to_response(doc: object) -> DocumentResponse:
         parent_document_id=getattr(doc, "parent_document_id", None),  # type: ignore[attr-defined]
         security_classification=getattr(doc, "security_classification", None),  # type: ignore[attr-defined]
         discipline=getattr(doc, "discipline", None),  # type: ignore[attr-defined]
+        validation_warnings=list(getattr(doc, "validation_warnings", None) or []),
     )
 
 
