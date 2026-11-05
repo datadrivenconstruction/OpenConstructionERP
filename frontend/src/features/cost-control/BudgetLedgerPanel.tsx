@@ -14,7 +14,7 @@ import { Badge, Button, ConfirmDialog, Skeleton } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { parseMoneyInput } from '@/shared/lib/parseDecimal';
 import type { BadgeVariant } from '@/shared/ui';
-import { fmtCurrency } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtList } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { CostLinePicker } from '@/features/costmodel/CostLinePicker';
@@ -215,8 +215,8 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
             {t('cost_control.ledger.transfer_summary', {
               defaultValue: '{{amount}} from {{from}} to {{to}}',
               amount: fmtCurrency(num(tr.moved), currency),
-              from: from.map((l) => l.code).join(', '),
-              to: to.map((l) => l.code).join(', '),
+              from: fmtList(from.map((l) => l.code)),
+              to: fmtList(to.map((l) => l.code)),
             })}
           </span>
           {actions('transfer', tr.id, tr.status)}

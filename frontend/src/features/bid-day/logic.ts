@@ -21,7 +21,7 @@ export function fromCents(c: number): string {
 
 /** Parse what an estimator types: "1 250 000", "1,250,000.50", "1.250.000,50", "-18400". */
 export function parseAmount(raw: string): string | null {
-  let s = raw.trim().replace(/[\s  ']/g, '');
+  let s = raw.trim().replace(/[\s\u00a0\u202f']/g, '');
   if (!s) return null;
   const lastComma = s.lastIndexOf(',');
   const lastDot = s.lastIndexOf('.');

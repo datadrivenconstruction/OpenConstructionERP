@@ -30,6 +30,7 @@ import {
 import { Badge, Button, Breadcrumb, EmptyState, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { PresenceIndicator } from '@/features/collab_locks';
 import {
@@ -660,7 +661,8 @@ export function BidDayPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-content-primary">
-            {t('bid_day.heading', { defaultValue: 'Bid day: {{name}}', name: board.tender_name })}
+            {t('bid_day.title', { defaultValue: 'Bid day' })}
+            <span className="ms-2 font-normal text-content-secondary">{board.tender_name}</span>
           </h1>
           {frozen ? (
             <Badge variant="purple">{t('bid_day.status_frozen', { defaultValue: 'Submitted' })}</Badge>
@@ -770,7 +772,7 @@ export function BidDayPage() {
                           })}
                         </span>
                         <div>
-                          {row.suggestion.reasons.map((r) => t(`bid_day.reason_${r}`, { defaultValue: REASONS[r] ?? r })).join(', ')}
+                          {fmtList(row.suggestion.reasons.map((r) => t(`bid_day.reason_${r}`, { defaultValue: REASONS[r] ?? r })))}
                         </div>
                         {!frozen && (
                           <button type="button" className="mt-0.5 font-medium text-oe-blue hover:underline" onClick={() => choose(row, row.suggestion?.quote_id ?? null)}>
@@ -1077,7 +1079,7 @@ export function BidDayPage() {
               )}
               {push.plan.skipped.length > 0 && (
                 <p className="mt-2 text-2xs text-content-tertiary">
-                  {t('bid_day.push_skipped', { defaultValue: 'Not linked to positions, left as is: {{list}}', list: push.plan.skipped.join(', ') })}
+                  {t('bid_day.push_skipped', { defaultValue: 'Not linked to positions, left as is: {{list}}', list: fmtList(push.plan.skipped) })}
                 </p>
               )}
             </div>

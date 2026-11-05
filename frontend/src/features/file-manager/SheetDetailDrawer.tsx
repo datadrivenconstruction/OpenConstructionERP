@@ -43,6 +43,7 @@ import clsx from 'clsx';
 import { AlertTriangle, ArrowRight, Check, FileText, History, ImageOff, Pencil, Ruler } from 'lucide-react';
 import { AuthImage, Badge, Button, DateDisplay, SideDrawer } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { confirmSheetExtraction, sheetThumbnailUrl, updateSheet, type SheetPatch } from './api';
 import { SheetEditForm } from './SheetEditForm';
@@ -280,7 +281,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
                   {wouldReplace.every(Boolean)
                     ? t('sheets.held_note', {
                         defaultValue: 'Held: not yet superseding {{sheets}}',
-                        sheets: wouldReplace.join(', '),
+                        sheets: fmtList(wouldReplace),
                       })
                     : t('sheets.held_note_unknown', {
                         defaultValue: 'Held: not yet superseding the current revision',

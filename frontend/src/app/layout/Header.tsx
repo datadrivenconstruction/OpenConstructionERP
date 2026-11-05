@@ -284,6 +284,8 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Guarantee exposure': 'guarantees.exposure_title',
   'Quote capture': 'quote_capture.title',
   'Bid day': 'bid_day.title',
+  'Bid / no-bid': 'bid_no_bid.title',
+  'Before and after': 'photoArchive.compare.title',
   'Owner bid schedule': 'owner_schedule.title',
   'WIP report': 'wip_report.title',
   'Certified Payroll': 'nav.certified_payroll',

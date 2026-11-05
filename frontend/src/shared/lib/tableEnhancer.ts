@@ -43,7 +43,7 @@ export function setEnhancerLabels(next: EnhancerLabels): void {
  * "1 234,5 m3", "-12 %", "(450.00)". Null for text that is not one number.
  */
 export function parseDisplayedNumber(raw: string): number | null {
-  let s = raw.replace(/[   ']/g, ' ').trim();
+  let s = raw.replace(/[\u00a0\u202f\u2009']/g, ' ').trim();
   if (!s) return null;
   let negative = false;
   if (/^\(.*\)$/.test(s)) {
