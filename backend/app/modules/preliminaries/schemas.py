@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
@@ -74,6 +74,7 @@ class PrelimItemResponse(BaseModel):
     sort_order: int = 0
     # Derived, read-only: rate_per_period * periods (time-related) or fixed_amount.
     line_total: DecimalMoney = Decimal("0")
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 

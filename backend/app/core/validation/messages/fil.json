@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "May {count} nang bill of quantities ang proyektong ito; ang konseptwal na bill na idinagdag sa tabi ay dalawang beses bibilangin ang parehong saklaw."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Ang petsa ng kontrata na {value} ay hindi tunay na petsa.",
+      "suggestion": "Maglagay ng wastong petsa sa format na YYYY-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Aktibo pa ang kontrata, ngunit natapos ang panahon nito noong {date}.",
+      "suggestion": "Tapusin ang kontrata sa pagtatapos ng panahon o i-renew ito na may bagong petsa ng pagtatapos."
+    },
+    "completed_without_items": {
+      "fail": "Tapos na ang work order, ngunit zero ang kabuuan ng mga linya nito kaya wala itong maibi-bill.",
+      "suggestion": "Magdagdag ng mga linya ng paggawa at materyales, o itama ang status ng work order."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Walang lumagda na minarkahang kinakailangan, kaya hindi kailanman ganap na malalagdaan ang session.",
+      "suggestion": "Markahan ang kahit isang lumagda bilang kinakailangan."
+    },
+    "expiry_past": {
+      "fail": "Mag-e-expire ang session sa {date}, na lumipas na.",
+      "suggestion": "Magtakda ng petsa ng pag-expire sa hinaharap o iwanang blangko ang field."
+    },
+    "signed_in_future": {
+      "fail": "Ang lagda ay may petsang {date}, na nasa hinaharap.",
+      "suggestion": "Suriin ang petsa at oras ng device sa paglagda at ilagay ang tunay na oras ng paglagda."
+    },
+    "signed_other_version": {
+      "fail": "Ang lumagda na may tungkuling {role} ay lumagda sa ibang bersyon ng dokumento kaysa sa nasa session.",
+      "suggestion": "Hilingin sa lumagda na lumagda muli sa kasalukuyang bersyon."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Ang factor para sa {module} / {action} ay lumalabas nang higit sa isang beses sa update na ito.",
+      "suggestion": "Ipadala ang bawat pares ng module at aksyon nang isang beses lang."
+    },
+    "factor_unknown_action": {
+      "fail": "Walang naitalang aksyon na tumutugma sa {module} / {action}, kaya hindi kailanman ginagamit ang factor na ito.",
+      "suggestion": "Ihambing ang mga pangalan ng module at aksyon sa listahan ng mga time factor."
+    },
+    "factor_over_workday": {
+      "fail": "Ang {minutes} minutong natipid bawat aksyon ay higit sa isang araw ng trabaho ({max} minuto).",
+      "suggestion": "Suriin ang halaga; malamang na oras ang naipasok bilang minuto."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Ang unit na {unit} ay naitala bilang naipadala, naihatid o nakakabit na, kaya lalaktawan ang quality check nito.",
+      "suggestion": "Itala ang unit sa unang yugto at isulong ito nang paunti-unti."
+    },
+    "bim_ids_invalid": {
+      "fail": "Ang mga naka-link na BIM element id ay may blangko o paulit-ulit na entry.",
+      "suggestion": "Alisin ang mga blangko at doble na id upang isang beses lang mai-link ang bawat model element."
+    },
+    "install_date_passed": {
+      "fail": "Lumipas na ang target na petsa ng pagkakabit na {date}, ngunit hindi pa nakakabit ang unit.",
+      "suggestion": "Magtakda ng bagong target na petsa ng pagkakabit o itala ang pagkakabit."
+    },
+    "dispatch_without_date": {
+      "fail": "Naipadala na ang unit ngunit walang target na petsa ng pagkakabit, kaya hindi makapagplano ang site ng paghahatid at oras ng crane.",
+      "suggestion": "Ilagay ang petsa kung kailan ikakabit ang unit."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Ito ay linya ng lump sum, ngunit may nailagay na rate o tagal; hindi ito kasama sa kabuuan.",
+      "suggestion": "Burahin ang rate at tagal, o gawing nakabatay sa oras ang linya."
+    },
+    "timed_carries_fixed": {
+      "fail": "Ito ay linyang nakabatay sa oras, ngunit may nailagay na takdang halaga; hindi ito kasama sa kabuuan.",
+      "suggestion": "Burahin ang takdang halaga, o gawing lump sum ang linya."
+    },
+    "line_unpriced": {
+      "fail": "Zero ang presyo ng linya kaya mawawala ito sa kabuuan ng mga pangkalahatang gastos ng site.",
+      "suggestion": "Ilagay ang rate at bilang ng mga yugto, o ang takdang halaga."
+    }
   }
 }

@@ -11,7 +11,9 @@ proxy) are the only cross-currency figures and carry no single-currency money.
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class CurrencyValueOut(BaseModel):
@@ -179,6 +181,7 @@ class TimeFactorsOut(BaseModel):
     """The full editable surface of a tenant's hours-saved minute factors."""
 
     factors: list[TimeFactorOut]
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class TimeFactorUpdate(BaseModel):

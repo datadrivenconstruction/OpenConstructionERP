@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Proyek ini sudah punya {count} daftar kuantitas; daftar konseptual di sampingnya menghitung lingkup yang sama dua kali."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Tanggal kontrak {value} bukan tanggal yang nyata.",
+      "suggestion": "Masukkan tanggal valid dengan format TTTT-BB-HH."
+    },
+    "contract_lapsed": {
+      "fail": "Kontrak masih aktif, tetapi masa berlakunya berakhir pada {date}.",
+      "suggestion": "Akhiri kontrak karena jatuh tempo atau perpanjang dengan tanggal akhir baru."
+    },
+    "completed_without_items": {
+      "fail": "Perintah kerja sudah selesai, tetapi jumlah barisnya nol sehingga tidak ada yang dapat ditagih.",
+      "suggestion": "Tambahkan baris tenaga kerja dan material, atau perbaiki status perintah kerja."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Tidak ada penandatangan yang ditandai wajib, sehingga sesi tidak akan pernah ditandatangani penuh.",
+      "suggestion": "Tandai setidaknya satu penandatangan sebagai wajib."
+    },
+    "expiry_past": {
+      "fail": "Sesi berakhir pada {date}, tanggal yang sudah lewat.",
+      "suggestion": "Tetapkan tanggal kedaluwarsa di masa depan atau biarkan kosong."
+    },
+    "signed_in_future": {
+      "fail": "Tanda tangan bertanggal {date}, yang berada di masa depan.",
+      "suggestion": "Periksa tanggal dan jam perangkat penandatanganan, lalu masukkan waktu penandatanganan yang sebenarnya."
+    },
+    "signed_other_version": {
+      "fail": "Penandatangan dengan peran {role} menandatangani versi dokumen yang berbeda dari yang ada di sesi.",
+      "suggestion": "Minta penandatangan menandatangani ulang versi terbaru."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Faktor untuk {module} / {action} muncul lebih dari sekali dalam pembaruan ini.",
+      "suggestion": "Kirim setiap pasangan modul dan tindakan hanya sekali."
+    },
+    "factor_unknown_action": {
+      "fail": "Tidak ada tindakan tercatat yang cocok dengan {module} / {action}, sehingga faktor ini tidak pernah dipakai.",
+      "suggestion": "Cocokkan nama modul dan tindakan dengan daftar faktor waktu."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} menit dihemat per tindakan lebih dari satu hari kerja ({max} menit).",
+      "suggestion": "Periksa angkanya; jam kemungkinan dimasukkan sebagai menit."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Unit {unit} tercatat sebagai terkirim, diserahkan, atau terpasang, sehingga pemeriksaan mutunya akan terlewati.",
+      "suggestion": "Daftarkan unit pada tahap pertama dan majukan selangkah demi selangkah."
+    },
+    "bim_ids_invalid": {
+      "fail": "ID elemen BIM yang terhubung berisi entri kosong atau berulang.",
+      "suggestion": "Hapus ID kosong dan ganda agar setiap elemen model terhubung satu kali."
+    },
+    "install_date_passed": {
+      "fail": "Tanggal target pemasangan {date} sudah lewat, tetapi unit belum terpasang.",
+      "suggestion": "Tetapkan tanggal target pemasangan baru atau catat pemasangannya."
+    },
+    "dispatch_without_date": {
+      "fail": "Unit sudah dikirim tetapi tidak punya tanggal target pemasangan, sehingga lokasi proyek tidak dapat merencanakan pengiriman dan jadwal derek.",
+      "suggestion": "Masukkan tanggal unit akan dipasang."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Ini baris harga lump sum, tetapi tarif atau durasi diisi; keduanya tidak dihitung dalam total.",
+      "suggestion": "Hapus tarif dan durasi, atau ubah baris menjadi berbasis waktu."
+    },
+    "timed_carries_fixed": {
+      "fail": "Ini baris berbasis waktu, tetapi jumlah tetap diisi; tidak dihitung dalam total.",
+      "suggestion": "Hapus jumlah tetap, atau ubah baris menjadi lump sum."
+    },
+    "line_unpriced": {
+      "fail": "Baris bernilai nol sehingga keluar dari total biaya umum proyek.",
+      "suggestion": "Masukkan tarif dan jumlah periode, atau jumlah tetap."
+    }
   }
 }

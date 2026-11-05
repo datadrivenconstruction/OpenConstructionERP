@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.service.models import (
     AssetInspectionChecklist,
     DebriefReport,
@@ -80,6 +81,7 @@ from app.modules.service.schemas import (
     WorkOrderItemCreate,
     WorkOrderUpdate,
 )
+from app.modules.service.validators import SERVICE_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -340,6 +342,28 @@ class ServiceService:
         self.checklist_repo = ChecklistRepository(session)
         self.recurring_repo = RecurringScheduleRepository(session)
 
+    async def _gate(
+        self,
+        data: dict[str, Any],
+        *,
+        operation: str,
+        target_type: str,
+        target_id: str = "",
+        before: dict[str, Any] | None = None,
+    ) -> Any:
+        """Run the service rules at a write; errors the write introduces answer a coded 422."""
+        return await gate_rule_set(
+            rule_set=SERVICE_RULE_SET,
+            data=data,
+            target_type=target_type,
+            target_id=target_id,
+            project_id=None,
+            operation=operation,
+            subject="service record",
+            before=before,
+            error="service_rules_failed",
+        )
+
     # ── Contract ─────────────────────────────────────────────────────────
 
     async def create_contract(
@@ -363,6 +387,19 @@ class ServiceService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="period_end must be on or after period_start.",
             )
+        report = await self._gate(
+            {
+                "contract": {
+                    "period_start": data.period_start,
+                    "period_end": data.period_end,
+                    "status": data.status,
+                    "value": data.value,
+                    "currency": data.currency,
+                }
+            },
+            operation="create",
+            target_type="service_contract",
+        )
         # Race-safe contract number allocation. Retry on the unique-index
         # IntegrityError if two requests raced past the same COUNT(*).
         contract: ServiceContract | None = None
@@ -401,6 +438,7 @@ class ServiceService:
                     f"{_MAX_NUMBER_RETRIES} attempts (concurrent contention)."
                 ),
             ) from last_exc
+        contract.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info("Service contract created: %s for customer %s", contract_number, data.customer_id)
         event_bus.publish_detached(
             "service.contract.created",
@@ -454,8 +492,25 @@ class ServiceService:
         if not fields:
             return contract
 
+        stored = {
+            "id": str(contract_id),
+            "period_start": contract.period_start,
+            "period_end": contract.period_end,
+            "status": contract.status,
+            "value": contract.value,
+            "currency": contract.currency,
+        }
+        merged = {**stored, **{k: v for k, v in fields.items() if k in stored and v is not None}}
+        report = await self._gate(
+            {"contract": merged},
+            operation="update",
+            target_type="service_contract",
+            target_id=str(contract_id),
+            before={"contract": stored},
+        )
         await self.contract_repo.update_fields(contract_id, **fields)
         await self.session.refresh(contract)
+        contract.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return contract
 
     async def close_contract(self, contract_id: uuid.UUID) -> ServiceContract:
@@ -1049,6 +1104,14 @@ class ServiceService:
                 ),
             )
 
+        report = await self._gate(
+            {
+                "work_order": {"status": data.status, "currency": data.currency},
+                "items": [{"quantity": i.quantity, "unit_rate": i.unit_rate, "total": i.total} for i in data.items],
+            },
+            operation="create",
+            target_type="service_work_order",
+        )
         # Race-safe WO number allocation. ``next_work_order_number()`` uses
         # COUNT(*) globally, so two concurrent POSTs can produce identical
         # WO-NNNNNN labels. Retry on the unique-index IntegrityError.
@@ -1097,6 +1160,7 @@ class ServiceService:
             )
 
         await self.session.refresh(wo)
+        wo.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info(
             "Work order created: %s for ticket %s",
             wo_number,
@@ -1156,8 +1220,22 @@ class ServiceService:
             assert_transition(wo.status, fields["status"], machine="work_order")
         if not fields:
             return wo
+        items = await self.work_order_item_repo.list_for_work_order(wo_id)
+        item_rows = [
+            {"id": str(i.id), "quantity": i.quantity, "unit_rate": i.unit_rate, "total": i.total} for i in items
+        ]
+        stored = {"work_order": {"id": str(wo_id), "status": wo.status, "currency": wo.currency}, "items": item_rows}
+        merged = {k: v for k, v in fields.items() if k in ("status", "currency") and v is not None}
+        report = await self._gate(
+            {"work_order": {**stored["work_order"], **merged}, "items": item_rows},
+            operation="update",
+            target_type="service_work_order",
+            target_id=str(wo_id),
+            before=stored,
+        )
         await self.work_order_repo.update_fields(wo_id, **fields)
         await self.session.refresh(wo)
+        wo.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return wo
 
     async def complete_work_order(
@@ -1175,6 +1253,16 @@ class ServiceService:
 
         items = await self.work_order_item_repo.list_for_work_order(wo_id)
         billed_amount = compute_work_order_total(items)
+        item_rows = [
+            {"id": str(i.id), "quantity": i.quantity, "unit_rate": i.unit_rate, "total": i.total} for i in items
+        ]
+        report = await self._gate(
+            {"work_order": {"id": str(wo_id), "status": "completed", "currency": wo.currency}, "items": item_rows},
+            operation="complete",
+            target_type="service_work_order",
+            target_id=str(wo_id),
+            before={"work_order": {"id": str(wo_id), "status": wo.status, "currency": wo.currency}, "items": item_rows},
+        )
 
         update_fields: dict[str, Any] = {
             "status": "completed",
@@ -1200,6 +1288,7 @@ class ServiceService:
         await self.debrief_repo.create(debrief)
 
         await self.session.refresh(wo)
+        wo.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         logger.info(
             "Work order completed: %s (billed_amount=%s)",
             wo.work_order_number,

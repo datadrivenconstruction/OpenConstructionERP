@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Loyihada hajmlar qaydnomasi allaqachon {count} ta; yoniga qoʻshilgan konseptual qaydnoma oʻsha hajmni ikki marta hisoblaydi."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Shartnoma sanasi {value} haqiqiy sana emas.",
+      "suggestion": "Sanani YYYY-OO-KK shaklida toʻgʻri kiriting."
+    },
+    "contract_lapsed": {
+      "fail": "Shartnoma hali amalda, lekin uning muddati {date} kuni tugagan.",
+      "suggestion": "Shartnomani muddati boʻyicha yoping yoki yangi tugash sanasi bilan uzaytiring."
+    },
+    "completed_without_items": {
+      "fail": "Ish topshirigʻi bajarilgan, ammo qatorlari yigʻindisi nolga teng, hisob-kitob qilinadigan narsa yoʻq.",
+      "suggestion": "Mehnat va material qatorlarini qoʻshing yoki ish topshirigʻi holatini toʻgʻrilang."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Hech bir imzolovchi majburiy deb belgilanmagan, shuning uchun seansga hech qachon toʻliq imzo qoʻyilmaydi.",
+      "suggestion": "Kamida bitta imzolovchini majburiy deb belgilang."
+    },
+    "expiry_past": {
+      "fail": "Seans {date} kuni tugaydi, bu sana allaqachon oʻtgan.",
+      "suggestion": "Kelajakdagi amal qilish muddatini belgilang yoki maydonni boʻsh qoldiring."
+    },
+    "signed_in_future": {
+      "fail": "Imzo sanasi {date}, bu kelajakda.",
+      "suggestion": "Imzolash qurilmasining sanasi va vaqtini tekshiring va haqiqiy imzolash vaqtini kiriting."
+    },
+    "signed_other_version": {
+      "fail": "{role} rolidagi imzolovchi seansdagidan boshqa hujjat versiyasiga imzo qoʻydi.",
+      "suggestion": "Imzolovchidan joriy versiyaga qayta imzo qoʻyishni soʻrang."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "{module} / {action} koeffitsiyenti bu yangilanishda bir necha marta uchraydi.",
+      "suggestion": "Modul va amalning har bir juftini faqat bir marta yuboring."
+    },
+    "factor_unknown_action": {
+      "fail": "Qayd etilgan hech bir amal {module} / {action} juftiga mos kelmaydi, shuning uchun bu koeffitsiyent hech qachon ishlatilmaydi.",
+      "suggestion": "Modul va amal nomlarini vaqt koeffitsiyentlari roʻyxati bilan solishtiring."
+    },
+    "factor_over_workday": {
+      "fail": "Har bir amalga {minutes} daqiqa tejash ish kunidan ({max} daqiqa) koʻp.",
+      "suggestion": "Qiymatni tekshiring: soatlar daqiqa sifatida kiritilgan boʻlishi mumkin."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "{unit} buyumi joʻnatilgan, yetkazilgan yoki oʻrnatilgan deb qayd etilgan, uning sifat nazorati oʻtkazib yuborilgan boʻlardi.",
+      "suggestion": "Buyumni birinchi bosqichda roʻyxatdan oʻtkazing va bosqichma-bosqich olgʻa siljiting."
+    },
+    "bim_ids_invalid": {
+      "fail": "Bogʻlangan BIM elementlari identifikatorlarida boʻsh yoki takrorlangan yozuv bor.",
+      "suggestion": "Boʻsh va takroriy identifikatorlarni olib tashlang, shunda modelning har bir elementi bir marta bogʻlanadi."
+    },
+    "install_date_passed": {
+      "fail": "Oʻrnatishning rejalashtirilgan sanasi {date} oʻtib ketgan, lekin buyum hali oʻrnatilmagan.",
+      "suggestion": "Oʻrnatishning yangi rejalashtirilgan sanasini belgilang yoki oʻrnatishni qayd eting."
+    },
+    "dispatch_without_date": {
+      "fail": "Buyum joʻnatilgan, lekin oʻrnatishning rejalashtirilgan sanasi yoʻq, shuning uchun maydon yetkazib berish va kran vaqtini rejalashtira olmaydi.",
+      "suggestion": "Buyum oʻrnatiladigan sanani kiriting."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Bu qatʼiy summali qator, ammo stavka yoki davomiylik kiritilgan; ular jamiga kirmaydi.",
+      "suggestion": "Stavka va davomiylikni oʻchiring yoki qatorni vaqtga bogʻliq qiling."
+    },
+    "timed_carries_fixed": {
+      "fail": "Bu vaqtga bogʻliq qator, ammo qatʼiy summa kiritilgan; u jamiga kirmaydi.",
+      "suggestion": "Qatʼiy summani oʻchiring yoki qatorni qatʼiy summali qiling."
+    },
+    "line_unpriced": {
+      "fail": "Qator narxi nolga teng va maydonning umumiy xarajatlari jamidan tushib qoladi.",
+      "suggestion": "Stavka va davrlar sonini yoki qatʼiy summani kiriting."
+    }
   }
 }

@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "このプロジェクトには数量書が既に {count} 件あります。隣に概算の数量書を足すと同じ範囲を二重に数えます。"
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "契約日 {value} は実在する日付ではありません。",
+      "suggestion": "YYYY-MM-DD 形式で有効な日付を入力してください。"
+    },
+    "contract_lapsed": {
+      "fail": "契約は有効なままですが、期間は {date} に終了しています。",
+      "suggestion": "契約を期間満了で終了するか、新しい終了日で更新してください。"
+    },
+    "completed_without_items": {
+      "fail": "作業指示は完了していますが、明細の合計がゼロで請求できるものがありません。",
+      "suggestion": "労務費と材料費の明細を追加するか、作業指示のステータスを修正してください。"
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "必須の署名者が一人も指定されていないため、このセッションは完全に署名されることがありません。",
+      "suggestion": "署名者を少なくとも一人、必須に設定してください。"
+    },
+    "expiry_past": {
+      "fail": "セッションの有効期限は {date} で、すでに過ぎています。",
+      "suggestion": "将来の有効期限を設定するか、空欄にしてください。"
+    },
+    "signed_in_future": {
+      "fail": "署名日が {date} で、未来の日付です。",
+      "suggestion": "署名端末の日付と時刻を確認し、実際の署名時刻を入力してください。"
+    },
+    "signed_other_version": {
+      "fail": "役割 {role} の署名者は、セッションにある版とは別の版の文書に署名しました。",
+      "suggestion": "署名者に現行版への再署名を依頼してください。"
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "{module} / {action} の係数が今回の更新に複数回含まれています。",
+      "suggestion": "モジュールと操作の組は一件ずつ送信してください。"
+    },
+    "factor_unknown_action": {
+      "fail": "{module} / {action} に対応する記録済みの操作がないため、この係数は使われません。",
+      "suggestion": "モジュール名と操作名を時間係数の一覧と照合してください。"
+    },
+    "factor_over_workday": {
+      "fail": "1 操作あたりの削減時間 {minutes} 分は、1 日の労働時間（{max} 分）を超えています。",
+      "suggestion": "値を確認してください。時間を分として入力した可能性があります。"
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "ユニット {unit} が出荷済み、納入済み、または取付済みで登録されており、品質検査が省略されます。",
+      "suggestion": "最初の段階で登録し、順に進めてください。"
+    },
+    "bim_ids_invalid": {
+      "fail": "関連付けた BIM 要素 ID に空欄または重複があります。",
+      "suggestion": "空欄と重複の ID を削除し、各モデル要素を一度だけ関連付けてください。"
+    },
+    "install_date_passed": {
+      "fail": "取付予定日 {date} を過ぎていますが、ユニットはまだ取り付けられていません。",
+      "suggestion": "新しい取付予定日を設定するか、取付を記録してください。"
+    },
+    "dispatch_without_date": {
+      "fail": "ユニットは出荷済みですが取付予定日がなく、現場は搬入とクレーンの手配を計画できません。",
+      "suggestion": "ユニットを取り付ける日付を入力してください。"
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "この明細は一式（固定額）ですが、単価または期間が入力されています。合計には含まれません。",
+      "suggestion": "単価と期間を削除するか、明細を期間比例に変更してください。"
+    },
+    "timed_carries_fixed": {
+      "fail": "この明細は期間比例ですが、固定額が入力されています。合計には含まれません。",
+      "suggestion": "固定額を削除するか、明細を一式に変更してください。"
+    },
+    "line_unpriced": {
+      "fail": "この明細の金額はゼロで、共通仮設費の合計から外れます。",
+      "suggestion": "単価と期間数、または固定額を入力してください。"
+    }
   }
 }

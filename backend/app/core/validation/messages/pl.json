@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Ten projekt ma już przedmiarów: {count}; dodany obok przedmiar koncepcyjny liczy ten sam zakres dwukrotnie."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Data umowy {value} nie jest prawdziwą datą.",
+      "suggestion": "Wpisz poprawną datę w formacie RRRR-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Umowa jest nadal aktywna, ale jej okres zakończył się {date}.",
+      "suggestion": "Zakończ umowę z upływem terminu albo przedłuż ją z nową datą końcową."
+    },
+    "completed_without_items": {
+      "fail": "Zlecenie robót jest zakończone, ale jego pozycje dają zero, więc nie ma czego fakturować.",
+      "suggestion": "Dodaj pozycje robocizny i materiałów albo popraw status zlecenia."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Żaden podpisujący nie jest oznaczony jako wymagany, więc sesja nigdy nie zostanie w pełni podpisana.",
+      "suggestion": "Oznacz co najmniej jednego podpisującego jako wymaganego."
+    },
+    "expiry_past": {
+      "fail": "Sesja wygasa {date}, a ta data już minęła.",
+      "suggestion": "Ustaw termin ważności w przyszłości albo zostaw pole puste."
+    },
+    "signed_in_future": {
+      "fail": "Podpis jest datowany na {date}, czyli w przyszłości.",
+      "suggestion": "Sprawdź datę i godzinę urządzenia podpisującego i wpisz rzeczywisty czas podpisu."
+    },
+    "signed_other_version": {
+      "fail": "Podpisujący w roli {role} podpisał inną wersję dokumentu niż ta w sesji.",
+      "suggestion": "Poproś podpisującego o ponowne podpisanie aktualnej wersji."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Współczynnik dla {module} / {action} występuje w tej zmianie więcej niż raz.",
+      "suggestion": "Przesyłaj każdą parę modułu i akcji tylko raz."
+    },
+    "factor_unknown_action": {
+      "fail": "Żadna zapisywana akcja nie odpowiada {module} / {action}, więc ten współczynnik nigdy nie jest używany.",
+      "suggestion": "Porównaj nazwy modułu i akcji z listą współczynników czasu."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} min oszczędności na akcję to więcej niż dzień pracy ({max} min).",
+      "suggestion": "Sprawdź wartość; prawdopodobnie godziny wpisano jako minuty."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Element {unit} jest zarejestrowany jako wysłany, dostarczony lub zamontowany, więc jego kontrola jakości zostałaby pominięta.",
+      "suggestion": "Zarejestruj element na pierwszym etapie i przesuwaj go krok po kroku."
+    },
+    "bim_ids_invalid": {
+      "fail": "Powiązane identyfikatory elementów BIM zawierają pusty lub powtórzony wpis.",
+      "suggestion": "Usuń puste i zdublowane identyfikatory, aby każdy element modelu był powiązany raz."
+    },
+    "install_date_passed": {
+      "fail": "Planowany termin montażu {date} minął, a element nie jest jeszcze zamontowany.",
+      "suggestion": "Ustaw nowy planowany termin montażu albo zapisz montaż."
+    },
+    "dispatch_without_date": {
+      "fail": "Element jest wysłany, ale nie ma planowanego terminu montażu, więc budowa nie zaplanuje dostawy ani pracy dźwigu.",
+      "suggestion": "Wpisz datę, kiedy element ma zostać zamontowany."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "To pozycja ryczałtowa, ale wpisano stawkę lub czas trwania; nie wchodzą one do sumy.",
+      "suggestion": "Wyczyść stawkę i czas trwania albo zmień pozycję na czasową."
+    },
+    "timed_carries_fixed": {
+      "fail": "To pozycja czasowa, ale wpisano kwotę ryczałtową; nie wchodzi ona do sumy.",
+      "suggestion": "Wyczyść kwotę ryczałtową albo zmień pozycję na ryczałtową."
+    },
+    "line_unpriced": {
+      "fail": "Pozycja wycenia się na zero i wypada z sumy kosztów ogólnych budowy.",
+      "suggestion": "Wpisz stawkę i liczbę okresów albo kwotę ryczałtową."
+    }
   }
 }

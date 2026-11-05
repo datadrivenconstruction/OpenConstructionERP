@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Bu projede zaten {count} metraj cetveli var; yanına eklenen kavramsal cetvel aynı kapsamı iki kez sayar."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Sözleşme tarihi {value} gerçek bir tarih değil.",
+      "suggestion": "YYYY-AA-GG biçiminde geçerli bir tarih girin."
+    },
+    "contract_lapsed": {
+      "fail": "Sözleşme hâlâ etkin, ancak süresi {date} tarihinde sona erdi.",
+      "suggestion": "Sözleşmeyi süre dolumuyla kapatın veya yeni bir bitiş tarihiyle yenileyin."
+    },
+    "completed_without_items": {
+      "fail": "İş emri tamamlandı, ancak kalemlerinin toplamı sıfır; faturalanacak bir şey yok.",
+      "suggestion": "İşçilik ve malzeme kalemlerini ekleyin veya iş emrinin durumunu düzeltin."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Hiçbir imzacı zorunlu olarak işaretlenmemiş; oturum hiçbir zaman tam imzalanamaz.",
+      "suggestion": "En az bir imzacıyı zorunlu olarak işaretleyin."
+    },
+    "expiry_past": {
+      "fail": "Oturum {date} tarihinde sona eriyor ve bu tarih geçmişte kaldı.",
+      "suggestion": "Gelecekte bir son kullanma tarihi belirleyin veya alanı boş bırakın."
+    },
+    "signed_in_future": {
+      "fail": "İmza {date} tarihli ve bu tarih gelecekte.",
+      "suggestion": "İmza cihazının tarih ve saatini kontrol edin, gerçek imza zamanını girin."
+    },
+    "signed_other_version": {
+      "fail": "{role} rolündeki imzacı, oturumdakinden farklı bir belge sürümünü imzaladı.",
+      "suggestion": "İmzacıdan güncel sürümü yeniden imzalamasını isteyin."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "{module} / {action} katsayısı bu güncellemede birden fazla kez geçiyor.",
+      "suggestion": "Her modül ve eylem çiftini yalnızca bir kez gönderin."
+    },
+    "factor_unknown_action": {
+      "fail": "Kayıtlı hiçbir eylem {module} / {action} ile eşleşmiyor; bu katsayı hiç kullanılmaz.",
+      "suggestion": "Modül ve eylem adlarını zaman katsayıları listesiyle karşılaştırın."
+    },
+    "factor_over_workday": {
+      "fail": "Eylem başına {minutes} dakika tasarruf bir iş gününden ({max} dakika) fazla.",
+      "suggestion": "Değeri kontrol edin; saatler muhtemelen dakika olarak girildi."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "{unit} birimi sevk edilmiş, teslim edilmiş veya monte edilmiş olarak kaydedilmiş; kalite kontrolü atlanmış olurdu.",
+      "suggestion": "Birimi ilk aşamada kaydedin ve adım adım ilerletin."
+    },
+    "bim_ids_invalid": {
+      "fail": "Bağlı BIM öğe kimlikleri boş veya tekrarlanan bir giriş içeriyor.",
+      "suggestion": "Boş ve yinelenen kimlikleri silin; her model öğesi bir kez bağlansın."
+    },
+    "install_date_passed": {
+      "fail": "Hedef montaj tarihi {date} geçti, ancak birim henüz monte edilmedi.",
+      "suggestion": "Yeni bir hedef montaj tarihi belirleyin veya montajı kaydedin."
+    },
+    "dispatch_without_date": {
+      "fail": "Birim sevk edildi ancak hedef montaj tarihi yok; şantiye teslimatı ve vinç zamanını planlayamaz.",
+      "suggestion": "Birimin monte edileceği tarihi girin."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Bu götürü bedel kalemi, ancak bir birim fiyat veya süre girilmiş; bunlar toplama dahil edilmez.",
+      "suggestion": "Fiyat ve süreyi silin veya kalemi süreye bağlı yapın."
+    },
+    "timed_carries_fixed": {
+      "fail": "Bu süreye bağlı bir kalem, ancak sabit tutar girilmiş; toplama dahil edilmez.",
+      "suggestion": "Sabit tutarı silin veya kalemi götürü bedel yapın."
+    },
+    "line_unpriced": {
+      "fail": "Kalem sıfır fiyatlanıyor ve şantiye genel giderleri toplamının dışında kalıyor.",
+      "suggestion": "Birim fiyatı ve dönem sayısını ya da sabit tutarı girin."
+    }
   }
 }

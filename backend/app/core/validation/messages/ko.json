@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "이 프로젝트에는 내역서가 이미 {count}건 있습니다. 옆에 개념 내역서를 추가하면 같은 범위를 두 번 계산합니다."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "계약 날짜 {value}은(는) 실제 존재하는 날짜가 아닙니다.",
+      "suggestion": "YYYY-MM-DD 형식의 올바른 날짜를 입력하세요."
+    },
+    "contract_lapsed": {
+      "fail": "계약은 아직 유효하지만 기간이 {date}에 끝났습니다.",
+      "suggestion": "계약을 기간 만료로 종료하거나 새 종료일로 갱신하세요."
+    },
+    "completed_without_items": {
+      "fail": "작업 지시는 완료되었지만 항목 합계가 0이어서 청구할 것이 없습니다.",
+      "suggestion": "노무 및 자재 항목을 추가하거나 작업 지시 상태를 바로잡으세요."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "필수로 표시된 서명자가 없어 이 세션은 완전히 서명될 수 없습니다.",
+      "suggestion": "서명자를 한 명 이상 필수로 표시하세요."
+    },
+    "expiry_past": {
+      "fail": "세션이 {date}에 만료되며 이 날짜는 이미 지났습니다.",
+      "suggestion": "미래의 만료일을 설정하거나 비워 두세요."
+    },
+    "signed_in_future": {
+      "fail": "서명 일자가 {date}로 미래입니다.",
+      "suggestion": "서명 장치의 날짜와 시간을 확인하고 실제 서명 시각을 입력하세요."
+    },
+    "signed_other_version": {
+      "fail": "{role} 역할의 서명자가 세션에 있는 것과 다른 버전의 문서에 서명했습니다.",
+      "suggestion": "서명자에게 현재 버전에 다시 서명하도록 요청하세요."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "{module} / {action}의 계수가 이번 업데이트에 여러 번 나옵니다.",
+      "suggestion": "모듈과 작업의 쌍을 한 번씩만 보내세요."
+    },
+    "factor_unknown_action": {
+      "fail": "{module} / {action}에 해당하는 기록된 작업이 없어 이 계수는 사용되지 않습니다.",
+      "suggestion": "모듈 및 작업 이름을 시간 계수 목록과 대조하세요."
+    },
+    "factor_over_workday": {
+      "fail": "작업당 절감 {minutes}분은 하루 근무 시간({max}분)보다 깁니다.",
+      "suggestion": "값을 확인하세요. 시간을 분으로 입력했을 가능성이 있습니다."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "유닛 {unit}이(가) 출하, 납품 또는 설치 완료로 등록되어 품질 검사가 생략됩니다.",
+      "suggestion": "첫 단계에서 유닛을 등록하고 한 단계씩 진행하세요."
+    },
+    "bim_ids_invalid": {
+      "fail": "연결된 BIM 요소 ID에 빈 항목이나 중복 항목이 있습니다.",
+      "suggestion": "빈 ID와 중복 ID를 삭제하여 각 모델 요소가 한 번만 연결되게 하세요."
+    },
+    "install_date_passed": {
+      "fail": "설치 목표일 {date}이(가) 지났지만 유닛은 아직 설치되지 않았습니다.",
+      "suggestion": "새 설치 목표일을 설정하거나 설치를 기록하세요."
+    },
+    "dispatch_without_date": {
+      "fail": "유닛이 출하되었지만 설치 목표일이 없어 현장에서 입고와 크레인 일정을 계획할 수 없습니다.",
+      "suggestion": "유닛을 설치할 날짜를 입력하세요."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "이 항목은 일식(고정 금액) 항목인데 단가나 기간이 입력되어 있습니다. 합계에 포함되지 않습니다.",
+      "suggestion": "단가와 기간을 지우거나 항목을 기간 기준으로 바꾸세요."
+    },
+    "timed_carries_fixed": {
+      "fail": "이 항목은 기간 기준 항목인데 고정 금액이 입력되어 있습니다. 합계에 포함되지 않습니다.",
+      "suggestion": "고정 금액을 지우거나 항목을 일식으로 바꾸세요."
+    },
+    "line_unpriced": {
+      "fail": "이 항목은 금액이 0이어서 공통 가설 비용 합계에서 빠집니다.",
+      "suggestion": "단가와 기간 수 또는 고정 금액을 입력하세요."
+    }
   }
 }

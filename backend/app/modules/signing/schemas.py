@@ -218,6 +218,7 @@ class SigningSessionResponse(BaseModel):
     signed_count: int = 0
     declined_count: int = 0
     signatures: list[SignatureResponse] = Field(default_factory=list)
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class CertExpiryFlag(BaseModel):

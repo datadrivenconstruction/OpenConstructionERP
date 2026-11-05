@@ -33,6 +33,7 @@ from typing import Any
 from fastapi import HTTPException
 from fastapi import status as http_status
 
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.signing.models import Signature, SigningSession
 from app.modules.signing.providers import get_provider
 from app.modules.signing.repository import SigningRepository
@@ -42,6 +43,7 @@ from app.modules.signing.schemas import (
     SigningSessionCreate,
     SigningSessionUpdate,
 )
+from app.modules.signing.validators import SIGNING_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +259,16 @@ class SigningService:
             ),
             [],
         ).status
+        report = await self._gate(
+            {
+                "status": status,
+                "expires_at": data.expires_at,
+                "signatory_map": signatory_map,
+                "document_content_hash": data.document_content_hash,
+            },
+            project_id=data.project_id,
+            operation="create",
+        )
         session_row = SigningSession(
             project_id=data.project_id,
             document_ref=data.document_ref,
@@ -273,6 +285,7 @@ class SigningService:
             created_by=user_id,
         )
         session_row = await self.repo.create_session(session_row)
+        warnings = warning_findings(report)
 
         # Best-effort provider initiation: for the built-in provider this is
         # a no-op acceptance (nothing external to dispatch); for a real
@@ -298,6 +311,7 @@ class SigningService:
             session_row.provider_capability,
             session_row.project_id,
         )
+        session_row.validation_warnings = warnings  # type: ignore[attr-defined]
         return session_row
 
     async def get_session(self, session_id: uuid.UUID) -> SigningSession:
@@ -341,6 +355,12 @@ class SigningService:
                 merged.update(incoming)
             fields["metadata_"] = merged
 
+        stored = self._rule_view(session_row)
+        view = {**stored, **{k: v for k, v in fields.items() if k in stored}}
+        report = await self._gate(
+            view, project_id=session_row.project_id, operation="update", session_id=session_id, before=stored
+        )
+
         for key, value in fields.items():
             setattr(session_row, key, value)
 
@@ -365,6 +385,7 @@ class SigningService:
 
         await self.session.flush()  # type: ignore[attr-defined]
         await self.session.refresh(session_row)  # type: ignore[attr-defined]
+        session_row.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return session_row
 
     async def delete_session(self, session_id: uuid.UUID) -> None:
@@ -383,12 +404,26 @@ class SigningService:
         session_row = await self.get_session(session_id)
         self._reject_if_terminal(session_row)
 
+        signed_at = data.signed_at or self._now()
+        report = await self._gate(
+            self._rule_view(session_row),
+            project_id=session_row.project_id,
+            operation="attest",
+            session_id=session_row.id,
+            signature={
+                "signed_at": signed_at,
+                "content_hash": data.content_hash,
+                "signatory_role": data.signatory_role,
+            },
+            # Only the signature is judged here; a stored session's own findings are not charged to it.
+            before=self._rule_view(session_row),
+        )
         signature = Signature(
             session_id=session_row.id,
             project_id=session_row.project_id,
             signatory_name=data.signatory_name,
             signatory_role=data.signatory_role,
-            signed_at=data.signed_at or self._now(),
+            signed_at=signed_at,
             cert_subject=data.cert_subject,
             cert_valid_until=data.cert_valid_until,
             content_hash=data.content_hash,
@@ -397,7 +432,9 @@ class SigningService:
             created_by=user_id,
         )
         await self.repo.add_signature(signature)
-        return await self._recompute_and_save(session_row)
+        saved = await self._recompute_and_save(session_row)
+        saved.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
+        return saved
 
     async def record_decline(
         self,
@@ -422,6 +459,42 @@ class SigningService:
         )
         await self.repo.add_signature(signature)
         return await self._recompute_and_save(session_row)
+
+    @staticmethod
+    def _rule_view(row: SigningSession) -> dict[str, Any]:
+        return {
+            "status": row.status,
+            "expires_at": row.expires_at,
+            "signatory_map": list(row.signatory_map or []),
+            "document_content_hash": row.document_content_hash,
+        }
+
+    async def _gate(
+        self,
+        session_view: dict[str, Any],
+        *,
+        project_id: uuid.UUID,
+        operation: str,
+        session_id: uuid.UUID | None = None,
+        signature: dict[str, Any] | None = None,
+        before: dict[str, Any] | None = None,
+    ) -> Any:
+        """Run the signing rules at a write; errors the write introduces answer a coded 422."""
+        sid = str(session_id or "")
+        data: dict[str, Any] = {"session": {"id": sid, **session_view}}
+        if signature is not None:
+            data["signature"] = signature
+        return await gate_rule_set(
+            rule_set=SIGNING_RULE_SET,
+            data=data,
+            target_type="signing_session",
+            target_id=sid,
+            project_id=project_id,
+            operation=operation,
+            subject="signing session",
+            before={"session": {"id": sid, **before}} if before is not None else None,
+            error="signing_rules_failed",
+        )
 
     def _reject_if_terminal(self, session_row: SigningSession) -> None:
         if session_row.status in _TERMINAL_STATUSES:

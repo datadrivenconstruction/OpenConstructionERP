@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Projektil on juba {count} mahutabelit; kõrvale lisatud kontseptsioonitabel loeb sama mahtu kaks korda."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Lepingu kuupäev {value} ei ole päris kuupäev.",
+      "suggestion": "Sisestage kehtiv kuupäev kujul AAAA-KK-PP."
+    },
+    "contract_lapsed": {
+      "fail": "Leping on endiselt aktiivne, kuid selle periood lõppes {date}.",
+      "suggestion": "Lõpetage leping tähtaja möödumisel või uuendage see uue lõppkuupäevaga."
+    },
+    "completed_without_items": {
+      "fail": "Töökäsk on lõpetatud, kuid selle read annavad kokku nulli ja midagi pole arvestada.",
+      "suggestion": "Lisage tööjõu- ja materjaliread või parandage töökäsu olek."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Ühtegi allkirjastajat pole nõutavaks märgitud, seega ei saa sessiooni kunagi täielikult allkirjastada.",
+      "suggestion": "Märkige vähemalt üks allkirjastaja nõutavaks."
+    },
+    "expiry_past": {
+      "fail": "Sessioon aegub {date}, see kuupäev on juba möödas.",
+      "suggestion": "Määrake aegumiskuupäev tulevikus või jätke väli tühjaks."
+    },
+    "signed_in_future": {
+      "fail": "Allkiri on dateeritud {date}, mis on tulevikus.",
+      "suggestion": "Kontrollige allkirjastusseadme kuupäeva ja kellaaega ning sisestage tegelik allkirjastamise aeg."
+    },
+    "signed_other_version": {
+      "fail": "Rollis {role} allkirjastaja allkirjastas dokumendi muu versiooni kui sessioonis olev.",
+      "suggestion": "Paluge allkirjastajal praegune versioon uuesti allkirjastada."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Tegur {module} / {action} esineb selles muudatuses mitu korda.",
+      "suggestion": "Saatke iga mooduli ja toimingu paar ainult üks kord."
+    },
+    "factor_unknown_action": {
+      "fail": "Ükski registreeritud toiming ei vasta kombinatsioonile {module} / {action}, seega seda tegurit ei kasutata kunagi.",
+      "suggestion": "Võrrelge mooduli ja toimingu nimesid ajategurite loendiga."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} säästetud minutit toimingu kohta on rohkem kui tööpäev ({max} minutit).",
+      "suggestion": "Kontrollige väärtust; tunnid on tõenäoliselt sisestatud minutitena."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Ühik {unit} on registreeritud saadetuna, tarnituna või paigaldatuna, seega jäetaks selle kvaliteedikontroll vahele.",
+      "suggestion": "Registreerige ühik esimeses etapis ja liigutage seda samm-sammult edasi."
+    },
+    "bim_ids_invalid": {
+      "fail": "Seotud BIM-elementide ID-d sisaldavad tühja või korduvat kirjet.",
+      "suggestion": "Eemaldage tühjad ja topeltID-d, et iga mudelielement oleks seotud ühe korra."
+    },
+    "install_date_passed": {
+      "fail": "Plaanitud paigalduskuupäev {date} on möödas, kuid ühikut pole veel paigaldatud.",
+      "suggestion": "Määrake uus plaanitud paigalduskuupäev või registreerige paigaldus."
+    },
+    "dispatch_without_date": {
+      "fail": "Ühik on saadetud, kuid plaanitud paigalduskuupäev puudub, seega ei saa ehitusplats planeerida tarnet ja kraanaaega.",
+      "suggestion": "Sisestage kuupäev, millal ühik paigaldatakse."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "See on kindla summa rida, kuid sisestatud on määr või kestus; need ei lähe kokkuvõttesse.",
+      "suggestion": "Tühjendage määr ja kestus või muutke rida ajapõhiseks."
+    },
+    "timed_carries_fixed": {
+      "fail": "See on ajapõhine rida, kuid sisestatud on kindel summa; see ei lähe kokkuvõttesse.",
+      "suggestion": "Tühjendage kindel summa või muutke rida kindla summa reaks."
+    },
+    "line_unpriced": {
+      "fail": "Rea hind on null ja see langeb ehitusplatsi üldkulude summast välja.",
+      "suggestion": "Sisestage määr ja perioodide arv või kindel summa."
+    }
   }
 }

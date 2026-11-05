@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Ce projet compte déjà {count} bordereau(x) de quantités ; un bordereau conceptuel ajouté à côté compte deux fois le même périmètre."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "La date du contrat {value} n'est pas une date réelle.",
+      "suggestion": "Saisir une date valide au format AAAA-MM-JJ."
+    },
+    "contract_lapsed": {
+      "fail": "Le contrat est toujours actif, mais sa période s'est terminée le {date}.",
+      "suggestion": "Clore le contrat à échéance ou le renouveler avec une nouvelle date de fin."
+    },
+    "completed_without_items": {
+      "fail": "L'ordre de travail est terminé, mais ses lignes totalisent zéro : rien ne peut être facturé.",
+      "suggestion": "Ajouter les lignes de main-d'œuvre et de matériaux ou corriger le statut de l'ordre de travail."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Aucun signataire n'est marqué comme obligatoire : la session ne pourra jamais être entièrement signée.",
+      "suggestion": "Marquer au moins un signataire comme obligatoire."
+    },
+    "expiry_past": {
+      "fail": "La session expire le {date}, date déjà passée.",
+      "suggestion": "Fixer une date d'expiration future ou laisser le champ vide."
+    },
+    "signed_in_future": {
+      "fail": "La signature est datée du {date}, qui est dans le futur.",
+      "suggestion": "Vérifier la date et l'heure de l'appareil de signature et saisir l'heure réelle de signature."
+    },
+    "signed_other_version": {
+      "fail": "Le signataire au rôle {role} a signé une autre version du document que celle de la session.",
+      "suggestion": "Demander au signataire de signer à nouveau la version actuelle."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Le facteur pour {module} / {action} apparaît plusieurs fois dans cette mise à jour.",
+      "suggestion": "N'envoyer chaque couple module et action qu'une seule fois."
+    },
+    "factor_unknown_action": {
+      "fail": "Aucune action enregistrée ne correspond à {module} / {action} : ce facteur n'est jamais utilisé.",
+      "suggestion": "Comparer les noms de module et d'action avec la liste des facteurs de temps."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} minutes économisées par action dépassent une journée de travail ({max} minutes).",
+      "suggestion": "Vérifier la valeur : des heures ont probablement été saisies en minutes."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "L'unité {unit} est enregistrée comme expédiée, livrée ou posée : son contrôle qualité serait sauté.",
+      "suggestion": "Enregistrer l'unité à la première étape et la faire avancer pas à pas."
+    },
+    "bim_ids_invalid": {
+      "fail": "Les identifiants d'éléments BIM liés contiennent une entrée vide ou répétée.",
+      "suggestion": "Supprimer les identifiants vides et en double pour que chaque élément du modèle soit lié une seule fois."
+    },
+    "install_date_passed": {
+      "fail": "La date de pose prévue du {date} est dépassée, mais l'unité n'est pas encore posée.",
+      "suggestion": "Fixer une nouvelle date de pose prévue ou enregistrer la pose."
+    },
+    "dispatch_without_date": {
+      "fail": "L'unité est expédiée mais n'a pas de date de pose prévue : le chantier ne peut pas planifier la livraison ni le créneau de grue.",
+      "suggestion": "Saisir la date à laquelle l'unité doit être posée."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Cette ligne est au forfait, mais un taux ou une durée est saisi ; ils ne sont pas comptés dans le total.",
+      "suggestion": "Effacer le taux et la durée ou passer la ligne en prix au temps."
+    },
+    "timed_carries_fixed": {
+      "fail": "Cette ligne est au temps, mais un montant forfaitaire est saisi ; il n'est pas compté dans le total.",
+      "suggestion": "Effacer le montant forfaitaire ou passer la ligne au forfait."
+    },
+    "line_unpriced": {
+      "fail": "La ligne est chiffrée à zéro et disparaît du total des prestations préliminaires.",
+      "suggestion": "Saisir le taux et le nombre de périodes, ou le montant forfaitaire."
+    }
   }
 }

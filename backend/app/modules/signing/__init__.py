@@ -29,3 +29,6 @@ async def on_startup() -> None:
     from app.modules.signing.permissions import register_signing_permissions
 
     register_signing_permissions()
+    from app.modules.signing.validators import register_signing_validation_rules
+
+    register_signing_validation_rules()

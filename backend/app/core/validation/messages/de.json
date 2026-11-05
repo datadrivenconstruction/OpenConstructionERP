@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Dieses Projekt hat bereits {count} Leistungsverzeichnis(se); ein daneben angelegtes Grobkosten-LV zählt denselben Umfang doppelt."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Das Vertragsdatum {value} ist kein reales Datum.",
+      "suggestion": "Ein gültiges Datum im Format JJJJ-MM-TT eintragen."
+    },
+    "contract_lapsed": {
+      "fail": "Der Vertrag ist noch aktiv, seine Laufzeit endete aber am {date}.",
+      "suggestion": "Den Vertrag ablaufen lassen oder mit neuem Enddatum verlängern."
+    },
+    "completed_without_items": {
+      "fail": "Der Arbeitsauftrag ist abgeschlossen, seine Positionen ergeben aber null; es kann nichts abgerechnet werden.",
+      "suggestion": "Lohn- und Materialpositionen ergänzen oder den Status des Arbeitsauftrags korrigieren."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Es ist kein Unterzeichner als erforderlich markiert; die Sitzung kann nie vollständig unterzeichnet werden.",
+      "suggestion": "Mindestens einen Unterzeichner als erforderlich markieren."
+    },
+    "expiry_past": {
+      "fail": "Die Sitzung läuft am {date} ab; dieses Datum liegt bereits in der Vergangenheit.",
+      "suggestion": "Ein Ablaufdatum in der Zukunft setzen oder das Feld leer lassen."
+    },
+    "signed_in_future": {
+      "fail": "Die Unterschrift ist auf den {date} datiert, der in der Zukunft liegt.",
+      "suggestion": "Datum und Uhrzeit des Unterschriftsgeräts prüfen und den tatsächlichen Zeitpunkt eintragen."
+    },
+    "signed_other_version": {
+      "fail": "Die Rolle {role} hat eine andere Fassung des Dokuments unterzeichnet als die der Sitzung.",
+      "suggestion": "Den Unterzeichner bitten, die aktuelle Fassung erneut zu unterzeichnen."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Der Faktor für {module} / {action} kommt in dieser Änderung mehrfach vor.",
+      "suggestion": "Jedes Paar aus Modul und Aktion nur einmal senden."
+    },
+    "factor_unknown_action": {
+      "fail": "Keine erfasste Aktion entspricht {module} / {action}; dieser Faktor wird nie verwendet.",
+      "suggestion": "Modul- und Aktionsnamen mit der Liste der Zeitfaktoren abgleichen."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} eingesparte Minuten je Aktion sind mehr als ein Arbeitstag ({max} Minuten).",
+      "suggestion": "Wert prüfen; vermutlich wurden Stunden als Minuten eingegeben."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Die Einheit {unit} ist als versendet, geliefert oder eingebaut erfasst; ihre Qualitätsprüfung würde übersprungen.",
+      "suggestion": "Die Einheit in der ersten Stufe erfassen und Schritt für Schritt weiterschalten."
+    },
+    "bim_ids_invalid": {
+      "fail": "Die verknüpften BIM-Element-IDs enthalten einen leeren oder doppelten Eintrag.",
+      "suggestion": "Leere und doppelte IDs entfernen, damit jedes Modellelement nur einmal verknüpft ist."
+    },
+    "install_date_passed": {
+      "fail": "Der Solltermin für den Einbau, der {date}, ist verstrichen, die Einheit ist aber noch nicht eingebaut.",
+      "suggestion": "Einen neuen Solltermin setzen oder den Einbau erfassen."
+    },
+    "dispatch_without_date": {
+      "fail": "Die Einheit ist versendet, hat aber keinen Solltermin für den Einbau; die Baustelle kann Anlieferung und Kranzeit nicht planen.",
+      "suggestion": "Das Datum eintragen, an dem die Einheit eingebaut werden soll."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Dies ist eine Pauschalposition, aber ein Satz oder eine Dauer ist eingetragen; beides geht nicht in die Summe ein.",
+      "suggestion": "Satz und Dauer löschen oder die Position auf zeitabhängig umstellen."
+    },
+    "timed_carries_fixed": {
+      "fail": "Dies ist eine zeitabhängige Position, aber ein Pauschalbetrag ist eingetragen; er geht nicht in die Summe ein.",
+      "suggestion": "Pauschalbetrag löschen oder die Position auf Pauschale umstellen."
+    },
+    "line_unpriced": {
+      "fail": "Die Position bewertet sich mit null und fällt aus der Summe der Baustelleneinrichtung heraus.",
+      "suggestion": "Satz und Anzahl der Zeiträume oder den Pauschalbetrag eintragen."
+    }
   }
 }

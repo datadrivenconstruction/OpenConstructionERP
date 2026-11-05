@@ -2290,5 +2290,83 @@
     "boq_beside_detailed": {
       "fail": "Dự án này đã có {count} bảng tiên lượng; bảng sơ bộ thêm bên cạnh sẽ tính cùng phạm vi hai lần."
     }
+  },
+  "service": {
+    "contract_date_invalid": {
+      "fail": "Ngày hợp đồng {value} không phải là ngày có thật.",
+      "suggestion": "Nhập ngày hợp lệ theo định dạng YYYY-MM-DD."
+    },
+    "contract_lapsed": {
+      "fail": "Hợp đồng vẫn đang hiệu lực nhưng thời hạn đã kết thúc vào {date}.",
+      "suggestion": "Cho hợp đồng hết hạn hoặc gia hạn với ngày kết thúc mới."
+    },
+    "completed_without_items": {
+      "fail": "Lệnh công việc đã hoàn thành nhưng tổng các dòng bằng không, không có gì để thanh toán.",
+      "suggestion": "Thêm các dòng nhân công và vật liệu, hoặc sửa trạng thái lệnh công việc."
+    }
+  },
+  "signing": {
+    "no_required_signatory": {
+      "fail": "Không có người ký nào được đánh dấu là bắt buộc nên phiên ký không bao giờ được ký đầy đủ.",
+      "suggestion": "Đánh dấu ít nhất một người ký là bắt buộc."
+    },
+    "expiry_past": {
+      "fail": "Phiên hết hạn vào {date}, ngày này đã qua.",
+      "suggestion": "Đặt ngày hết hạn trong tương lai hoặc để trống."
+    },
+    "signed_in_future": {
+      "fail": "Chữ ký có ngày {date}, tức là trong tương lai.",
+      "suggestion": "Kiểm tra ngày giờ của thiết bị ký và nhập thời điểm ký thực tế."
+    },
+    "signed_other_version": {
+      "fail": "Người ký với vai trò {role} đã ký phiên bản tài liệu khác với phiên bản trong phiên.",
+      "suggestion": "Yêu cầu người ký ký lại phiên bản hiện hành."
+    }
+  },
+  "value": {
+    "factor_duplicate": {
+      "fail": "Hệ số cho {module} / {action} xuất hiện nhiều lần trong lần cập nhật này.",
+      "suggestion": "Chỉ gửi mỗi cặp mô-đun và hành động một lần."
+    },
+    "factor_unknown_action": {
+      "fail": "Không có hành động nào được ghi nhận khớp với {module} / {action} nên hệ số này không bao giờ được dùng.",
+      "suggestion": "Đối chiếu tên mô-đun và hành động với danh sách hệ số thời gian."
+    },
+    "factor_over_workday": {
+      "fail": "{minutes} phút tiết kiệm mỗi hành động nhiều hơn một ngày làm việc ({max} phút).",
+      "suggestion": "Kiểm tra lại giá trị; có thể giờ đã bị nhập thành phút."
+    }
+  },
+  "prefab": {
+    "entry_past_qa": {
+      "fail": "Cấu kiện {unit} được ghi nhận là đã xuất, đã giao hoặc đã lắp nên bước kiểm tra chất lượng sẽ bị bỏ qua.",
+      "suggestion": "Đăng ký cấu kiện ở giai đoạn đầu và chuyển tiếp từng bước."
+    },
+    "bim_ids_invalid": {
+      "fail": "Các ID phần tử BIM được liên kết có mục trống hoặc trùng lặp.",
+      "suggestion": "Xóa các ID trống và trùng để mỗi phần tử mô hình chỉ liên kết một lần."
+    },
+    "install_date_passed": {
+      "fail": "Ngày lắp đặt dự kiến {date} đã qua nhưng cấu kiện chưa được lắp.",
+      "suggestion": "Đặt ngày lắp đặt dự kiến mới hoặc ghi nhận việc lắp đặt."
+    },
+    "dispatch_without_date": {
+      "fail": "Cấu kiện đã xuất xưởng nhưng chưa có ngày lắp đặt dự kiến nên công trường không thể lên kế hoạch giao hàng và cẩu.",
+      "suggestion": "Nhập ngày cấu kiện sẽ được lắp đặt."
+    }
+  },
+  "preliminaries": {
+    "fixed_carries_rate": {
+      "fail": "Đây là dòng giá trọn gói nhưng đã nhập đơn giá hoặc thời lượng; chúng không được tính vào tổng.",
+      "suggestion": "Xóa đơn giá và thời lượng, hoặc đổi dòng sang tính theo thời gian."
+    },
+    "timed_carries_fixed": {
+      "fail": "Đây là dòng tính theo thời gian nhưng đã nhập số tiền cố định; số này không được tính vào tổng.",
+      "suggestion": "Xóa số tiền cố định, hoặc đổi dòng sang trọn gói."
+    },
+    "line_unpriced": {
+      "fail": "Dòng có giá bằng không và bị loại khỏi tổng chi phí chung công trường.",
+      "suggestion": "Nhập đơn giá và số kỳ, hoặc số tiền cố định."
+    }
   }
 }

@@ -15,3 +15,6 @@ async def on_startup() -> None:
     from app.modules.service.permissions import register_service_permissions
 
     register_service_permissions()
+    from app.modules.service.validators import register_service_validation_rules
+
+    register_service_validation_rules()
