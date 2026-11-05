@@ -47,7 +47,11 @@ CASES = [
     (TakeoffValueInRangeRule, _m(), _m(measurement_value=5e9)),
     (TakeoffValueInRangeRule, _m(), _m(measurement_value=-3)),
     (TakeoffGeometryMatchesTypeRule, _m(), _m(points=SQUARE[:2])),
-    (TakeoffLinkNeedsConfirmedRule, _m(linked_boq_position_id="p1"), _m(linked_boq_position_id="p1", review_status="proposed")),
+    (
+        TakeoffLinkNeedsConfirmedRule,
+        _m(linked_boq_position_id="p1"),
+        _m(linked_boq_position_id="p1", review_status="proposed"),
+    ),
     (TakeoffScaleStatedRule, _m(), _m(scale_pixels_per_unit=None)),
     (TakeoffUnitMatchesTypeRule, _m(), _m(measurement_unit="m")),
 ]
@@ -79,7 +83,7 @@ def test_unit_family_reads_common_spellings() -> None:
 
 async def test_message_follows_locale() -> None:
     de = await _run(TakeoffScaleStatedRule(), _m(scale_pixels_per_unit=None), locale="de")
-    assert "Maßstab" in de[0].message
+    assert "maßstab" in de[0].message.lower()
 
 
 def _payload(project_id: str, **kw: object) -> dict:
@@ -136,7 +140,9 @@ async def test_bulk_import_rejects_the_batch_on_a_blocking_row(client, admin_aut
     body = {"measurements": [_payload(project_id), _payload(project_id, points=SQUARE[:2])]}
     resp = await client.post("/api/v1/takeoff/measurements/bulk/", json=body, headers=header)
     assert resp.status_code == 422
-    ok = await client.post("/api/v1/takeoff/measurements/bulk/", json={"measurements": [_payload(project_id)]}, headers=header)
+    ok = await client.post(
+        "/api/v1/takeoff/measurements/bulk/", json={"measurements": [_payload(project_id)]}, headers=header
+    )
     assert ok.status_code == 201, ok.text
 
 

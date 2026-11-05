@@ -56,6 +56,16 @@ class EstimatingRule(MoneyRule):
         )
 
 
+def _finding_key(result: Any) -> tuple[Any, ...]:
+    """Identity of a finding: rule, record and offending values, so a new bad value is never read as the old one."""
+    return (
+        result.rule_id,
+        result.element_ref,
+        result.message,
+        tuple(sorted((str(k), str(v)) for k, v in (result.details or {}).items())),
+    )
+
+
 async def gate_rules(
     rule_set: str,
     data: dict[str, Any],
@@ -100,8 +110,8 @@ async def gate_rules(
         )
     blocking = list(report.errors)
     if blocking and before is not None:
-        legacy = {(r.rule_id, r.message) for r in (await _run(before)).errors}
-        blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+        legacy = {_finding_key(r) for r in (await _run(before)).errors}
+        blocking = [r for r in blocking if _finding_key(r) not in legacy]
     if blocking and warn_only:
         return report
     if blocking:

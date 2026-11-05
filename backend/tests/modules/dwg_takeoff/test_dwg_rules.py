@@ -44,7 +44,11 @@ async def _run(rule: object, data: dict, locale: str = "en"):
 CASES = [
     (DwgMeasurementInRangeRule, _ctx(), _ctx({"measurement_value": 5e9})),
     (DwgMeasurementInRangeRule, _ctx(), _ctx({"measurement_value": -1})),
-    (DwgCountIsWholeRule, _ctx({"annotation_type": "count", "measurement_value": 4}), _ctx({"annotation_type": "count", "measurement_value": 2.5})),
+    (
+        DwgCountIsWholeRule,
+        _ctx({"annotation_type": "count", "measurement_value": 4}),
+        _ctx({"annotation_type": "count", "measurement_value": 2.5}),
+    ),
     (DwgUnitStatedRule, _ctx(), _ctx({"measurement_unit": ""})),
     (DwgScalePlausibleRule, _ctx(), _ctx(drawing={"scale_denominator": 250000})),
     (DwgScaleConfirmedRule, _ctx(), _ctx(drawing={"scale_denominator": 1, "scale_mode": "preset"})),
@@ -138,7 +142,9 @@ async def test_warnings_are_reported_and_do_not_block(client, admin_auth, projec
 async def test_update_that_introduces_an_error_is_rejected(client, admin_auth, project_id) -> None:  # noqa: F811
     _, header = admin_auth
     did = await _drawing(project_id, scale_denominator=Decimal("50"), scale_mode="calibrated")
-    created = (await client.post("/api/v1/dwg-takeoff/annotations/", json=_body(project_id, did), headers=header)).json()
+    created = (
+        await client.post("/api/v1/dwg-takeoff/annotations/", json=_body(project_id, did), headers=header)
+    ).json()
     resp = await client.patch(
         f"/api/v1/dwg-takeoff/annotations/{created['id']}", json={"measurement_value": -4}, headers=header
     )
@@ -149,7 +155,9 @@ async def test_update_that_introduces_an_error_is_rejected(client, admin_auth, p
 async def test_legacy_annotation_with_existing_violation_stays_editable(client, admin_auth, project_id) -> None:  # noqa: F811
     _, header = admin_auth
     did = await _drawing(project_id, scale_denominator=Decimal("50"), scale_mode="calibrated")
-    created = (await client.post("/api/v1/dwg-takeoff/annotations/", json=_body(project_id, did), headers=header)).json()
+    created = (
+        await client.post("/api/v1/dwg-takeoff/annotations/", json=_body(project_id, did), headers=header)
+    ).json()
     async with async_session_factory() as session:
         await session.execute(
             update(DwgAnnotation).where(DwgAnnotation.id == uuid.UUID(created["id"])).values(measurement_value=5e9)
@@ -165,7 +173,7 @@ async def test_unusual_drawing_scale_is_reported(client, admin_auth, project_id)
     did = await _drawing(project_id)
     resp = await client.patch(
         f"/api/v1/dwg-takeoff/drawings/{did}/scale/",
-        json={"scale_denominator": 50000, "scale_mode": "calibrated"},
+        json={"scale_denominator": 0.001, "scale_mode": "calibrated"},
         headers=header,
     )
     assert resp.status_code == 200, resp.text

@@ -70,3 +70,16 @@ def test_message_placeholders_match_the_rule_params(locale: str) -> None:
     section = _section(locale)
     for key, params in PARAMS.items():
         assert set(re.findall(r"\{(\w+)\}", section[key]["fail"])) <= params, (locale, key)
+
+
+def test_legacy_key_tells_a_new_bad_value_from_the_old_one() -> None:
+    from types import SimpleNamespace  # noqa: PLC0415
+
+    from app.core.validation.estimating_rules import _finding_key  # noqa: PLC0415
+
+    def finding(value: str, ref: str = "a") -> SimpleNamespace:
+        return SimpleNamespace(rule_id="r", element_ref=ref, message="same", details={"value": value})
+
+    assert _finding_key(finding("1")) == _finding_key(finding("1"))
+    assert _finding_key(finding("1")) != _finding_key(finding("2"))
+    assert _finding_key(finding("1")) != _finding_key(finding("1", ref="b"))
