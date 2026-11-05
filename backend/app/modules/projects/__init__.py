@@ -12,3 +12,7 @@ async def on_startup() -> None:
     from app.modules.projects.permissions import register_project_permissions
 
     register_project_permissions()
+
+    from app.modules.projects.validators import register_projects_validation_rules
+
+    register_projects_validation_rules()
