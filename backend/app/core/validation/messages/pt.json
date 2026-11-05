@@ -2239,5 +2239,56 @@
       "fail": "Serviços ocultos foram aceitos sem indicar: {missing}.",
       "suggestion": "Registre o elemento e a sua localização antes de encerrar o registro."
     }
+  },
+  "allowances": {
+    "suggestion": "Verifique o valor retido, a moeda e as notas das utilizações desta verba e guarde novamente.",
+    "overdrawn": {
+      "fail": "{label}: as utilizações de {drawn} excedem os {held} retidos, pelo que o orçamento fica curto em {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} utilização(ões) não têm nota a indicar a que pacote ou instrução o dinheiro foi libertado."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Mantenha um único fator por categoria de material, escrita como nos mapas de quantidades.",
+    "duplicate_category": {
+      "fail": "Já existe um fator de desperdício para a categoria {category}, pelo que a quantidade bruta dependeria de qual é lido por último."
+    },
+    "category_case_variant": {
+      "fail": "A categoria {category} difere de {existing} apenas na grafia; as categorias são comparadas exatamente, pelo que as linhas não encontrarão o mesmo fator."
+    },
+    "factor_high": {
+      "fail": "O fator {factor} para {category} encomenda mais {pct} % do que a quantidade desenhada, mais do que o desperdício costuma explicar."
+    }
+  },
+  "price_index": {
+    "suggestion": "Confira o período, o valor e a fonte com o índice publicado e guarde novamente.",
+    "duplicate_period": {
+      "fail": "A série já tem um valor para o período {value}."
+    },
+    "duplicate_region": {
+      "fail": "Já existe um fator de localização para a região {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} é {value}, uma variação de {pct} % face a {other_label} ({other}); um salto tão grande costuma ser erro de digitação ou de unidade."
+    },
+    "location_factor_outlier": {
+      "fail": "O fator de localização {factor} para {region} está fora da faixa habitual de {low} a {high} em torno da base nacional de 1."
+    },
+    "index_source_missing": {
+      "fail": "O índice {label} não tem fonte, por isso não pode ser confrontado com a publicação oficial."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Reveja a área, a moeda e a região da estimativa conceptual e guarde novamente.",
+    "region_not_set": {
+      "fail": "Não há região selecionada, por isso não se aplica fator regional de custo e o intervalo de precisão continua amplo."
+    },
+    "baseline_replaced": {
+      "fail": "Este projeto já tem {count} estimativa(s) conceptual(ais) guardada(s); a mais recente passa a ser a base da reconciliação."
+    },
+    "boq_beside_detailed": {
+      "fail": "Este projeto já tem {count} mapa(s) de quantidades; um mapa conceptual adicionado ao lado conta duas vezes o mesmo âmbito."
+    }
   }
 }

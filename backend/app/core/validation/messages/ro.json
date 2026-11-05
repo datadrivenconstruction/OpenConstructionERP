@@ -2239,5 +2239,56 @@
       "fail": "Lucrări ascunse au fost acceptate fără a indica: {missing}.",
       "suggestion": "Înregistrați elementul și poziția lui înainte de a închide înregistrarea."
     }
+  },
+  "allowances": {
+    "suggestion": "Verificați suma reținută, moneda și notele retragerilor din această poziție, apoi salvați din nou.",
+    "overdrawn": {
+      "fail": "{label}: retragerile de {drawn} depășesc cei {held} reținuți, deci devizul este scurt cu {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} retragere/retrageri nu au notă care să arate pentru ce pachet sau dispoziție au fost eliberați banii."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Păstrați un singur coeficient pe categorie de material, scrisă ca în listele de cantități.",
+    "duplicate_category": {
+      "fail": "Există deja un coeficient de pierderi pentru categoria {category}, deci cantitatea brută ar depinde de care este citit ultimul."
+    },
+    "category_case_variant": {
+      "fail": "Categoria {category} diferă de {existing} doar prin scriere; categoriile se potrivesc exact, deci liniile nu vor găsi același coeficient."
+    },
+    "factor_high": {
+      "fail": "Coeficientul {factor} pentru {category} comandă cu {pct} % peste cantitatea din desen, mai mult decât explică de obicei pierderile."
+    }
+  },
+  "price_index": {
+    "suggestion": "Verificați perioada, valoarea și sursa în raport cu indicele publicat, apoi salvați din nou.",
+    "duplicate_period": {
+      "fail": "Seria are deja o valoare pentru perioada {value}."
+    },
+    "duplicate_region": {
+      "fail": "Există deja un coeficient de localizare pentru regiunea {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} este {value}, o diferență de {pct} % față de {other_label} ({other}); un salt atât de mare este de obicei o greșeală de tastare sau de unitate."
+    },
+    "location_factor_outlier": {
+      "fail": "Coeficientul de localizare {factor} pentru {region} este în afara intervalului obișnuit de la {low} la {high} în jurul bazei naționale 1."
+    },
+    "index_source_missing": {
+      "fail": "Indicele {label} nu are sursă, deci nu poate fi verificat cu comunicatul publicat."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Verificați suprafața, moneda și regiunea estimării conceptuale, apoi salvați din nou.",
+    "region_not_set": {
+      "fail": "Nu este aleasă nicio regiune, deci nu se aplică coeficient regional de cost și intervalul de precizie rămâne larg."
+    },
+    "baseline_replaced": {
+      "fail": "Acest proiect are deja {count} estimare/estimări conceptuale salvate; cea mai nouă devine baza pentru reconciliere."
+    },
+    "boq_beside_detailed": {
+      "fail": "Acest proiect are deja {count} listă/liste de cantități; o listă conceptuală adăugată alături numără de două ori același domeniu."
+    }
   }
 }

@@ -2239,5 +2239,56 @@
       "fail": "Lavorazioni nascoste accettate senza indicare: {missing}.",
       "suggestion": "Registra l'elemento e la sua posizione prima di chiudere la voce."
     }
+  },
+  "allowances": {
+    "suggestion": "Controlli l'importo trattenuto, la valuta e le note dei prelievi di questa voce, quindi salvi di nuovo.",
+    "overdrawn": {
+      "fail": "{label}: i prelievi di {drawn} superano i {held} trattenuti, quindi la stima è corta di {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} prelievo/i non hanno una nota che indichi a quale pacchetto o istruzione sono stati destinati i fondi."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Mantenga un solo fattore per categoria di materiale, scritta come nei computi metrici.",
+    "duplicate_category": {
+      "fail": "Esiste già un fattore di scarto per la categoria {category}, quindi la quantità lorda dipenderebbe da quale viene letto per ultimo."
+    },
+    "category_case_variant": {
+      "fail": "La categoria {category} differisce da {existing} solo per grafia; le categorie si confrontano esattamente, quindi le righe non troveranno lo stesso fattore."
+    },
+    "factor_high": {
+      "fail": "Il fattore {factor} per {category} ordina il {pct} % in più della quantità di progetto, più di quanto spieghi di solito lo scarto."
+    }
+  },
+  "price_index": {
+    "suggestion": "Controlli periodo, valore e fonte con l'indice pubblicato, quindi salvi di nuovo.",
+    "duplicate_period": {
+      "fail": "La serie ha già un valore per il periodo {value}."
+    },
+    "duplicate_region": {
+      "fail": "Esiste già un fattore di localizzazione per la regione {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} vale {value}, con una variazione del {pct} % rispetto a {other_label} ({other}); un salto così ampio è di solito un errore di battitura o di unità."
+    },
+    "location_factor_outlier": {
+      "fail": "Il fattore di localizzazione {factor} per {region} è fuori dalla fascia abituale da {low} a {high} attorno alla base nazionale 1."
+    },
+    "index_source_missing": {
+      "fail": "L'indice {label} non ha una fonte, quindi non si può verificare con la pubblicazione ufficiale."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Controlli superficie, valuta e regione della stima concettuale, quindi salvi di nuovo.",
+    "region_not_set": {
+      "fail": "Nessuna regione selezionata: non si applica alcun fattore regionale e l'intervallo di precisione resta ampio."
+    },
+    "baseline_replaced": {
+      "fail": "Questo progetto ha già {count} stima/e concettuale/i salvata/e; la più recente diventa la base per la riconciliazione."
+    },
+    "boq_beside_detailed": {
+      "fail": "Questo progetto ha già {count} computo/i metrico/i; un computo concettuale aggiunto accanto conta due volte lo stesso ambito."
+    }
   }
 }

@@ -2239,5 +2239,56 @@
       "fail": "Zakrývané práce byly převzaty bez uvedení: {missing}.",
       "suggestion": "Zapište prvek a jeho umístění před uzavřením záznamu."
     }
+  },
+  "allowances": {
+    "suggestion": "Zkontrolujte zadrženou částku, měnu a poznámky k čerpání této položky a uložte znovu.",
+    "overdrawn": {
+      "fail": "{label}: čerpání {drawn} překračuje zadržených {held}, rozpočet je tedy o {excess} nízký."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} čerpání nemá poznámku, na který balíček nebo pokyn byly peníze uvolněny."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Veďte jeden koeficient na kategorii materiálu, psanou jako ve výkazech výměr.",
+    "duplicate_category": {
+      "fail": "Koeficient ztrát pro kategorii {category} už existuje, hrubé množství by tedy záviselo na tom, který se přečte jako poslední."
+    },
+    "category_case_variant": {
+      "fail": "Kategorie {category} se od {existing} liší jen zápisem; kategorie se porovnávají přesně, řádky proto nenajdou stejný koeficient."
+    },
+    "factor_high": {
+      "fail": "Koeficient {factor} pro {category} objednává o {pct} % více než výkresové množství, víc, než obvykle vysvětlí ztráty."
+    }
+  },
+  "price_index": {
+    "suggestion": "Zkontrolujte období, hodnotu a zdroj podle zveřejněného indexu a uložte znovu.",
+    "duplicate_period": {
+      "fail": "Řada už má hodnotu pro období {value}."
+    },
+    "duplicate_region": {
+      "fail": "Lokalitní koeficient pro region {value} už existuje."
+    },
+    "jump_implausible": {
+      "fail": "{label} je {value}, tedy změna o {pct} % oproti {other_label} ({other}); takový skok bývá překlep nebo chyba jednotek."
+    },
+    "location_factor_outlier": {
+      "fail": "Lokalitní koeficient {factor} pro {region} je mimo obvyklé pásmo {low} až {high} kolem národní báze 1."
+    },
+    "index_source_missing": {
+      "fail": "Index {label} nemá uvedený zdroj, nelze jej proto ověřit podle zveřejněného sdělení."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Zkontrolujte plochu, měnu a region konceptuálního odhadu a uložte znovu.",
+    "region_not_set": {
+      "fail": "Není vybrán region, proto se nepoužije regionální nákladový koeficient a pásmo přesnosti zůstává široké."
+    },
+    "baseline_replaced": {
+      "fail": "Tento projekt už má uložených konceptuálních odhadů: {count}; nejnovější se stává základem pro srovnání."
+    },
+    "boq_beside_detailed": {
+      "fail": "Tento projekt už má výkazů výměr: {count}; vedle přidaný konceptuální výkaz počítá stejný rozsah dvakrát."
+    }
   }
 }

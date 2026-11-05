@@ -2239,5 +2239,56 @@
       "fail": "隠蔽部の工事が次の記載なしに受け入れられました: {missing}。",
       "suggestion": "記録を閉じる前に、部材と位置を記録してください。"
     }
+  },
+  "allowances": {
+    "suggestion": "この項目の留保額、通貨、引出しの備考を確認して、もう一度保存してください。",
+    "overdrawn": {
+      "fail": "{label}: 引出し {drawn} が留保額 {held} を超えており、見積は {excess} 不足しています。"
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} 件の引出しに、どのパッケージまたは指示に資金を充てたかの備考がありません。"
+    }
+  },
+  "waste_factors": {
+    "suggestion": "材料区分ごとに係数は 1 つにし、数量書と同じ表記にしてください。",
+    "duplicate_category": {
+      "fail": "区分 {category} には既にロス係数があり、総数量はどちらを最後に読むかで変わってしまいます。"
+    },
+    "category_case_variant": {
+      "fail": "区分 {category} は {existing} と表記だけが異なります。区分は完全一致で照合されるため、明細は同じ係数を見つけられません。"
+    },
+    "factor_high": {
+      "fail": "{category} の係数 {factor} は図面数量に {pct} % を上乗せして発注します。通常のロスで説明できる範囲を超えています。"
+    }
+  },
+  "price_index": {
+    "suggestion": "期間、値、出典を公表された指数と照合して、もう一度保存してください。",
+    "duplicate_period": {
+      "fail": "この系列には期間 {value} の値が既にあります。"
+    },
+    "duplicate_region": {
+      "fail": "地域 {value} の地域係数は既にあります。"
+    },
+    "jump_implausible": {
+      "fail": "{label} は {value} で、{other_label} ({other}) から {pct} % 乖離しています。これほどの跳ね方は入力ミスか単位の誤りがほとんどです。"
+    },
+    "location_factor_outlier": {
+      "fail": "{region} の地域係数 {factor} は、全国基準 1 を中心とした通常の範囲 {low} から {high} を外れています。"
+    },
+    "index_source_missing": {
+      "fail": "指数 {label} には出典がなく、公表資料と照合できません。"
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "概算の面積、通貨、地域を確認して、もう一度保存してください。",
+    "region_not_set": {
+      "fail": "地域が選択されていないため地域別コスト係数が適用されず、精度の幅は広いままです。"
+    },
+    "baseline_replaced": {
+      "fail": "このプロジェクトには保存済みの概算が既に {count} 件あります。最新のものが照合の基準になります。"
+    },
+    "boq_beside_detailed": {
+      "fail": "このプロジェクトには数量書が既に {count} 件あります。隣に概算の数量書を足すと同じ範囲を二重に数えます。"
+    }
   }
 }

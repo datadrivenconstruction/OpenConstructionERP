@@ -2239,5 +2239,56 @@
       "fail": "Gizli işler şunlar belirtilmeden kabul edildi: {missing}.",
       "suggestion": "Kaydı kapatmadan önce elemanı ve konumunu kaydedin."
     }
+  },
+  "allowances": {
+    "suggestion": "Tutulan tutarı, para birimini ve bu kalemdeki çekişlerin notlarını kontrol edip yeniden kaydedin.",
+    "overdrawn": {
+      "fail": "{label}: {drawn} tutarındaki çekişler tutulan {held} tutarını aşıyor, bu yüzden keşif {excess} eksik kalıyor."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} çekişte paranın hangi pakete veya talimata ayrıldığını söyleyen not yok."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Malzeme kategorisi başına tek katsayı tutun, metraj cetvelindeki yazımla.",
+    "duplicate_category": {
+      "fail": "{category} kategorisi için zaten bir fire katsayısı var; brüt miktar hangisinin son okunduğuna bağlı olurdu."
+    },
+    "category_case_variant": {
+      "fail": "{category} kategorisi {existing} kategorisinden yalnızca yazımda ayrılıyor; kategoriler tam eşleştirilir, bu yüzden satırlar aynı katsayıyı bulmaz."
+    },
+    "factor_high": {
+      "fail": "{category} için {factor} katsayısı çizilen miktarın %{pct} üzerinde sipariş verir; fire genellikle bundan azını açıklar."
+    }
+  },
+  "price_index": {
+    "suggestion": "Dönemi, değeri ve kaynağı yayımlanmış endeksle karşılaştırıp yeniden kaydedin.",
+    "duplicate_period": {
+      "fail": "Seride {value} dönemi için zaten bir değer var."
+    },
+    "duplicate_region": {
+      "fail": "{value} bölgesi için zaten bir konum katsayısı var."
+    },
+    "jump_implausible": {
+      "fail": "{label} değeri {value}; {other_label} ({other}) değerinden %{pct} farklı. Bu kadar büyük bir sıçrama genellikle yazım veya birim hatasıdır."
+    },
+    "location_factor_outlier": {
+      "fail": "{region} için {factor} konum katsayısı, ulusal taban 1 çevresindeki olağan {low} ile {high} aralığının dışında."
+    },
+    "index_source_missing": {
+      "fail": "{label} endeksinin kaynağı yok, bu yüzden yayımlanmış bildirimle doğrulanamaz."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Kavramsal keşfin alanını, para birimini ve bölgesini kontrol edip yeniden kaydedin.",
+    "region_not_set": {
+      "fail": "Bölge seçilmedi, bu yüzden bölgesel maliyet katsayısı uygulanmıyor ve doğruluk aralığı geniş kalıyor."
+    },
+    "baseline_replaced": {
+      "fail": "Bu projede zaten {count} kayıtlı kavramsal keşif var; en yenisi mutabakat için temel olur."
+    },
+    "boq_beside_detailed": {
+      "fail": "Bu projede zaten {count} metraj cetveli var; yanına eklenen kavramsal cetvel aynı kapsamı iki kez sayar."
+    }
   }
 }

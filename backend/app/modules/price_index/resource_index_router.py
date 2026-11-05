@@ -115,11 +115,14 @@ async def create_index(
     data: ResourceIndexValueCreate, session: SessionDep, _user_id: CurrentUserId
 ) -> ResourceIndexValueResponse:
     """Enter one index from a quarterly letter."""
+    service = ResourceIndexService(session)
     try:
-        row = await ResourceIndexService(session).create_index(data)
+        row = await service.create_index(data)
     except DuplicateEntryError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    return ResourceIndexValueResponse.model_validate(row)
+    created = ResourceIndexValueResponse.model_validate(row)
+    created.warnings = service.warnings
+    return created
 
 
 @router.patch("/indices/{index_id}/", response_model=ResourceIndexValueResponse, dependencies=[_MANAGE])
@@ -127,10 +130,13 @@ async def update_index(
     index_id: uuid.UUID, data: ResourceIndexValueUpdate, session: SessionDep, _user_id: CurrentUserId
 ) -> ResourceIndexValueResponse:
     """Change an index value or its source."""
-    row = await ResourceIndexService(session).update_index(index_id, data)
+    service = ResourceIndexService(session)
+    row = await service.update_index(index_id, data)
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Index value not found")
-    return ResourceIndexValueResponse.model_validate(row)
+    updated = ResourceIndexValueResponse.model_validate(row)
+    updated.warnings = service.warnings
+    return updated
 
 
 @router.delete("/indices/{index_id}/", status_code=status.HTTP_204_NO_CONTENT, dependencies=[_MANAGE])

@@ -2239,5 +2239,56 @@
       "fail": "Peittyvät työt hyväksyttiin ilman tietoja: {missing}.",
       "suggestion": "Kirjaa rakenneosa ja sijainti ennen merkinnän sulkemista."
     }
+  },
+  "allowances": {
+    "suggestion": "Tarkista pidätetty summa, valuutta ja nostojen huomautukset ja tallenna uudelleen.",
+    "overdrawn": {
+      "fail": "{label}: nostot {drawn} ylittävät pidätetyn {held}, joten arvio jää {excess} vajaaksi."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} nostolta puuttuu huomautus siitä, mille paketille tai ohjeelle raha vapautettiin."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Pidä yksi kerroin materiaaliluokkaa kohti, kirjoitettuna kuten määräluetteloissa.",
+    "duplicate_category": {
+      "fail": "Luokalle {category} on jo hukkakerroin, joten bruttomäärä riippuisi siitä, kumpi luetaan viimeisenä."
+    },
+    "category_case_variant": {
+      "fail": "Luokka {category} eroaa luokasta {existing} vain kirjoitusasultaan; luokat täsmätään tarkasti, joten rivit eivät löydä samaa kerrointa."
+    },
+    "factor_high": {
+      "fail": "Kerroin {factor} luokalle {category} tilaa {pct} % piirretyn määrän päälle, enemmän kuin hukka yleensä selittää."
+    }
+  },
+  "price_index": {
+    "suggestion": "Tarkista jakso, arvo ja lähde julkaistua indeksiä vasten ja tallenna uudelleen.",
+    "duplicate_period": {
+      "fail": "Sarjassa on jo arvo jaksolle {value}."
+    },
+    "duplicate_region": {
+      "fail": "Alueelle {value} on jo paikkakerroin."
+    },
+    "jump_implausible": {
+      "fail": "{label} on {value}, eli {pct} % poikkeama kohteesta {other_label} ({other}); näin suuri hyppy on yleensä kirjoitus- tai yksikkövirhe."
+    },
+    "location_factor_outlier": {
+      "fail": "Paikkakerroin {factor} alueelle {region} on tavanomaisen {low}–{high} vaihteluvälin ulkopuolella kansallisen perustason 1 ympärillä."
+    },
+    "index_source_missing": {
+      "fail": "Indeksillä {label} ei ole lähdettä, joten sitä ei voi tarkistaa julkaistua tiedotetta vasten."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Tarkista konseptiarvion pinta-ala, valuutta ja alue ja tallenna uudelleen.",
+    "region_not_set": {
+      "fail": "Aluetta ei ole valittu, joten aluekohtaista kustannuskerrointa ei käytetä ja tarkkuusväli pysyy leveänä."
+    },
+    "baseline_replaced": {
+      "fail": "Hankkeessa on jo {count} tallennettua konseptiarviota; uusin on täsmäytyksen pohja."
+    },
+    "boq_beside_detailed": {
+      "fail": "Hankkeessa on jo {count} määräluetteloa; viereen lisätty konseptiluettelo laskee saman laajuuden kahdesti."
+    }
   }
 }

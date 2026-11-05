@@ -69,6 +69,8 @@ class WasteFactorResponse(BaseModel):
     tenant_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
     @field_serializer("factor")
     def _ser_factor(self, v: Decimal) -> str:

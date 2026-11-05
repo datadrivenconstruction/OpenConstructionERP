@@ -2239,5 +2239,56 @@
       "fail": "Verdeckte Leistungen wurden abgenommen, ohne anzugeben: {missing}.",
       "suggestion": "Erfassen Sie Bauteil und Lage, bevor der Eintrag abgeschlossen wird."
     }
+  },
+  "allowances": {
+    "suggestion": "Prüfen Sie den Ansatz, die Währung und die Vermerke zu den Abrufen dieser Position, und speichern Sie erneut.",
+    "overdrawn": {
+      "fail": "{label}: Abrufe von {drawn} übersteigen den Ansatz von {held}, die Kalkulation ist damit um {excess} zu knapp."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} Abruf(e) enthalten keinen Vermerk, für welches Paket oder welche Anweisung das Geld freigegeben wurde."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Führen Sie einen Faktor je Materialkategorie, geschrieben wie im Leistungsverzeichnis.",
+    "duplicate_category": {
+      "fail": "Für die Kategorie {category} gibt es bereits einen Verschnittfaktor, die Bruttomenge hinge sonst davon ab, welcher zuletzt gelesen wird."
+    },
+    "category_case_variant": {
+      "fail": "Die Kategorie {category} unterscheidet sich von {existing} nur in der Schreibweise; Kategorien werden exakt abgeglichen, die Positionen finden daher nicht denselben Faktor."
+    },
+    "factor_high": {
+      "fail": "Der Faktor {factor} für {category} bestellt {pct} % über der gezeichneten Menge, mehr als Verschnitt üblicherweise erklärt."
+    }
+  },
+  "price_index": {
+    "suggestion": "Prüfen Sie Zeitraum, Wert und Quelle anhand des veröffentlichten Index, und speichern Sie erneut.",
+    "duplicate_period": {
+      "fail": "Die Reihe hat bereits einen Wert für den Zeitraum {value}."
+    },
+    "duplicate_region": {
+      "fail": "Für die Region {value} gibt es bereits einen Regionalfaktor."
+    },
+    "jump_implausible": {
+      "fail": "{label} ist {value} und weicht um {pct} % von {other_label} ({other}) ab; ein so großer Sprung ist meist ein Tipp- oder Einheitenfehler."
+    },
+    "location_factor_outlier": {
+      "fail": "Der Regionalfaktor {factor} für {region} liegt außerhalb des üblichen Bereichs von {low} bis {high} um die nationale Basis 1."
+    },
+    "index_source_missing": {
+      "fail": "Der Index {label} hat keine Quelle und lässt sich daher nicht mit der veröffentlichten Mitteilung abgleichen."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Prüfen Sie Fläche, Währung und Region der Grobkostenschätzung, und speichern Sie erneut.",
+    "region_not_set": {
+      "fail": "Es ist keine Region gewählt, daher wird kein Regionalfaktor angewendet und die Genauigkeitsspanne bleibt weit."
+    },
+    "baseline_replaced": {
+      "fail": "Dieses Projekt hat bereits {count} gespeicherte Grobkostenschätzung(en); die neueste wird zur Basis für den Abgleich."
+    },
+    "boq_beside_detailed": {
+      "fail": "Dieses Projekt hat bereits {count} Leistungsverzeichnis(se); ein daneben angelegtes Grobkosten-LV zählt denselben Umfang doppelt."
+    }
   }
 }

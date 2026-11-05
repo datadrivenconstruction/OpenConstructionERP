@@ -2239,5 +2239,56 @@
       "fail": "Varjatud tööd võeti vastu ilma märkimata: {missing}.",
       "suggestion": "Registreerige ehitusosa ja asukoht enne kirje sulgemist."
     }
+  },
+  "allowances": {
+    "suggestion": "Kontrollige kinnipeetud summat, valuutat ja kasutuste märkusi ning salvestage uuesti.",
+    "overdrawn": {
+      "fail": "{label}: kasutused {drawn} ületavad kinnipeetud {held}, seega jääb hinnang {excess} võrra väikseks."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} kasutusel puudub märkus, millisele paketile või korraldusele raha vabastati."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Hoidke üks tegur materjalikategooria kohta, kirjutatud nagu mahutabelites.",
+    "duplicate_category": {
+      "fail": "Kategooria {category} jaoks on kadutegur juba olemas, seega sõltuks brutokogus sellest, kumb loetakse viimasena."
+    },
+    "category_case_variant": {
+      "fail": "Kategooria {category} erineb kategooriast {existing} vaid kirjapildi poolest; kategooriaid võrreldakse täpselt, seega read ei leia sama tegurit."
+    },
+    "factor_high": {
+      "fail": "Tegur {factor} kategooriale {category} tellib {pct} % rohkem kui joonistelt, rohkem kui kadu tavaliselt selgitab."
+    }
+  },
+  "price_index": {
+    "suggestion": "Kontrollige perioodi, väärtust ja allikat avaldatud indeksi järgi ning salvestage uuesti.",
+    "duplicate_period": {
+      "fail": "Reas on perioodi {value} jaoks juba väärtus."
+    },
+    "duplicate_region": {
+      "fail": "Piirkonna {value} jaoks on asukohategur juba olemas."
+    },
+    "jump_implausible": {
+      "fail": "{label} on {value}, mis erineb {pct} % võrra suurusest {other_label} ({other}); nii suur hüpe on tavaliselt trükiviga või ühikuviga."
+    },
+    "location_factor_outlier": {
+      "fail": "Asukohategur {factor} piirkonnale {region} jääb väljapoole tavapärast vahemikku {low} kuni {high} riikliku baasi 1 ümber."
+    },
+    "index_source_missing": {
+      "fail": "Indeksil {label} puudub allikas, seega ei saa seda avaldatud teatega kontrollida."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Kontrollige kontseptsioonihinnangu pindala, valuutat ja piirkonda ning salvestage uuesti.",
+    "region_not_set": {
+      "fail": "Piirkonda pole valitud, seega piirkondlikku kulutegurit ei rakendata ja täpsusvahemik jääb laiaks."
+    },
+    "baseline_replaced": {
+      "fail": "Projektil on juba {count} salvestatud kontseptsioonihinnangut; uusim saab võrdluse aluseks."
+    },
+    "boq_beside_detailed": {
+      "fail": "Projektil on juba {count} mahutabelit; kõrvale lisatud kontseptsioonitabel loeb sama mahtu kaks korda."
+    }
   }
 }

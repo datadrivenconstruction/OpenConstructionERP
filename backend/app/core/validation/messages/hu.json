@@ -2239,5 +2239,56 @@
       "fail": "Az eltakart munkákat az alábbi megadása nélkül vették át: {missing}.",
       "suggestion": "Rögzítse az elemet és a helyét a bejegyzés lezárása előtt."
     }
+  },
+  "allowances": {
+    "suggestion": "Ellenőrizze a visszatartott összeget, a pénznemet és a felhasználások megjegyzéseit, majd mentse újra.",
+    "overdrawn": {
+      "fail": "{label}: a {drawn} összegű felhasználások meghaladják a visszatartott {held} összeget, így a költségvetés {excess} összeggel kevés."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} felhasználásnál nincs megjegyzés arról, melyik csomagra vagy utasításra szabadították fel a pénzt."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Anyagkategóriánként egy tényezőt tartson, úgy írva, ahogy a költségvetési kiírásban szerepel.",
+    "duplicate_category": {
+      "fail": "A(z) {category} kategóriához már van veszteségi tényező, így a bruttó mennyiség attól függne, melyiket olvassák utoljára."
+    },
+    "category_case_variant": {
+      "fail": "A(z) {category} kategória csak írásmódban tér el a(z) {existing} kategóriától; a kategóriákat pontosan egyeztetjük, így a tételek nem ugyanazt a tényezőt találják."
+    },
+    "factor_high": {
+      "fail": "A(z) {category} kategória {factor} tényezője {pct} %-kal többet rendel a tervezett mennyiségnél, többet, mint amennyit a veszteség szokott indokolni."
+    }
+  },
+  "price_index": {
+    "suggestion": "Ellenőrizze az időszakot, az értéket és a forrást a közzétett index alapján, majd mentse újra.",
+    "duplicate_period": {
+      "fail": "A sorozatnak már van értéke a(z) {value} időszakra."
+    },
+    "duplicate_region": {
+      "fail": "A(z) {value} régióhoz már van területi tényező."
+    },
+    "jump_implausible": {
+      "fail": "{label} értéke {value}, ami {pct} %-kal tér el a(z) {other_label} ({other}) értékétől; ekkora ugrás többnyire elírás vagy mértékegység-hiba."
+    },
+    "location_factor_outlier": {
+      "fail": "A(z) {region} területi tényezője ({factor}) kívül esik a nemzeti 1-es alap körüli szokásos {low}–{high} sávon."
+    },
+    "index_source_missing": {
+      "fail": "A(z) {label} indexnek nincs forrása, ezért nem vethető össze a közzétett közleménnyel."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Ellenőrizze a koncepcionális becslés területét, pénznemét és régióját, majd mentse újra.",
+    "region_not_set": {
+      "fail": "Nincs régió kiválasztva, ezért nem alkalmazunk területi költségtényezőt, és a pontossági sáv széles marad."
+    },
+    "baseline_replaced": {
+      "fail": "Ennek a projektnek már {count} mentett koncepcionális becslése van; a legújabb lesz az egyeztetés alapja."
+    },
+    "boq_beside_detailed": {
+      "fail": "Ennek a projektnek már {count} költségvetése van; a mellé felvett koncepcionális költségvetés ugyanazt a tartalmat kétszer számolja."
+    }
   }
 }

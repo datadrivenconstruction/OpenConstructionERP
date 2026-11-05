@@ -2239,5 +2239,56 @@
       "fail": "Des ouvrages cachés ont été acceptés sans préciser : {missing}.",
       "suggestion": "Saisissez l'élément et son emplacement avant de clore l'entrée."
     }
+  },
+  "allowances": {
+    "suggestion": "Vérifiez le montant retenu, la devise et les notes des prélèvements de cette provision, puis enregistrez à nouveau.",
+    "overdrawn": {
+      "fail": "{label} : les prélèvements de {drawn} dépassent les {held} retenus, l'estimation est donc insuffisante de {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} prélèvement(s) n'ont pas de note indiquant à quel lot ou sur quelle instruction l'argent a été libéré."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Gardez un seul coefficient par catégorie de matériau, orthographiée comme dans les métrés.",
+    "duplicate_category": {
+      "fail": "Un coefficient de perte existe déjà pour la catégorie {category} ; la quantité brute dépendrait donc de celui qui est lu en dernier."
+    },
+    "category_case_variant": {
+      "fail": "La catégorie {category} ne diffère de {existing} que par l'orthographe ; les catégories sont comparées exactement, les lignes ne trouveront donc pas le même coefficient."
+    },
+    "factor_high": {
+      "fail": "Le coefficient {factor} pour {category} commande {pct} % de plus que la quantité dessinée, plus que ce que les pertes expliquent d'ordinaire."
+    }
+  },
+  "price_index": {
+    "suggestion": "Vérifiez la période, la valeur et sa source avec l'indice publié, puis enregistrez à nouveau.",
+    "duplicate_period": {
+      "fail": "La série a déjà une valeur pour la période {value}."
+    },
+    "duplicate_region": {
+      "fail": "Un coefficient de localisation existe déjà pour la région {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} vaut {value}, soit un écart de {pct} % par rapport à {other_label} ({other}) ; un tel saut est le plus souvent une faute de frappe ou d'unité."
+    },
+    "location_factor_outlier": {
+      "fail": "Le coefficient de localisation {factor} pour {region} sort de la plage habituelle de {low} à {high} autour de la base nationale de 1."
+    },
+    "index_source_missing": {
+      "fail": "L'indice {label} n'a pas de source, il ne peut donc pas être vérifié avec la publication officielle."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Vérifiez la surface, la devise et la région de l'estimation conceptuelle, puis enregistrez à nouveau.",
+    "region_not_set": {
+      "fail": "Aucune région n'est choisie, donc aucun coefficient régional n'est appliqué et la fourchette de précision reste large."
+    },
+    "baseline_replaced": {
+      "fail": "Ce projet compte déjà {count} estimation(s) conceptuelle(s) enregistrée(s) ; la plus récente devient la base du rapprochement."
+    },
+    "boq_beside_detailed": {
+      "fail": "Ce projet compte déjà {count} bordereau(x) de quantités ; un bordereau conceptuel ajouté à côté compte deux fois le même périmètre."
+    }
   }
 }

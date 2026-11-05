@@ -15,3 +15,6 @@ async def on_startup() -> None:
     from app.modules.rom_estimate.permissions import register_rom_estimate_permissions
 
     register_rom_estimate_permissions()
+    from app.modules.rom_estimate.validators import register_rom_estimate_validation_rules
+
+    register_rom_estimate_validation_rules()

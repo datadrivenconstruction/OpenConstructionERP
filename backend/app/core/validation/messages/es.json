@@ -2239,5 +2239,56 @@
       "fail": "Se aceptaron trabajos ocultos sin indicar: {missing}.",
       "suggestion": "Registre el elemento y su ubicación antes de cerrar la anotación."
     }
+  },
+  "allowances": {
+    "suggestion": "Revise el importe retenido, la moneda y las notas de las disposiciones de esta partida, y guarde de nuevo.",
+    "overdrawn": {
+      "fail": "{label}: las disposiciones de {drawn} superan los {held} retenidos, por lo que el presupuesto se queda corto en {excess}."
+    },
+    "drawdown_unexplained": {
+      "fail": "{count} disposición(es) no tienen nota que indique a qué paquete o instrucción se destinó el dinero."
+    }
+  },
+  "waste_factors": {
+    "suggestion": "Mantenga un solo factor por categoría de material, escrita como en las mediciones.",
+    "duplicate_category": {
+      "fail": "Ya existe un factor de desperdicio para la categoría {category}, así que la cantidad bruta dependería de cuál se lea al final."
+    },
+    "category_case_variant": {
+      "fail": "La categoría {category} solo difiere de {existing} en la escritura; las categorías se comparan exactamente, así que las líneas no encontrarán el mismo factor."
+    },
+    "factor_high": {
+      "fail": "El factor {factor} para {category} pide un {pct} % más que la cantidad dibujada, más de lo que suele explicar el desperdicio."
+    }
+  },
+  "price_index": {
+    "suggestion": "Compruebe el período, el valor y su fuente con el índice publicado, y guarde de nuevo.",
+    "duplicate_period": {
+      "fail": "La serie ya tiene un valor para el período {value}."
+    },
+    "duplicate_region": {
+      "fail": "Ya existe un factor de localización para la región {value}."
+    },
+    "jump_implausible": {
+      "fail": "{label} es {value}, un cambio del {pct} % frente a {other_label} ({other}); un salto tan grande suele ser un error de digitación o de unidades."
+    },
+    "location_factor_outlier": {
+      "fail": "El factor de localización {factor} para {region} queda fuera de la banda habitual de {low} a {high} en torno a la base nacional de 1."
+    },
+    "index_source_missing": {
+      "fail": "El índice {label} no tiene fuente, por lo que no puede contrastarse con la publicación oficial."
+    }
+  },
+  "rom_estimate": {
+    "suggestion": "Revise la superficie, la moneda y la región de la estimación conceptual, y guarde de nuevo.",
+    "region_not_set": {
+      "fail": "No hay región seleccionada, así que no se aplica factor regional de coste y el margen de precisión sigue siendo amplio."
+    },
+    "baseline_replaced": {
+      "fail": "Este proyecto ya tiene {count} estimación(es) conceptual(es) guardada(s); la más reciente pasa a ser la base de conciliación."
+    },
+    "boq_beside_detailed": {
+      "fail": "Este proyecto ya tiene {count} presupuesto(s) de mediciones; uno conceptual añadido al lado cuenta dos veces el mismo alcance."
+    }
   }
 }

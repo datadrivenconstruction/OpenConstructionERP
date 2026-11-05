@@ -80,6 +80,8 @@ class ResourceIndexValueResponse(BaseModel):
     is_sample: bool
     created_at: datetime
     updated_at: datetime
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
 
 # ── Overhead and profit norms ────────────────────────────────────────────────
