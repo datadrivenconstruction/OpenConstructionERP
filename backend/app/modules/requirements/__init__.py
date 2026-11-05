@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.requirements.permissions import register_requirements_permissions
 
     register_requirements_permissions()
+    from app.modules.requirements.validators import register_requirements_validation_rules
+
+    register_requirements_validation_rules()

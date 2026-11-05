@@ -2111,5 +2111,133 @@
       "fail": "Độ trễ {days} ngày giữa hai dự án dài bất thường.",
       "suggestion": "Kiểm tra đơn vị: độ trễ nhập theo ngày."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Yêu cầu {name} dùng phép kiểm {type} nhưng không có giá trị để so sánh.",
+      "suggestion": "Nhập giới hạn hoặc mẫu dùng để so sánh với giá trị trong mô hình."
+    },
+    "value_invalid": {
+      "fail": "Giá trị '{value}' của yêu cầu {name} không dùng được với phép kiểm {type}.",
+      "suggestion": "Dùng số cho min và max, thấp..cao cho khoảng, hoặc biểu thức chính quy hợp lệ."
+    },
+    "unit_missing": {
+      "fail": "Yêu cầu {name} đặt giới hạn bằng số ({type}) nhưng không có đơn vị.",
+      "suggestion": "Ghi rõ đơn vị, ví dụ m, mm, m2 hoặc kN."
+    },
+    "verification_missing": {
+      "fail": "Yêu cầu bắt buộc {name} không nêu cách xác minh sự phù hợp.",
+      "suggestion": "Chọn phương pháp xác minh: kiểm tra, thí nghiệm, tính toán hoặc kiểm tra mô hình."
+    },
+    "locked_set_empty": {
+      "fail": "Bộ yêu cầu không có yêu cầu nào thì không thể khóa làm mốc chuẩn.",
+      "suggestion": "Hãy thêm yêu cầu trước rồi khóa bộ."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Dòng {row} không có tên thuộc tính.",
+      "suggestion": "Đặt tên thuộc tính được kiểm, ví dụ GiớiHạnChịuLửa."
+    },
+    "filter_empty": {
+      "fail": "{count} trên {total} yêu cầu không có bộ lọc cấu kiện và sẽ áp dụng cho mọi cấu kiện trong mô hình.",
+      "suggestion": "Giới hạn mỗi yêu cầu theo một lớp hoặc loại cấu kiện."
+    },
+    "bounds_inverted": {
+      "fail": "Dòng {row} ({property}): giá trị nhỏ nhất {low} lớn hơn giá trị lớn nhất {high}.",
+      "suggestion": "Đổi chỗ hai cận hoặc sửa lại số liệu."
+    },
+    "pattern_invalid": {
+      "fail": "Dòng {row} ({property}): mẫu '{pattern}' không phải biểu thức chính quy hợp lệ.",
+      "suggestion": "Sửa mẫu để có thể biên dịch."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Chi phí của điểm không phù hợp, {amount}, chưa có đơn vị tiền tệ.",
+      "suggestion": "Chọn đơn vị tiền tệ của tác động chi phí."
+    },
+    "root_cause_missing": {
+      "fail": "Điểm không phù hợp ({grade}) đang xác minh hoặc đã đóng chưa ghi nguyên nhân gốc.",
+      "suggestion": "Ghi nguyên nhân gốc trước khi xác minh hoặc đóng báo cáo."
+    },
+    "punch_due_before_raised": {
+      "fail": "Hạng mục tồn đọng đến hạn ngày {due}, trước ngày lập {raised}.",
+      "suggestion": "Đặt hạn vào ngày lập hoặc sau đó."
+    },
+    "calibration_window": {
+      "fail": "Hiệu chuẩn có hiệu lực đến {until}, không muộn hơn ngày hiệu chuẩn {start}.",
+      "suggestion": "Kiểm tra ngày hiệu chuẩn và ngày hết hạn."
+    },
+    "calibration_lapsed": {
+      "fail": "Hiệu chuẩn được đánh dấu còn hiệu lực nhưng đã hết hạn ngày {until}.",
+      "suggestion": "Hiệu chuẩn lại thiết bị hoặc đặt trạng thái hết hạn."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Dung sai dưới {lower} lớn hơn dung sai trên {upper}.",
+      "suggestion": "Đổi chỗ hai cận để cận dưới không vượt cận trên."
+    },
+    "nominal_outside": {
+      "fail": "Giá trị danh định {nominal} nằm ngoài dải dung sai từ {lower} đến {upper}.",
+      "suggestion": "Sửa giá trị danh định hoặc các cận dung sai."
+    },
+    "certificate_window": {
+      "fail": "Chứng chỉ có hiệu lực đến {until}, tức là trước ngày bắt đầu {start}.",
+      "suggestion": "Kiểm tra các ngày hiệu lực ghi trên chứng chỉ."
+    },
+    "certificate_expired": {
+      "fail": "Chứng chỉ vật liệu đã hết hạn ngày {date} nhưng vật liệu đang ở trạng thái {status}.",
+      "suggestion": "Lấy chứng chỉ còn hiệu lực trước khi nghiệm thu vật liệu."
+    },
+    "test_before_sample": {
+      "fail": "Ngày thí nghiệm {tested} trước ngày lấy mẫu {sampled}.",
+      "suggestion": "Đối chiếu ngày lấy mẫu và ngày thí nghiệm với báo cáo của phòng thí nghiệm."
+    },
+    "lab_unaccredited": {
+      "fail": "Phòng thí nghiệm {lab} chưa được ghi nhận là đã công nhận.",
+      "suggestion": "Ghi mã công nhận hoặc dùng phòng thí nghiệm được công nhận."
+    },
+    "date_in_future": {
+      "fail": "Ngày {field} ({date}) nằm trong tương lai.",
+      "suggestion": "Ghi ngày công việc, lấy mẫu hoặc thí nghiệm thực sự diễn ra."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Ngày hoàn thành {date} nằm trong tương lai.",
+      "suggestion": "Nhập ngày hoàn thành thực tế."
+    },
+    "ready_undated": {
+      "fail": "Hạng mục được đánh dấu sẵn sàng nhưng chưa có ngày hoàn thành.",
+      "suggestion": "Nhập ngày hoàn thành của hạng mục."
+    },
+    "gate_item_unowned": {
+      "fail": "Điều kiện khởi công ({status}) chưa có người chịu trách nhiệm.",
+      "suggestion": "Chỉ định người hoàn tất điều kiện trước khi mở công trường."
+    },
+    "plan_start_missing": {
+      "fail": "Kế hoạch tổ chức công trường ({status}) chưa có ngày bắt đầu dự kiến.",
+      "suggestion": "Nhập ngày bắt đầu dự kiến của việc tổ chức công trường."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Lượt thăm công trường ({status}) chưa có ngày thực tế.",
+      "suggestion": "Nhập ngày lượt thăm diễn ra."
+    },
+    "visit_in_future": {
+      "fail": "Lượt thăm ({status}) nhưng ngày {date} nằm trong tương lai.",
+      "suggestion": "Sửa ngày hoặc giữ lượt thăm ở trạng thái kế hoạch cho đến khi diễn ra."
+    },
+    "observation_missing": {
+      "fail": "Mục loại {category} chưa có nội dung quan sát.",
+      "suggestion": "Mô tả điều đã quan sát được tại công trường."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Công việc bị che khuất được nghiệm thu mà không nêu: {missing}.",
+      "suggestion": "Ghi cấu kiện và vị trí trước khi đóng mục."
+    }
   }
 }

@@ -2111,5 +2111,133 @@
       "fail": "Un desfase de {days} días entre dos proyectos es inusualmente largo.",
       "suggestion": "Compruebe la unidad: el desfase se introduce en días."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "El requisito {name} usa la comprobación {type} pero no tiene un valor con el que comparar.",
+      "suggestion": "Introduzca el límite o el patrón con el que se compara el valor del modelo."
+    },
+    "value_invalid": {
+      "fail": "El valor '{value}' del requisito {name} no sirve para la comprobación {type}.",
+      "suggestion": "Use un número para min y max, bajo..alto para un rango o una expresión regular válida."
+    },
+    "unit_missing": {
+      "fail": "El requisito {name} fija un límite numérico ({type}) sin unidad.",
+      "suggestion": "Indique la unidad, por ejemplo m, mm, m2 o kN."
+    },
+    "verification_missing": {
+      "fail": "El requisito obligatorio {name} no indica cómo se verificará su cumplimiento.",
+      "suggestion": "Elija un método de verificación: inspección, ensayo, cálculo o comprobación del modelo."
+    },
+    "locked_set_empty": {
+      "fail": "Un conjunto sin requisitos no se puede bloquear como línea base.",
+      "suggestion": "Añada primero los requisitos y después bloquee el conjunto."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "La fila {row} no tiene nombre de propiedad.",
+      "suggestion": "Indique la propiedad que comprueba, por ejemplo ResistenciaAlFuego."
+    },
+    "filter_empty": {
+      "fail": "{count} de {total} requisitos no tienen filtro de elementos y se aplicarían a todos los elementos del modelo.",
+      "suggestion": "Limite cada requisito a una clase o tipo de elemento."
+    },
+    "bounds_inverted": {
+      "fail": "Fila {row} ({property}): el mínimo {low} supera el máximo {high}.",
+      "suggestion": "Intercambie los límites o corrija las cifras."
+    },
+    "pattern_invalid": {
+      "fail": "Fila {row} ({property}): el patrón '{pattern}' no es una expresión regular válida.",
+      "suggestion": "Corrija el patrón para que se pueda compilar."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "El coste de la no conformidad, {amount}, no tiene moneda.",
+      "suggestion": "Seleccione la moneda del impacto económico."
+    },
+    "root_cause_missing": {
+      "fail": "Una no conformidad {grade} en verificación o cerrada no tiene causa raíz.",
+      "suggestion": "Registre la causa raíz antes de verificar o cerrar el informe."
+    },
+    "punch_due_before_raised": {
+      "fail": "La tarea pendiente vence el {due}, antes de su alta el {raised}.",
+      "suggestion": "Fije un vencimiento igual o posterior al día del alta."
+    },
+    "calibration_window": {
+      "fail": "La calibración es válida hasta {until}, que no es posterior a su fecha {start}.",
+      "suggestion": "Compruebe la fecha de calibración y la de caducidad."
+    },
+    "calibration_lapsed": {
+      "fail": "La calibración figura como válida pero caducó el {until}.",
+      "suggestion": "Vuelva a calibrar el equipo o cambie el estado a caducada."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "La tolerancia inferior {lower} supera la superior {upper}.",
+      "suggestion": "Intercambie los límites para que el inferior no supere al superior."
+    },
+    "nominal_outside": {
+      "fail": "El valor nominal {nominal} queda fuera de la banda de tolerancia {lower} a {upper}.",
+      "suggestion": "Corrija el valor nominal o los límites de tolerancia."
+    },
+    "certificate_window": {
+      "fail": "El certificado es válido hasta {until}, antes de su fecha de inicio {start}.",
+      "suggestion": "Compruebe las fechas de validez que figuran en el certificado."
+    },
+    "certificate_expired": {
+      "fail": "El certificado del material caducó el {date}, pero el material está {status}.",
+      "suggestion": "Obtenga un certificado vigente antes de aceptar el material."
+    },
+    "test_before_sample": {
+      "fail": "La fecha del ensayo {tested} es anterior a la del muestreo {sampled}.",
+      "suggestion": "Contraste las fechas de muestreo y ensayo con el informe del laboratorio."
+    },
+    "lab_unaccredited": {
+      "fail": "El laboratorio {lab} no figura como acreditado.",
+      "suggestion": "Registre la referencia de acreditación o use un laboratorio acreditado."
+    },
+    "date_in_future": {
+      "fail": "La fecha {field} ({date}) está en el futuro.",
+      "suggestion": "Registre el día en que realmente se hizo el trabajo, el muestreo o el ensayo."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "La fecha de finalización {date} está en el futuro.",
+      "suggestion": "Introduzca el día en que realmente se terminó."
+    },
+    "ready_undated": {
+      "fail": "La partida figura como lista pero no tiene fecha de finalización.",
+      "suggestion": "Introduzca la fecha en que se terminó."
+    },
+    "gate_item_unowned": {
+      "fail": "El requisito previo está {status} y no tiene responsable.",
+      "suggestion": "Asigne quién lo resolverá antes de abrir la obra."
+    },
+    "plan_start_missing": {
+      "fail": "El plan de implantación está {status} pero no tiene fecha de inicio prevista.",
+      "suggestion": "Introduzca la fecha de inicio prevista de la implantación."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "La visita está {status} pero no tiene fecha real.",
+      "suggestion": "Introduzca la fecha en que se hizo la visita."
+    },
+    "visit_in_future": {
+      "fail": "La visita está {status} pero su fecha {date} está en el futuro.",
+      "suggestion": "Corrija la fecha o deje la visita como planificada hasta que se realice."
+    },
+    "observation_missing": {
+      "fail": "Una anotación de tipo {category} no tiene texto de observación.",
+      "suggestion": "Describa lo observado en obra."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Se aceptaron trabajos ocultos sin indicar: {missing}.",
+      "suggestion": "Registre el elemento y su ubicación antes de cerrar la anotación."
+    }
   }
 }

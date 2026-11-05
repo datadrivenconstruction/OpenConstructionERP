@@ -2111,5 +2111,133 @@
       "fail": "A lag of {days} days between two projects is unusually long.",
       "suggestion": "Check the unit: the lag is entered in days."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Requirement {name} uses the {type} check but has no value to compare against.",
+      "suggestion": "Enter the limit or pattern the model value is compared with."
+    },
+    "value_invalid": {
+      "fail": "The value '{value}' of requirement {name} cannot be used with a {type} check.",
+      "suggestion": "Use a number for min and max, low..high for a range, or a valid regular expression."
+    },
+    "unit_missing": {
+      "fail": "Requirement {name} sets a numeric {type} limit without a unit.",
+      "suggestion": "State the unit, for example m, mm, m2 or kN."
+    },
+    "verification_missing": {
+      "fail": "Mandatory requirement {name} does not say how compliance will be verified.",
+      "suggestion": "Choose a verification method such as inspection, test, calculation or model check."
+    },
+    "locked_set_empty": {
+      "fail": "A requirement set with no requirements cannot be locked as the baseline.",
+      "suggestion": "Add the requirements first, then lock the set."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Row {row} has no property name.",
+      "suggestion": "Name the property the row checks, for example FireRating."
+    },
+    "filter_empty": {
+      "fail": "{count} of {total} requirements have no element filter and would apply to every element in the model.",
+      "suggestion": "Narrow each requirement to an element class or type."
+    },
+    "bounds_inverted": {
+      "fail": "Row {row} ({property}): the minimum {low} is above the maximum {high}.",
+      "suggestion": "Swap the bounds or correct the figures."
+    },
+    "pattern_invalid": {
+      "fail": "Row {row} ({property}): the pattern '{pattern}' is not a valid regular expression.",
+      "suggestion": "Correct the pattern so that it compiles."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "The non-conformance cost of {amount} has no currency.",
+      "suggestion": "Select the currency of the cost impact."
+    },
+    "root_cause_missing": {
+      "fail": "A {grade} non-conformance that is verifying or closed has no root cause recorded.",
+      "suggestion": "Record the root cause before verifying or closing the report."
+    },
+    "punch_due_before_raised": {
+      "fail": "The punch item is due on {due}, before it was raised on {raised}.",
+      "suggestion": "Set a due date on or after the day the item was raised."
+    },
+    "calibration_window": {
+      "fail": "The calibration is valid until {until}, which is not after the calibration date {start}.",
+      "suggestion": "Check the calibration date and the expiry date."
+    },
+    "calibration_lapsed": {
+      "fail": "The calibration is marked valid but expired on {until}.",
+      "suggestion": "Recalibrate the instrument or set the status to expired."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "The lower tolerance {lower} is above the upper tolerance {upper}.",
+      "suggestion": "Swap the limits so the lower value is not above the upper one."
+    },
+    "nominal_outside": {
+      "fail": "The nominal value {nominal} lies outside the tolerance band {lower} to {upper}.",
+      "suggestion": "Correct the nominal value or the tolerance limits."
+    },
+    "certificate_window": {
+      "fail": "The certificate is valid until {until}, which is before its start date {start}.",
+      "suggestion": "Check the validity dates printed on the certificate."
+    },
+    "certificate_expired": {
+      "fail": "The material certificate expired on {date}, but the material is {status}.",
+      "suggestion": "Obtain a current certificate before the material is accepted."
+    },
+    "test_before_sample": {
+      "fail": "The test date {tested} is before the sampling date {sampled}.",
+      "suggestion": "Check the sampling and test dates against the laboratory report."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratory {lab} is not recorded as accredited.",
+      "suggestion": "Record the accreditation reference or use an accredited laboratory."
+    },
+    "date_in_future": {
+      "fail": "The {field} date {date} is in the future.",
+      "suggestion": "Record the date on which the work, sampling or test actually took place."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "The completion date {date} is in the future.",
+      "suggestion": "Enter the day the item was actually completed."
+    },
+    "ready_undated": {
+      "fail": "The item is marked ready but has no completion date.",
+      "suggestion": "Enter the date the item was completed."
+    },
+    "gate_item_unowned": {
+      "fail": "The gate item is {status} and has no responsible party.",
+      "suggestion": "Assign the party who will clear this item before the site opens."
+    },
+    "plan_start_missing": {
+      "fail": "The mobilisation plan is {status} but has no target start date.",
+      "suggestion": "Enter the planned start date of the mobilisation."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "The visit is {status} but has no actual date.",
+      "suggestion": "Enter the date the visit took place."
+    },
+    "visit_in_future": {
+      "fail": "The visit is {status} but its date {date} is in the future.",
+      "suggestion": "Correct the date, or keep the visit as planned until it has taken place."
+    },
+    "observation_missing": {
+      "fail": "A {category} entry has no observation text.",
+      "suggestion": "Describe what was observed on site."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Hidden works were accepted without naming: {missing}.",
+      "suggestion": "Record the element and its location before the entry is closed."
+    }
   }
 }

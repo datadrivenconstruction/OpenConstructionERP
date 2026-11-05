@@ -2111,5 +2111,133 @@
       "fail": "Un decalaj de {days} zile între două proiecte este neobișnuit de lung.",
       "suggestion": "Verificați unitatea: decalajul se introduce în zile."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Cerința {name} folosește verificarea {type}, dar nu are o valoare de comparat.",
+      "suggestion": "Introduceți limita sau modelul cu care se compară valoarea din model."
+    },
+    "value_invalid": {
+      "fail": "Valoarea '{value}' a cerinței {name} nu poate fi folosită cu verificarea {type}.",
+      "suggestion": "Folosiți un număr pentru min și max, jos..sus pentru un interval sau o expresie regulată validă."
+    },
+    "unit_missing": {
+      "fail": "Cerința {name} stabilește o limită numerică ({type}) fără unitate de măsură.",
+      "suggestion": "Indicați unitatea, de exemplu m, mm, m2 sau kN."
+    },
+    "verification_missing": {
+      "fail": "Pentru cerința obligatorie {name} nu se spune cum se verifică conformitatea.",
+      "suggestion": "Alegeți o metodă de verificare: inspecție, încercare, calcul sau verificarea modelului."
+    },
+    "locked_set_empty": {
+      "fail": "Un set fără cerințe nu poate fi blocat ca referință.",
+      "suggestion": "Adăugați mai întâi cerințele, apoi blocați setul."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Rândul {row} nu are numele proprietății.",
+      "suggestion": "Denumiți proprietatea verificată, de exemplu RezistențaLaFoc."
+    },
+    "filter_empty": {
+      "fail": "{count} din {total} cerințe nu au filtru de elemente și s-ar aplica fiecărui element din model.",
+      "suggestion": "Limitați fiecare cerință la o clasă sau un tip de element."
+    },
+    "bounds_inverted": {
+      "fail": "Rândul {row} ({property}): minimul {low} depășește maximul {high}.",
+      "suggestion": "Inversați limitele sau corectați cifrele."
+    },
+    "pattern_invalid": {
+      "fail": "Rândul {row} ({property}): modelul '{pattern}' nu este o expresie regulată validă.",
+      "suggestion": "Corectați modelul astfel încât să poată fi compilat."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Costul neconformității, {amount}, nu are monedă.",
+      "suggestion": "Selectați moneda impactului financiar."
+    },
+    "root_cause_missing": {
+      "fail": "O neconformitate ({grade}) în verificare sau închisă nu are cauza principală înregistrată.",
+      "suggestion": "Înregistrați cauza principală înainte de a verifica sau închide raportul."
+    },
+    "punch_due_before_raised": {
+      "fail": "Remedierea are termen {due}, înainte de data deschiderii {raised}.",
+      "suggestion": "Stabiliți un termen în ziua deschiderii sau după aceasta."
+    },
+    "calibration_window": {
+      "fail": "Etalonarea este valabilă până la {until}, ceea ce nu este după data etalonării {start}.",
+      "suggestion": "Verificați data etalonării și data expirării."
+    },
+    "calibration_lapsed": {
+      "fail": "Etalonarea este marcată ca valabilă, dar a expirat la {until}.",
+      "suggestion": "Etalonați din nou aparatul sau setați starea la expirată."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Toleranța inferioară {lower} depășește toleranța superioară {upper}.",
+      "suggestion": "Inversați limitele astfel încât cea inferioară să nu depășească pe cea superioară."
+    },
+    "nominal_outside": {
+      "fail": "Valoarea nominală {nominal} este în afara câmpului de toleranță de la {lower} la {upper}.",
+      "suggestion": "Corectați valoarea nominală sau limitele de toleranță."
+    },
+    "certificate_window": {
+      "fail": "Certificatul este valabil până la {until}, adică înainte de data de început {start}.",
+      "suggestion": "Verificați datele de valabilitate de pe certificat."
+    },
+    "certificate_expired": {
+      "fail": "Certificatul materialului a expirat la {date}, iar materialul are starea {status}.",
+      "suggestion": "Obțineți un certificat în termen înainte de recepția materialului."
+    },
+    "test_before_sample": {
+      "fail": "Data încercării {tested} este înainte de data prelevării {sampled}.",
+      "suggestion": "Comparați datele de prelevare și încercare cu raportul laboratorului."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratorul {lab} nu este înregistrat ca acreditat.",
+      "suggestion": "Înregistrați referința de acreditare sau folosiți un laborator acreditat."
+    },
+    "date_in_future": {
+      "fail": "Data ({field}) {date} este în viitor.",
+      "suggestion": "Înregistrați ziua în care lucrarea, prelevarea sau încercarea au avut loc efectiv."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Data finalizării {date} este în viitor.",
+      "suggestion": "Introduceți ziua finalizării efective."
+    },
+    "ready_undated": {
+      "fail": "Elementul este marcat ca pregătit, dar nu are data finalizării.",
+      "suggestion": "Introduceți data finalizării elementului."
+    },
+    "gate_item_unowned": {
+      "fail": "Condiția de acces pe șantier ({status}) nu are responsabil.",
+      "suggestion": "Desemnați cine rezolvă condiția înainte de deschiderea șantierului."
+    },
+    "plan_start_missing": {
+      "fail": "Planul de mobilizare ({status}) nu are data de început planificată.",
+      "suggestion": "Introduceți data planificată de început a mobilizării."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Vizita ({status}) nu are dată efectivă.",
+      "suggestion": "Introduceți data la care a avut loc vizita."
+    },
+    "visit_in_future": {
+      "fail": "Vizita ({status}), dar data ei {date} este în viitor.",
+      "suggestion": "Corectați data sau lăsați vizita planificată până când are loc."
+    },
+    "observation_missing": {
+      "fail": "O înregistrare de tip {category} nu are textul observației.",
+      "suggestion": "Descrieți ce s-a constatat pe șantier."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Lucrări ascunse au fost acceptate fără a indica: {missing}.",
+      "suggestion": "Înregistrați elementul și poziția lui înainte de a închide înregistrarea."
+    }
   }
 }

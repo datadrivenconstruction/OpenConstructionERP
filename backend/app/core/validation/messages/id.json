@@ -2111,5 +2111,133 @@
       "fail": "Jeda {days} hari antara dua proyek luar biasa panjang.",
       "suggestion": "Periksa satuan: jeda dimasukkan dalam hari."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Persyaratan {name} memakai pemeriksaan {type} tetapi tidak punya nilai pembanding.",
+      "suggestion": "Masukkan batas atau pola yang dibandingkan dengan nilai model."
+    },
+    "value_invalid": {
+      "fail": "Nilai '{value}' pada persyaratan {name} tidak dapat dipakai dengan pemeriksaan {type}.",
+      "suggestion": "Gunakan angka untuk min dan maks, rendah..tinggi untuk rentang, atau ekspresi reguler yang valid."
+    },
+    "unit_missing": {
+      "fail": "Persyaratan {name} menetapkan batas angka ({type}) tanpa satuan.",
+      "suggestion": "Cantumkan satuan, misalnya m, mm, m2 atau kN."
+    },
+    "verification_missing": {
+      "fail": "Persyaratan wajib {name} tidak menyebut cara pemenuhannya diverifikasi.",
+      "suggestion": "Pilih metode verifikasi: inspeksi, pengujian, perhitungan atau pemeriksaan model."
+    },
+    "locked_set_empty": {
+      "fail": "Set tanpa persyaratan tidak dapat dikunci sebagai baseline.",
+      "suggestion": "Tambahkan persyaratan terlebih dahulu, lalu kunci set."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Baris {row} tidak punya nama properti.",
+      "suggestion": "Beri nama properti yang diperiksa, misalnya KetahananApi."
+    },
+    "filter_empty": {
+      "fail": "{count} dari {total} persyaratan tidak punya filter elemen dan akan berlaku untuk setiap elemen model.",
+      "suggestion": "Batasi tiap persyaratan pada kelas atau tipe elemen."
+    },
+    "bounds_inverted": {
+      "fail": "Baris {row} ({property}): minimum {low} lebih besar dari maksimum {high}.",
+      "suggestion": "Tukar batasnya atau perbaiki angkanya."
+    },
+    "pattern_invalid": {
+      "fail": "Baris {row} ({property}): pola '{pattern}' bukan ekspresi reguler yang valid.",
+      "suggestion": "Perbaiki pola agar dapat dikompilasi."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Biaya ketidaksesuaian sebesar {amount} tidak punya mata uang.",
+      "suggestion": "Pilih mata uang dampak biaya."
+    },
+    "root_cause_missing": {
+      "fail": "Ketidaksesuaian ({grade}) yang sedang diverifikasi atau sudah ditutup tidak mencatat akar masalah.",
+      "suggestion": "Catat akar masalah sebelum laporan diverifikasi atau ditutup."
+    },
+    "punch_due_before_raised": {
+      "fail": "Item punch jatuh tempo {due}, sebelum dibuat pada {raised}.",
+      "suggestion": "Tetapkan tenggat pada hari pembuatan atau sesudahnya."
+    },
+    "calibration_window": {
+      "fail": "Kalibrasi berlaku sampai {until}, yang tidak lebih lambat dari tanggal kalibrasi {start}.",
+      "suggestion": "Periksa tanggal kalibrasi dan tanggal kedaluwarsa."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibrasi ditandai berlaku, tetapi sudah kedaluwarsa pada {until}.",
+      "suggestion": "Kalibrasi ulang alat atau ubah status menjadi kedaluwarsa."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Toleransi bawah {lower} lebih besar dari toleransi atas {upper}.",
+      "suggestion": "Tukar batasnya agar batas bawah tidak melebihi batas atas."
+    },
+    "nominal_outside": {
+      "fail": "Nilai nominal {nominal} berada di luar pita toleransi {lower} sampai {upper}.",
+      "suggestion": "Perbaiki nilai nominal atau batas toleransi."
+    },
+    "certificate_window": {
+      "fail": "Sertifikat berlaku sampai {until}, yaitu sebelum tanggal mulai {start}.",
+      "suggestion": "Periksa tanggal masa berlaku pada sertifikat."
+    },
+    "certificate_expired": {
+      "fail": "Sertifikat material kedaluwarsa pada {date}, padahal status material {status}.",
+      "suggestion": "Dapatkan sertifikat yang berlaku sebelum material diterima."
+    },
+    "test_before_sample": {
+      "fail": "Tanggal uji {tested} lebih awal dari tanggal pengambilan sampel {sampled}.",
+      "suggestion": "Cocokkan tanggal pengambilan sampel dan uji dengan laporan laboratorium."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratorium {lab} tidak tercatat terakreditasi.",
+      "suggestion": "Catat rujukan akreditasi atau gunakan laboratorium terakreditasi."
+    },
+    "date_in_future": {
+      "fail": "Tanggal {field} ({date}) berada di masa depan.",
+      "suggestion": "Catat hari ketika pekerjaan, pengambilan sampel atau pengujian benar-benar dilakukan."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Tanggal penyelesaian {date} berada di masa depan.",
+      "suggestion": "Masukkan hari penyelesaian yang sebenarnya."
+    },
+    "ready_undated": {
+      "fail": "Item ditandai siap tetapi tidak punya tanggal penyelesaian.",
+      "suggestion": "Masukkan tanggal penyelesaian item."
+    },
+    "gate_item_unowned": {
+      "fail": "Syarat mulai ({status}) tidak punya penanggung jawab.",
+      "suggestion": "Tunjuk pihak yang memenuhi syarat ini sebelum lokasi dibuka."
+    },
+    "plan_start_missing": {
+      "fail": "Rencana mobilisasi ({status}) tidak punya tanggal mulai rencana.",
+      "suggestion": "Masukkan tanggal mulai rencana mobilisasi."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Kunjungan ({status}) tidak punya tanggal sebenarnya.",
+      "suggestion": "Masukkan tanggal kunjungan dilakukan."
+    },
+    "visit_in_future": {
+      "fail": "Kunjungan ({status}), tetapi tanggalnya {date} berada di masa depan.",
+      "suggestion": "Perbaiki tanggal atau biarkan kunjungan terencana sampai terlaksana."
+    },
+    "observation_missing": {
+      "fail": "Entri bertipe {category} tidak punya teks pengamatan.",
+      "suggestion": "Uraikan apa yang diamati di lokasi."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Pekerjaan tersembunyi diterima tanpa menyebut: {missing}.",
+      "suggestion": "Catat elemen dan lokasinya sebelum entri ditutup."
+    }
   }
 }

@@ -18,3 +18,6 @@ async def on_startup() -> None:
     from app.modules.site_prep.permissions import register_site_prep_permissions
 
     register_site_prep_permissions()
+    from app.modules.site_prep.validators import register_site_prep_validation_rules
+
+    register_site_prep_validation_rules()

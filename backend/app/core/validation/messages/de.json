@@ -2111,5 +2111,133 @@
       "fail": "Ein Zeitabstand von {days} Tagen zwischen zwei Projekten ist ungewöhnlich lang.",
       "suggestion": "Einheit prüfen: der Zeitabstand wird in Tagen eingegeben."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Anforderung {name} verwendet die Prüfung {type}, hat aber keinen Vergleichswert.",
+      "suggestion": "Geben Sie den Grenzwert oder das Muster an, mit dem der Modellwert verglichen wird."
+    },
+    "value_invalid": {
+      "fail": "Der Wert '{value}' der Anforderung {name} ist für die Prüfung {type} nicht verwendbar.",
+      "suggestion": "Verwenden Sie eine Zahl für min und max, von..bis für einen Bereich oder einen gültigen regulären Ausdruck."
+    },
+    "unit_missing": {
+      "fail": "Anforderung {name} legt einen numerischen Grenzwert ({type}) ohne Einheit fest.",
+      "suggestion": "Geben Sie die Einheit an, zum Beispiel m, mm, m2 oder kN."
+    },
+    "verification_missing": {
+      "fail": "Für die verbindliche Anforderung {name} ist nicht angegeben, wie die Einhaltung nachgewiesen wird.",
+      "suggestion": "Wählen Sie ein Nachweisverfahren wie Besichtigung, Prüfung, Berechnung oder Modellprüfung."
+    },
+    "locked_set_empty": {
+      "fail": "Ein Anforderungssatz ohne Anforderungen kann nicht als Referenzstand gesperrt werden.",
+      "suggestion": "Erfassen Sie zuerst die Anforderungen und sperren Sie den Satz danach."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Zeile {row} hat keinen Eigenschaftsnamen.",
+      "suggestion": "Benennen Sie die geprüfte Eigenschaft, zum Beispiel Feuerwiderstand."
+    },
+    "filter_empty": {
+      "fail": "{count} von {total} Anforderungen haben keinen Elementfilter und würden für jedes Element im Modell gelten.",
+      "suggestion": "Beschränken Sie jede Anforderung auf eine Elementklasse oder einen Elementtyp."
+    },
+    "bounds_inverted": {
+      "fail": "Zeile {row} ({property}): Das Minimum {low} liegt über dem Maximum {high}.",
+      "suggestion": "Vertauschen Sie die Grenzen oder korrigieren Sie die Zahlen."
+    },
+    "pattern_invalid": {
+      "fail": "Zeile {row} ({property}): Das Muster '{pattern}' ist kein gültiger regulärer Ausdruck.",
+      "suggestion": "Korrigieren Sie das Muster, sodass es sich kompilieren lässt."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Die Kosten der Abweichung von {amount} haben keine Währung.",
+      "suggestion": "Wählen Sie die Währung der Kostenauswirkung."
+    },
+    "root_cause_missing": {
+      "fail": "Bei einer Abweichung der Schwere {grade} in Prüfung oder abgeschlossen fehlt die Ursache.",
+      "suggestion": "Erfassen Sie die Ursache, bevor Sie den Bericht prüfen oder abschließen."
+    },
+    "punch_due_before_raised": {
+      "fail": "Der Mangel ist am {due} fällig, also vor seiner Erfassung am {raised}.",
+      "suggestion": "Setzen Sie eine Frist am oder nach dem Tag der Erfassung."
+    },
+    "calibration_window": {
+      "fail": "Die Kalibrierung gilt bis {until}, das nicht nach dem Kalibrierdatum {start} liegt.",
+      "suggestion": "Prüfen Sie Kalibrierdatum und Ablaufdatum."
+    },
+    "calibration_lapsed": {
+      "fail": "Die Kalibrierung ist als gültig markiert, ist aber am {until} abgelaufen.",
+      "suggestion": "Kalibrieren Sie das Gerät neu oder setzen Sie den Status auf abgelaufen."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Die untere Toleranz {lower} liegt über der oberen Toleranz {upper}.",
+      "suggestion": "Vertauschen Sie die Grenzen, sodass der untere Wert nicht über dem oberen liegt."
+    },
+    "nominal_outside": {
+      "fail": "Der Nennwert {nominal} liegt außerhalb des Toleranzbands {lower} bis {upper}.",
+      "suggestion": "Korrigieren Sie den Nennwert oder die Toleranzgrenzen."
+    },
+    "certificate_window": {
+      "fail": "Das Zertifikat gilt bis {until}, also vor seinem Beginn am {start}.",
+      "suggestion": "Prüfen Sie die auf dem Zertifikat angegebenen Gültigkeitsdaten."
+    },
+    "certificate_expired": {
+      "fail": "Das Materialzertifikat ist am {date} abgelaufen, das Material hat aber den Status {status}.",
+      "suggestion": "Beschaffen Sie ein gültiges Zertifikat, bevor das Material abgenommen wird."
+    },
+    "test_before_sample": {
+      "fail": "Das Prüfdatum {tested} liegt vor dem Probenahmedatum {sampled}.",
+      "suggestion": "Gleichen Sie Probenahme- und Prüfdatum mit dem Laborbericht ab."
+    },
+    "lab_unaccredited": {
+      "fail": "Das Labor {lab} ist nicht als akkreditiert erfasst.",
+      "suggestion": "Erfassen Sie die Akkreditierungsnummer oder beauftragen Sie ein akkreditiertes Labor."
+    },
+    "date_in_future": {
+      "fail": "Das Datum {field} ({date}) liegt in der Zukunft.",
+      "suggestion": "Erfassen Sie den Tag, an dem Arbeit, Probenahme oder Prüfung tatsächlich stattfand."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Das Fertigstellungsdatum {date} liegt in der Zukunft.",
+      "suggestion": "Geben Sie den Tag der tatsächlichen Fertigstellung ein."
+    },
+    "ready_undated": {
+      "fail": "Die Position ist als bereit markiert, hat aber kein Fertigstellungsdatum.",
+      "suggestion": "Geben Sie das Datum der Fertigstellung ein."
+    },
+    "gate_item_unowned": {
+      "fail": "Die Voraussetzung ist {status} und hat keinen Verantwortlichen.",
+      "suggestion": "Weisen Sie die Stelle zu, die diese Voraussetzung vor Baubeginn erledigt."
+    },
+    "plan_start_missing": {
+      "fail": "Der Einrichtungsplan ist {status}, hat aber keinen geplanten Starttermin.",
+      "suggestion": "Geben Sie den geplanten Beginn der Baustelleneinrichtung ein."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Der Besuch ist {status}, hat aber kein tatsächliches Datum.",
+      "suggestion": "Geben Sie das Datum des Besuchs ein."
+    },
+    "visit_in_future": {
+      "fail": "Der Besuch ist {status}, sein Datum {date} liegt aber in der Zukunft.",
+      "suggestion": "Korrigieren Sie das Datum oder lassen Sie den Besuch geplant, bis er stattgefunden hat."
+    },
+    "observation_missing": {
+      "fail": "Ein Eintrag der Art {category} hat keinen Beobachtungstext.",
+      "suggestion": "Beschreiben Sie, was auf der Baustelle festgestellt wurde."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Verdeckte Leistungen wurden abgenommen, ohne anzugeben: {missing}.",
+      "suggestion": "Erfassen Sie Bauteil und Lage, bevor der Eintrag abgeschlossen wird."
+    }
   }
 }

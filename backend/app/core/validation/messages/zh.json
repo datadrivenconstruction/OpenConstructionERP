@@ -2111,5 +2111,133 @@
       "fail": "两个项目之间 {days} 天的滞后异常长。",
       "suggestion": "请检查单位：滞后以天为单位输入。"
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "要求 {name} 使用了 {type} 检查，但没有可比较的值。",
+      "suggestion": "填写用于与模型值比较的限值或模式。"
+    },
+    "value_invalid": {
+      "fail": "要求 {name} 的值“{value}”不能用于 {type} 检查。",
+      "suggestion": "min 和 max 使用数字，范围使用 下限..上限，其他使用有效的正则表达式。"
+    },
+    "unit_missing": {
+      "fail": "要求 {name} 设定了数值限值（{type}），但没有单位。",
+      "suggestion": "注明单位，例如 m、mm、m2 或 kN。"
+    },
+    "verification_missing": {
+      "fail": "强制性要求 {name} 没有说明如何验证符合性。",
+      "suggestion": "选择验证方法：检查、试验、计算或模型检查。"
+    },
+    "locked_set_empty": {
+      "fail": "没有任何要求的集合不能锁定为基准。",
+      "suggestion": "请先添加要求，再锁定集合。"
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "第 {row} 行没有属性名称。",
+      "suggestion": "填写被检查的属性名称，例如耐火极限。"
+    },
+    "filter_empty": {
+      "fail": "{total} 条要求中有 {count} 条没有构件过滤条件，会适用于模型中的所有构件。",
+      "suggestion": "将每条要求限定到某个构件类别或类型。"
+    },
+    "bounds_inverted": {
+      "fail": "第 {row} 行（{property}）：最小值 {low} 大于最大值 {high}。",
+      "suggestion": "互换两个限值，或更正数值。"
+    },
+    "pattern_invalid": {
+      "fail": "第 {row} 行（{property}）：模式“{pattern}”不是有效的正则表达式。",
+      "suggestion": "更正模式，使其可以编译。"
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "不合格项的费用 {amount} 没有币种。",
+      "suggestion": "选择费用影响的币种。"
+    },
+    "root_cause_missing": {
+      "fail": "处于验证中或已关闭的不合格项（{grade}）没有记录根本原因。",
+      "suggestion": "在验证或关闭报告之前记录根本原因。"
+    },
+    "punch_due_before_raised": {
+      "fail": "整改项的到期日 {due} 早于登记日 {raised}。",
+      "suggestion": "将到期日设为登记当天或之后。"
+    },
+    "calibration_window": {
+      "fail": "校准有效期至 {until}，并不晚于校准日期 {start}。",
+      "suggestion": "检查校准日期和到期日期。"
+    },
+    "calibration_lapsed": {
+      "fail": "校准被标记为有效，但已于 {until} 过期。",
+      "suggestion": "重新校准仪器，或将状态设为已过期。"
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "下限公差 {lower} 大于上限公差 {upper}。",
+      "suggestion": "互换两个限值，使下限不超过上限。"
+    },
+    "nominal_outside": {
+      "fail": "标称值 {nominal} 超出公差范围 {lower} 至 {upper}。",
+      "suggestion": "更正标称值或公差限值。"
+    },
+    "certificate_window": {
+      "fail": "证书有效期至 {until}，早于其起始日期 {start}。",
+      "suggestion": "核对证书上印制的有效日期。"
+    },
+    "certificate_expired": {
+      "fail": "材料证书已于 {date} 过期，但材料状态为 {status}。",
+      "suggestion": "在验收材料之前取得有效证书。"
+    },
+    "test_before_sample": {
+      "fail": "试验日期 {tested} 早于取样日期 {sampled}。",
+      "suggestion": "将取样和试验日期与实验室报告核对。"
+    },
+    "lab_unaccredited": {
+      "fail": "实验室 {lab} 未记录为已认可。",
+      "suggestion": "记录认可编号，或使用经认可的实验室。"
+    },
+    "date_in_future": {
+      "fail": "日期（{field}）{date} 在未来。",
+      "suggestion": "记录工作、取样或试验实际发生的日期。"
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "完成日期 {date} 在未来。",
+      "suggestion": "填写实际完成的日期。"
+    },
+    "ready_undated": {
+      "fail": "该项已标记为就绪，但没有完成日期。",
+      "suggestion": "填写该项的完成日期。"
+    },
+    "gate_item_unowned": {
+      "fail": "开工条件（{status}）没有责任方。",
+      "suggestion": "指定在现场开放前落实该条件的责任方。"
+    },
+    "plan_start_missing": {
+      "fail": "现场准备计划（{status}）没有计划开始日期。",
+      "suggestion": "填写现场准备的计划开始日期。"
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "巡视（{status}）没有实际日期。",
+      "suggestion": "填写巡视发生的日期。"
+    },
+    "visit_in_future": {
+      "fail": "巡视（{status}），但其日期 {date} 在未来。",
+      "suggestion": "更正日期，或在巡视发生之前保持为计划状态。"
+    },
+    "observation_missing": {
+      "fail": "{category} 类记录没有观察描述。",
+      "suggestion": "描述在现场观察到的情况。"
+    },
+    "hidden_works_unidentified": {
+      "fail": "隐蔽工程在未注明以下内容的情况下被验收：{missing}。",
+      "suggestion": "在关闭记录之前记录构件及其位置。"
+    }
   }
 }

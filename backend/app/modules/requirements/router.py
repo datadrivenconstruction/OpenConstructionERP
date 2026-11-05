@@ -616,7 +616,14 @@ async def import_requirements_file(
             skipped += 1
             warnings.append(f"Skipped row '{row.get('entity', '')}.{row.get('attribute', '')}': {exc}")
             continue
-        await service.add_requirement(set_id, create, user_id=str(user_id) if user_id else "")
+        try:
+            await service.add_requirement(set_id, create, user_id=str(user_id) if user_id else "")
+        except HTTPException as exc:
+            if exc.status_code != 422 or not isinstance(exc.detail, dict):
+                raise
+            skipped += 1
+            warnings.append(f"Skipped row '{row.get('entity', '')}.{row.get('attribute', '')}': {exc.detail['code']}")
+            continue
         imported += 1
 
     return ImportFromFileResponse(

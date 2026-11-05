@@ -462,4 +462,5 @@ async def install_from_yaml(
         "pack_id": req_set.metadata_.get("pack_id"),
         "rules_installed": len(created),
         "rule_ids": [r.id for r in created],
+        "warnings": service.findings,
     }

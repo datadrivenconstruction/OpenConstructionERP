@@ -2111,5 +2111,133 @@
       "fail": "Hindi karaniwang mahaba ang lag na {days} araw sa pagitan ng dalawang proyekto.",
       "suggestion": "Suriin ang unit: ang lag ay inilalagay sa araw."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Ang kinakailangan na {name} ay gumagamit ng pagsusuring {type} pero walang halagang ihahambing.",
+      "suggestion": "Ilagay ang hangganan o pattern na pinaghahambingan ng halaga mula sa modelo."
+    },
+    "value_invalid": {
+      "fail": "Ang halagang '{value}' ng kinakailangan na {name} ay hindi magagamit sa pagsusuring {type}.",
+      "suggestion": "Gumamit ng numero para sa min at max, mababa..mataas para sa saklaw, o wastong regular expression."
+    },
+    "unit_missing": {
+      "fail": "Ang kinakailangan na {name} ay nagtatakda ng numerong hangganan ({type}) na walang yunit.",
+      "suggestion": "Ilagay ang yunit, halimbawa m, mm, m2 o kN."
+    },
+    "verification_missing": {
+      "fail": "Ang sapilitang kinakailangan na {name} ay hindi nagsasabi kung paano mapapatunayan ang pagsunod.",
+      "suggestion": "Pumili ng paraan ng pagpapatunay: inspeksyon, pagsubok, kalkulasyon o pagsusuri ng modelo."
+    },
+    "locked_set_empty": {
+      "fail": "Hindi maaaring i-lock bilang baseline ang set na walang kinakailangan.",
+      "suggestion": "Magdagdag muna ng mga kinakailangan, saka i-lock ang set."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Walang pangalan ng property ang hilera {row}.",
+      "suggestion": "Ilagay ang pangalan ng property na sinusuri, halimbawa FireRating."
+    },
+    "filter_empty": {
+      "fail": "{count} sa {total} kinakailangan ay walang filter ng elemento at sasaklaw sa bawat elemento sa modelo.",
+      "suggestion": "Limitahan ang bawat kinakailangan sa isang klase o uri ng elemento."
+    },
+    "bounds_inverted": {
+      "fail": "Hilera {row} ({property}): ang minimum na {low} ay mas mataas sa maximum na {high}.",
+      "suggestion": "Palitan ang mga hangganan o itama ang mga numero."
+    },
+    "pattern_invalid": {
+      "fail": "Hilera {row} ({property}): ang pattern na '{pattern}' ay hindi wastong regular expression.",
+      "suggestion": "Itama ang pattern para ma-compile ito."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Walang pera ang gastos ng hindi pagsunod na {amount}.",
+      "suggestion": "Piliin ang pera ng epekto sa gastos."
+    },
+    "root_cause_missing": {
+      "fail": "Walang nakatalang ugat na sanhi ang hindi pagsunod ({grade}) na isinasailalim sa pagpapatunay o sarado na.",
+      "suggestion": "Itala ang ugat na sanhi bago patunayan o isara ang ulat."
+    },
+    "punch_due_before_raised": {
+      "fail": "Ang takdang petsa ng punch item na {due} ay bago ang petsa ng pagtatala na {raised}.",
+      "suggestion": "Magtakda ng petsa sa araw ng pagtatala o pagkatapos nito."
+    },
+    "calibration_window": {
+      "fail": "Balido ang kalibrasyon hanggang {until}, na hindi pagkatapos ng petsa ng kalibrasyon na {start}.",
+      "suggestion": "Tingnan ang petsa ng kalibrasyon at petsa ng pagkapaso."
+    },
+    "calibration_lapsed": {
+      "fail": "Minarkahang balido ang kalibrasyon pero nag-expire noong {until}.",
+      "suggestion": "I-calibrate muli ang instrumento o gawing expired ang status."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Mas malaki ang mababang tolerance na {lower} kaysa sa mataas na tolerance na {upper}.",
+      "suggestion": "Palitan ang mga hangganan para hindi lumampas ang mababa sa mataas."
+    },
+    "nominal_outside": {
+      "fail": "Ang nominal na halaga na {nominal} ay nasa labas ng saklaw ng tolerance na {lower} hanggang {upper}.",
+      "suggestion": "Itama ang nominal na halaga o ang mga hangganan ng tolerance."
+    },
+    "certificate_window": {
+      "fail": "Balido ang sertipiko hanggang {until}, ibig sabihin bago ang petsa ng simula na {start}.",
+      "suggestion": "Tingnan ang mga petsa ng bisa na nakasulat sa sertipiko."
+    },
+    "certificate_expired": {
+      "fail": "Nag-expire ang sertipiko ng materyal noong {date}, pero ang status ng materyal ay {status}.",
+      "suggestion": "Kumuha ng balidong sertipiko bago tanggapin ang materyal."
+    },
+    "test_before_sample": {
+      "fail": "Ang petsa ng pagsubok na {tested} ay bago ang petsa ng pagkuha ng sample na {sampled}.",
+      "suggestion": "Ikumpara ang mga petsa ng sampling at pagsubok sa ulat ng laboratoryo."
+    },
+    "lab_unaccredited": {
+      "fail": "Ang laboratoryong {lab} ay hindi nakatalang akreditado.",
+      "suggestion": "Itala ang sanggunian ng akreditasyon o gumamit ng akreditadong laboratoryo."
+    },
+    "date_in_future": {
+      "fail": "Ang petsa ({field}) na {date} ay nasa hinaharap.",
+      "suggestion": "Itala ang araw na talagang ginawa ang trabaho, sampling o pagsubok."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Ang petsa ng pagkumpleto na {date} ay nasa hinaharap.",
+      "suggestion": "Ilagay ang araw ng aktwal na pagkumpleto."
+    },
+    "ready_undated": {
+      "fail": "Minarkahang handa ang item pero walang petsa ng pagkumpleto.",
+      "suggestion": "Ilagay ang petsa ng pagkumpleto ng item."
+    },
+    "gate_item_unowned": {
+      "fail": "Walang responsableng partido ang kondisyon sa pagsisimula ({status}).",
+      "suggestion": "Italaga kung sino ang tutupad sa kondisyon bago buksan ang site."
+    },
+    "plan_start_missing": {
+      "fail": "Walang planadong petsa ng simula ang plano sa mobilisasyon ({status}).",
+      "suggestion": "Ilagay ang planadong petsa ng simula ng mobilisasyon."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Walang aktwal na petsa ang pagbisita ({status}).",
+      "suggestion": "Ilagay ang petsa kung kailan naganap ang pagbisita."
+    },
+    "visit_in_future": {
+      "fail": "Ang pagbisita ({status}) pero ang petsa nitong {date} ay nasa hinaharap.",
+      "suggestion": "Itama ang petsa o iwang planado ang pagbisita hanggang maganap ito."
+    },
+    "observation_missing": {
+      "fail": "Walang teksto ng obserbasyon ang entry na uri {category}.",
+      "suggestion": "Ilarawan ang namasdan sa site."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Tinanggap ang mga nakatagong gawa nang hindi tinutukoy ang: {missing}.",
+      "suggestion": "Itala ang elemento at lokasyon nito bago isara ang entry."
+    }
   }
 }

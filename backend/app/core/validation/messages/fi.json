@@ -2111,5 +2111,133 @@
       "fail": "{days} päivän viive kahden hankkeen välillä on poikkeuksellisen pitkä.",
       "suggestion": "Tarkista yksikkö: viive annetaan päivinä."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Vaatimus {name} käyttää tarkistusta {type}, mutta sillä ei ole vertailuarvoa.",
+      "suggestion": "Anna raja tai kaava, johon mallin arvoa verrataan."
+    },
+    "value_invalid": {
+      "fail": "Vaatimuksen {name} arvoa '{value}' ei voi käyttää tarkistuksessa {type}.",
+      "suggestion": "Käytä lukua min- ja max-arvoille, alin..ylin välille tai kelvollista säännöllistä lauseketta."
+    },
+    "unit_missing": {
+      "fail": "Vaatimus {name} asettaa numeerisen rajan ({type}) ilman yksikköä.",
+      "suggestion": "Ilmoita yksikkö, esimerkiksi m, mm, m2 tai kN."
+    },
+    "verification_missing": {
+      "fail": "Pakolliselle vaatimukselle {name} ei ole kerrottu, miten vaatimustenmukaisuus todennetaan.",
+      "suggestion": "Valitse todentamistapa: katselmus, koe, laskelma tai mallitarkistus."
+    },
+    "locked_set_empty": {
+      "fail": "Vaatimusjoukkoa, jossa ei ole vaatimuksia, ei voi lukita perustasoksi.",
+      "suggestion": "Lisää ensin vaatimukset ja lukitse joukko sitten."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Riviltä {row} puuttuu ominaisuuden nimi.",
+      "suggestion": "Anna tarkistettavan ominaisuuden nimi, esimerkiksi Palonkesto."
+    },
+    "filter_empty": {
+      "fail": "{count} vaatimuksella {total}:sta ei ole elementtisuodatinta, ja ne koskisivat kaikkia mallin elementtejä.",
+      "suggestion": "Rajaa jokainen vaatimus elementtiluokkaan tai -tyyppiin."
+    },
+    "bounds_inverted": {
+      "fail": "Rivi {row} ({property}): vähimmäisarvo {low} on suurempi kuin enimmäisarvo {high}.",
+      "suggestion": "Vaihda rajat keskenään tai korjaa luvut."
+    },
+    "pattern_invalid": {
+      "fail": "Rivi {row} ({property}): kaava '{pattern}' ei ole kelvollinen säännöllinen lauseke.",
+      "suggestion": "Korjaa kaava niin, että se voidaan kääntää."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Poikkeaman kustannukselta {amount} puuttuu valuutta.",
+      "suggestion": "Valitse kustannusvaikutuksen valuutta."
+    },
+    "root_cause_missing": {
+      "fail": "Tarkastusvaiheessa olevalta tai suljetulta poikkeamalta ({grade}) puuttuu juurisyy.",
+      "suggestion": "Kirjaa juurisyy ennen raportin todentamista tai sulkemista."
+    },
+    "punch_due_before_raised": {
+      "fail": "Vikaluettelon kohdan eräpäivä {due} on ennen kirjauspäivää {raised}.",
+      "suggestion": "Aseta eräpäivä kirjauspäiväksi tai sen jälkeiseksi."
+    },
+    "calibration_window": {
+      "fail": "Kalibrointi on voimassa {until} asti, mikä ei ole kalibrointipäivän {start} jälkeen.",
+      "suggestion": "Tarkista kalibrointipäivä ja vanhenemispäivä."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibrointi on merkitty voimassa olevaksi, mutta se vanheni {until}.",
+      "suggestion": "Kalibroi laite uudelleen tai aseta tilaksi vanhentunut."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Alatoleranssi {lower} on suurempi kuin ylätoleranssi {upper}.",
+      "suggestion": "Vaihda rajat keskenään, jotta alaraja ei ylitä ylärajaa."
+    },
+    "nominal_outside": {
+      "fail": "Nimellisarvo {nominal} on toleranssialueen {lower}–{upper} ulkopuolella.",
+      "suggestion": "Korjaa nimellisarvo tai toleranssirajat."
+    },
+    "certificate_window": {
+      "fail": "Todistus on voimassa {until} asti eli ennen alkupäivää {start}.",
+      "suggestion": "Tarkista todistuksessa ilmoitetut voimassaoloajat."
+    },
+    "certificate_expired": {
+      "fail": "Materiaalin todistus vanheni {date}, mutta materiaalin tila on {status}.",
+      "suggestion": "Hanki voimassa oleva todistus ennen materiaalin hyväksymistä."
+    },
+    "test_before_sample": {
+      "fail": "Kokeen päivä {tested} on ennen näytteenottopäivää {sampled}.",
+      "suggestion": "Vertaa näytteenotto- ja koepäivää laboratorion raporttiin."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratoriota {lab} ei ole merkitty akkreditoiduksi.",
+      "suggestion": "Kirjaa akkreditointiviite tai käytä akkreditoitua laboratoriota."
+    },
+    "date_in_future": {
+      "fail": "Päivä ({field}) {date} on tulevaisuudessa.",
+      "suggestion": "Kirjaa päivä, jolloin työ, näytteenotto tai koe todella tehtiin."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Valmistumispäivä {date} on tulevaisuudessa.",
+      "suggestion": "Anna päivä, jolloin kohta todella valmistui."
+    },
+    "ready_undated": {
+      "fail": "Kohta on merkitty valmiiksi, mutta sillä ei ole valmistumispäivää.",
+      "suggestion": "Anna kohdan valmistumispäivä."
+    },
+    "gate_item_unowned": {
+      "fail": "Aloitusehdolla ({status}) ei ole vastuuhenkilöä.",
+      "suggestion": "Nimeä vastuuhenkilö, joka täyttää ehdon ennen työmaan avaamista."
+    },
+    "plan_start_missing": {
+      "fail": "Työmaan perustamissuunnitelmalla ({status}) ei ole suunniteltua aloituspäivää.",
+      "suggestion": "Anna perustamisen suunniteltu aloituspäivä."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Käynnillä ({status}) ei ole toteutunutta päivää.",
+      "suggestion": "Anna käynnin päivämäärä."
+    },
+    "visit_in_future": {
+      "fail": "Käynti ({status}), mutta sen päivä {date} on tulevaisuudessa.",
+      "suggestion": "Korjaa päivä tai jätä käynti suunnitelluksi, kunnes se on tapahtunut."
+    },
+    "observation_missing": {
+      "fail": "Tyypin {category} merkinnällä ei ole havaintotekstiä.",
+      "suggestion": "Kuvaa, mitä työmaalla havaittiin."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Peittyvät työt hyväksyttiin ilman tietoja: {missing}.",
+      "suggestion": "Kirjaa rakenneosa ja sijainti ennen merkinnän sulkemista."
+    }
   }
 }
