@@ -482,3 +482,55 @@ def test_the_same_bill_with_five_defects_is_reported_once_for_each() -> None:
         "birimfiyat.own_item_analysed": ["p-2.7"],
         "birimfiyat.profit_overhead_once": ["None"],
     }
+
+
+# ── Published prices carry the 25 percent already ────────────────────────────
+
+
+def _run_published(positions: list[dict[str, Any]], markups: list[dict[str, Any]], **data: Any) -> list[Any]:
+    from app.core.validation.rules import BirimFiyatOverheadsNotAppliedTwice
+
+    payload: dict[str, Any] = {"positions": positions, "markups": markups, **data}
+    rule = BirimFiyatOverheadsNotAppliedTwice()
+    return asyncio.run(rule.validate(ValidationContext(data=payload, metadata={"locale": "en"})))
+
+
+def _turkish_stack() -> list[dict[str, Any]]:
+    return [
+        _markup("Müteahhit kârı ve genel giderler", "overhead", "25"),
+        _markup("KDV", "tax", "20", apply_to="cumulative", sort_order=1),
+    ]
+
+
+def test_a_bill_stated_as_priced_from_published_rates_that_adds_the_25_percent_is_reported() -> None:
+    results = _run_published([_line()], _turkish_stack(), priced_from_published_rates=True)
+    assert [r.passed for r in results] == [False]
+    assert results[0].details["added_percent"] == 25
+    assert "25 percent" in results[0].message
+    assert results[0].suggestion
+
+
+def test_the_same_bill_with_the_line_removed_passes() -> None:
+    stack = [m for m in _turkish_stack() if m["category"] == "tax"]
+    results = _run_published([_line()], stack, priced_from_published_rates=True)
+    assert [r.passed for r in results] == [True]
+
+
+def test_a_bill_with_no_statement_stays_quiet_even_with_poz_codes() -> None:
+    """The Istanbul demo cites poz numbers on net rates and must not be warned."""
+    assert _run_published([_line()], _turkish_stack()) == []
+    assert _run_published([_line()], _turkish_stack(), priced_from_published_rates=False) == []
+
+
+def test_an_inactive_line_is_not_counted() -> None:
+    stack = [_markup("Müteahhit kârı ve genel giderler", "overhead", "25", is_active=False)]
+    results = _run_published([_line()], stack, priced_from_published_rates=True)
+    assert [r.passed for r in results] == [True]
+
+
+def test_lines_carrying_a_price_list_block_are_a_signal_too() -> None:
+    block = {"prezzario": {"rate_includes_overheads": True}}
+    rows = [_line(metadata=block), _line(ordinal="1.2", metadata=block)]
+    assert [r.passed for r in _run_published(rows, _turkish_stack())] == [False]
+    net = {"prezzario": {"rate_includes_overheads": False}}
+    assert _run_published([_line(metadata=net)], _turkish_stack()) == []

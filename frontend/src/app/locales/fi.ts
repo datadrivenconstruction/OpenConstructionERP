@@ -59551,6 +59551,8 @@ const resource = {
     "boq.recurring_apply": "Käytä kaikkiin",
     "boq.recurring_applied": "Hinta käytetty: {{updated}}. Ennallaan: {{unchanged}}",
     "boq.recurring_bad_rate": "Anna yksikköhinta, joka on 0 tai suurempi.",
+    "boq.priced_from_published_rates": "Hinnat ovat julkaistuja yksikköhintoja",
+    "boq.priced_from_published_rates_hint": "Ne sisältävät jo yleiskulut ja voiton. Validointi varoittaa, jos lisäkate lisää ne uudelleen.",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

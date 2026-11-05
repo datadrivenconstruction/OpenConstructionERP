@@ -517,6 +517,10 @@
       "fail": "承包商利润和管理费已用于 {count} 行，合计 {total} 个百分点，超过唯一的 {limit} 个百分点",
       "suggestion": "这 25% 只加一次。请保留一行；若单价为已公布的单价，其中已含此项，则应全部删除"
     },
+    "overheads_not_applied_twice": {
+      "fail": "该清单按已公布单价计价，而这些单价已包含承包商利润和管理费，却又被重复计入（{percent}%）",
+      "suggestion": "从此清单中删除利润和管理费行，或者如果您的单价不含这些费用，请关闭设置“价格为已公布的单价”"
+    },
     "unit_matches_poz_definition": {
       "fail": "第 {ordinal} 项的 poz“{code}”按“{unit}”计量，但已安装的单价册将其定义为“{book_unit}”",
       "suggestion": "一个 poz 编号只定义一种单位。请按单价册的单位计量该行，或把不同的工作作为自建条目（ÖZEL-1）编号",

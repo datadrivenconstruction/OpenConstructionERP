@@ -59307,6 +59307,8 @@ const resource = {
     "boq.recurring_applied": "Đã áp dụng đơn giá: {{updated}}. Không đổi: {{unchanged}}",
     "boq.recurring_bad_rate": "Nhập đơn giá từ 0 trở lên.",
     "boq.recurring_drifting": "Đơn giá khác nhau",
+    "boq.priced_from_published_rates": "Giá là đơn giá đã công bố",
+    "boq.priced_from_published_rates_hint": "Đơn giá đã bao gồm chi phí chung và lợi nhuận. Kiểm tra sẽ cảnh báo nếu hệ số cộng thêm lại cộng chúng một lần nữa.",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

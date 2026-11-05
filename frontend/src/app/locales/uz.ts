@@ -60479,6 +60479,8 @@ const resource = {
     "boq.recurring_applied": "Narx qoʻllandi: {{updated}}. Oʻzgarmagan: {{unchanged}}",
     "boq.recurring_bad_rate": "0 yoki undan katta birlik narxini kiriting.",
     "boq.recurring_drifting": "Turli narxlar",
+    "boq.priced_from_published_rates": "Narxlar – e'lon qilingan birlik narxlar",
+    "boq.priced_from_published_rates_hint": "Ularga ustama xarajatlar va foyda allaqachon kiritilgan. Agar ustama ularni qayta qo'shsa, validatsiya ogohlantiradi.",
     "guide.cost_control.title": "Xarajatlarni nazorat qilish",
     "guide.cost_control.intro": "Xarajatlarni nazorat qilish bitta savolga javob beradi: loyiha oxirida qancha turadi va nima uchun. U oʻz modullarida allaqachon turgan byudjet, smeta, shartnomalar, oʻzgartirishlar, oʻlchangan ish va hisob-fakturalarni oʻqiydi, shuning uchun hech narsa ikki marta kiritilmaydi.",
     "guide.cost_control.methods.title": "Prognozni oʻqishning toʻrt usuli",

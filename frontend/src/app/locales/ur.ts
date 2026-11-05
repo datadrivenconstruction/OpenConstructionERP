@@ -59513,6 +59513,8 @@ const resource = {
     "boq.recurring_applied": "ریٹ لاگو ہوا: {{updated}}۔ بغیر تبدیلی: {{unchanged}}",
     "boq.recurring_bad_rate": "0 یا اس سے زیادہ یونٹ ریٹ درج کریں۔",
     "boq.recurring_drifting": "مختلف ریٹ",
+    "boq.priced_from_published_rates": "قیمتیں شائع شدہ یونٹ قیمتیں ہیں",
+    "boq.priced_from_published_rates_hint": "ان میں پہلے ہی اوور ہیڈ اور منافع شامل ہیں۔ اگر مارک اپ انہیں دوبارہ شامل کرے تو ویلیڈیشن انتباہ دے گی۔",
     "guide.cost_control.title": "لاگت کنٹرول",
     "guide.cost_control.intro": "لاگت کنٹرول ایک سوال کا جواب دیتا ہے: پروجیکٹ کی آخر میں لاگت کیا ہوگی، اور کیوں۔ یہ بجٹ، تخمینہ، کنٹریکٹس، تبدیلیاں، ناپا ہوا کام اور انوائسز پڑھتا ہے جو پہلے ہی اپنے ماڈیولز میں موجود ہیں، اس لیے کچھ دو بار نہیں لکھنا پڑتا۔",
     "guide.cost_control.methods.title": "پیش گوئی پڑھنے کے چار طریقے",

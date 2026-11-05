@@ -67,6 +67,7 @@ BIRIMFIYAT_RULES = (
     rules.BirimFiyatPozRateConsistent,
     rules.BirimFiyatOwnItemAnalysed,
     rules.BirimFiyatProfitOverheadOnce,
+    rules.BirimFiyatOverheadsNotAppliedTwice,
     rules.BirimFiyatUnitMatchesPoz,
     rules.BirimFiyatRateAgainstPublished,
 )

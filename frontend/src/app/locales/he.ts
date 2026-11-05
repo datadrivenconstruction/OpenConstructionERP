@@ -59833,6 +59833,8 @@ const resource = {
     "boq.recurring_apply": "החלה על כולם",
     "boq.recurring_applied": "המחיר הוחל: {{updated}}. ללא שינוי: {{unchanged}}",
     "boq.recurring_bad_rate": "הזינו מחיר יחידה של 0 ומעלה.",
+    "boq.priced_from_published_rates": "המחירים הם מחירי יחידה מפורסמים",
+    "boq.priced_from_published_rates_hint": "הם כבר כוללים תקורה ורווח. הוולידציה מזהירה אם תוספת מחיר מוסיפה אותם שוב.",
     "guide.cost_control.title": "בקרת עלויות",
     "guide.cost_control.intro": "בקרת עלויות עונה על שאלה אחת: כמה הפרויקט יעלה בסוף, ולמה. היא קוראת את התקציב, האומדן, החוזים, השינויים, העבודה שנמדדה והחשבוניות שכבר נמצאים במודולים שלהם, כך שאין הקלדה כפולה.",
     "guide.cost_control.methods.title": "ארבע דרכים לקרוא את התחזית",

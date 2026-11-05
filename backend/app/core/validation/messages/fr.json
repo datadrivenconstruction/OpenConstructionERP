@@ -517,6 +517,10 @@
       "fail": "Le bénéfice et les frais généraux de l'entreprise sont appliqués sur {count} lignes, {total} pour cent au total, au-dessus des {limit} pour cent uniques",
       "suggestion": "Les 25 pour cent ne s'ajoutent qu'une fois. Garder une seule ligne, et la supprimer entièrement quand les prix sont des prix unitaires publiés, qui les contiennent déjà"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Le bordereau est chiffré à partir de prix unitaires publiés, qui intègrent déjà le bénéfice et les frais généraux de l'entreprise, et ils sont pourtant rajoutés ({percent} pour cent)",
+      "suggestion": "Supprimez la ligne bénéfice et frais généraux de ce bordereau, ou désactivez le réglage « Les prix sont des prix unitaires publiés » si vos tarifs sont nets de ces frais"
+    },
     "unit_matches_poz_definition": {
       "fail": "Le poz « {code} » du poste {ordinal} est métré en « {unit} », mais le recueil de prix unitaires installé le définit en « {book_unit} »",
       "suggestion": "Un numéro de poz est défini dans une seule unité. Métrez la ligne dans l'unité du recueil, ou numérotez le travail différent comme un article propre (ÖZEL-1)",

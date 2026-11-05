@@ -517,6 +517,10 @@
       "fail": "Entreprenørens fortjeneste og generelle kostnader er brukt på {count} linjer, {total} prosent til sammen, over de enkle {limit} prosentene",
       "suggestion": "De 25 prosentene legges på én gang. Behold én linje, og fjern den helt når prisene er publiserte enhetspriser, som allerede inneholder dem"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Massespesifikasjonen er priset med publiserte enhetspriser som allerede inneholder entreprenørens fortjeneste og generelle kostnader, likevel legges de til igjen ({percent} prosent)",
+      "suggestion": "Fjern linjen for fortjeneste og generelle kostnader fra denne spesifikasjonen, eller slå av innstillingen „Prisene er publiserte enhetspriser“ hvis satsene dine er uten dem"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' på post {ordinal} er målt i '{unit}', men den installerte enhetsprisboken definerer den i '{book_unit}'",
       "suggestion": "Et poz-nummer er definert i én enhet. Mål linjen i bokens enhet, eller nummerer det avvikende arbeidet som din egen post (ÖZEL-1)",

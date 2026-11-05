@@ -59547,6 +59547,8 @@ const resource = {
     "boq.recurring_apply": "Anvend på alle",
     "boq.recurring_applied": "Pris anvendt: {{updated}}. Uændrede: {{unchanged}}",
     "boq.recurring_bad_rate": "Angiv en enhedspris på 0 eller mere.",
+    "boq.priced_from_published_rates": "Priserne er publicerede enhedspriser",
+    "boq.priced_from_published_rates_hint": "De indeholder allerede indirekte omkostninger og fortjeneste. Validering advarer, hvis et påslag lægger dem til igen.",
     "guide.cost_control.title": "Omkostningsstyring",
     "guide.cost_control.intro": "Omkostningsstyring svarer på ét spørgsmål: hvad kommer projektet til at koste til sidst, og hvorfor. Den læser budget, kalkulation, kontrakter, ændringer, opmålt arbejde og fakturaer, som allerede ligger i deres egne moduler, så intet skrives ind to gange.",
     "guide.cost_control.methods.title": "Fire måder at læse prognosen på",

@@ -517,6 +517,10 @@
       "fail": "Utile d'impresa e spese generali sono applicati su {count} righe, {total} per cento in totale, oltre l'unico {limit} per cento",
       "suggestion": "Il 25 per cento si aggiunge una sola volta. Tenere una sola riga, e toglierla del tutto quando i prezzi sono prezzi unitari pubblicati, che lo contengono già"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Il computo è valorizzato con prezzi unitari pubblicati, che includono già l'utile d'impresa e le spese generali, eppure vengono aggiunti di nuovo ({percent} per cento)",
+      "suggestion": "Rimuovere dal computo la riga di utile e spese generali, oppure disattivare l'impostazione „I prezzi sono prezzi unitari pubblicati“ se le tariffe ne sono al netto"
+    },
     "unit_matches_poz_definition": {
       "fail": "Il poz '{code}' della voce {ordinal} è misurato in '{unit}', ma il listino prezzi unitari installato lo definisce in '{book_unit}'",
       "suggestion": "Un numero di poz è definito in una sola unità. Misuri la riga nell'unità del listino, oppure numeri il lavoro diverso come voce propria (ÖZEL-1)",

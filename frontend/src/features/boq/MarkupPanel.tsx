@@ -192,6 +192,9 @@ interface MarkupPanelProps {
   openSignal?: number;
   /** Available sections for scoping markups to a specific section. */
   sections?: SectionEntry[];
+  /** The bill's `metadata.priced_from_published_rates`: its rates already contain overhead and profit. */
+  pricedFromPublishedRates?: boolean;
+  readOnly?: boolean;
 }
 
 interface EditState {
@@ -200,7 +203,7 @@ interface EditState {
   value: string;
 }
 
-export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt, openSignal, sections }: MarkupPanelProps) {
+export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt, openSignal, sections, pricedFromPublishedRates = false, readOnly = false }: MarkupPanelProps) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -221,6 +224,11 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
     queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
     queryClient.invalidateQueries({ queryKey: ['boq-cost-breakdown', boqId] });
   }, [queryClient, boqId]);
+
+  const publishedRatesMutation = useMutation({
+    mutationFn: (next: boolean) => boqApi.update(boqId, { metadata: { priced_from_published_rates: next } }),
+    onSuccess: invalidate,
+  });
 
   const addMutation = useMutation({
     mutationFn: (data: CreateMarkupData) => boqApi.addMarkup(boqId, data),
@@ -509,6 +517,24 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
 
       {isOpen && (
         <div className="border-t border-border-light">
+          <label className="flex items-start gap-2 px-5 py-2.5 text-sm text-content-primary border-b border-border-light">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={pricedFromPublishedRates}
+              disabled={readOnly || publishedRatesMutation.isPending}
+              onChange={(e) => publishedRatesMutation.mutate(e.target.checked)}
+              data-testid="priced-from-published-rates"
+            />
+            <span>
+              {t('boq.priced_from_published_rates', { defaultValue: 'Prices are published unit prices' })}
+              <span className="block text-xs text-content-tertiary">
+                {t('boq.priced_from_published_rates_hint', {
+                  defaultValue: 'They already contain overhead and profit. Validation warns if a markup adds them again.',
+                })}
+              </span>
+            </span>
+          </label>
           {/* Toolbar: Regional template + Add */}
           <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-surface-secondary/30">
             {/* Regional template dropdown */}

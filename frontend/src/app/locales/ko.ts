@@ -59915,6 +59915,8 @@ const resource = {
     "boq.recurring_apply": "모두 적용",
     "boq.recurring_applied": "단가 적용: {{updated}}. 변경 없음: {{unchanged}}",
     "boq.recurring_bad_rate": "0 이상의 단가를 입력하세요.",
+    "boq.priced_from_published_rates": "가격은 공시된 단가입니다",
+    "boq.priced_from_published_rates_hint": "공시 단가에는 이미 간접비와 이윤이 포함되어 있습니다. 할증이 이를 다시 더하면 검증에서 경고합니다.",
     "guide.cost_control.title": "원가 관리",
     "guide.cost_control.intro": "원가 관리는 한 가지 질문에 답합니다. 프로젝트가 결국 얼마가 들고, 그 이유는 무엇인가. 예산, 견적, 계약, 변경, 실측 물량, 청구서는 각자의 모듈에 이미 있는 것을 읽어 오므로 두 번 입력할 필요가 없습니다.",
     "guide.cost_control.methods.title": "예측을 보는 네 가지 방법",

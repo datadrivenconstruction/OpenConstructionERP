@@ -62613,6 +62613,8 @@ const resource = {
     "boq.recurring_apply": "تطبيق على الكل",
     "boq.recurring_applied": "تم تطبيق السعر: {{updated}}. دون تغيير: {{unchanged}}",
     "boq.recurring_bad_rate": "أدخل سعر وحدة يساوي 0 أو أكثر.",
+    "boq.priced_from_published_rates": "الأسعار هي أسعار وحدات منشورة",
+    "boq.priced_from_published_rates_hint": "تتضمن هذه الأسعار المصاريف العامة والربح سلفًا. يحذّر التحقق إذا أضاف الهامش هذه المبالغ مرة أخرى.",
     "guide.cost_control.title": "ضبط التكاليف",
     "guide.cost_control.intro": "يجيب ضبط التكاليف عن سؤال واحد: كم سيكلّف المشروع في النهاية، ولماذا. يقرأ الميزانية والتقدير والعقود والتغييرات والأعمال المقاسة والفواتير الموجودة أصلًا في وحداتها، فلا يُدخل شيء مرتين.",
     "guide.cost_control.methods.title": "أربع طرق لقراءة التوقع",

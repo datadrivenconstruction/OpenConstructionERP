@@ -21,7 +21,7 @@ import logging
 import re
 import unicodedata
 from datetime import timezone
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -6179,6 +6179,86 @@ class BirimFiyatProfitOverheadOnce(ValidationRule):
         ]
 
 
+PRICED_FROM_PUBLISHED_RATES_KEY = "priced_from_published_rates"
+
+
+class BirimFiyatOverheadsNotAppliedTwice(ValidationRule):
+    """A bill priced from published unit prices adds no profit and general expenses line.
+
+    A published Ministry unit price already contains the 25 percent. The rule
+    speaks only on an explicit statement: the bill (or its project) says it is
+    priced from published rates, or at least half of its lines carry a price-list
+    block with ``rate_includes_overheads`` true. A poz number alone says
+    nothing, because a bill can cite poz numbers and price them net.
+    """
+
+    rule_id = "birimfiyat.overheads_not_applied_twice"
+    name = "Published Prices Carry No Second Profit And General Expenses"
+    standard = "birimfiyat"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "A bill priced from published unit prices must not add the profit and general expenses they contain"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        # Imported here: the Italian module imports this one at load time.
+        from app.core.validation.rules.italy_prezzario import (
+            LIST_PRICED_SHARE,
+            _bill_wide_markups,
+            _direct_cost,
+            markup_amounts,
+            prezzario_block,
+        )
+
+        data = context.data if isinstance(context.data, dict) else {}
+        leaves = _get_leaf_positions(context)
+        from_list = [pos for pos in leaves if prezzario_block(pos).get("rate_includes_overheads") is True]
+        stated = data.get(PRICED_FROM_PUBLISHED_RATES_KEY) is True
+        by_lines = bool(leaves) and Decimal(len(from_list)) / Decimal(len(leaves)) >= LIST_PRICED_SHARE
+        if not (stated or by_lines):
+            return []
+        counted = BirimFiyatProfitOverheadOnce._lines(context)
+        if counted is None:
+            return []
+        ids = {id(m) for m in counted}
+        bill_wide = _bill_wide_markups(context)
+        direct = _direct_cost(context, leaves)
+        added = Decimal(0)
+        if direct > 0 and counted:
+            amounts = markup_amounts(bill_wide, direct)
+            added = (
+                sum(
+                    (amount for m, amount in zip(bill_wide, amounts, strict=True) if id(m) in ids),
+                    Decimal(0),
+                )
+                / direct
+                * 100
+            )
+        shown = int(added.quantize(Decimal(1), rounding=ROUND_HALF_UP))
+        passed = shown < 1
+        locale = _get_locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=passed,
+                message=_ok(locale)
+                if passed
+                else translate("birimfiyat.overheads_not_applied_twice.fail", locale=locale, percent=shown),
+                element_ref=None,
+                details={
+                    "markups": [str(m.get("name") or "") for m in counted],
+                    "added_percent": shown,
+                    "signal": "stated" if stated else "price_list_lines",
+                },
+                suggestion=None
+                if passed
+                else translate("birimfiyat.overheads_not_applied_twice.suggestion", locale=locale),
+            )
+        ]
+
+
 # ── Birim Fiyat rules that read the installed unit-price base ───────────
 #
 # The two rules below compare a line with the book it cites. The book reaches
@@ -12295,6 +12375,7 @@ def register_builtin_rules() -> None:
         (BirimFiyatPozRateConsistent(), None),
         (BirimFiyatOwnItemAnalysed(), None),
         (BirimFiyatProfitOverheadOnce(), None),
+        (BirimFiyatOverheadsNotAppliedTwice(), None),
         (BirimFiyatUnitMatchesPoz(), None),
         (BirimFiyatRateAgainstPublished(), None),
         # Sekisan (Japan)

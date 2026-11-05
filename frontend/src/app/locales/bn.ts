@@ -59817,6 +59817,8 @@ const resource = {
     "boq.recurring_apply": "সবগুলোতে প্রয়োগ",
     "boq.recurring_applied": "দর প্রয়োগ: {{updated}}। অপরিবর্তিত: {{unchanged}}",
     "boq.recurring_bad_rate": "০ বা তার বেশি একক দর লিখুন।",
+    "boq.priced_from_published_rates": "মূল্য হলো প্রকাশিত একক দর",
+    "boq.priced_from_published_rates_hint": "এতে ইতিমধ্যে ওভারহেড ও লাভ অন্তর্ভুক্ত আছে। মার্কআপ আবার যোগ করলে ভ্যালিডেশন সতর্ক করবে।",
     "guide.cost_control.title": "খরচ নিয়ন্ত্রণ",
     "guide.cost_control.intro": "খরচ নিয়ন্ত্রণ একটি প্রশ্নের উত্তর দেয়: শেষে প্রকল্পের খরচ কত হবে, এবং কেন। এটি বাজেট, প্রাক্কলন, চুক্তি, পরিবর্তন, মাপা কাজ ও চালান পড়ে, যা আগে থেকেই নিজ নিজ মডিউলে আছে, তাই কিছু দুবার লিখতে হয় না।",
     "guide.cost_control.methods.title": "পূর্বাভাস পড়ার চারটি উপায়",

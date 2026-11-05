@@ -517,6 +517,10 @@
       "fail": "Entreprenörens vinst och allmänna omkostnader läggs på {count} rader, {total} procent tillsammans, över de enkla {limit} procenten",
       "suggestion": "De 25 procenten läggs på en gång. Behåll en rad, och ta bort den helt när priserna är publicerade enhetspriser, som redan innehåller dem"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Mängdförteckningen är prissatt med publicerade enhetspriser som redan innehåller entreprenörens vinst och allmänna kostnader, men de läggs ändå till igen ({percent} procent)",
+      "suggestion": "Ta bort raden för vinst och allmänna kostnader från mängdförteckningen, eller stäng av inställningen „Priserna är publicerade enhetspriser” om dina priser är utan dem"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' på post {ordinal} är mätt i '{unit}', men den installerade enhetsprisboken definierar den i '{book_unit}'",
       "suggestion": "Ett poz-nummer är definierat i en enhet. Mät raden i bokens enhet, eller numrera det avvikande arbetet som en egen post (ÖZEL-1)",

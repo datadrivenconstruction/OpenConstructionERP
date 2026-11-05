@@ -59497,6 +59497,8 @@ const resource = {
     "boq.recurring_apply": "Rakenda kõigile",
     "boq.recurring_applied": "Hind rakendatud: {{updated}}. Muutmata: {{unchanged}}",
     "boq.recurring_bad_rate": "Sisesta ühikuhind 0 või rohkem.",
+    "boq.priced_from_published_rates": "Hinnad on avaldatud ühikhinnad",
+    "boq.priced_from_published_rates_hint": "Need sisaldavad juba üldkulusid ja kasumit. Valideerimine hoiatab, kui lisand need uuesti lisab.",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

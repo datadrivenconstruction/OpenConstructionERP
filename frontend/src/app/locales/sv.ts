@@ -60162,6 +60162,8 @@ const resource = {
     "boq.recurring_applied": "Pris tillämpat: {{updated}}. Oförändrade: {{unchanged}}",
     "boq.recurring_bad_rate": "Ange ett à-pris på 0 eller mer.",
     "boq.recurring_drifting": "Olika priser",
+    "boq.priced_from_published_rates": "Priserna är publicerade enhetspriser",
+    "boq.priced_from_published_rates_hint": "De innehåller redan omkostnader och vinst. Valideringen varnar om ett påslag lägger till dem igen.",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

@@ -517,6 +517,10 @@
       "fail": "Winst en algemene kosten van de aannemer zijn op {count} regels toegepast, samen {total} procent, boven de enkele {limit} procent",
       "suggestion": "De 25 procent wordt één keer opgeteld. Houd één regel aan, en verwijder die helemaal wanneer de tarieven gepubliceerde eenheidsprijzen zijn, die het al bevatten"
     },
+    "overheads_not_applied_twice": {
+      "fail": "De staat van hoeveelheden is geprijsd op basis van gepubliceerde eenheidsprijzen, die de winst van de aannemer en algemene kosten al bevatten, toch worden ze opnieuw toegevoegd ({percent} procent)",
+      "suggestion": "Verwijder de regel voor winst en algemene kosten uit deze staat, of zet de instelling „Prijzen zijn gepubliceerde eenheidsprijzen“ uit als uw tarieven zonder deze kosten zijn"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' op post {ordinal} is gemeten in '{unit}', maar het geïnstalleerde eenheidsprijzenboek definieert het in '{book_unit}'",
       "suggestion": "Een poz-nummer is in één eenheid gedefinieerd. Meet de regel in de eenheid van het boek, of nummer het afwijkende werk als eigen post (ÖZEL-1)",

@@ -60428,6 +60428,8 @@ const resource = {
     "boq.recurring_apply": "Op alle toepassen",
     "boq.recurring_applied": "Prijs toegepast: {{updated}}. Ongewijzigd: {{unchanged}}",
     "boq.recurring_bad_rate": "Voer een eenheidsprijs van 0 of meer in.",
+    "boq.priced_from_published_rates": "Prijzen zijn gepubliceerde eenheidsprijzen",
+    "boq.priced_from_published_rates_hint": "Ze bevatten al algemene kosten en winst. Validatie waarschuwt als een opslag ze opnieuw toevoegt.",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

@@ -61077,6 +61077,8 @@ const resource = {
     "boq.recurring_apply": "Zastosuj do wszystkich",
     "boq.recurring_applied": "Zastosowano cenę: {{updated}}. Bez zmian: {{unchanged}}",
     "boq.recurring_bad_rate": "Wpisz cenę jednostkową równą 0 lub większą.",
+    "boq.priced_from_published_rates": "Ceny to opublikowane ceny jednostkowe",
+    "boq.priced_from_published_rates_hint": "Zawierają już koszty ogólne i zysk. Walidacja ostrzega, jeśli narzut doda je ponownie.",
     "guide.cost_control.title": "Kontrola kosztów",
     "guide.cost_control.intro": "Kontrola kosztów odpowiada na jedno pytanie: ile projekt będzie kosztował na koniec i dlaczego. Czyta budżet, kosztorys, umowy, zmiany, roboty obmierzone i faktury, które już są w swoich modułach, więc nic nie jest wpisywane dwa razy.",
     "guide.cost_control.methods.title": "Cztery sposoby odczytu prognozy",

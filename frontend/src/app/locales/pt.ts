@@ -62450,6 +62450,8 @@ const resource = {
     "boq.recurring_applied": "Preço aplicado: {{updated}}. Sem alteração: {{unchanged}}",
     "boq.recurring_bad_rate": "Introduza um preço unitário igual ou superior a 0.",
     "boq.recurring_drifting": "Preços diferentes",
+    "boq.priced_from_published_rates": "Os preços são preços unitários publicados",
+    "boq.priced_from_published_rates_hint": "Já incluem despesas gerais e lucro. A validação avisa se uma margem os adiciona novamente.",
     "guide.cost_control.title": "Controlo de custos",
     "guide.cost_control.intro": "O controlo de custos responde a uma pergunta: quanto vai custar o projeto no fim e porquê. Lê o orçamento, a estimativa, os contratos, as alterações, o trabalho medido e as faturas que já vivem nos seus módulos, por isso nada é escrito duas vezes.",
     "guide.cost_control.methods.title": "Quatro formas de ler a previsão",

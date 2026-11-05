@@ -517,6 +517,10 @@
       "fail": "Unternehmergewinn und allgemeine Geschäftskosten werden auf {count} Zeilen angesetzt, zusammen {total} Prozent, über den einmaligen {limit} Prozent",
       "suggestion": "Die 25 Prozent werden einmal aufgeschlagen. Eine Zeile behalten und ganz entfernen, wenn die Preise veröffentlichte Einheitspreise sind, die ihn bereits enthalten"
     },
+    "overheads_not_applied_twice": {
+      "fail": "Das LV ist auf Basis veröffentlichter Einheitspreise kalkuliert, die Unternehmergewinn und allgemeine Geschäftskosten bereits enthalten, und setzt beides dennoch erneut an ({percent} Prozent)",
+      "suggestion": "Zeile für Unternehmergewinn und allgemeine Geschäftskosten aus diesem LV entfernen oder die Einstellung „Preise sind veröffentlichte Einheitspreise“ deaktivieren, wenn Ihre Preise ohne diese Anteile angesetzt sind"
+    },
     "unit_matches_poz_definition": {
       "fail": "Poz '{code}' an Position {ordinal} ist in '{unit}' gemessen, das installierte Einheitspreisbuch definiert sie aber in '{book_unit}'",
       "suggestion": "Eine poz-Nummer ist in genau einer Einheit definiert. Messen Sie die Zeile in der Einheit des Buchs oder nummerieren Sie die abweichende Leistung als eigene Position (ÖZEL-1)",

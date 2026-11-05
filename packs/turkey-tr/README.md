@@ -48,11 +48,11 @@ encoded here.
 - Currency TRY at two decimals, a Turkish interface and the `turkey`
   estimating method: 25 percent profit and general expenses, then KDV.
 - The `birimfiyat` classification, so a line is coded with its poz number.
-- Ten validation rules under the `birimfiyat` rule set: a poz number is
+- Eleven validation rules under the `birimfiyat` rule set: a poz number is
   present, it is well formed, its chapter is one a publisher uses, the unit is
   one the book measures in, one poz number is not measured in two units or
   priced at two rates within a bill, an own item carries its analysis, and the
-  25 percent is not applied twice. The last two look each Ministry poz up in
+  25 percent is not applied twice, and a bill marked as priced from the published unit prices (a setting in the Markups panel) carries no 25 percent line of its own. The last two look each Ministry poz up in
   the installed national cost base: the line is measured in the unit the book
   defines the poz in, and the line's rate is set beside the published price.
   The rate check only states the difference, because a tender discount below

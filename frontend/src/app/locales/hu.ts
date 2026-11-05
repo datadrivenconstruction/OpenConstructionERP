@@ -62112,6 +62112,8 @@ const resource = {
     "boq.recurring_apply": "Alkalmazás mindegyikre",
     "boq.recurring_applied": "Ár alkalmazva: {{updated}}. Változatlan: {{unchanged}}",
     "boq.recurring_bad_rate": "Adjon meg 0 vagy nagyobb egységárat.",
+    "boq.priced_from_published_rates": "Az árak közzétett egységárak",
+    "boq.priced_from_published_rates_hint": "Ezek már tartalmazzák a rezsit és a nyereséget. Az ellenőrzés figyelmeztet, ha egy felár újra hozzáadja őket.",
     "guide.cost_control.title": "Költségkövetés",
     "guide.cost_control.intro": "A költségkövetés egy kérdésre válaszol: mennyibe fog kerülni a projekt a végén, és miért. A költségvetést, a költségbecslést, a szerződéseket, a módosításokat, a felmért munkát és a számlákat olvassa, amelyek már a saját moduljukban vannak, így semmit nem kell kétszer beírni.",
     "guide.cost_control.methods.title": "Az előrejelzés négy olvasata",

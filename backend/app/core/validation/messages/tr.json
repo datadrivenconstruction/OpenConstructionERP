@@ -531,6 +531,10 @@
       "repriced": "Ulusal birim fiyat veri tabanı ({region}) başka bir pazara veya para birimine çevrilmiş; bu nedenle fiyatlar yayımlanmış fiyatlarla karşılaştırılmadı. Bu denetimi çalıştırmak için veri tabanını kendi pazarına döndürün",
       "currency_differs": "{count} kalemin fiyatı {currency} cinsinden, birim fiyat kitabı ise {book_currency} cinsinden; bu nedenle yayımlanmış fiyatlarla karşılaştırılmadı",
       "currency_unknown": "{count} kalemin para birimi kayıtlı değil; bu nedenle fiyatları {book_currency} cinsinden yayımlanmış fiyatlarla karşılaştırılmadı"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Teklif yayımlanmış birim fiyatlarla hazırlanmış; bu fiyatlar yüklenici kârı ve genel giderleri zaten içeriyor, ancak bunlar tekrar ekleniyor (yüzde {percent})",
+      "suggestion": "Kâr ve genel giderler satırını bu tekliften kaldırın; fiyatlarınız bunlar hariç net fiyatlarsa 'Fiyatlar yayımlanmış birim fiyatlardır' ayarını kaldırın"
     }
   },
   "turkey": {

@@ -53740,6 +53740,8 @@ const resource = {
     "boq.recurring_apply": "Apply to all",
     "boq.recurring_applied": "Rate applied: {{updated}}. Left as they were: {{unchanged}}",
     "boq.recurring_bad_rate": "Enter a unit rate of 0 or more.",
+    "boq.priced_from_published_rates": "Prices are published unit prices",
+    "boq.priced_from_published_rates_hint": "They already contain overhead and profit. Validation warns if a markup adds them again.",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

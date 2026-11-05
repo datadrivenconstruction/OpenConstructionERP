@@ -59547,6 +59547,8 @@ const resource = {
     "boq.recurring_apply": "Bruk på alle",
     "boq.recurring_applied": "Pris brukt: {{updated}}. Uendret: {{unchanged}}",
     "boq.recurring_bad_rate": "Angi en enhetspris på 0 eller mer.",
+    "boq.priced_from_published_rates": "Prisene er publiserte enhetspriser",
+    "boq.priced_from_published_rates_hint": "De inkluderer allerede generelle kostnader og fortjeneste. Validering advarer hvis et påslag legger dem til igjen.",
     "guide.cost_control.title": "Kostnadsstyring",
     "guide.cost_control.intro": "Kostnadsstyring svarer på ett spørsmål: hva kommer prosjektet til å koste til slutt, og hvorfor. Den leser budsjett, kalkyle, kontrakter, endringer, målt arbeid og fakturaer som allerede ligger i sine egne moduler, så ingenting skrives inn to ganger.",
     "guide.cost_control.methods.title": "Fire måter å lese prognosen på",

@@ -60428,6 +60428,8 @@ const resource = {
     "boq.recurring_applied": "Fiyat uygulandı: {{updated}}. Değişmeyen: {{unchanged}}",
     "boq.recurring_bad_rate": "0 veya daha büyük bir birim fiyat girin.",
     "boq.recurring_drifting": "Farklı fiyatlar",
+    "boq.priced_from_published_rates": "Fiyatlar yayımlanmış birim fiyatlardır",
+    "boq.priced_from_published_rates_hint": "Genel gider ve kâr zaten dahildir. Bir kâr marjı bunları yeniden eklerse doğrulama uyarır.",
     "guide.cost_control.title": "Maliyet kontrolü",
     "guide.cost_control.intro": "Maliyet kontrolü tek bir soruya cevap verir: proje sonunda neye mal olacak ve neden. Bütçeyi, keşfi, sözleşmeleri, değişiklikleri, ölçülen işi ve faturaları, zaten kendi modüllerinde durdukları yerden okur; böylece hiçbir şey iki kez girilmez.",
     "guide.cost_control.methods.title": "Tahmini okumanın dört yolu",

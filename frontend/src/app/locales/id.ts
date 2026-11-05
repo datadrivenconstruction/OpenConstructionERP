@@ -59298,6 +59298,8 @@ const resource = {
     "boq.recurring_apply": "Terapkan ke semua",
     "boq.recurring_applied": "Harga diterapkan: {{updated}}. Tidak berubah: {{unchanged}}",
     "boq.recurring_bad_rate": "Masukkan harga satuan 0 atau lebih.",
+    "boq.priced_from_published_rates": "Harga adalah harga satuan yang dipublikasikan",
+    "boq.priced_from_published_rates_hint": "Harga tersebut sudah mencakup overhead dan laba. Validasi memberi peringatan jika markup menambahkannya lagi.",
     "guide.cost_control.title": "Pengendalian biaya",
     "guide.cost_control.intro": "Pengendalian biaya menjawab satu pertanyaan: berapa biaya proyek pada akhirnya, dan mengapa. Modul ini membaca anggaran, estimasi, kontrak, perubahan, pekerjaan terukur, dan faktur yang sudah ada di modulnya masing-masing, sehingga tidak ada yang diketik dua kali.",
     "guide.cost_control.methods.title": "Empat cara membaca prakiraan",

@@ -531,6 +531,10 @@
       "repriced": "The national unit-price base ({region}) is switched to another market or currency, so rates were not compared with the published prices. Return the base to its home market to run this check",
       "currency_differs": "Rates on {count} lines are in {currency} while the unit-price book is in {book_currency}, so they were not compared with the published prices",
       "currency_unknown": "The currency of {count} lines is not recorded, so their rates were not compared with the published prices in {book_currency}"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "The bill is priced from published unit prices, which already contain the contractor profit and general expenses, yet it adds them again ({percent} percent)",
+      "suggestion": "Remove the profit and general expenses line from this bill, or clear the setting 'Prices are published unit prices' if your rates are net of them"
     }
   },
   "turkey": {

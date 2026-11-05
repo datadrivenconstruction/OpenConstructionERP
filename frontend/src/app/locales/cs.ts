@@ -60816,6 +60816,8 @@ const resource = {
     "boq.recurring_apply": "Použít na vše",
     "boq.recurring_applied": "Cena použita: {{updated}}. Beze změny: {{unchanged}}",
     "boq.recurring_bad_rate": "Zadejte jednotkovou cenu 0 nebo vyšší.",
+    "boq.priced_from_published_rates": "Ceny jsou zveřejněné jednotkové ceny",
+    "boq.priced_from_published_rates_hint": "Už obsahují režie a zisk. Validace upozorní, pokud je přirážka přidá znovu.",
     "guide.cost_control.title": "Řízení nákladů",
     "guide.cost_control.intro": "Řízení nákladů odpovídá na jednu otázku: kolik bude projekt nakonec stát a proč. Čte rozpočet, odhad, smlouvy, změny, naměřené práce a faktury, které už jsou ve svých modulech, takže se nic nezadává dvakrát.",
     "guide.cost_control.methods.title": "Čtyři způsoby, jak číst prognózu",

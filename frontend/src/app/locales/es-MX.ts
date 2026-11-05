@@ -50168,6 +50168,8 @@ const resource = {
     "boq.recurring_apply": "Aplicar a todas",
     "boq.recurring_applied": "Precio aplicado: {{updated}}. Sin cambios: {{unchanged}}",
     "boq.recurring_bad_rate": "Introduzca un precio unitario de 0 o más.",
+    "boq.priced_from_published_rates": "Los precios son precios unitarios publicados",
+    "boq.priced_from_published_rates_hint": "Ya incluyen indirectos y utilidad. La validación avisa si un recargo los vuelve a sumar.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

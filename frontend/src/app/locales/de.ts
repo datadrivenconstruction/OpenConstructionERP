@@ -62182,6 +62182,8 @@ const resource = {
     "boq.recurring_apply": "Auf alle anwenden",
     "boq.recurring_applied": "Preis übernommen: {{updated}}. Unverändert: {{unchanged}}",
     "boq.recurring_bad_rate": "Einen Einheitspreis von 0 oder mehr eingeben.",
+    "boq.priced_from_published_rates": "Preise sind veröffentlichte Einheitspreise",
+    "boq.priced_from_published_rates_hint": "Sie enthalten bereits Gemeinkosten und Gewinn. Die Validierung warnt, wenn ein Aufschlag beides erneut hinzufügt.",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",

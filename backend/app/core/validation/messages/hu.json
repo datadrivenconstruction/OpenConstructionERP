@@ -517,6 +517,10 @@
       "fail": "A vállalkozói nyereséget és az általános költséget {count} soron alkalmazták, összesen {total} százalékot, az egyszeri {limit} százalék fölött",
       "suggestion": "A 25 százalék egyszer adódik hozzá. Tartson meg egy sort, és teljesen távolítsa el, ha az árak közzétett egységárak, amelyek ezt már tartalmazzák"
     },
+    "overheads_not_applied_twice": {
+      "fail": "A tételes költségvetés közzétett egységárakkal készült, amelyek már tartalmazzák a vállalkozó nyereségét és a rezsiköltségeket, mégis újra hozzáadásra kerülnek ({percent} százalék)",
+      "suggestion": "Távolítsa el a nyereség és rezsi sort ebből a költségvetésből, vagy kapcsolja ki a(z) „Az árak közzétett egységárak” beállítást, ha az árai ezek nélkül értendők"
+    },
     "unit_matches_poz_definition": {
       "fail": "A(z) {ordinal}. tétel „{code}” poz száma „{unit}” mértékegységben van mérve, de a telepített egységárjegyzék „{book_unit}” egységben határozza meg",
       "suggestion": "Egy poz szám egyetlen mértékegységben van meghatározva. Mérje a sort a jegyzék mértékegységében, vagy számozza az eltérő munkát saját tételként (ÖZEL-1)",

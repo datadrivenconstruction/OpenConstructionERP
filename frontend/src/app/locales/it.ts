@@ -60758,6 +60758,8 @@ const resource = {
     "boq.recurring_apply": "Applica a tutte",
     "boq.recurring_applied": "Prezzo applicato: {{updated}}. Invariate: {{unchanged}}",
     "boq.recurring_bad_rate": "Inserire un prezzo unitario pari o superiore a 0.",
+    "boq.priced_from_published_rates": "I prezzi sono prezzi unitari pubblicati",
+    "boq.priced_from_published_rates_hint": "Includono già spese generali e utile. La validazione avvisa se un ricarico li aggiunge di nuovo.",
     "guide.cost_control.title": "Controllo dei costi",
     "guide.cost_control.intro": "Il controllo dei costi risponde a una domanda: quanto costerà il progetto alla fine e perché. Legge budget, stima, contratti, varianti, lavori misurati e fatture che vivono già nei loro moduli, così nulla viene scritto due volte.",
     "guide.cost_control.methods.title": "Quattro modi di leggere la previsione",
