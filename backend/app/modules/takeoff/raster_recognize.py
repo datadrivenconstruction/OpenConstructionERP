@@ -360,6 +360,9 @@ _SKETCH_MAX_PARTS = 60
 _HEAVY_LINE_RATIO = 1.4
 # Line drawings leave most of the paper bare. A page with this much ink is a photo, a
 # mottled scan or noise, and wall bands found in it would be accidents.
+# Ink readings scatter around a pen weight, and losing wall costs a room while keeping a
+# light line costs little: the cut sits below the middle.
+_KEEP_BELOW_SPLIT = 0.8
 _MAX_INK_SHARE = 0.35
 
 
@@ -530,7 +533,7 @@ def scan_parts(
             fills.append(vp.Fill([to_pt(*p) for p in box], 0.0, len(fills)))
     split = _heavy_split([wt for _b, wt in strokes], [b.hi - b.lo for b, _wt in strokes])
     for b, wt in strokes:
-        if wt < split:
+        if wt < _KEEP_BELOW_SPLIT * split:
             continue  # dimensions, furniture, door swings: what lies beyond the cut, in a lighter pen
         a, c = ((b.lo, b.c), (b.hi, b.c)) if b.axis == "h" else ((b.c, b.lo), (b.c, b.hi))
         segs.append(vp.Seg(to_pt(*a), to_pt(*c), wt * sx, len(segs)))
