@@ -78,6 +78,7 @@ def test_unit_family_reads_common_spellings() -> None:
     assert unit_family("cu.yd") == "volume"
     assert unit_family("ft3") == "volume"
     assert unit_family("pcs") == "count"
+    assert unit_family("LF") == "length"
     assert unit_family("furlong") is None
 
 

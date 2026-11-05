@@ -30,6 +30,9 @@ MEASURED_TYPES = frozenset({"distance", "area", "polyline", "line", "rectangle",
 MIN_SCALE = Decimal("0.01")
 MAX_SCALE = Decimal("10000")
 
+#: A count computed in floating point (3 x 0.1 x 10) may land a hair off a whole number.
+COUNT_TOLERANCE = Decimal("0.000001")
+
 
 class DwgMeasurementInRangeRule(EstimatingRule):
     """A measured quantity is non-negative and below the scale-slip ceiling."""
@@ -68,7 +71,7 @@ class DwgCountIsWholeRule(EstimatingRule):
         if (
             a.get("annotation_type") == "count"
             and value is not None
-            and (value < 0 or value != value.to_integral_value())
+            and (value < 0 or abs(value - value.to_integral_value()) > COUNT_TOLERANCE)
         ):
             return [self.fail(context, "count_not_whole", ref=ref, value=value)]
         return [self.ok(ref)]

@@ -138,3 +138,15 @@ async def test_bulk_import_rejects_the_batch_on_a_blocking_row(client, admin_aut
     assert resp.json()["detail"]["errors"][0]["element_ref"] == bad["code"]
     ok = await client.post("/api/v1/costs/bulk/", json=[good], headers=header)
     assert ok.status_code == 201, ok.text
+
+
+async def test_renaming_a_legacy_item_does_not_turn_its_old_violation_into_a_new_one(client, admin_auth) -> None:  # noqa: F811
+    _, header = admin_auth
+    created = (await client.post("/api/v1/costs/", json=_payload(), headers=header)).json()
+    async with async_session_factory() as session:
+        await session.execute(update(CostItem).where(CostItem.id == uuid.UUID(created["id"])).values(mass_basis="t"))
+        await session.commit()
+    new_code = f"R-{uuid.uuid4().hex[:8]}"
+    resp = await client.patch(f"/api/v1/costs/{created['id']}", json={"code": new_code}, headers=header)
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["code"] == new_code
