@@ -772,7 +772,7 @@ async def upload_my_avatar(
         user = await service.set_avatar(uuid.UUID(user_id), data, file.content_type)
     except AvatarValidationError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"rule": exc.rule, "message": exc.message},
         ) from exc
     return UserResponse.model_validate(user)

@@ -199,6 +199,7 @@ _MODULE_LAYERS = (
     "pipeline_nodes",
     "repairs",
     "schema",
+    "billing_forms",
 )
 
 if modules_dir.is_dir():

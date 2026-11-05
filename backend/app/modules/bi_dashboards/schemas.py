@@ -487,7 +487,7 @@ class SavedFilterRead(BaseModel):
 class KPIHistoryPoint(BaseModel):
     period_start: date
     period_end: date
-    value: Decimal20_6
+    value: FiniteDecimal
     unit: str
     source_record_count: int = 0
 
@@ -745,7 +745,7 @@ class PerformanceBenchmarkRequest(CostIndexOptions, BenchmarkCohort):
 
 class PerformanceProjectRow(BaseModel):
     project_id: UUID
-    value: Decimal20_6 | None
+    value: FiniteDecimal | None
     numerator: FiniteDecimal | None = None
     denominator: FiniteDecimal | None = None
     records: int = 0
@@ -1267,7 +1267,7 @@ class PerformancePositionContextItem(BaseModel):
     unit: str | None = None
     currency: str | None = None
     estimate: FiniteDecimal | None = None
-    value: Decimal20_6 | None = None
+    value: FiniteDecimal | None = None
     value_unit: str | None = None
     headline: FiniteDecimal | None = None
     statistic: str | None = None

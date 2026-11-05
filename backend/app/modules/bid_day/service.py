@@ -253,7 +253,7 @@ class BidDayService:
             logger.info("no FX rate %s->%s for bid day board %s", ccy, board.currency, board.id, exc_info=True)
         if strict:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"code": "no_fx_rate", "message": f"No exchange rate from {ccy} to {board.currency}."},
             )
         return Decimal("1")

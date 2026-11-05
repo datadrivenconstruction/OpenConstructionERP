@@ -274,7 +274,11 @@ async def daily_plan_pdf(session: SessionDep, day: date | None = None, _perm: No
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="daily-plan-{d.isoformat()}.pdf"'},
+        # The plan's labels are written in English whatever the reader asked for.
+        headers={
+            "Content-Disposition": f'attachment; filename="daily-plan-{d.isoformat()}.pdf"',
+            "Content-Language": "en",
+        },
     )
 
 

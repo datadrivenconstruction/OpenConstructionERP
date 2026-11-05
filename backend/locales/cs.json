@@ -2592,6 +2592,19 @@
     }
   },
   "capital_plan": {
-    "export": "Exportovat"
+    "export": {
+      "sheet": "Investiční plán",
+      "col": {
+        "title": "Projekt",
+        "priority": "Priorita",
+        "status": "Stav",
+        "total": "Celkové náklady"
+      },
+      "row": {
+        "envelope": "Rozpočtový rámec",
+        "demand": "Potřeba",
+        "gap": "Schodek"
+      }
+    }
   }
 }

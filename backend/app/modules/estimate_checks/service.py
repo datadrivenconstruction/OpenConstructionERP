@@ -102,7 +102,7 @@ class EstimateCheckService:
         for cfg in kpis.values():
             low, high = cfg.get("low"), cfg.get("high")
             if low is not None and high is not None and low > high:
-                raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "low must not exceed high")
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "low must not exceed high")
         await self.repo.save_settings(WORKSPACE_KEY, {**body, "kpis": kpis}, user_id)
         clear_caches()
         return await self.settings()

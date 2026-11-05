@@ -170,7 +170,11 @@ async def export_snapshot(
         return Response(
             snapshot_pdf(snap.payload),
             media_type="application/pdf",
-            headers={"Content-Disposition": attachment_disposition(f"submitted-bid-{stamp}.pdf")},
+            # The snapshot's labels are written in English whatever the reader asked for.
+            headers={
+                "Content-Disposition": attachment_disposition(f"submitted-bid-{stamp}.pdf"),
+                "Content-Language": "en",
+            },
         )
     return Response(
         snapshot_xlsx(snap.payload),

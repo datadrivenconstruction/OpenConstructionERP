@@ -466,6 +466,14 @@ teach identifiers that were never rule sets at all.
 | `rfq_award` | Enquiry at the point of award |
 | `subcontract` | Subcontract packages |
 | `submittal` | Submittals |
+| `bid_leveling` | Bid leveling sheet: plugged gaps and their share of the bid |
+| `bid_award` | Bid at the point of award |
+| `bid_outcome` | Recorded outcome of a bid |
+| `field_diary_capture` | Offline field diary captures |
+| `field_productivity` | Field productivity records |
+| `sheet_intake` | Drawing sheets at intake |
+| `subcontract_change` | Subcontract change orders |
+| `workforce` | Workforce records |
 | `property_dev` | Development appraisal |
 | `pipeline` | Opportunity pipeline |
 | `offline_sync` | Offline merge from a device: every conflicting field resolved before the merge applies |

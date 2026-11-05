@@ -1807,6 +1807,9 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # French calendar. Sunday rest is the statute (L3132-3); Saturday is the
     # convention, and a site working Saturdays sets its own calendar.
     "FR": frozenset({0, 1, 2, 3, 4}),
+    # Peru: Legislative Decree 854 caps the week at 48 hours and does not fix the days; Sunday is
+    # the usual rest day. Monday to Friday is this table's convention, a six-day site sets its own.
+    "PE": frozenset({0, 1, 2, 3, 4}),
 }
 
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})

@@ -17,6 +17,7 @@ from decimal import Decimal, InvalidOperation
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cost_scope import get_cost_item
 from app.modules.costs.models import CostItem
 from app.modules.rate_feedback.models import (
     STATUS_ACCEPTED,
@@ -122,7 +123,7 @@ class RateFeedbackService:
         stats = [s for s in aggregate(await self._observations(project_ids)) if s.project_count >= req.min_projects]
         created = unchanged = 0
         for stat in stats:
-            item = await self.session.get(CostItem, uuid.UUID(stat.cost_item_id))
+            item = await get_cost_item(self.session, stat.cost_item_id)
             rate = _rate_of(item) if item is not None else None
             if item is None or rate is None or not deviates(stat, req.tolerance):
                 continue
@@ -204,7 +205,7 @@ class RateFeedbackService:
         proposal = await self.session.get(RateFeedbackProposal, proposal_id)
         if proposal is None:
             raise RateFeedbackError(404, "not_found", "Proposal not found.")
-        item = await self.session.get(CostItem, proposal.cost_item_id)
+        item = await get_cost_item(self.session, proposal.cost_item_id)
         return proposal, item
 
     async def confirm(self, proposal_id: uuid.UUID, user_id: uuid.UUID, req: ConfirmRequest) -> ProposalResponse:

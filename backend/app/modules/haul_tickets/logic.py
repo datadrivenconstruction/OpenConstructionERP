@@ -115,11 +115,11 @@ def resolve_weights(gross: Any, tare: Any, net: Any, *, tolerance: Decimal = Dec
     """
     g, t, n = dec(gross), dec(tare), dec(net)
     if g is not None and t is not None and n is None:
-        n = g - t
+        n = (g - t).quantize(QTY_Q)
     elif g is not None and n is not None and t is None:
-        t = g - n
+        t = (g - n).quantize(QTY_Q)
     elif t is not None and n is not None and g is None:
-        g = t + n
+        g = (t + n).quantize(QTY_Q)
     consistent = True
     if g is not None and t is not None and n is not None:
         consistent = abs((g - t) - n) <= tolerance and n >= ZERO and t >= ZERO

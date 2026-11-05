@@ -536,6 +536,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "schedule_advanced",  # look-ahead and weekly work plans
             "tasks",
             "procurement",
+            "bid_management",  # rfq_bidding depends on it
             "rfq_bidding",  # request for quotation to equipment suppliers
             "supplier_catalogs",
             "submittals",

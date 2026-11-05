@@ -189,7 +189,10 @@ async def ticket_pdf(ticket_id: uuid.UUID, session: SessionDep, user_id: Current
     pdf = render_ticket_pdf(row, project_name=getattr(project, "name", "") or "")
     name = f"haul-ticket-{row.ticket_number or row.id}.pdf".replace(" ", "_")
     return Response(
-        content=pdf, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{name}"'}
+        content=pdf,
+        media_type="application/pdf",
+        # The ticket's default labels are in English whatever the reader asked for.
+        headers={"Content-Disposition": f'inline; filename="{name}"', "Content-Language": "en"},
     )
 
 

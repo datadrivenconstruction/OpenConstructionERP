@@ -46,6 +46,7 @@ manifest = ModuleManifest(
         "MY",
         "NG",
         "NZ",
+        "PE",
         "PK",
         "PL",
         "RU",

@@ -91,7 +91,7 @@ class LessonService:
         blocking = [r for r in failed if r.severity.value == "error"]
         if blocking:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"code": "lesson_incomplete", "rules": [r.rule_id for r in blocking]},
             )
         lesson.status = "confirmed"
