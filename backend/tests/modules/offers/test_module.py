@@ -32,3 +32,13 @@ def test_migration_chain_has_one_head() -> None:
         revs[rev] = down
     parents = {d for v in revs.values() for d in ([v] if isinstance(v, str) else (v or []))}
     assert [r for r in revs if r not in parents] == ["voff01_customer_offers"]
+
+
+def test_accepting_needs_only_the_write_permission() -> None:
+    """Accept is gated by boq.update; creating the contract is a separate, softer check."""
+    source = (Path(__file__).resolve().parents[3] / "app/modules/offers/router.py").read_text(encoding="utf-8")
+    start = source.index('"/{offer_id}/accept"')
+    decorator = source[start : source.index("\n", start)]
+    assert "_WRITE" in decorator
+    assert "contracts.create" not in decorator
+    assert "_AWARD" not in decorator

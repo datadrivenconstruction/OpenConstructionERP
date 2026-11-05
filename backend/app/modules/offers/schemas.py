@@ -178,6 +178,7 @@ class AcceptResponse(BaseModel):
     offer: OfferResponse
     contract_id: uuid.UUID | None = None
     milestones: int = 0
+    contract_blocked: str | None = None
 
 
 class PreviewResponse(BaseModel):

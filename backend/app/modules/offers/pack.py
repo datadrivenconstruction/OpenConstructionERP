@@ -156,6 +156,7 @@ def summary(pack: dict[str, Any], locale: str | None) -> dict[str, Any]:
     return {
         "pack_key": pack.get("key"),
         "pack_name": pack.get("name") or "",
+        "country": str(pack.get("key") or "").split("-")[0],
         "currency": pack.get("currency") or "",
         "paper": pack.get("paper") or "A4",
         "validity_days": int(pack.get("validity_days") or 30),

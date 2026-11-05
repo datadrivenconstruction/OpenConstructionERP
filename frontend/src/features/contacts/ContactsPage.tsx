@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { billingPayload } from './billing';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -230,6 +231,13 @@ interface ContactFormData {
   address: string;
   postcode: string;
   city: string;
+  /** Ticked: invoices and offers go to the premises address (billing_address stays empty). */
+  billingSame: boolean;
+  billingStreet: string;
+  billingPostcode: string;
+  billingCity: string;
+  billingState: string;
+  billingCountry: string;
   payment_terms: string;
   prequalification_status: PrequalificationStatus;
   notes: string;
@@ -251,6 +259,12 @@ const EMPTY_FORM: ContactFormData = {
   address: '',
   postcode: '',
   city: '',
+  billingSame: true,
+  billingStreet: '',
+  billingPostcode: '',
+  billingCity: '',
+  billingState: '',
+  billingCountry: '',
   payment_terms: '30',
   prequalification_status: 'pending',
   notes: '',
@@ -290,6 +304,7 @@ function addressPayload(form: ContactFormData): Record<string, string> | null {
   return Object.keys(stored).length > 0 ? stored : null;
 }
 
+
 /**
  * The form state a contact opens with.
  *
@@ -323,6 +338,12 @@ export function contactFormData(contact?: Contact): ContactFormData {
     address: addressField(contact.address, ['text', 'line1', 'street']),
     postcode: addressField(contact.address, ['postcode', 'postal_code', 'zip']),
     city: addressField(contact.address, ['city']),
+    billingSame: !contact.billing_address,
+    billingStreet: addressField(contact.billing_address, ['street', 'text', 'line1']),
+    billingPostcode: addressField(contact.billing_address, ['postcode', 'postal_code', 'zip']),
+    billingCity: addressField(contact.billing_address, ['city']),
+    billingState: addressField(contact.billing_address, ['state', 'region']),
+    billingCountry: addressField(contact.billing_address, ['country']),
     payment_terms: contact.payment_terms_days || '30',
     prequalification_status: (contact.prequalification_status as PrequalificationStatus) || 'pending',
     notes: contact.notes || '',
@@ -364,6 +385,10 @@ export function buildContactPatch(
   if (form.address !== base.address || form.postcode !== base.postcode || form.city !== base.city) {
     data.address = addressPayload(form);
   }
+  const billingKeys = [
+    'billingSame', 'billingStreet', 'billingPostcode', 'billingCity', 'billingState', 'billingCountry',
+  ] as const;
+  if (billingKeys.some((k) => form[k] !== base[k])) data.billing_address = billingPayload(form);
   if (form.payment_terms !== base.payment_terms) {
     data.payment_terms_days = form.payment_terms || null;
   }
@@ -679,6 +704,45 @@ function AddContactModal({
             className={inputCls}
           />
         </WideModalField>
+      </WideModalSection>
+
+      {/* Billing address: folded behind "Same as address", which stores nothing. */}
+      <WideModalSection
+        title={t('offers.contacts.billing_address', { defaultValue: 'Billing address' })}
+        columns={2}
+      >
+        <label className="col-span-2 flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.billingSame}
+            onChange={(e) => set('billingSame', e.target.checked)}
+          />
+          {t('offers.contacts.billing_same', { defaultValue: 'Same as address' })}
+        </label>
+        {!form.billingSame && (
+          <>
+            <WideModalField label={t('contacts.field_address', { defaultValue: 'Address' })}>
+              <input value={form.billingStreet} onChange={(e) => set('billingStreet', e.target.value)} className={inputCls} />
+            </WideModalField>
+            <WideModalField label={t('contacts.field_postcode', { defaultValue: 'Postcode' })}>
+              <input value={form.billingPostcode} onChange={(e) => set('billingPostcode', e.target.value)} maxLength={20} className={inputCls} />
+            </WideModalField>
+            <WideModalField label={t('contacts.field_city', { defaultValue: 'City' })}>
+              <input value={form.billingCity} onChange={(e) => set('billingCity', e.target.value)} maxLength={100} className={inputCls} />
+            </WideModalField>
+            <WideModalField label={t('contacts.field_state', { defaultValue: 'State / region' })}>
+              <input value={form.billingState} onChange={(e) => set('billingState', e.target.value)} maxLength={100} className={inputCls} />
+            </WideModalField>
+            <WideModalField label={t('contacts.field_country', { defaultValue: 'Country' })}>
+              <input
+                value={form.billingCountry}
+                onChange={(e) => set('billingCountry', e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))}
+                maxLength={2}
+                className={inputCls}
+              />
+            </WideModalField>
+          </>
+        )}
       </WideModalSection>
 
       {/* Payment & Status */}
@@ -1786,6 +1850,7 @@ export function ContactsPage() {
         website: formData.website || undefined,
         country_code: formData.country || undefined,
         address: addressPayload(formData) ?? undefined,
+        billing_address: billingPayload(formData) ?? undefined,
         payment_terms_days: formData.payment_terms || undefined,
         prequalification_status: formData.prequalification_status || undefined,
         notes: formData.notes || undefined,

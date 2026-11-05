@@ -4,11 +4,17 @@ from __future__ import annotations
 
 import base64
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    get_current_user_payload,
+    verify_project_access,
+)
 from app.modules.boq.pdf_export import pdf_language
 from app.modules.offers import pack as pack_mod
 from app.modules.offers.models import Offer
@@ -35,7 +41,21 @@ router = APIRouter(tags=["offers"])
 
 _READ = Depends(RequirePermission("boq.read"))
 _WRITE = Depends(RequirePermission("boq.update"))
-_AWARD = Depends(RequirePermission("contracts.create"))
+
+
+async def _can_award(payload: dict[str, Any] = Depends(get_current_user_payload)) -> bool:
+    """Whether the caller may also create the client contract (accepting needs only ``boq.update``)."""
+    from app.core.permissions import permission_registry
+
+    role = str(payload.get("role", ""))
+    return (
+        role == "admin"
+        or "contracts.create" in payload.get("permissions", [])
+        or permission_registry.role_has_permission(role, "contracts.create")
+    )
+
+
+CanAward = Annotated[bool, Depends(_can_award)]
 
 
 async def _load(session: SessionDep, user_id: str, offer_id: uuid.UUID) -> tuple[OfferService, Offer]:
@@ -47,11 +67,13 @@ async def _load(session: SessionDep, user_id: str, offer_id: uuid.UUID) -> tuple
 
 @router.get("/context", response_model=ContextResponse, dependencies=[_READ])
 async def context(
-    session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID, boq_id: uuid.UUID
+    session: SessionDep, user_id: CurrentUserId, can_award: CanAward, project_id: uuid.UUID, boq_id: uuid.UUID
 ) -> ContextResponse:
     """Everything the offer page needs before an offer exists."""
     await verify_project_access(project_id, user_id, session)
-    return ContextResponse.model_validate(await OfferService(session).context(project_id, boq_id))
+    data = await OfferService(session).context(project_id, boq_id)
+    data["permissions"] = {"create_contract": can_award}
+    return ContextResponse.model_validate(data)
 
 
 @router.get("/", response_model=list[OfferSummary], dependencies=[_READ])
@@ -172,6 +194,15 @@ async def download_pdf(offer_id: uuid.UUID, session: SessionDep, user_id: Curren
     )
 
 
+@router.post("/{offer_id}/texts/{kind}/reset", response_model=OfferResponse, dependencies=[_WRITE])
+async def reset_offer_text(
+    offer_id: uuid.UUID, kind: str, session: SessionDep, user_id: CurrentUserId
+) -> OfferResponse:
+    """Drop this project's override of one text and use the company text again."""
+    service, _ = await _load(session, user_id, offer_id)
+    return await service.response(await service.reset_text(offer_id, kind))
+
+
 @router.post("/{offer_id}/send", response_model=OfferResponse, dependencies=[_WRITE])
 async def send_offer(offer_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> OfferResponse:
     service, _ = await _load(session, user_id, offer_id)
@@ -190,11 +221,19 @@ async def decline_offer(offer_id: uuid.UUID, session: SessionDep, user_id: Curre
     return await service.response(await service.decline(offer_id))
 
 
-@router.post("/{offer_id}/accept", response_model=AcceptResponse, dependencies=[_WRITE, _AWARD])
+@router.post("/{offer_id}/accept", response_model=AcceptResponse, dependencies=[_WRITE])
 async def accept_offer(
-    offer_id: uuid.UUID, data: AcceptRequest, session: SessionDep, user_id: CurrentUserId
+    offer_id: uuid.UUID, data: AcceptRequest, session: SessionDep, user_id: CurrentUserId, can_award: CanAward
 ) -> AcceptResponse:
-    """Record the customer's acceptance and award the work to a client contract."""
+    """Record the customer's acceptance; the client contract needs contracts.create on top of boq.update."""
     service, _ = await _load(session, user_id, offer_id)
+    blocked = data.create_contract and not can_award
+    if blocked:
+        data = data.model_copy(update={"create_contract": False})
     offer, contract_id, milestones = await service.accept(offer_id, data, user_id)
-    return AcceptResponse(offer=await service.response(offer), contract_id=contract_id, milestones=milestones)
+    return AcceptResponse(
+        offer=await service.response(offer),
+        contract_id=contract_id,
+        milestones=milestones,
+        contract_blocked="contracts.create" if blocked else None,
+    )
