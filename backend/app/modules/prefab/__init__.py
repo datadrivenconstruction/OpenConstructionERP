@@ -19,3 +19,6 @@ async def on_startup() -> None:
     from app.modules.prefab.permissions import register_prefab_permissions
 
     register_prefab_permissions()
+    from app.modules.prefab.validators import register_prefab_validation_rules
+
+    register_prefab_validation_rules()

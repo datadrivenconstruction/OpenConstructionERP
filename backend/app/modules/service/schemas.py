@@ -94,6 +94,7 @@ class ServiceContractResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── ServiceAsset ───────────────────────────────────────────────────────────
@@ -314,6 +315,7 @@ class WorkOrderResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ServiceTicketListResponse(BaseModel):

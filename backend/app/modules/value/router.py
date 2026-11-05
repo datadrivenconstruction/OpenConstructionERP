@@ -390,15 +390,17 @@ async def put_time_factors(
         # An admin whose tenant cannot be resolved has nowhere to scope the
         # write; refuse rather than persist an unscoped (null-tenant) override.
         raise HTTPException(status_code=400, detail="Tenant could not be resolved for the current user")
+    warnings: list[dict] = []
     try:
         rows = await set_factors(
             session,
             tenant_id,
             [(f.module, f.action, f.minutes) for f in payload.factors],
+            warnings_out=warnings,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return TimeFactorsOut(factors=[_factor_out(r) for r in rows])
+    return TimeFactorsOut(factors=[_factor_out(r) for r in rows], validation_warnings=warnings)
 
 
 async def _resolve_project_ids(
