@@ -180,7 +180,9 @@ async def create_estimate(
         row = await service.create_estimate(project_id, request, created_by)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
-    return _row_to_record(row)
+    record = _row_to_record(row)
+    record.warnings = service.warnings
+    return record
 
 
 @router.post(

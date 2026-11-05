@@ -105,6 +105,7 @@ class RomCreateBoqResponse(BaseModel):
     estimate_id: str = Field(default="", description="Id of the conceptual baseline estimate that was saved.")
     sections_created: int = Field(description="Number of elemental sections created in the BOQ.")
     positions_created: int = Field(description="Number of provisional concept-rate positions created.")
+    warnings: list[dict] = Field(default_factory=list, description="Non-blocking rule findings of this write.")
 
 
 # ── Result parts ─────────────────────────────────────────────────────────────
@@ -258,6 +259,8 @@ class RomEstimateRecord(BaseModel):
     elements: list[RomElementBreakdown] = Field(default_factory=list)
     created_at: datetime | None = None
     created_by: UUID | None = None
+    # Non-blocking rule findings from the write that produced this response.
+    warnings: list[dict] = Field(default_factory=list)
 
     @field_serializer(
         "gross_floor_area",

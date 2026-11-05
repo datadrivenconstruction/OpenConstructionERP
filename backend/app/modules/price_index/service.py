@@ -41,6 +41,7 @@ from app.modules.price_index.schemas import (
     LocationFactorCreate,
     LocationFactorUpdate,
 )
+from app.modules.price_index.validators import gate, neighbours_of
 from app.modules.projects.models import Project
 
 
@@ -61,6 +62,68 @@ class PriceIndexService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking findings of the latest write, for the router to report.
+        self.warnings: list[dict[str, Any]] = []
+
+    async def _other_points(
+        self, series_id: uuid.UUID, except_id: uuid.UUID | None
+    ) -> list[tuple[uuid.UUID, str, Decimal]]:
+        stmt = select(CostIndexPoint.id, CostIndexPoint.period, CostIndexPoint.factor).where(
+            CostIndexPoint.series_id == series_id
+        )
+        if except_id is not None:
+            stmt = stmt.where(CostIndexPoint.id != except_id)
+        return [(i, p, f) for i, p, f in (await self.session.execute(stmt)).all()]
+
+    async def _gate_point(
+        self,
+        series_id: uuid.UUID,
+        point_id: uuid.UUID | None,
+        period: str,
+        factor: Decimal,
+        before: tuple[str, Decimal] | None,
+    ) -> None:
+        """Run the price index rules for a point as it would be stored."""
+        others = await self._other_points(series_id, point_id)
+        listing = [{"id": str(i), "period": p} for i, p, _ in others]
+        pairs = [(p, f) for _, p, f in others]
+
+        def context(at: str, value: Decimal) -> dict[str, Any]:
+            return {
+                "point": {"id": str(point_id) if point_id else "", "period": at},
+                "points": listing,
+                "step": {"id": str(point_id) if point_id else "", "label": at, "at": at, "value": value},
+                "neighbours": neighbours_of(pairs, at),
+            }
+
+        self.warnings = await gate(
+            context(period, factor),
+            context(*before) if before is not None else None,
+            target_type="price_index_point",
+            target_id=str(point_id or series_id),
+        )
+
+    async def _gate_location(
+        self, factor_id: uuid.UUID | None, region_code: str, factor: Decimal, before: tuple[str, Decimal] | None
+    ) -> None:
+        """Run the price index rules for a regional factor as it would be stored."""
+        stmt = select(LocationFactor.id, LocationFactor.region_code)
+        if factor_id is not None:
+            stmt = stmt.where(LocationFactor.id != factor_id)
+        others = [{"id": str(i), "region_code": c} for i, c in (await self.session.execute(stmt)).all()]
+
+        def context(code: str, value: Decimal) -> dict[str, Any]:
+            return {
+                "location": {"id": str(factor_id) if factor_id else "", "region_code": code, "factor": value},
+                "locations": others,
+            }
+
+        self.warnings = await gate(
+            context(region_code, factor),
+            context(*before) if before is not None else None,
+            target_type="price_index_location",
+            target_id=str(factor_id or region_code),
+        )
 
     # ── Series ───────────────────────────────────────────────────────────
 
@@ -118,6 +181,7 @@ class PriceIndexService:
         series_id: uuid.UUID,
         data: CostIndexPointCreate,
     ) -> CostIndexPoint:
+        await self._gate_point(series_id, None, data.period, data.factor, None)
         obj = CostIndexPoint(series_id=series_id, period=data.period, factor=data.factor)
         self.session.add(obj)
         await self.session.flush()
@@ -134,9 +198,16 @@ class PriceIndexService:
         obj = await self.get_point(point_id)
         if obj is None:
             return None
-        for key, value in data.model_dump(exclude_unset=True).items():
-            if value is not None:
-                setattr(obj, key, value)
+        changes = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+        await self._gate_point(
+            obj.series_id,
+            point_id,
+            changes.get("period", obj.period),
+            changes.get("factor", obj.factor),
+            (obj.period, obj.factor),
+        )
+        for key, value in changes.items():
+            setattr(obj, key, value)
         await self.session.flush()
         return obj
 
@@ -158,6 +229,7 @@ class PriceIndexService:
         return await self.session.get(LocationFactor, factor_id)
 
     async def create_location_factor(self, data: LocationFactorCreate) -> LocationFactor:
+        await self._gate_location(None, data.region_code, data.factor, None)
         obj = LocationFactor(
             region_code=data.region_code,
             label=data.label,
@@ -175,9 +247,15 @@ class PriceIndexService:
         obj = await self.get_location_factor(factor_id)
         if obj is None:
             return None
-        for key, value in data.model_dump(exclude_unset=True).items():
-            if value is not None:
-                setattr(obj, key, value)
+        changes = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+        await self._gate_location(
+            factor_id,
+            changes.get("region_code", obj.region_code),
+            changes.get("factor", obj.factor),
+            (obj.region_code, obj.factor),
+        )
+        for key, value in changes.items():
+            setattr(obj, key, value)
         await self.session.flush()
         return obj
 
