@@ -23,6 +23,7 @@ import { bboxStyle, sourceRoute } from '../model';
 import { AISuggestionList } from './AISuggestionList';
 import { LinkPicker } from './LinkPicker';
 import { PhotoMetaEditor } from './PhotoMetaEditor';
+import { fmtNumberForInput } from '@/shared/lib/formatters';
 
 interface PhotoLightboxProps {
   photo: ArchivePhoto;
@@ -182,7 +183,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
             {photo.gps_lat != null && photo.gps_lon != null ? (
               <span className="inline-flex items-center gap-1">
                 <MapPin className="h-3 w-3" aria-hidden />
-                {photo.gps_lat.toFixed(5)}, {photo.gps_lon.toFixed(5)}
+                {fmtNumberForInput(photo.gps_lat, 5)}, {fmtNumberForInput(photo.gps_lon, 5)}
                 {photo.gps_accuracy_m != null && (
                   <span className="text-content-tertiary">
                     {t('photoArchive.meta.accuracy', { value: Math.round(photo.gps_accuracy_m) })}

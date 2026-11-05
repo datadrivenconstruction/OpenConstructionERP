@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
 import { RuleResultsList } from '@/shared/ui/RuleResultsList';
 import { fmtNumber } from '@/shared/lib/formatters';
+import { currencyFractionDigits } from '@/shared/lib/money';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fetchCostBoard } from '../telematicsApi';
 import { lastDaysWindow, moneyWithCurrency, suggestionTone } from '../telematicsFormat';
@@ -86,16 +87,16 @@ export function CostBoard() {
                         <div className="font-medium text-content-primary">{m.code}</div>
                         <div className="text-xs text-content-tertiary">{m.name}</div>
                       </td>
-                      <td className={num}>{fmtNumber(m.owning_cost, 2)}</td>
-                      <td className={num}>{fmtNumber(m.operating_cost, 2)}</td>
+                      <td className={num}>{fmtNumber(m.owning_cost, currencyFractionDigits(m.currency))}</td>
+                      <td className={num}>{fmtNumber(m.operating_cost, currencyFractionDigits(m.currency))}</td>
                       <td className={`${num} font-medium`}>
-                        {moneyWithCurrency(fmtNumber(m.total_cost, 2), m.currency)}
+                        {moneyWithCurrency(fmtNumber(m.total_cost, currencyFractionDigits(m.currency)), m.currency)}
                       </td>
                       <td className={num}>{fmtNumber(m.used_hours, 1)}</td>
                       <td className={num}>{fmtNumber(m.billed_hours, 1)}</td>
                       <td className={num}>{m.idle_pct == null ? dash : `${fmtNumber(m.idle_pct, 1)}%`}</td>
-                      <td className={num}>{m.cost_per_used_hour == null ? dash : fmtNumber(m.cost_per_used_hour, 2)}</td>
-                      <td className={num}>{m.market_hour_rate == null ? dash : fmtNumber(m.market_hour_rate, 2)}</td>
+                      <td className={num}>{m.cost_per_used_hour == null ? dash : fmtNumber(m.cost_per_used_hour, currencyFractionDigits(m.currency))}</td>
+                      <td className={num}>{m.market_hour_rate == null ? dash : fmtNumber(m.market_hour_rate, currencyFractionDigits(m.currency))}</td>
                       <td className={num}>{m.recovery_pct == null ? dash : `${fmtNumber(m.recovery_pct, 0)}%`}</td>
                       <td className="py-2 pl-3">
                         <span
@@ -117,9 +118,9 @@ export function CostBoard() {
                         <td className="py-2 pr-3">
                           {t('equipment.costboard.totals', { defaultValue: 'Total' })} {cur}
                         </td>
-                        <td className={num}>{fmtNumber(tot.owning_cost, 2)}</td>
-                        <td className={num}>{fmtNumber(tot.operating_cost, 2)}</td>
-                        <td className={num}>{fmtNumber(tot.total_cost, 2)}</td>
+                        <td className={num}>{fmtNumber(tot.owning_cost, currencyFractionDigits(cur))}</td>
+                        <td className={num}>{fmtNumber(tot.operating_cost, currencyFractionDigits(cur))}</td>
+                        <td className={num}>{fmtNumber(tot.total_cost, currencyFractionDigits(cur))}</td>
                         <td colSpan={7} />
                       </tr>
                     ))}

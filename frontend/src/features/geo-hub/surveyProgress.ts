@@ -5,6 +5,7 @@
 import type { BadgeVariant } from '@/shared/ui';
 
 import type { SurveyCapture, SurveyPlatform, SurveyStatus } from './types';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 /** Mirrors backend ``survey_logic.DEFAULT_TOLERANCE_PCT``. */
 export const DEFAULT_TOLERANCE_PCT = 5;
@@ -42,7 +43,7 @@ export function varianceBadge(status: SurveyStatus): VarianceBadge {
 export function formatVariance(variance: number | null | undefined): string {
   if (variance === null || variance === undefined || Number.isNaN(variance)) return '—';
   const rounded = Math.round(variance * 10) / 10;
-  return `${rounded > 0 ? '+' : ''}${rounded.toFixed(1)}`;
+  return `${rounded > 0 ? '+' : ''}${fmtFixed(rounded, 1)}`;
 }
 
 export type ParsedPct = { ok: true; value: number } | { ok: false };
@@ -122,7 +123,7 @@ export function formatGsd(gsdCm: string | number | null | undefined): string | n
   if (gsdCm === null || gsdCm === undefined || gsdCm === '') return null;
   const n = Number(gsdCm);
   if (!Number.isFinite(n)) return null;
-  return n >= 100 ? `${(n / 100).toFixed(2)} m/px` : `${n.toFixed(1)} cm/px`;
+  return n >= 100 ? `${fmtFixed(n / 100, 2)} m/px` : `${fmtFixed(n, 1)} cm/px`;
 }
 
 export function formatSize(width: number | null | undefined, height: number | null | undefined): string | null {

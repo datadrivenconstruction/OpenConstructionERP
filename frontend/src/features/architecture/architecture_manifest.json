@@ -313637,10 +313637,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 67,
+      "ts_files": 68,
       "css_files": 0,
       "test_files": 23,
-      "total_files": 67
+      "total_files": 68
     },
     {
       "name": "setup",
@@ -313861,10 +313861,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 31,
+      "ts_files": 37,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 31
+      "test_files": 10,
+      "total_files": 37
     },
     {
       "name": "voice",
@@ -315752,7 +315752,7 @@
     "total_schemas": 4684,
     "total_python_files": 3316,
     "frontend_features": 236,
-    "frontend_ts_files": 4096,
+    "frontend_ts_files": 4103,
     "frontend_backend_mapped": 212
   },
   "frontend_backend_mapping": {

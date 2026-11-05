@@ -36,6 +36,7 @@ import {
   type Unit,
 } from './api';
 import { NEXT_STATUS, STATUS_VARIANT, netTonnes, totalsOf } from './model';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 type Tab = 'tickets' | 'summary' | 'invoices' | 'import';
 
@@ -192,8 +193,8 @@ function TicketsTab({ projectId }: { projectId: string }) {
           {t('haul.totals', {
             defaultValue: '{{count}} tickets, {{qty}} counted, {{amount}} amount',
             count: items.length,
-            qty: totals.quantity.toFixed(2),
-            amount: totals.amount.toFixed(2),
+            qty: fmtFixed(totals.quantity, 2),
+            amount: fmtFixed(totals.amount, 2),
           })}
         </span>
         <Button size="sm" onClick={() => setAdding((v) => !v)}>

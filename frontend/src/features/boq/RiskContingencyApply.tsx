@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tansta
 import { AlertTriangle, CheckCircle2, Loader2, Undo2 } from 'lucide-react';
 import { boqApi, type RiskContingencyMode, type RiskContingencySource, type RiskContingencyStatus } from './api';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
-import { fmtFixed, fmtPercent } from '@/shared/lib/formatters';
+import { fmtFixed, fmtPercent, fmtDate } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 
 const PRESETS = [50, 80] as const;
@@ -374,7 +374,7 @@ export function RiskContingencyApply({
               p: applied.percentile,
               seed: applied.seed ?? '-',
               iterations: applied.iterations ?? '-',
-              date: applied.applied_at ? new Date(applied.applied_at).toLocaleDateString() : '-',
+              date: applied.applied_at ? fmtDate(applied.applied_at) : '-',
               who: applied.applied_by_email || applied.applied_by || '-',
             })}
           </div>

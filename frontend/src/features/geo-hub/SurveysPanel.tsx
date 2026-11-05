@@ -42,6 +42,7 @@ import {
   varianceBadge,
 } from './surveyProgress';
 import type { SurveyCapture, SurveyPlatform, SurveyProgressRow } from './types';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 interface SurveysPanelProps {
   projectId: string;
@@ -564,7 +565,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
                   <td className="max-w-[9rem] truncate py-1 pr-1" title={`${row.code} ${row.name}`}>
                     <span className="text-content-tertiary">{row.code}</span> {row.name}
                   </td>
-                  <td className="px-1 text-right tabular-nums">{row.planned_pct_on_date.toFixed(0)}</td>
+                  <td className="px-1 text-right tabular-nums">{fmtFixed(row.planned_pct_on_date, 0)}</td>
                   <td className="px-1 text-right">
                     <input
                       type="text"

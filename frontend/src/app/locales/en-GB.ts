@@ -45,6 +45,7 @@ const resource = {
     "nav.supplier_catalogs": "Supplier Catalogues",
     "nav.labor_rates": "Labour Rates",
     "nav.measurement_book": "Measurement book",
+    "nav.supplier_rfq": "Supplier RFQ",
     "enterprise_workflows.no_requests": "No approval requests",
     "enterprise_workflows.no_workflows": "No workflows yet",
     "modules.catalog.catalog": "Product & Resource Catalogue",
@@ -749,6 +750,7 @@ const resource = {
     "catalog.category_general_equipment": "General Equipment",
     "catalog.category_labor": "Labour",
     "catalog.category_operators": "Operators",
+    "sidebar.help.supplier_rfq": "Ask suppliers for quotes on materials and services and award to a purchase order.",
   }
 } as { translation: Record<string, string> };
 

@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import type { PunchItem } from './api';
 
 const base: PunchItem = {
@@ -72,7 +73,7 @@ describe('PunchDetailDrawer after a transition', () => {
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
-      <QueryClientProvider client={qc}>
+      <QueryClientProvider client={qc}><MemoryRouter>
         <PunchDetailDrawer
           itemId={base.id}
           projectId={base.project_id}
@@ -80,7 +81,8 @@ describe('PunchDetailDrawer after a transition', () => {
           projectCurrency=""
           onClose={() => {}}
         />
-      </QueryClientProvider>,
+      </MemoryRouter>
+</QueryClientProvider>,
     );
 
     await waitFor(() => expect(fetchPunchItem).toHaveBeenCalledTimes(1));

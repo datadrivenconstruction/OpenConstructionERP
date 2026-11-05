@@ -14,7 +14,7 @@ import { Badge, Button, ConfirmDialog, Skeleton } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { parseMoneyInput } from '@/shared/lib/parseDecimal';
 import type { BadgeVariant } from '@/shared/ui';
-import { fmtCurrency, fmtList } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtList, fmtNumberForInput } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { CostLinePicker } from '@/features/costmodel/CostLinePicker';
@@ -502,8 +502,8 @@ function TransferForm({ projectId, currency, onDone, onCancel, onError }: FormPr
       budgetLedgerApi.createTransfer(projectId, {
         reason,
         legs: [
-          { cost_line_id: from, amount: (-value).toFixed(2) },
-          { cost_line_id: to, amount: value.toFixed(2) },
+          { cost_line_id: from, amount: fmtNumberForInput(-value, 2) },
+          { cost_line_id: to, amount: fmtNumberForInput(value, 2) },
         ],
       }),
     onSuccess: onDone,
@@ -552,7 +552,7 @@ function ModificationForm({ projectId, currency, onDone, onCancel, onError }: Fo
     mutationFn: () =>
       budgetLedgerApi.createModification(projectId, {
         cost_line_id: line,
-        amount: value.toFixed(2),
+        amount: fmtNumberForInput(value, 2),
         reason,
         approval_ref: ref,
       }),

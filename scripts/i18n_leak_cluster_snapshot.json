@@ -2156,5 +2156,13 @@
     ],
     "key_count_at_seed": 3,
     "note": "Journal is the accounting term in each of these languages; reviewed 2026-11-05"
+  },
+  {
+    "locale_set": [
+      "fr",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Position, Guide and Session are the native words in French and Swedish; reviewed 2026-11-06"
   }
 ]

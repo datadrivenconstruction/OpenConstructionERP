@@ -35,6 +35,7 @@ import {
 } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { InvoiceInboxOrderLink, hasOrderMismatch } from './InvoiceInboxOrderLink';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -413,7 +414,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
 
 function amountText(v: string | undefined): string {
   const n = Number(v);
-  return Number.isFinite(n) ? new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) : (v ?? '-');
+  return Number.isFinite(n) ? new Intl.NumberFormat(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) : (v ?? '-');
 }
 
 /* ── Detail modal ──────────────────────────────────────────────────────── */

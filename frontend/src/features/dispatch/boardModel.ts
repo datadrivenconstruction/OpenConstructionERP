@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Pure helpers for the dispatch board: dates, status colours, grouping and selection. */
 import type { CardStatus, Conflict, ConflictKind, DispatchLocation, LocationKind, Placement } from './api';
+import { compareNames } from '@/shared/lib/collator';
 
 /** Local calendar date as YYYY-MM-DD, never shifted by the UTC offset. */
 export function isoDay(d: Date): string {
@@ -37,7 +38,7 @@ export const LOCATION_ORDER: Record<LocationKind, number> = { project: 0, yard: 
 export function sortLocations(locations: DispatchLocation[]): DispatchLocation[] {
   return [...locations].sort(
     (a, b) =>
-      LOCATION_ORDER[a.kind] - LOCATION_ORDER[b.kind] || a.sort_order - b.sort_order || a.name.localeCompare(b.name),
+      LOCATION_ORDER[a.kind] - LOCATION_ORDER[b.kind] || a.sort_order - b.sort_order || compareNames(a.name, b.name),
   );
 }
 
@@ -47,7 +48,7 @@ export function groupByLocation(placements: Placement[]): Record<string, Placeme
     (out[p.location_id] ??= []).push(p);
   }
   for (const list of Object.values(out)) {
-    list.sort((a, b) => a.start_time.localeCompare(b.start_time) || a.label.localeCompare(b.label));
+    list.sort((a, b) => a.start_time.localeCompare(b.start_time) || compareNames(a.label, b.label));
   }
   return out;
 }

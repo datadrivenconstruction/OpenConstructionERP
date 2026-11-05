@@ -30,7 +30,7 @@ import {
 import { Badge, Button, Breadcrumb, EmptyState, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
-import { fmtList } from '@/shared/lib/formatters';
+import { fmtList, fmtDate } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { PresenceIndicator } from '@/features/collab_locks';
 import {
@@ -960,7 +960,7 @@ export function BidDayPage() {
                   <li key={s.id} className="rounded border border-border-light p-2">
                     <div className="font-semibold tabular-nums text-content-primary">{money(s.bid_total, s.currency)}</div>
                     <div className="text-content-tertiary">
-                      {new Date(s.created_at).toLocaleString()} {s.submitted_by_name && `· ${s.submitted_by_name}`}
+                      {fmtDate(s.created_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} {s.submitted_by_name && `· ${s.submitted_by_name}`}
                     </div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       <Button variant="ghost" size="sm" icon={<Download size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'pdf')}>PDF</Button>

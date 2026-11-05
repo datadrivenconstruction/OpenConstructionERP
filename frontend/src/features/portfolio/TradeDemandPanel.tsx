@@ -15,6 +15,7 @@ import { AlertTriangle, HardHat, X } from 'lucide-react';
 import { Badge, Card, CardContent, EmptyState, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { getWorkforceDemand, type WorkforceCell, type WorkforceTradeRow } from './api';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 const WEEK_OPTIONS = [8, 12, 26] as const;
 
@@ -41,7 +42,7 @@ function todayIso(): string {
 
 function fmt(raw: string, lang: string, digits = 1): string {
   const n = Number(raw);
-  return Number.isFinite(n) ? n.toLocaleString(lang, { maximumFractionDigits: digits }) : '-';
+  return Number.isFinite(n) ? n.toLocaleString(getNumberLocale(), { maximumFractionDigits: digits }) : '-';
 }
 
 export function TradeDemandPanel() {

@@ -127,7 +127,7 @@ const moreExpanded = () => screen.getByTestId('sidebar-more-modules').getAttribu
 
 // The Learn card (Videos, Cases, Packs) sits above everything else in every mode,
 // workspace included, until the user hides it.
-const LEARN = ['/videos', '/cases', '/packs'];
+const LEARN = ['/videos', '/courses', '/cases', '/packs'];
 
 const GC_WORKSPACE = [
   '/',

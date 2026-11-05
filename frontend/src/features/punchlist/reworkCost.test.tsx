@@ -15,6 +15,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({
   fetchPunchItem: vi.fn(),
@@ -76,7 +77,7 @@ function renderDrawer(item: PunchItem, projectCurrency: string) {
   api.fetchPunchItem.mockResolvedValue(item);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={client}>
+    <QueryClientProvider client={client}><MemoryRouter>
       <PunchDetailDrawer
         itemId={item.id}
         projectId={item.project_id}
@@ -84,7 +85,8 @@ function renderDrawer(item: PunchItem, projectCurrency: string) {
         projectCurrency={projectCurrency}
         onClose={() => {}}
       />
-    </QueryClientProvider>,
+    </MemoryRouter>
+</QueryClientProvider>,
   );
 }
 

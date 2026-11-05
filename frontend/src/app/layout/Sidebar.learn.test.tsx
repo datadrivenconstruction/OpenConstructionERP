@@ -123,13 +123,13 @@ describe('the Learn card', () => {
     const hrefs = within(learn)
       .getAllByRole('link')
       .map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/videos', '/cases', '/packs']);
+    expect(hrefs).toEqual(['/videos', '/courses', '/cases', '/packs']);
 
     const firstLinks = within(nav())
       .getAllByRole('link')
-      .slice(0, 4)
+      .slice(0, 5)
       .map((a) => a.getAttribute('href'));
-    expect(firstLinks).toEqual(['/videos', '/cases', '/packs', '/boq']);
+    expect(firstLinks).toEqual(['/videos', '/courses', '/cases', '/packs', '/boq']);
   });
 
   it('marks Packs as the current page on a single pack too', () => {
