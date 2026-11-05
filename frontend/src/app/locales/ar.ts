@@ -47200,6 +47200,7 @@ const resource = {
   "validation.light_passed": "ناجح",
   "validation.light_warning": "تحذيرات",
   "validation.no_results": "لا يوجد شيء للفحص بعد. تعمل القواعد بمجرد توفر البيانات.",
+  "validation.saved_with_warnings": "تم الحفظ مع تحذيرات",
     "modules.tab_profiles": "ملفات الشركة",
     "modules.tab_packs": "الحزم",
     "modules.tab_data_packages": "حزم البيانات",
