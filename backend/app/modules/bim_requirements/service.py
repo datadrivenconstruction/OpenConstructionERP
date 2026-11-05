@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.bim_requirements.classifier import FormatClassifier
 from app.modules.bim_requirements.models import BIMRequirement, BIMRequirementSet
 from app.modules.bim_requirements.parsers.base import ParseResult, UniversalRequirement
+from app.modules.bim_requirements.validators import gate_import
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +81,8 @@ class BIMRequirementService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking rule findings of the last import, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
 
     # ── Import ─────────────────────────────────────────────────────────────
 
@@ -160,6 +163,23 @@ class BIMRequirementService:
                     f"Errors: {parse_result.errors}"
                 ),
             )
+
+        # The rules judge the whole file before anything is stored; an error refuses it with a coded 422.
+        self.findings = await gate_import(
+            [
+                {
+                    "row": i,
+                    "property_name": req.property_name,
+                    "element_filter": req.element_filter,
+                    "constraint_def": req.constraint_def,
+                }
+                for i, req in enumerate(parse_result.requirements, start=1)
+            ],
+            operation="import",
+            project_id=project_id,
+            subject="requirements file",
+        )
+        parse_result.warnings.extend({"row": None, "field": f["code"], "msg": f["message"]} for f in self.findings)
 
         # Create the requirement set
         set_name = name or f"{Path(filename).stem} ({format_name})"
@@ -660,8 +680,6 @@ class BIMRequirementService:
                 "source": pack.pack.source,
             },
         )
-        self.session.add(req_set)
-        await self.session.flush()
 
         created: list[BIMRequirement] = []
         for rule in pack.rules:
@@ -699,7 +717,6 @@ class BIMRequirementService:
                 element_filter["properties"] = [p.model_dump(exclude_none=True) for p in rule.selector.properties]
 
             db_req = BIMRequirement(
-                requirement_set_id=req_set.id,
                 element_filter=element_filter,
                 property_group=None,
                 property_name=property_name,
@@ -715,9 +732,27 @@ class BIMRequirementService:
                 source_ref=f"{pack.pack.id}#{rule.id}",
                 is_active=True,
             )
-            self.session.add(db_req)
             created.append(db_req)
 
+        self.findings = await gate_import(
+            [
+                {
+                    "row": i,
+                    "property_name": r.property_name,
+                    "element_filter": r.element_filter,
+                    "constraint_def": r.constraint_def,
+                }
+                for i, r in enumerate(created, start=1)
+            ],
+            operation="install",
+            project_id=project_id,
+            subject="rule pack",
+        )
+        self.session.add(req_set)
+        await self.session.flush()
+        for db_req in created:
+            db_req.requirement_set_id = req_set.id
+            self.session.add(db_req)
         await self.session.flush()
 
         logger.info(

@@ -2111,5 +2111,133 @@
       "fail": "İki proje arasındaki {days} günlük gecikme alışılmadık derecede uzun.",
       "suggestion": "Birimi kontrol edin: gecikme gün olarak girilir."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "{name} gereksinimi {type} kontrolünü kullanıyor ancak karşılaştırılacak bir değeri yok.",
+      "suggestion": "Model değerinin karşılaştırıldığı sınırı veya deseni girin."
+    },
+    "value_invalid": {
+      "fail": "{name} gereksiniminin '{value}' değeri {type} kontrolüyle kullanılamaz.",
+      "suggestion": "min ve max için sayı, aralık için alt..üst veya geçerli bir düzenli ifade kullanın."
+    },
+    "unit_missing": {
+      "fail": "{name} gereksinimi birimsiz sayısal bir sınır ({type}) koyuyor.",
+      "suggestion": "Birimi belirtin, örneğin m, mm, m2 veya kN."
+    },
+    "verification_missing": {
+      "fail": "Zorunlu {name} gereksinimi için uygunluğun nasıl doğrulanacağı belirtilmemiş.",
+      "suggestion": "Bir doğrulama yöntemi seçin: muayene, deney, hesap veya model kontrolü."
+    },
+    "locked_set_empty": {
+      "fail": "Gereksinimi olmayan bir küme temel olarak kilitlenemez.",
+      "suggestion": "Önce gereksinimleri ekleyin, sonra kümeyi kilitleyin."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "{row}. satırda özellik adı yok.",
+      "suggestion": "Kontrol edilen özelliği adlandırın, örneğin YangınDayanımı."
+    },
+    "filter_empty": {
+      "fail": "{total} gereksinimin {count} tanesinde eleman filtresi yok ve modeldeki her elemana uygulanırdı.",
+      "suggestion": "Her gereksinimi bir eleman sınıfı veya türüyle sınırlayın."
+    },
+    "bounds_inverted": {
+      "fail": "{row}. satır ({property}): en az değer {low}, en çok değer {high} değerinden büyük.",
+      "suggestion": "Sınırları yer değiştirin veya sayıları düzeltin."
+    },
+    "pattern_invalid": {
+      "fail": "{row}. satır ({property}): '{pattern}' deseni geçerli bir düzenli ifade değil.",
+      "suggestion": "Deseni derlenebilir olacak şekilde düzeltin."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Uygunsuzluğun maliyetinin ({amount}) para birimi yok.",
+      "suggestion": "Maliyet etkisinin para birimini seçin."
+    },
+    "root_cause_missing": {
+      "fail": "Doğrulamada veya kapalı olan uygunsuzluğun ({grade}) kök nedeni kayıtlı değil.",
+      "suggestion": "Raporu doğrulamadan veya kapatmadan önce kök nedeni kaydedin."
+    },
+    "punch_due_before_raised": {
+      "fail": "Eksik kaydının son tarihi {due}, açıldığı {raised} tarihinden önce.",
+      "suggestion": "Son tarihi açılış gününe veya sonrasına ayarlayın."
+    },
+    "calibration_window": {
+      "fail": "Kalibrasyon {until} tarihine kadar geçerli, bu da kalibrasyon tarihi {start} sonrası değil.",
+      "suggestion": "Kalibrasyon tarihini ve geçerlilik bitiş tarihini kontrol edin."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibrasyon geçerli işaretli ama {until} tarihinde sona erdi.",
+      "suggestion": "Cihazı yeniden kalibre edin veya durumu süresi dolmuş yapın."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Alt tolerans {lower}, üst tolerans {upper} değerinden büyük.",
+      "suggestion": "Alt sınır üstü aşmasın diye sınırları yer değiştirin."
+    },
+    "nominal_outside": {
+      "fail": "Anma değeri {nominal}, {lower} ile {upper} arasındaki tolerans bandının dışında.",
+      "suggestion": "Anma değerini veya tolerans sınırlarını düzeltin."
+    },
+    "certificate_window": {
+      "fail": "Sertifika {until} tarihine kadar geçerli, yani başlangıç tarihi {start} öncesinde.",
+      "suggestion": "Sertifika üzerindeki geçerlilik tarihlerini kontrol edin."
+    },
+    "certificate_expired": {
+      "fail": "Malzeme sertifikası {date} tarihinde sona erdi, ancak malzeme durumu {status}.",
+      "suggestion": "Malzemeyi kabul etmeden önce geçerli bir sertifika alın."
+    },
+    "test_before_sample": {
+      "fail": "Deney tarihi {tested}, numune alma tarihi {sampled} öncesinde.",
+      "suggestion": "Numune alma ve deney tarihlerini laboratuvar raporuyla karşılaştırın."
+    },
+    "lab_unaccredited": {
+      "fail": "{lab} laboratuvarı akredite olarak kayıtlı değil.",
+      "suggestion": "Akreditasyon referansını kaydedin veya akredite bir laboratuvar kullanın."
+    },
+    "date_in_future": {
+      "fail": "{field} tarihi ({date}) gelecekte.",
+      "suggestion": "İşin, numune almanın veya deneyin gerçekten yapıldığı günü kaydedin."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Tamamlanma tarihi {date} gelecekte.",
+      "suggestion": "Kalemin gerçekten tamamlandığı günü girin."
+    },
+    "ready_undated": {
+      "fail": "Kalem hazır işaretli ama tamamlanma tarihi yok.",
+      "suggestion": "Kalemin tamamlanma tarihini girin."
+    },
+    "gate_item_unowned": {
+      "fail": "Başlama koşulunun ({status}) sorumlusu yok.",
+      "suggestion": "Şantiye açılmadan önce koşulu kimin karşılayacağını belirleyin."
+    },
+    "plan_start_missing": {
+      "fail": "Şantiye kurulum planının ({status}) planlanan başlangıç tarihi yok.",
+      "suggestion": "Kurulumun planlanan başlangıç tarihini girin."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Ziyaretin ({status}) gerçekleşen tarihi yok.",
+      "suggestion": "Ziyaretin yapıldığı tarihi girin."
+    },
+    "visit_in_future": {
+      "fail": "Ziyaret ({status}), ancak tarihi {date} gelecekte.",
+      "suggestion": "Tarihi düzeltin veya ziyaret gerçekleşene kadar planlı bırakın."
+    },
+    "observation_missing": {
+      "fail": "{category} türündeki kaydın gözlem metni yok.",
+      "suggestion": "Şantiyede neyin gözlendiğini yazın."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Gizli işler şunlar belirtilmeden kabul edildi: {missing}.",
+      "suggestion": "Kaydı kapatmadan önce elemanı ve konumunu kaydedin."
+    }
   }
 }

@@ -14,3 +14,7 @@ async def on_startup() -> None:
     )
 
     register_bim_requirements_permissions()
+
+    from app.modules.bim_requirements.validators import register_bim_requirements_validation_rules
+
+    register_bim_requirements_validation_rules()

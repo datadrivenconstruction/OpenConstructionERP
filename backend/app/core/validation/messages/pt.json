@@ -2111,5 +2111,133 @@
       "fail": "Um desfasamento de {days} dias entre dois projetos é invulgarmente longo.",
       "suggestion": "Verifique a unidade: o desfasamento é introduzido em dias."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "O requisito {name} usa a verificação {type}, mas não tem valor para comparar.",
+      "suggestion": "Informe o limite ou o padrão com que o valor do modelo é comparado."
+    },
+    "value_invalid": {
+      "fail": "O valor '{value}' do requisito {name} não serve para a verificação {type}.",
+      "suggestion": "Use um número para min e max, baixo..alto para um intervalo ou uma expressão regular válida."
+    },
+    "unit_missing": {
+      "fail": "O requisito {name} define um limite numérico ({type}) sem unidade.",
+      "suggestion": "Indique a unidade, por exemplo m, mm, m2 ou kN."
+    },
+    "verification_missing": {
+      "fail": "O requisito obrigatório {name} não diz como a conformidade será verificada.",
+      "suggestion": "Escolha um método de verificação: inspeção, ensaio, cálculo ou verificação do modelo."
+    },
+    "locked_set_empty": {
+      "fail": "Um conjunto sem requisitos não pode ser bloqueado como linha de base.",
+      "suggestion": "Adicione primeiro os requisitos e depois bloqueie o conjunto."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "A linha {row} não tem nome de propriedade.",
+      "suggestion": "Indique a propriedade verificada, por exemplo ResistenciaAoFogo."
+    },
+    "filter_empty": {
+      "fail": "{count} de {total} requisitos não têm filtro de elementos e valeriam para todos os elementos do modelo.",
+      "suggestion": "Limite cada requisito a uma classe ou tipo de elemento."
+    },
+    "bounds_inverted": {
+      "fail": "Linha {row} ({property}): o mínimo {low} é maior que o máximo {high}.",
+      "suggestion": "Troque os limites ou corrija os valores."
+    },
+    "pattern_invalid": {
+      "fail": "Linha {row} ({property}): o padrão '{pattern}' não é uma expressão regular válida.",
+      "suggestion": "Corrija o padrão para que possa ser compilado."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "O custo da não conformidade, {amount}, não tem moeda.",
+      "suggestion": "Selecione a moeda do impacto financeiro."
+    },
+    "root_cause_missing": {
+      "fail": "Uma não conformidade {grade} em verificação ou encerrada não tem causa raiz.",
+      "suggestion": "Registre a causa raiz antes de verificar ou encerrar o relatório."
+    },
+    "punch_due_before_raised": {
+      "fail": "A pendência vence em {due}, antes de ser aberta em {raised}.",
+      "suggestion": "Defina um prazo igual ou posterior ao dia da abertura."
+    },
+    "calibration_window": {
+      "fail": "A calibração é válida até {until}, que não é posterior à data {start}.",
+      "suggestion": "Verifique a data de calibração e a de validade."
+    },
+    "calibration_lapsed": {
+      "fail": "A calibração está marcada como válida, mas expirou em {until}.",
+      "suggestion": "Recalibre o equipamento ou mude o estado para expirada."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "A tolerância inferior {lower} é maior que a superior {upper}.",
+      "suggestion": "Troque os limites para que o inferior não passe do superior."
+    },
+    "nominal_outside": {
+      "fail": "O valor nominal {nominal} está fora da faixa de tolerância de {lower} a {upper}.",
+      "suggestion": "Corrija o valor nominal ou os limites de tolerância."
+    },
+    "certificate_window": {
+      "fail": "O certificado é válido até {until}, antes da data de início {start}.",
+      "suggestion": "Verifique as datas de validade impressas no certificado."
+    },
+    "certificate_expired": {
+      "fail": "O certificado do material expirou em {date}, mas o material está {status}.",
+      "suggestion": "Obtenha um certificado atual antes de aceitar o material."
+    },
+    "test_before_sample": {
+      "fail": "A data do ensaio {tested} é anterior à da amostragem {sampled}.",
+      "suggestion": "Confira as datas de amostragem e ensaio com o relatório do laboratório."
+    },
+    "lab_unaccredited": {
+      "fail": "O laboratório {lab} não consta como acreditado.",
+      "suggestion": "Registre a referência de acreditação ou use um laboratório acreditado."
+    },
+    "date_in_future": {
+      "fail": "A data {field} ({date}) está no futuro.",
+      "suggestion": "Registre o dia em que o trabalho, a amostragem ou o ensaio realmente ocorreu."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "A data de conclusão {date} está no futuro.",
+      "suggestion": "Informe o dia em que o item foi realmente concluído."
+    },
+    "ready_undated": {
+      "fail": "O item está marcado como pronto, mas não tem data de conclusão.",
+      "suggestion": "Informe a data de conclusão do item."
+    },
+    "gate_item_unowned": {
+      "fail": "O item impeditivo está {status} e não tem responsável.",
+      "suggestion": "Atribua quem o resolverá antes da abertura da obra."
+    },
+    "plan_start_missing": {
+      "fail": "O plano de mobilização está {status}, mas não tem data de início prevista.",
+      "suggestion": "Informe a data de início prevista da mobilização."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "A visita está {status}, mas não tem data efetiva.",
+      "suggestion": "Informe a data em que a visita ocorreu."
+    },
+    "visit_in_future": {
+      "fail": "A visita está {status}, mas a sua data {date} está no futuro.",
+      "suggestion": "Corrija a data ou mantenha a visita como planejada até que ocorra."
+    },
+    "observation_missing": {
+      "fail": "Um registro do tipo {category} não tem texto de observação.",
+      "suggestion": "Descreva o que foi observado na obra."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Serviços ocultos foram aceitos sem indicar: {missing}.",
+      "suggestion": "Registre o elemento e a sua localização antes de encerrar o registro."
+    }
   }
 }

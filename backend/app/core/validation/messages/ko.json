@@ -2111,5 +2111,133 @@
       "fail": "두 프로젝트 간 {days}일의 지연은 비정상적으로 깁니다.",
       "suggestion": "단위를 확인하세요. 지연은 일 단위로 입력합니다."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "요구사항 {name}은(는) {type} 검사를 사용하지만 비교할 값이 없습니다.",
+      "suggestion": "모델 값과 비교할 한계 또는 패턴을 입력하세요."
+    },
+    "value_invalid": {
+      "fail": "요구사항 {name}의 값 '{value}'은(는) {type} 검사에 사용할 수 없습니다.",
+      "suggestion": "min과 max에는 숫자, 범위에는 하한..상한, 그 외에는 올바른 정규식을 사용하세요."
+    },
+    "unit_missing": {
+      "fail": "요구사항 {name}은(는) 단위 없이 숫자 한계({type})를 정합니다.",
+      "suggestion": "단위를 지정하세요. 예: m, mm, m2, kN."
+    },
+    "verification_missing": {
+      "fail": "필수 요구사항 {name}에 적합성을 어떻게 검증하는지 적혀 있지 않습니다.",
+      "suggestion": "검증 방법을 선택하세요: 검사, 시험, 계산 또는 모델 확인."
+    },
+    "locked_set_empty": {
+      "fail": "요구사항이 없는 세트는 기준선으로 잠글 수 없습니다.",
+      "suggestion": "먼저 요구사항을 추가한 뒤 세트를 잠그세요."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "{row}행에 속성 이름이 없습니다.",
+      "suggestion": "확인할 속성 이름을 입력하세요. 예: 내화성능."
+    },
+    "filter_empty": {
+      "fail": "요구사항 {total}개 중 {count}개에 요소 필터가 없어 모델의 모든 요소에 적용됩니다.",
+      "suggestion": "각 요구사항을 요소 분류 또는 유형으로 한정하세요."
+    },
+    "bounds_inverted": {
+      "fail": "{row}행({property}): 최솟값 {low}이(가) 최댓값 {high}보다 큽니다.",
+      "suggestion": "한계를 서로 바꾸거나 수치를 고치세요."
+    },
+    "pattern_invalid": {
+      "fail": "{row}행({property}): 패턴 '{pattern}'은(는) 올바른 정규식이 아닙니다.",
+      "suggestion": "컴파일되도록 패턴을 고치세요."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "부적합 비용 {amount}에 통화가 없습니다.",
+      "suggestion": "비용 영향의 통화를 선택하세요."
+    },
+    "root_cause_missing": {
+      "fail": "검증 중이거나 종결된 부적합({grade})에 근본 원인이 기록되어 있지 않습니다.",
+      "suggestion": "보고서를 검증하거나 종결하기 전에 근본 원인을 기록하세요."
+    },
+    "punch_due_before_raised": {
+      "fail": "펀치 항목의 기한 {due}이(가) 등록일 {raised}보다 앞섭니다.",
+      "suggestion": "기한을 등록일 이후로 지정하세요."
+    },
+    "calibration_window": {
+      "fail": "교정은 {until}까지 유효하며, 이는 교정일 {start} 이후가 아닙니다.",
+      "suggestion": "교정일과 만료일을 확인하세요."
+    },
+    "calibration_lapsed": {
+      "fail": "교정이 유효로 표시되어 있지만 {until}에 만료되었습니다.",
+      "suggestion": "계측기를 다시 교정하거나 상태를 만료로 바꾸세요."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "하한 공차 {lower}이(가) 상한 공차 {upper}보다 큽니다.",
+      "suggestion": "하한이 상한을 넘지 않도록 한계를 서로 바꾸세요."
+    },
+    "nominal_outside": {
+      "fail": "공칭값 {nominal}이(가) 공차 범위 {lower}~{upper}를 벗어났습니다.",
+      "suggestion": "공칭값 또는 공차 한계를 고치세요."
+    },
+    "certificate_window": {
+      "fail": "인증서는 {until}까지 유효하며, 이는 시작일 {start}보다 앞섭니다.",
+      "suggestion": "인증서에 적힌 유효 기간을 확인하세요."
+    },
+    "certificate_expired": {
+      "fail": "자재 인증서가 {date}에 만료되었는데 자재 상태는 {status}입니다.",
+      "suggestion": "자재를 승인하기 전에 유효한 인증서를 받으세요."
+    },
+    "test_before_sample": {
+      "fail": "시험일 {tested}이(가) 시료 채취일 {sampled}보다 앞섭니다.",
+      "suggestion": "채취일과 시험일을 시험소 성적서와 대조하세요."
+    },
+    "lab_unaccredited": {
+      "fail": "시험소 {lab}은(는) 인정 기관으로 기록되어 있지 않습니다.",
+      "suggestion": "인정 번호를 기록하거나 인정받은 시험소를 이용하세요."
+    },
+    "date_in_future": {
+      "fail": "날짜({field}) {date}이(가) 미래입니다.",
+      "suggestion": "작업, 시료 채취 또는 시험이 실제로 이루어진 날을 기록하세요."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "완료일 {date}이(가) 미래입니다.",
+      "suggestion": "실제 완료한 날을 입력하세요."
+    },
+    "ready_undated": {
+      "fail": "항목이 준비됨으로 표시되었지만 완료일이 없습니다.",
+      "suggestion": "항목의 완료일을 입력하세요."
+    },
+    "gate_item_unowned": {
+      "fail": "착수 조건({status})에 담당자가 없습니다.",
+      "suggestion": "현장 개설 전에 이 조건을 해결할 담당자를 지정하세요."
+    },
+    "plan_start_missing": {
+      "fail": "현장 준비 계획({status})에 예정 시작일이 없습니다.",
+      "suggestion": "준비의 예정 시작일을 입력하세요."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "방문({status})에 실제 날짜가 없습니다.",
+      "suggestion": "방문이 이루어진 날짜를 입력하세요."
+    },
+    "visit_in_future": {
+      "fail": "방문({status})인데 날짜 {date}이(가) 미래입니다.",
+      "suggestion": "날짜를 고치거나 방문이 이루어질 때까지 계획 상태로 두세요."
+    },
+    "observation_missing": {
+      "fail": "유형 {category} 기록에 관찰 내용이 없습니다.",
+      "suggestion": "현장에서 관찰한 내용을 적으세요."
+    },
+    "hidden_works_unidentified": {
+      "fail": "다음을 명시하지 않고 은폐 공사를 승인했습니다: {missing}.",
+      "suggestion": "기록을 종결하기 전에 부위와 위치를 기록하세요."
+    }
   }
 }

@@ -2111,5 +2111,133 @@
       "fail": "Un décalage de {days} jours entre deux projets est anormalement long.",
       "suggestion": "Vérifiez l'unité : le décalage se saisit en jours."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "L'exigence {name} utilise le contrôle {type} mais n'a aucune valeur de comparaison.",
+      "suggestion": "Saisissez la limite ou le motif auquel la valeur du modèle est comparée."
+    },
+    "value_invalid": {
+      "fail": "La valeur '{value}' de l'exigence {name} est inutilisable avec le contrôle {type}.",
+      "suggestion": "Utilisez un nombre pour min et max, bas..haut pour une plage, ou une expression régulière valide."
+    },
+    "unit_missing": {
+      "fail": "L'exigence {name} fixe une limite numérique ({type}) sans unité.",
+      "suggestion": "Indiquez l'unité, par exemple m, mm, m2 ou kN."
+    },
+    "verification_missing": {
+      "fail": "L'exigence obligatoire {name} n'indique pas comment la conformité sera vérifiée.",
+      "suggestion": "Choisissez une méthode de vérification : inspection, essai, calcul ou contrôle du modèle."
+    },
+    "locked_set_empty": {
+      "fail": "Un jeu d'exigences vide ne peut pas être verrouillé comme référence.",
+      "suggestion": "Ajoutez d'abord les exigences, puis verrouillez le jeu."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "La ligne {row} n'a pas de nom de propriété.",
+      "suggestion": "Nommez la propriété contrôlée, par exemple ResistanceAuFeu."
+    },
+    "filter_empty": {
+      "fail": "{count} exigences sur {total} n'ont aucun filtre d'élément et s'appliqueraient à tous les éléments du modèle.",
+      "suggestion": "Limitez chaque exigence à une classe ou un type d'élément."
+    },
+    "bounds_inverted": {
+      "fail": "Ligne {row} ({property}) : le minimum {low} dépasse le maximum {high}.",
+      "suggestion": "Inversez les bornes ou corrigez les valeurs."
+    },
+    "pattern_invalid": {
+      "fail": "Ligne {row} ({property}) : le motif '{pattern}' n'est pas une expression régulière valide.",
+      "suggestion": "Corrigez le motif pour qu'il soit compilable."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Le coût de la non-conformité, {amount}, n'a pas de devise.",
+      "suggestion": "Sélectionnez la devise de l'impact financier."
+    },
+    "root_cause_missing": {
+      "fail": "Une non-conformité {grade} en vérification ou clôturée n'a pas de cause racine.",
+      "suggestion": "Saisissez la cause racine avant de vérifier ou de clôturer le rapport."
+    },
+    "punch_due_before_raised": {
+      "fail": "La réserve est due le {due}, avant sa création le {raised}.",
+      "suggestion": "Fixez une échéance à la date de création ou après."
+    },
+    "calibration_window": {
+      "fail": "L'étalonnage est valable jusqu'au {until}, ce qui n'est pas postérieur à sa date {start}.",
+      "suggestion": "Vérifiez la date d'étalonnage et la date d'expiration."
+    },
+    "calibration_lapsed": {
+      "fail": "L'étalonnage est marqué valide mais a expiré le {until}.",
+      "suggestion": "Étalonnez de nouveau l'instrument ou passez le statut à expiré."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "La tolérance inférieure {lower} dépasse la tolérance supérieure {upper}.",
+      "suggestion": "Inversez les limites pour que la valeur basse ne dépasse pas la haute."
+    },
+    "nominal_outside": {
+      "fail": "La valeur nominale {nominal} est hors de la plage de tolérance {lower} à {upper}.",
+      "suggestion": "Corrigez la valeur nominale ou les limites de tolérance."
+    },
+    "certificate_window": {
+      "fail": "Le certificat est valable jusqu'au {until}, avant sa date de début {start}.",
+      "suggestion": "Vérifiez les dates de validité figurant sur le certificat."
+    },
+    "certificate_expired": {
+      "fail": "Le certificat du matériau a expiré le {date}, alors que le matériau est {status}.",
+      "suggestion": "Obtenez un certificat à jour avant d'accepter le matériau."
+    },
+    "test_before_sample": {
+      "fail": "La date d'essai {tested} précède la date de prélèvement {sampled}.",
+      "suggestion": "Comparez les dates de prélèvement et d'essai avec le rapport du laboratoire."
+    },
+    "lab_unaccredited": {
+      "fail": "Le laboratoire {lab} n'est pas enregistré comme accrédité.",
+      "suggestion": "Saisissez la référence d'accréditation ou faites appel à un laboratoire accrédité."
+    },
+    "date_in_future": {
+      "fail": "La date {field} ({date}) est dans le futur.",
+      "suggestion": "Saisissez la date réelle des travaux, du prélèvement ou de l'essai."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "La date d'achèvement {date} est dans le futur.",
+      "suggestion": "Saisissez le jour où l'élément a réellement été achevé."
+    },
+    "ready_undated": {
+      "fail": "L'élément est marqué prêt mais n'a pas de date d'achèvement.",
+      "suggestion": "Saisissez la date d'achèvement de l'élément."
+    },
+    "gate_item_unowned": {
+      "fail": "Le point bloquant est {status} et n'a pas de responsable.",
+      "suggestion": "Désignez la personne qui lèvera ce point avant l'ouverture du chantier."
+    },
+    "plan_start_missing": {
+      "fail": "Le plan d'installation est {status} mais n'a pas de date de démarrage prévue.",
+      "suggestion": "Saisissez la date de démarrage prévue de l'installation de chantier."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "La visite est {status} mais n'a pas de date réelle.",
+      "suggestion": "Saisissez la date de la visite."
+    },
+    "visit_in_future": {
+      "fail": "La visite est {status} mais sa date {date} est dans le futur.",
+      "suggestion": "Corrigez la date, ou laissez la visite planifiée jusqu'à ce qu'elle ait eu lieu."
+    },
+    "observation_missing": {
+      "fail": "Une entrée de type {category} n'a pas de texte d'observation.",
+      "suggestion": "Décrivez ce qui a été constaté sur le chantier."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Des ouvrages cachés ont été acceptés sans préciser : {missing}.",
+      "suggestion": "Saisissez l'élément et son emplacement avant de clore l'entrée."
+    }
   }
 }

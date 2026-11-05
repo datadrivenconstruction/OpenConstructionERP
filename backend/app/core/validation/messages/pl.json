@@ -2111,5 +2111,133 @@
       "fail": "Opóźnienie {days} dni między dwoma projektami jest niezwykle długie.",
       "suggestion": "Sprawdź jednostkę: opóźnienie wpisuje się w dniach."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Wymaganie {name} używa kontroli {type}, ale nie ma wartości do porównania.",
+      "suggestion": "Podaj limit lub wzorzec, z którym porównywana jest wartość z modelu."
+    },
+    "value_invalid": {
+      "fail": "Wartość '{value}' wymagania {name} nie nadaje się do kontroli {type}.",
+      "suggestion": "Użyj liczby dla min i max, dolna..górna dla zakresu albo poprawnego wyrażenia regularnego."
+    },
+    "unit_missing": {
+      "fail": "Wymaganie {name} ustala limit liczbowy ({type}) bez jednostki.",
+      "suggestion": "Podaj jednostkę, na przykład m, mm, m2 lub kN."
+    },
+    "verification_missing": {
+      "fail": "Dla obowiązkowego wymagania {name} nie podano, jak zostanie sprawdzona zgodność.",
+      "suggestion": "Wybierz metodę weryfikacji: oględziny, badanie, obliczenia lub kontrola modelu."
+    },
+    "locked_set_empty": {
+      "fail": "Zestawu bez wymagań nie można zablokować jako bazowego.",
+      "suggestion": "Najpierw dodaj wymagania, potem zablokuj zestaw."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Wiersz {row} nie ma nazwy właściwości.",
+      "suggestion": "Podaj sprawdzaną właściwość, na przykład OdpornośćOgniowa."
+    },
+    "filter_empty": {
+      "fail": "{count} z {total} wymagań nie ma filtra elementów i dotyczyłoby każdego elementu modelu.",
+      "suggestion": "Ogranicz każde wymaganie do klasy lub typu elementu."
+    },
+    "bounds_inverted": {
+      "fail": "Wiersz {row} ({property}): minimum {low} jest większe niż maksimum {high}.",
+      "suggestion": "Zamień granice miejscami lub popraw wartości."
+    },
+    "pattern_invalid": {
+      "fail": "Wiersz {row} ({property}): wzorzec '{pattern}' nie jest poprawnym wyrażeniem regularnym.",
+      "suggestion": "Popraw wzorzec tak, aby się kompilował."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Koszt niezgodności, {amount}, nie ma waluty.",
+      "suggestion": "Wybierz walutę skutku kosztowego."
+    },
+    "root_cause_missing": {
+      "fail": "Niezgodność ({grade}) w weryfikacji lub zamknięta nie ma podanej przyczyny źródłowej.",
+      "suggestion": "Zapisz przyczynę źródłową przed weryfikacją lub zamknięciem raportu."
+    },
+    "punch_due_before_raised": {
+      "fail": "Usterka ma termin {due}, wcześniejszy niż data zgłoszenia {raised}.",
+      "suggestion": "Ustaw termin nie wcześniejszy niż dzień zgłoszenia."
+    },
+    "calibration_window": {
+      "fail": "Wzorcowanie jest ważne do {until}, co nie jest później niż data wzorcowania {start}.",
+      "suggestion": "Sprawdź datę wzorcowania i datę ważności."
+    },
+    "calibration_lapsed": {
+      "fail": "Wzorcowanie jest oznaczone jako ważne, ale wygasło {until}.",
+      "suggestion": "Wzorcuj przyrząd ponownie albo ustaw status wygasłe."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Tolerancja dolna {lower} jest większa niż górna {upper}.",
+      "suggestion": "Zamień granice, aby dolna nie przekraczała górnej."
+    },
+    "nominal_outside": {
+      "fail": "Wartość nominalna {nominal} leży poza polem tolerancji od {lower} do {upper}.",
+      "suggestion": "Popraw wartość nominalną lub granice tolerancji."
+    },
+    "certificate_window": {
+      "fail": "Certyfikat jest ważny do {until}, czyli przed datą początku {start}.",
+      "suggestion": "Sprawdź daty ważności podane na certyfikacie."
+    },
+    "certificate_expired": {
+      "fail": "Certyfikat materiału wygasł {date}, a materiał ma status {status}.",
+      "suggestion": "Uzyskaj aktualny certyfikat przed odbiorem materiału."
+    },
+    "test_before_sample": {
+      "fail": "Data badania {tested} jest wcześniejsza niż data pobrania próbki {sampled}.",
+      "suggestion": "Porównaj daty pobrania i badania ze sprawozdaniem laboratorium."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratorium {lab} nie jest zapisane jako akredytowane.",
+      "suggestion": "Wpisz numer akredytacji lub skorzystaj z laboratorium akredytowanego."
+    },
+    "date_in_future": {
+      "fail": "Data ({field}) {date} jest w przyszłości.",
+      "suggestion": "Wpisz dzień, w którym praca, pobranie próbki lub badanie faktycznie się odbyły."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Data zakończenia {date} jest w przyszłości.",
+      "suggestion": "Wpisz dzień faktycznego zakończenia."
+    },
+    "ready_undated": {
+      "fail": "Pozycja jest oznaczona jako gotowa, ale nie ma daty zakończenia.",
+      "suggestion": "Wpisz datę zakończenia pozycji."
+    },
+    "gate_item_unowned": {
+      "fail": "Warunek wejścia na budowę ({status}) nie ma osoby odpowiedzialnej.",
+      "suggestion": "Wskaż, kto zamknie ten warunek przed otwarciem budowy."
+    },
+    "plan_start_missing": {
+      "fail": "Plan zagospodarowania placu budowy ({status}) nie ma planowanej daty rozpoczęcia.",
+      "suggestion": "Wpisz planowaną datę rozpoczęcia."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Wizyta ({status}) nie ma daty rzeczywistej.",
+      "suggestion": "Wpisz datę odbycia wizyty."
+    },
+    "visit_in_future": {
+      "fail": "Wizyta ({status}), ale jej data {date} jest w przyszłości.",
+      "suggestion": "Popraw datę albo pozostaw wizytę jako zaplanowaną, dopóki się nie odbędzie."
+    },
+    "observation_missing": {
+      "fail": "Wpis typu {category} nie ma opisu obserwacji.",
+      "suggestion": "Opisz, co stwierdzono na budowie."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Roboty zanikowe przyjęto bez wskazania: {missing}.",
+      "suggestion": "Zapisz element i jego lokalizację przed zamknięciem wpisu."
+    }
   }
 }

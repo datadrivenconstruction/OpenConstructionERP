@@ -2111,5 +2111,133 @@
       "fail": "Uno sfasamento di {days} giorni tra due progetti è insolitamente lungo.",
       "suggestion": "Verificare l'unità: lo sfasamento si inserisce in giorni."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Il requisito {name} usa il controllo {type} ma non ha un valore di confronto.",
+      "suggestion": "Inserisci il limite o il modello con cui si confronta il valore del modello."
+    },
+    "value_invalid": {
+      "fail": "Il valore '{value}' del requisito {name} non è utilizzabile con il controllo {type}.",
+      "suggestion": "Usa un numero per min e max, basso..alto per un intervallo o un'espressione regolare valida."
+    },
+    "unit_missing": {
+      "fail": "Il requisito {name} fissa un limite numerico ({type}) senza unità.",
+      "suggestion": "Indica l'unità, ad esempio m, mm, m2 o kN."
+    },
+    "verification_missing": {
+      "fail": "Il requisito obbligatorio {name} non indica come sarà verificata la conformità.",
+      "suggestion": "Scegli un metodo di verifica: ispezione, prova, calcolo o controllo del modello."
+    },
+    "locked_set_empty": {
+      "fail": "Un insieme senza requisiti non può essere bloccato come riferimento.",
+      "suggestion": "Aggiungi prima i requisiti, poi blocca l'insieme."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "La riga {row} non ha il nome della proprietà.",
+      "suggestion": "Indica la proprietà controllata, ad esempio ResistenzaAlFuoco."
+    },
+    "filter_empty": {
+      "fail": "{count} requisiti su {total} non hanno filtro sugli elementi e si applicherebbero a ogni elemento del modello.",
+      "suggestion": "Limita ogni requisito a una classe o a un tipo di elemento."
+    },
+    "bounds_inverted": {
+      "fail": "Riga {row} ({property}): il minimo {low} supera il massimo {high}.",
+      "suggestion": "Scambia i limiti o correggi i valori."
+    },
+    "pattern_invalid": {
+      "fail": "Riga {row} ({property}): il modello '{pattern}' non è un'espressione regolare valida.",
+      "suggestion": "Correggi il modello in modo che sia compilabile."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Il costo della non conformità, {amount}, non ha valuta.",
+      "suggestion": "Seleziona la valuta dell'impatto economico."
+    },
+    "root_cause_missing": {
+      "fail": "Una non conformità {grade} in verifica o chiusa non ha la causa radice.",
+      "suggestion": "Registra la causa radice prima di verificare o chiudere il rapporto."
+    },
+    "punch_due_before_raised": {
+      "fail": "La voce di punch list scade il {due}, prima della sua apertura il {raised}.",
+      "suggestion": "Imposta una scadenza uguale o successiva al giorno di apertura."
+    },
+    "calibration_window": {
+      "fail": "La taratura è valida fino al {until}, che non è successivo alla data {start}.",
+      "suggestion": "Controlla la data di taratura e quella di scadenza."
+    },
+    "calibration_lapsed": {
+      "fail": "La taratura è segnata come valida ma è scaduta il {until}.",
+      "suggestion": "Ritara lo strumento o imposta lo stato su scaduta."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "La tolleranza inferiore {lower} supera quella superiore {upper}.",
+      "suggestion": "Scambia i limiti in modo che quello inferiore non superi il superiore."
+    },
+    "nominal_outside": {
+      "fail": "Il valore nominale {nominal} è fuori dalla fascia di tolleranza da {lower} a {upper}.",
+      "suggestion": "Correggi il valore nominale o i limiti di tolleranza."
+    },
+    "certificate_window": {
+      "fail": "Il certificato è valido fino al {until}, prima della data di inizio {start}.",
+      "suggestion": "Controlla le date di validità riportate sul certificato."
+    },
+    "certificate_expired": {
+      "fail": "Il certificato del materiale è scaduto il {date}, ma il materiale è {status}.",
+      "suggestion": "Ottieni un certificato valido prima di accettare il materiale."
+    },
+    "test_before_sample": {
+      "fail": "La data della prova {tested} precede la data del prelievo {sampled}.",
+      "suggestion": "Confronta le date di prelievo e prova con il rapporto del laboratorio."
+    },
+    "lab_unaccredited": {
+      "fail": "Il laboratorio {lab} non risulta accreditato.",
+      "suggestion": "Registra il riferimento di accreditamento o usa un laboratorio accreditato."
+    },
+    "date_in_future": {
+      "fail": "La data {field} ({date}) è nel futuro.",
+      "suggestion": "Registra il giorno in cui lavoro, prelievo o prova si sono svolti davvero."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "La data di completamento {date} è nel futuro.",
+      "suggestion": "Inserisci il giorno in cui la voce è stata effettivamente completata."
+    },
+    "ready_undated": {
+      "fail": "La voce è segnata come pronta ma non ha data di completamento.",
+      "suggestion": "Inserisci la data di completamento."
+    },
+    "gate_item_unowned": {
+      "fail": "L'elemento bloccante è {status} e non ha un responsabile.",
+      "suggestion": "Assegna chi lo risolverà prima dell'apertura del cantiere."
+    },
+    "plan_start_missing": {
+      "fail": "Il piano di allestimento è {status} ma non ha una data di inizio prevista.",
+      "suggestion": "Inserisci la data di inizio prevista dell'allestimento."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "La visita è {status} ma non ha una data effettiva.",
+      "suggestion": "Inserisci la data in cui si è svolta la visita."
+    },
+    "visit_in_future": {
+      "fail": "La visita è {status} ma la sua data {date} è nel futuro.",
+      "suggestion": "Correggi la data o lascia la visita pianificata finché non si è svolta."
+    },
+    "observation_missing": {
+      "fail": "Una voce di tipo {category} non ha il testo dell'osservazione.",
+      "suggestion": "Descrivi quanto osservato in cantiere."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Lavorazioni nascoste accettate senza indicare: {missing}.",
+      "suggestion": "Registra l'elemento e la sua posizione prima di chiudere la voce."
+    }
   }
 }

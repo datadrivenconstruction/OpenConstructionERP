@@ -2111,5 +2111,133 @@
       "fail": "{days} päeva pikkune viide kahe projekti vahel on ebatavaliselt pikk.",
       "suggestion": "Kontrollige ühikut: viide sisestatakse päevades."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Nõue {name} kasutab kontrolli {type}, kuid sellel pole võrdlusväärtust.",
+      "suggestion": "Sisestage piir või muster, millega mudeli väärtust võrreldakse."
+    },
+    "value_invalid": {
+      "fail": "Nõude {name} väärtust '{value}' ei saa kontrolliga {type} kasutada.",
+      "suggestion": "Kasutage min ja max jaoks arvu, vahemiku jaoks madal..kõrge või kehtivat regulaaravaldist."
+    },
+    "unit_missing": {
+      "fail": "Nõue {name} seab arvulise piiri ({type}) ilma ühikuta.",
+      "suggestion": "Märkige ühik, näiteks m, mm, m2 või kN."
+    },
+    "verification_missing": {
+      "fail": "Kohustusliku nõude {name} puhul pole öeldud, kuidas vastavust tõendatakse.",
+      "suggestion": "Valige tõendamisviis: ülevaatus, katse, arvutus või mudelikontroll."
+    },
+    "locked_set_empty": {
+      "fail": "Nõueteta komplekti ei saa lukustada algtasemena.",
+      "suggestion": "Lisage esmalt nõuded ja lukustage siis komplekt."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Real {row} puudub omaduse nimi.",
+      "suggestion": "Märkige kontrollitav omadus, näiteks Tulepüsivus."
+    },
+    "filter_empty": {
+      "fail": "{count} nõudel {total}-st puudub elemendifilter ja need kehtiksid mudeli kõigile elementidele.",
+      "suggestion": "Piirake iga nõue elemendiklassi või -tüübiga."
+    },
+    "bounds_inverted": {
+      "fail": "Rida {row} ({property}): miinimum {low} on suurem kui maksimum {high}.",
+      "suggestion": "Vahetage piirid omavahel või parandage arvud."
+    },
+    "pattern_invalid": {
+      "fail": "Rida {row} ({property}): muster '{pattern}' ei ole kehtiv regulaaravaldis.",
+      "suggestion": "Parandage muster nii, et see kompileeruks."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Mittevastavuse maksumusel {amount} puudub valuuta.",
+      "suggestion": "Valige kulumõju valuuta."
+    },
+    "root_cause_missing": {
+      "fail": "Kontrollimisel või suletud mittevastavusel ({grade}) puudub algpõhjus.",
+      "suggestion": "Registreerige algpõhjus enne aruande kontrollimist või sulgemist."
+    },
+    "punch_due_before_raised": {
+      "fail": "Puuduse tähtaeg {due} on enne registreerimise kuupäeva {raised}.",
+      "suggestion": "Määrake tähtaeg registreerimise päevaks või hilisemaks."
+    },
+    "calibration_window": {
+      "fail": "Kalibreering kehtib kuni {until}, mis ei ole hilisem kui kalibreerimise kuupäev {start}.",
+      "suggestion": "Kontrollige kalibreerimise ja aegumise kuupäeva."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibreering on märgitud kehtivaks, kuid aegus {until}.",
+      "suggestion": "Kalibreerige seade uuesti või määrake olekuks aegunud."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Alumine tolerants {lower} on suurem kui ülemine tolerants {upper}.",
+      "suggestion": "Vahetage piirid, et alumine ei ületaks ülemist."
+    },
+    "nominal_outside": {
+      "fail": "Nimiväärtus {nominal} jääb tolerantsivälja {lower} kuni {upper} välja.",
+      "suggestion": "Parandage nimiväärtust või tolerantsipiire."
+    },
+    "certificate_window": {
+      "fail": "Sertifikaat kehtib kuni {until}, st enne alguskuupäeva {start}.",
+      "suggestion": "Kontrollige sertifikaadil toodud kehtivuskuupäevi."
+    },
+    "certificate_expired": {
+      "fail": "Materjali sertifikaat aegus {date}, kuid materjali olek on {status}.",
+      "suggestion": "Hankige kehtiv sertifikaat enne materjali vastuvõttu."
+    },
+    "test_before_sample": {
+      "fail": "Katse kuupäev {tested} on enne proovivõtmise kuupäeva {sampled}.",
+      "suggestion": "Võrrelge proovivõtmise ja katse kuupäevi labori aruandega."
+    },
+    "lab_unaccredited": {
+      "fail": "Laborit {lab} pole akrediteerituks märgitud.",
+      "suggestion": "Registreerige akrediteeringu viide või kasutage akrediteeritud laborit."
+    },
+    "date_in_future": {
+      "fail": "Kuupäev ({field}) {date} on tulevikus.",
+      "suggestion": "Registreerige päev, mil töö, proovivõtt või katse tegelikult toimus."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Valmimise kuupäev {date} on tulevikus.",
+      "suggestion": "Sisestage päev, mil kirje tegelikult valmis."
+    },
+    "ready_undated": {
+      "fail": "Kirje on märgitud valmis, kuid sellel pole valmimise kuupäeva.",
+      "suggestion": "Sisestage kirje valmimise kuupäev."
+    },
+    "gate_item_unowned": {
+      "fail": "Alustamistingimusel ({status}) puudub vastutaja.",
+      "suggestion": "Määrake, kes tingimuse enne ehitusplatsi avamist täidab."
+    },
+    "plan_start_missing": {
+      "fail": "Ehitusplatsi rajamise plaanil ({status}) puudub kavandatud alguskuupäev.",
+      "suggestion": "Sisestage rajamise kavandatud alguskuupäev."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Visiidil ({status}) puudub tegelik kuupäev.",
+      "suggestion": "Sisestage visiidi toimumise kuupäev."
+    },
+    "visit_in_future": {
+      "fail": "Visiit ({status}), kuid selle kuupäev {date} on tulevikus.",
+      "suggestion": "Parandage kuupäev või jätke visiit kavandatuks, kuni see on toimunud."
+    },
+    "observation_missing": {
+      "fail": "Tüübi {category} kirjel puudub tähelepanekuteksti.",
+      "suggestion": "Kirjeldage, mida ehitusplatsil täheldati."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Varjatud tööd võeti vastu ilma märkimata: {missing}.",
+      "suggestion": "Registreerige ehitusosa ja asukoht enne kirje sulgemist."
+    }
   }
 }

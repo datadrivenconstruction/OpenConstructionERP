@@ -2111,5 +2111,133 @@
       "fail": "En tidsforskyvning på {days} dager mellom to prosjekter er uvanlig lang.",
       "suggestion": "Kontroller enheten: forskyvningen oppgis i dager."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Kravet {name} bruker kontrollen {type}, men har ingen verdi å sammenligne med.",
+      "suggestion": "Oppgi grensen eller mønsteret som modellverdien sammenlignes med."
+    },
+    "value_invalid": {
+      "fail": "Verdien '{value}' for kravet {name} kan ikke brukes med kontrollen {type}.",
+      "suggestion": "Bruk et tall for min og maks, lav..høy for et intervall eller et gyldig regulært uttrykk."
+    },
+    "unit_missing": {
+      "fail": "Kravet {name} setter en numerisk grense ({type}) uten enhet.",
+      "suggestion": "Oppgi enheten, for eksempel m, mm, m2 eller kN."
+    },
+    "verification_missing": {
+      "fail": "For det obligatoriske kravet {name} står det ikke hvordan etterlevelsen skal verifiseres.",
+      "suggestion": "Velg en verifikasjonsmetode: befaring, prøving, beregning eller modellkontroll."
+    },
+    "locked_set_empty": {
+      "fail": "Et kravsett uten krav kan ikke låses som grunnlag.",
+      "suggestion": "Legg først til kravene, og lås deretter settet."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Rad {row} har ikke egenskapsnavn.",
+      "suggestion": "Oppgi egenskapen som kontrolleres, for eksempel Brannmotstand."
+    },
+    "filter_empty": {
+      "fail": "{count} av {total} krav har ikke elementfilter og ville gjelde alle elementer i modellen.",
+      "suggestion": "Avgrens hvert krav til en elementklasse eller en type."
+    },
+    "bounds_inverted": {
+      "fail": "Rad {row} ({property}): minimum {low} er større enn maksimum {high}.",
+      "suggestion": "Bytt om grensene eller rett tallene."
+    },
+    "pattern_invalid": {
+      "fail": "Rad {row} ({property}): mønsteret '{pattern}' er ikke et gyldig regulært uttrykk.",
+      "suggestion": "Rett mønsteret slik at det kan kompileres."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Avvikets kostnad {amount} har ingen valuta.",
+      "suggestion": "Velg valuta for kostnadspåvirkningen."
+    },
+    "root_cause_missing": {
+      "fail": "Et avvik ({grade}) under verifisering eller lukket har ingen registrert rotårsak.",
+      "suggestion": "Registrer rotårsaken før rapporten verifiseres eller lukkes."
+    },
+    "punch_due_before_raised": {
+      "fail": "Mangelpunktet forfaller {due}, før registreringsdatoen {raised}.",
+      "suggestion": "Sett en frist på registreringsdagen eller senere."
+    },
+    "calibration_window": {
+      "fail": "Kalibreringen gjelder til {until}, som ikke er etter kalibreringsdatoen {start}.",
+      "suggestion": "Kontroller kalibreringsdato og utløpsdato."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibreringen er merket som gyldig, men utløp {until}.",
+      "suggestion": "Kalibrer instrumentet på nytt, eller sett status til utløpt."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Nedre toleranse {lower} er større enn øvre toleranse {upper}.",
+      "suggestion": "Bytt om grensene slik at den nedre ikke overstiger den øvre."
+    },
+    "nominal_outside": {
+      "fail": "Nominell verdi {nominal} ligger utenfor toleransefeltet {lower} til {upper}.",
+      "suggestion": "Rett den nominelle verdien eller toleransegrensene."
+    },
+    "certificate_window": {
+      "fail": "Sertifikatet gjelder til {until}, altså før startdatoen {start}.",
+      "suggestion": "Kontroller gyldighetsdatoene på sertifikatet."
+    },
+    "certificate_expired": {
+      "fail": "Materialsertifikatet utløp {date}, men materialet har status {status}.",
+      "suggestion": "Skaff et gyldig sertifikat før materialet godkjennes."
+    },
+    "test_before_sample": {
+      "fail": "Prøvedatoen {tested} ligger før prøvetakingsdatoen {sampled}.",
+      "suggestion": "Sammenlign prøvetakings- og prøvedato med laboratoriets rapport."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratoriet {lab} er ikke registrert som akkreditert.",
+      "suggestion": "Registrer akkrediteringsnummeret, eller bruk et akkreditert laboratorium."
+    },
+    "date_in_future": {
+      "fail": "Datoen ({field}) {date} ligger i fremtiden.",
+      "suggestion": "Registrer dagen arbeidet, prøvetakingen eller prøvingen faktisk fant sted."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Ferdigdatoen {date} ligger i fremtiden.",
+      "suggestion": "Oppgi dagen posten faktisk ble ferdig."
+    },
+    "ready_undated": {
+      "fail": "Posten er merket klar, men har ingen ferdigdato.",
+      "suggestion": "Oppgi datoen posten ble ferdig."
+    },
+    "gate_item_unowned": {
+      "fail": "Oppstartsvilkåret ({status}) har ingen ansvarlig.",
+      "suggestion": "Utpek hvem som oppfyller vilkåret før byggeplassen åpnes."
+    },
+    "plan_start_missing": {
+      "fail": "Riggplanen ({status}) har ingen planlagt startdato.",
+      "suggestion": "Oppgi planlagt startdato for riggingen."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Besøket ({status}) har ingen faktisk dato.",
+      "suggestion": "Oppgi datoen besøket fant sted."
+    },
+    "visit_in_future": {
+      "fail": "Besøket ({status}), men datoen {date} ligger i fremtiden.",
+      "suggestion": "Rett datoen, eller la besøket stå som planlagt til det har funnet sted."
+    },
+    "observation_missing": {
+      "fail": "En registrering av typen {category} har ingen observasjonstekst.",
+      "suggestion": "Beskriv hva som ble observert på byggeplassen."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Skjulte arbeider ble godkjent uten å oppgi: {missing}.",
+      "suggestion": "Registrer bygningsdel og plassering før registreringen lukkes."
+    }
   }
 }

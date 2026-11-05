@@ -26,3 +26,6 @@ async def on_startup() -> None:
     )
 
     register_site_supervision_permissions()
+    from app.modules.site_supervision.rules import register_site_supervision_validation_rules
+
+    register_site_supervision_validation_rules()

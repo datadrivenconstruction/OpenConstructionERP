@@ -2111,5 +2111,133 @@
       "fail": "Odmak od {days} dana između dva projekta neobično je dug.",
       "suggestion": "Provjerite jedinicu: odmak se unosi u danima."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Zahtjev {name} koristi provjeru {type}, ali nema vrijednost za usporedbu.",
+      "suggestion": "Unesite granicu ili uzorak s kojim se uspoređuje vrijednost iz modela."
+    },
+    "value_invalid": {
+      "fail": "Vrijednost '{value}' zahtjeva {name} ne može se koristiti s provjerom {type}.",
+      "suggestion": "Koristite broj za min i max, donja..gornja za raspon ili ispravan regularni izraz."
+    },
+    "unit_missing": {
+      "fail": "Zahtjev {name} postavlja brojčanu granicu ({type}) bez jedinice.",
+      "suggestion": "Navedite jedinicu, na primjer m, mm, m2 ili kN."
+    },
+    "verification_missing": {
+      "fail": "Za obvezni zahtjev {name} nije navedeno kako će se dokazati sukladnost.",
+      "suggestion": "Odaberite način provjere: pregled, ispitivanje, proračun ili provjera modela."
+    },
+    "locked_set_empty": {
+      "fail": "Skup bez zahtjeva ne može se zaključati kao osnovni.",
+      "suggestion": "Prvo dodajte zahtjeve, zatim zaključajte skup."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Redak {row} nema naziv svojstva.",
+      "suggestion": "Navedite provjeravano svojstvo, na primjer OtpornostNaPožar."
+    },
+    "filter_empty": {
+      "fail": "{count} od {total} zahtjeva nema filtar elemenata i vrijedilo bi za svaki element u modelu.",
+      "suggestion": "Ograničite svaki zahtjev na klasu ili vrstu elementa."
+    },
+    "bounds_inverted": {
+      "fail": "Redak {row} ({property}): minimum {low} veći je od maksimuma {high}.",
+      "suggestion": "Zamijenite granice ili ispravite brojeve."
+    },
+    "pattern_invalid": {
+      "fail": "Redak {row} ({property}): uzorak '{pattern}' nije ispravan regularni izraz.",
+      "suggestion": "Ispravite uzorak da se može prevesti."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Trošak nesukladnosti, {amount}, nema valutu.",
+      "suggestion": "Odaberite valutu troškovnog učinka."
+    },
+    "root_cause_missing": {
+      "fail": "Nesukladnost ({grade}) u provjeri ili zatvorena nema zapisan uzrok.",
+      "suggestion": "Zapišite uzrok prije provjere ili zatvaranja izvješća."
+    },
+    "punch_due_before_raised": {
+      "fail": "Nedostatak ima rok {due}, prije datuma unosa {raised}.",
+      "suggestion": "Postavite rok na dan unosa ili poslije."
+    },
+    "calibration_window": {
+      "fail": "Umjeravanje vrijedi do {until}, što nije poslije datuma umjeravanja {start}.",
+      "suggestion": "Provjerite datum umjeravanja i datum isteka."
+    },
+    "calibration_lapsed": {
+      "fail": "Umjeravanje je označeno kao važeće, ali je isteklo {until}.",
+      "suggestion": "Ponovno umjerite uređaj ili postavite status na isteklo."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Donja tolerancija {lower} veća je od gornje tolerancije {upper}.",
+      "suggestion": "Zamijenite granice da donja ne prelazi gornju."
+    },
+    "nominal_outside": {
+      "fail": "Nazivna vrijednost {nominal} izvan je tolerancijskog polja od {lower} do {upper}.",
+      "suggestion": "Ispravite nazivnu vrijednost ili granice tolerancije."
+    },
+    "certificate_window": {
+      "fail": "Certifikat vrijedi do {until}, dakle prije datuma početka {start}.",
+      "suggestion": "Provjerite datume valjanosti na certifikatu."
+    },
+    "certificate_expired": {
+      "fail": "Certifikat materijala istekao je {date}, a materijal ima status {status}.",
+      "suggestion": "Pribavite važeći certifikat prije prihvaćanja materijala."
+    },
+    "test_before_sample": {
+      "fail": "Datum ispitivanja {tested} prije je datuma uzorkovanja {sampled}.",
+      "suggestion": "Usporedite datume uzorkovanja i ispitivanja s izvješćem laboratorija."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratorij {lab} nije zabilježen kao akreditiran.",
+      "suggestion": "Upišite broj akreditacije ili koristite akreditirani laboratorij."
+    },
+    "date_in_future": {
+      "fail": "Datum ({field}) {date} je u budućnosti.",
+      "suggestion": "Upišite dan kada su rad, uzorkovanje ili ispitivanje stvarno obavljeni."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Datum dovršetka {date} je u budućnosti.",
+      "suggestion": "Unesite dan stvarnog dovršetka."
+    },
+    "ready_undated": {
+      "fail": "Stavka je označena kao spremna, ali nema datum dovršetka.",
+      "suggestion": "Unesite datum dovršetka stavke."
+    },
+    "gate_item_unowned": {
+      "fail": "Uvjet za početak ({status}) nema odgovornu osobu.",
+      "suggestion": "Odredite tko će ispuniti uvjet prije otvaranja gradilišta."
+    },
+    "plan_start_missing": {
+      "fail": "Plan organizacije gradilišta ({status}) nema planirani datum početka.",
+      "suggestion": "Unesite planirani datum početka."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Posjet ({status}) nema stvarni datum.",
+      "suggestion": "Unesite datum održavanja posjeta."
+    },
+    "visit_in_future": {
+      "fail": "Posjet ({status}), ali njegov datum {date} je u budućnosti.",
+      "suggestion": "Ispravite datum ili ostavite posjet planiranim dok se ne održi."
+    },
+    "observation_missing": {
+      "fail": "Zapis vrste {category} nema tekst opažanja.",
+      "suggestion": "Opišite što je utvrđeno na gradilištu."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Skriveni radovi prihvaćeni su bez navođenja: {missing}.",
+      "suggestion": "Upišite element i njegov položaj prije zatvaranja zapisa."
+    }
   }
 }

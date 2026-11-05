@@ -2111,5 +2111,133 @@
       "fail": "2 つのプロジェクト間の {days} 日のラグは異常に長いです。",
       "suggestion": "単位を確認してください。ラグは日数で入力します。"
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "要求事項 {name} は {type} チェックを使いますが、比較する値がありません。",
+      "suggestion": "モデルの値と比較する限界値またはパターンを入力してください。"
+    },
+    "value_invalid": {
+      "fail": "要求事項 {name} の値 '{value}' は {type} チェックでは使えません。",
+      "suggestion": "min と max には数値、範囲には 下限..上限、それ以外には有効な正規表現を使ってください。"
+    },
+    "unit_missing": {
+      "fail": "要求事項 {name} は単位なしで数値の限界 ({type}) を定めています。",
+      "suggestion": "単位を指定してください。例: m、mm、m2、kN。"
+    },
+    "verification_missing": {
+      "fail": "必須の要求事項 {name} に、適合をどう検証するかが記載されていません。",
+      "suggestion": "検証方法を選んでください。検査、試験、計算、またはモデルチェックなど。"
+    },
+    "locked_set_empty": {
+      "fail": "要求事項のないセットはベースラインとしてロックできません。",
+      "suggestion": "先に要求事項を追加してから、セットをロックしてください。"
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "{row} 行目にプロパティ名がありません。",
+      "suggestion": "確認するプロパティ名を入力してください。例: 耐火性能。"
+    },
+    "filter_empty": {
+      "fail": "要求事項 {total} 件のうち {count} 件に要素フィルターがなく、モデルのすべての要素に適用されてしまいます。",
+      "suggestion": "各要求事項を要素クラスまたはタイプに絞り込んでください。"
+    },
+    "bounds_inverted": {
+      "fail": "{row} 行目 ({property}): 最小値 {low} が最大値 {high} を超えています。",
+      "suggestion": "限界値を入れ替えるか、数値を修正してください。"
+    },
+    "pattern_invalid": {
+      "fail": "{row} 行目 ({property}): パターン '{pattern}' は有効な正規表現ではありません。",
+      "suggestion": "コンパイルできるようにパターンを修正してください。"
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "不適合の費用 {amount} に通貨がありません。",
+      "suggestion": "費用影響の通貨を選択してください。"
+    },
+    "root_cause_missing": {
+      "fail": "検証中または完了した不適合 ({grade}) に根本原因が記録されていません。",
+      "suggestion": "報告書を検証または完了する前に根本原因を記録してください。"
+    },
+    "punch_due_before_raised": {
+      "fail": "手直し項目の期限 {due} が登録日 {raised} より前です。",
+      "suggestion": "期限は登録日以降に設定してください。"
+    },
+    "calibration_window": {
+      "fail": "校正は {until} まで有効ですが、これは校正日 {start} より後ではありません。",
+      "suggestion": "校正日と有効期限を確認してください。"
+    },
+    "calibration_lapsed": {
+      "fail": "校正が有効とされていますが、{until} に期限切れとなっています。",
+      "suggestion": "機器を再校正するか、状態を期限切れにしてください。"
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "下限公差 {lower} が上限公差 {upper} を超えています。",
+      "suggestion": "下限が上限を超えないよう、限界値を入れ替えてください。"
+    },
+    "nominal_outside": {
+      "fail": "公称値 {nominal} が公差範囲 {lower} ～ {upper} の外にあります。",
+      "suggestion": "公称値または公差の限界値を修正してください。"
+    },
+    "certificate_window": {
+      "fail": "証明書は {until} まで有効で、開始日 {start} より前です。",
+      "suggestion": "証明書に記載の有効期間を確認してください。"
+    },
+    "certificate_expired": {
+      "fail": "材料証明書が {date} に期限切れですが、材料の状態は {status} です。",
+      "suggestion": "材料を受け入れる前に有効な証明書を入手してください。"
+    },
+    "test_before_sample": {
+      "fail": "試験日 {tested} が採取日 {sampled} より前です。",
+      "suggestion": "採取日と試験日を試験所の報告書と照合してください。"
+    },
+    "lab_unaccredited": {
+      "fail": "試験所 {lab} は認定機関として記録されていません。",
+      "suggestion": "認定番号を記録するか、認定された試験所を利用してください。"
+    },
+    "date_in_future": {
+      "fail": "日付 ({field}) {date} が未来です。",
+      "suggestion": "作業、採取、試験を実際に行った日を記録してください。"
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "完了日 {date} が未来です。",
+      "suggestion": "実際に完了した日を入力してください。"
+    },
+    "ready_undated": {
+      "fail": "項目が準備完了とされていますが、完了日がありません。",
+      "suggestion": "項目の完了日を入力してください。"
+    },
+    "gate_item_unowned": {
+      "fail": "着工条件 ({status}) に責任者がいません。",
+      "suggestion": "現場開設前にこの条件を解消する担当者を指名してください。"
+    },
+    "plan_start_missing": {
+      "fail": "仮設計画 ({status}) に開始予定日がありません。",
+      "suggestion": "仮設の開始予定日を入力してください。"
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "訪問 ({status}) に実施日がありません。",
+      "suggestion": "訪問を行った日付を入力してください。"
+    },
+    "visit_in_future": {
+      "fail": "訪問 ({status}) ですが、日付 {date} が未来です。",
+      "suggestion": "日付を修正するか、実施されるまで計画のままにしてください。"
+    },
+    "observation_missing": {
+      "fail": "種別 {category} の記録に所見のテキストがありません。",
+      "suggestion": "現場で確認した内容を記述してください。"
+    },
+    "hidden_works_unidentified": {
+      "fail": "隠蔽部の工事が次の記載なしに受け入れられました: {missing}。",
+      "suggestion": "記録を閉じる前に、部材と位置を記録してください。"
+    }
   }
 }

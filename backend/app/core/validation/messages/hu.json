@@ -2111,5 +2111,133 @@
       "fail": "A két projekt közötti {days} napos késleltetés szokatlanul hosszú.",
       "suggestion": "Ellenőrizze a mértékegységet: a késleltetést napokban kell megadni."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "A(z) {name} követelmény {type} ellenőrzést használ, de nincs összehasonlítandó értéke.",
+      "suggestion": "Adja meg azt a határt vagy mintát, amellyel a modell értékét összevetik."
+    },
+    "value_invalid": {
+      "fail": "A(z) {name} követelmény '{value}' értéke nem használható {type} ellenőrzéshez.",
+      "suggestion": "Használjon számot a min és max esetén, alsó..felső értéket tartományhoz, vagy érvényes reguláris kifejezést."
+    },
+    "unit_missing": {
+      "fail": "A(z) {name} követelmény mértékegység nélküli számszerű határt ({type}) ad meg.",
+      "suggestion": "Adja meg a mértékegységet, például m, mm, m2 vagy kN."
+    },
+    "verification_missing": {
+      "fail": "A(z) {name} kötelező követelménynél nincs megadva, hogyan igazolják a megfelelést.",
+      "suggestion": "Válasszon ellenőrzési módot: szemle, vizsgálat, számítás vagy modellellenőrzés."
+    },
+    "locked_set_empty": {
+      "fail": "A követelmények nélküli készlet nem zárolható alapként.",
+      "suggestion": "Először vegye fel a követelményeket, majd zárolja a készletet."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "A(z) {row}. sorhoz nincs tulajdonságnév megadva.",
+      "suggestion": "Nevezze meg az ellenőrzött tulajdonságot, például TűzállóságiHatár."
+    },
+    "filter_empty": {
+      "fail": "A(z) {total} követelményből {count}-nak nincs elemszűrője, és a modell minden elemére vonatkozna.",
+      "suggestion": "Szűkítse minden követelményt egy elemosztályra vagy típusra."
+    },
+    "bounds_inverted": {
+      "fail": "{row}. sor ({property}): a minimum ({low}) nagyobb a maximumnál ({high}).",
+      "suggestion": "Cserélje meg a határokat, vagy javítsa a számokat."
+    },
+    "pattern_invalid": {
+      "fail": "{row}. sor ({property}): a(z) '{pattern}' minta nem érvényes reguláris kifejezés.",
+      "suggestion": "Javítsa a mintát, hogy lefordítható legyen."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "A hiba költségéhez ({amount}) nincs pénznem megadva.",
+      "suggestion": "Válassza ki a költséghatás pénznemét."
+    },
+    "root_cause_missing": {
+      "fail": "Az ellenőrzés alatt álló vagy lezárt, {grade} súlyosságú eltérésnél nincs rögzítve a kiváltó ok.",
+      "suggestion": "Rögzítse a kiváltó okot az ellenőrzés vagy lezárás előtt."
+    },
+    "punch_due_before_raised": {
+      "fail": "A hibalista tétel határideje ({due}) korábbi a felvétel napjánál ({raised}).",
+      "suggestion": "Állítson be határidőt a felvétel napjára vagy későbbre."
+    },
+    "calibration_window": {
+      "fail": "A kalibrálás {until}-ig érvényes, ami nem későbbi a kalibrálás dátumánál ({start}).",
+      "suggestion": "Ellenőrizze a kalibrálás és a lejárat dátumát."
+    },
+    "calibration_lapsed": {
+      "fail": "A kalibrálás érvényesnek van jelölve, de {until}-án lejárt.",
+      "suggestion": "Kalibrálja újra a műszert, vagy állítsa az állapotot lejártra."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Az alsó tűrés ({lower}) nagyobb a felső tűrésnél ({upper}).",
+      "suggestion": "Cserélje meg a határokat, hogy az alsó ne haladja meg a felsőt."
+    },
+    "nominal_outside": {
+      "fail": "A névleges érték ({nominal}) a tűrésmezőn ({lower} és {upper} között) kívül esik.",
+      "suggestion": "Javítsa a névleges értéket vagy a tűréshatárokat."
+    },
+    "certificate_window": {
+      "fail": "A tanúsítvány {until}-ig érvényes, vagyis a kezdő dátuma ({start}) előtt.",
+      "suggestion": "Ellenőrizze a tanúsítványon feltüntetett érvényességi dátumokat."
+    },
+    "certificate_expired": {
+      "fail": "Az anyag tanúsítványa {date}-án lejárt, de az anyag állapota: {status}.",
+      "suggestion": "Szerezzen érvényes tanúsítványt az anyag átvétele előtt."
+    },
+    "test_before_sample": {
+      "fail": "A vizsgálat dátuma ({tested}) korábbi a mintavétel dátumánál ({sampled}).",
+      "suggestion": "Vesse össze a mintavétel és a vizsgálat dátumát a laboratóriumi jelentéssel."
+    },
+    "lab_unaccredited": {
+      "fail": "A(z) {lab} laboratórium nincs akkreditáltként rögzítve.",
+      "suggestion": "Rögzítse az akkreditációs hivatkozást, vagy használjon akkreditált laboratóriumot."
+    },
+    "date_in_future": {
+      "fail": "A(z) {field} dátuma ({date}) a jövőben van.",
+      "suggestion": "Rögzítse azt a napot, amikor a munka, a mintavétel vagy a vizsgálat ténylegesen megtörtént."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "A befejezés dátuma ({date}) a jövőben van.",
+      "suggestion": "Adja meg a tényleges befejezés napját."
+    },
+    "ready_undated": {
+      "fail": "A tétel késznek van jelölve, de nincs befejezési dátuma.",
+      "suggestion": "Adja meg a tétel befejezési dátumát."
+    },
+    "gate_item_unowned": {
+      "fail": "A kapufeltétel ({status}) mellett nincs felelős.",
+      "suggestion": "Jelölje ki, ki teljesíti a feltételt a munkaterület megnyitása előtt."
+    },
+    "plan_start_missing": {
+      "fail": "Az előkészítési terv ({status}) mellett nincs tervezett kezdő dátum.",
+      "suggestion": "Adja meg az előkészítés tervezett kezdő dátumát."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "A látogatás ({status}) mellett nincs tényleges dátum.",
+      "suggestion": "Adja meg a látogatás napját."
+    },
+    "visit_in_future": {
+      "fail": "A látogatás ({status}), de a dátuma ({date}) a jövőben van.",
+      "suggestion": "Javítsa a dátumot, vagy hagyja tervezettnek a látogatást, amíg meg nem történik."
+    },
+    "observation_missing": {
+      "fail": "A(z) {category} típusú bejegyzésnek nincs megfigyelési szövege.",
+      "suggestion": "Írja le, mit észleltek a helyszínen."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Az eltakart munkákat az alábbi megadása nélkül vették át: {missing}.",
+      "suggestion": "Rögzítse az elemet és a helyét a bejegyzés lezárása előtt."
+    }
   }
 }

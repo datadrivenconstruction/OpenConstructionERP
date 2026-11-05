@@ -17,11 +17,12 @@ from collections import defaultdict
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.requirements.evaluator import compute_deliverable_coverage
 from app.modules.requirements.models import (
     GateResult,
@@ -45,6 +46,11 @@ from app.modules.requirements.schemas import (
     RequirementSetCreate,
     RequirementUpdate,
     TextImportRequest,
+)
+from app.modules.requirements.validators import (
+    REQUIREMENT_FIELDS,
+    REQUIREMENTS_RULE_SET,
+    SET_FIELDS,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,6 +123,34 @@ class RequirementsService:
         self.gate_repo = GateResultRepository(session)
         self.deliverable_repo = RequirementDeliverableRepository(session)
         self.link_repo = RequirementPositionLinkRepository(session)
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID | None,
+        target_id: str = "",
+    ) -> list[dict[str, Any]]:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422."""
+        warnings = await gate_record(
+            REQUIREMENTS_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="requirements_rules_failed",
+            target_id=target_id,
+        )
+        self.findings = warnings
+        return warnings
 
     # ── RequirementSet CRUD ──────────────────────────────────────────────
 
@@ -182,6 +216,7 @@ class RequirementsService:
             status=status_filter,
         )
 
+    @carries_warnings
     async def update_set(
         self,
         set_id: uuid.UUID,
@@ -220,6 +255,22 @@ class RequirementsService:
 
         if not safe_fields:
             return item
+
+        if "status" in safe_fields:
+            count = (
+                await self.session.execute(
+                    select(func.count()).select_from(Requirement).where(Requirement.requirement_set_id == set_id)
+                )
+            ).scalar_one()
+            await self._gate(
+                "set",
+                {"status": item.status, "requirement_count": count},
+                SET_FIELDS,
+                {"status": safe_fields["status"]},
+                operation="update",
+                project_id=item.project_id,
+                target_id=str(set_id),
+            )
 
         await self.set_repo.update_fields(set_id, **safe_fields)
         await self.session.refresh(item)
@@ -281,6 +332,7 @@ class RequirementsService:
 
     # ── Requirement CRUD ─────────────────────────────────────────────────
 
+    @carries_warnings
     async def add_requirement(
         self,
         set_id: uuid.UUID,
@@ -288,7 +340,10 @@ class RequirementsService:
         user_id: str = "",
     ) -> Requirement:
         """Add a requirement to a set."""
-        await self.get_set(set_id)  # Verify set exists
+        req_set = await self.get_set(set_id)  # Verify set exists
+        await self._gate(
+            "requirement", {}, REQUIREMENT_FIELDS, data.model_dump(), operation="create", project_id=req_set.project_id
+        )
 
         item = _requirement_from_create(set_id, data, user_id)
         item = await self.req_repo.create(item)
@@ -307,6 +362,7 @@ class RequirementsService:
         )
         return item
 
+    @carries_warnings
     async def update_requirement(
         self,
         req_id: uuid.UUID,
@@ -331,6 +387,16 @@ class RequirementsService:
 
         if not fields:
             return item
+
+        await self._gate(
+            "requirement",
+            item,
+            REQUIREMENT_FIELDS,
+            fields,
+            operation="update",
+            project_id=None,
+            target_id=str(req_id),
+        )
 
         # Convert confidence float to string for storage
         if "confidence" in fields and fields["confidence"] is not None:
@@ -379,7 +445,20 @@ class RequirementsService:
         user_id: str = "",
     ) -> list[Requirement]:
         """Bulk add requirements to a set."""
-        await self.get_set(set_id)  # Verify set exists
+        req_set = await self.get_set(set_id)  # Verify set exists
+
+        # One refused row refuses the batch, so nothing is half imported.
+        warnings: list[dict[str, Any]] = []
+        for data in items_data:
+            warnings += await self._gate(
+                "requirement",
+                {},
+                REQUIREMENT_FIELDS,
+                data.model_dump(),
+                operation="bulk",
+                project_id=req_set.project_id,
+            )
+        self.findings = warnings
 
         items = [_requirement_from_create(set_id, data, user_id) for data in items_data]
         created = await self.req_repo.bulk_create(items)
@@ -395,6 +474,7 @@ class RequirementsService:
                     "requirement_set_id": str(set_id),
                 },
             )
+            item.validation_warnings = warnings  # type: ignore[attr-defined]
         return created
 
     # ── Link to BOQ position ─────────────────────────────────────────────
@@ -1270,6 +1350,23 @@ class RequirementsService:
                 parse_errors.append(f"Line {line_num}: empty required field")
                 continue
 
+            row = {
+                "entity": entity,
+                "attribute": attribute,
+                "constraint_type": constraint_type,
+                "constraint_value": constraint_value,
+                "unit": unit,
+                "priority": data.default_priority,
+            }
+            try:
+                await self._gate(
+                    "requirement", {}, REQUIREMENT_FIELDS, row, operation="import", project_id=req_set.project_id
+                )
+            except HTTPException as exc:
+                # A line the rules refuse is reported with the other unparsable lines, never dropped silently.
+                detail = exc.detail if isinstance(exc.detail, dict) else {}
+                parse_errors.append(f"Line {line_num}: {detail.get('code', 'rejected')}: {detail.get('message', '')}")
+                continue
             items.append(
                 Requirement(
                     requirement_set_id=set_id_val,

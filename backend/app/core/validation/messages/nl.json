@@ -2111,5 +2111,133 @@
       "fail": "Een tijdsverschuiving van {days} dagen tussen twee projecten is ongewoon lang.",
       "suggestion": "Controleer de eenheid: de verschuiving wordt in dagen ingevoerd."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Eis {name} gebruikt de controle {type} maar heeft geen vergelijkingswaarde.",
+      "suggestion": "Voer de grens of het patroon in waarmee de modelwaarde wordt vergeleken."
+    },
+    "value_invalid": {
+      "fail": "De waarde '{value}' van eis {name} is niet bruikbaar voor de controle {type}.",
+      "suggestion": "Gebruik een getal voor min en max, laag..hoog voor een bereik of een geldige reguliere expressie."
+    },
+    "unit_missing": {
+      "fail": "Eis {name} stelt een numerieke grens ({type}) zonder eenheid.",
+      "suggestion": "Geef de eenheid op, bijvoorbeeld m, mm, m2 of kN."
+    },
+    "verification_missing": {
+      "fail": "Voor verplichte eis {name} staat niet vermeld hoe de naleving wordt aangetoond.",
+      "suggestion": "Kies een verificatiemethode: inspectie, beproeving, berekening of modelcontrole."
+    },
+    "locked_set_empty": {
+      "fail": "Een eisenset zonder eisen kan niet als nulmeting worden vergrendeld.",
+      "suggestion": "Voeg eerst de eisen toe en vergrendel daarna de set."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Rij {row} heeft geen eigenschapsnaam.",
+      "suggestion": "Geef de gecontroleerde eigenschap een naam, bijvoorbeeld Brandwerendheid."
+    },
+    "filter_empty": {
+      "fail": "{count} van {total} eisen hebben geen elementfilter en zouden voor elk element in het model gelden.",
+      "suggestion": "Beperk elke eis tot een elementklasse of -type."
+    },
+    "bounds_inverted": {
+      "fail": "Rij {row} ({property}): het minimum {low} ligt boven het maximum {high}.",
+      "suggestion": "Wissel de grenzen om of corrigeer de cijfers."
+    },
+    "pattern_invalid": {
+      "fail": "Rij {row} ({property}): het patroon '{pattern}' is geen geldige reguliere expressie.",
+      "suggestion": "Corrigeer het patroon zodat het compileert."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "De kosten van de afwijking, {amount}, hebben geen valuta.",
+      "suggestion": "Kies de valuta van de kostenimpact."
+    },
+    "root_cause_missing": {
+      "fail": "Bij een afwijking van ernst {grade} in verificatie of afgesloten ontbreekt de oorzaak.",
+      "suggestion": "Leg de oorzaak vast voordat u het rapport verifieert of afsluit."
+    },
+    "punch_due_before_raised": {
+      "fail": "Het opleverpunt moet op {due} klaar zijn, vóór de registratie op {raised}.",
+      "suggestion": "Stel een termijn in op of na de registratiedag."
+    },
+    "calibration_window": {
+      "fail": "De kalibratie is geldig tot {until}, wat niet na de kalibratiedatum {start} ligt.",
+      "suggestion": "Controleer de kalibratiedatum en de vervaldatum."
+    },
+    "calibration_lapsed": {
+      "fail": "De kalibratie staat als geldig maar is verlopen op {until}.",
+      "suggestion": "Kalibreer het instrument opnieuw of zet de status op verlopen."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "De ondertolerantie {lower} ligt boven de boventolerantie {upper}.",
+      "suggestion": "Wissel de grenzen om zodat de onderste niet boven de bovenste ligt."
+    },
+    "nominal_outside": {
+      "fail": "De nominale waarde {nominal} valt buiten de tolerantieband {lower} tot {upper}.",
+      "suggestion": "Corrigeer de nominale waarde of de tolerantiegrenzen."
+    },
+    "certificate_window": {
+      "fail": "Het certificaat is geldig tot {until}, vóór de begindatum {start}.",
+      "suggestion": "Controleer de geldigheidsdatums op het certificaat."
+    },
+    "certificate_expired": {
+      "fail": "Het materiaalcertificaat is verlopen op {date}, maar het materiaal is {status}.",
+      "suggestion": "Vraag een geldig certificaat aan voordat het materiaal wordt geaccepteerd."
+    },
+    "test_before_sample": {
+      "fail": "De beproevingsdatum {tested} ligt vóór de monsternamedatum {sampled}.",
+      "suggestion": "Vergelijk monstername- en beproevingsdatum met het laboratoriumrapport."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratorium {lab} staat niet geregistreerd als geaccrediteerd.",
+      "suggestion": "Leg het accreditatienummer vast of gebruik een geaccrediteerd laboratorium."
+    },
+    "date_in_future": {
+      "fail": "De datum {field} ({date}) ligt in de toekomst.",
+      "suggestion": "Leg de dag vast waarop het werk, de monstername of de beproeving echt plaatsvond."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "De opleverdatum {date} ligt in de toekomst.",
+      "suggestion": "Voer de dag in waarop het onderdeel echt is opgeleverd."
+    },
+    "ready_undated": {
+      "fail": "Het onderdeel staat als gereed maar heeft geen opleverdatum.",
+      "suggestion": "Voer de opleverdatum in."
+    },
+    "gate_item_unowned": {
+      "fail": "Het poortpunt is {status} en heeft geen verantwoordelijke.",
+      "suggestion": "Wijs toe wie dit punt oplost voordat de bouwplaats opent."
+    },
+    "plan_start_missing": {
+      "fail": "Het inrichtingsplan is {status} maar heeft geen beoogde startdatum.",
+      "suggestion": "Voer de geplande startdatum van de inrichting in."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Het bezoek is {status} maar heeft geen werkelijke datum.",
+      "suggestion": "Voer de datum in waarop het bezoek plaatsvond."
+    },
+    "visit_in_future": {
+      "fail": "Het bezoek is {status} maar de datum {date} ligt in de toekomst.",
+      "suggestion": "Corrigeer de datum of laat het bezoek gepland tot het heeft plaatsgevonden."
+    },
+    "observation_missing": {
+      "fail": "Een registratie van type {category} heeft geen waarnemingstekst.",
+      "suggestion": "Beschrijf wat op de bouwplaats is waargenomen."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Verborgen werk is geaccepteerd zonder te vermelden: {missing}.",
+      "suggestion": "Leg het element en de locatie vast voordat de registratie wordt afgesloten."
+    }
   }
 }

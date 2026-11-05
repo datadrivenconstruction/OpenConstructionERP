@@ -17,6 +17,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.construction_control.deletion import (
     HolderCount,
     refuse_if_held,
@@ -51,6 +52,13 @@ from app.modules.construction_control.schemas import (
     TestResultUpdate,
 )
 from app.modules.construction_control.uer import is_empty_ref, resolve_element_ref
+from app.modules.construction_control.validators import (
+    CONSTRUCTION_CONTROL_RULE_SET,
+    CRITERION_FIELDS,
+    INSPECTION_FIELDS,
+    MATERIAL_FIELDS,
+    TEST_FIELDS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -139,10 +147,40 @@ class ConstructionControlService:
         self.materials = MaterialRecordRepository(session)
         self.tests = TestResultRepository(session)
         self.holders = ReferenceCountRepository(session)
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID,
+        target_id: str = "",
+    ) -> None:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422."""
+        self.findings = await gate_record(
+            CONSTRUCTION_CONTROL_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="construction_control_rules_failed",
+            target_id=target_id,
+        )
 
     # ── Acceptance criteria ──────────────────────────────────────────────────
 
+    @carries_warnings
     async def create_criterion(self, data: AcceptanceCriterionCreate, user_id: str | None) -> AcceptanceCriterion:
+        await self._gate(
+            "criterion", {}, CRITERION_FIELDS, data.model_dump(), operation="create", project_id=data.project_id
+        )
         criterion = AcceptanceCriterion(
             project_id=data.project_id,
             code=data.code,
@@ -185,11 +223,21 @@ class ConstructionControlService:
             project_id, offset=offset, limit=limit, category=category, is_active=is_active
         )
 
+    @carries_warnings
     async def update_criterion(self, criterion_id: uuid.UUID, data: AcceptanceCriterionUpdate) -> AcceptanceCriterion:
         criterion = await self.get_criterion(criterion_id)
         fields = self._merge_metadata_patch(data.model_dump(exclude_unset=True), criterion)
         if not fields:
             return criterion
+        await self._gate(
+            "criterion",
+            criterion,
+            CRITERION_FIELDS,
+            fields,
+            operation="update",
+            project_id=criterion.project_id,
+            target_id=str(criterion_id),
+        )
         # Records judged against the criterion keep only its id, so moving the
         # bounds would silently change what their recorded verdicts mean. Only
         # real changes count, so a form that sends the stored bounds back still
@@ -409,6 +457,7 @@ class ConstructionControlService:
         await self.element_refs.delete_for_owner("inspection", str(inspection.id))
         await self.inspections.delete(inspection_id)
 
+    @carries_warnings
     async def record_result(
         self,
         inspection_id: uuid.UUID,
@@ -427,6 +476,15 @@ class ConstructionControlService:
             )
 
         new_status, default_severity, raise_ncr = _RESULT_RULES[data.result]
+        await self._gate(
+            "inspection",
+            inspection,
+            INSPECTION_FIELDS,
+            {"performed_at": data.performed_at},
+            operation="record_result",
+            project_id=inspection.project_id,
+            target_id=str(inspection_id),
+        )
 
         await self.inspections.update_fields(
             inspection_id,
@@ -572,9 +630,13 @@ class ConstructionControlService:
                 detail="Acceptance criterion not found in this project",
             )
 
+    @carries_warnings
     async def create_material(self, data: MaterialRecordCreate, user_id: str | None) -> MaterialRecord:
         if data.criterion_id is not None:
             await self._assert_criterion_in_project(data.criterion_id, data.project_id)
+        await self._gate(
+            "material", {}, MATERIAL_FIELDS, data.model_dump(), operation="create", project_id=data.project_id
+        )
 
         material = MaterialRecord(
             project_id=data.project_id,
@@ -635,6 +697,7 @@ class ConstructionControlService:
             project_id, offset=offset, limit=limit, status=status_filter, material_type=material_type, gr_id=gr_id
         )
 
+    @carries_warnings
     async def update_material(self, material_id: uuid.UUID, data: MaterialRecordUpdate) -> MaterialRecord:
         material = await self.get_material(material_id)
         if material.status in _MATERIAL_LOCKED_STATUSES:
@@ -652,6 +715,15 @@ class ConstructionControlService:
         fields = self._merge_metadata_patch(fields, material)
         if not fields:
             return material
+        await self._gate(
+            "material",
+            material,
+            MATERIAL_FIELDS,
+            fields,
+            operation="update",
+            project_id=material.project_id,
+            target_id=str(material_id),
+        )
         await self.materials.update_fields(material_id, **fields)
         await self.session.refresh(material)
         return material
@@ -692,6 +764,7 @@ class ConstructionControlService:
         await self.element_refs.delete_for_owner("material_record", str(material.id))
         await self.materials.delete(material_id)
 
+    @carries_warnings
     async def review_material(
         self, material_id: uuid.UUID, data: MaterialReviewIn, user_id: str | None
     ) -> MaterialRecord:
@@ -706,6 +779,15 @@ class ConstructionControlService:
                 ),
             )
         new_status, default_severity, raise_ncr = _MATERIAL_REVIEW_RULES[data.decision]
+        await self._gate(
+            "material",
+            material,
+            MATERIAL_FIELDS,
+            {"status": new_status},
+            operation="review",
+            project_id=material.project_id,
+            target_id=str(material_id),
+        )
 
         await self.materials.update_fields(
             material_id,
@@ -729,6 +811,7 @@ class ConstructionControlService:
 
     # ── Test results (ISO/IEC 17025, Pillar 2) ────────────────────────────────
 
+    @carries_warnings
     async def create_test_result(self, data: TestResultCreate, user_id: str | None) -> TestResult:
         if data.criterion_id is not None:
             await self._assert_criterion_in_project(data.criterion_id, data.project_id)
@@ -739,6 +822,7 @@ class ConstructionControlService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Material record not found in this project",
                 )
+        await self._gate("test", {}, TEST_FIELDS, data.model_dump(), operation="create", project_id=data.project_id)
 
         test = TestResult(
             project_id=data.project_id,
@@ -792,6 +876,7 @@ class ConstructionControlService:
             material_record_id=material_record_id,
         )
 
+    @carries_warnings
     async def update_test_result(self, result_id: uuid.UUID, data: TestResultUpdate) -> TestResult:
         test = await self.get_test_result(result_id)
         if test.status in ("recorded", "void"):
@@ -828,6 +913,9 @@ class ConstructionControlService:
         fields = self._merge_metadata_patch(fields, test)
         if not fields:
             return test
+        await self._gate(
+            "test", test, TEST_FIELDS, fields, operation="update", project_id=test.project_id, target_id=str(result_id)
+        )
         await self.tests.update_fields(result_id, **fields)
         await self.session.refresh(test)
         return test
@@ -852,6 +940,7 @@ class ConstructionControlService:
         await self.element_refs.delete_for_owner("test_result", str(test.id))
         await self.tests.delete(result_id)
 
+    @carries_warnings
     async def record_test_result(
         self, result_id: uuid.UUID, data: TestResultRecordIn, user_id: str | None
     ) -> TestResult:
@@ -866,6 +955,15 @@ class ConstructionControlService:
                 ),
             )
         new_status, default_severity, raise_ncr = _TEST_RESULT_RULES[data.result]
+        await self._gate(
+            "test",
+            test,
+            TEST_FIELDS,
+            {"status": new_status, "tested_at": data.tested_at},
+            operation="record_result",
+            project_id=test.project_id,
+            target_id=str(result_id),
+        )
 
         await self.tests.update_fields(
             result_id,

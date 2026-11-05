@@ -2111,5 +2111,133 @@
       "fail": "Ikki loyiha orasidagi {days} kunlik kechikish odatdagidan uzun.",
       "suggestion": "Birlikni tekshiring: kechikish kunlarda kiritiladi."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "{name} talabi {type} tekshiruvidan foydalanadi, lekin solishtiradigan qiymati yoʻq.",
+      "suggestion": "Model qiymati solishtiriladigan chegara yoki namunani kiriting."
+    },
+    "value_invalid": {
+      "fail": "{name} talabining '{value}' qiymatini {type} tekshiruvida ishlatib boʻlmaydi.",
+      "suggestion": "min va max uchun son, oraliq uchun past..yuqori yoki toʻgʻri muntazam ifodadan foydalaning."
+    },
+    "unit_missing": {
+      "fail": "{name} talabi oʻlchov birligisiz raqamli chegara ({type}) belgilaydi.",
+      "suggestion": "Birlikni koʻrsating, masalan m, mm, m2 yoki kN."
+    },
+    "verification_missing": {
+      "fail": "Majburiy {name} talabida muvofiqlik qanday tasdiqlanishi koʻrsatilmagan.",
+      "suggestion": "Tasdiqlash usulini tanlang: koʻzdan kechirish, sinov, hisob-kitob yoki modelni tekshirish."
+    },
+    "locked_set_empty": {
+      "fail": "Talablari boʻlmagan toʻplamni asosiy variant sifatida qulflab boʻlmaydi.",
+      "suggestion": "Avval talablarni qoʻshing, soʻng toʻplamni qulflang."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "{row}-qatorda xossa nomi yoʻq.",
+      "suggestion": "Tekshiriladigan xossa nomini yozing, masalan OlgaChidamlilik."
+    },
+    "filter_empty": {
+      "fail": "{total} ta talabning {count} tasida element filtri yoʻq va ular modeldagi har bir elementga tatbiq etilgan boʻlardi.",
+      "suggestion": "Har bir talabni element sinfi yoki turi bilan cheklang."
+    },
+    "bounds_inverted": {
+      "fail": "{row}-qator ({property}): eng kam qiymat {low} eng koʻp qiymat {high} dan katta.",
+      "suggestion": "Chegaralarni almashtiring yoki raqamlarni toʻgʻrilang."
+    },
+    "pattern_invalid": {
+      "fail": "{row}-qator ({property}): '{pattern}' namunasi toʻgʻri muntazam ifoda emas.",
+      "suggestion": "Namunani kompilyatsiya qilinadigan qilib toʻgʻrilang."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Nomuvofiqlik xarajati {amount} uchun valyuta yoʻq.",
+      "suggestion": "Xarajat ta’siri valyutasini tanlang."
+    },
+    "root_cause_missing": {
+      "fail": "Tekshiruvdagi yoki yopilgan nomuvofiqlikda ({grade}) asosiy sabab yozilmagan.",
+      "suggestion": "Hisobotni tekshirishdan yoki yopishdan oldin asosiy sababni yozing."
+    },
+    "punch_due_before_raised": {
+      "fail": "Kamchilikning muddati {due} uning roʻyxatga olingan sanasi {raised} dan oldin.",
+      "suggestion": "Muddatni roʻyxatga olingan kunga yoki undan keyingi kunga qoʻying."
+    },
+    "calibration_window": {
+      "fail": "Kalibrlash {until} gacha amal qiladi, bu kalibrlash sanasi {start} dan keyin emas.",
+      "suggestion": "Kalibrlash sanasi va amal qilish muddati tugashini tekshiring."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibrlash amaldagi deb belgilangan, lekin {until} da tugagan.",
+      "suggestion": "Asbobni qayta kalibrlang yoki holatini muddati oʻtgan deb belgilang."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Pastki ruxsat {lower} yuqori ruxsat {upper} dan katta.",
+      "suggestion": "Pastki chegara yuqoridan oshmasligi uchun chegaralarni almashtiring."
+    },
+    "nominal_outside": {
+      "fail": "Nominal qiymat {nominal} {lower} dan {upper} gacha ruxsat maydonidan tashqarida.",
+      "suggestion": "Nominal qiymatni yoki ruxsat chegaralarini toʻgʻrilang."
+    },
+    "certificate_window": {
+      "fail": "Sertifikat {until} gacha amal qiladi, ya’ni boshlanish sanasi {start} dan oldin.",
+      "suggestion": "Sertifikatdagi amal qilish sanalarini tekshiring."
+    },
+    "certificate_expired": {
+      "fail": "Material sertifikati {date} da tugagan, material holati esa {status}.",
+      "suggestion": "Materialni qabul qilishdan oldin amaldagi sertifikat oling."
+    },
+    "test_before_sample": {
+      "fail": "Sinov sanasi {tested} namuna olish sanasi {sampled} dan oldin.",
+      "suggestion": "Namuna olish va sinov sanalarini laboratoriya bayonnomasi bilan solishtiring."
+    },
+    "lab_unaccredited": {
+      "fail": "{lab} laboratoriyasi akkreditatsiyadan oʻtgan deb qayd etilmagan.",
+      "suggestion": "Akkreditatsiya rekvizitini yozing yoki akkreditatsiyalangan laboratoriyadan foydalaning."
+    },
+    "date_in_future": {
+      "fail": "({field}) sanasi {date} kelajakda.",
+      "suggestion": "Ish, namuna olish yoki sinov haqiqatan oʻtgan kunni yozing."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Tugallanish sanasi {date} kelajakda.",
+      "suggestion": "Haqiqiy tugallangan kunni kiriting."
+    },
+    "ready_undated": {
+      "fail": "Pozitsiya tayyor deb belgilangan, lekin tugallanish sanasi yoʻq.",
+      "suggestion": "Pozitsiyaning tugallanish sanasini kiriting."
+    },
+    "gate_item_unowned": {
+      "fail": "Boshlash shartining ({status}) mas’ul shaxsi yoʻq.",
+      "suggestion": "Maydon ochilishidan oldin bu shartni kim bajarishini belgilang."
+    },
+    "plan_start_missing": {
+      "fail": "Maydonni tashkil etish rejasining ({status}) rejalashtirilgan boshlanish sanasi yoʻq.",
+      "suggestion": "Rejalashtirilgan boshlanish sanasini kiriting."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Tashrifning ({status}) haqiqiy sanasi yoʻq.",
+      "suggestion": "Tashrif boʻlgan sanani kiriting."
+    },
+    "visit_in_future": {
+      "fail": "Tashrif ({status}), lekin uning sanasi {date} kelajakda.",
+      "suggestion": "Sanani toʻgʻrilang yoki tashrif boʻlmaguncha rejada qoldiring."
+    },
+    "observation_missing": {
+      "fail": "{category} turidagi yozuvda kuzatuv matni yoʻq.",
+      "suggestion": "Maydonda nima kuzatilganini yozing."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Yashirin ishlar quyidagilar koʻrsatilmasdan qabul qilindi: {missing}.",
+      "suggestion": "Yozuvni yopishdan oldin elementni va uning joyini yozing."
+    }
   }
 }

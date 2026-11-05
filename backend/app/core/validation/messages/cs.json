@@ -2111,5 +2111,133 @@
       "fail": "Prodleva {days} dnů mezi dvěma projekty je neobvykle dlouhá.",
       "suggestion": "Zkontrolujte jednotku: prodleva se zadává ve dnech."
     }
+  },
+  "requirements": {
+    "value_missing": {
+      "fail": "Požadavek {name} používá kontrolu {type}, ale nemá hodnotu k porovnání.",
+      "suggestion": "Zadejte mez nebo vzor, se kterým se porovnává hodnota z modelu."
+    },
+    "value_invalid": {
+      "fail": "Hodnotu '{value}' požadavku {name} nelze pro kontrolu {type} použít.",
+      "suggestion": "Použijte číslo pro min a max, dolní..horní pro rozsah nebo platný regulární výraz."
+    },
+    "unit_missing": {
+      "fail": "Požadavek {name} stanoví číselnou mez ({type}) bez jednotky.",
+      "suggestion": "Uveďte jednotku, například m, mm, m2 nebo kN."
+    },
+    "verification_missing": {
+      "fail": "U závazného požadavku {name} není uvedeno, jak bude prokázán soulad.",
+      "suggestion": "Zvolte způsob ověření: prohlídka, zkouška, výpočet nebo kontrola modelu."
+    },
+    "locked_set_empty": {
+      "fail": "Sadu bez požadavků nelze zamknout jako základní.",
+      "suggestion": "Nejprve přidejte požadavky, potom sadu zamkněte."
+    }
+  },
+  "bim_requirements": {
+    "property_missing": {
+      "fail": "Řádek {row} nemá název vlastnosti.",
+      "suggestion": "Zadejte kontrolovanou vlastnost, například PožárníOdolnost."
+    },
+    "filter_empty": {
+      "fail": "{count} z {total} požadavků nemá filtr prvků a platilo by pro každý prvek modelu.",
+      "suggestion": "Omezte každý požadavek na třídu nebo typ prvku."
+    },
+    "bounds_inverted": {
+      "fail": "Řádek {row} ({property}): minimum {low} je větší než maximum {high}.",
+      "suggestion": "Prohoďte meze nebo opravte hodnoty."
+    },
+    "pattern_invalid": {
+      "fail": "Řádek {row} ({property}): vzor '{pattern}' není platný regulární výraz.",
+      "suggestion": "Opravte vzor tak, aby šel zkompilovat."
+    }
+  },
+  "qms": {
+    "cost_currency_missing": {
+      "fail": "Náklady neshody, {amount}, nemají měnu.",
+      "suggestion": "Vyberte měnu dopadu na náklady."
+    },
+    "root_cause_missing": {
+      "fail": "Neshoda ({grade}) ve verifikaci nebo uzavřená nemá uvedenou příčinu.",
+      "suggestion": "Zapište příčinu před ověřením nebo uzavřením zprávy."
+    },
+    "punch_due_before_raised": {
+      "fail": "Drobná vada má termín {due}, dřívější než datum zadání {raised}.",
+      "suggestion": "Nastavte termín ke dni zadání nebo později."
+    },
+    "calibration_window": {
+      "fail": "Kalibrace platí do {until}, což není později než datum kalibrace {start}.",
+      "suggestion": "Zkontrolujte datum kalibrace a datum platnosti."
+    },
+    "calibration_lapsed": {
+      "fail": "Kalibrace je označena jako platná, ale vypršela {until}.",
+      "suggestion": "Přístroj znovu zkalibrujte nebo nastavte stav na vypršelá."
+    }
+  },
+  "construction_control": {
+    "band_inverted": {
+      "fail": "Dolní tolerance {lower} je větší než horní tolerance {upper}.",
+      "suggestion": "Prohoďte meze, aby dolní nebyla větší než horní."
+    },
+    "nominal_outside": {
+      "fail": "Jmenovitá hodnota {nominal} leží mimo toleranční pole {lower} až {upper}.",
+      "suggestion": "Opravte jmenovitou hodnotu nebo meze tolerance."
+    },
+    "certificate_window": {
+      "fail": "Certifikát platí do {until}, tedy před datem začátku {start}.",
+      "suggestion": "Zkontrolujte data platnosti uvedená na certifikátu."
+    },
+    "certificate_expired": {
+      "fail": "Certifikát materiálu vypršel {date}, ale materiál má stav {status}.",
+      "suggestion": "Před převzetím materiálu získejte platný certifikát."
+    },
+    "test_before_sample": {
+      "fail": "Datum zkoušky {tested} je dřívější než datum odběru vzorku {sampled}.",
+      "suggestion": "Porovnejte data odběru a zkoušky s protokolem laboratoře."
+    },
+    "lab_unaccredited": {
+      "fail": "Laboratoř {lab} není vedena jako akreditovaná.",
+      "suggestion": "Zapište číslo akreditace nebo použijte akreditovanou laboratoř."
+    },
+    "date_in_future": {
+      "fail": "Datum ({field}) {date} leží v budoucnosti.",
+      "suggestion": "Zapište den, kdy se práce, odběr nebo zkouška skutečně uskutečnily."
+    }
+  },
+  "site_prep": {
+    "completed_in_future": {
+      "fail": "Datum dokončení {date} leží v budoucnosti.",
+      "suggestion": "Zadejte den skutečného dokončení."
+    },
+    "ready_undated": {
+      "fail": "Položka je označena jako připravená, ale nemá datum dokončení.",
+      "suggestion": "Zadejte datum dokončení položky."
+    },
+    "gate_item_unowned": {
+      "fail": "Podmínka zahájení ({status}) nemá odpovědnou osobu.",
+      "suggestion": "Určete, kdo podmínku splní před otevřením staveniště."
+    },
+    "plan_start_missing": {
+      "fail": "Plán zařízení staveniště ({status}) nemá plánované datum zahájení.",
+      "suggestion": "Zadejte plánované datum zahájení."
+    }
+  },
+  "site_supervision": {
+    "visit_undated": {
+      "fail": "Návštěva ({status}) nemá skutečné datum.",
+      "suggestion": "Zadejte datum, kdy se návštěva uskutečnila."
+    },
+    "visit_in_future": {
+      "fail": "Návštěva ({status}), ale její datum {date} leží v budoucnosti.",
+      "suggestion": "Opravte datum nebo nechte návštěvu jako plánovanou, dokud se neuskuteční."
+    },
+    "observation_missing": {
+      "fail": "Záznam typu {category} nemá text pozorování.",
+      "suggestion": "Popište, co bylo na stavbě zjištěno."
+    },
+    "hidden_works_unidentified": {
+      "fail": "Zakrývané práce byly převzaty bez uvedení: {missing}.",
+      "suggestion": "Zapište prvek a jeho umístění před uzavřením záznamu."
+    }
   }
 }

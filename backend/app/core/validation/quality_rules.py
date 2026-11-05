@@ -10,6 +10,8 @@ under the ``quality`` section.
 
 from __future__ import annotations
 
+import contextlib
+import functools
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -138,6 +140,7 @@ async def gate_keyed_rule_set(
     error_code: str,
     before: dict[str, Any] | None = None,
     project_id: str | None = None,
+    warnings_only: bool = False,
 ) -> ValidationReport:
     """``gate_rule_set`` for a record the rules read under ``data[key]`` (with its ``id`` set)."""
 
@@ -148,6 +151,7 @@ async def gate_keyed_rule_set(
         rule_set=rule_set,
         data=wrap(state),
         before=wrap(before) if before is not None else None,
+        warnings_only=warnings_only,
         target_type=target_type,
         target_id=target_id,
         project_id=project_id,
@@ -155,3 +159,76 @@ async def gate_keyed_rule_set(
         subject=subject,
         error=error_code,
     )
+
+
+def record_snapshot(source: Any, names: Any, changes: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The fields ``names`` of a stored record (object or dict) with ``changes`` applied on top.
+
+    This is the record as it will be after the write, which is what the rules judge; with no
+    ``changes`` it is the stored record, the ``before`` side of the "only what the edit introduces" filter.
+    """
+    changes = changes or {}
+    out: dict[str, Any] = {}
+    for name in names:
+        if name in changes:
+            out[name] = changes[name]
+        elif isinstance(source, dict):
+            out[name] = source.get(name)
+        else:
+            out[name] = getattr(source, name, None)
+    return out
+
+
+async def gate_record(
+    rule_set: str,
+    key: str,
+    record: Any,
+    names: Any,
+    changes: dict[str, Any] | None = None,
+    *,
+    operation: str,
+    project_id: Any,
+    error_code: str,
+    target_id: str = "",
+    warnings_only: bool = False,
+) -> list[dict[str, Any]]:
+    """Gate one record write: the rules judge ``record`` with ``changes`` applied; returns the warnings.
+
+    A write that edits a stored record passes its ``target_id``; the stored fields are then the
+    ``before`` state, so only the errors this edit introduces block it.
+    """
+    report = await gate_keyed_rule_set(
+        record_snapshot(record, names, changes),
+        rule_set=rule_set,
+        key=key,
+        target_type=f"{rule_set}_{key}",
+        target_id=target_id,
+        operation=operation,
+        subject=key.replace("_", " "),
+        error_code=error_code,
+        before=record_snapshot(record, names) if target_id else None,
+        project_id=str(project_id) if project_id else None,
+        warnings_only=warnings_only,
+    )
+    if warnings_only:
+        return [finding(r) for r in (*report.errors, *report.warnings)]
+    return warning_findings(report)
+
+
+def carries_warnings(method: Any) -> Any:
+    """Decorate an async service write: the non-blocking findings of its gate ride on the returned record.
+
+    The service keeps them in ``self.findings`` (reset per call); the response schema reads
+    ``validation_warnings`` off the record.
+    """
+
+    @functools.wraps(method)
+    async def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        self.findings = []
+        out = await method(self, *args, **kwargs)
+        if out is not None and not isinstance(out, (list, tuple, dict, set)):
+            with contextlib.suppress(AttributeError):
+                out.validation_warnings = list(self.findings)
+        return out
+
+    return wrapper
