@@ -1941,5 +1941,63 @@
       "fail": "Det underkända provet saknar anteckning om vad som observerats."
     },
     "suggestion": "Registrera åtgärden eller iakttagelsen och slutför förkontroller och funktionsprov före avslut."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "Slutet {end} ligger inte efter början {start}.",
+      "suggestion": "Rätta datumen så att slutet följer efter början."
+    },
+    "period_outside_stay": {
+      "fail": "Debiteringsperioden {start} till {end} ligger utanför vistelsen {stay_start} till {stay_end}.",
+      "suggestion": "Jämför debiteringsperioden med bokningsdatumen."
+    },
+    "currency_missing": {
+      "fail": "Ett belopp på {amount} anges utan valuta.",
+      "suggestion": "Ange valuta på posten, rumspriset eller projektet."
+    },
+    "capacity_exceeded": {
+      "fail": "Rummen summerar till {total} bäddar, mer än den angivna kapaciteten {capacity}.",
+      "suggestion": "Höj den angivna kapaciteten eller se över rummens kapacitet."
+    },
+    "camp_room_charged": {
+      "fail": "Rum {label} i ett arbetsläger har priset {rate}.",
+      "suggestion": "Lägerboende ställs normalt gratis till arbetslaget; bekräfta att priset är avsett."
+    },
+    "nothing_recorded": {
+      "fail": "Status är {state} men rapporten saknar arbeten, förseningar, anteckningar och personal.",
+      "suggestion": "Beskriv dagen före inlämning eller behåll rapporten som utkast."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} timmars försening är registrerad utan angiven orsak.",
+      "suggestion": "Beskriv orsaken till förseningen, till exempel väder, sen leverans eller tillträde."
+    },
+    "date_in_future": {
+      "fail": "Posten är daterad {date}, vilket ännu inte har inträffat.",
+      "suggestion": "Rätta datumet eller registrera posten när dagen är slut."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} timmar per person eller maskin på en dag, mer än dygnets 24 timmar.",
+      "suggestion": "Kontrollera om arbetslagets summa angetts som timmar per person, eller om enheten är fel."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} arbetstimmar är registrerade men bemanningen är noll.",
+      "suggestion": "Ange hur många personer som fanns på plats."
+    },
+    "incident_undescribed": {
+      "fail": "En incident är registrerad utan beskrivning.",
+      "suggestion": "Beskriv vad som hände, vem som var inblandad och vad som gjordes."
+    },
+    "delay_undescribed": {
+      "fail": "En försening på {hours} h är registrerad utan orsak.",
+      "suggestion": "Lägg till orsaken till förseningen."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} timmar är registrerade i ett fönster på bara {span} timmar.",
+      "suggestion": "Rätta timmarna eller start- och sluttiderna."
+    },
+    "crew_without_record": {
+      "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
+      "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
+    }
   }
 }

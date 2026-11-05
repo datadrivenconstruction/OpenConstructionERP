@@ -84,6 +84,7 @@ class DiaryEntryResponse(BaseModel):
         default_factory=dict,
         alias="metadata_",
     )
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Diary activity ────────────────────────────────────────────────────────
@@ -122,6 +123,7 @@ class DiaryActivityResponse(BaseModel):
     )
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Diary attachment ──────────────────────────────────────────────────────

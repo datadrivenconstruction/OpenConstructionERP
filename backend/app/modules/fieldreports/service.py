@@ -22,12 +22,13 @@ from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.pdf_branding import branded_cover_brand
 from app.core.validation.messages import translate
+from app.core.validation.quality_rules import gate_rule_set, warning_findings
 from app.modules.fieldreports.builtin_templates import (
     BUILTIN_TEMPLATES,
     get_builtin,
     is_builtin_id,
 )
-from app.modules.fieldreports.models import FieldReport, FieldReportTemplate
+from app.modules.fieldreports.models import FieldReport, FieldReportTemplate, SiteEquipmentLog, SiteWorkforceLog
 from app.modules.fieldreports.repository import (
     FieldReportRepository,
     FieldReportTemplateRepository,
@@ -48,6 +49,117 @@ class FieldReportService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = FieldReportRepository(session)
+
+    # ── Validation rules ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _state_of(report: FieldReport) -> dict[str, Any]:
+        return {
+            "status": report.status,
+            "report_date": str(report.report_date),
+            "work_performed": report.work_performed,
+            "notes": report.notes,
+            "delays": report.delays,
+            "delay_hours": report.delay_hours,
+            "workforce": list(report.workforce or []),
+        }
+
+    @staticmethod
+    def log_hours(regular: object, overtime: object) -> float:
+        """Regular plus overtime hours of a workforce log row; text that is not a number counts as zero."""
+
+        def _num(value: object) -> float:
+            try:
+                return float(str(value))
+            except (TypeError, ValueError):
+                return 0.0
+
+        return _num(regular) + _num(overtime)
+
+    @classmethod
+    def _workforce_row(cls, entry: SiteWorkforceLog) -> dict[str, Any]:
+        return {
+            "id": str(entry.id or ""),
+            "item": entry.worker_type,
+            "count": entry.headcount,
+            "hours": cls.log_hours(entry.hours_worked, entry.overtime_hours),
+        }
+
+    @staticmethod
+    def _equipment_row(entry: SiteEquipmentLog) -> dict[str, Any]:
+        return {
+            "id": str(entry.id or ""),
+            "item": entry.equipment_description,
+            "hours_operational": entry.hours_operational,
+            "hours_standby": entry.hours_standby,
+            "hours_breakdown": entry.hours_breakdown,
+        }
+
+    async def _log_rows(self, report_id: uuid.UUID) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        from sqlalchemy import select
+
+        crew = (
+            (await self.session.execute(select(SiteWorkforceLog).where(SiteWorkforceLog.field_report_id == report_id)))
+            .scalars()
+            .all()
+        )
+        kit = (
+            (await self.session.execute(select(SiteEquipmentLog).where(SiteEquipmentLog.field_report_id == report_id)))
+            .scalars()
+            .all()
+        )
+        return [self._workforce_row(e) for e in crew], [self._equipment_row(e) for e in kit]
+
+    async def _gate(
+        self,
+        project_id: uuid.UUID,
+        report_id: str,
+        *,
+        state: dict[str, Any],
+        crew: list[dict[str, Any]],
+        kit: list[dict[str, Any]],
+        operation: str,
+        before: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        def _ctx(st: dict[str, Any], cr: list[dict[str, Any]], ki: list[dict[str, Any]]) -> dict[str, Any]:
+            return {"report": {**st, "id": report_id}, "workforce_log": cr, "equipment_log": ki}
+
+        report = await gate_rule_set(
+            rule_set="fieldreports",
+            data=_ctx(state, crew, kit),
+            before=_ctx(*before) if before is not None else None,  # type: ignore[misc]
+            target_type="field_report",
+            target_id=report_id,
+            project_id=project_id,
+            operation=operation,
+            subject="field report",
+        )
+        return warning_findings(report)
+
+    async def check_log_write(
+        self,
+        report: FieldReport,
+        *,
+        kind: str,
+        row: dict[str, Any],
+        replace_id: uuid.UUID | None = None,
+        operation: str,
+    ) -> None:
+        """Gate a workforce or equipment log write against the report it belongs to."""
+        crew, kit = await self._log_rows(report.id)
+        state = self._state_of(report)
+        rows = crew if kind == "workforce" else kit
+        merged = [row if r["id"] == str(replace_id) else r for r in rows] if replace_id else [*rows, row]
+        new_crew, new_kit = (merged, kit) if kind == "workforce" else (crew, merged)
+        await self._gate(
+            report.project_id,
+            str(report.id),
+            state=state,
+            crew=new_crew,
+            kit=new_kit,
+            operation=operation,
+            before=(state, crew, kit),  # type: ignore[arg-type]
+        )
 
     # ── Create ────────────────────────────────────────────────────────────
 
@@ -114,7 +226,24 @@ class FieldReportService:
         if weather_data and data.humidity is None and weather_data.get("humidity_pct") is not None:
             report.humidity = weather_data["humidity_pct"]
 
+        warnings = await self._gate(
+            data.project_id,
+            "",
+            state={
+                "status": "draft",
+                "report_date": str(data.report_date),
+                "work_performed": data.work_performed,
+                "notes": data.notes,
+                "delays": data.delays,
+                "delay_hours": data.delay_hours,
+                "workforce": workforce_data,
+            },
+            crew=[],
+            kit=[],
+            operation="create",
+        )
         report = await self.repo.create(report)
+        report.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info(
             "Field report created: %s (%s) for project %s",
             report.report_date,
@@ -267,8 +396,20 @@ class FieldReportService:
         if not fields:
             return report
 
+        before = self._state_of(report)
+        crew, kit = await self._log_rows(report_id)
+        warnings = await self._gate(
+            report.project_id,
+            str(report_id),
+            state={**before, **{k: v for k, v in fields.items() if k in before}},
+            crew=crew,
+            kit=kit,
+            operation="update",
+            before=(before, crew, kit),  # type: ignore[arg-type]
+        )
         await self.repo.update_fields(report_id, **fields)
         await self.session.refresh(report)
+        report.validation_warnings = warnings  # type: ignore[attr-defined]
 
         logger.info("Field report updated: %s (fields=%s)", report_id, list(fields.keys()))
         return report
@@ -310,6 +451,15 @@ class FieldReportService:
                 detail=f"Cannot submit report with status '{report.status}' - must be draft",
             )
 
+        crew, kit = await self._log_rows(report_id)
+        warnings = await self._gate(
+            report.project_id,
+            str(report_id),
+            state={**self._state_of(report), "status": "submitted"},
+            crew=crew,
+            kit=kit,
+            operation="submit",
+        )
         # Snapshot the progress payload before update_fields() expires the
         # session - the inline metadata read might MissingGreenlet otherwise.
         md = report.metadata_ if isinstance(report.metadata_, dict) else {}
@@ -318,6 +468,7 @@ class FieldReportService:
 
         await self.repo.update_fields(report_id, status="submitted")
         await self.session.refresh(report)
+        report.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Field report submitted: %s", report_id)
 
         if isinstance(schedule_progress, list) and schedule_progress:
@@ -351,6 +502,17 @@ class FieldReportService:
             )
 
         prior_status = report.status
+        crew, kit = await self._log_rows(report_id)
+        stored = self._state_of(report)
+        warnings = await self._gate(
+            report.project_id,
+            str(report_id),
+            state={**stored, "status": "approved"},
+            crew=crew,
+            kit=kit,
+            operation="approve",
+            before=(stored, crew, kit),  # type: ignore[arg-type]
+        )
         now = datetime.now(UTC)
         await self.repo.update_fields(
             report_id,
@@ -359,6 +521,7 @@ class FieldReportService:
             approved_at=now,
         )
         await self.session.refresh(report)
+        report.validation_warnings = warnings  # type: ignore[attr-defined]
 
         # Epic H - universal audit trail.
         from app.core.audit_log import log_activity as _log_activity

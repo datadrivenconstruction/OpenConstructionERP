@@ -1941,5 +1941,63 @@
       "fail": "La prueba fallida no tiene una nota que describa lo observado."
     },
     "suggestion": "Registre la resolución o la observación y complete las comprobaciones previas y las pruebas funcionales antes del cierre."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "El fin {end} no es posterior al inicio {start}.",
+      "suggestion": "Corrija las fechas para que el fin sea posterior al inicio."
+    },
+    "period_outside_stay": {
+      "fail": "El periodo facturado {start} a {end} queda fuera de la estancia {stay_start} a {stay_end}.",
+      "suggestion": "Compare el periodo de facturación con las fechas de la reserva."
+    },
+    "currency_missing": {
+      "fail": "Se indica un importe de {amount} sin moneda.",
+      "suggestion": "Indique la moneda en el registro, en la tarifa de la habitación o en el proyecto."
+    },
+    "capacity_exceeded": {
+      "fail": "Las habitaciones suman {total} camas, más que la capacidad nominal de {capacity}.",
+      "suggestion": "Aumente la capacidad nominal o revise la capacidad de las habitaciones."
+    },
+    "camp_room_charged": {
+      "fail": "La habitación {label} de un campamento de obra tiene una tarifa de {rate}.",
+      "suggestion": "El alojamiento de campamento se suele dar gratis a la cuadrilla; confirme que la tarifa es intencionada."
+    },
+    "nothing_recorded": {
+      "fail": "El estado es {state} pero el parte no recoge trabajos, retrasos, notas ni personal.",
+      "suggestion": "Describa la jornada antes de enviar, o deje el parte en borrador."
+    },
+    "delay_unexplained": {
+      "fail": "Se registran {hours} horas de retraso sin causa indicada.",
+      "suggestion": "Indique la causa del retraso: clima, entrega tardía, acceso."
+    },
+    "date_in_future": {
+      "fail": "El registro lleva fecha {date}, que aún no ha llegado.",
+      "suggestion": "Corrija la fecha o registre el parte al terminar el día."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} horas por persona o máquina en un día, más de las 24 horas que tiene un día.",
+      "suggestion": "Compruebe si se anotó el total de la cuadrilla como horas por persona, o si hay un error de unidades."
+    },
+    "hours_without_crew": {
+      "fail": "Hay {hours} horas de trabajo registradas pero la plantilla es cero.",
+      "suggestion": "Indique cuántas personas había en obra."
+    },
+    "incident_undescribed": {
+      "fail": "Se registra una incidencia sin descripción.",
+      "suggestion": "Describa qué ocurrió, quién intervino y qué se hizo."
+    },
+    "delay_undescribed": {
+      "fail": "Se registra un retraso de {hours} h sin motivo.",
+      "suggestion": "Añada la causa del retraso."
+    },
+    "hours_exceed_window": {
+      "fail": "Se registran {hours} horas en una ventana de solo {span} horas.",
+      "suggestion": "Corrija las horas o las horas de inicio y fin."
+    },
+    "crew_without_record": {
+      "fail": "Había una cuadrilla de {headcount} en obra pero no consta trabajo, inspección ni retraso.",
+      "suggestion": "Añada lo que hizo la cuadrilla o el retraso que paralizó el trabajo."
+    }
   }
 }

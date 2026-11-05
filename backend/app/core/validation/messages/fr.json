@@ -1941,5 +1941,63 @@
       "fail": "L'essai échoué n'a pas de commentaire décrivant ce qui a été constaté."
     },
     "suggestion": "Consignez la résolution ou le constat, et terminez les contrôles préalables et essais fonctionnels avant la clôture."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "La fin {end} n'est pas postérieure au début {start}.",
+      "suggestion": "Corriger les dates pour que la fin suive le début."
+    },
+    "period_outside_stay": {
+      "fail": "La période facturée {start} à {end} sort du séjour {stay_start} à {stay_end}.",
+      "suggestion": "Comparer la période de facturation aux dates de réservation."
+    },
+    "currency_missing": {
+      "fail": "Un montant de {amount} est indiqué sans devise.",
+      "suggestion": "Renseigner la devise sur l'enregistrement, le tarif de la chambre ou le projet."
+    },
+    "capacity_exceeded": {
+      "fail": "Les chambres totalisent {total} lits, plus que la capacité nominale de {capacity}.",
+      "suggestion": "Augmenter la capacité nominale ou revoir la capacité des chambres."
+    },
+    "camp_room_charged": {
+      "fail": "La chambre {label} d'une base-vie porte un tarif de {rate}.",
+      "suggestion": "L'hébergement de chantier est normalement fourni gratuitement aux équipes ; confirmer que le tarif est voulu."
+    },
+    "nothing_recorded": {
+      "fail": "Le statut est {state} mais le rapport ne consigne ni travaux, ni arrêts, ni notes, ni effectifs.",
+      "suggestion": "Décrire la journée avant de soumettre, ou garder le rapport en brouillon."
+    },
+    "delay_unexplained": {
+      "fail": "{hours} heures d'arrêt sont consignées sans cause indiquée.",
+      "suggestion": "Indiquer la cause de l'arrêt : météo, livraison tardive, accès."
+    },
+    "date_in_future": {
+      "fail": "L'enregistrement est daté du {date}, qui n'est pas encore passé.",
+      "suggestion": "Corriger la date ou saisir l'enregistrement à la fin de la journée."
+    },
+    "hours_exceed_day": {
+      "fail": "{item} : {hours} heures par personne ou engin sur une journée, plus que les 24 heures d'un jour.",
+      "suggestion": "Vérifier qu'un total d'équipe n'a pas été saisi comme heures par personne, ou une erreur d'unité."
+    },
+    "hours_without_crew": {
+      "fail": "{hours} heures de travail sont saisies mais l'effectif est nul.",
+      "suggestion": "Saisir le nombre de personnes présentes sur le chantier."
+    },
+    "incident_undescribed": {
+      "fail": "Un incident est consigné sans description.",
+      "suggestion": "Décrire ce qui s'est passé, les personnes concernées et les mesures prises."
+    },
+    "delay_undescribed": {
+      "fail": "Un arrêt de {hours} h est consigné sans motif.",
+      "suggestion": "Ajouter la cause de l'arrêt."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} heures sont saisies dans une plage de {span} heures seulement.",
+      "suggestion": "Corriger les heures ou les horaires de début et de fin."
+    },
+    "crew_without_record": {
+      "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
+      "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
+    }
   }
 }

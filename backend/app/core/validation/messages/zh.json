@@ -1941,5 +1941,63 @@
       "fail": "未通过的测试没有记录所观察到情况的结果备注。"
     },
     "suggestion": "请记录处理结果或观察情况，并在关闭前完成预功能检查和功能测试。"
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "结束时间 {end} 不晚于开始时间 {start}。",
+      "suggestion": "请更正日期，使结束晚于开始。"
+    },
+    "period_outside_stay": {
+      "fail": "计费期 {start} 至 {end} 超出入住期 {stay_start} 至 {stay_end}。",
+      "suggestion": "请对照预订日期核对计费期。"
+    },
+    "currency_missing": {
+      "fail": "金额 {amount} 未注明币种。",
+      "suggestion": "请在记录、房价或项目上设置币种。"
+    },
+    "capacity_exceeded": {
+      "fail": "房间合计 {total} 个床位，超过额定容量 {capacity}。",
+      "suggestion": "请提高额定容量或核对各房间容量。"
+    },
+    "camp_room_charged": {
+      "fail": "工人营地的房间 {label} 设有费率 {rate}。",
+      "suggestion": "营地住宿通常对班组免费；请确认该费率是有意设置。"
+    },
+    "nothing_recorded": {
+      "fail": "状态为 {state}，但报告没有记录施工内容、延误、备注或人员。",
+      "suggestion": "请在提交前描述当天情况，或将报告保留为草稿。"
+    },
+    "delay_unexplained": {
+      "fail": "记录了 {hours} 小时延误但未说明原因。",
+      "suggestion": "请说明延误原因，例如天气、材料迟到或进场受阻。"
+    },
+    "date_in_future": {
+      "fail": "记录日期为 {date}，该日尚未到来。",
+      "suggestion": "请更正日期，或在当天结束后再录入。"
+    },
+    "hours_exceed_day": {
+      "fail": "{item}：一天内每人或每台设备 {hours} 小时，超过一天的 24 小时。",
+      "suggestion": "请检查是否把班组总工时录成了人均工时，或单位有误。"
+    },
+    "hours_without_crew": {
+      "fail": "记录了 {hours} 小时工时，但出勤人数为零。",
+      "suggestion": "请填写现场人数。"
+    },
+    "incident_undescribed": {
+      "fail": "记录了一起事件但没有描述。",
+      "suggestion": "请说明发生了什么、涉及哪些人以及采取了哪些措施。"
+    },
+    "delay_undescribed": {
+      "fail": "记录了 {hours} 小时延误但没有原因。",
+      "suggestion": "请补充延误原因。"
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} 小时被记录在仅 {span} 小时的时间窗内。",
+      "suggestion": "请更正工时或起止时间。"
+    },
+    "crew_without_record": {
+      "fail": "现场有 {headcount} 人的班组，但未记录施工、检查或延误。",
+      "suggestion": "请补充班组所做工作，或导致停工的延误。"
+    }
   }
 }

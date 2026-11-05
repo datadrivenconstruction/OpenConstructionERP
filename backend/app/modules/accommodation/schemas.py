@@ -99,6 +99,7 @@ class AccommodationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AccommodationDetailResponse(AccommodationResponse):
@@ -163,6 +164,7 @@ class RoomResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Booking ──────────────────────────────────────────────────────────────
@@ -245,6 +247,7 @@ class BookingResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class BookingDetailResponse(BookingResponse):
@@ -332,6 +335,7 @@ class ChargeResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Cross-module integrations ────────────────────────────────────────────

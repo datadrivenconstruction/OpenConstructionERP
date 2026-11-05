@@ -12,3 +12,6 @@ async def on_startup() -> None:
     from app.modules.fieldreports.permissions import register_fieldreports_permissions
 
     register_fieldreports_permissions()
+    from app.modules.fieldreports.validators import register_fieldreports_validation_rules
+
+    register_fieldreports_validation_rules()

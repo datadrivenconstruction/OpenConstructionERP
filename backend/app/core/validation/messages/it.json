@@ -1941,5 +1941,63 @@
       "fail": "La prova fallita non ha una nota che descriva quanto rilevato."
     },
     "suggestion": "Registrare la risoluzione o l'osservazione e completare le verifiche preliminari e le prove funzionali prima della chiusura."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "La fine {end} non è successiva all'inizio {start}.",
+      "suggestion": "Correggere le date in modo che la fine segua l'inizio."
+    },
+    "period_outside_stay": {
+      "fail": "Il periodo fatturato da {start} a {end} è fuori dal soggiorno da {stay_start} a {stay_end}.",
+      "suggestion": "Confrontare il periodo di fatturazione con le date della prenotazione."
+    },
+    "currency_missing": {
+      "fail": "È indicato un importo di {amount} senza valuta.",
+      "suggestion": "Impostare la valuta sul record, sulla tariffa della camera o sul progetto."
+    },
+    "capacity_exceeded": {
+      "fail": "Le camere sommano {total} posti letto, più della capacità nominale di {capacity}.",
+      "suggestion": "Aumentare la capacità nominale o rivedere la capacità delle camere."
+    },
+    "camp_room_charged": {
+      "fail": "La camera {label} di un campo base ha una tariffa di {rate}.",
+      "suggestion": "L'alloggio di cantiere è normalmente gratuito per le maestranze; confermare che la tariffa sia voluta."
+    },
+    "nothing_recorded": {
+      "fail": "Lo stato è {state} ma il rapporto non riporta lavori, ritardi, note né manodopera.",
+      "suggestion": "Descrivere la giornata prima dell'invio, oppure lasciare il rapporto in bozza."
+    },
+    "delay_unexplained": {
+      "fail": "Sono registrate {hours} ore di ritardo senza causa indicata.",
+      "suggestion": "Indicare la causa del ritardo: meteo, consegna tardiva, accesso."
+    },
+    "date_in_future": {
+      "fail": "Il record è datato {date}, che non è ancora arrivato.",
+      "suggestion": "Correggere la data o inserire il record a fine giornata."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} ore per persona o macchina in un giorno, più delle 24 ore di un giorno.",
+      "suggestion": "Verificare se il totale della squadra è stato inserito come ore per persona, o se c'è un errore di unità."
+    },
+    "hours_without_crew": {
+      "fail": "Sono registrate {hours} ore di lavoro ma la forza presente è zero.",
+      "suggestion": "Indicare quante persone erano in cantiere."
+    },
+    "incident_undescribed": {
+      "fail": "Un evento è registrato senza descrizione.",
+      "suggestion": "Descrivere cosa è accaduto, chi era coinvolto e cosa è stato fatto."
+    },
+    "delay_undescribed": {
+      "fail": "Un ritardo di {hours} h è registrato senza motivo.",
+      "suggestion": "Aggiungere la causa del ritardo."
+    },
+    "hours_exceed_window": {
+      "fail": "{hours} ore sono registrate in una finestra di sole {span} ore.",
+      "suggestion": "Correggere le ore o gli orari di inizio e fine."
+    },
+    "crew_without_record": {
+      "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
+      "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
+    }
   }
 }

@@ -1941,5 +1941,63 @@
       "fail": "O ensaio reprovado não tem nota a descrever o que foi observado."
     },
     "suggestion": "Registe a resolução ou a observação e conclua as verificações prévias e os ensaios funcionais antes do encerramento."
+  },
+  "site_records": {
+    "dates_not_ordered": {
+      "fail": "O fim {end} não é posterior ao início {start}.",
+      "suggestion": "Corrija as datas para que o fim seja posterior ao início."
+    },
+    "period_outside_stay": {
+      "fail": "O período faturado de {start} a {end} fica fora da estadia de {stay_start} a {stay_end}.",
+      "suggestion": "Compare o período de faturação com as datas da reserva."
+    },
+    "currency_missing": {
+      "fail": "É indicado um valor de {amount} sem moeda.",
+      "suggestion": "Defina a moeda no registo, na tarifa do quarto ou no projeto."
+    },
+    "capacity_exceeded": {
+      "fail": "Os quartos somam {total} camas, mais do que a capacidade nominal de {capacity}.",
+      "suggestion": "Aumente a capacidade nominal ou reveja a capacidade dos quartos."
+    },
+    "camp_room_charged": {
+      "fail": "O quarto {label} de um alojamento de obra tem uma tarifa de {rate}.",
+      "suggestion": "O alojamento de obra é normalmente gratuito para a equipa; confirme que a tarifa é intencional."
+    },
+    "nothing_recorded": {
+      "fail": "O estado é {state} mas o relatório não regista trabalhos, atrasos, notas nem mão de obra.",
+      "suggestion": "Descreva o dia antes de submeter, ou mantenha o relatório como rascunho."
+    },
+    "delay_unexplained": {
+      "fail": "Estão registadas {hours} horas de atraso sem causa indicada.",
+      "suggestion": "Indique a causa do atraso: meteorologia, entrega tardia, acesso."
+    },
+    "date_in_future": {
+      "fail": "O registo tem a data {date}, que ainda não chegou.",
+      "suggestion": "Corrija a data ou introduza o registo no fim do dia."
+    },
+    "hours_exceed_day": {
+      "fail": "{item}: {hours} horas por pessoa ou máquina num dia, mais do que as 24 horas de um dia.",
+      "suggestion": "Verifique se o total da equipa foi introduzido como horas por pessoa, ou se há erro de unidades."
+    },
+    "hours_without_crew": {
+      "fail": "Estão registadas {hours} horas de trabalho mas o efetivo é zero.",
+      "suggestion": "Indique quantas pessoas estavam em obra."
+    },
+    "incident_undescribed": {
+      "fail": "Uma ocorrência está registada sem descrição.",
+      "suggestion": "Descreva o que aconteceu, quem esteve envolvido e o que foi feito."
+    },
+    "delay_undescribed": {
+      "fail": "Um atraso de {hours} h está registado sem motivo.",
+      "suggestion": "Acrescente a causa do atraso."
+    },
+    "hours_exceed_window": {
+      "fail": "Estão registadas {hours} horas numa janela de apenas {span} horas.",
+      "suggestion": "Corrija as horas ou as horas de início e fim."
+    },
+    "crew_without_record": {
+      "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
+      "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
+    }
   }
 }

@@ -61,3 +61,19 @@ async def test_only_errors_the_edit_introduces_block() -> None:
     assert [r.rule_id for r in await introduced_errors(after, stored)] == ["demo.fresh"]
     assert len(await introduced_errors(after, None)) == 2
     assert await introduced_errors(_report(legacy), stored) == []
+
+
+@pytest.mark.asyncio
+async def test_same_text_on_another_element_or_value_is_not_legacy() -> None:
+    def res(ref: str, value: str) -> RuleResult:
+        r = _result("demo.row", "Quantity is out of range")
+        r.element_ref = ref
+        r.details = {"value": value}
+        return r
+
+    async def stored() -> ValidationReport:
+        return _report(res("row-1", "-5"))
+
+    assert await introduced_errors(_report(res("row-1", "-5")), stored) == []
+    assert len(await introduced_errors(_report(res("row-2", "-5")), stored)) == 1
+    assert len(await introduced_errors(_report(res("row-1", "-9")), stored)) == 1
