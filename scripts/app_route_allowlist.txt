@@ -14,11 +14,12 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live4 (sha256 53bf8425a56027ef49fcc894bd8f9f23a575cec5329c0d1162a5b92466d5dc1b)
-# Segments: 220
+# Extracted from: Caddyfile.live (sha256 c70c15b2b8ef7a3738affebcee4c698c6330b1de0b04e946731dd28442d3422e)
+# Segments: 228
 5d
 about
 accommodation
+accounting-sync
 admin
 advisor
 ai-agents
@@ -44,6 +45,7 @@ buyer-portal
 ca-boq-exchange
 cad-explorer
 cad-takeoff
+capital-plan
 carbon
 cases
 catalog
@@ -85,6 +87,8 @@ de-din276-exchange
 deadlines
 defects-liability
 design-options
+dispatch
+document-assistant
 documents
 drawing-compare
 dwg-takeoff
@@ -94,6 +98,7 @@ equipment
 es-pbc-exchange
 esg
 estimate-basis
+estimate-checks
 estimate-copilot
 estimates
 field
@@ -113,6 +118,7 @@ gaeb-exchange
 geo
 geo-hub
 governance
+haul-tickets
 how-it-works
 hse-advanced
 in-boq-exchange
@@ -130,6 +136,7 @@ jp-sekisan-exchange
 kr-boq-exchange
 labor-rates
 leasing
+lessons-learned
 login
 login-next
 markups
@@ -235,4 +242,5 @@ value
 variations
 videos
 waste-factors
+win-loss
 workflows
