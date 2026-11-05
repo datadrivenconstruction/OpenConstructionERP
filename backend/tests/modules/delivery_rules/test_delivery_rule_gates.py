@@ -387,3 +387,14 @@ async def test_value_overwriting_a_stored_override_is_clean(pg_session):
     warnings: list[dict] = []
     await set_factors(pg_session, tenant, [("rfi", "rfi_answered", "50")], warnings_out=warnings)
     assert warnings == []
+
+
+@pytest.mark.asyncio
+async def test_value_duplicate_pair_is_refused_even_when_the_pair_is_already_stored(pg_session):
+    from app.modules.value.time_factors_service import set_factors
+
+    tenant = str(uuid.uuid4())
+    await set_factors(pg_session, tenant, [("rfi", "rfi_answered", "45")])
+    with pytest.raises(HTTPException) as exc:
+        await set_factors(pg_session, tenant, [("rfi", "rfi_answered", "40"), ("rfi", "rfi_answered", "50")])
+    assert exc.value.detail["error"] == "value_rules_failed"
