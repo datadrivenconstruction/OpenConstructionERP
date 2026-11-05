@@ -2444,5 +2444,105 @@
       "fail": "The line prices to nothing, so it drops out of the preliminaries total.",
       "suggestion": "Enter the rate and the number of periods, or the fixed amount."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "The photo reference \"{photo}\" is a local or parent-folder path, not a stored photo.",
+      "suggestion": "Attach the photo to the plan and use the reference it is given."
+    },
+    "file_version_invalid": {
+      "fail": "The file version \"{version}\" is not a valid version id.",
+      "suggestion": "Pick the version from the document's version list."
+    },
+    "pin_bare": {
+      "fail": "The pin on page {page} has neither a note nor a photo.",
+      "suggestion": "Add a note or a photo so the pin says what was found."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "The \"{kind}\" document does not state the amount it covers.",
+      "suggestion": "Enter the coverage amount shown on the policy or bond."
+    },
+    "currency_invalid": {
+      "fail": "The currency \"{currency}\" is not a three-letter ISO code.",
+      "suggestion": "Use a code such as EUR or USD, or leave it blank for the project currency."
+    },
+    "status_contradicts_dates": {
+      "fail": "The status \"{status}\" contradicts the expiry date {expires}.",
+      "suggestion": "Correct the status or the validity dates."
+    },
+    "policy_number_missing": {
+      "fail": "The \"{kind}\" document has no policy or bond number.",
+      "suggestion": "Enter the number so the document can be verified with the issuer."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "The transmittal lists no files and cannot be sent.",
+      "suggestion": "Add at least one file before sending."
+    },
+    "send_without_recipients": {
+      "fail": "The transmittal has no recipients and cannot be sent.",
+      "suggestion": "Add at least one recipient before sending."
+    },
+    "item_duplicate": {
+      "fail": "The file \"{name}\" is listed more than once in this transmittal.",
+      "suggestion": "Remove the repeated line."
+    },
+    "construction_unversioned": {
+      "fail": "The file \"{name}\" issued for construction has no revision.",
+      "suggestion": "Enter the revision of the file so the site builds from the right one."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Step {step} requires the role \"{role}\", which no user can hold.",
+      "suggestion": "Choose an existing role, or name the approver directly."
+    },
+    "step_sla_missing": {
+      "fail": "Step {step} has no time limit.",
+      "suggestion": "Set the hours the approver has to respond so late steps can escalate."
+    },
+    "delegation_ended": {
+      "fail": "The hand-off already ended on {ends}.",
+      "suggestion": "Set an end date that is today or later."
+    },
+    "delegation_open_ended": {
+      "fail": "The hand-off has no end date and stays in force until revoked.",
+      "suggestion": "Set the day the delegate stops covering your approvals."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "For {metric} the warning level {warn} is above the error level {error}.",
+      "suggestion": "Set the warning level at or below the error level."
+    },
+    "threshold_value_invalid": {
+      "fail": "The value {value} is not a usable limit for {metric}.",
+      "suggestion": "Enter zero or a positive number, a whole number for counts of clashes or days."
+    },
+    "threshold_disabled": {
+      "fail": "The alarm for {metric} is switched off.",
+      "suggestion": "Switch it back on, or confirm that nobody needs this warning."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "The due date \"{value}\" is not a calendar date.",
+      "suggestion": "Enter the date as year-month-day, for example 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "The clash was due on {due} and is still open.",
+      "suggestion": "Set a new due date or close the clash."
+    },
+    "severe_unassigned": {
+      "fail": "A {level} clash is being worked on with nobody assigned.",
+      "suggestion": "Assign the clash to the discipline lead who will resolve it."
+    },
+    "clearance_distance_missing": {
+      "fail": "A clearance run needs a clearance distance above zero.",
+      "suggestion": "Enter the minimum clearance in metres, or use a hard clash run."
+    }
   }
 }

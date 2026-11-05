@@ -148,6 +148,8 @@ class ComplianceDocResponse(BaseModel):
         default=0,
         description=("Signed integer - negative when already expired, 0 on expiry day, positive when still valid."),
     )
+    # Non-blocking findings of the compliance_docs rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 __all__ = [

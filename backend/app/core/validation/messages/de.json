@@ -2444,5 +2444,105 @@
       "fail": "Die Position bewertet sich mit null und fällt aus der Summe der Baustelleneinrichtung heraus.",
       "suggestion": "Satz und Anzahl der Zeiträume oder den Pauschalbetrag eintragen."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Die Fotoreferenz „{photo}“ ist ein lokaler Pfad oder ein Pfad im übergeordneten Ordner, kein gespeichertes Foto.",
+      "suggestion": "Hängen Sie das Foto an den Plan an und verwenden Sie die vergebene Referenz."
+    },
+    "file_version_invalid": {
+      "fail": "Die Dateiversion „{version}“ ist keine gültige Versionskennung.",
+      "suggestion": "Wählen Sie die Version aus der Versionsliste des Dokuments."
+    },
+    "pin_bare": {
+      "fail": "Der Pin auf Seite {page} hat weder eine Notiz noch ein Foto.",
+      "suggestion": "Ergänzen Sie eine Notiz oder ein Foto, damit der Pin zeigt, was gefunden wurde."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Das Dokument „{kind}“ nennt nicht den Betrag, den es abdeckt.",
+      "suggestion": "Tragen Sie die Deckungssumme aus der Police oder Bürgschaft ein."
+    },
+    "currency_invalid": {
+      "fail": "Die Währung „{currency}“ ist kein dreistelliger ISO-Code.",
+      "suggestion": "Verwenden Sie einen Code wie EUR oder USD oder lassen Sie das Feld für die Projektwährung leer."
+    },
+    "status_contradicts_dates": {
+      "fail": "Der Status „{status}“ widerspricht dem Ablaufdatum {expires}.",
+      "suggestion": "Korrigieren Sie den Status oder die Gültigkeitsdaten."
+    },
+    "policy_number_missing": {
+      "fail": "Das Dokument „{kind}“ hat keine Policen- oder Bürgschaftsnummer.",
+      "suggestion": "Tragen Sie die Nummer ein, damit das Dokument beim Aussteller geprüft werden kann."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Die Übermittlung enthält keine Dateien und kann nicht versendet werden.",
+      "suggestion": "Fügen Sie vor dem Versand mindestens eine Datei hinzu."
+    },
+    "send_without_recipients": {
+      "fail": "Die Übermittlung hat keine Empfänger und kann nicht versendet werden.",
+      "suggestion": "Fügen Sie vor dem Versand mindestens einen Empfänger hinzu."
+    },
+    "item_duplicate": {
+      "fail": "Die Datei „{name}“ ist in dieser Übermittlung mehrfach aufgeführt.",
+      "suggestion": "Entfernen Sie die doppelte Zeile."
+    },
+    "construction_unversioned": {
+      "fail": "Die für die Ausführung freigegebene Datei „{name}“ hat keinen Revisionsstand.",
+      "suggestion": "Tragen Sie den Revisionsstand ein, damit auf der Baustelle nach dem richtigen Stand gebaut wird."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Schritt {step} verlangt die Rolle „{role}“, die kein Benutzer innehaben kann.",
+      "suggestion": "Wählen Sie eine vorhandene Rolle oder benennen Sie den Genehmiger direkt."
+    },
+    "step_sla_missing": {
+      "fail": "Schritt {step} hat keine Frist.",
+      "suggestion": "Legen Sie die Stunden für die Antwort fest, damit verspätete Schritte eskalieren können."
+    },
+    "delegation_ended": {
+      "fail": "Die Vertretung endete bereits am {ends}.",
+      "suggestion": "Legen Sie ein Enddatum fest, das heute oder später liegt."
+    },
+    "delegation_open_ended": {
+      "fail": "Die Vertretung hat kein Enddatum und gilt bis zum Widerruf.",
+      "suggestion": "Legen Sie den Tag fest, an dem die Vertretung Ihrer Freigaben endet."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Bei {metric} liegt die Warnschwelle {warn} über der Fehlerschwelle {error}.",
+      "suggestion": "Setzen Sie die Warnschwelle auf oder unter die Fehlerschwelle."
+    },
+    "threshold_value_invalid": {
+      "fail": "Der Wert {value} ist kein brauchbarer Grenzwert für {metric}.",
+      "suggestion": "Geben Sie null oder eine positive Zahl ein, bei Kollisionen oder Tagen eine ganze Zahl."
+    },
+    "threshold_disabled": {
+      "fail": "Der Alarm für {metric} ist ausgeschaltet.",
+      "suggestion": "Schalten Sie ihn wieder ein oder bestätigen Sie, dass niemand diese Warnung braucht."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Das Fälligkeitsdatum „{value}“ ist kein Kalenderdatum.",
+      "suggestion": "Geben Sie das Datum als Jahr-Monat-Tag ein, zum Beispiel 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Die Kollision war am {due} fällig und ist noch offen.",
+      "suggestion": "Setzen Sie ein neues Fälligkeitsdatum oder schließen Sie die Kollision."
+    },
+    "severe_unassigned": {
+      "fail": "Eine Kollision der Stufe „{level}“ wird bearbeitet, ohne dass jemand zugewiesen ist.",
+      "suggestion": "Weisen Sie die Kollision dem Fachleiter zu, der sie lösen wird."
+    },
+    "clearance_distance_missing": {
+      "fail": "Ein Abstandslauf braucht einen Mindestabstand über null.",
+      "suggestion": "Geben Sie den Mindestabstand in Metern ein oder verwenden Sie einen Lauf auf harte Kollisionen."
+    }
   }
 }

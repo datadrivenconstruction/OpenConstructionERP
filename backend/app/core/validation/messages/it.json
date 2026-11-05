@@ -2444,5 +2444,105 @@
       "fail": "La voce vale zero e esce dal totale degli oneri generali di cantiere.",
       "suggestion": "Inserire la tariffa e il numero di periodi, oppure l'importo fisso."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Il riferimento della foto «{photo}» è un percorso locale o di cartella superiore, non una foto salvata.",
+      "suggestion": "Allegare la foto alla planimetria e usare il riferimento assegnato."
+    },
+    "file_version_invalid": {
+      "fail": "La versione del file «{version}» non è un identificativo di versione valido.",
+      "suggestion": "Scegliere la versione dall’elenco delle versioni del documento."
+    },
+    "pin_bare": {
+      "fail": "Il segnaposto a pagina {page} non ha né nota né foto.",
+      "suggestion": "Aggiungere una nota o una foto perché il segnaposto indichi cosa è stato rilevato."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Il documento «{kind}» non indica l’importo che copre.",
+      "suggestion": "Inserire il massimale riportato sulla polizza o sulla fideiussione."
+    },
+    "currency_invalid": {
+      "fail": "La valuta «{currency}» non è un codice ISO di tre lettere.",
+      "suggestion": "Usare un codice come EUR o USD, oppure lasciare vuoto per la valuta del progetto."
+    },
+    "status_contradicts_dates": {
+      "fail": "Lo stato «{status}» contraddice la data di scadenza {expires}.",
+      "suggestion": "Correggere lo stato o le date di validità."
+    },
+    "policy_number_missing": {
+      "fail": "Il documento «{kind}» non ha il numero di polizza o fideiussione.",
+      "suggestion": "Inserire il numero per poter verificare il documento presso l’emittente."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "La trasmissione non elenca alcun file e non può essere inviata.",
+      "suggestion": "Aggiungere almeno un file prima dell’invio."
+    },
+    "send_without_recipients": {
+      "fail": "La trasmissione non ha destinatari e non può essere inviata.",
+      "suggestion": "Aggiungere almeno un destinatario prima dell’invio."
+    },
+    "item_duplicate": {
+      "fail": "Il file «{name}» compare più volte in questa trasmissione.",
+      "suggestion": "Rimuovere la riga duplicata."
+    },
+    "construction_unversioned": {
+      "fail": "Il file «{name}» emesso per l’esecuzione non ha una revisione.",
+      "suggestion": "Inserire la revisione perché il cantiere costruisca sulla versione giusta."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Il passo {step} richiede il ruolo «{role}», che nessun utente può avere.",
+      "suggestion": "Scegliere un ruolo esistente o indicare direttamente l’approvatore."
+    },
+    "step_sla_missing": {
+      "fail": "Il passo {step} non ha un termine.",
+      "suggestion": "Impostare le ore di risposta così che i passi in ritardo possano essere escalati."
+    },
+    "delegation_ended": {
+      "fail": "La delega è già terminata il {ends}.",
+      "suggestion": "Impostare una data di fine pari o successiva a oggi."
+    },
+    "delegation_open_ended": {
+      "fail": "La delega non ha data di fine e resta valida fino alla revoca.",
+      "suggestion": "Impostare il giorno in cui il delegato smette di coprire le sue approvazioni."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Per {metric} la soglia di avviso {warn} supera la soglia di errore {error}.",
+      "suggestion": "Impostare la soglia di avviso uguale o inferiore a quella di errore."
+    },
+    "threshold_value_invalid": {
+      "fail": "Il valore {value} non è un limite utilizzabile per {metric}.",
+      "suggestion": "Inserire zero o un numero positivo, intero per interferenze o giorni."
+    },
+    "threshold_disabled": {
+      "fail": "L’allarme per {metric} è disattivato.",
+      "suggestion": "Riattivarlo oppure confermare che nessuno ha bisogno di questo avviso."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "La scadenza «{value}» non è una data di calendario.",
+      "suggestion": "Inserire la data come anno-mese-giorno, per esempio 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "L’interferenza scadeva il {due} ed è ancora aperta.",
+      "suggestion": "Impostare una nuova scadenza o chiudere l’interferenza."
+    },
+    "severe_unassigned": {
+      "fail": "Un’interferenza di gravità «{level}» è in lavorazione senza nessun assegnatario.",
+      "suggestion": "Assegnare l’interferenza al responsabile della disciplina che la risolverà."
+    },
+    "clearance_distance_missing": {
+      "fail": "Una verifica di distanza richiede una distanza minima maggiore di zero.",
+      "suggestion": "Inserire la distanza minima in metri oppure usare una verifica di interferenze dirette."
+    }
   }
 }

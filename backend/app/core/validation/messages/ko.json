@@ -2444,5 +2444,105 @@
       "fail": "이 항목은 금액이 0이어서 공통 가설 비용 합계에서 빠집니다.",
       "suggestion": "단가와 기간 수 또는 고정 금액을 입력하세요."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "사진 참조 “{photo}”는 로컬 경로 또는 상위 폴더 경로이며 저장된 사진이 아닙니다.",
+      "suggestion": "사진을 도면에 첨부하고 부여된 참조를 사용하세요."
+    },
+    "file_version_invalid": {
+      "fail": "파일 버전 “{version}”은(는) 올바른 버전 ID가 아닙니다.",
+      "suggestion": "문서의 버전 목록에서 버전을 선택하세요."
+    },
+    "pin_bare": {
+      "fail": "{page}페이지의 핀에는 메모도 사진도 없습니다.",
+      "suggestion": "핀이 발견 내용을 보여 주도록 메모나 사진을 추가하세요."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "문서 “{kind}”에 보장 금액이 명시되어 있지 않습니다.",
+      "suggestion": "보험증권 또는 보증서에 적힌 보장 금액을 입력하세요."
+    },
+    "currency_invalid": {
+      "fail": "통화 “{currency}”은(는) 세 글자 ISO 코드가 아닙니다.",
+      "suggestion": "EUR 또는 USD 같은 코드를 사용하거나, 프로젝트 통화를 쓰려면 비워 두세요."
+    },
+    "status_contradicts_dates": {
+      "fail": "상태 “{status}”이(가) 만료일 {expires}과(와) 모순됩니다.",
+      "suggestion": "상태 또는 유효 기간을 수정하세요."
+    },
+    "policy_number_missing": {
+      "fail": "문서 “{kind}”에 증권 번호 또는 보증 번호가 없습니다.",
+      "suggestion": "발급처에서 문서를 확인할 수 있도록 번호를 입력하세요."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "송부서에 파일이 없어 발송할 수 없습니다.",
+      "suggestion": "발송 전에 파일을 하나 이상 추가하세요."
+    },
+    "send_without_recipients": {
+      "fail": "송부서에 수신자가 없어 발송할 수 없습니다.",
+      "suggestion": "발송 전에 수신자를 한 명 이상 추가하세요."
+    },
+    "item_duplicate": {
+      "fail": "파일 “{name}”이(가) 이 송부서에 여러 번 나열되어 있습니다.",
+      "suggestion": "중복된 행을 삭제하세요."
+    },
+    "construction_unversioned": {
+      "fail": "시공용으로 발행된 파일 “{name}”에 리비전이 없습니다.",
+      "suggestion": "현장이 올바른 버전으로 시공하도록 리비전을 입력하세요."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "단계 {step}에는 어떤 사용자도 가질 수 없는 역할 “{role}”이(가) 필요합니다.",
+      "suggestion": "기존 역할을 선택하거나 승인자를 직접 지정하세요."
+    },
+    "step_sla_missing": {
+      "fail": "단계 {step}에는 시간 제한이 없습니다.",
+      "suggestion": "지연된 단계를 에스컬레이션할 수 있도록 응답 시간을 설정하세요."
+    },
+    "delegation_ended": {
+      "fail": "위임이 이미 {ends}에 종료되었습니다.",
+      "suggestion": "종료일을 오늘 또는 그 이후로 설정하세요."
+    },
+    "delegation_open_ended": {
+      "fail": "위임에 종료일이 없어 취소할 때까지 유효합니다.",
+      "suggestion": "대리인이 귀하의 승인을 더 이상 대신하지 않는 날짜를 설정하세요."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "{metric}의 경고 수준 {warn}이(가) 오류 수준 {error}보다 높습니다.",
+      "suggestion": "경고 수준을 오류 수준 이하로 설정하세요."
+    },
+    "threshold_value_invalid": {
+      "fail": "값 {value}은(는) {metric}에 사용할 수 있는 한도가 아닙니다.",
+      "suggestion": "0 또는 양수를 입력하세요. 간섭 건수나 일수는 정수여야 합니다."
+    },
+    "threshold_disabled": {
+      "fail": "{metric}의 알람이 꺼져 있습니다.",
+      "suggestion": "다시 켜거나, 이 경고가 누구에게도 필요하지 않음을 확인하세요."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "기한 “{value}”은(는) 달력 날짜가 아닙니다.",
+      "suggestion": "날짜를 연-월-일 형식으로 입력하세요(예: 2026-11-30)."
+    },
+    "due_date_past": {
+      "fail": "이 간섭의 기한은 {due}였으며 아직 열려 있습니다.",
+      "suggestion": "새 기한을 설정하거나 간섭을 종료하세요."
+    },
+    "severe_unassigned": {
+      "fail": "심각도 “{level}” 간섭이 담당자 없이 처리되고 있습니다.",
+      "suggestion": "이를 해결할 분야 책임자에게 간섭을 배정하세요."
+    },
+    "clearance_distance_missing": {
+      "fail": "이격 검사에는 0보다 큰 이격 거리가 필요합니다.",
+      "suggestion": "최소 이격 거리를 미터 단위로 입력하거나 하드 간섭 검사를 사용하세요."
+    }
   }
 }

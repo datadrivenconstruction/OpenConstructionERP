@@ -2444,5 +2444,105 @@
       "fail": "A linha custa zero e fica fora do total dos trabalhos preliminares.",
       "suggestion": "Introduza a taxa e o número de períodos, ou o valor fixo."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "A referência da foto «{photo}» é um caminho local ou de pasta superior, não uma foto guardada.",
+      "suggestion": "Anexe a foto à planta e use a referência atribuída."
+    },
+    "file_version_invalid": {
+      "fail": "A versão do ficheiro «{version}» não é um identificador de versão válido.",
+      "suggestion": "Escolha a versão na lista de versões do documento."
+    },
+    "pin_bare": {
+      "fail": "O marcador da página {page} não tem nota nem foto.",
+      "suggestion": "Adicione uma nota ou uma foto para que o marcador indique o que foi encontrado."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "O documento «{kind}» não indica o valor que cobre.",
+      "suggestion": "Introduza o capital seguro indicado na apólice ou na garantia."
+    },
+    "currency_invalid": {
+      "fail": "A moeda «{currency}» não é um código ISO de três letras.",
+      "suggestion": "Use um código como EUR ou USD, ou deixe em branco para a moeda do projeto."
+    },
+    "status_contradicts_dates": {
+      "fail": "O estado «{status}» contradiz a data de validade {expires}.",
+      "suggestion": "Corrija o estado ou as datas de vigência."
+    },
+    "policy_number_missing": {
+      "fail": "O documento «{kind}» não tem número de apólice ou garantia.",
+      "suggestion": "Introduza o número para que o documento possa ser verificado junto do emissor."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "A remessa não lista nenhum ficheiro e não pode ser enviada.",
+      "suggestion": "Adicione pelo menos um ficheiro antes de enviar."
+    },
+    "send_without_recipients": {
+      "fail": "A remessa não tem destinatários e não pode ser enviada.",
+      "suggestion": "Adicione pelo menos um destinatário antes de enviar."
+    },
+    "item_duplicate": {
+      "fail": "O ficheiro «{name}» aparece mais de uma vez nesta remessa.",
+      "suggestion": "Remova a linha repetida."
+    },
+    "construction_unversioned": {
+      "fail": "O ficheiro «{name}» emitido para construção não tem revisão.",
+      "suggestion": "Introduza a revisão para que a obra construa pela versão certa."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "A etapa {step} exige o perfil «{role}», que nenhum utilizador pode ter.",
+      "suggestion": "Escolha um perfil existente ou indique diretamente o aprovador."
+    },
+    "step_sla_missing": {
+      "fail": "A etapa {step} não tem prazo.",
+      "suggestion": "Defina as horas de resposta para que as etapas atrasadas possam ser escaladas."
+    },
+    "delegation_ended": {
+      "fail": "A delegação já terminou em {ends}.",
+      "suggestion": "Defina uma data de fim igual ou posterior a hoje."
+    },
+    "delegation_open_ended": {
+      "fail": "A delegação não tem data de fim e fica em vigor até ser revogada.",
+      "suggestion": "Defina o dia em que o delegado deixa de cobrir as suas aprovações."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Em {metric}, o nível de aviso {warn} está acima do nível de erro {error}.",
+      "suggestion": "Defina o nível de aviso igual ou abaixo do nível de erro."
+    },
+    "threshold_value_invalid": {
+      "fail": "O valor {value} não é um limite utilizável para {metric}.",
+      "suggestion": "Introduza zero ou um número positivo, inteiro para colisões ou dias."
+    },
+    "threshold_disabled": {
+      "fail": "O alarme de {metric} está desligado.",
+      "suggestion": "Volte a ligá-lo ou confirme que ninguém precisa deste aviso."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "O prazo «{value}» não é uma data de calendário.",
+      "suggestion": "Introduza a data como ano-mês-dia, por exemplo 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "A colisão tinha prazo em {due} e continua aberta.",
+      "suggestion": "Defina um novo prazo ou feche a colisão."
+    },
+    "severe_unassigned": {
+      "fail": "Uma colisão de gravidade «{level}» está a ser tratada sem ninguém atribuído.",
+      "suggestion": "Atribua a colisão ao responsável da disciplina que a resolverá."
+    },
+    "clearance_distance_missing": {
+      "fail": "Uma execução de folga precisa de uma distância superior a zero.",
+      "suggestion": "Introduza a folga mínima em metros ou use uma execução de colisões diretas."
+    }
   }
 }

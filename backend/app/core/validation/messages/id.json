@@ -2444,5 +2444,105 @@
       "fail": "Baris bernilai nol sehingga keluar dari total biaya umum proyek.",
       "suggestion": "Masukkan tarif dan jumlah periode, atau jumlah tetap."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Referensi foto “{photo}” adalah jalur lokal atau folder induk, bukan foto yang tersimpan.",
+      "suggestion": "Lampirkan foto ke denah dan gunakan referensi yang diberikan."
+    },
+    "file_version_invalid": {
+      "fail": "Versi berkas “{version}” bukan ID versi yang valid.",
+      "suggestion": "Pilih versi dari daftar versi dokumen."
+    },
+    "pin_bare": {
+      "fail": "Pin di halaman {page} tidak memiliki catatan maupun foto.",
+      "suggestion": "Tambahkan catatan atau foto agar pin menunjukkan apa yang ditemukan."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokumen “{kind}” tidak menyebutkan jumlah yang dicakupnya.",
+      "suggestion": "Masukkan jumlah pertanggungan yang tertera pada polis atau jaminan."
+    },
+    "currency_invalid": {
+      "fail": "Mata uang “{currency}” bukan kode ISO tiga huruf.",
+      "suggestion": "Gunakan kode seperti EUR atau USD, atau kosongkan untuk mata uang proyek."
+    },
+    "status_contradicts_dates": {
+      "fail": "Status “{status}” bertentangan dengan tanggal kedaluwarsa {expires}.",
+      "suggestion": "Perbaiki status atau tanggal berlaku."
+    },
+    "policy_number_missing": {
+      "fail": "Dokumen “{kind}” tidak memiliki nomor polis atau jaminan.",
+      "suggestion": "Masukkan nomor agar dokumen dapat diverifikasi ke penerbitnya."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Pengiriman tidak memuat berkas dan tidak dapat dikirim.",
+      "suggestion": "Tambahkan setidaknya satu berkas sebelum mengirim."
+    },
+    "send_without_recipients": {
+      "fail": "Pengiriman tidak memiliki penerima dan tidak dapat dikirim.",
+      "suggestion": "Tambahkan setidaknya satu penerima sebelum mengirim."
+    },
+    "item_duplicate": {
+      "fail": "Berkas “{name}” tercantum lebih dari sekali dalam pengiriman ini.",
+      "suggestion": "Hapus baris yang berulang."
+    },
+    "construction_unversioned": {
+      "fail": "Berkas “{name}” yang diterbitkan untuk konstruksi tidak memiliki revisi.",
+      "suggestion": "Masukkan revisi agar lapangan membangun sesuai versi yang benar."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Langkah {step} memerlukan peran “{role}” yang tidak dapat dimiliki pengguna mana pun.",
+      "suggestion": "Pilih peran yang ada atau sebutkan penyetuju secara langsung."
+    },
+    "step_sla_missing": {
+      "fail": "Langkah {step} tidak memiliki batas waktu.",
+      "suggestion": "Tetapkan jam untuk menanggapi agar langkah yang terlambat dapat dieskalasi."
+    },
+    "delegation_ended": {
+      "fail": "Pelimpahan sudah berakhir pada {ends}.",
+      "suggestion": "Tetapkan tanggal berakhir hari ini atau sesudahnya."
+    },
+    "delegation_open_ended": {
+      "fail": "Pelimpahan tidak memiliki tanggal berakhir dan berlaku sampai dicabut.",
+      "suggestion": "Tetapkan hari ketika penerima limpahan berhenti menggantikan persetujuan Anda."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Untuk {metric}, tingkat peringatan {warn} lebih tinggi dari tingkat kesalahan {error}.",
+      "suggestion": "Tetapkan tingkat peringatan sama dengan atau di bawah tingkat kesalahan."
+    },
+    "threshold_value_invalid": {
+      "fail": "Nilai {value} bukan batas yang dapat dipakai untuk {metric}.",
+      "suggestion": "Masukkan nol atau bilangan positif, bilangan bulat untuk jumlah tabrakan atau hari."
+    },
+    "threshold_disabled": {
+      "fail": "Alarm untuk {metric} dimatikan.",
+      "suggestion": "Nyalakan kembali atau pastikan tidak ada yang memerlukan peringatan ini."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Tenggat “{value}” bukan tanggal kalender.",
+      "suggestion": "Masukkan tanggal sebagai tahun-bulan-hari, misalnya 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Tabrakan ini jatuh tempo pada {due} dan masih terbuka.",
+      "suggestion": "Tetapkan tenggat baru atau tutup tabrakan."
+    },
+    "severe_unassigned": {
+      "fail": "Tabrakan dengan tingkat keparahan “{level}” sedang ditangani tanpa penanggung jawab.",
+      "suggestion": "Tugaskan tabrakan kepada kepala disiplin yang akan menyelesaikannya."
+    },
+    "clearance_distance_missing": {
+      "fail": "Pemeriksaan jarak bebas memerlukan jarak bebas lebih dari nol.",
+      "suggestion": "Masukkan jarak bebas minimum dalam meter atau gunakan pemeriksaan tabrakan keras."
+    }
   }
 }

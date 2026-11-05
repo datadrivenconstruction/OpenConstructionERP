@@ -2444,5 +2444,105 @@
       "fail": "Zero ang presyo ng linya kaya mawawala ito sa kabuuan ng mga pangkalahatang gastos ng site.",
       "suggestion": "Ilagay ang rate at bilang ng mga yugto, o ang takdang halaga."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Ang sanggunian ng larawan na “{photo}” ay lokal na landas o landas ng parent folder, hindi naka-save na larawan.",
+      "suggestion": "Ilakip ang larawan sa plano at gamitin ang ibinigay na sanggunian."
+    },
+    "file_version_invalid": {
+      "fail": "Ang bersyon ng file na “{version}” ay hindi wastong version ID.",
+      "suggestion": "Piliin ang bersyon mula sa listahan ng bersyon ng dokumento."
+    },
+    "pin_bare": {
+      "fail": "Ang pin sa pahina {page} ay walang tala o larawan.",
+      "suggestion": "Magdagdag ng tala o larawan para ipakita ng pin kung ano ang natagpuan."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Hindi binabanggit ng dokumentong “{kind}” ang halagang sinasaklaw nito.",
+      "suggestion": "Ilagay ang halaga ng coverage na nakasulat sa polisiya o garantiya."
+    },
+    "currency_invalid": {
+      "fail": "Ang currency na “{currency}” ay hindi tatlong-letrang ISO code.",
+      "suggestion": "Gumamit ng code tulad ng EUR o USD, o iwanang blangko para sa currency ng proyekto."
+    },
+    "status_contradicts_dates": {
+      "fail": "Salungat ang status na “{status}” sa petsa ng pagkawalang-bisa na {expires}.",
+      "suggestion": "Itama ang status o ang mga petsa ng bisa."
+    },
+    "policy_number_missing": {
+      "fail": "Walang numero ng polisiya o garantiya ang dokumentong “{kind}”.",
+      "suggestion": "Ilagay ang numero para ma-verify ang dokumento sa nag-isyu."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Walang file ang transmittal at hindi ito maipapadala.",
+      "suggestion": "Magdagdag ng kahit isang file bago ipadala."
+    },
+    "send_without_recipients": {
+      "fail": "Walang tatanggap ang transmittal at hindi ito maipapadala.",
+      "suggestion": "Magdagdag ng kahit isang tatanggap bago ipadala."
+    },
+    "item_duplicate": {
+      "fail": "Ang file na “{name}” ay nakalista nang higit sa isang beses sa transmittal na ito.",
+      "suggestion": "Alisin ang paulit-ulit na linya."
+    },
+    "construction_unversioned": {
+      "fail": "Walang rebisyon ang file na “{name}” na inilabas para sa konstruksyon.",
+      "suggestion": "Ilagay ang rebisyon para tama ang bersyong susundin ng site."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Ang hakbang {step} ay nangangailangan ng tungkuling “{role}” na walang user na maaaring magkaroon.",
+      "suggestion": "Pumili ng umiiral na tungkulin o direktang pangalanan ang tagapag-apruba."
+    },
+    "step_sla_missing": {
+      "fail": "Walang takdang oras ang hakbang {step}.",
+      "suggestion": "Itakda ang oras ng pagtugon para ma-escalate ang mga naantalang hakbang."
+    },
+    "delegation_ended": {
+      "fail": "Natapos na ang delegasyon noong {ends}.",
+      "suggestion": "Magtakda ng petsa ng pagtatapos na ngayon o mas huli."
+    },
+    "delegation_open_ended": {
+      "fail": "Walang petsa ng pagtatapos ang delegasyon at may bisa hanggang bawiin.",
+      "suggestion": "Itakda ang araw na titigil ang kinatawan sa pagsakop sa iyong mga pag-apruba."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Para sa {metric}, mas mataas ang antas ng babala na {warn} kaysa sa antas ng error na {error}.",
+      "suggestion": "Itakda ang antas ng babala sa o mas mababa sa antas ng error."
+    },
+    "threshold_value_invalid": {
+      "fail": "Ang halagang {value} ay hindi magagamit na limitasyon para sa {metric}.",
+      "suggestion": "Maglagay ng zero o positibong numero, buong numero para sa bilang ng banggaan o araw."
+    },
+    "threshold_disabled": {
+      "fail": "Naka-off ang alarma para sa {metric}.",
+      "suggestion": "I-on itong muli o kumpirmahing walang nangangailangan ng babalang ito."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Ang takdang petsa na “{value}” ay hindi petsa sa kalendaryo.",
+      "suggestion": "Ilagay ang petsa bilang taon-buwan-araw, halimbawa 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Ang banggaan ay may takdang petsa na {due} at bukas pa rin.",
+      "suggestion": "Magtakda ng bagong takdang petsa o isara ang banggaan."
+    },
+    "severe_unassigned": {
+      "fail": "Ang banggaang may bigat na “{level}” ay inaayos nang walang nakatalaga.",
+      "suggestion": "Italaga ang banggaan sa pinuno ng disiplina na lulutas nito."
+    },
+    "clearance_distance_missing": {
+      "fail": "Kailangan ng clearance run ng clearance na higit sa zero.",
+      "suggestion": "Ilagay ang pinakamababang clearance sa metro o gumamit ng run para sa matitigas na banggaan."
+    }
   }
 }

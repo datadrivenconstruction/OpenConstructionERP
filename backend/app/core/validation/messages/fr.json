@@ -2444,5 +2444,105 @@
       "fail": "La ligne est chiffrée à zéro et disparaît du total des prestations préliminaires.",
       "suggestion": "Saisir le taux et le nombre de périodes, ou le montant forfaitaire."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "La référence de photo « {photo} » est un chemin local ou de dossier parent, pas une photo enregistrée.",
+      "suggestion": "Joignez la photo au plan et utilisez la référence attribuée."
+    },
+    "file_version_invalid": {
+      "fail": "La version de fichier « {version} » n’est pas un identifiant de version valide.",
+      "suggestion": "Choisissez la version dans la liste des versions du document."
+    },
+    "pin_bare": {
+      "fail": "Le repère de la page {page} n’a ni note ni photo.",
+      "suggestion": "Ajoutez une note ou une photo pour que le repère indique ce qui a été constaté."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Le document « {kind} » n’indique pas le montant qu’il couvre.",
+      "suggestion": "Saisissez le montant de garantie figurant sur la police ou la caution."
+    },
+    "currency_invalid": {
+      "fail": "La devise « {currency} » n’est pas un code ISO à trois lettres.",
+      "suggestion": "Utilisez un code comme EUR ou USD, ou laissez vide pour la devise du projet."
+    },
+    "status_contradicts_dates": {
+      "fail": "Le statut « {status} » contredit la date d’expiration {expires}.",
+      "suggestion": "Corrigez le statut ou les dates de validité."
+    },
+    "policy_number_missing": {
+      "fail": "Le document « {kind} » n’a pas de numéro de police ou de caution.",
+      "suggestion": "Saisissez le numéro pour que le document puisse être vérifié auprès de l’émetteur."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Le bordereau ne liste aucun fichier et ne peut pas être envoyé.",
+      "suggestion": "Ajoutez au moins un fichier avant l’envoi."
+    },
+    "send_without_recipients": {
+      "fail": "Le bordereau n’a aucun destinataire et ne peut pas être envoyé.",
+      "suggestion": "Ajoutez au moins un destinataire avant l’envoi."
+    },
+    "item_duplicate": {
+      "fail": "Le fichier « {name} » figure plusieurs fois dans ce bordereau.",
+      "suggestion": "Supprimez la ligne en double."
+    },
+    "construction_unversioned": {
+      "fail": "Le fichier « {name} » émis pour exécution n’a pas d’indice de révision.",
+      "suggestion": "Saisissez l’indice de révision pour que le chantier construise d’après le bon fichier."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "L’étape {step} exige le rôle « {role} », qu’aucun utilisateur ne peut détenir.",
+      "suggestion": "Choisissez un rôle existant ou désignez directement l’approbateur."
+    },
+    "step_sla_missing": {
+      "fail": "L’étape {step} n’a pas de délai.",
+      "suggestion": "Fixez le nombre d’heures de réponse afin que les étapes en retard puissent être escaladées."
+    },
+    "delegation_ended": {
+      "fail": "La délégation s’est déjà terminée le {ends}.",
+      "suggestion": "Indiquez une date de fin aujourd’hui ou plus tard."
+    },
+    "delegation_open_ended": {
+      "fail": "La délégation n’a pas de date de fin et reste valable jusqu’à sa révocation.",
+      "suggestion": "Indiquez le jour où le délégataire cesse de couvrir vos approbations."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Pour {metric}, le seuil d’alerte {warn} dépasse le seuil d’erreur {error}.",
+      "suggestion": "Placez le seuil d’alerte au niveau du seuil d’erreur ou en dessous."
+    },
+    "threshold_value_invalid": {
+      "fail": "La valeur {value} n’est pas une limite utilisable pour {metric}.",
+      "suggestion": "Saisissez zéro ou un nombre positif, entier pour les collisions ou les jours."
+    },
+    "threshold_disabled": {
+      "fail": "L’alarme de {metric} est désactivée.",
+      "suggestion": "Réactivez-la ou confirmez que personne n’a besoin de cet avertissement."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "L’échéance « {value} » n’est pas une date du calendrier.",
+      "suggestion": "Saisissez la date sous la forme année-mois-jour, par exemple 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "La collision était due le {due} et reste ouverte.",
+      "suggestion": "Fixez une nouvelle échéance ou clôturez la collision."
+    },
+    "severe_unassigned": {
+      "fail": "Une collision de gravité « {level} » est traitée sans personne d’assigné.",
+      "suggestion": "Assignez la collision au responsable de lot qui la résoudra."
+    },
+    "clearance_distance_missing": {
+      "fail": "Un contrôle de distance exige une distance minimale supérieure à zéro.",
+      "suggestion": "Saisissez la distance minimale en mètres ou utilisez un contrôle de collisions franches."
+    }
   }
 }

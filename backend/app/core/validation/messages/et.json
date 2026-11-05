@@ -2444,5 +2444,105 @@
       "fail": "Rea hind on null ja see langeb ehitusplatsi üldkulude summast välja.",
       "suggestion": "Sisestage määr ja perioodide arv või kindel summa."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Foto viide „{photo}” on kohalik tee või ülemkausta tee, mitte salvestatud foto.",
+      "suggestion": "Lisage foto joonisele ja kasutage antud viidet."
+    },
+    "file_version_invalid": {
+      "fail": "Faili versioon „{version}” ei ole kehtiv versiooni tunnus.",
+      "suggestion": "Valige versioon dokumendi versioonide loendist."
+    },
+    "pin_bare": {
+      "fail": "Leheküljel {page} oleval märgil pole ei märkust ega fotot.",
+      "suggestion": "Lisage märkus või foto, et märk näitaks, mida leiti."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokument „{kind}” ei nimeta summat, mida see katab.",
+      "suggestion": "Sisestage poliisil või tagatisel olev kattesumma."
+    },
+    "currency_invalid": {
+      "fail": "Valuuta „{currency}” ei ole kolmetäheline ISO kood.",
+      "suggestion": "Kasutage koodi, näiteks EUR või USD, või jätke tühjaks projekti valuuta jaoks."
+    },
+    "status_contradicts_dates": {
+      "fail": "Olek „{status}” on vastuolus aegumiskuupäevaga {expires}.",
+      "suggestion": "Parandage olek või kehtivuskuupäevad."
+    },
+    "policy_number_missing": {
+      "fail": "Dokumendil „{kind}” puudub poliisi- või tagatisnumber.",
+      "suggestion": "Sisestage number, et dokumenti saaks väljastaja juures kontrollida."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Saatelehel pole faile ja seda ei saa saata.",
+      "suggestion": "Lisage enne saatmist vähemalt üks fail."
+    },
+    "send_without_recipients": {
+      "fail": "Saatelehel pole saajaid ja seda ei saa saata.",
+      "suggestion": "Lisage enne saatmist vähemalt üks saaja."
+    },
+    "item_duplicate": {
+      "fail": "Fail „{name}” on selles saatelehes mitu korda.",
+      "suggestion": "Eemaldage korduv rida."
+    },
+    "construction_unversioned": {
+      "fail": "Ehituseks väljastatud failil „{name}” puudub revisjon.",
+      "suggestion": "Sisestage revisjon, et ehitusplatsil ehitataks õige versiooni järgi."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Samm {step} nõuab rolli „{role}”, mida ükski kasutaja ei saa omada.",
+      "suggestion": "Valige olemasolev roll või nimetage kinnitaja otse."
+    },
+    "step_sla_missing": {
+      "fail": "Sammul {step} puudub tähtaeg.",
+      "suggestion": "Määrake vastamise tunnid, et hilinenud samme saaks eskaleerida."
+    },
+    "delegation_ended": {
+      "fail": "Asendus lõppes juba {ends}.",
+      "suggestion": "Määrake lõppkuupäev, mis on täna või hiljem."
+    },
+    "delegation_open_ended": {
+      "fail": "Asendusel puudub lõppkuupäev ja see kehtib kuni tühistamiseni.",
+      "suggestion": "Määrake päev, millal asendaja lõpetab teie kinnituste katmise."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Mõõdiku {metric} hoiatustase {warn} on veataseme {error} kohal.",
+      "suggestion": "Määrake hoiatustase veataseme tasemele või sellest allapoole."
+    },
+    "threshold_value_invalid": {
+      "fail": "Väärtus {value} ei ole mõõdiku {metric} jaoks kasutatav piir.",
+      "suggestion": "Sisestage null või positiivne arv, kokkupõrgete ja päevade puhul täisarv."
+    },
+    "threshold_disabled": {
+      "fail": "Mõõdiku {metric} alarm on välja lülitatud.",
+      "suggestion": "Lülitage see tagasi sisse või kinnitage, et seda hoiatust ei vaja keegi."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Tähtaeg „{value}” ei ole kalendrikuupäev.",
+      "suggestion": "Sisestage kuupäev kujul aasta-kuu-päev, näiteks 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Kokkupõrke tähtaeg oli {due} ja see on endiselt avatud.",
+      "suggestion": "Määrake uus tähtaeg või sulgege kokkupõrge."
+    },
+    "severe_unassigned": {
+      "fail": "Raskusastmega „{level}” kokkupõrget käsitletakse ilma määratud isikuta.",
+      "suggestion": "Määrake kokkupõrge osa juhile, kes selle lahendab."
+    },
+    "clearance_distance_missing": {
+      "fail": "Vahekauguse kontroll vajab nullist suuremat vahekaugust.",
+      "suggestion": "Sisestage vähim vahekaugus meetrites või kasutage kõvade kokkupõrgete kontrolli."
+    }
   }
 }

@@ -2444,5 +2444,105 @@
       "fail": "Pozycja wycenia się na zero i wypada z sumy kosztów ogólnych budowy.",
       "suggestion": "Wpisz stawkę i liczbę okresów albo kwotę ryczałtową."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Odwołanie do zdjęcia „{photo}” to ścieżka lokalna lub do folderu nadrzędnego, a nie zapisane zdjęcie.",
+      "suggestion": "Dołącz zdjęcie do planu i użyj nadanego odwołania."
+    },
+    "file_version_invalid": {
+      "fail": "Wersja pliku „{version}” nie jest prawidłowym identyfikatorem wersji.",
+      "suggestion": "Wybierz wersję z listy wersji dokumentu."
+    },
+    "pin_bare": {
+      "fail": "Pinezka na stronie {page} nie ma ani notatki, ani zdjęcia.",
+      "suggestion": "Dodaj notatkę lub zdjęcie, aby pinezka pokazywała, co stwierdzono."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokument „{kind}” nie podaje kwoty, którą obejmuje.",
+      "suggestion": "Wpisz sumę gwarancyjną z polisy lub gwarancji."
+    },
+    "currency_invalid": {
+      "fail": "Waluta „{currency}” nie jest trzyliterowym kodem ISO.",
+      "suggestion": "Użyj kodu, np. EUR lub USD, albo zostaw puste dla waluty projektu."
+    },
+    "status_contradicts_dates": {
+      "fail": "Status „{status}” jest sprzeczny z datą ważności {expires}.",
+      "suggestion": "Popraw status lub daty ważności."
+    },
+    "policy_number_missing": {
+      "fail": "Dokument „{kind}” nie ma numeru polisy lub gwarancji.",
+      "suggestion": "Wpisz numer, aby dokument można było zweryfikować u wystawcy."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Przekazanie nie zawiera plików i nie może zostać wysłane.",
+      "suggestion": "Dodaj co najmniej jeden plik przed wysłaniem."
+    },
+    "send_without_recipients": {
+      "fail": "Przekazanie nie ma odbiorców i nie może zostać wysłane.",
+      "suggestion": "Dodaj co najmniej jednego odbiorcę przed wysłaniem."
+    },
+    "item_duplicate": {
+      "fail": "Plik „{name}” występuje w tym przekazaniu więcej niż raz.",
+      "suggestion": "Usuń powtórzony wiersz."
+    },
+    "construction_unversioned": {
+      "fail": "Plik „{name}” wydany do realizacji nie ma rewizji.",
+      "suggestion": "Wpisz rewizję, aby budowa realizowała właściwą wersję."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Krok {step} wymaga roli „{role}”, której nie może mieć żaden użytkownik.",
+      "suggestion": "Wybierz istniejącą rolę lub wskaż zatwierdzającego bezpośrednio."
+    },
+    "step_sla_missing": {
+      "fail": "Krok {step} nie ma limitu czasu.",
+      "suggestion": "Ustaw liczbę godzin na odpowiedź, aby opóźnione kroki mogły być eskalowane."
+    },
+    "delegation_ended": {
+      "fail": "Zastępstwo zakończyło się już {ends}.",
+      "suggestion": "Ustaw datę zakończenia dzisiejszą lub późniejszą."
+    },
+    "delegation_open_ended": {
+      "fail": "Zastępstwo nie ma daty zakończenia i obowiązuje do odwołania.",
+      "suggestion": "Ustaw dzień, w którym zastępca przestaje obejmować Twoje zatwierdzenia."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Dla {metric} poziom ostrzeżenia {warn} jest wyższy niż poziom błędu {error}.",
+      "suggestion": "Ustaw poziom ostrzeżenia na poziomie błędu lub niżej."
+    },
+    "threshold_value_invalid": {
+      "fail": "Wartość {value} nie jest użytecznym limitem dla {metric}.",
+      "suggestion": "Wpisz zero lub liczbę dodatnią, całkowitą dla kolizji lub dni."
+    },
+    "threshold_disabled": {
+      "fail": "Alarm dla {metric} jest wyłączony.",
+      "suggestion": "Włącz go ponownie lub potwierdź, że nikt nie potrzebuje tego ostrzeżenia."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Termin „{value}” nie jest datą kalendarzową.",
+      "suggestion": "Wpisz datę jako rok-miesiąc-dzień, np. 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Kolizja miała termin {due} i nadal jest otwarta.",
+      "suggestion": "Ustaw nowy termin lub zamknij kolizję."
+    },
+    "severe_unassigned": {
+      "fail": "Kolizja o wadze „{level}” jest obsługiwana bez przypisanej osoby.",
+      "suggestion": "Przypisz kolizję kierownikowi branży, który ją rozwiąże."
+    },
+    "clearance_distance_missing": {
+      "fail": "Przebieg sprawdzania prześwitu wymaga prześwitu większego od zera.",
+      "suggestion": "Wpisz minimalny prześwit w metrach lub użyj przebiegu kolizji twardych."
+    }
   }
 }

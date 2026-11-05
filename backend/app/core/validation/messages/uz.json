@@ -2444,5 +2444,105 @@
       "fail": "Qator narxi nolga teng va maydonning umumiy xarajatlari jamidan tushib qoladi.",
       "suggestion": "Stavka va davrlar sonini yoki qatʼiy summani kiriting."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "«{photo}» surat havolasi saqlangan surat emas, balki mahalliy yoʻl yoki yuqori papka yoʻli.",
+      "suggestion": "Suratni rejaga biriktiring va berilgan havoladan foydalaning."
+    },
+    "file_version_invalid": {
+      "fail": "«{version}» fayl versiyasi yaroqli versiya identifikatori emas.",
+      "suggestion": "Versiyani hujjatning versiyalar roʻyxatidan tanlang."
+    },
+    "pin_bare": {
+      "fail": "{page}-sahifadagi belgida na izoh, na surat bor.",
+      "suggestion": "Belgi topilganini koʻrsatishi uchun izoh yoki surat qoʻshing."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "«{kind}» hujjati qoplaydigan summani koʻrsatmagan.",
+      "suggestion": "Polis yoki kafolatda koʻrsatilgan qoplash summasini kiriting."
+    },
+    "currency_invalid": {
+      "fail": "«{currency}» valyutasi uch harfli ISO kodi emas.",
+      "suggestion": "EUR yoki USD kabi koddan foydalaning yoki loyiha valyutasi uchun boʻsh qoldiring."
+    },
+    "status_contradicts_dates": {
+      "fail": "«{status}» holati amal qilish muddati tugashi sanasiga {expires} zid.",
+      "suggestion": "Holatni yoki amal qilish sanalarini tuzating."
+    },
+    "policy_number_missing": {
+      "fail": "«{kind}» hujjatida polis yoki kafolat raqami yoʻq.",
+      "suggestion": "Hujjatni beruvchida tekshirish uchun raqamni kiriting."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Topshirish varaqasida fayl yoʻq, uni yuborib boʻlmaydi.",
+      "suggestion": "Yuborishdan oldin kamida bitta fayl qoʻshing."
+    },
+    "send_without_recipients": {
+      "fail": "Topshirish varaqasida oluvchi yoʻq, uni yuborib boʻlmaydi.",
+      "suggestion": "Yuborishdan oldin kamida bitta oluvchi qoʻshing."
+    },
+    "item_duplicate": {
+      "fail": "«{name}» fayli ushbu topshirish varaqasida bir necha marta koʻrsatilgan.",
+      "suggestion": "Takrorlangan qatorni oʻchiring."
+    },
+    "construction_unversioned": {
+      "fail": "Qurilish uchun chiqarilgan «{name}» faylida reviziya yoʻq.",
+      "suggestion": "Obyektda toʻgʻri versiya boʻyicha qurilishi uchun reviziyani kiriting."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "{step}-qadam hech bir foydalanuvchi ega boʻla olmaydigan «{role}» rolini talab qiladi.",
+      "suggestion": "Mavjud rolni tanlang yoki tasdiqlovchini toʻgʻridan-toʻgʻri koʻrsating."
+    },
+    "step_sla_missing": {
+      "fail": "{step}-qadamda vaqt chegarasi yoʻq.",
+      "suggestion": "Kechikkan qadamlarni yuqoriga koʻtarish mumkin boʻlishi uchun javob soatlarini belgilang."
+    },
+    "delegation_ended": {
+      "fail": "Oʻrinbosarlik {ends} sanasida allaqachon tugagan.",
+      "suggestion": "Tugash sanasini bugun yoki undan keyin qilib belgilang."
+    },
+    "delegation_open_ended": {
+      "fail": "Oʻrinbosarlikda tugash sanasi yoʻq, u bekor qilinguncha amalda.",
+      "suggestion": "Oʻrinbosar sizning tasdiqlashlaringizni qoplashni toʻxtatadigan kunni belgilang."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "{metric} uchun ogohlantirish darajasi {warn} xato darajasidan {error} yuqori.",
+      "suggestion": "Ogohlantirish darajasini xato darajasiga teng yoki undan past qilib qoʻying."
+    },
+    "threshold_value_invalid": {
+      "fail": "{value} qiymati {metric} uchun yaroqli chegara emas.",
+      "suggestion": "Nol yoki musbat son kiriting, toʻqnashuvlar va kunlar uchun butun son."
+    },
+    "threshold_disabled": {
+      "fail": "{metric} signali oʻchirilgan.",
+      "suggestion": "Uni qayta yoqing yoki bu ogohlantirish hech kimga kerak emasligini tasdiqlang."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "«{value}» muddati kalendar sanasi emas.",
+      "suggestion": "Sanani yil-oy-kun shaklida kiriting, masalan 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Toʻqnashuvning muddati {due} edi va u hali ochiq.",
+      "suggestion": "Yangi muddat belgilang yoki toʻqnashuvni yoping."
+    },
+    "severe_unassigned": {
+      "fail": "«{level}» jiddiylikdagi toʻqnashuv biriktirilgan shaxssiz koʻrib chiqilmoqda.",
+      "suggestion": "Toʻqnashuvni uni hal qiladigan boʻlim rahbariga biriktiring."
+    },
+    "clearance_distance_missing": {
+      "fail": "Oraliq tekshiruvi noldan katta oraliq masofani talab qiladi.",
+      "suggestion": "Eng kichik oraliqni metrda kiriting yoki qattiq toʻqnashuvlar tekshiruvidan foydalaning."
+    }
   }
 }

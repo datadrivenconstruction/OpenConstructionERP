@@ -2444,5 +2444,105 @@
       "fail": "De regel komt uit op nul en valt weg uit het totaal van de algemene kosten.",
       "suggestion": "Voer het tarief en het aantal perioden in, of het vaste bedrag."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "De fotoverwijzing “{photo}” is een lokaal pad of pad naar een bovenliggende map, geen opgeslagen foto.",
+      "suggestion": "Voeg de foto toe aan de plattegrond en gebruik de toegekende verwijzing."
+    },
+    "file_version_invalid": {
+      "fail": "De bestandsversie “{version}” is geen geldige versie-id.",
+      "suggestion": "Kies de versie uit de versielijst van het document."
+    },
+    "pin_bare": {
+      "fail": "De pin op pagina {page} heeft geen notitie en geen foto.",
+      "suggestion": "Voeg een notitie of foto toe zodat de pin laat zien wat is aangetroffen."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Het document “{kind}” vermeldt niet welk bedrag het dekt.",
+      "suggestion": "Vul het verzekerde bedrag van de polis of garantie in."
+    },
+    "currency_invalid": {
+      "fail": "De valuta “{currency}” is geen ISO-code van drie letters.",
+      "suggestion": "Gebruik een code zoals EUR of USD, of laat leeg voor de projectvaluta."
+    },
+    "status_contradicts_dates": {
+      "fail": "De status “{status}” spreekt de vervaldatum {expires} tegen.",
+      "suggestion": "Corrigeer de status of de geldigheidsdata."
+    },
+    "policy_number_missing": {
+      "fail": "Het document “{kind}” heeft geen polis- of garantienummer.",
+      "suggestion": "Vul het nummer in zodat het document bij de uitgever kan worden gecontroleerd."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "De transmittal bevat geen bestanden en kan niet worden verzonden.",
+      "suggestion": "Voeg minstens één bestand toe voordat u verzendt."
+    },
+    "send_without_recipients": {
+      "fail": "De transmittal heeft geen ontvangers en kan niet worden verzonden.",
+      "suggestion": "Voeg minstens één ontvanger toe voordat u verzendt."
+    },
+    "item_duplicate": {
+      "fail": "Het bestand “{name}” staat meerdere keren in deze transmittal.",
+      "suggestion": "Verwijder de dubbele regel."
+    },
+    "construction_unversioned": {
+      "fail": "Het bestand “{name}” dat voor uitvoering is uitgegeven, heeft geen revisie.",
+      "suggestion": "Vul de revisie in zodat de bouwplaats volgens de juiste versie bouwt."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Stap {step} vereist de rol “{role}”, die geen gebruiker kan hebben.",
+      "suggestion": "Kies een bestaande rol of wijs de goedkeurder rechtstreeks aan."
+    },
+    "step_sla_missing": {
+      "fail": "Stap {step} heeft geen termijn.",
+      "suggestion": "Stel de uren voor een reactie in zodat late stappen kunnen escaleren."
+    },
+    "delegation_ended": {
+      "fail": "De overdracht is al geëindigd op {ends}.",
+      "suggestion": "Stel een einddatum in van vandaag of later."
+    },
+    "delegation_open_ended": {
+      "fail": "De overdracht heeft geen einddatum en blijft van kracht tot intrekking.",
+      "suggestion": "Stel de dag in waarop de vervanger uw goedkeuringen niet meer overneemt."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Bij {metric} ligt het waarschuwingsniveau {warn} boven het foutniveau {error}.",
+      "suggestion": "Stel het waarschuwingsniveau in op of onder het foutniveau."
+    },
+    "threshold_value_invalid": {
+      "fail": "De waarde {value} is geen bruikbare grens voor {metric}.",
+      "suggestion": "Voer nul of een positief getal in, een geheel getal voor botsingen of dagen."
+    },
+    "threshold_disabled": {
+      "fail": "Het alarm voor {metric} staat uit.",
+      "suggestion": "Zet het weer aan of bevestig dat niemand deze waarschuwing nodig heeft."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "De deadline “{value}” is geen kalenderdatum.",
+      "suggestion": "Voer de datum in als jaar-maand-dag, bijvoorbeeld 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "De botsing had deadline {due} en staat nog open.",
+      "suggestion": "Stel een nieuwe deadline in of sluit de botsing."
+    },
+    "severe_unassigned": {
+      "fail": "Een botsing met ernst “{level}” wordt behandeld zonder toegewezen persoon.",
+      "suggestion": "Wijs de botsing toe aan de discipline-lead die haar oplost."
+    },
+    "clearance_distance_missing": {
+      "fail": "Een afstandscontrole heeft een vrije afstand groter dan nul nodig.",
+      "suggestion": "Voer de minimale vrije afstand in meters in of gebruik een controle op harde botsingen."
+    }
   }
 }

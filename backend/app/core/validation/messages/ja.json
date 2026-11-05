@@ -2444,5 +2444,105 @@
       "fail": "この明細の金額はゼロで、共通仮設費の合計から外れます。",
       "suggestion": "単価と期間数、または固定額を入力してください。"
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "写真参照「{photo}」はローカルパスまたは親フォルダのパスであり、保存済みの写真ではありません。",
+      "suggestion": "写真を図面に添付し、割り当てられた参照を使用してください。"
+    },
+    "file_version_invalid": {
+      "fail": "ファイルバージョン「{version}」は有効なバージョンIDではありません。",
+      "suggestion": "文書のバージョン一覧からバージョンを選択してください。"
+    },
+    "pin_bare": {
+      "fail": "{page}ページのピンにはメモも写真もありません。",
+      "suggestion": "ピンが確認内容を示すよう、メモか写真を追加してください。"
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "文書「{kind}」には補償する金額が記載されていません。",
+      "suggestion": "保険証券または保証書に記載の補償額を入力してください。"
+    },
+    "currency_invalid": {
+      "fail": "通貨「{currency}」は3文字のISOコードではありません。",
+      "suggestion": "EURやUSDなどのコードを使うか、プロジェクト通貨にする場合は空欄にしてください。"
+    },
+    "status_contradicts_dates": {
+      "fail": "ステータス「{status}」は有効期限 {expires} と矛盾しています。",
+      "suggestion": "ステータスまたは有効期間を修正してください。"
+    },
+    "policy_number_missing": {
+      "fail": "文書「{kind}」には証券番号または保証番号がありません。",
+      "suggestion": "発行元で文書を確認できるよう番号を入力してください。"
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "送付書にファイルがなく、送信できません。",
+      "suggestion": "送信前にファイルを1つ以上追加してください。"
+    },
+    "send_without_recipients": {
+      "fail": "送付書に宛先がなく、送信できません。",
+      "suggestion": "送信前に宛先を1つ以上追加してください。"
+    },
+    "item_duplicate": {
+      "fail": "ファイル「{name}」がこの送付書に複数回記載されています。",
+      "suggestion": "重複した行を削除してください。"
+    },
+    "construction_unversioned": {
+      "fail": "施工用に発行されたファイル「{name}」にはリビジョンがありません。",
+      "suggestion": "現場が正しい版で施工できるようリビジョンを入力してください。"
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "ステップ {step} はロール「{role}」を必要としますが、そのロールを持てるユーザーはいません。",
+      "suggestion": "既存のロールを選ぶか、承認者を直接指定してください。"
+    },
+    "step_sla_missing": {
+      "fail": "ステップ {step} には期限がありません。",
+      "suggestion": "遅延したステップをエスカレーションできるよう、回答時間を設定してください。"
+    },
+    "delegation_ended": {
+      "fail": "委任は {ends} にすでに終了しています。",
+      "suggestion": "終了日は本日以降に設定してください。"
+    },
+    "delegation_open_ended": {
+      "fail": "委任には終了日がなく、取り消されるまで有効です。",
+      "suggestion": "代理人があなたの承認を代行しなくなる日を設定してください。"
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "{metric} では警告レベル {warn} がエラーレベル {error} を上回っています。",
+      "suggestion": "警告レベルをエラーレベル以下に設定してください。"
+    },
+    "threshold_value_invalid": {
+      "fail": "値 {value} は {metric} の上限として使用できません。",
+      "suggestion": "0以上の数値を入力してください。干渉件数や日数は整数にします。"
+    },
+    "threshold_disabled": {
+      "fail": "{metric} のアラームがオフになっています。",
+      "suggestion": "再度オンにするか、この警告が誰にも不要であることを確認してください。"
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "期限「{value}」はカレンダー上の日付ではありません。",
+      "suggestion": "日付は年-月-日の形式で入力してください(例: 2026-11-30)。"
+    },
+    "due_date_past": {
+      "fail": "この干渉の期限は {due} で、まだ未解決です。",
+      "suggestion": "新しい期限を設定するか、干渉をクローズしてください。"
+    },
+    "severe_unassigned": {
+      "fail": "重大度「{level}」の干渉が担当者なしで対応中です。",
+      "suggestion": "解決する専門分野の責任者に干渉を割り当ててください。"
+    },
+    "clearance_distance_missing": {
+      "fail": "クリアランス検査には0より大きいクリアランス距離が必要です。",
+      "suggestion": "最小クリアランスをメートルで入力するか、ハード干渉の検査を使用してください。"
+    }
   }
 }

@@ -16,12 +16,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import gate_record
 from app.modules.compliance_docs.models import ComplianceDoc
 from app.modules.compliance_docs.repository import ComplianceDocRepository
 from app.modules.compliance_docs.schemas import (
     ComplianceDocCreate,
     ComplianceDocUpdate,
 )
+from app.modules.compliance_docs.validators import COMPLIANCE_DOCS_RULE_SET, DOC_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -227,6 +229,24 @@ class ComplianceDocService:
             effective_date=data.effective_date,
         )
 
+        rule_warnings = await gate_record(
+            COMPLIANCE_DOCS_RULE_SET,
+            "doc",
+            {
+                "doc_type": data.doc_type,
+                "policy_number": data.policy_number,
+                "coverage_amount": data.coverage_amount,
+                "currency": data.currency,
+                "effective_date": data.effective_date,
+                "expires_at": data.expires_at,
+                "status": derived_status,
+            },
+            DOC_FIELDS,
+            operation="create",
+            project_id=data.project_id,
+            error_code="compliance_docs_rules_failed",
+        )
+
         doc = ComplianceDoc(
             project_id=data.project_id,
             doc_type=data.doc_type,
@@ -255,6 +275,7 @@ class ComplianceDocService:
         # ``previous_status=None`` → unconditional fire when current
         # status is in the alert set.
         self._publish_expiry_alert(doc, previous_status=None)
+        doc.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return doc
 
     async def get_doc(self, doc_id: uuid.UUID) -> ComplianceDoc:
@@ -359,12 +380,25 @@ class ComplianceDocService:
         if not fields:
             return doc
 
+        rule_warnings = await gate_record(
+            COMPLIANCE_DOCS_RULE_SET,
+            "doc",
+            doc,
+            DOC_FIELDS,
+            fields,
+            operation="update",
+            project_id=doc.project_id,
+            error_code="compliance_docs_rules_failed",
+            target_id=str(doc_id),
+        )
+
         await self.repo.update_fields(doc_id, **fields)
         fresh = await self.repo.get_by_id(doc_id)
         result = fresh or doc
         # Emit alert only if the patch *moved* the doc into an alerting
         # bucket - same bucket → no event (avoids subscriber re-spam).
         self._publish_expiry_alert(result, previous_status=previous_status)
+        result.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return result
 
     async def delete_doc(self, doc_id: uuid.UUID) -> None:
