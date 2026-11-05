@@ -24,6 +24,7 @@ from app.core.cde_naming import check_container_code, client_metadata
 from app.core.cde_states import CDEState, CDEStateMachine
 from app.core.events import publish_after_commit
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import gate_record
 from app.modules.cde import readiness as cde_readiness
 from app.modules.cde.models import (
     CdeSettings,
@@ -52,6 +53,7 @@ from app.modules.cde.schemas import (
     StateTransitionRequest,
 )
 from app.modules.cde.suitability import validate_suitability_for_state
+from app.modules.cde.validators import CDE_RULE_SET, CONTAINER_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -170,6 +172,16 @@ class CDEService:
         # and its ISO parts; with no scheme pinned this is a no-op.
         await check_container_code(self.session, data.project_id, data.container_code, _code_parts(data))
 
+        rule_warnings = await gate_record(
+            CDE_RULE_SET,
+            "container",
+            data,
+            CONTAINER_FIELDS,
+            operation="create",
+            project_id=data.project_id,
+            error_code="cde_rules_failed",
+        )
+
         existing = await self.container_repo.get_by_code_and_project(data.project_id, data.container_code)
         if existing is not None:
             raise HTTPException(
@@ -197,6 +209,7 @@ class CDEService:
             metadata_=client_metadata(data.metadata),
         )
         container = await self.container_repo.create(container)
+        container.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         logger.info(
             "CDE container created: %s (%s) for project %s",
             data.container_code,
@@ -278,8 +291,21 @@ class CDEService:
             merged = {k: fields.get(k, getattr(container, k)) for k in _NAMING_FIELDS}
             await check_container_code(self.session, container.project_id, merged["container_code"], merged)
 
+        rule_warnings = await gate_record(
+            CDE_RULE_SET,
+            "container",
+            container,
+            CONTAINER_FIELDS,
+            fields,
+            operation="update",
+            project_id=container.project_id,
+            error_code="cde_rules_failed",
+            target_id=str(container_id),
+        )
+
         await self.container_repo.update_fields(container_id, **fields)
         await self.session.refresh(container)
+        container.validation_warnings = rule_warnings  # type: ignore[attr-defined]
 
         logger.info(
             "CDE container updated: %s (fields=%s)",
@@ -340,6 +366,18 @@ class CDEService:
         gate_meta = _state_machine.get_gate_requirements(current_state, target_state)
         gate_code = gate_meta.get("gate")
 
+        rule_warnings = await gate_record(
+            CDE_RULE_SET,
+            "container",
+            container,
+            CONTAINER_FIELDS,
+            {"cde_state": target_state},
+            operation="transition",
+            project_id=container.project_id,
+            error_code="cde_rules_failed",
+            target_id=str(container_id),
+        )
+
         # Gate enforcement - Epic H lifted the bespoke Gate-B signature
         # check into ``app.core.audit_gates.gate_registry`` so additional
         # transition preconditions can be added declaratively elsewhere.
@@ -385,6 +423,7 @@ class CDEService:
         self.session.add(audit)
         await self.session.flush()
         await self.session.refresh(container)
+        container.validation_warnings = rule_warnings  # type: ignore[attr-defined]
 
         logger.info(
             "CDE state transition: %s -> %s for container %s (gate=%s, user=%s)",
@@ -589,6 +628,16 @@ class CDEService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="storage_key refers to a file of a different project",
                 )
+
+        await gate_record(
+            CDE_RULE_SET,
+            "revision",
+            {"file_size": file_size, "content_hash": data.content_hash},
+            ("file_size", "content_hash"),
+            operation="revision",
+            project_id=container.project_id,
+            error_code="cde_rules_failed",
+        )
 
         rev_number = await self.revision_repo.next_revision_number(container_id)
 
