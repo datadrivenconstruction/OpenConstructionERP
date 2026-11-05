@@ -15723,7 +15723,7 @@
             },
             {
               "name": "value",
-              "type": "Decimal20_6"
+              "type": "FiniteDecimal"
             },
             {
               "name": "unit",
@@ -16097,7 +16097,7 @@
             },
             {
               "name": "value",
-              "type": "Decimal20_6 | None"
+              "type": "FiniteDecimal | None"
             },
             {
               "name": "numerator",
@@ -17351,7 +17351,7 @@
             },
             {
               "name": "value",
-              "type": "Decimal20_6 | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
