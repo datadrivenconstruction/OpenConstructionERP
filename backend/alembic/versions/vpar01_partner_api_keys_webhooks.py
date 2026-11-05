@@ -44,6 +44,9 @@ def _tables() -> set[str]:
     return set(sa.inspect(op.get_bind()).get_table_names())
 
 
+# data-rewrite-ack: table=oe_integrations_delivery growth=tenure rows=one row per logged webhook delivery
+# data-rewrite-ack: table=oe_integrations_webhook growth=bounded rows=one row per configured notification target, set up by hand
+# boot-repair: gap - old deliveries stay unsettled and old notification targets are not copied on an install that never runs alembic
 def upgrade() -> None:
     tables = _tables()
 

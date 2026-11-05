@@ -25,9 +25,6 @@ from app.modules.rfq_bidding.models import RFQ, RFQAward, RFQBid, RFQBidAdjustme
 from app.modules.rfq_bidding.schemas import BidAdjustmentCreate, BidCreate, BidLineCreate, RFQLineCreate
 from app.modules.rfq_bidding.service import RFQService
 
-TODAY = date(2026, 7, 10)
-
-
 # ── In-memory repositories ──────────────────────────────────────────────────
 
 
@@ -232,7 +229,7 @@ class TestComparisonPayload:
         )
         rfq.bids.append(bid)
 
-        payload = RFQService._validation_payload(rfq, as_of=TODAY)
+        payload = RFQService._validation_payload(rfq, as_of=date(2026, 7, 10))
         assert payload["as_of"] == "2026-07-10"
         assert payload["lines"][0]["quantity"] == "100"
         assert payload["bids"][0]["exchange_rate"] == "1.15"
@@ -245,7 +242,7 @@ class TestComparisonPayload:
         rfq = _rfq()
         rfq.bids.append(_bid(rfq, bidder_contact_id="alpha", bid_amount="1200"))
         rfq.bids.append(_bid(rfq, bidder_contact_id="beta", bid_amount="900"))
-        result = RFQService.compare_payload(rfq, as_of=TODAY)
+        result = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert [quote.bidder_contact_id for quote in result.ranked] == ["beta", "alpha"]
         assert result.recommended_bid_id == str(rfq.bids[1].id)
 
@@ -253,7 +250,7 @@ class TestComparisonPayload:
         """The register predates scope lines; a lump-sum package must still rank."""
         rfq = _rfq()
         rfq.bids.append(_bid(rfq, bid_amount="500"))
-        result = RFQService.compare_payload(rfq, as_of=TODAY)
+        result = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert result.lines_required == 0
         assert result.ranked[0].normalised_amount == Decimal("500")
 
@@ -341,7 +338,7 @@ class TestSubmitBid:
         assert bid.is_late is True
         assert bid.status == "late"
         assert bid.late_reason
-        result = RFQService.compare_payload(rfq, as_of=TODAY)
+        result = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert result.ranked == ()
         assert cmp.REASON_LATE_NOT_ADMITTED in result.excluded[0].reasons
 
@@ -390,7 +387,7 @@ class TestStanding:
         assert updated.status == "withdrawn"
         assert updated.withdrawn_reason
         assert updated.withdrawn_at
-        result = RFQService.compare_payload(rfq, as_of=TODAY)
+        result = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert cmp.REASON_WITHDRAWN in result.excluded[0].reasons
 
     async def test_disqualifying_a_quote_needs_an_award_level_role(self) -> None:
@@ -418,7 +415,7 @@ class TestStanding:
         rfq.bids.append(late)
         service = _service(rfq)
 
-        before = RFQService.compare_payload(rfq, as_of=TODAY)
+        before = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert [quote.bidder_contact_id for quote in before.ranked] == ["alpha"]
 
         admitted = await service.admit_late_bid(
@@ -429,7 +426,7 @@ class TestStanding:
         )
         assert admitted.admitted_at
         assert admitted.admission_reason
-        after = RFQService.compare_payload(rfq, as_of=TODAY)
+        after = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert [quote.bidder_contact_id for quote in after.ranked] == ["beta", "alpha"]
         assert cmp.NOTE_LATE_ADMITTED in after.ranked[0].notes
 
@@ -470,7 +467,7 @@ class TestStanding:
             BidAdjustmentCreate(kind="installation", amount="300", source="buyer", included_in_bid=False),
         )
         assert updated.adjustments[0].currency_code == "EUR"
-        result = RFQService.compare_payload(rfq, as_of=TODAY)
+        result = RFQService.compare_payload(rfq, as_of=date(2026, 7, 10))
         assert result.ranked[0].normalised_amount == Decimal("1300")
 
 

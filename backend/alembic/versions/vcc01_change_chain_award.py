@@ -117,6 +117,8 @@ def backfill_package_type(bind: sa.engine.Connection) -> int:
     return len(supply)
 
 
+# data-rewrite-ack: table=oe_bid_management_package growth=tenure rows=one row per bid package, grows with tendering activity
+# boot-repair: gap - packages already awarded as supply keep the default package_type on an install that never runs alembic
 def upgrade() -> None:
     tables = set(sa.inspect(op.get_bind()).get_table_names())
     _add_missing(

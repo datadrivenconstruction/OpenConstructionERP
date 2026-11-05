@@ -53,7 +53,13 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '2026-11-05',
+  tag: 'NEW',
+  summary:
+    'Capital plan with yearly budgets and what-if scenarios, read-only data feeds for Excel and BI tools, and SCIM 2.0 provisioning for identity providers.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.

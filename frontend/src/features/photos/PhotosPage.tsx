@@ -586,7 +586,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
                 <ul className="flex gap-2 overflow-x-auto pb-1">
                   {day.photos.map((p) => (
                     <li key={p.id} className="shrink-0">
-                      <button type="button" onClick={() => setOpen(p)} className="block h-24 w-24 overflow-hidden rounded border border-border-light">
+                      <button type="button" aria-label={p.caption || p.filename} onClick={() => setOpen(p)} className="block h-24 w-24 overflow-hidden rounded border border-border-light">
                         <AuthImage src={p.thumb_url} alt={p.caption || p.filename} className="h-full w-full object-cover" />
                       </button>
                     </li>

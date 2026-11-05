@@ -30,7 +30,6 @@ from app.modules.schedule.permissions import register_schedule_permissions
 from app.modules.users.models import APIKey, User
 
 PREFIX = "/v1/bi-feed"
-STAMP = datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -90,8 +89,8 @@ async def make_position(
         "quantity": "10",
         "unit_rate": "100.50",
         "total": "1005.00",
-        "created_at": STAMP,
-        "updated_at": STAMP,
+        "created_at": datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
+        "updated_at": datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
     }
     values.update(fields)
     if position_id is not None:

@@ -272,6 +272,10 @@ _ACK_RE = re.compile(
 _UNRESOLVED_BASELINE: frozenset[tuple[str, str]] = frozenset(
     {
         (
+            "vpar01_partner_api_keys_webhooks.py",
+            "bind.execute(sa.select(endpoint.c.metadata))",
+        ),
+        (
             "7f3ab0f2d4e1_phase2e_money_numeric.py",
             "op.execute(f\"ALTER TABLE {table} ALTER COLUMN {column} TYPE NUMERIC({precision}, {scale}) USING NULLIF({column}, '')::NUMERIC({precision}, {scale})\")",
         ),

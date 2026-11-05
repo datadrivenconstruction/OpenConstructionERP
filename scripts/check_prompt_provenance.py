@@ -218,6 +218,14 @@ AFFECTIVE_TERMS: tuple[str, ...] = (
 #: that is not here fails, which is the point.
 CLEARED_BY_READING: dict[tuple[str, str, str], str] = {
     (
+        "backend/app/modules/doc_assistant/service.py",
+        "_call",
+        "system",
+    ): (
+        "The closure's only two callers in this file pass the module constants _EXPAND_SYSTEM and "
+        "_ANSWER_SYSTEM. Question and document text travel in the prompt argument, never in system."
+    ),
+    (
         "backend/app/modules/permits/service.py",
         "extract_conditions",
         "extraction.system_prompt()",

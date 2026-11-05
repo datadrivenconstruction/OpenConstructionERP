@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * API helpers and React Query hooks for the accounting sync module: connections
- * to Xero and QuickBooks (live, OAuth) and to file targets (DATEV EXTF, journal
+ * to Xero and QBO (live, OAuth) and to file targets (DATEV EXTF, journal
  * CSV or Excel, SAF-T), the account and tax mapping, the sync log and exports.
  *
  * Mounted at `/api/v1/accounting_sync`. Money is a decimal STRING on the wire and
@@ -305,8 +305,7 @@ export const pullPayments = (id: string) => apiPost<PushResult>(`${BASE}/connect
 
 export const fetchLog = (id: string, opts: { status?: LogStatus; limit?: number; offset?: number }) =>
   apiGet<LogPage>(`${BASE}/connections/${id}/log${qs({ ...opts })}`);
-export const retryLogEntry = (id: string, entryId: string) =>
-  apiPost<LogEntry>(`${BASE}/connections/${id}/log/${entryId}/retry`);
+export const retryLogEntry = (entryId: string) => apiPost<LogEntry>(`${BASE}/log/${entryId}/retry`);
 
 /** Authenticated file download; the server names the file. */
 export function downloadExport(

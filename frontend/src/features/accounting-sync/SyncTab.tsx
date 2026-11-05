@@ -73,7 +73,7 @@ export function SyncTab({
 
   const pushMut = useSyncMutation(() => pushRecords(id, { record_ids: [...selected] }));
   const pullMut = useSyncMutation(() => pullPayments(id));
-  const retryMut = useSyncMutation((entryId: string) => retryLogEntry(id, entryId));
+  const retryMut = useSyncMutation((entryId: string) => retryLogEntry(entryId));
 
   const findings = findingsQ.data ?? [];
   const docs = docsQ.data ?? [];
