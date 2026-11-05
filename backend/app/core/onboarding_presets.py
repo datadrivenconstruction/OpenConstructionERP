@@ -537,6 +537,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "tasks",
             "procurement",
             "rfq_bidding",  # request for quotation to equipment suppliers
+            "bid_management",  # rfq_bidding depends on it
             "supplier_catalogs",
             "submittals",
             "rfi",

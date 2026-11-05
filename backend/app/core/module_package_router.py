@@ -162,8 +162,10 @@ async def issue_ui_token(
     account = await session.get(User, UUID(str(user["sub"])))
     if account is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    sid = user.get("sid")
+    if not sid:
+        # A token with no session cannot be signed out, so a scoped one is not minted from it.
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in again to open this page.")
     expires = datetime.now(UTC) + timedelta(minutes=UI_TOKEN_MINUTES)
-    token = create_access_token(
-        account, settings, extra_claims={SCOPE_CLAIM: module_name, "exp": expires}, sid=user.get("sid")
-    )
+    token = create_access_token(account, settings, extra_claims={SCOPE_CLAIM: module_name, "exp": expires}, sid=sid)
     return {"token": token, "expires_at": expires.isoformat()}

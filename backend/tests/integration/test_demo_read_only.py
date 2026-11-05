@@ -51,6 +51,7 @@ from app.core.demo_read_only import (
     _AUTHENTICATION_WRITABLE,
     ALLOWED_ENDPOINTS,
     DEMO_READ_ONLY_ERROR,
+    DEMO_READ_ONLY_MESSAGE,
     SAFE_METHODS,
     demo_read_only_guard,
     endpoint_key,
@@ -483,8 +484,15 @@ async def test_demo_read_only_refuses_every_write_and_moves_no_rows(app_client, 
             continue
         response = await client.request(method, concrete, headers=headers, json={})
         swept += 1
-        if response.status_code != 403 or response.json().get("detail", {}).get("error") != DEMO_READ_ONLY_ERROR:
-            unexpected.append(f"{method} {template} -> {response.status_code}")
+        body = response.json() if response.status_code == 403 else {}
+        detail = body.get("detail")
+        if template.startswith("/scim/v2"):
+            # SCIM answers in its own RFC 7644 error schema, so the refusal arrives as the message.
+            refused = detail == DEMO_READ_ONLY_MESSAGE
+        else:
+            refused = isinstance(detail, dict) and detail.get("error") == DEMO_READ_ONLY_ERROR
+        if not refused:
+            unexpected.append(f"{method} {template} -> {response.status_code} {str(detail)[:60]}")
 
     after = await _census()
     moved = _diff(before, after)
