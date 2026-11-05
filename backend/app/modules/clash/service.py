@@ -49,6 +49,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.validation.quality_rules import gate_record
 from app.modules.bcf.bcf_xml import BCFParseError, parse_bcfzip
 from app.modules.bcf.schemas import PerspectiveCamera, TopicCreate, Vec3, ViewpointCreate
 from app.modules.bcf.service import BCFService
@@ -83,6 +84,7 @@ from app.modules.clash.schemas import (
     ClashRunCreate,
     ClashSelectionSet,
 )
+from app.modules.clash.validators import CLASH_FIELDS, CLASH_RULE_SET, RUN_FIELDS
 
 try:  # The geometry loader is a sibling module; tolerate its absence.
     from app.modules.clash.geometry import ClashGeometryProvider, ElementGeom
@@ -1618,6 +1620,8 @@ class ClashService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = ClashRepository(session)
+        # Non-blocking findings of the last gated triage write, for the router to report.
+        self.findings: list[dict[str, Any]] = []
 
     # ── Run lifecycle ──────────────────────────────────────────────────
 
@@ -1664,6 +1668,16 @@ class ClashService:
                 )
             set_a = data.set_a.model_dump()
             set_b = data.set_b.model_dump()
+
+        await gate_record(
+            CLASH_RULE_SET,
+            "run",
+            {"clash_type": data.clash_type, "clearance_m": data.clearance_m},
+            RUN_FIELDS,
+            operation="create_run",
+            project_id=project_id,
+            error_code="clash_rules_failed",
+        )
 
         name = (data.name or "").strip() or (f"Clash run {_now():%Y-%m-%d %H:%M}")
         # Wave A4 - initial rule set carried straight from the request.
@@ -2659,6 +2673,15 @@ class ClashService:
                 detail="Profile name must not be empty.",
             )
         self._validate_profile_config(data.mode, data.clash_type)
+        await gate_record(
+            CLASH_RULE_SET,
+            "run",
+            {"clash_type": data.clash_type, "clearance_m": data.clearance_m},
+            RUN_FIELDS,
+            operation="create_profile",
+            project_id=project_id,
+            error_code="clash_rules_failed",
+        )
         existing = await self.repo.get_profile_by_name(project_id, name)
         if existing is not None:
             raise HTTPException(
@@ -2730,6 +2753,18 @@ class ClashService:
         new_ctype = fields.get("clash_type", profile.clash_type)
         if "mode" in fields or "clash_type" in fields:
             self._validate_profile_config(new_mode, new_ctype)
+        if "clash_type" in fields or "clearance_m" in fields:
+            await gate_record(
+                CLASH_RULE_SET,
+                "run",
+                profile,
+                RUN_FIELDS,
+                {k: fields[k] for k in RUN_FIELDS if k in fields},
+                operation="update_profile",
+                project_id=project_id,
+                error_code="clash_rules_failed",
+                target_id=str(profile_id),
+            )
         if "clash_type" in fields:
             profile.clash_type = fields["clash_type"]
         if "ignore_same_model" in fields:
@@ -3968,6 +4003,27 @@ class ClashService:
         if result is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clash not found")
         actor_id = str(actor or "system")
+        triage: dict[str, Any] = {}
+        if new_status is not None:
+            triage["status"] = new_status
+        if severity is not None:
+            triage["severity"] = severity
+        if assigned_to is not None:
+            triage["assigned_to"] = assigned_to or None
+        if due_date is not None:
+            triage["due_date"] = due_date or None
+        self.findings = await gate_record(
+            CLASH_RULE_SET,
+            "clash",
+            result,
+            CLASH_FIELDS,
+            triage,
+            operation="triage",
+            project_id=project_id,
+            error_code="clash_rules_failed",
+            target_id=str(result_id),
+        )
+        result.validation_warnings = self.findings  # type: ignore[attr-defined]
         # Track which fields changed so we can fan notifications out once
         # at the end (cheaper than N parallel publish calls).
         changed_fields: list[str] = []
@@ -4155,6 +4211,37 @@ class ClashService:
             )
 
         rows = await self.repo.results_by_ids(run_id, unique_ids)
+        # One gate call per distinct before/after triage state, not one per row.
+        self.findings = []
+        gated: set[tuple[Any, ...]] = set()
+        seen_findings: set[tuple[Any, ...]] = set()
+        for result in rows:
+            changes: dict[str, Any] = {}
+            if new_status is not None:
+                changes["status"] = new_status
+            if severity is not None:
+                changes["severity"] = severity
+            if assigned_to is not None:
+                changes["assigned_to"] = assigned_to or None
+            state = tuple(getattr(result, k) for k in CLASH_FIELDS) + tuple(sorted(changes.items()))
+            if state in gated:
+                continue
+            gated.add(state)
+            for warning in await gate_record(
+                CLASH_RULE_SET,
+                "clash",
+                result,
+                CLASH_FIELDS,
+                changes,
+                operation="bulk_triage",
+                project_id=project_id,
+                error_code="clash_rules_failed",
+                target_id=str(result.id),
+            ):
+                key = (warning["rule_id"], warning["message"])
+                if key not in seen_findings:
+                    seen_findings.add(key)
+                    self.findings.append(warning)
         # (result, changed_fields) for the post-flush notification fan-out.
         touched: list[tuple[ClashResult, list[str]]] = []
         for result in rows:

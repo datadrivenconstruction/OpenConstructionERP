@@ -2444,5 +2444,105 @@
       "fail": "Kalem sıfır fiyatlanıyor ve şantiye genel giderleri toplamının dışında kalıyor.",
       "suggestion": "Birim fiyatı ve dönem sayısını ya da sabit tutarı girin."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "“{photo}” fotoğraf başvurusu yerel veya üst klasör yoludur, kayıtlı bir fotoğraf değildir.",
+      "suggestion": "Fotoğrafı plana ekleyin ve verilen başvuruyu kullanın."
+    },
+    "file_version_invalid": {
+      "fail": "“{version}” dosya sürümü geçerli bir sürüm kimliği değildir.",
+      "suggestion": "Sürümü belgenin sürüm listesinden seçin."
+    },
+    "pin_bare": {
+      "fail": "{page}. sayfadaki işaretin ne notu ne de fotoğrafı var.",
+      "suggestion": "İşaretin bulunanı göstermesi için bir not veya fotoğraf ekleyin."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "“{kind}” belgesi kapsadığı tutarı belirtmiyor.",
+      "suggestion": "Poliçede veya teminatta yazan teminat tutarını girin."
+    },
+    "currency_invalid": {
+      "fail": "“{currency}” para birimi üç harfli bir ISO kodu değildir.",
+      "suggestion": "EUR veya USD gibi bir kod kullanın ya da proje para birimi için boş bırakın."
+    },
+    "status_contradicts_dates": {
+      "fail": "“{status}” durumu, {expires} geçerlilik bitiş tarihiyle çelişiyor.",
+      "suggestion": "Durumu veya geçerlilik tarihlerini düzeltin."
+    },
+    "policy_number_missing": {
+      "fail": "“{kind}” belgesinin poliçe veya teminat numarası yok.",
+      "suggestion": "Belgenin düzenleyen kuruluştan doğrulanabilmesi için numarayı girin."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Gönderimde hiç dosya yok ve gönderilemez.",
+      "suggestion": "Göndermeden önce en az bir dosya ekleyin."
+    },
+    "send_without_recipients": {
+      "fail": "Gönderimin alıcısı yok ve gönderilemez.",
+      "suggestion": "Göndermeden önce en az bir alıcı ekleyin."
+    },
+    "item_duplicate": {
+      "fail": "“{name}” dosyası bu gönderimde birden fazla kez listelenmiş.",
+      "suggestion": "Tekrarlanan satırı kaldırın."
+    },
+    "construction_unversioned": {
+      "fail": "İnşaat için yayımlanan “{name}” dosyasının revizyonu yok.",
+      "suggestion": "Şantiyenin doğru sürüme göre inşa etmesi için revizyonu girin."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "{step}. adım, hiçbir kullanıcının sahip olamayacağı “{role}” rolünü gerektiriyor.",
+      "suggestion": "Var olan bir rol seçin veya onaylayanı doğrudan belirtin."
+    },
+    "step_sla_missing": {
+      "fail": "{step}. adımın süre sınırı yok.",
+      "suggestion": "Geciken adımların yükseltilebilmesi için yanıt saatini belirleyin."
+    },
+    "delegation_ended": {
+      "fail": "Vekâlet {ends} tarihinde zaten sona erdi.",
+      "suggestion": "Bugün veya sonrası bir bitiş tarihi belirleyin."
+    },
+    "delegation_open_ended": {
+      "fail": "Vekâletin bitiş tarihi yok ve iptal edilene kadar geçerli.",
+      "suggestion": "Vekilin onaylarınızı karşılamayı bırakacağı günü belirleyin."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "{metric} için uyarı düzeyi {warn}, hata düzeyi {error} değerinin üzerinde.",
+      "suggestion": "Uyarı düzeyini hata düzeyine eşit veya altına ayarlayın."
+    },
+    "threshold_value_invalid": {
+      "fail": "{value} değeri {metric} için kullanılabilir bir sınır değil.",
+      "suggestion": "Sıfır veya pozitif bir sayı girin; çakışma veya gün sayılarında tam sayı olmalı."
+    },
+    "threshold_disabled": {
+      "fail": "{metric} için alarm kapalı.",
+      "suggestion": "Yeniden açın veya bu uyarıya kimsenin ihtiyaç duymadığını onaylayın."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "“{value}” son tarihi bir takvim tarihi değil.",
+      "suggestion": "Tarihi yıl-ay-gün olarak girin, örneğin 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Çakışmanın son tarihi {due} idi ve hâlâ açık.",
+      "suggestion": "Yeni bir son tarih belirleyin veya çakışmayı kapatın."
+    },
+    "severe_unassigned": {
+      "fail": "“{level}” önem derecesindeki bir çakışma kimseye atanmadan ele alınıyor.",
+      "suggestion": "Çakışmayı çözecek disiplin sorumlusuna atayın."
+    },
+    "clearance_distance_missing": {
+      "fail": "Açıklık taraması sıfırdan büyük bir açıklık mesafesi gerektirir.",
+      "suggestion": "En küçük açıklığı metre olarak girin veya sert çakışma taraması kullanın."
+    }
   }
 }

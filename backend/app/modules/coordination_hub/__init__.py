@@ -32,3 +32,7 @@ async def on_startup() -> None:
     )
 
     register_coordination_hub_permissions()
+
+    from app.modules.coordination_hub.validators import register_coordination_hub_validation_rules
+
+    register_coordination_hub_validation_rules()

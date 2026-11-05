@@ -22,6 +22,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.plan_room.models import PlanPin
 from app.modules.plan_room.repository import PlanPinRepository
 from app.modules.plan_room.schemas import (
@@ -33,6 +34,7 @@ from app.modules.plan_room.schemas import (
     OverlayVersion,
     PlanPinCreate,
 )
+from app.modules.plan_room.validators import PIN_FIELDS, PLAN_ROOM_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +253,15 @@ class PlanRoomService:
         user_id: str | None = None,
     ) -> PlanPin:
         """Create a positioned photo / note pin on a document page."""
+        rule_warnings = await gate_record(
+            PLAN_ROOM_RULE_SET,
+            "pin",
+            {"page": page, "note": data.note, "photo_ref": data.photo_ref, "file_version_id": data.file_version_id},
+            PIN_FIELDS,
+            operation="create",
+            project_id=project_id,
+            error_code="plan_room_rules_failed",
+        )
         pin = PlanPin(
             project_id=project_id,
             document_id=document_id,
@@ -264,6 +275,7 @@ class PlanRoomService:
             metadata_=data.metadata,
         )
         pin = await self.pin_repo.create(pin)
+        pin.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         logger.info("plan_room pin created: doc=%s page=%s project=%s", document_id, page, project_id)
         return pin
 

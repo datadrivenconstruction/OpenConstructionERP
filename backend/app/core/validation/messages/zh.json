@@ -2444,5 +2444,105 @@
       "fail": "该行报价为零，不会计入开办费合计。",
       "suggestion": "请填写单价和期数，或填写固定金额。"
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "照片引用“{photo}”是本地路径或上级文件夹路径，而不是已保存的照片。",
+      "suggestion": "请将照片附加到图纸，并使用分配的引用。"
+    },
+    "file_version_invalid": {
+      "fail": "文件版本“{version}”不是有效的版本 ID。",
+      "suggestion": "请从文档的版本列表中选择版本。"
+    },
+    "pin_bare": {
+      "fail": "第 {page} 页的标记既没有备注也没有照片。",
+      "suggestion": "请添加备注或照片，让标记说明发现了什么。"
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "文档“{kind}”没有注明其承保金额。",
+      "suggestion": "请填写保单或保函上载明的保障金额。"
+    },
+    "currency_invalid": {
+      "fail": "币种“{currency}”不是三位字母的 ISO 代码。",
+      "suggestion": "请使用 EUR 或 USD 等代码，或留空以使用项目币种。"
+    },
+    "status_contradicts_dates": {
+      "fail": "状态“{status}”与到期日 {expires} 相矛盾。",
+      "suggestion": "请更正状态或有效期。"
+    },
+    "policy_number_missing": {
+      "fail": "文档“{kind}”没有保单号或保函号。",
+      "suggestion": "请填写编号，以便向签发方核实该文档。"
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "该传送单没有任何文件，无法发送。",
+      "suggestion": "发送前请至少添加一个文件。"
+    },
+    "send_without_recipients": {
+      "fail": "该传送单没有收件人，无法发送。",
+      "suggestion": "发送前请至少添加一位收件人。"
+    },
+    "item_duplicate": {
+      "fail": "文件“{name}”在此传送单中被列出多次。",
+      "suggestion": "请删除重复的行。"
+    },
+    "construction_unversioned": {
+      "fail": "为施工发布的文件“{name}”没有修订版本。",
+      "suggestion": "请填写修订版本，以便现场按正确版本施工。"
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "步骤 {step} 需要角色“{role}”，但没有任何用户可以拥有该角色。",
+      "suggestion": "请选择现有角色，或直接指定审批人。"
+    },
+    "step_sla_missing": {
+      "fail": "步骤 {step} 没有时限。",
+      "suggestion": "请设置响应小时数，以便逾期步骤可以升级处理。"
+    },
+    "delegation_ended": {
+      "fail": "该委托已于 {ends} 结束。",
+      "suggestion": "请将结束日期设为今天或之后。"
+    },
+    "delegation_open_ended": {
+      "fail": "该委托没有结束日期，将持续有效直至被撤销。",
+      "suggestion": "请设置代理人不再代为审批的日期。"
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "对于 {metric}，预警级别 {warn} 高于错误级别 {error}。",
+      "suggestion": "请将预警级别设为不高于错误级别。"
+    },
+    "threshold_value_invalid": {
+      "fail": "值 {value} 不是 {metric} 可用的限值。",
+      "suggestion": "请输入零或正数；碰撞数或天数须为整数。"
+    },
+    "threshold_disabled": {
+      "fail": "{metric} 的警报已关闭。",
+      "suggestion": "请重新开启，或确认没有人需要此预警。"
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "截止日期“{value}”不是日历日期。",
+      "suggestion": "请按 年-月-日 输入日期，例如 2026-11-30。"
+    },
+    "due_date_past": {
+      "fail": "该碰撞的截止日期为 {due}，目前仍未关闭。",
+      "suggestion": "请设置新的截止日期或关闭该碰撞。"
+    },
+    "severe_unassigned": {
+      "fail": "严重程度为“{level}”的碰撞正在处理，但未指派任何人。",
+      "suggestion": "请将该碰撞指派给负责解决它的专业负责人。"
+    },
+    "clearance_distance_missing": {
+      "fail": "净距检查需要大于零的净距。",
+      "suggestion": "请输入以米为单位的最小净距，或改用硬碰撞检查。"
+    }
   }
 }

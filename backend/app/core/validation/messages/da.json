@@ -2444,5 +2444,105 @@
       "fail": "Linjen prissættes til nul og falder ud af summen for byggepladsomkostninger.",
       "suggestion": "Angiv sats og antal perioder, eller det faste beløb."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Fotoreferencen „{photo}“ er en lokal sti eller en sti til en overordnet mappe, ikke et gemt foto.",
+      "suggestion": "Vedhæft fotoet til tegningen, og brug den tildelte reference."
+    },
+    "file_version_invalid": {
+      "fail": "Filversionen „{version}“ er ikke et gyldigt versions-id.",
+      "suggestion": "Vælg versionen fra dokumentets versionsliste."
+    },
+    "pin_bare": {
+      "fail": "Markøren på side {page} har hverken note eller foto.",
+      "suggestion": "Tilføj en note eller et foto, så markøren viser, hvad der blev fundet."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokumentet „{kind}“ angiver ikke, hvilket beløb det dækker.",
+      "suggestion": "Angiv dækningsbeløbet fra policen eller garantien."
+    },
+    "currency_invalid": {
+      "fail": "Valutaen „{currency}“ er ikke en ISO-kode på tre bogstaver.",
+      "suggestion": "Brug en kode som EUR eller USD, eller lad feltet stå tomt for projektets valuta."
+    },
+    "status_contradicts_dates": {
+      "fail": "Statussen „{status}“ modsiger udløbsdatoen {expires}.",
+      "suggestion": "Ret statussen eller gyldighedsdatoerne."
+    },
+    "policy_number_missing": {
+      "fail": "Dokumentet „{kind}“ har intet police- eller garantinummer.",
+      "suggestion": "Angiv nummeret, så dokumentet kan kontrolleres hos udstederen."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Fremsendelsen indeholder ingen filer og kan ikke sendes.",
+      "suggestion": "Tilføj mindst én fil, før du sender."
+    },
+    "send_without_recipients": {
+      "fail": "Fremsendelsen har ingen modtagere og kan ikke sendes.",
+      "suggestion": "Tilføj mindst én modtager, før du sender."
+    },
+    "item_duplicate": {
+      "fail": "Filen „{name}“ optræder flere gange i denne fremsendelse.",
+      "suggestion": "Fjern den gentagne linje."
+    },
+    "construction_unversioned": {
+      "fail": "Filen „{name}“ udstedt til udførelse har ingen revision.",
+      "suggestion": "Angiv revisionen, så byggepladsen bygger efter den rigtige version."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Trin {step} kræver rollen „{role}“, som ingen bruger kan have.",
+      "suggestion": "Vælg en eksisterende rolle, eller angiv godkenderen direkte."
+    },
+    "step_sla_missing": {
+      "fail": "Trin {step} har ingen tidsfrist.",
+      "suggestion": "Angiv antal timer til svar, så forsinkede trin kan eskaleres."
+    },
+    "delegation_ended": {
+      "fail": "Stedfortrædningen sluttede allerede {ends}.",
+      "suggestion": "Angiv en slutdato, der er i dag eller senere."
+    },
+    "delegation_open_ended": {
+      "fail": "Stedfortrædningen har ingen slutdato og gælder, til den tilbagekaldes.",
+      "suggestion": "Angiv den dag, hvor stedfortræderen holder op med at dække dine godkendelser."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "For {metric} ligger advarselsniveauet {warn} over fejlniveauet {error}.",
+      "suggestion": "Sæt advarselsniveauet på eller under fejlniveauet."
+    },
+    "threshold_value_invalid": {
+      "fail": "Værdien {value} er ikke en brugbar grænse for {metric}.",
+      "suggestion": "Angiv nul eller et positivt tal, et helt tal for kollisioner eller dage."
+    },
+    "threshold_disabled": {
+      "fail": "Alarmen for {metric} er slået fra.",
+      "suggestion": "Slå den til igen, eller bekræft, at ingen har brug for denne advarsel."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Fristen „{value}“ er ikke en kalenderdato.",
+      "suggestion": "Angiv datoen som år-måned-dag, for eksempel 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Kollisionen skulle være løst {due} og er stadig åben.",
+      "suggestion": "Angiv en ny frist, eller luk kollisionen."
+    },
+    "severe_unassigned": {
+      "fail": "En kollision med alvorlighed „{level}“ behandles uden en tildelt person.",
+      "suggestion": "Tildel kollisionen til den fagansvarlige, der løser den."
+    },
+    "clearance_distance_missing": {
+      "fail": "Et frihøjdetjek kræver en frihøjde over nul.",
+      "suggestion": "Angiv den mindste frihøjde i meter, eller brug et tjek for hårde kollisioner."
+    }
   }
 }

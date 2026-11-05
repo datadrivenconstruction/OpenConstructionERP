@@ -2444,5 +2444,105 @@
       "fail": "Stavka se vrednuje nulom i ispada iz zbroja općih troškova gradilišta.",
       "suggestion": "Unesite cijenu i broj razdoblja ili fiksni iznos."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Referenca fotografije „{photo}“ je lokalna putanja ili putanja nadređene mape, a ne pohranjena fotografija.",
+      "suggestion": "Priložite fotografiju nacrtu i upotrijebite dodijeljenu referencu."
+    },
+    "file_version_invalid": {
+      "fail": "Verzija datoteke „{version}“ nije valjan identifikator verzije.",
+      "suggestion": "Odaberite verziju s popisa verzija dokumenta."
+    },
+    "pin_bare": {
+      "fail": "Oznaka na stranici {page} nema ni bilješku ni fotografiju.",
+      "suggestion": "Dodajte bilješku ili fotografiju kako bi oznaka pokazivala što je pronađeno."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokument „{kind}“ ne navodi iznos koji pokriva.",
+      "suggestion": "Unesite iznos pokrića naveden na polici ili jamstvu."
+    },
+    "currency_invalid": {
+      "fail": "Valuta „{currency}“ nije troslovna ISO oznaka.",
+      "suggestion": "Upotrijebite oznaku poput EUR ili USD ili ostavite prazno za valutu projekta."
+    },
+    "status_contradicts_dates": {
+      "fail": "Status „{status}“ proturječi datumu isteka {expires}.",
+      "suggestion": "Ispravite status ili datume valjanosti."
+    },
+    "policy_number_missing": {
+      "fail": "Dokument „{kind}“ nema broj police ili jamstva.",
+      "suggestion": "Unesite broj kako bi se dokument mogao provjeriti kod izdavatelja."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Otprema ne sadrži nijednu datoteku i ne može se poslati.",
+      "suggestion": "Dodajte barem jednu datoteku prije slanja."
+    },
+    "send_without_recipients": {
+      "fail": "Otprema nema primatelja i ne može se poslati.",
+      "suggestion": "Dodajte barem jednog primatelja prije slanja."
+    },
+    "item_duplicate": {
+      "fail": "Datoteka „{name}“ navedena je više puta u ovoj otpremi.",
+      "suggestion": "Uklonite ponovljeni redak."
+    },
+    "construction_unversioned": {
+      "fail": "Datoteka „{name}“ izdana za izvedbu nema reviziju.",
+      "suggestion": "Unesite reviziju kako bi se na gradilištu gradilo prema ispravnoj verziji."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Korak {step} traži ulogu „{role}“ koju nijedan korisnik ne može imati.",
+      "suggestion": "Odaberite postojeću ulogu ili izravno imenujte odobravatelja."
+    },
+    "step_sla_missing": {
+      "fail": "Korak {step} nema vremensko ograničenje.",
+      "suggestion": "Postavite broj sati za odgovor kako bi se zakašnjeli koraci mogli eskalirati."
+    },
+    "delegation_ended": {
+      "fail": "Zamjena je već završila {ends}.",
+      "suggestion": "Postavite datum završetka koji je danas ili kasnije."
+    },
+    "delegation_open_ended": {
+      "fail": "Zamjena nema datum završetka i vrijedi do opoziva.",
+      "suggestion": "Postavite dan kada zamjenik prestaje pokrivati vaša odobrenja."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Za {metric} razina upozorenja {warn} veća je od razine pogreške {error}.",
+      "suggestion": "Postavite razinu upozorenja na razinu pogreške ili ispod nje."
+    },
+    "threshold_value_invalid": {
+      "fail": "Vrijednost {value} nije upotrebljiva granica za {metric}.",
+      "suggestion": "Unesite nulu ili pozitivan broj, cijeli broj za sudare ili dane."
+    },
+    "threshold_disabled": {
+      "fail": "Alarm za {metric} je isključen.",
+      "suggestion": "Ponovno ga uključite ili potvrdite da nikome ne treba ovo upozorenje."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Rok „{value}“ nije kalendarski datum.",
+      "suggestion": "Unesite datum kao godina-mjesec-dan, na primjer 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Sudar je imao rok {due} i još je otvoren.",
+      "suggestion": "Postavite novi rok ili zatvorite sudar."
+    },
+    "severe_unassigned": {
+      "fail": "Sudar težine „{level}“ obrađuje se bez dodijeljene osobe.",
+      "suggestion": "Dodijelite sudar voditelju struke koji će ga riješiti."
+    },
+    "clearance_distance_missing": {
+      "fail": "Provjera razmaka traži razmak veći od nule.",
+      "suggestion": "Unesite najmanji razmak u metrima ili upotrijebite provjeru tvrdih sudara."
+    }
   }
 }

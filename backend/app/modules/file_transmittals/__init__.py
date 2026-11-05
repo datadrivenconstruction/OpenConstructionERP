@@ -31,3 +31,7 @@ async def on_startup() -> None:
     )
 
     register_file_transmittal_permissions()
+
+    from app.modules.file_transmittals.validators import register_file_transmittals_validation_rules
+
+    register_file_transmittals_validation_rules()

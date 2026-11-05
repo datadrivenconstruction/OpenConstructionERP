@@ -2444,5 +2444,105 @@
       "fail": "Linia se evaluează la zero și iese din totalul cheltuielilor generale de șantier.",
       "suggestion": "Introduceți tariful și numărul de perioade sau suma fixă."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Referința fotografiei „{photo}” este o cale locală sau a folderului părinte, nu o fotografie salvată.",
+      "suggestion": "Atașați fotografia la plan și folosiți referința atribuită."
+    },
+    "file_version_invalid": {
+      "fail": "Versiunea fișierului „{version}” nu este un identificator de versiune valid.",
+      "suggestion": "Alegeți versiunea din lista de versiuni a documentului."
+    },
+    "pin_bare": {
+      "fail": "Marcajul de pe pagina {page} nu are nici notă, nici fotografie.",
+      "suggestion": "Adăugați o notă sau o fotografie ca marcajul să arate ce s-a constatat."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Documentul „{kind}” nu indică suma pe care o acoperă.",
+      "suggestion": "Introduceți suma asigurată din poliță sau din garanție."
+    },
+    "currency_invalid": {
+      "fail": "Moneda „{currency}” nu este un cod ISO din trei litere.",
+      "suggestion": "Folosiți un cod precum EUR sau USD sau lăsați gol pentru moneda proiectului."
+    },
+    "status_contradicts_dates": {
+      "fail": "Starea „{status}” contrazice data expirării {expires}.",
+      "suggestion": "Corectați starea sau datele de valabilitate."
+    },
+    "policy_number_missing": {
+      "fail": "Documentul „{kind}” nu are număr de poliță sau de garanție.",
+      "suggestion": "Introduceți numărul pentru ca documentul să poată fi verificat la emitent."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Transmiterea nu conține niciun fișier și nu poate fi trimisă.",
+      "suggestion": "Adăugați cel puțin un fișier înainte de trimitere."
+    },
+    "send_without_recipients": {
+      "fail": "Transmiterea nu are destinatari și nu poate fi trimisă.",
+      "suggestion": "Adăugați cel puțin un destinatar înainte de trimitere."
+    },
+    "item_duplicate": {
+      "fail": "Fișierul „{name}” apare de mai multe ori în această transmitere.",
+      "suggestion": "Eliminați rândul repetat."
+    },
+    "construction_unversioned": {
+      "fail": "Fișierul „{name}” emis pentru execuție nu are revizie.",
+      "suggestion": "Introduceți revizia pentru ca șantierul să construiască după versiunea corectă."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Pasul {step} cere rolul „{role}”, pe care niciun utilizator nu îl poate avea.",
+      "suggestion": "Alegeți un rol existent sau numiți direct aprobatorul."
+    },
+    "step_sla_missing": {
+      "fail": "Pasul {step} nu are termen.",
+      "suggestion": "Stabiliți orele de răspuns pentru ca pașii întârziați să poată fi escaladați."
+    },
+    "delegation_ended": {
+      "fail": "Delegarea s-a încheiat deja la {ends}.",
+      "suggestion": "Stabiliți o dată de încheiere de azi sau mai târziu."
+    },
+    "delegation_open_ended": {
+      "fail": "Delegarea nu are dată de încheiere și rămâne în vigoare până la revocare.",
+      "suggestion": "Stabiliți ziua în care delegatul încetează să vă acopere aprobările."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Pentru {metric}, nivelul de avertizare {warn} depășește nivelul de eroare {error}.",
+      "suggestion": "Stabiliți nivelul de avertizare la nivelul de eroare sau sub el."
+    },
+    "threshold_value_invalid": {
+      "fail": "Valoarea {value} nu este o limită utilizabilă pentru {metric}.",
+      "suggestion": "Introduceți zero sau un număr pozitiv, întreg pentru coliziuni sau zile."
+    },
+    "threshold_disabled": {
+      "fail": "Alarma pentru {metric} este oprită.",
+      "suggestion": "Porniți-o din nou sau confirmați că nimeni nu are nevoie de această avertizare."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Termenul „{value}” nu este o dată calendaristică.",
+      "suggestion": "Introduceți data ca an-lună-zi, de exemplu 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Coliziunea avea termen {due} și este încă deschisă.",
+      "suggestion": "Stabiliți un termen nou sau închideți coliziunea."
+    },
+    "severe_unassigned": {
+      "fail": "O coliziune de gravitate „{level}” este tratată fără persoană atribuită.",
+      "suggestion": "Atribuiți coliziunea responsabilului de specialitate care o va rezolva."
+    },
+    "clearance_distance_missing": {
+      "fail": "O rulare de distanță are nevoie de o distanță mai mare de zero.",
+      "suggestion": "Introduceți distanța minimă în metri sau folosiți o rulare de coliziuni ferme."
+    }
   }
 }

@@ -2444,5 +2444,105 @@
       "fail": "A tétel nulla értéket kap, és kiesik az általános költségek összegéből.",
       "suggestion": "Adja meg a díjtételt és az időszakok számát, vagy a fix összeget."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "A(z) „{photo}” fotóhivatkozás helyi vagy szülőmappa-útvonal, nem tárolt fotó.",
+      "suggestion": "Csatolja a fotót a tervhez, és használja a kapott hivatkozást."
+    },
+    "file_version_invalid": {
+      "fail": "A(z) „{version}” fájlverzió nem érvényes verzióazonosító.",
+      "suggestion": "Válassza ki a verziót a dokumentum verzióinak listájából."
+    },
+    "pin_bare": {
+      "fail": "A(z) {page}. oldalon lévő jelölőnek nincs sem jegyzete, sem fotója.",
+      "suggestion": "Adjon hozzá jegyzetet vagy fotót, hogy a jelölő megmutassa, mit találtak."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "A(z) „{kind}” dokumentum nem tünteti fel a fedezett összeget.",
+      "suggestion": "Adja meg a kötvényen vagy garancián szereplő fedezeti összeget."
+    },
+    "currency_invalid": {
+      "fail": "A(z) „{currency}” pénznem nem hárombetűs ISO-kód.",
+      "suggestion": "Használjon kódot, például EUR vagy USD, vagy hagyja üresen a projekt pénzneméhez."
+    },
+    "status_contradicts_dates": {
+      "fail": "A(z) „{status}” állapot ellentmond a lejárati dátumnak: {expires}.",
+      "suggestion": "Javítsa az állapotot vagy az érvényességi dátumokat."
+    },
+    "policy_number_missing": {
+      "fail": "A(z) „{kind}” dokumentumnak nincs kötvény- vagy garanciaszáma.",
+      "suggestion": "Adja meg a számot, hogy a dokumentum ellenőrizhető legyen a kiállítónál."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Az átadás egyetlen fájlt sem tartalmaz, ezért nem küldhető el.",
+      "suggestion": "Küldés előtt adjon hozzá legalább egy fájlt."
+    },
+    "send_without_recipients": {
+      "fail": "Az átadásnak nincs címzettje, ezért nem küldhető el.",
+      "suggestion": "Küldés előtt adjon hozzá legalább egy címzettet."
+    },
+    "item_duplicate": {
+      "fail": "A(z) „{name}” fájl többször szerepel ebben az átadásban.",
+      "suggestion": "Törölje az ismétlődő sort."
+    },
+    "construction_unversioned": {
+      "fail": "A kivitelezésre kiadott „{name}” fájlnak nincs revíziója.",
+      "suggestion": "Adja meg a revíziót, hogy az építkezésen a helyes változat szerint építsenek."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "A(z) {step}. lépés a „{role}” szerepkört kéri, amellyel egy felhasználó sem rendelkezhet.",
+      "suggestion": "Válasszon létező szerepkört, vagy nevezze meg közvetlenül a jóváhagyót."
+    },
+    "step_sla_missing": {
+      "fail": "A(z) {step}. lépésnek nincs határideje.",
+      "suggestion": "Állítsa be a válaszadási órákat, hogy a késő lépések eszkalálhatók legyenek."
+    },
+    "delegation_ended": {
+      "fail": "A helyettesítés már véget ért: {ends}.",
+      "suggestion": "Adjon meg mai vagy későbbi befejezési dátumot."
+    },
+    "delegation_open_ended": {
+      "fail": "A helyettesítésnek nincs befejezési dátuma, és visszavonásig érvényes.",
+      "suggestion": "Adja meg azt a napot, amikor a helyettes már nem fedi a jóváhagyásait."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "A(z) {metric} mutatónál a figyelmeztetési szint ({warn}) a hibaszint ({error}) fölött van.",
+      "suggestion": "Állítsa a figyelmeztetési szintet a hibaszintre vagy az alá."
+    },
+    "threshold_value_invalid": {
+      "fail": "A(z) {value} érték nem használható határérték a(z) {metric} mutatóhoz.",
+      "suggestion": "Adjon meg nullát vagy pozitív számot, ütközéseknél és napoknál egész számot."
+    },
+    "threshold_disabled": {
+      "fail": "A(z) {metric} riasztása ki van kapcsolva.",
+      "suggestion": "Kapcsolja vissza, vagy erősítse meg, hogy senkinek nincs szüksége erre a figyelmeztetésre."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "A(z) „{value}” határidő nem naptári dátum.",
+      "suggestion": "Adja meg a dátumot év-hónap-nap formában, például 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Az ütközés határideje {due} volt, és még nyitott.",
+      "suggestion": "Adjon meg új határidőt, vagy zárja le az ütközést."
+    },
+    "severe_unassigned": {
+      "fail": "A(z) „{level}” súlyosságú ütközést hozzárendelt személy nélkül kezelik.",
+      "suggestion": "Rendelje az ütközést a szakági vezetőhöz, aki megoldja."
+    },
+    "clearance_distance_missing": {
+      "fail": "A távolságvizsgálathoz nullánál nagyobb távolság kell.",
+      "suggestion": "Adja meg a legkisebb távolságot méterben, vagy használjon kemény ütközések vizsgálatát."
+    }
   }
 }

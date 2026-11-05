@@ -2444,5 +2444,105 @@
       "fail": "Linjen prises til null og faller ut av summen for rigg og drift.",
       "suggestion": "Oppgi sats og antall perioder, eller det faste beløpet."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Fotoreferansen «{photo}» er en lokal sti eller en sti til overordnet mappe, ikke et lagret foto.",
+      "suggestion": "Legg fotoet ved tegningen og bruk den tildelte referansen."
+    },
+    "file_version_invalid": {
+      "fail": "Filversjonen «{version}» er ikke en gyldig versjons-ID.",
+      "suggestion": "Velg versjonen fra dokumentets versjonsliste."
+    },
+    "pin_bare": {
+      "fail": "Markøren på side {page} har verken notat eller foto.",
+      "suggestion": "Legg til et notat eller et foto slik at markøren viser hva som ble funnet."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Dokumentet «{kind}» oppgir ikke hvilket beløp det dekker.",
+      "suggestion": "Oppgi dekningsbeløpet fra polisen eller garantien."
+    },
+    "currency_invalid": {
+      "fail": "Valutaen «{currency}» er ikke en ISO-kode på tre bokstaver.",
+      "suggestion": "Bruk en kode som EUR eller USD, eller la feltet stå tomt for prosjektets valuta."
+    },
+    "status_contradicts_dates": {
+      "fail": "Statusen «{status}» motsier utløpsdatoen {expires}.",
+      "suggestion": "Rett statusen eller gyldighetsdatoene."
+    },
+    "policy_number_missing": {
+      "fail": "Dokumentet «{kind}» har ikke polise- eller garantinummer.",
+      "suggestion": "Oppgi nummeret slik at dokumentet kan kontrolleres hos utstederen."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Oversendelsen inneholder ingen filer og kan ikke sendes.",
+      "suggestion": "Legg til minst én fil før du sender."
+    },
+    "send_without_recipients": {
+      "fail": "Oversendelsen har ingen mottakere og kan ikke sendes.",
+      "suggestion": "Legg til minst én mottaker før du sender."
+    },
+    "item_duplicate": {
+      "fail": "Filen «{name}» er ført opp flere ganger i denne oversendelsen.",
+      "suggestion": "Fjern den gjentatte linjen."
+    },
+    "construction_unversioned": {
+      "fail": "Filen «{name}» utstedt for utførelse har ingen revisjon.",
+      "suggestion": "Oppgi revisjonen slik at byggeplassen bygger etter riktig versjon."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Trinn {step} krever rollen «{role}», som ingen bruker kan ha.",
+      "suggestion": "Velg en eksisterende rolle eller oppgi godkjenneren direkte."
+    },
+    "step_sla_missing": {
+      "fail": "Trinn {step} har ingen tidsfrist.",
+      "suggestion": "Angi antall timer for svar slik at forsinkede trinn kan eskaleres."
+    },
+    "delegation_ended": {
+      "fail": "Stedfortredelsen tok allerede slutt {ends}.",
+      "suggestion": "Angi en sluttdato som er i dag eller senere."
+    },
+    "delegation_open_ended": {
+      "fail": "Stedfortredelsen har ingen sluttdato og gjelder til den trekkes tilbake.",
+      "suggestion": "Angi dagen stedfortrederen slutter å dekke godkjenningene dine."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "For {metric} ligger varselnivået {warn} over feilnivået {error}.",
+      "suggestion": "Sett varselnivået på eller under feilnivået."
+    },
+    "threshold_value_invalid": {
+      "fail": "Verdien {value} er ikke en brukbar grense for {metric}.",
+      "suggestion": "Oppgi null eller et positivt tall, et helt tall for kollisjoner eller dager."
+    },
+    "threshold_disabled": {
+      "fail": "Alarmen for {metric} er slått av.",
+      "suggestion": "Slå den på igjen eller bekreft at ingen trenger dette varselet."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Fristen «{value}» er ikke en kalenderdato.",
+      "suggestion": "Oppgi datoen som år-måned-dag, for eksempel 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Kollisjonen skulle vært løst {due} og er fortsatt åpen.",
+      "suggestion": "Angi en ny frist eller lukk kollisjonen."
+    },
+    "severe_unassigned": {
+      "fail": "En kollisjon med alvorlighet «{level}» behandles uten at noen er tildelt.",
+      "suggestion": "Tildel kollisjonen til faglederen som løser den."
+    },
+    "clearance_distance_missing": {
+      "fail": "En klaringskjøring trenger en klaringsavstand over null.",
+      "suggestion": "Oppgi minste klaring i meter eller bruk en kjøring for harde kollisjoner."
+    }
   }
 }

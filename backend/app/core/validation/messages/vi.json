@@ -2444,5 +2444,105 @@
       "fail": "Dòng có giá bằng không và bị loại khỏi tổng chi phí chung công trường.",
       "suggestion": "Nhập đơn giá và số kỳ, hoặc số tiền cố định."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Tham chiếu ảnh “{photo}” là đường dẫn cục bộ hoặc thư mục cha, không phải ảnh đã lưu.",
+      "suggestion": "Hãy đính kèm ảnh vào bản vẽ và dùng tham chiếu được cấp."
+    },
+    "file_version_invalid": {
+      "fail": "Phiên bản tệp “{version}” không phải mã phiên bản hợp lệ.",
+      "suggestion": "Hãy chọn phiên bản từ danh sách phiên bản của tài liệu."
+    },
+    "pin_bare": {
+      "fail": "Ghim trên trang {page} không có ghi chú lẫn ảnh.",
+      "suggestion": "Hãy thêm ghi chú hoặc ảnh để ghim cho biết đã phát hiện gì."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Tài liệu “{kind}” không nêu số tiền mà nó bảo hiểm.",
+      "suggestion": "Hãy nhập số tiền bảo hiểm ghi trên đơn bảo hiểm hoặc bảo lãnh."
+    },
+    "currency_invalid": {
+      "fail": "Đơn vị tiền tệ “{currency}” không phải mã ISO ba chữ cái.",
+      "suggestion": "Hãy dùng mã như EUR hoặc USD, hoặc để trống để dùng tiền tệ của dự án."
+    },
+    "status_contradicts_dates": {
+      "fail": "Trạng thái “{status}” mâu thuẫn với ngày hết hạn {expires}.",
+      "suggestion": "Hãy sửa trạng thái hoặc ngày hiệu lực."
+    },
+    "policy_number_missing": {
+      "fail": "Tài liệu “{kind}” không có số đơn bảo hiểm hoặc số bảo lãnh.",
+      "suggestion": "Hãy nhập số để có thể xác minh tài liệu với bên phát hành."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Phiếu chuyển giao không có tệp nào và không thể gửi.",
+      "suggestion": "Hãy thêm ít nhất một tệp trước khi gửi."
+    },
+    "send_without_recipients": {
+      "fail": "Phiếu chuyển giao không có người nhận và không thể gửi.",
+      "suggestion": "Hãy thêm ít nhất một người nhận trước khi gửi."
+    },
+    "item_duplicate": {
+      "fail": "Tệp “{name}” được liệt kê nhiều lần trong phiếu chuyển giao này.",
+      "suggestion": "Hãy xóa dòng bị lặp."
+    },
+    "construction_unversioned": {
+      "fail": "Tệp “{name}” phát hành để thi công chưa có bản sửa đổi.",
+      "suggestion": "Hãy nhập bản sửa đổi để công trường thi công đúng phiên bản."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Bước {step} yêu cầu vai trò “{role}” mà không người dùng nào có thể nắm giữ.",
+      "suggestion": "Hãy chọn vai trò hiện có hoặc chỉ định trực tiếp người phê duyệt."
+    },
+    "step_sla_missing": {
+      "fail": "Bước {step} không có thời hạn.",
+      "suggestion": "Hãy đặt số giờ phản hồi để các bước trễ có thể được nâng cấp xử lý."
+    },
+    "delegation_ended": {
+      "fail": "Việc ủy quyền đã kết thúc vào {ends}.",
+      "suggestion": "Hãy đặt ngày kết thúc là hôm nay hoặc sau đó."
+    },
+    "delegation_open_ended": {
+      "fail": "Việc ủy quyền không có ngày kết thúc và có hiệu lực đến khi bị thu hồi.",
+      "suggestion": "Hãy đặt ngày người được ủy quyền thôi thay bạn phê duyệt."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Với {metric}, mức cảnh báo {warn} cao hơn mức lỗi {error}.",
+      "suggestion": "Hãy đặt mức cảnh báo bằng hoặc thấp hơn mức lỗi."
+    },
+    "threshold_value_invalid": {
+      "fail": "Giá trị {value} không phải ngưỡng dùng được cho {metric}.",
+      "suggestion": "Hãy nhập số không hoặc số dương, số nguyên đối với va chạm hoặc số ngày."
+    },
+    "threshold_disabled": {
+      "fail": "Cảnh báo cho {metric} đang tắt.",
+      "suggestion": "Hãy bật lại hoặc xác nhận rằng không ai cần cảnh báo này."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Hạn “{value}” không phải ngày trong lịch.",
+      "suggestion": "Hãy nhập ngày theo dạng năm-tháng-ngày, ví dụ 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Va chạm này đến hạn vào {due} và vẫn đang mở.",
+      "suggestion": "Hãy đặt hạn mới hoặc đóng va chạm."
+    },
+    "severe_unassigned": {
+      "fail": "Va chạm mức nghiêm trọng “{level}” đang được xử lý mà chưa giao cho ai.",
+      "suggestion": "Hãy giao va chạm cho trưởng bộ môn sẽ giải quyết."
+    },
+    "clearance_distance_missing": {
+      "fail": "Lượt kiểm tra khoảng hở cần khoảng hở lớn hơn không.",
+      "suggestion": "Hãy nhập khoảng hở tối thiểu theo mét hoặc dùng lượt kiểm tra va chạm cứng."
+    }
   }
 }

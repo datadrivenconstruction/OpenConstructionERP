@@ -20,3 +20,7 @@ async def on_startup() -> None:
     from app.modules.clash.permissions import register_clash_permissions
 
     register_clash_permissions()
+
+    from app.modules.clash.validators import register_clash_validation_rules
+
+    register_clash_validation_rules()

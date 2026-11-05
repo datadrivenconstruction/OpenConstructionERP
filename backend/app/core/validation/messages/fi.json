@@ -2444,5 +2444,105 @@
       "fail": "Rivin hinta on nolla, ja se putoaa pois työmaan yleiskustannusten summasta.",
       "suggestion": "Anna hinta ja jaksojen määrä tai kiinteä summa."
     }
+  },
+  "plan_room": {
+    "photo_ref_path": {
+      "fail": "Valokuvaviite ”{photo}” on paikallinen polku tai ylemmän kansion polku, ei tallennettu valokuva.",
+      "suggestion": "Liitä valokuva piirustukseen ja käytä annettua viitettä."
+    },
+    "file_version_invalid": {
+      "fail": "Tiedoston versio ”{version}” ei ole kelvollinen versiotunniste.",
+      "suggestion": "Valitse versio asiakirjan versioluettelosta."
+    },
+    "pin_bare": {
+      "fail": "Sivun {page} merkinnällä ei ole muistiinpanoa eikä valokuvaa.",
+      "suggestion": "Lisää muistiinpano tai valokuva, jotta merkintä kertoo, mitä löydettiin."
+    }
+  },
+  "compliance_docs": {
+    "coverage_missing": {
+      "fail": "Asiakirja ”{kind}” ei ilmoita summaa, jonka se kattaa.",
+      "suggestion": "Anna vakuutuskirjassa tai takauksessa oleva kattavuussumma."
+    },
+    "currency_invalid": {
+      "fail": "Valuutta ”{currency}” ei ole kolmikirjaiminen ISO-koodi.",
+      "suggestion": "Käytä koodia, kuten EUR tai USD, tai jätä tyhjäksi hankkeen valuuttaa varten."
+    },
+    "status_contradicts_dates": {
+      "fail": "Tila ”{status}” on ristiriidassa päättymispäivän {expires} kanssa.",
+      "suggestion": "Korjaa tila tai voimassaolopäivät."
+    },
+    "policy_number_missing": {
+      "fail": "Asiakirjalla ”{kind}” ei ole vakuutus- tai takausnumeroa.",
+      "suggestion": "Anna numero, jotta asiakirja voidaan tarkistaa myöntäjältä."
+    }
+  },
+  "file_transmittals": {
+    "send_without_items": {
+      "fail": "Lähete ei sisällä tiedostoja, eikä sitä voi lähettää.",
+      "suggestion": "Lisää vähintään yksi tiedosto ennen lähettämistä."
+    },
+    "send_without_recipients": {
+      "fail": "Lähetteellä ei ole vastaanottajia, eikä sitä voi lähettää.",
+      "suggestion": "Lisää vähintään yksi vastaanottaja ennen lähettämistä."
+    },
+    "item_duplicate": {
+      "fail": "Tiedosto ”{name}” on tässä lähetteessä useammin kuin kerran.",
+      "suggestion": "Poista toistuva rivi."
+    },
+    "construction_unversioned": {
+      "fail": "Toteutukseen annetulla tiedostolla ”{name}” ei ole revisiota.",
+      "suggestion": "Anna revisio, jotta työmaalla rakennetaan oikean version mukaan."
+    }
+  },
+  "approval_routes": {
+    "approver_role_unknown": {
+      "fail": "Vaihe {step} edellyttää roolia ”{role}”, jota millään käyttäjällä ei voi olla.",
+      "suggestion": "Valitse olemassa oleva rooli tai nimeä hyväksyjä suoraan."
+    },
+    "step_sla_missing": {
+      "fail": "Vaiheella {step} ei ole määräaikaa.",
+      "suggestion": "Aseta vastaustunnit, jotta myöhästyneet vaiheet voidaan eskaloida."
+    },
+    "delegation_ended": {
+      "fail": "Sijaisuus päättyi jo {ends}.",
+      "suggestion": "Aseta päättymispäivä, joka on tänään tai myöhemmin."
+    },
+    "delegation_open_ended": {
+      "fail": "Sijaisuudella ei ole päättymispäivää, ja se on voimassa peruutukseen asti.",
+      "suggestion": "Aseta päivä, jolloin sijainen lakkaa kattamasta hyväksyntöjäsi."
+    }
+  },
+  "coordination_hub": {
+    "threshold_inverted": {
+      "fail": "Mittarilla {metric} varoitustaso {warn} on virhetasoa {error} korkeampi.",
+      "suggestion": "Aseta varoitustaso virhetasolle tai sen alapuolelle."
+    },
+    "threshold_value_invalid": {
+      "fail": "Arvo {value} ei ole käyttökelpoinen raja mittarille {metric}.",
+      "suggestion": "Anna nolla tai positiivinen luku, törmäyksille ja päiville kokonaisluku."
+    },
+    "threshold_disabled": {
+      "fail": "Mittarin {metric} hälytys on pois päältä.",
+      "suggestion": "Kytke se takaisin päälle tai vahvista, ettei kukaan tarvitse tätä varoitusta."
+    }
+  },
+  "clash": {
+    "due_date_invalid": {
+      "fail": "Määräaika ”{value}” ei ole kalenteripäivä.",
+      "suggestion": "Anna päivä muodossa vuosi-kuukausi-päivä, esimerkiksi 2026-11-30."
+    },
+    "due_date_past": {
+      "fail": "Törmäyksen määräaika oli {due}, ja se on yhä avoin.",
+      "suggestion": "Aseta uusi määräaika tai sulje törmäys."
+    },
+    "severe_unassigned": {
+      "fail": "Vakavuudeltaan ”{level}” oleva törmäys on työn alla ilman vastuuhenkilöä.",
+      "suggestion": "Osoita törmäys alan vastaavalle, joka ratkaisee sen."
+    },
+    "clearance_distance_missing": {
+      "fail": "Välysajo tarvitsee nollaa suuremman välyksen.",
+      "suggestion": "Anna pienin välys metreinä tai käytä kovien törmäysten ajoa."
+    }
   }
 }
