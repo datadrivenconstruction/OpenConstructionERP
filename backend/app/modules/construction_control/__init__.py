@@ -18,3 +18,6 @@ async def on_startup() -> None:
     from app.modules.construction_control.permissions import register_construction_control_permissions
 
     register_construction_control_permissions()
+    from app.modules.construction_control.validators import register_construction_control_validation_rules
+
+    register_construction_control_validation_rules()

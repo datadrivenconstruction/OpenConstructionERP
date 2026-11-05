@@ -23,6 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus, publish_after_commit
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.qms.models import (
     QMSNCR,
     ITPItem,
@@ -63,6 +64,7 @@ from app.modules.qms.schemas import (
     PunchItemCreate,
     PunchItemUpdate,
 )
+from app.modules.qms.validators import CALIBRATION_FIELDS, NCR_FIELDS, PUNCH_FIELDS, QMS_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +197,37 @@ class QMSService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = QMSRepository(session)
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID | None,
+        target_id: str = "",
+        warnings_only: bool = False,
+    ) -> None:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422.
+
+        ``warnings_only`` is for system-driven changes, which are reported and never refused.
+        """
+        self.findings = await gate_record(
+            QMS_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="qms_rules_failed",
+            target_id=target_id,
+            warnings_only=warnings_only,
+        )
 
     # ── ITP plan ───────────────────────────────────────────────────────
 
@@ -1160,6 +1193,7 @@ class QMSService:
 
     # ── NCR ────────────────────────────────────────────────────────────
 
+    @carries_warnings
     async def raise_ncr(
         self,
         data: NCRCreate,
@@ -1180,6 +1214,15 @@ class QMSService:
             raise ValueError(
                 "cost_impact_currency is required when cost_impact_amount is provided",
             )
+
+        await self._gate(
+            "ncr",
+            {},
+            NCR_FIELDS,
+            {**data.model_dump(), "status": "open"},
+            operation="create",
+            project_id=data.project_id,
+        )
 
         ncr = QMSNCR(
             project_id=data.project_id,
@@ -1232,6 +1275,7 @@ class QMSService:
         )
         return ncr
 
+    @carries_warnings
     async def update_ncr(
         self,
         ncr_id: uuid.UUID,
@@ -1262,6 +1306,9 @@ class QMSService:
                 entity="NCR",
             )
         if fields:
+            await self._gate(
+                "ncr", ncr, NCR_FIELDS, fields, operation="update", project_id=ncr.project_id, target_id=str(ncr_id)
+            )
             await self.repo.update_ncr_fields(ncr_id, **fields)
             await self.session.refresh(ncr)
         # R8 audit: status transitions via PATCH were not audit-logged, leaving
@@ -1334,12 +1381,24 @@ class QMSService:
         if ncr and ncr.status == "action_pending":
             siblings = await self.repo.list_ncr_actions(action.ncr_id)
             if siblings and all(s.status == "done" for s in siblings):
+                # The move to verifying is system-driven: a missing root cause is reported, never refused.
+                await self._gate(
+                    "ncr",
+                    ncr,
+                    NCR_FIELDS,
+                    {"status": "verifying"},
+                    operation="verify_action",
+                    project_id=ncr.project_id,
+                    target_id=str(ncr.id),
+                    warnings_only=True,
+                )
                 await self.repo.update_ncr_fields(
                     action.ncr_id,
                     status="verifying",
                 )
         return action
 
+    @carries_warnings
     async def close_ncr(self, ncr_id: uuid.UUID) -> QMSNCR:
         ncr = await self.repo.get_ncr(ncr_id)
         if ncr is None:
@@ -1365,6 +1424,15 @@ class QMSService:
         # check above, then race to write "closed". Flush the pending update
         # and re-read inside the same transaction so the second caller sees the
         # committed "closed" status and raises instead of double-writing.
+        await self._gate(
+            "ncr",
+            ncr,
+            NCR_FIELDS,
+            {"status": "closed"},
+            operation="close",
+            project_id=ncr.project_id,
+            target_id=str(ncr_id),
+        )
         await self.repo.update_ncr_fields(ncr_id, status="closed")
         await self.session.flush()
         await self.session.refresh(ncr)
@@ -1463,6 +1531,7 @@ class QMSService:
 
     # ── Punch list ─────────────────────────────────────────────────────
 
+    @carries_warnings
     async def add_punch_item(
         self,
         data: PunchItemCreate,
@@ -1476,9 +1545,18 @@ class QMSService:
             except (TypeError, ValueError):
                 raised_by_uuid = None
 
+        raised_at = _utc_now_iso()
+        await self._gate(
+            "punch",
+            {},
+            PUNCH_FIELDS,
+            {"raised_at": raised_at, "due_date": _to_utc_iso(data.due_date)},
+            operation="create",
+            project_id=data.project_id,
+        )
         punch = QMSPunchItem(
             project_id=data.project_id,
-            raised_at=_utc_now_iso(),
+            raised_at=raised_at,
             raised_by=raised_by_uuid,
             title=data.title,
             description=data.description,
@@ -1506,6 +1584,7 @@ class QMSService:
         )
         return punch
 
+    @carries_warnings
     async def update_punch_item(
         self,
         punch_id: uuid.UUID,
@@ -1528,6 +1607,15 @@ class QMSService:
         if "due_date" in fields and isinstance(fields["due_date"], datetime):
             fields["due_date"] = _to_utc_iso(fields["due_date"])
         if fields:
+            await self._gate(
+                "punch",
+                punch,
+                PUNCH_FIELDS,
+                fields,
+                operation="update",
+                project_id=punch.project_id,
+                target_id=str(punch_id),
+            )
             await self.repo.update_punch_fields(punch_id, **fields)
             await self.session.refresh(punch)
         return punch
@@ -2474,6 +2562,7 @@ class QMSService:
 
     # ── Calibration tracking ──────────────────────────────────────────
 
+    @carries_warnings
     async def create_calibration(
         self,
         data: CalibrationCreate,
@@ -2483,6 +2572,14 @@ class QMSService:
         del user_id  # accepted for symmetry; not stored on this entity
         if data.valid_until <= data.calibration_date:
             raise ValueError("valid_until must be after calibration_date")
+        await self._gate(
+            "calibration",
+            {},
+            CALIBRATION_FIELDS,
+            {**data.model_dump(), "status": "valid"},
+            operation="create",
+            project_id=data.project_id,
+        )
         cal = QMSCalibration(
             project_id=data.project_id,
             instrument_id=data.instrument_id,
@@ -2502,6 +2599,7 @@ class QMSService:
         )
         return await self.repo.create_calibration(cal)
 
+    @carries_warnings
     async def update_calibration(
         self,
         cal_id: uuid.UUID,
@@ -2512,6 +2610,15 @@ class QMSService:
             raise ValueError(f"Calibration {cal_id} not found")
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if fields:
+            await self._gate(
+                "calibration",
+                cal,
+                CALIBRATION_FIELDS,
+                fields,
+                operation="update",
+                project_id=cal.project_id,
+                target_id=str(cal_id),
+            )
             await self.repo.update_calibration_fields(cal_id, **fields)
             await self.session.refresh(cal)
         return cal

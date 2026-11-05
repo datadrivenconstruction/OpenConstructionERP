@@ -19,3 +19,7 @@ async def on_startup() -> None:
 
     register_qms_permissions()
     register_subscribers()
+
+    from app.modules.qms.validators import register_qms_validation_rules
+
+    register_qms_validation_rules()
