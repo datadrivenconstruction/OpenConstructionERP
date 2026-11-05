@@ -14,3 +14,6 @@ async def on_startup() -> None:
     from app.modules.cvr.permissions import register_cvr_permissions
 
     register_cvr_permissions()
+    from app.modules.cvr.validators import register_cvr_validation_rules
+
+    register_cvr_validation_rules()
