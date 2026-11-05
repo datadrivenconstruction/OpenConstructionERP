@@ -1388,6 +1388,12 @@
     },
     "boq_pdf": {
       "strings": {
+        "offer_percent": "%",
+        "offer_licence": "N° de licence",
+        "offer_preliminaries": "Travaux préparatoires",
+        "offer_attn": "À l'attention de",
+        "offer_reverse_charge": "Autoliquidation : la taxe est due par le destinataire",
+        "offer_tax_exempt": "Exonéré de taxe",
         "offer_item": "Poste",
         "offer_description": "Désignation",
         "offer_qty": "Qté",
