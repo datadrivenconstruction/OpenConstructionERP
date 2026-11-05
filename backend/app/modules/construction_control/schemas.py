@@ -214,6 +214,8 @@ def _assert_range_bounds_ordered(
 
 class AcceptanceCriterionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -290,6 +292,8 @@ class InspectionResultIn(BaseModel):
 
 class InspectionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -443,6 +447,8 @@ class MaterialReviewIn(BaseModel):
 
 class MaterialRecordResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -552,6 +558,8 @@ class TestResultRecordIn(BaseModel):
 
 class TestResultResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -688,6 +696,8 @@ class AsBuiltImportFromScanIn(BaseModel):
 
 class AsBuiltRecordResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID

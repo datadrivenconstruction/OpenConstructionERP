@@ -22,9 +22,11 @@ from typing import Any
 from fastapi import HTTPException
 from fastapi import status as http_status
 
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.site_supervision import validators
 from app.modules.site_supervision.models import SupervisionEntry, SupervisionVisit
 from app.modules.site_supervision.repository import SupervisionRepository
+from app.modules.site_supervision.rules import ENTRY_FIELDS, SITE_SUPERVISION_RULE_SET, VISIT_FIELDS
 from app.modules.site_supervision.schemas import (
     SupervisionEntryCreate,
     SupervisionEntryUpdate,
@@ -41,6 +43,32 @@ class SupervisionService:
     def __init__(self, session: object) -> None:
         self.session = session
         self.repo = SupervisionRepository(session)  # type: ignore[arg-type]
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID,
+        target_id: str = "",
+    ) -> None:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422."""
+        self.findings = await gate_record(
+            SITE_SUPERVISION_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="site_supervision_rules_failed",
+            target_id=target_id,
+        )
 
     @staticmethod
     def _now() -> datetime:
@@ -48,12 +76,14 @@ class SupervisionService:
 
     # ── Visit CRUD ──────────────────────────────────────────────────────
 
+    @carries_warnings
     async def create_visit(
         self,
         data: SupervisionVisitCreate,
         *,
         user_id: str | None = None,
     ) -> SupervisionVisit:
+        await self._gate("visit", {}, VISIT_FIELDS, data.model_dump(), operation="create", project_id=data.project_id)
         visit = SupervisionVisit(
             project_id=data.project_id,
             planned_date=data.planned_date,
@@ -88,6 +118,7 @@ class SupervisionService:
     ) -> list[SupervisionVisit]:
         return await self.repo.list_visits(project_id, status=status, discipline=discipline)
 
+    @carries_warnings
     async def update_visit(
         self,
         visit_id: uuid.UUID,
@@ -97,6 +128,15 @@ class SupervisionService:
     ) -> SupervisionVisit:
         visit = await self.get_visit(visit_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        await self._gate(
+            "visit",
+            visit,
+            VISIT_FIELDS,
+            fields,
+            operation="update",
+            project_id=visit.project_id,
+            target_id=str(visit.id),
+        )
 
         if "metadata" in fields:
             incoming = fields.pop("metadata")
@@ -117,6 +157,7 @@ class SupervisionService:
 
     # ── Visit state machine ─────────────────────────────────────────────
 
+    @carries_warnings
     async def conduct_visit(self, visit_id: uuid.UUID) -> SupervisionVisit:
         """Mark a planned visit as conducted (planned -> conducted).
 
@@ -129,13 +170,23 @@ class SupervisionService:
                 status_code=http_status.HTTP_400_BAD_REQUEST,
                 detail="A reported visit cannot be re-opened for conducting.",
             )
-        if visit.actual_date is None:
-            visit.actual_date = self._now().date()
+        actual = visit.actual_date or self._now().date()
+        await self._gate(
+            "visit",
+            visit,
+            VISIT_FIELDS,
+            {"status": "conducted", "actual_date": actual},
+            operation="conduct",
+            project_id=visit.project_id,
+            target_id=str(visit.id),
+        )
+        visit.actual_date = actual
         visit.status = "conducted"
         await self.session.flush()  # type: ignore[attr-defined]
         await self.session.refresh(visit)  # type: ignore[attr-defined]
         return visit
 
+    @carries_warnings
     async def report_visit(self, visit_id: uuid.UUID) -> SupervisionVisit:
         """Mark a conducted visit as reported (conducted -> reported).
 
@@ -147,6 +198,15 @@ class SupervisionService:
                 status_code=http_status.HTTP_400_BAD_REQUEST,
                 detail="Only a conducted visit can be reported.",
             )
+        await self._gate(
+            "visit",
+            visit,
+            VISIT_FIELDS,
+            {"status": "reported"},
+            operation="report",
+            project_id=visit.project_id,
+            target_id=str(visit.id),
+        )
         visit.status = "reported"
         await self.session.flush()  # type: ignore[attr-defined]
         await self.session.refresh(visit)  # type: ignore[attr-defined]
@@ -154,6 +214,7 @@ class SupervisionService:
 
     # ── Entry CRUD ──────────────────────────────────────────────────────
 
+    @carries_warnings
     async def create_entry(
         self,
         data: SupervisionEntryCreate,
@@ -163,6 +224,7 @@ class SupervisionService:
         # The entry inherits its tenancy from the visit so the project-scoped
         # guard need not join through the visit.
         visit = await self.get_visit(data.visit_id)
+        await self._gate("entry", {}, ENTRY_FIELDS, data.model_dump(), operation="create", project_id=visit.project_id)
         entry = SupervisionEntry(
             visit_id=visit.id,
             project_id=visit.project_id,
@@ -190,6 +252,7 @@ class SupervisionService:
     async def list_entries_for_visit(self, visit_id: uuid.UUID) -> list[SupervisionEntry]:
         return await self.repo.list_entries_for_visit(visit_id)
 
+    @carries_warnings
     async def update_entry(
         self,
         entry_id: uuid.UUID,
@@ -199,6 +262,15 @@ class SupervisionService:
     ) -> SupervisionEntry:
         entry = await self.get_entry(entry_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        await self._gate(
+            "entry",
+            entry,
+            ENTRY_FIELDS,
+            fields,
+            operation="update",
+            project_id=entry.project_id,
+            target_id=str(entry.id),
+        )
 
         # Stamp resolved_at when the entry reaches a resolved state.
         new_status = fields.get("status")

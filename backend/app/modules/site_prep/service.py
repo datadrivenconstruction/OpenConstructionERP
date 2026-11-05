@@ -15,13 +15,15 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, status
 
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.site_prep import readiness
 from app.modules.site_prep.models import SitePrepItem, SitePrepPlan
 from app.modules.site_prep.repository import SitePrepItemRepository, SitePrepPlanRepository
+from app.modules.site_prep.validators import ITEM_FIELDS, PLAN_FIELDS, SITE_PREP_RULE_SET
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,6 +73,32 @@ class SitePrepService:
         self.session = session
         self._plan_repo = SitePrepPlanRepository(session)
         self._item_repo = SitePrepItemRepository(session)
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict] = []
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID,
+        target_id: str = "",
+    ) -> None:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422."""
+        self.findings = await gate_record(
+            SITE_PREP_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="site_prep_rules_failed",
+            target_id=target_id,
+        )
 
     # -- Plan ---------------------------------------------------------------
 
@@ -88,6 +116,7 @@ class SitePrepService:
             )
         return plan
 
+    @carries_warnings
     async def create_plan(
         self,
         project_id: uuid.UUID,
@@ -100,6 +129,7 @@ class SitePrepService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="A mobilisation plan already exists for this project",
             )
+        await self._gate("plan", {}, PLAN_FIELDS, payload.model_dump(), operation="create", project_id=project_id)
         plan = SitePrepPlan(
             project_id=project_id,
             target_start_date=payload.target_start_date,
@@ -109,6 +139,7 @@ class SitePrepService:
         )
         return await self._plan_repo.create(plan)
 
+    @carries_warnings
     async def update_plan(
         self,
         project_id: uuid.UUID,
@@ -117,6 +148,9 @@ class SitePrepService:
         """Patch the project's plan; only provided fields are changed."""
         plan = await self.require_plan(project_id)
         data = payload.model_dump(exclude_unset=True)
+        await self._gate(
+            "plan", plan, PLAN_FIELDS, data, operation="update", project_id=project_id, target_id=str(plan.id)
+        )
         for key, value in data.items():
             setattr(plan, key, value)
         await self.session.flush()
@@ -124,6 +158,7 @@ class SitePrepService:
 
     # -- Items --------------------------------------------------------------
 
+    @carries_warnings
     async def create_item(
         self,
         project_id: uuid.UUID,
@@ -133,6 +168,7 @@ class SitePrepService:
         """Create a readiness item, re-verifying any referenced plan in-project."""
         if payload.plan_id is not None:
             await self._require_plan_in_project(project_id, payload.plan_id)
+        await self._gate("item", {}, ITEM_FIELDS, payload.model_dump(), operation="create", project_id=project_id)
         item = SitePrepItem(
             project_id=project_id,
             plan_id=payload.plan_id,
@@ -174,6 +210,7 @@ class SitePrepService:
             )
         return item
 
+    @carries_warnings
     async def update_item(
         self,
         project_id: uuid.UUID,
@@ -185,6 +222,9 @@ class SitePrepService:
         data = payload.model_dump(exclude_unset=True)
         if "plan_id" in data and data["plan_id"] is not None:
             await self._require_plan_in_project(project_id, data["plan_id"])
+        await self._gate(
+            "item", item, ITEM_FIELDS, data, operation="update", project_id=project_id, target_id=str(item.id)
+        )
         for key, value in data.items():
             setattr(item, key, value)
         await self.session.flush()

@@ -23,6 +23,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.json_merge import merge_metadata
+from app.core.validation.quality_rules import carries_warnings, gate_record
 from app.modules.construction_control.deletion import refuse_if_locked
 from app.modules.construction_control.models import AcceptanceCriterion, AsBuiltRecord, ElementRef
 from app.modules.construction_control.ncr_bridge import raise_ncr
@@ -41,6 +42,7 @@ from app.modules.construction_control.schemas import (
 )
 from app.modules.construction_control.signing import snapshot_sha256
 from app.modules.construction_control.uer import is_empty_ref, resolve_element_ref
+from app.modules.construction_control.validators import ASBUILT_FIELDS, CONSTRUCTION_CONTROL_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +120,30 @@ class AsBuiltService:
         self.records = AsBuiltRecordRepository(session)
         self.criteria = CriterionRepository(session)
         self.element_refs = ElementRefRepository(session)
+        #: Non-blocking rule findings of the last write, for the caller to report.
+        self.findings: list[dict[str, Any]] = []
+
+    async def _gate(
+        self,
+        record: Any,
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID,
+        target_id: str = "",
+    ) -> None:
+        """Run the rule set over the as-built as it will be; errors the edit introduces raise a coded 422."""
+        self.findings = await gate_record(
+            CONSTRUCTION_CONTROL_RULE_SET,
+            "asbuilt",
+            record,
+            ASBUILT_FIELDS,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="construction_control_rules_failed",
+            target_id=target_id,
+        )
 
     # ── Cross-project guards ─────────────────────────────────────────────────
 
@@ -133,9 +159,11 @@ class AsBuiltService:
 
     # ── CRUD ─────────────────────────────────────────────────────────────────
 
+    @carries_warnings
     async def create_asbuilt(self, data: AsBuiltRecordCreate, user_id: str | None) -> AsBuiltRecord:
         if data.criterion_id is not None:
             await self._get_criterion_in_project(data.criterion_id, data.project_id)
+        await self._gate({}, data.model_dump(), operation="create", project_id=data.project_id)
 
         record = AsBuiltRecord(
             project_id=data.project_id,
@@ -245,6 +273,7 @@ class AsBuiltService:
                     ),
                 )
 
+    @carries_warnings
     async def update_asbuilt(self, record_id: uuid.UUID, data: AsBuiltRecordUpdate) -> AsBuiltRecord:
         record = await self.get_asbuilt(record_id)
         if record.status in _ASBUILT_LOCKED_STATUSES:
@@ -263,6 +292,7 @@ class AsBuiltService:
         fields = self._merge_metadata_patch(fields, record)
         if not fields:
             return record
+        await self._gate(record, fields, operation="update", project_id=record.project_id, target_id=str(record_id))
         await self.records.update_fields(record_id, **fields)
         await self.session.refresh(record)
         return record
@@ -292,6 +322,7 @@ class AsBuiltService:
 
     # ── Survey / verify / sign (the FSM) ──────────────────────────────────────
 
+    @carries_warnings
     async def record_survey(self, record_id: uuid.UUID, data: AsBuiltSurveyIn, user_id: str | None) -> AsBuiltRecord:
         """Record the captured value and compute the tolerance result against the criterion.
 
@@ -335,6 +366,9 @@ class AsBuiltService:
         if user_id is not None and not record.surveyed_by:
             fields["surveyed_by"] = user_id
 
+        await self._gate(
+            record, fields, operation="record_survey", project_id=record.project_id, target_id=str(record_id)
+        )
         await self.records.update_fields(record_id, **fields)
         await self.session.refresh(record)
         logger.info("As-built %s surveyed: tolerance=%s", record.record_number, tolerance_result)

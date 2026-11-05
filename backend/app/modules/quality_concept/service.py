@@ -790,6 +790,8 @@ class QualityConceptService:
             RequirementCreate(
                 entity=data.entity,
                 attribute=data.attribute,
+                # a requirement with no stated value asks only that the property exists
+                constraint_type="equals" if data.constraint_value.strip() else "exists",
                 constraint_value=data.constraint_value,
                 unit=data.unit,
                 category=data.category,
