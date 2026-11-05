@@ -202,18 +202,7 @@ def _serialize_entity(
         }
     elif entity_type in ("LWPOLYLINE", "POLYLINE"):
         try:
-            points = []
-            if entity_type == "LWPOLYLINE":
-                for x, y, *_ in entity.get_points(format="xy"):
-                    points.append({"x": x, "y": y})
-            else:
-                for vertex in entity.vertices:
-                    loc = vertex.dxf.location
-                    points.append({"x": loc.x, "y": loc.y})
-            result["geometry_data"] = {
-                "points": points,
-                "closed": getattr(entity, "closed", False),
-            }
+            result["geometry_data"] = _polyline_geometry(entity, entity_type)
         except Exception:
             result["geometry_data"] = {"points": [], "closed": False}
     elif entity_type == "TEXT":
@@ -278,8 +267,22 @@ def _serialize_entity(
             result["geometry_data"] = {"control_points": points}
         except Exception:
             result["geometry_data"] = {"control_points": []}
+        try:
+            # The control polygon is not the curve: measure the curve itself.
+            flat = _xy_list(list(entity.flattening(_FLAT_REL * _extent(entity.control_points))))
+            result["geometry_data"]["points"] = [{"x": x, "y": y} for x, y in flat]
+            result["geometry_data"]["closed"] = bool(entity.closed)
+        except Exception:
+            logger.debug("SPLINE flattening failed", exc_info=True)
     elif entity_type == "HATCH":
-        result["geometry_data"] = {"pattern_name": dxf.get("pattern_name", "SOLID")}
+        result["geometry_data"] = {
+            "pattern_name": dxf.get("pattern_name", "SOLID"),
+            "is_solid": bool(dxf.get("solid_fill", 0)),
+        }
+        try:
+            result["geometry_data"].update(_hatch_rings(entity))
+        except Exception:
+            logger.debug("HATCH boundary extraction failed", exc_info=True)
     elif entity_type == "DIMENSION":
         result["geometry_data"] = {
             "dimension_type": dxf.get("dimtype", 0),
@@ -287,6 +290,100 @@ def _serialize_entity(
         }
 
     return result
+
+
+# Arcs and splines are flattened to a sagitta of this share of the entity's
+# extent: 0.01 % keeps a bulged room within 0.01 % of its true area.
+_FLAT_REL = 0.0001
+
+
+def _xy_list(vertices: Any) -> list[tuple[float, float]]:
+    return [(float(v[0]), float(v[1])) for v in vertices]
+
+
+def _extent(vertices: Any) -> float:
+    pts = _xy_list(vertices)
+    if not pts:
+        return 1.0
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return max(max(xs) - min(xs), max(ys) - min(ys), 1e-9)
+
+
+def _close_ring(pts: list[tuple[float, float]], closed: bool) -> tuple[list[tuple[float, float]], bool]:
+    """Drop consecutive duplicates; a ring whose last vertex repeats its first is closed."""
+    out: list[tuple[float, float]] = []
+    for p in pts:
+        if not out or math.dist(p, out[-1]) > 1e-9:
+            out.append(p)
+    if len(out) >= 4 and math.dist(out[0], out[-1]) <= 1e-9 * max(1.0, _extent(out)):
+        out.pop()
+        closed = True
+    return out, closed
+
+
+def _polyline_geometry(entity: Any, entity_type: str) -> dict[str, Any]:
+    """Vertices of a 2D polyline with arc segments (bulges) flattened."""
+    from ezdxf import path as ezpath  # noqa: PLC0415
+
+    if entity_type == "LWPOLYLINE":
+        raw = [(x, y, b) for x, y, b in entity.get_points(format="xyb")]
+    else:
+        raw = [(v.dxf.location.x, v.dxf.location.y, v.dxf.get("bulge", 0.0)) for v in entity.vertices]
+    closed = bool(getattr(entity, "closed", False))
+    if any(abs(b) > 1e-12 for _x, _y, b in raw):
+        pts = _xy_list(ezpath.make_path(entity).flattening(_FLAT_REL * _extent(raw)))
+    else:
+        pts = [(x, y) for x, y, _b in raw]
+    pts, closed = _close_ring(pts, closed)
+    return {"points": [{"x": x, "y": y} for x, y in pts], "closed": closed}
+
+
+def _hatch_rings(entity: Any) -> dict[str, Any]:
+    """Outer boundary and holes of a hatch, curves flattened.
+
+    Nesting depth decides the role: a loop inside an even number of other loops
+    is filled, inside an odd number it is a hole. The largest filled loop is the
+    boundary, the other filled loops are ``extra_loops``; downstream the area is
+    every filled loop minus every hole.
+    """
+    from ezdxf import path as ezpath  # noqa: PLC0415
+
+    rings = []
+    for pth in ezpath.from_hatch(entity):
+        pts = _xy_list(pth.flattening(_FLAT_REL * max(1e-9, _extent(pth.control_vertices()))))
+        pts, _ = _close_ring(pts, True)
+        if len(pts) >= 3:
+            rings.append(pts)
+    if not rings:
+        return {}
+    rings.sort(key=lambda r: -abs(_ring_area(r)))
+    depth = [sum(1 for j in range(i) if _point_in_ring(rings[i][0], rings[j])) for i in range(len(rings))]
+    filled = [r for i, r in enumerate(rings) if depth[i] % 2 == 0]
+    holes = [r for i, r in enumerate(rings) if depth[i] % 2 == 1]
+    out: dict[str, Any] = {"points": [{"x": x, "y": y} for x, y in filled[0]], "closed": True}
+    if len(filled) > 1:
+        # Disjoint pieces of one hatch (two slab areas, islands inside holes).
+        out["extra_loops"] = [[{"x": x, "y": y} for x, y in r] for r in filled[1:]]
+    if holes:
+        out["holes"] = [[{"x": x, "y": y} for x, y in h] for h in holes]
+    return out
+
+
+def _ring_area(pts: list[tuple[float, float]]) -> float:
+    return 0.5 * sum(pts[i - 1][0] * pts[i][1] - pts[i][0] * pts[i - 1][1] for i in range(len(pts)))
+
+
+def _point_in_ring(p: tuple[float, float], ring: list[tuple[float, float]]) -> bool:
+    x, y = p
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i]
+        xj, yj = ring[j]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
 
 
 def _serialize_block_definitions(

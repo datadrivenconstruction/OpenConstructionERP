@@ -332,7 +332,8 @@ PLAN_READ_VISION_PROMPT = """\
 Read this architectural floor-plan image.
 
 Coordinate contract (use it for every point you return):
-- Coordinates are normalized to the range 0.0 to 1.0.
+- Coordinates are normalized to the range 0.0 to 1.0 of the WHOLE image, with \
+4 decimals (0.4127), never pixels and never percent.
 - The origin (0, 0) is the TOP-LEFT corner of the image.
 - x increases to the RIGHT, y increases DOWNWARD.
 
@@ -379,22 +380,28 @@ bar, or (c) as a last resort, infer it from a typical door leaf width of about \
 0.9 m. Record which you used in "source" as one of "dimension_string", \
 "scale_bar", or "inferred". Return the scale reference as two normalized \
 endpoints in "ref_pixels", the real-world length in "ref_real_value", and its \
-unit in "ref_unit" (one of "m", "mm", "ft", "in"). If there is no evidence of a \
+unit in "ref_unit" (one of "m", "mm", "ft", "in"). For a dimension string, put \
+the endpoints on the dimension's two extension lines (tick marks), not on the \
+text, and copy the number exactly as printed. If there is no evidence of a \
 scale, return "scale": null. Never guess a ratio.\
 """
 
 PLAN_READ_ROOMS_INSTRUCTION = """\
 Trace each enclosed room as an ordered polygon of 4 to 60 normalized vertices \
-that follows the inner face of its walls. Read the room name from text printed \
-inside the room (use an empty string if there is no readable name). Score each \
-room's confidence by how clearly its boundary and name are readable. Do NOT \
-report furniture, hatching, or dimension lines as rooms.\
+that follows the INNER face of its walls (the room side of the wall line, not \
+the wall centre or the outer face), one vertex per corner, in order around the \
+room. Report each room exactly once; a room cut by a wall is two rooms. Read the \
+room name from text printed inside the room (use an empty string if there is no \
+readable name). Score each room's confidence by how clearly its boundary and \
+name are readable. Do NOT report furniture, hatching, dimension lines, the \
+title block or the page border as rooms.\
 """
 
 PLAN_READ_SYMBOLS_INSTRUCTION = """\
 Find repeated symbols (doors, windows, sanitary fixtures, sockets, and similar). \
 Cluster each repeated symbol into one entry per class: set "element_class" from \
 the legend if you can read it (else a short generic name), and list each \
-instance's centroid in "centers". Be conservative: only report a class when you \
+instance's centroid in "centers", each instance exactly once (for a door, the \
+centre of its opening in the wall). Be conservative: only report a class when you \
 see several clearly repeated, similar symbols.\
 """
