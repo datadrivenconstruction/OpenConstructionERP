@@ -28,7 +28,7 @@ TYPE_FAMILY = {"distance": "length", "polyline": "length", "area": "area", "volu
 MIN_POINTS = {"distance": 2, "polyline": 2, "area": 3, "volume": 3}
 
 UNIT_FAMILY = {
-    **dict.fromkeys(("m", "lm", "mm", "cm", "km", "ft", "in", "yd", "mi", "rm"), "length"),
+    **dict.fromkeys(("m", "lm", "mm", "cm", "km", "ft", "in", "yd", "mi", "rm", "lf"), "length"),
     **dict.fromkeys(
         ("m2", "sqm", "sm", "mm2", "cm2", "km2", "ha", "sf", "sqft", "ft2", "yd2", "sy", "sqyd", "ac"), "area"
     ),
