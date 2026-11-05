@@ -180,6 +180,8 @@ class RouteResponse(BaseModel):
     # Failed ``approval_routes.bands_contiguous`` findings of the steps' amount
     # bands (overlaps are warnings; gaps are refused on save and never stored).
     band_findings: list[dict[str, Any]] = Field(default_factory=list)
+    # Non-blocking findings of the approval_routes rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Instance payloads ────────────────────────────────────────────────
@@ -310,6 +312,7 @@ class DelegationResponse(BaseModel):
     created_by: UUID | None
     created_at: datetime
     updated_at: datetime
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class EscalationOut(BaseModel):

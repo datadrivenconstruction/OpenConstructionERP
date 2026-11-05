@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
@@ -236,6 +236,8 @@ class ThresholdRow(BaseModel):
     current_value: FiniteDecimal
     level: ThresholdLevel
     message: str = ""
+    # Non-blocking findings of the coordination_hub rule set for the edit that produced this row.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ThresholdAlert(BaseModel):

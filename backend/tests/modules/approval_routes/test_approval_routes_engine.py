@@ -218,7 +218,7 @@ async def test_majority_mode_advances_after_majority_approve(
             steps=[
                 StepCreate(
                     ordinal=1,
-                    approver_role="reviewer",
+                    approver_role="editor",
                     mode="majority",
                     required_approver_count=3,
                 ),
@@ -238,7 +238,7 @@ async def test_majority_mode_advances_after_majority_approve(
         instance.id,
         DecisionSubmit(step_id=steps[0].id, decision="approved"),
         approver_id=u1,
-        caller_role="reviewer",
+        caller_role="editor",
     )
     assert instance.current_step_ordinal == 1  # still on step 1
 
@@ -247,7 +247,7 @@ async def test_majority_mode_advances_after_majority_approve(
         instance.id,
         DecisionSubmit(step_id=steps[0].id, decision="approved"),
         approver_id=u2,
-        caller_role="reviewer",
+        caller_role="editor",
     )
     assert instance.current_step_ordinal == 2  # advanced to step 2
 
@@ -271,7 +271,7 @@ async def test_any_mode_advances_on_first_approval(session: AsyncSession) -> Non
             project_id=project_id,
             name="any-gate",
             target_kind="markup",
-            steps=[StepCreate(ordinal=1, approver_role="qa", mode="any")],
+            steps=[StepCreate(ordinal=1, approver_role="editor", mode="any")],
         ),
         created_by=owner_id,
     )
@@ -284,7 +284,7 @@ async def test_any_mode_advances_on_first_approval(session: AsyncSession) -> Non
         instance.id,
         DecisionSubmit(step_id=steps[0].id, decision="approved"),
         approver_id=u1,
-        caller_role="qa",
+        caller_role="editor",
     )
     assert instance.status == "approved"  # single-step route → done
 

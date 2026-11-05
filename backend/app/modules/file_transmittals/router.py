@@ -121,6 +121,7 @@ def _to_response(transmittal, *, mask_tokens: bool = True) -> TransmittalRespons
         recipients=recipients,
         created_at=transmittal.created_at,
         updated_at=transmittal.updated_at,
+        validation_warnings=list(getattr(transmittal, "validation_warnings", None) or []),
     )
 
 

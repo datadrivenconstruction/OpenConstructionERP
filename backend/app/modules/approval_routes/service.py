@@ -39,6 +39,7 @@ from app.core.audit_log import log_activity
 from app.core.commercial_checks import check_bands_contiguous, step_applies
 from app.core.events import event_bus
 from app.core.permissions import ROLE_HIERARCHY, _resolve_role
+from app.core.validation.quality_rules import gate_record
 from app.modules.approval_routes import analytics, delegation_engine
 from app.modules.approval_routes.delegation_engine import DelegationView
 from app.modules.approval_routes.models import (
@@ -67,6 +68,11 @@ from app.modules.approval_routes.schemas import (
 )
 from app.modules.approval_routes.simulate import min_approvals_to_clear, named_approver_quorum_conflict, step_cleared
 from app.modules.approval_routes.timeline import compute_timeline
+from app.modules.approval_routes.validators import (
+    APPROVAL_ROUTES_RULE_SET,
+    DELEGATION_FIELDS,
+    ROUTE_FIELDS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +198,14 @@ def next_ordinal_after(steps: list[Step], amount: Decimal | None, ordinal: int) 
     """The next step after ``ordinal`` that ``amount`` routes through, or None when the chain is done."""
     later = [o for o in applicable_ordinals(steps, amount) if o > ordinal]
     return later[0] if later else None
+def _step_view(step: object) -> dict[str, object]:
+    """A step (stored row or payload) as the route rules read it."""
+    return {
+        "ordinal": getattr(step, "ordinal", None),
+        "approver_role": getattr(step, "approver_role", None),
+        "approver_user_id": getattr(step, "approver_user_id", None),
+        "sla_hours": getattr(step, "sla_hours", None),
+    }
 
 
 def _safe_publish(name: str, data: dict[str, object]) -> None:
@@ -295,6 +309,16 @@ class ApprovalRouteService:
             _validate_step_quorum(step)
         _validate_bands(payload.steps)
 
+        rule_warnings = await gate_record(
+            APPROVAL_ROUTES_RULE_SET,
+            "route",
+            {"is_active": payload.is_active, "steps": [_step_view(s) for s in payload.steps]},
+            ROUTE_FIELDS,
+            operation="create",
+            project_id=payload.project_id,
+            error_code="approval_routes_rules_failed",
+        )
+
         route = Route(
             project_id=payload.project_id,
             name=payload.name,
@@ -335,6 +359,7 @@ class ApprovalRouteService:
                 "project_id": str(route.project_id) if route.project_id else None,
             },
         )
+        route.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return route
 
     async def clone_route(
@@ -396,6 +421,28 @@ class ApprovalRouteService:
         actor_id: uuid.UUID | None,
     ) -> Route:
         route = await self.get_route(route_id)
+        rule_warnings: list[dict[str, object]] = []
+        if payload.steps is not None or payload.is_active is not None:
+            for step in payload.steps or []:
+                _validate_step_mode(step.mode)
+                _validate_step_quorum(step)
+            stored_steps = await self.repo.list_steps(route_id)
+            changes: dict[str, object] = {}
+            if payload.is_active is not None:
+                changes["is_active"] = payload.is_active
+            if payload.steps is not None:
+                changes["steps"] = [_step_view(s) for s in payload.steps]
+            rule_warnings = await gate_record(
+                APPROVAL_ROUTES_RULE_SET,
+                "route",
+                {"is_active": route.is_active, "steps": [_step_view(s) for s in stored_steps]},
+                ROUTE_FIELDS,
+                changes,
+                operation="update",
+                project_id=route.project_id,
+                error_code="approval_routes_rules_failed",
+                target_id=str(route_id),
+            )
         changed: dict[str, object] = {}
         if payload.name is not None and payload.name != route.name:
             changed["name"] = (route.name, payload.name)
@@ -455,6 +502,7 @@ class ApprovalRouteService:
             module="approval_routes",
             metadata={k: {"from": v[0], "to": v[1]} for k, v in changed.items()},
         )
+        route.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return route
 
     async def delete_route(
@@ -1293,6 +1341,15 @@ class ApprovalRouteService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Cannot delegate approvals to yourself",
             )
+        rule_warnings = await gate_record(
+            APPROVAL_ROUTES_RULE_SET,
+            "delegation",
+            {"starts_at": starts_at, "ends_at": ends_at},
+            DELEGATION_FIELDS,
+            operation="create",
+            project_id=project_id,
+            error_code="approval_routes_rules_failed",
+        )
         delegation = Delegation(
             delegator_user_id=delegator_id,
             delegate_user_id=delegate_id,
@@ -1324,6 +1381,7 @@ class ApprovalRouteService:
                 "project_id": str(project_id) if project_id else None,
             },
         )
+        delegation.validation_warnings = rule_warnings  # type: ignore[attr-defined]
         return delegation
 
     async def list_delegations(
