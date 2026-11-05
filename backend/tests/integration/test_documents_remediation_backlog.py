@@ -98,7 +98,7 @@ async def test_cde_null_state_allows_initial_legal_transition() -> None:
     from app.modules.documents.service import DocumentService
 
     svc = DocumentService.__new__(DocumentService)
-    doc = SimpleNamespace(cde_state=None, name="d", id=uuid.uuid4())
+    doc = SimpleNamespace(cde_state=None, name="d", id=uuid.uuid4(), project_id=uuid.uuid4())
 
     async def _get_document(_id):  # noqa: ANN001, ANN202
         return doc
