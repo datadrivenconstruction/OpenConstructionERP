@@ -205,6 +205,7 @@ async def test_ncr_audit_trail_records_all_transitions(svc: QMSService) -> None:
     )
     action = await svc.assign_ncr_action(ncr.id, NCRActionCreate(description="Fix"))
     await svc.verify_action(action.id)
+    await svc.update_ncr(ncr.id, NCRUpdate(root_cause="Poor compaction"))
     with patch("app.modules.qms.service.event_bus.publish_detached", MagicMock()):
         await svc.close_ncr(ncr.id)
 
