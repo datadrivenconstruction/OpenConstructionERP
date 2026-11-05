@@ -49,7 +49,7 @@ from app.modules.cvr.schemas import (
     PaymentApplicationUpdate,
     ProgressClaimOption,
 )
-from app.modules.cvr.validators import CvrValidationError, assert_single_currency
+from app.modules.cvr.validators import CVR_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -218,7 +218,7 @@ class CvrService:
         """Add a cost head to a report, enforcing the single-currency guard."""
         report = await self.get_report(report_id)
         self._reject_if_final(report)
-        self._guard_currency(report.currency, data.currency)
+        await self._guard_currency(report.currency, data.currency)
 
         line = CvrLine(
             report_id=report_id,
@@ -310,7 +310,7 @@ class CvrService:
         line = await self.get_line(line_id)
         report = await self.get_report(line.report_id)
         self._reject_if_final(report)
-        self._guard_currency(report.currency, data.currency)
+        await self._guard_currency(report.currency, data.currency)
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         # currency is a guard-only field, never a stored column on a line.
@@ -605,12 +605,17 @@ class CvrService:
     # ── Guards ────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _guard_currency(report_currency: str, incoming_currency: str | None) -> None:
-        """Translate the pure single-currency guard into a 400 on conflict."""
-        try:
-            assert_single_currency(report_currency, incoming_currency)
-        except CvrValidationError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    async def _guard_currency(report_currency: str, incoming_currency: str | None, line_id: str = "") -> None:
+        """Run the single-currency rule: a conflicting line is a coded 422, a blank one inherits."""
+        from app.core.validation.cost_gate import raise_on_errors, run_rule_set  # noqa: PLC0415
+
+        report = await run_rule_set(
+            CVR_RULE_SET,
+            {"report": {"currency": report_currency}, "line": {"id": line_id, "currency": incoming_currency}},
+            target_type="cvr_line",
+            target_id=line_id,
+        )
+        raise_on_errors(report, error="cvr_rules_failed")
 
     @staticmethod
     def _reject_if_final(report: CvrReport) -> None:
