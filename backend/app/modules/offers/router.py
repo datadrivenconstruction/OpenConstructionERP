@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, Response
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.boq.pdf_export import pdf_language
 from app.modules.offers import pack as pack_mod
 from app.modules.offers.models import Offer
 from app.modules.offers.schemas import (
@@ -164,7 +165,10 @@ async def download_pdf(offer_id: uuid.UUID, session: SessionDep, user_id: Curren
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{offer.number}-{offer.revision}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{offer.number}-{offer.revision}.pdf"',
+            "Content-Language": pdf_language(offer.locale),
+        },
     )
 
 
