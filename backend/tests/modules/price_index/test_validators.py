@@ -184,3 +184,22 @@ async def test_api_update_blocks_new_duplicate_but_legacy_outlier_stays_editable
     move = await client.patch(f"/v1/price-index/series/{sid}/points/{p2['id']}/", json={"period": "2026-01"})
     assert move.status_code == 422, move.text
     assert move.json()["detail"]["code"] == "price_index.period_unique"
+
+
+@pytest.mark.asyncio
+async def test_api_statssa_import_reports_jump_warnings_and_saves(ctx) -> None:
+    client, _ = ctx
+    csv = b"Work group,Description,Jan 2026,Feb 2026\n9921,Jump group,100.0,400.0\n9922,Calm group,100.0,101.0\n"
+    r = await client.post(
+        "/v1/price-index/import/statssa-p0151/",
+        files={"file": ("p0151.csv", csv, "text/csv")},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert (body["series_created"], body["points_created"]) == (2, 4)
+    assert [w["rule_id"] for w in body["warnings"]] == ["price_index.step_plausible"]
+    assert "9921" in body["warnings"][0]["message"]
+    bad = await client.post(
+        "/v1/price-index/import/statssa-p0151/", files={"file": ("p.csv", b"nothing,here\n", "text/csv")}
+    )
+    assert bad.status_code == 422, bad.text
