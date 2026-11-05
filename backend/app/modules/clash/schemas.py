@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -392,6 +393,8 @@ class ClashResultResponse(BaseModel):
     # still validate cleanly.
     watchers: list[str] = Field(default_factory=list)
     history: list[ClashHistoryEntry] = Field(default_factory=list)
+    # Non-blocking findings of the clash rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
     # Wave A2 - open-ended advisory annotations (engine-derived,
     # non-authoritative). Currently ``{"severity_suggestion": "<sev>"}``
     # on deep hard clashes - the UI shows a "Suggested" chip. Defaults to
@@ -454,6 +457,8 @@ class ClashBulkUpdateResponse(BaseModel):
 
     updated: int = 0
     requested: int = 0
+    # Distinct non-blocking findings of the clash rule set across the batch.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ClashMatrixCell(BaseModel):
