@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
 from app.core.validation.money_rules import MoneyRule, blank, section
-from app.core.validation.quality_rules import parse_day, today_of
+from app.core.validation.quality_rules import latest_local_day, parse_day
 
 SITE_PREP_RULE_SET = "site_prep"
 
@@ -43,7 +43,7 @@ class CompletedNotInFutureRule(_SitePrepRule):
         item = section(context, "item")
         ref = str(item.get("id", ""))
         day = parse_day(item.get("completed_date"))
-        if day is not None and day > today_of(context):
+        if day is not None and day > latest_local_day(context):
             return [self.fail(context, "completed_in_future", ref=ref, date=day.isoformat())]
         return [self.ok(ref)]
 
