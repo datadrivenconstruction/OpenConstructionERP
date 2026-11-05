@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Breadcrumb, EmptyState, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
+import { fmtList, formatDateValue } from '@/shared/lib/formatters';
 import { formatCurrency } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { PresenceIndicator } from '@/features/collab_locks';
@@ -770,7 +771,7 @@ export function BidDayPage() {
                           })}
                         </span>
                         <div>
-                          {row.suggestion.reasons.map((r) => t(`bid_day.reason_${r}`, { defaultValue: REASONS[r] ?? r })).join(', ')}
+                          {fmtList(row.suggestion.reasons.map((r) => t(`bid_day.reason_${r}`, { defaultValue: REASONS[r] ?? r })))}
                         </div>
                         {!frozen && (
                           <button type="button" className="mt-0.5 font-medium text-oe-blue hover:underline" onClick={() => choose(row, row.suggestion?.quote_id ?? null)}>
@@ -958,7 +959,7 @@ export function BidDayPage() {
                   <li key={s.id} className="rounded border border-border-light p-2">
                     <div className="font-semibold tabular-nums text-content-primary">{money(s.bid_total, s.currency)}</div>
                     <div className="text-content-tertiary">
-                      {new Date(s.created_at).toLocaleString()} {s.submitted_by_name && `· ${s.submitted_by_name}`}
+                      {formatDateValue(s.created_at, { dateStyle: 'medium', timeStyle: 'short' })} {s.submitted_by_name && `· ${s.submitted_by_name}`}
                     </div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       <Button variant="ghost" size="sm" icon={<Download size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'pdf')}>PDF</Button>
@@ -1077,7 +1078,7 @@ export function BidDayPage() {
               )}
               {push.plan.skipped.length > 0 && (
                 <p className="mt-2 text-2xs text-content-tertiary">
-                  {t('bid_day.push_skipped', { defaultValue: 'Not linked to positions, left as is: {{list}}', list: push.plan.skipped.join(', ') })}
+                  {t('bid_day.push_skipped', { defaultValue: 'Not linked to positions, left as is: {{list}}', list: fmtList(push.plan.skipped) })}
                 </p>
               )}
             </div>

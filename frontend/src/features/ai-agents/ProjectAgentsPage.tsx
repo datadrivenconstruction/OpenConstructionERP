@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // Project agent catalogue: enable, configure, run, and review the drafts agents produce.
+import { formatDateValue } from '@/shared/lib/formatters';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -263,7 +264,7 @@ function DraftCard({ draft, projectId }: { draft: AgentDraft; projectId: string 
           <h4 className="text-sm font-medium text-content-primary">{draft.title}</h4>
           <p className="text-2xs text-content-tertiary">
             {t(`project_agents.agent.${draft.agent_name}.name`, { defaultValue: draft.agent_name })}
-            {draft.created_at ? ` · ${new Date(draft.created_at).toLocaleString()}` : ''}
+            {draft.created_at ? ` · ${formatDateValue(draft.created_at, { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
           </p>
         </div>
         <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs">
@@ -499,7 +500,7 @@ export function ProjectAgentsPage() {
                   <td className="py-1 pr-2">{t(`project_agents.agent.${r.agent_name}.name`, { defaultValue: r.agent_name })}</td>
                   <td className="py-1 pr-2">{r.failure_reason ? `${r.status} (${r.failure_reason})` : r.status}</td>
                   <td className="py-1 pr-2">{r.total_tokens}</td>
-                  <td className="py-1 pr-2">{r.started_at ? new Date(r.started_at).toLocaleString() : ''}</td>
+                  <td className="py-1 pr-2">{r.started_at ? formatDateValue(r.started_at, { dateStyle: 'medium', timeStyle: 'short' }) : ''}</td>
                   <td className="py-1">
                     <Link to={`/ai-agents?run=${r.id}`} className="text-oe-blue hover:underline">
                       {t('project_agents.open_timeline', { defaultValue: 'Timeline' })}

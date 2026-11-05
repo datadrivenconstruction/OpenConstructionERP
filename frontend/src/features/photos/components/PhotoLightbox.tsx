@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // One photo full size, with where and when it was taken, its links, plan pins and AI review.
 
+import { fmtFixed } from '@/shared/lib/formatters';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -182,7 +183,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
             {photo.gps_lat != null && photo.gps_lon != null ? (
               <span className="inline-flex items-center gap-1">
                 <MapPin className="h-3 w-3" aria-hidden />
-                {photo.gps_lat.toFixed(5)}, {photo.gps_lon.toFixed(5)}
+                {fmtFixed(photo.gps_lat, 5)}, {fmtFixed(photo.gps_lon, 5)}
                 {photo.gps_accuracy_m != null && (
                   <span className="text-content-tertiary">
                     {t('photoArchive.meta.accuracy', { value: Math.round(photo.gps_accuracy_m) })}

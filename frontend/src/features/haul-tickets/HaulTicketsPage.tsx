@@ -4,6 +4,7 @@
  * Haul tickets: one row per truck load to or from site.
  * Tabs: tickets, daily summary, haulier invoices, weighbridge import. Verified tickets feed position actuals.
  */
+import { fmtFixed } from '@/shared/lib/formatters';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -192,8 +193,8 @@ function TicketsTab({ projectId }: { projectId: string }) {
           {t('haul.totals', {
             defaultValue: '{{count}} tickets, {{qty}} counted, {{amount}} amount',
             count: items.length,
-            qty: totals.quantity.toFixed(2),
-            amount: totals.amount.toFixed(2),
+            qty: fmtFixed(totals.quantity, 2),
+            amount: fmtFixed(totals.amount, 2),
           })}
         </span>
         <Button size="sm" onClick={() => setAdding((v) => !v)}>

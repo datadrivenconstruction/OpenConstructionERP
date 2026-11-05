@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, HardHat, X } from 'lucide-react';
 import { Badge, Card, CardContent, EmptyState, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { getWorkforceDemand, type WorkforceCell, type WorkforceTradeRow } from './api';
 
 const WEEK_OPTIONS = [8, 12, 26] as const;
@@ -39,14 +40,13 @@ function todayIso(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function fmt(raw: string, lang: string, digits = 1): string {
+function fmt(raw: string, digits = 1): string {
   const n = Number(raw);
-  return Number.isFinite(n) ? n.toLocaleString(lang, { maximumFractionDigits: digits }) : '-';
+  return Number.isFinite(n) ? n.toLocaleString(getNumberLocale(), { maximumFractionDigits: digits }) : '-';
 }
 
 export function TradeDemandPanel() {
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [weeks, setWeeks] = useState<number>(12);
   const start = useMemo(todayIso, []);
@@ -180,7 +180,7 @@ export function TradeDemandPanel() {
                           {t('workforce.row_sub', {
                             defaultValue: '{{count}} available · peak short {{short}}',
                             count: row.available_resources,
-                            short: fmt(row.peak_shortfall_fte, lang),
+                            short: fmt(row.peak_shortfall_fte),
                           })}
                         </div>
                       </div>
@@ -192,12 +192,12 @@ export function TradeDemandPanel() {
                             type="button"
                             disabled={c.status === 'idle'}
                             onClick={() => setSel(active ? null : { trade: row.trade, week: c.week_index })}
-                            title={`${t('workforce.demand', { defaultValue: 'Demand' })} ${fmt(c.demand_fte, lang)} / ${t('workforce.available', { defaultValue: 'Available' })} ${fmt(c.available_fte, lang)}`}
+                            title={`${t('workforce.demand', { defaultValue: 'Demand' })} ${fmt(c.demand_fte)} / ${t('workforce.available', { defaultValue: 'Available' })} ${fmt(c.available_fte)}`}
                             className={`flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${demandCellClasses(c)} ${
                               active ? 'ring-2 ring-inset ring-oe-blue' : ''
                             }`}
                           >
-                            {c.status === 'idle' ? '' : fmt(c.gap_fte, lang)}
+                            {c.status === 'idle' ? '' : fmt(c.gap_fte)}
                           </button>
                         );
                       })}
@@ -234,9 +234,9 @@ export function TradeDemandPanel() {
                 <div className="text-xs text-content-tertiary">
                   {t('workforce.cell_summary', {
                     defaultValue: 'Demand {{demand}}, available {{available}}, gap {{gap}}',
-                    demand: fmt(selCell.demand_fte, lang),
-                    available: fmt(selCell.available_fte, lang),
-                    gap: fmt(selCell.gap_fte, lang),
+                    demand: fmt(selCell.demand_fte),
+                    available: fmt(selCell.available_fte),
+                    gap: fmt(selCell.gap_fte),
                   })}
                 </div>
               </div>
@@ -271,7 +271,7 @@ export function TradeDemandPanel() {
                         : t('workforce.kind_staffing', { defaultValue: 'Staffing position' })}
                     </div>
                   </button>
-                  <span className="shrink-0 tabular-nums">{fmt(c.fte, lang, 2)}</span>
+                  <span className="shrink-0 tabular-nums">{fmt(c.fte, 2)}</span>
                 </li>
               ))}
             </ul>

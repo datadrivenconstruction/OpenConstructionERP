@@ -186,11 +186,10 @@ describe('auditRowTooltip', () => {
 type Excluded = { file: string; sites: number; why: string };
 
 const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
-  // Route parameter, split back apart by PackFocusPage before it is shown.
-  { file: 'features/solution_packages/focus.ts', sites: 1, why: 'machine-read route parameter' },
   // Joined to seed a text input, split back apart when the form is saved.
   { file: 'features/correspondence/CorrespondencePage.tsx', sites: 2, why: 'round-trip form field' },
   { file: 'features/forms/TemplateBuilder.tsx', sites: 4, why: 'round-trip form field' },
+  { file: 'features/photos/model.ts', sites: 1, why: 'round-trip form field' },
   { file: 'features/phonelog/PhoneLogEditDialog.tsx', sites: 1, why: 'round-trip form field' },
   { file: 'features/phonelog/RecordingProtocolCard.tsx', sites: 1, why: 'round-trip form field' },
   { file: 'features/subcontractors/SubcontractorsPage.tsx', sites: 1, why: 'round-trip form field' },

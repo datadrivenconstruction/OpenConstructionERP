@@ -5,6 +5,7 @@
  * score against the threshold, record the decision (a person's, with a reason
  * when it goes against the score), then the outcome. Every change is logged.
  */
+import { fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -71,7 +72,7 @@ export function BidNoBidPage() {
     const score = weightedScore(card.weights, scores);
     void patch(
       { scores: { [k]: n } },
-      { ...card, scores, score: score == null ? null : score.toFixed(1), recommendation: recommendationOf(score, card.threshold) },
+      { ...card, scores, score: score == null ? null : String(Math.round(score * 10) / 10), recommendation: recommendationOf(score, card.threshold) },
     );
   };
 
@@ -128,7 +129,7 @@ export function BidNoBidPage() {
           <div>
             <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('bid_no_bid.score', { defaultValue: 'Score' })}</div>
             <div className="text-4xl font-bold tabular-nums text-content-primary" data-testid="bid-no-bid-score">
-              {score == null ? '–' : score.toFixed(1)}
+              {score == null ? '–' : fmtFixed(score, 1)}
               <span className="text-base font-normal text-content-tertiary"> / 100</span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm">
@@ -332,7 +333,7 @@ export function BidNoBidPage() {
         <ul className="mt-2 space-y-1 text-xs text-content-secondary" data-testid="bid-no-bid-trail">
           {card.events.map((e) => (
             <li key={e.id}>
-              <span className="tabular-nums text-content-tertiary">{new Date(e.created_at).toLocaleString()}</span>
+              <span className="tabular-nums text-content-tertiary">{formatDateValue(e.created_at, { dateStyle: 'medium', timeStyle: 'short' })}</span>
               {' · '}
               {e.user_name || '–'}
               {' · '}
