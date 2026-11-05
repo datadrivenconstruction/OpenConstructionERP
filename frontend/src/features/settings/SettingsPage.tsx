@@ -27,6 +27,7 @@ import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
 import { SidebarFooterCard } from './SidebarFooterCard';
 import { FloatingButtonsCard } from './FloatingButtonsCard';
+import { LearningTipsCard } from './LearningTipsCard';
 import { NotificationChannelsCard } from './NotificationChannelsCard';
 import { ChordShortcutsCard } from './ChordShortcutsCard';
 import VectorStatusCard from './VectorStatusCard';
@@ -1902,6 +1903,7 @@ export function SettingsPage() {
               <TableOptionsCard key={`tables-${modeKey}`} />
               <SidebarFooterCard />
               <FloatingButtonsCard />
+              <LearningTipsCard />
               <NotificationChannelsCard />
               <ChordShortcutsCard />
             </>

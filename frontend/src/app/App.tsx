@@ -884,6 +884,10 @@ const CasesPage = lazy(() =>
 const VideosPage = lazy(() =>
   import('@/features/videos').then((m) => ({ default: m.VideosPage }))
 );
+// Courses and guides of the Academy: a catalogue of links, loaded on demand.
+const CoursesPage = lazy(() =>
+  import('@/features/videos/CoursesPage').then((m) => ({ default: m.CoursesPage }))
+);
 // The case editor, split from the hub: most readers never author one.
 const CaseEditorPage = lazy(() =>
   import('@/features/cases').then((m) => ({ default: m.CaseEditorPage }))
@@ -1735,6 +1739,7 @@ export default function App() {
             /cases/new is declared before the stepper for readability only -
             the router ranks a static segment above a dynamic one regardless. */}
         <Route path="/videos" element={<P title="Videos"><VideosPage /></P>} />
+        <Route path="/courses" element={<P title="Courses and guides"><CoursesPage /></P>} />
         <Route path="/packs" element={<P title="Packs"><PacksPage /></P>} />
         <Route path="/packs/focus" element={<P title="Packs"><PackFocusPage /></P>} />
         <Route path="/packs/:slug" element={<P title="Packs"><PackDetailPage /></P>} />

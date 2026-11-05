@@ -339,6 +339,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   // Learning & admin
   'Cases': 'nav.cases',
   'Videos': 'nav.videos',
+  'Courses and guides': 'nav.courses',
   'How it works': 'howto.page_title',
   'Inside track': 'inside.page_title',
   'Module Builder': 'nav.module_builder',
@@ -1173,6 +1174,18 @@ function HelpMenu() {
           >
             <GraduationCap size={14} className="text-oe-blue shrink-0" />
             <span className="flex-1 text-left">{t('howto.menu_item', { defaultValue: 'How it works' })}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              navigate('/courses');
+            }}
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+          >
+            <GraduationCap size={14} className="text-oe-blue shrink-0" />
+            <span className="flex-1 text-left">{t('nav.courses', { defaultValue: 'Courses and guides' })}</span>
           </button>
           <div className="my-1 border-t border-border-light" role="separator" />
 

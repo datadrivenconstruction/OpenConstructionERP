@@ -103,6 +103,7 @@ import {
   Flag,
   Wrench,
   MonitorPlay,
+  GraduationCap,
   KeyRound,
 } from 'lucide-react';
 
@@ -231,6 +232,7 @@ export const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.videos', defaultLabel: 'Video guides', to: '/videos', icon: MonitorPlay },
+      { labelKey: 'nav.courses', defaultLabel: 'Courses and guides', to: '/courses', icon: GraduationCap },
       { labelKey: 'nav.cases', to: '/cases', icon: Route },
       { labelKey: 'nav.packs', defaultLabel: 'Packs', to: '/packs', icon: PackageOpen },
     ],

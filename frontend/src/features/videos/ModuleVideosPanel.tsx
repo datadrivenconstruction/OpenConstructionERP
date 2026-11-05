@@ -1,19 +1,21 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// "Videos for this step": a small pill above a module screen that opens a
-// short list of the videos whose cases walk through this screen, best fit for
-// the reader first. The video plays in place; nothing leaves the screen.
+// The popover behind the "Learn this step" chip: the videos whose cases walk
+// through this screen, best fit first, then up to three courses or guides of
+// the Academy. A video plays in place; a course opens the Academy site in a new
+// tab.
 //
-// It stays out of the way. It starts folded, it can be hidden on this screen
-// or on every screen with an undo, and the Videos page can bring it back.
-// Loaded lazily by ModuleVideosSlot, so the catalogue is fetched only here.
+// It stays out of the way. The chip (ModuleVideosSlot) starts folded, it can
+// be hidden on this screen or on every screen with an undo, and Settings or the
+// Videos page can bring it back. Loaded lazily on first open, so the
+// catalogues are fetched only here.
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { ChevronDown, EyeOff, Hourglass, MonitorPlay, X } from 'lucide-react';
+import { EyeOff, Hourglass, X } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
 import { useToastStore } from '@/stores/useToastStore';
 import type { AcademyVideo } from './academyTypes';
@@ -23,6 +25,8 @@ import { useVideoLabels } from './videoLabels';
 import { useVideoHintsStore } from './videoRoutes';
 import { VideoCover } from './VideoCover';
 import { VideoPlayerDialog } from './VideoPlayerDialog';
+import { AcademyItemRow } from './AcademyItemLinks';
+import { itemsForScreen, itemTotalForRoute } from './academyItems';
 
 const SHOWN = 3;
 
@@ -47,7 +51,14 @@ export function videosForScreen(
   return [...all].sort((a, b) => Number(b.status === 'published') - Number(a.status === 'published'));
 }
 
-export default function ModuleVideosPanel({ route }: { route: string }) {
+interface PanelProps {
+  route: string;
+  open: boolean;
+  panelId: string;
+  onClose: () => void;
+}
+
+export default function ModuleVideosPanel({ route, open, panelId, onClose }: PanelProps) {
   const { t } = useTranslation();
   const labels = useVideoLabels();
   const ctx = useVideoContext();
@@ -55,35 +66,20 @@ export default function ModuleVideosPanel({ route }: { route: string }) {
   const hideOn = useVideoHintsStore((s) => s.hideOn);
   const unhideOn = useVideoHintsStore((s) => s.unhideOn);
   const setOff = useVideoHintsStore((s) => s.setOff);
-  const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState<{ video: AcademyVideo; start: number } | null>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
-  const panelId = useId();
 
   const videos = useMemo(
     () => videosForScreen(route, { role: ctx.role, market: ctx.market, language: ctx.language }),
     [route, ctx.role, ctx.market, ctx.language],
   );
+  const reader = useMemo(
+    () => ({ language: ctx.language, market: ctx.market, anyMarket: ctx.marketSource === 'any' }),
+    [ctx.language, ctx.market, ctx.marketSource],
+  );
+  const items = useMemo(() => itemsForScreen(route, reader), [route, reader]);
+  const itemTotal = itemTotalForRoute(route, reader);
   const label = moduleLabel(route);
   const moduleName = label ? t(label.key, { defaultValue: label.fallback }) : '';
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  if (videos.length === 0) return null;
 
   const hideHere = () => {
     hideOn(route);
@@ -114,96 +110,99 @@ export default function ModuleVideosPanel({ route }: { route: string }) {
     );
   };
 
-  return (
-    <div className="relative z-30 mb-2 flex justify-end" data-testid="module-videos">
-      <div ref={boxRef} className="relative">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-controls={panelId}
-          data-testid="module-videos-toggle"
-          className={clsx(
-            'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium shadow-sm transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
-            open
-              ? 'border-oe-blue/50 bg-oe-blue/10 text-oe-blue'
-              : 'border-border-light bg-surface-primary/90 text-content-secondary backdrop-blur hover:border-oe-blue/40 hover:text-oe-blue',
-          )}
-        >
-          <MonitorPlay size={13} aria-hidden />
-          {t('videos.for_this_step', { defaultValue: 'Videos for this step' })}
-          <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue">
-            {videos.length}
-          </span>
-          <ChevronDown size={12} className={clsx('transition-transform', open && 'rotate-180')} aria-hidden />
-        </button>
+  const hasItems = items.length > 0;
+  const sectionTitle = 'px-3 pb-0.5 pt-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary';
+  const learnLabel = t('learn.for_this_step', { defaultValue: 'Learn this step' });
 
-        {open && (
-          <div
-            id={panelId}
-            role="region"
-            aria-label={t('videos.for_this_step', { defaultValue: 'Videos for this step' })}
-            className="absolute right-0 top-full mt-1.5 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-xl"
-          >
-            <div className="flex items-start gap-2 border-b border-border-light px-3 py-2">
-              <p className="min-w-0 flex-1 text-xs font-semibold text-content-primary">
-                {moduleName
+  return (
+    <>
+      {open && (
+        <div
+          id={panelId}
+          role="region"
+          aria-label={hasItems ? learnLabel : t('videos.for_this_step', { defaultValue: 'Videos for this step' })}
+          className="absolute end-0 top-full mt-1.5 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-xl"
+        >
+          <div className="flex items-start gap-2 border-b border-border-light px-3 py-2">
+            <p className="min-w-0 flex-1 text-xs font-semibold text-content-primary">
+              {hasItems
+                ? moduleName || learnLabel
+                : moduleName
                   ? t('videos.for_module', { defaultValue: 'Videos about {{module}}', module: moduleName })
                   : t('videos.for_this_step', { defaultValue: 'Videos for this step' })}
+              {videos.length > 0 && (
                 <span className="mt-0.5 block text-2xs font-normal text-content-tertiary">
                   {t('videos.for_step_note', {
                     defaultValue: 'Suggested by our editors from the cases that use this screen.',
                   })}
                 </span>
-              </p>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label={t('common.close', { defaultValue: 'Close' })}
-                className="rounded p-0.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-              >
-                <X size={14} />
-              </button>
-            </div>
-            <ul className="divide-y divide-border-light">
-              {videos.slice(0, SHOWN).map((video) => (
-                <li key={video.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPlaying({ video, start: 0 });
-                      setOpen(false);
-                    }}
-                    className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
-                  >
-                    <span className="relative block h-[54px] w-24 shrink-0 overflow-hidden rounded-md bg-slate-900">
-                      <VideoCover src={video.cover} width={96} height={54} className="h-full w-full object-cover" />
-                      {video.duration ? (
-                        <span className="absolute bottom-0.5 right-0.5 rounded bg-black/75 px-1 font-mono text-[9px] text-white">
-                          {formatClock(video.duration)}
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
+              className="rounded p-0.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+            >
+              <X size={14} />
+            </button>
+          </div>
+          {videos.length > 0 && hasItems && (
+            <p className={sectionTitle}>{t('videos.view_videos', { defaultValue: 'Videos' })}</p>
+          )}
+          <ul className="divide-y divide-border-light">
+            {videos.slice(0, SHOWN).map((video) => (
+              <li key={video.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlaying({ video, start: 0 });
+                    onClose();
+                  }}
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-start hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
+                >
+                  <span className="relative block h-[54px] w-24 shrink-0 overflow-hidden rounded-md bg-slate-900">
+                    <VideoCover src={video.cover} width={96} height={54} className="h-full w-full object-cover" />
+                    {video.duration ? (
+                      <span className="absolute bottom-0.5 end-0.5 rounded bg-black/75 px-1 font-mono text-[9px] text-white">
+                        {formatClock(video.duration)}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span lang={video.language} className="line-clamp-2 text-xs font-medium leading-snug text-content-primary">
+                      {video.title}
+                    </span>
+                    <span className="mt-0.5 flex items-center gap-1 text-2xs text-content-tertiary">
+                      {video.status !== 'published' && (
+                        <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-300">
+                          <Hourglass size={10} aria-hidden />
+                          {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
                         </span>
-                      ) : null}
+                      )}
+                      <span className="truncate">{labels.series(video.series)}</span>
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span lang={video.language} className="line-clamp-2 text-xs font-medium leading-snug text-content-primary">
-                        {video.title}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-2xs text-content-tertiary">
-                        {video.status !== 'published' && (
-                          <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-300">
-                            <Hourglass size={10} aria-hidden />
-                            {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
-                          </span>
-                        )}
-                        <span className="truncate">{labels.series(video.series)}</span>
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="space-y-1.5 border-t border-border-light bg-surface-secondary/40 px-3 py-2">
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {hasItems && (
+            <>
+              <p className={clsx(sectionTitle, videos.length > 0 && 'mt-1 border-t border-border-light')}>
+                {t('nav.courses', { defaultValue: 'Courses and guides' })}
+              </p>
+              <ul>
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <AcademyItemRow item={item} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div className="space-y-1.5 border-t border-border-light bg-surface-secondary/40 px-3 py-2">
+            {videos.length > 0 && (
               <Link
                 to={`/videos?route=${encodeURIComponent(route)}`}
                 className="block text-xs font-medium text-oe-blue hover:underline"
@@ -213,20 +212,28 @@ export default function ModuleVideosPanel({ route }: { route: string }) {
                   total: videos.length,
                 })}
               </Link>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-2xs text-content-tertiary">
-                <button type="button" onClick={hideHere} className="inline-flex items-center gap-1 hover:text-content-primary">
-                  <EyeOff size={11} aria-hidden />
-                  {t('videos.hide_here', { defaultValue: 'Hide on this screen' })}
-                </button>
-                <button type="button" onClick={hideEverywhere} className="inline-flex items-center gap-1 hover:text-content-primary">
-                  <EyeOff size={11} aria-hidden />
-                  {t('videos.hide_everywhere', { defaultValue: 'Hide on every screen' })}
-                </button>
-              </div>
+            )}
+            {itemTotal > 0 && (
+              <Link
+                to={`/courses?route=${encodeURIComponent(route)}`}
+                className="block text-xs font-medium text-oe-blue hover:underline"
+              >
+                {t('learn.all_courses', { defaultValue: 'All courses and guides' })}
+              </Link>
+            )}
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-2xs text-content-tertiary">
+              <button type="button" onClick={hideHere} className="inline-flex items-center gap-1 hover:text-content-primary">
+                <EyeOff size={11} aria-hidden />
+                {t('videos.hide_here', { defaultValue: 'Hide on this screen' })}
+              </button>
+              <button type="button" onClick={hideEverywhere} className="inline-flex items-center gap-1 hover:text-content-primary">
+                <EyeOff size={11} aria-hidden />
+                {t('videos.hide_everywhere', { defaultValue: 'Hide on every screen' })}
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {playing && (
         <VideoPlayerDialog
@@ -236,9 +243,9 @@ export default function ModuleVideosPanel({ route }: { route: string }) {
           autoplay
           labels={labels}
           onClose={() => setPlaying(null)}
-          onOpenVideo={(v, s = 0) => setPlaying({ video: v, start: s })}
+          onOpenVideo={(v, st = 0) => setPlaying({ video: v, start: st })}
         />
       )}
-    </div>
+    </>
   );
 }

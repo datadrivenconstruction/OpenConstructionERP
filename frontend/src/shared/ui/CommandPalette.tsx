@@ -23,6 +23,9 @@ import {
   Keyboard,
   RotateCcw,
   Zap,
+  Crown,
+  ExternalLink,
+  GraduationCap,
   type LucideIcon,
 } from 'lucide-react';
 import { projectsApi, type Project } from '@/features/projects/api';
@@ -49,6 +52,9 @@ import {
   useBindings,
 } from '@/shared/lib/actions/useActionRunner';
 import { askAi } from '@/shared/lib/actions/askAi';
+import { openLink } from '@/shared/lib/desktop';
+import { useVideosStore } from '@/features/videos/useVideosStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 registerAppActions();
 
@@ -58,6 +64,7 @@ registerAppActions();
 type PaletteRow =
   | { kind: 'action'; id: string; action: PaletteAction; project?: { id: string; name: string } | null; score: number }
   | { kind: 'link'; id: string; label: string; description?: string; icon: LucideIcon; path: string }
+  | { kind: 'external'; id: string; label: string; description: string; icon: LucideIcon; url: string; paid: boolean }
   | { kind: 'ask'; id: string; text: string };
 
 interface RowGroup {
@@ -161,6 +168,27 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [globalResults, setGlobalResults] = useState<GlobalSearchResult[]>([]);
   const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
   const globalSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The Academy catalogue is a lazy chunk, fetched the first time a query could match it.
+  const [academy, setAcademy] = useState<typeof import('@/features/videos/academyItems') | null>(null);
+  const marketChoice = useVideosStore((s) => s.market);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const academyReader = useMemo(() => {
+    const language = i18n.language || 'en';
+    if (marketChoice === 'any') return { language, market: null, anyMarket: true };
+    if (marketChoice !== 'auto') return { language, market: marketChoice };
+    return { language, market: projects.find((p) => p.id === activeProjectId)?.country_code?.toUpperCase() ?? null };
+  }, [i18n.language, marketChoice, projects, activeProjectId]);
+  const wantsAcademy = open && !academy && query.trim().length >= 2;
+  useEffect(() => {
+    if (!wantsAcademy) return;
+    let cancelled = false;
+    void import('@/features/videos/academyItems').then((m) => {
+      if (!cancelled) setAcademy(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [wantsAcademy]);
   // Rebinding: which action is listening for keys, and why the last try was refused.
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const [recordError, setRecordError] = useState<string | null>(null);
@@ -440,9 +468,28 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       }
     }
 
+    // Courses and guides: only for a typed query, at most three, never a nag.
+    const courseRows = academy ? academy.paletteItems(trimmed, academyReader, lang) : [];
+    if (courseRows.length > 0) {
+      groups.push({
+        title: t('nav.courses', { defaultValue: 'Courses and guides' }),
+        items: courseRows.map(
+          (item): PaletteRow => ({
+            kind: 'external',
+            id: `academy-${item.id}`,
+            label: item.title,
+            description: t(`learn.kind.${item.kind}`, { defaultValue: item.kind }),
+            icon: GraduationCap,
+            url: academy!.academyUrlFor(item, i18n.language || 'en'),
+            paid: item.access === 'paid',
+          }),
+        ),
+      });
+    }
+
     if (best >= ASK_FIRST_BELOW) groups.push(aiGroup);
     return groups;
-  }, [query, actions, projects, boqs, globalResults, t, lang, actionTargets]);
+  }, [query, actions, projects, boqs, globalResults, t, i18n.language, lang, actionTargets, academy, academyReader]);
 
   // Flat list for keyboard navigation
   const flatResults = useMemo(() => results.flatMap((g) => g.items), [results]);
@@ -457,6 +504,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       onClose();
       if (row.kind === 'action') runAction(row.action, row.project ?? null);
       else if (row.kind === 'link') navigate(row.path);
+      else if (row.kind === 'external') openLink(row.url);
       else askAi(row.text, { pathname: location.pathname, navigate });
     },
     [navigate, onClose, runAction, location.pathname],
@@ -678,7 +726,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       title: titleOf(a),
                     });
                   }
-                } else if (item.kind === 'link') {
+                } else if (item.kind === 'link' || item.kind === 'external') {
                   Icon = item.icon;
                   label = item.label;
                   description = item.description;
@@ -710,11 +758,21 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       type="button"
                       onClick={() => selectResult(item)}
                       title={shortcut ? `${label} (${formatShortcut(shortcut)})` : label}
+                      aria-description={
+                        item.kind === 'external' && item.paid
+                          ? t('learn.paid_tooltip', { defaultValue: 'Paid training course' })
+                          : undefined
+                      }
                       className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
                     >
                       <Icon size={16} strokeWidth={1.75} className="shrink-0 opacity-70" />
                       <div className="flex-1 min-w-0">
-                        <span className="truncate block">{label}</span>
+                        <span className="flex items-center gap-1">
+                          <span className="truncate block">{label}</span>
+                          {item.kind === 'external' && item.paid && (
+                            <Crown size={12} strokeWidth={2} className="shrink-0 text-oe-purple-text" aria-hidden />
+                          )}
+                        </span>
                         {description && (
                           <span className="truncate block text-xs text-content-tertiary">{description}</span>
                         )}
@@ -723,6 +781,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         <kbd className="shrink-0 font-mono text-2xs text-content-tertiary bg-surface-secondary border border-border-light rounded px-1.5 py-0.5">
                           {formatShortcut(shortcut)}
                         </kbd>
+                      )}
+                      {item.kind === 'external' && (
+                        <ExternalLink size={12} className="shrink-0 text-content-quaternary rtl:-scale-x-100" aria-hidden />
                       )}
                       {isActive && !actionId && (
                         <CornerDownLeft size={14} className="shrink-0 text-content-tertiary" />
