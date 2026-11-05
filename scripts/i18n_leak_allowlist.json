@@ -2198,5 +2198,10 @@
     "en_value": "SCIM",
     "note": "System for Cross-domain Identity Management, an identity standard cited by its acronym in every locale",
     "reason_category": "standard_code"
+  },
+  "haul.pdf": {
+    "en_value": "PDF",
+    "note": "file format name, written the same way in every locale",
+    "reason_category": "standard_code"
   }
 }

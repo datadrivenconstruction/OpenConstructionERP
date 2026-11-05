@@ -2099,5 +2099,62 @@
     ],
     "key_count_at_seed": 3,
     "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
+  },
+  {
+    "locale_set": [
+      "de",
+      "es",
+      "id",
+      "pt",
+      "ro",
+      "sv"
+    ],
+    "key_count_at_seed": 4,
+    "note": "Material is the native word in each of these languages; reviewed 2026-11-05"
+  },
+  {
+    "locale_set": [
+      "id",
+      "pt-BR"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Item and Van are the words used in Indonesian and Brazilian Portuguese; reviewed 2026-11-05"
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "et",
+      "id",
+      "nl",
+      "no",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Register and Filter are the native words in each of these languages; reviewed 2026-11-05"
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "hu",
+      "id",
+      "nl",
+      "no",
+      "pl",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Bank is the native word in each of these languages; reviewed 2026-11-05"
+  },
+  {
+    "locale_set": [
+      "de",
+      "fr",
+      "no",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Journal is the accounting term in each of these languages; reviewed 2026-11-05"
   }
 ]
