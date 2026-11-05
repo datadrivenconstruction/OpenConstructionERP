@@ -1642,7 +1642,7 @@
           "method": "GET",
           "path": "/connections",
           "handler": "list_connections",
-          "response_model": "list[ConnectionResponse]"
+          "response_model": "ConnectionListResponse"
         },
         {
           "method": "POST",
@@ -1706,14 +1706,14 @@
           "method": "GET",
           "path": "/connections/{connection_id}/documents",
           "handler": "preview_documents",
-          "response_model": "list[PreviewDocument]",
+          "response_model": "PreviewDocumentListResponse",
           "request_schema": "date | None"
         },
         {
           "method": "GET",
           "path": "/connections/{connection_id}/findings",
           "handler": "findings",
-          "response_model": "list[Finding]"
+          "response_model": "FindingListResponse"
         },
         {
           "method": "POST",
@@ -2168,6 +2168,60 @@
           ]
         },
         {
+          "class_name": "ConnectionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ConnectionResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "FindingListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[Finding]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
           "class_name": "SyncCounts",
           "bases": [
             "BaseModel"
@@ -2299,6 +2353,33 @@
               "name": "external_id",
               "type": "str | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PreviewDocumentListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PreviewDocument]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -20306,7 +20387,7 @@
           "method": "GET",
           "path": "/comparisons/{comparison_id}/plugs",
           "handler": "list_leveling_plugs",
-          "response_model": "list[BidLevelingPlugResponse]",
+          "response_model": "BidLevelingPlugListResponse",
           "request_schema": "None"
         },
         {
@@ -21884,6 +21965,33 @@
               "name": "note",
               "type": "str",
               "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "BidLevelingPlugListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BidLevelingPlugResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "1000"
             }
           ]
         },
@@ -34890,7 +34998,7 @@
           "method": "GET",
           "path": "/plans/",
           "handler": "list_plans",
-          "response_model": "list[PlanResponse]",
+          "response_model": "PlanListResponse",
           "request_schema": "CapitalPlanService"
         },
         {
@@ -34924,7 +35032,7 @@
           "method": "GET",
           "path": "/plans/{plan_id}/envelopes/",
           "handler": "list_envelopes",
-          "response_model": "list[EnvelopeResponse]",
+          "response_model": "EnvelopeListResponse",
           "request_schema": "CapitalPlanService"
         },
         {
@@ -34938,7 +35046,7 @@
           "method": "GET",
           "path": "/plans/{plan_id}/scenarios/",
           "handler": "list_scenarios",
-          "response_model": "list[ScenarioResponse]",
+          "response_model": "ScenarioListResponse",
           "request_schema": "CapitalPlanService"
         },
         {
@@ -34972,7 +35080,7 @@
           "method": "GET",
           "path": "/scenarios/{scenario_id}/items/",
           "handler": "list_items",
-          "response_model": "list[ItemResponse]",
+          "response_model": "ItemListResponse",
           "request_schema": "CapitalPlanService"
         },
         {
@@ -35578,6 +35686,114 @@
             {
               "name": "outside_horizon",
               "type": "FiniteDecimal"
+            }
+          ]
+        },
+        {
+          "class_name": "PlanListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PlanResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "EnvelopeListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[EnvelopeResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
+            }
+          ]
+        },
+        {
+          "class_name": "ScenarioListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ScenarioResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "ItemListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ItemResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "1000"
             }
           ]
         },
@@ -103170,7 +103386,7 @@
           "method": "GET",
           "path": "/locations",
           "handler": "list_locations",
-          "response_model": "list[LocationResponse]",
+          "response_model": "LocationListResponse",
           "request_schema": "None"
         },
         {
@@ -103191,7 +103407,7 @@
           "method": "GET",
           "path": "/crews",
           "handler": "list_crews",
-          "response_model": "list[CrewResponse]",
+          "response_model": "CrewListResponse",
           "request_schema": "None"
         },
         {
@@ -103263,7 +103479,7 @@
           "method": "GET",
           "path": "/moves",
           "handler": "list_moves",
-          "response_model": "list[ScheduledMoveResponse]",
+          "response_model": "ScheduledMoveListResponse",
           "request_schema": "None"
         },
         {
@@ -103433,6 +103649,33 @@
           ]
         },
         {
+          "class_name": "LocationListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LocationResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
+            }
+          ]
+        },
+        {
           "class_name": "CrewCreate",
           "bases": [
             "BaseModel"
@@ -103554,6 +103797,33 @@
             {
               "name": "is_active",
               "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "CrewListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[CrewResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         },
@@ -103755,6 +104025,33 @@
             {
               "name": "applied_at",
               "type": "datetime | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ScheduledMoveListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ScheduledMoveResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
             }
           ]
         },
@@ -104380,7 +104677,7 @@
           "method": "GET",
           "path": "/saved",
           "handler": "list_saved",
-          "response_model": "list[SavedAnswerOut]"
+          "response_model": "SavedAnswerListResponse"
         }
       ],
       "schemas": [
@@ -104670,6 +104967,33 @@
             {
               "name": "created_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "SavedAnswerListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SavedAnswerOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -148912,6 +149236,33 @@
           ]
         },
         {
+          "class_name": "SurveyCaptureListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SurveyCaptureResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
           "class_name": "SurveyObservationUpsert",
           "bases": [
             "BaseModel"
@@ -149008,6 +149359,33 @@
               "name": "note",
               "type": "str",
               "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "SurveyProgressListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SurveyProgressRow]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
             }
           ]
         },
@@ -151377,7 +151755,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/expected",
           "handler": "expected",
-          "response_model": "list[ExpectedDeliveryOut]",
+          "response_model": "ExpectedDeliveryListResponse",
           "request_schema": "date | None"
         },
         {
@@ -151411,7 +151789,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/invoices",
           "handler": "list_invoices",
-          "response_model": "list[InvoiceOut]"
+          "response_model": "InvoiceListResponse"
         },
         {
           "method": "POST",
@@ -151460,7 +151838,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/rates",
           "handler": "list_rates",
-          "response_model": "list[RateOut]"
+          "response_model": "RateListResponse"
         },
         {
           "method": "POST",
@@ -151478,7 +151856,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/materials",
           "handler": "list_materials",
-          "response_model": "list[MaterialOut]"
+          "response_model": "MaterialListResponse"
         },
         {
           "method": "POST",
@@ -152338,6 +152716,33 @@
           ]
         },
         {
+          "class_name": "RateListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RateOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
           "class_name": "MaterialIn",
           "bases": [
             "BaseModel"
@@ -152389,6 +152794,33 @@
               "name": "builtin",
               "type": "bool",
               "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[MaterialOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         },
@@ -152526,6 +152958,33 @@
             {
               "name": "findings",
               "type": "list[FindingOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoiceListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[InvoiceOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "100"
             }
           ]
         },
@@ -152691,6 +153150,33 @@
             {
               "name": "ticketed",
               "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "ExpectedDeliveryListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ExpectedDeliveryOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         }
@@ -165446,7 +165932,7 @@
           "method": "GET",
           "path": "/",
           "handler": "list_lessons",
-          "response_model": "list[LessonResponse]",
+          "response_model": "LessonListResponse",
           "request_schema": "LessonStatus | None"
         },
         {
@@ -165648,6 +166134,33 @@
             {
               "name": "findings",
               "type": "list[Finding]"
+            }
+          ]
+        },
+        {
+          "class_name": "LessonListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LessonResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         },
@@ -178874,7 +179387,7 @@
           "method": "GET",
           "path": "/profiles",
           "handler": "list_profiles",
-          "response_model": "list[ProfileSummary]"
+          "response_model": "ProfileListResponse"
         },
         {
           "method": "GET",
@@ -178967,6 +179480,33 @@
             {
               "name": "handled_by",
               "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProfileSummary]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         },
@@ -186114,7 +186654,7 @@
           "method": "GET",
           "path": "/timeline/",
           "handler": "photo_timeline",
-          "response_model": "list[TimelineDay]",
+          "response_model": "TimelineListResponse",
           "request_schema": "datetime | None"
         },
         {
@@ -186133,14 +186673,14 @@
           "method": "GET",
           "path": "/by-target/",
           "handler": "photos_by_target",
-          "response_model": "list[PhotoOut]",
+          "response_model": "PhotoListResponse",
           "request_schema": "None"
         },
         {
           "method": "GET",
           "path": "/albums/",
           "handler": "list_albums",
-          "response_model": "list[AlbumOut]",
+          "response_model": "AlbumListResponse",
           "request_schema": "None"
         },
         {
@@ -186186,7 +186726,7 @@
           "method": "GET",
           "path": "/compare/",
           "handler": "list_compares",
-          "response_model": "list[CompareOut]",
+          "response_model": "CompareListResponse",
           "request_schema": "None"
         },
         {
@@ -186289,7 +186829,7 @@
           "method": "GET",
           "path": "/{photo_id}/pins/",
           "handler": "list_pins",
-          "response_model": "list[PinOut]",
+          "response_model": "PinListResponse",
           "request_schema": "PhotosService"
         },
         {
@@ -186310,7 +186850,7 @@
           "method": "GET",
           "path": "/{photo_id}/ai/",
           "handler": "list_suggestions",
-          "response_model": "list[SuggestionOut]",
+          "response_model": "SuggestionListResponse",
           "request_schema": "PhotosService"
         }
       ],
@@ -186551,6 +187091,60 @@
           ]
         },
         {
+          "class_name": "TimelineListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[TimelineDay]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
+            }
+          ]
+        },
+        {
+          "class_name": "PhotoListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PhotoOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
           "class_name": "PhotoPatch",
           "bases": [
             "BaseModel"
@@ -186694,6 +187288,33 @@
           ]
         },
         {
+          "class_name": "AlbumListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[AlbumOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
           "class_name": "AlbumItemsIn",
           "bases": [
             "BaseModel"
@@ -186792,6 +187413,33 @@
           ]
         },
         {
+          "class_name": "PinListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PinOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
           "class_name": "CompareIn",
           "bases": [
             "BaseModel"
@@ -186851,6 +187499,33 @@
           ]
         },
         {
+          "class_name": "CompareListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[CompareOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "100"
+            }
+          ]
+        },
+        {
           "class_name": "SuggestionOut",
           "bases": [
             "BaseModel"
@@ -186905,6 +187580,33 @@
               "name": "created_at",
               "type": "datetime | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SuggestionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SuggestionOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "100"
             }
           ]
         },
@@ -233505,7 +234207,7 @@
           "method": "GET",
           "path": "/proposals",
           "handler": "list_proposals",
-          "response_model": "list[ProposalResponse]"
+          "response_model": "ProposalListResponse"
         },
         {
           "method": "POST",
@@ -233622,6 +234324,33 @@
             {
               "name": "warnings",
               "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ProposalListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProposalResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         },
@@ -239426,7 +240155,7 @@
           "method": "GET",
           "path": "/certifications/types",
           "handler": "list_certification_types",
-          "response_model": "list[str]",
+          "response_model": "CertificationTypeListResponse",
           "request_schema": "None"
         },
         {
@@ -240265,6 +240994,33 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "CertificationTypeListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[str]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
             }
           ]
         },
@@ -279123,14 +279879,14 @@
           "method": "GET",
           "path": "/agreements/{agreement_id}/changes/",
           "handler": "list_agreement_changes",
-          "response_model": "list[SubcontractChangeResponse]",
+          "response_model": "SubcontractChangeListResponse",
           "request_schema": "None"
         },
         {
           "method": "GET",
           "path": "/agreements/{agreement_id}/changes/sov-lines",
           "handler": "agreement_change_sov_lines",
-          "response_model": "list[SovChangeLine]",
+          "response_model": "SovChangeLineListResponse",
           "request_schema": "None"
         },
         {
@@ -305468,7 +306224,7 @@
           "method": "GET",
           "path": "/notices/by-source/{source_type}/{source_id}",
           "handler": "notices_for_field_event",
-          "response_model": "list[NoticeResponse]",
+          "response_model": "NoticeListResponse",
           "request_schema": "None"
         },
         {
@@ -310374,7 +311130,7 @@
           "method": "GET",
           "path": "/",
           "handler": "list_entries",
-          "response_model": "list[BidOutcomeResponse]",
+          "response_model": "BidOutcomeListResponse",
           "request_schema": "None"
         },
         {
@@ -310687,6 +311443,33 @@
             {
               "name": "warnings",
               "type": "list[ValidationFinding]"
+            }
+          ]
+        },
+        {
+          "class_name": "BidOutcomeListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BidOutcomeResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
             }
           ]
         },
@@ -314966,7 +315749,7 @@
     "total_columns": 10547,
     "total_relationships": 261,
     "total_routes": 5166,
-    "total_schemas": 4655,
+    "total_schemas": 4684,
     "total_python_files": 3316,
     "frontend_features": 236,
     "frontend_ts_files": 4096,
