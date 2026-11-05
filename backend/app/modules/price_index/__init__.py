@@ -31,6 +31,9 @@ async def on_startup() -> None:
     from app.modules.price_index.permissions import register_price_index_permissions
 
     register_price_index_permissions()
+    from app.modules.price_index.validators import register_price_index_validation_rules
+
+    register_price_index_validation_rules()
 
     try:
         from app.database import async_session_factory

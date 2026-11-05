@@ -81,7 +81,9 @@ async def create_factor(
     """Create a new factor-library row."""
     service = WasteFactorService(session)
     obj = await service.create(data)
-    return _to_response(obj)
+    created = _to_response(obj)
+    created.warnings = service.warnings
+    return created
 
 
 @router.get("/factors/{factor_id}", response_model=WasteFactorResponse)
@@ -111,7 +113,9 @@ async def update_factor(
     service = WasteFactorService(session)
     obj = await service.update(factor_id, data)
     assert obj is not None  # the load_or_404 above proved existence
-    return _to_response(obj)
+    updated = _to_response(obj)
+    updated.warnings = service.warnings
+    return updated
 
 
 @router.delete(

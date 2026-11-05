@@ -46,6 +46,7 @@ from app.modules.price_index.resource_index_schemas import (
     WorkTypeSummaryOut,
 )
 from app.modules.price_index.seed import SAMPLE_NORM_SOURCE_NOTE, SAMPLE_SOURCE_NOTE
+from app.modules.price_index.validators import gate, neighbours_of
 from app.modules.projects.models import Project
 
 #: Key under ``BOQ.metadata_`` that holds the person's choices for this method.
@@ -148,6 +149,37 @@ class ResourceIndexService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        #: Non-blocking findings of the latest write, for the router to report.
+        self.warnings: list[dict[str, Any]] = []
+
+    async def _gate_index(
+        self,
+        index_id: uuid.UUID | None,
+        *,
+        region: str,
+        quarter: str,
+        group: str,
+        value: Decimal,
+        source: str,
+        is_sample: bool,
+    ) -> None:
+        """Run the price index rules for a resource index value as it would be stored (warnings only)."""
+        stmt = select(ResourceIndexValue.quarter, ResourceIndexValue.index_value).where(
+            ResourceIndexValue.region_code == region, ResourceIndexValue.resource_group == group
+        )
+        if index_id is not None:
+            stmt = stmt.where(ResourceIndexValue.id != index_id)
+        label = f"{group} {region} {quarter}"
+        self.warnings = await gate(
+            {
+                "index": {"id": str(index_id or ""), "source": source, "is_sample": is_sample, "label": label},
+                "step": {"id": str(index_id or ""), "label": label, "at": quarter, "value": value},
+                "neighbours": neighbours_of([(q, v) for q, v in (await self.session.execute(stmt)).all()], quarter),
+            },
+            None,
+            target_type="price_index_resource_index",
+            target_id=str(index_id or label),
+        )
 
     # ── Index values ─────────────────────────────────────────────────────
 
@@ -191,6 +223,15 @@ class ResourceIndexService:
             raise DuplicateEntryError(
                 f"an index for {data.resource_group} in {region}, {data.quarter} already exists; edit it instead"
             )
+        await self._gate_index(
+            None,
+            region=region,
+            quarter=data.quarter,
+            group=data.resource_group,
+            value=data.index_value,
+            source=data.source,
+            is_sample=False,
+        )
         row = ResourceIndexValue(
             region_code=region,
             quarter=data.quarter,
@@ -208,6 +249,20 @@ class ResourceIndexService:
         row = await self.session.get(ResourceIndexValue, index_id)
         if row is None:
             return None
+        new_value = data.index_value if data.index_value is not None else row.index_value
+        new_source = data.source if data.source is not None else row.source
+        touched = new_value != row.index_value or new_source != row.source
+        if touched and data.source is None and new_source == SAMPLE_SOURCE_NOTE:
+            new_source = ""
+        await self._gate_index(
+            index_id,
+            region=row.region_code,
+            quarter=row.quarter,
+            group=row.resource_group,
+            value=new_value,
+            source=new_source,
+            is_sample=row.is_sample and not touched,
+        )
         changed = False
         if data.index_value is not None and data.index_value != row.index_value:
             row.index_value = data.index_value
