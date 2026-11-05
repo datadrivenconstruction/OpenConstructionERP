@@ -94,9 +94,16 @@ async def create_location(
 
 @router.patch("/locations/{location_id}", response_model=LocationResponse)
 async def update_location(
-    location_id: uuid.UUID, data: LocationUpdate, session: SessionDep, _perm: None = _MANAGE
+    location_id: uuid.UUID,
+    data: LocationUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId = None,
+    _perm: None = _MANAGE,  # type: ignore[assignment]
 ) -> LocationResponse:
     """Rename, reorder or hide a column."""
+    loc = await DispatchService(session).repo.get_location(location_id)
+    if loc is not None and loc.project_id is not None:
+        await verify_project_access(loc.project_id, user_id or "", session)
     return LocationResponse.model_validate(await DispatchService(session).update_location(location_id, data))
 
 

@@ -15,7 +15,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.accounting_sync import templates
 from app.modules.accounting_sync.exports.journal import JOURNAL_COLUMNS
 from app.modules.accounting_sync.models import AccountingConnection, SyncLogEntry
@@ -221,7 +221,9 @@ async def findings(connection_id: uuid.UUID, session: SessionDep) -> list[Findin
 
 
 @router.post("/connections/{connection_id}/push", response_model=SyncCounts, dependencies=[_WRITE])
-async def push(connection_id: uuid.UUID, body: PushRequest, session: SessionDep) -> SyncCounts:
+async def push(connection_id: uuid.UUID, body: PushRequest, session: SessionDep, user_id: CurrentUserId) -> SyncCounts:
+    if body.project_id is not None:
+        await verify_project_access(body.project_id, user_id, session)
     if not body.record_ids:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Select the reviewed documents to post")
     svc = AccountingSyncService(session)
