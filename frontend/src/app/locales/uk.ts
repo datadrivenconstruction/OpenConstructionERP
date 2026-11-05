@@ -47250,6 +47250,7 @@ const resource = {
     "validation.rs_label_norm_base": "Шифри норм",
     "validation.rs_label_public_funding": "Обмеження для публічних коштів",
     "validation.rs_label_vat_rate": "Ставка ПДВ",
+    "validation.saved_with_warnings": "Збережено з попередженнями",
     "modules.tab_profiles": "Профілі компанії",
     "modules.tab_packs": "Пакети",
     "modules.tab_data_packages": "Пакети даних",

@@ -47469,6 +47469,7 @@ const resource = {
   "validation.rs_label_norm_base": "Kody norm",
   "validation.rs_label_public_funding": "Limity finansowania publicznego",
   "validation.rs_label_vat_rate": "Stawka VAT",
+  "validation.saved_with_warnings": "Zapisano z ostrzeżeniami",
     "modules.tab_profiles": "Profile firmy",
     "modules.tab_packs": "Pakiety",
     "modules.tab_data_packages": "Pakiety danych",

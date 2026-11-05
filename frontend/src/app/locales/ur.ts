@@ -46997,6 +46997,7 @@ const resource = {
     "validation.rs_label_norm_base": "معیاری کوڈز",
     "validation.rs_label_public_funding": "سرکاری فنڈنگ کی حدیں",
     "validation.rs_label_vat_rate": "VAT کی شرح",
+    "validation.saved_with_warnings": "انتباہات کے ساتھ محفوظ ہو گیا",
     "cost_match.tier_exact": "بالکل درست",
     "cost_match.tier_high_confidence": "پراعتماد",
     "cost_match.tier_needs_review": "نظرثانی درکار",

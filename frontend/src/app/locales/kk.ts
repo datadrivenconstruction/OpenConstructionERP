@@ -46847,6 +46847,7 @@ const resource = {
     "validation.rs_label_norm_base": "Норма кодтары",
     "validation.rs_label_public_funding": "Мемлекеттік қаржыландыру шектері",
     "validation.rs_label_vat_rate": "ҚҚС мөлшерлемесі",
+    "validation.saved_with_warnings": "Ескертулермен сақталды",
     "cost_match.tier_exact": "Дәл сай",
     "cost_match.tier_high_confidence": "Сенімді",
     "cost_match.tier_needs_review": "Қарауды қажет етеді",

@@ -45319,6 +45319,7 @@ const resource = {
   "validation.doctpl.locale_fallback": "Sem tradução: é impresso o texto em {{fallback}}.",
   "validation.doctpl.legal_data_missing": "{{field}} é obrigatório neste documento em {{country}} ({{source}}). Inclua-o em {{where}}.",
   "validation.doctpl.draft_unpublished": "Um rascunho ainda não foi publicado.",
+  "validation.saved_with_warnings": "Salvo com avisos",
     "modules.tab_profiles": "Perfis da empresa",
     "modules.tab_packs": "Pacotes",
     "modules.tab_data_packages": "Pacotes de dados",

@@ -46303,6 +46303,7 @@ const resource = {
   "validation.rs_label_norm_base": "품셈 코드",
   "validation.rs_label_public_funding": "공공 재원 상한",
   "validation.rs_label_vat_rate": "부가가치세율",
+  "validation.saved_with_warnings": "경고와 함께 저장되었습니다",
     "modules.tab_profiles": "회사 프로필",
     "modules.tab_packs": "팩",
     "modules.tab_data_packages": "데이터 패키지",

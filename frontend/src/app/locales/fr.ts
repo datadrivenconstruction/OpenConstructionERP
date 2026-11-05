@@ -46824,6 +46824,7 @@ const resource = {
   "validation.rs_label_norm_base": "Codes de norme",
   "validation.rs_label_public_funding": "Plafonds du financement public",
   "validation.rs_label_vat_rate": "Taux de TVA",
+  "validation.saved_with_warnings": "Enregistré avec avertissements",
     "modules.tab_profiles": "Profils d'entreprise",
     "modules.tab_packs": "Packs",
     "modules.tab_data_packages": "Packs de données",

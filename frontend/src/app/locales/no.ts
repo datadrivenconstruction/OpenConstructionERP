@@ -46577,6 +46577,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normkoder",
   "validation.rs_label_public_funding": "Tak for offentlig finansiering",
   "validation.rs_label_vat_rate": "Mva-sats",
+  "validation.saved_with_warnings": "Lagret med advarsler",
     "modules.tab_profiles": "Firmaprofiler",
     "modules.tab_packs": "Pakker",
     "modules.tab_data_packages": "Datapakker",

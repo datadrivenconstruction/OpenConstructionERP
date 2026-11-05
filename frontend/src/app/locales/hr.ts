@@ -46730,6 +46730,7 @@ const resource = {
   "validation.rs_label_norm_base": "Šifre normi",
   "validation.rs_label_public_funding": "Gornje granice javnog financiranja",
   "validation.rs_label_vat_rate": "Stopa PDV-a",
+  "validation.saved_with_warnings": "Spremljeno s upozorenjima",
     "modules.tab_profiles": "Profili tvrtke",
     "modules.tab_packs": "Paketi",
     "modules.tab_data_packages": "Paketi podataka",

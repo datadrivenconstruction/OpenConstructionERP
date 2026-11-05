@@ -46351,6 +46351,7 @@ const resource = {
   "validation.rs_label_norm_base": "定额编号",
   "validation.rs_label_public_funding": "财政资金取费上限",
   "validation.rs_label_vat_rate": "增值税税率",
+  "validation.saved_with_warnings": "已保存，但有警告",
     "modules.tab_profiles": "公司档案",
     "modules.tab_packs": "包",
     "modules.tab_data_packages": "数据包",

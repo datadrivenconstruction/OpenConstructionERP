@@ -46303,6 +46303,7 @@ const resource = {
   "validation.rs_label_norm_base": "歩掛コード",
   "validation.rs_label_public_funding": "公的資金の上限",
   "validation.rs_label_vat_rate": "消費税率",
+  "validation.saved_with_warnings": "警告付きで保存しました",
     "modules.tab_profiles": "会社プロファイル",
     "modules.tab_packs": "パック",
     "modules.tab_data_packages": "データパッケージ",

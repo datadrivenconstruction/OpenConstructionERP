@@ -46535,6 +46535,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normnummern",
   "validation.rs_label_public_funding": "Obergrenzen öffentlicher Mittel",
   "validation.rs_label_vat_rate": "MwSt.-Satz",
+  "validation.saved_with_warnings": "Mit Warnungen gespeichert",
     "modules.tab_profiles": "Firmenprofile",
     "modules.tab_packs": "Pakete",
     "modules.tab_data_packages": "Datenpakete",

@@ -46969,6 +46969,7 @@ const resource = {
   "validation.rs_label_norm_base": "Norma kodları",
   "validation.rs_label_public_funding": "Kamu finansmanı tavanları",
   "validation.rs_label_vat_rate": "KDV oranı",
+  "validation.saved_with_warnings": "Uyarılarla kaydedildi",
     "modules.tab_profiles": "Şirket Profilleri",
     "modules.tab_packs": "Paketler",
     "modules.tab_data_packages": "Veri Paketleri",

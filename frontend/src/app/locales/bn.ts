@@ -46884,6 +46884,7 @@ const resource = {
     "validation.rs_label_norm_base": "মানদণ্ড কোড",
     "validation.rs_label_public_funding": "সরকারি অর্থায়নের সীমা",
     "validation.rs_label_vat_rate": "ভ্যাট হার",
+    "validation.saved_with_warnings": "সতর্কতা সহ সংরক্ষিত",
     "tax_withholding.verification_col": "যাচাই প্রয়োজন",
     "tax_withholding.unnamed_party": "নামহীন পক্ষ",
     "tax_withholding.taxable_base_label": "করযোগ্য ভিত্তি",

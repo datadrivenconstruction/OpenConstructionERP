@@ -47483,6 +47483,7 @@ const resource = {
   "validation.rs_label_norm_base": "رموز المعايير",
   "validation.rs_label_public_funding": "سقوف التمويل العام",
   "validation.rs_label_vat_rate": "نسبة ضريبة القيمة المضافة",
+  "validation.saved_with_warnings": "تم الحفظ مع تحذيرات",
     "modules.tab_profiles": "ملفات الشركة",
     "modules.tab_packs": "الحزم",
     "modules.tab_data_packages": "حزم البيانات",

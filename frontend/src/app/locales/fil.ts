@@ -46884,6 +46884,7 @@ const resource = {
     "validation.rs_label_norm_base": "Mga code ng pamantayan",
     "validation.rs_label_public_funding": "Mga takda sa pampublikong pondo",
     "validation.rs_label_vat_rate": "Rate ng VAT",
+    "validation.saved_with_warnings": "Na-save na may mga babala",
     "cost_match.action_close": "Isara ang review",
     "cost_match.action_confirm": "Kumpirmahin",
     "cost_match.action_override": "Presyuhan laban sa iba",

@@ -40624,6 +40624,7 @@ const resource = {
   "validation.rs_label_norm_base": "Norm codes",
   "validation.rs_label_public_funding": "Public funding caps",
   "validation.rs_label_vat_rate": "VAT rate",
+  "validation.saved_with_warnings": "Saved with warnings",
     "modules.tab_profiles": "Company Profiles",
     "modules.tab_packs": "Packs",
     "modules.tab_data_packages": "Data Packages",

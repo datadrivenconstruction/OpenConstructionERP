@@ -46205,6 +46205,7 @@ const resource = {
   "validation.rs_label_norm_base": "Kode norma",
   "validation.rs_label_public_funding": "Batas pendanaan publik",
   "validation.rs_label_vat_rate": "Tarif PPN",
+  "validation.saved_with_warnings": "Disimpan dengan peringatan",
     "modules.tab_profiles": "Profil Perusahaan",
     "modules.tab_packs": "Paket",
     "modules.tab_data_packages": "Paket Data",

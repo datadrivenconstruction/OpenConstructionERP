@@ -46313,6 +46313,7 @@ const resource = {
     "validation.rs_label_norm_base": "Normakódok",
     "validation.rs_label_public_funding": "Közfinanszírozási felső határok",
     "validation.rs_label_vat_rate": "ÁFA-kulcs",
+    "validation.saved_with_warnings": "Mentve figyelmeztetésekkel",
     "modules.tab_profiles": "Cégprofilok",
     "modules.tab_packs": "Csomagok",
     "modules.tab_data_packages": "Adatcsomagok",

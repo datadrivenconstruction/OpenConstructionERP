@@ -46582,6 +46582,7 @@ const resource = {
   "validation.rs_label_norm_base": "मानक कोड",
   "validation.rs_label_public_funding": "सार्वजनिक फ़ंडिंग सीमाएँ",
   "validation.rs_label_vat_rate": "VAT दर",
+  "validation.saved_with_warnings": "चेतावनियों के साथ सहेजा गया",
     "modules.tab_profiles": "कंपनी प्रोफ़ाइल",
     "modules.tab_packs": "पैक",
     "modules.tab_data_packages": "डेटा पैकेज",

@@ -46534,6 +46534,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normcodes",
   "validation.rs_label_public_funding": "Limieten publieke financiering",
   "validation.rs_label_vat_rate": "Btw-tarief",
+  "validation.saved_with_warnings": "Opgeslagen met waarschuwingen",
     "modules.tab_profiles": "Bedrijfsprofielen",
     "modules.tab_packs": "Pakketten",
     "modules.tab_data_packages": "Gegevenspakketten",

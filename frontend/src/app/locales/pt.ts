@@ -46813,6 +46813,7 @@ const resource = {
   "validation.rs_label_norm_base": "Códigos de norma",
   "validation.rs_label_public_funding": "Limites do financiamento público",
   "validation.rs_label_vat_rate": "Taxa de IVA",
+  "validation.saved_with_warnings": "Guardado com avisos",
     "modules.tab_profiles": "Perfis da empresa",
     "modules.tab_packs": "Pacotes",
     "modules.tab_data_packages": "Pacotes de dados",

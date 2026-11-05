@@ -47011,6 +47011,7 @@ const resource = {
   "validation.rs_label_norm_base": "Kódy norem",
   "validation.rs_label_public_funding": "Limity veřejného financování",
   "validation.rs_label_vat_rate": "Sazba DPH",
+  "validation.saved_with_warnings": "Uloženo s upozorněními",
     "modules.tab_profiles": "Firemní profily",
     "modules.tab_packs": "Balíčky",
     "modules.tab_data_packages": "Datové balíčky",

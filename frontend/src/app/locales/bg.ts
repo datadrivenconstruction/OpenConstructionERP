@@ -46550,6 +46550,7 @@ const resource = {
   "validation.rs_label_norm_base": "Кодове на норми",
   "validation.rs_label_public_funding": "Тавани при публично финансиране",
   "validation.rs_label_vat_rate": "Ставка на ДДС",
+  "validation.saved_with_warnings": "Запазено с предупреждения",
     "modules.tab_profiles": "Фирмени профили",
     "modules.tab_packs": "Пакети",
     "modules.tab_data_packages": "Пакети с данни",

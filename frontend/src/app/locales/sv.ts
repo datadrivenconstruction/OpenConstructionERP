@@ -46577,6 +46577,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normkoder",
   "validation.rs_label_public_funding": "Tak för offentlig finansiering",
   "validation.rs_label_vat_rate": "Momssats",
+  "validation.saved_with_warnings": "Sparat med varningar",
     "modules.tab_profiles": "Företagsprofiler",
     "modules.tab_packs": "Paket",
     "modules.tab_data_packages": "Datapaket",

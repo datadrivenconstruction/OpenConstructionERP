@@ -46357,6 +46357,7 @@ const resource = {
   "validation.rs_label_norm_base": "Mã định mức",
   "validation.rs_label_public_funding": "Mức trần vốn công",
   "validation.rs_label_vat_rate": "Thuế suất VAT",
+  "validation.saved_with_warnings": "Đã lưu kèm cảnh báo",
     "modules.tab_profiles": "Hồ sơ công ty",
     "modules.tab_packs": "Gói",
     "modules.tab_data_packages": "Gói dữ liệu",

@@ -46872,6 +46872,7 @@ const resource = {
     "validation.rs_label_norm_base": "Κωδικοί προτύπων",
     "validation.rs_label_public_funding": "Όρια δημόσιας χρηματοδότησης",
     "validation.rs_label_vat_rate": "Συντελεστής ΦΠΑ",
+    "validation.saved_with_warnings": "Αποθηκεύτηκε με προειδοποιήσεις",
     "cost_match.tier_exact": "Ακριβές",
     "cost_match.tier_high_confidence": "Με εμπιστοσύνη",
     "cost_match.tier_needs_review": "Χρειάζεται έλεγχο",

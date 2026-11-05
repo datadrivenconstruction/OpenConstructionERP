@@ -46557,6 +46557,7 @@ const resource = {
   "validation.rs_label_norm_base": "Норма коддору",
   "validation.rs_label_public_funding": "Мамлекеттик каржылоонун чектери",
   "validation.rs_label_vat_rate": "КНС ставкасы",
+  "validation.saved_with_warnings": "Эскертүүлөр менен сакталды",
     "modules.tab_profiles": "Компания профилдери",
     "modules.tab_packs": "Пакеттер",
     "modules.tab_data_packages": "Дайындар пакеттери",

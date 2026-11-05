@@ -46541,6 +46541,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normkoder",
   "validation.rs_label_public_funding": "Lofter for offentlig finansiering",
   "validation.rs_label_vat_rate": "Momssats",
+  "validation.saved_with_warnings": "Gemt med advarsler",
     "modules.tab_profiles": "Virksomhedsprofiler",
     "modules.tab_packs": "Pakker",
     "modules.tab_data_packages": "Datapakker",

@@ -47796,6 +47796,7 @@ const resource = {
     "validation.rs_label_norm_base": "Нормын кодууд",
     "validation.rs_label_public_funding": "Улсын санхүүжилтийн дээд хязгаар",
     "validation.rs_label_vat_rate": "НӨАТ-ын хувь",
+    "validation.saved_with_warnings": "Анхааруулгатай хадгалагдлаа",
     "boq.price_analysis_currency": "Валют",
     "boq.price_analysis_col_resource": "Нөөц",
     "boq.price_analysis_col_unit_cost": "Нэгжийн үнэ",

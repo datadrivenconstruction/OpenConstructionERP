@@ -46814,6 +46814,7 @@ const resource = {
   "validation.rs_label_norm_base": "Coduri de normă",
   "validation.rs_label_public_funding": "Plafoane pentru finanțare publică",
   "validation.rs_label_vat_rate": "Cota TVA",
+  "validation.saved_with_warnings": "Salvat cu avertismente",
     "modules.tab_profiles": "Profiluri companie",
     "modules.tab_packs": "Pachete",
     "modules.tab_data_packages": "Pachete de date",

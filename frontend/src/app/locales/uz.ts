@@ -46476,6 +46476,7 @@ const resource = {
     "validation.rs_label_norm_base": "Norma kodlari",
     "validation.rs_label_public_funding": "Davlat moliyalashtirishi chegaralari",
     "validation.rs_label_vat_rate": "QQS stavkasi",
+    "validation.saved_with_warnings": "Ogohlantirishlar bilan saqlandi",
     "modules.tab_profiles": "Kompaniya profillari",
     "modules.tab_packs": "Paketlar",
     "modules.tab_data_packages": "Maʼlumotlar paketlari",

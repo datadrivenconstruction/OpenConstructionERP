@@ -46867,6 +46867,7 @@ const resource = {
   "validation.rs_label_norm_base": "Codici di norma",
   "validation.rs_label_public_funding": "Limiti del finanziamento pubblico",
   "validation.rs_label_vat_rate": "Aliquota IVA",
+  "validation.saved_with_warnings": "Salvato con avvisi",
     "modules.tab_profiles": "Profili aziendali",
     "modules.tab_packs": "Pacchetti",
     "modules.tab_data_packages": "Pacchetti di dati",

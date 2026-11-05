@@ -47212,6 +47212,7 @@ const resource = {
     "validation.rs_label_norm_base": "קודי תקן",
     "validation.rs_label_public_funding": "תקרות מימון ציבורי",
     "validation.rs_label_vat_rate": "שיעור מע״מ",
+    "validation.saved_with_warnings": "נשמר עם אזהרות",
     "cost_match.tier_exact": "מדויק",
     "cost_match.tier_high_confidence": "ביטחון גבוה",
     "cost_match.tier_needs_review": "דורש בדיקה",

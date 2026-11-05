@@ -45209,6 +45209,7 @@ const resource = {
   "validation.doctpl.legal_data_missing": "Falta {{field}} en este documento de {{country}} ({{source}}). Añádalo en {{where}}.",
   "validation.doctpl.draft_unpublished": "Un borrador aún no está publicado.",
   "validation.rs_label_public_funding": "Topes de financiamiento pública",
+  "validation.saved_with_warnings": "Guardado con advertencias",
     "modules.tab_profiles": "Perfiles de empresa",
     "modules.tab_packs": "Paquetes",
     "modules.tab_data_packages": "Paquetes de datos",

@@ -47890,6 +47890,7 @@ const resource = {
     "validation.rs_label_norm_base": "Normikoodid",
     "validation.rs_label_public_funding": "Avaliku rahastuse ülemmäärad",
     "validation.rs_label_vat_rate": "Käibemaksumäär",
+    "validation.saved_with_warnings": "Salvestatud hoiatustega",
     "boq.price_analysis_currency": "Valuuta",
     "boq.price_analysis_col_resource": "Ressurss",
     "boq.price_analysis_col_unit_cost": "Ühikuhind",

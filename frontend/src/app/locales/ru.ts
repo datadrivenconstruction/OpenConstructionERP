@@ -47009,6 +47009,7 @@ const resource = {
   "validation.rs_label_norm_base": "Шифры норм",
   "validation.rs_label_public_funding": "Ограничения для публичных средств",
   "validation.rs_label_vat_rate": "Ставка НДС",
+  "validation.saved_with_warnings": "Сохранено с предупреждениями",
     "modules.tab_profiles": "Профили компании",
     "modules.tab_packs": "Пакеты",
     "modules.tab_data_packages": "Пакеты данных",

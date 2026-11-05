@@ -46349,6 +46349,7 @@ const resource = {
   "validation.rs_label_norm_base": "รหัสมาตรฐาน",
   "validation.rs_label_public_funding": "เพดานสำหรับเงินทุนภาครัฐ",
   "validation.rs_label_vat_rate": "อัตราภาษีมูลค่าเพิ่ม",
+  "validation.saved_with_warnings": "บันทึกแล้วพร้อมคำเตือน",
     "modules.tab_profiles": "โปรไฟล์บริษัท",
     "modules.tab_packs": "แพ็ก",
     "modules.tab_data_packages": "แพ็กข้อมูล",

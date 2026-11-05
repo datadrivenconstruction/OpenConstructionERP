@@ -46550,6 +46550,7 @@ const resource = {
   "validation.rs_label_norm_base": "Normikoodit",
   "validation.rs_label_public_funding": "Julkisen rahoituksen enimmäismäärät",
   "validation.rs_label_vat_rate": "ALV-kanta",
+  "validation.saved_with_warnings": "Tallennettu varoituksin",
     "modules.tab_profiles": "Yritysprofiilit",
     "modules.tab_packs": "Paketit",
     "modules.tab_data_packages": "Datapaketit",

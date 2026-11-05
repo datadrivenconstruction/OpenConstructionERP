@@ -46931,6 +46931,7 @@ const resource = {
     "validation.rs_label_norm_base": "کدهای نُرم",
     "validation.rs_label_public_funding": "سقف‌های تأمین مالی دولتی",
     "validation.rs_label_vat_rate": "نرخ مالیات بر ارزش افزوده",
+    "validation.saved_with_warnings": "با هشدار ذخیره شد",
     "cost_match.tier_exact": "دقیق",
     "cost_match.tier_high_confidence": "قابل‌اطمینان",
     "cost_match.tier_needs_review": "نیاز به بازبینی",
