@@ -118,6 +118,8 @@ class RequirementResponse(BaseModel):
     """Requirement item returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     @field_validator("confidence", mode="before")
     @classmethod
@@ -313,6 +315,8 @@ class RequirementSetResponse(BaseModel):
     """Requirement set returned from the API (without nested requirements)."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID

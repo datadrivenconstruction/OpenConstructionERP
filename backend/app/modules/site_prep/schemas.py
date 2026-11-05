@@ -17,7 +17,7 @@ same values so an out-of-vocabulary value is rejected at the edge (422).
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -76,6 +76,8 @@ class SitePrepPlanResponse(BaseModel):
     """A mobilisation plan returned from the API."""
 
     model_config = ConfigDict(from_attributes=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
@@ -130,6 +132,8 @@ class SitePrepItemResponse(BaseModel):
     """A readiness item returned from the API."""
 
     model_config = ConfigDict(from_attributes=True)
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     id: UUID
     project_id: UUID
