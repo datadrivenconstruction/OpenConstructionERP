@@ -129,8 +129,8 @@ async def gate_rule_set(
     report = await run(state)
     blocking = list(report.errors)
     if blocking and before is not None:
-        legacy = {(r.rule_id, r.message) for r in (await run(before)).errors}
-        blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+        legacy = {(r.rule_id, r.element_ref, r.message) for r in (await run(before)).errors}
+        blocking = [r for r in blocking if (r.rule_id, r.element_ref, r.message) not in legacy]
     if blocking:
         detail = rule_errors_detail(
             report,

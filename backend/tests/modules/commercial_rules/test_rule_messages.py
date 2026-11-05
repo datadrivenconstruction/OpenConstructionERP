@@ -60,3 +60,10 @@ def test_uzbek_uses_the_modifier_letter_not_a_quote():
     text = json.dumps({s: _load("uz")[s] for s in KEYS}, ensure_ascii=False)
     assert "ʻ" in text
     assert "o'" not in text and "g'" not in text
+
+
+@pytest.mark.parametrize("section", sorted(KEYS))
+def test_every_key_the_rules_emit_is_in_the_bundle(section):
+    source = (Path(bundle.__file__).parents[3] / "modules" / section / "validators.py").read_text(encoding="utf-8")
+    used = set(re.findall(r'self\.fail\(\s*context,\s*"(\w+)"', source))
+    assert used and used <= set(_load("en")[section])
