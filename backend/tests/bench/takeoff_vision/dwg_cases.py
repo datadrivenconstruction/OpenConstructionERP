@@ -52,6 +52,13 @@ def _draw(path: Path) -> list[Case]:
     ep = h.paths.add_edge_path(flags=16)
     ep.add_arc((37, 4), 0.5, 0, 360)
     cases.append(Case("hatch_with_holes", "area", 80 - 6 - math.pi * 0.25))
+    # One hatch over two separate slabs, the second with a hole holding an island.
+    h2 = msp.add_hatch()
+    h2.paths.add_polyline_path([(60, 0), (64, 0), (64, 4), (60, 4)], is_closed=True, flags=1)
+    h2.paths.add_polyline_path([(70, 0), (76, 0), (76, 6), (70, 6)], is_closed=True, flags=1)
+    h2.paths.add_polyline_path([(71, 1), (75, 1), (75, 5), (71, 5)], is_closed=True, flags=16)
+    h2.paths.add_polyline_path([(72, 2), (73, 2), (73, 3), (72, 3)], is_closed=True, flags=16)
+    cases.append(Case("hatch_disjoint_loops", "area", 16 + 36 - 16 + 1))
     # Open spline: a smooth run whose control polygon is much longer than the curve.
     fit = [(50, 0), (52, 2), (54, 0), (56, 2)]
     msp.add_spline(fit_points=fit)
@@ -76,7 +83,8 @@ def _area(vertices: list[dict[str, float]]) -> float:
 def measure(entity: dict[str, Any]) -> tuple[str, float]:
     verts = entity.get("vertices") or []
     if entity.get("closed") or entity["type"] == "HATCH":
-        return "area", _area(verts) - sum(_area(h) for h in entity.get("holes") or [])
+        filled = _area(verts) + sum(_area(r) for r in entity.get("extra_loops") or [])
+        return "area", filled - sum(_area(h) for h in entity.get("holes") or [])
     return "length", sum(math.dist((a["x"], a["y"]), (b["x"], b["y"])) for a, b in zip(verts, verts[1:], strict=False))
 
 

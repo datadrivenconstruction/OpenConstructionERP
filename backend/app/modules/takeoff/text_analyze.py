@@ -2,9 +2,11 @@
 
 The model reads the text and proposes items; this module decides how much of
 each proposal the text actually supports. A quantity that appears nowhere in
-the source is the typical hallucination, so it caps the item below the medium
-confidence band; repeated rows are merged; unit spellings are normalised so
-category subtotals do not split ``m2`` from ``sqm``. Pure functions, no I/O.
+the source (next to its unit, or on a line sharing the item's words) is the
+typical hallucination, so it caps the item below the medium confidence band.
+Finding the number never raises the model's score. Repeated rows are kept (the
+same door on two floors is two doors) and flagged; unit spellings are
+normalised so subtotals do not split ``m2`` from ``sqm``. Pure, no I/O.
 """
 
 from __future__ import annotations
@@ -15,7 +17,6 @@ from typing import Any
 
 # Below the 0.62 medium band: an ungrounded quantity always needs a human look.
 UNGROUNDED_MAX_CONFIDENCE = 0.55
-GROUNDED_EVIDENCE = 0.95
 _REL_TOL = 0.001  # a model may round 1,234.56 to 1234.6, not further
 
 _UNIT_ALIASES: dict[str, str] = {
@@ -132,18 +133,26 @@ def _to_float(token: str) -> float | None:
         return None
 
 
-def source_numbers(text: str) -> list[tuple[float, int]]:
-    """Every number in the text with its offset, both readings of an ambiguous ``1,250``."""
-    out: list[tuple[float, int]] = []
-    for m in _NUMBER.finditer(text or ""):
+def source_numbers(text: str) -> list[tuple[float, int, int]]:
+    """Every number in the text with its span, both readings of an ambiguous ``1,250``.
+
+    Parts of dates (``12.05.2024``) are skipped.
+    """
+    out: list[tuple[float, int, int]] = []
+    text = text or ""
+    for m in _NUMBER.finditer(text):
         tok = m.group(0)
+        if re.match(r"[.,/]\d", text[m.end() : m.end() + 2]) or re.search(
+            r"\d[./]$", text[max(0, m.start() - 2) : m.start()]
+        ):
+            continue
         v = _to_float(tok)
         if v is not None:
-            out.append((v, m.start()))
+            out.append((v, m.start(), m.end()))
         if re.fullmatch(r"\d{1,3}[.,]\d{3}", tok):
             alt = float(tok.replace(",", ".")) if "," in tok else float(tok.replace(".", ""))
             if alt != v:
-                out.append((alt, m.start()))
+                out.append((alt, m.start(), m.end()))
     return out
 
 
@@ -151,35 +160,75 @@ def _norm_desc(text: str) -> str:
     return re.sub(r"[^\w]+", " ", text.casefold()).strip()
 
 
+_UNIT_AFTER = re.compile(r"\s*([^\W\d_][\w.²³^/ ]{0,7})")
+
+
+def _unit_after(text: str, end: int) -> str | None:
+    m = _UNIT_AFTER.match(text, end)
+    if not m:
+        return None
+    words = m.group(1).split()
+    for n in (2, 1):
+        if len(words) >= n:
+            u = normalize_unit(" ".join(words[:n]))
+            if u in _UNIT_ALIASES.values():
+                return u
+    return None
+
+
+def _line_at(text: str, pos: int) -> str:
+    a = text.rfind("\n", 0, pos) + 1
+    b = text.find("\n", pos)
+    return text[a : b if b >= 0 else len(text)]
+
+
+def _grounding(qty: float, unit: str, desc: str, text: str, numbers: list[tuple[float, int, int]]) -> int | None:
+    """Offset of the source number that backs ``qty``, or ``None``.
+
+    The number must carry the item's unit right after it, or sit on a line that
+    shares a word of four or more letters with the description. A bare ``12``
+    from a date or a drawing number backs nothing.
+    """
+    words = {w for w in re.findall(r"[^\W\d_]{4,}", desc.casefold())}
+    for v, start, end in numbers:
+        if abs(v - qty) > _REL_TOL * max(abs(qty), 1e-9):
+            continue
+        if _unit_after(text, end) == unit:
+            return start
+        line_words = set(re.findall(r"[^\W\d_]{4,}", _line_at(text, start).casefold()))
+        if words & line_words:
+            return start
+    return None
+
+
 def check_items(items: list[dict[str, Any]], source_text: str) -> list[CheckedItem]:
-    """Ground, normalise and de-duplicate parsed items.
+    """Ground and normalise parsed items; never merge or drop one.
 
     Each item needs ``description``, ``quantity`` (float, already band-clamped),
     ``unit``, ``category`` and ``confidence`` (the model's score or the router's
-    heuristic). Order is preserved; a repeat of an earlier row is dropped and
-    noted on the row it repeats.
+    heuristic). Order is preserved; a row identical to an earlier one is kept
+    and flagged ``repeated_line`` for the estimator to confirm.
     """
     numbers = source_numbers(source_text)
     out: list[CheckedItem] = []
-    seen: dict[tuple[str, str, float], CheckedItem] = {}
+    seen: set[tuple[str, str, float]] = set()
     for it in items:
         qty = float(it.get("quantity") or 0.0)
         unit = normalize_unit(str(it.get("unit") or ""))
         desc = str(it.get("description") or "").strip()
         key = (_norm_desc(desc), unit, round(qty, 3))
-        if key in seen:
-            if "merged_duplicate" not in seen[key].flags:
-                seen[key].flags.append("merged_duplicate")
-            continue
         llm = float(it.get("confidence") or 0.0)
         flags: list[str] = []
+        if key in seen:
+            flags.append("repeated_line")
+        seen.add(key)
         grounded, evidence = False, ""
         if qty > 0:
-            hit = next((pos for v, pos in numbers if abs(v - qty) <= _REL_TOL * max(abs(qty), 1e-9)), None)
+            hit = _grounding(qty, unit, desc, source_text, numbers)
             if hit is not None:
                 grounded = True
                 evidence = source_text[max(0, hit - 40) : hit + 40].replace("\n", " ").strip()
-                conf = 0.5 * llm + 0.5 * GROUNDED_EVIDENCE
+                conf = llm
             else:
                 flags.append("quantity_not_in_source")
                 conf = min(llm, UNGROUNDED_MAX_CONFIDENCE)
@@ -198,6 +247,5 @@ def check_items(items: list[dict[str, Any]], source_text: str) -> list[CheckedIt
             flags=flags,
             evidence=evidence,
         )
-        seen[key] = row
         out.append(row)
     return out

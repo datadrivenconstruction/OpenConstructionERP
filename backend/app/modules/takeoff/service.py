@@ -4323,9 +4323,9 @@ class TakeoffService:
         }
 
 
-# Conservative pre-flight token estimate for one 2000px page vision call
-# (image tokens + the capped output). Used only by the pre-flight cost gate;
-# the real token count from the provider replaces it after the call.
-_PLAN_READ_PREFLIGHT_TOKENS = 4000
 # Output is geometry and short labels, not prose - a small cap keeps cost down.
 _PLAN_READ_MAX_TOKENS = 4096
+# Conservative pre-flight token estimate for one 2000px page vision call: the
+# image and prompt (about 2,800 tokens) plus the full output cap. Used only by
+# the pre-flight cost gate; the provider's real count replaces it after the call.
+_PLAN_READ_PREFLIGHT_TOKENS = 2800 + _PLAN_READ_MAX_TOKENS

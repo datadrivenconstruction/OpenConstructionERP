@@ -540,6 +540,8 @@ def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
         result["is_solid"] = gd.get("is_solid", False)
         if gd.get("holes"):
             result["holes"] = gd["holes"]
+        if gd.get("extra_loops"):
+            result["extra_loops"] = gd["extra_loops"]
     elif entity_type == "SPLINE":
         result["type"] = "LWPOLYLINE"
         result["vertices"] = gd.get("points") or gd.get("control_points", [])

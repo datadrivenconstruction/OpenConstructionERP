@@ -94,6 +94,8 @@ export interface DxfEntity {
   vertices?: { x: number; y: number }[];
   /** Hatch islands (shafts, openings) inside the boundary; their area is not filled */
   holes?: { x: number; y: number }[][];
+  /** Further filled loops of the same hatch (separate slab pieces) */
+  extra_loops?: { x: number; y: number }[][];
   /** Arc / circle radius */
   radius?: number;
   /** Ellipse major radius */

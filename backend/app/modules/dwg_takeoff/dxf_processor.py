@@ -343,7 +343,8 @@ def _hatch_rings(entity: Any) -> dict[str, Any]:
 
     Nesting depth decides the role: a loop inside an even number of other loops
     is filled, inside an odd number it is a hole. The largest filled loop is the
-    boundary; the holes inside it are subtracted from its area downstream.
+    boundary, the other filled loops are ``extra_loops``; downstream the area is
+    every filled loop minus every hole.
     """
     from ezdxf import path as ezpath  # noqa: PLC0415
 
@@ -357,10 +358,12 @@ def _hatch_rings(entity: Any) -> dict[str, Any]:
         return {}
     rings.sort(key=lambda r: -abs(_ring_area(r)))
     depth = [sum(1 for j in range(i) if _point_in_ring(rings[i][0], rings[j])) for i in range(len(rings))]
-    outer_i = next((i for i, d in enumerate(depth) if d % 2 == 0), 0)
-    outer = rings[outer_i]
-    holes = [r for i, r in enumerate(rings) if depth[i] % 2 == 1 and _point_in_ring(r[0], outer)]
-    out: dict[str, Any] = {"points": [{"x": x, "y": y} for x, y in outer], "closed": True}
+    filled = [r for i, r in enumerate(rings) if depth[i] % 2 == 0]
+    holes = [r for i, r in enumerate(rings) if depth[i] % 2 == 1]
+    out: dict[str, Any] = {"points": [{"x": x, "y": y} for x, y in filled[0]], "closed": True}
+    if len(filled) > 1:
+        # Disjoint pieces of one hatch (two slab areas, islands inside holes).
+        out["extra_loops"] = [[{"x": x, "y": y} for x, y in r] for r in filled[1:]]
     if holes:
         out["holes"] = [[{"x": x, "y": y} for x, y in h] for h in holes]
     return out

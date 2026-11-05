@@ -2,9 +2,10 @@
 
 Generated specification texts in three number styles (1,234.5 / 1.234,5 /
 1 234,5) and a mock model answer per text: the true items with unit spelling
-noise, repeated rows, and invented quantities. Scored: how many invented
-quantities stay below the medium band, how many true items stay at or above
-it, how many repeats are merged.
+noise, the same item listed for a second floor, and invented quantities, some
+copied from a date or drawing number in the header. Scored: invented quantities
+kept below the medium band, true items kept at or above it, second-floor rows
+kept (quantity not lost), and that no score ever rises above the model's.
 
     cd backend
     python -m tests.bench.takeoff_vision.analyze_cases
@@ -45,33 +46,39 @@ def make_case(seed: int) -> tuple[str, list[dict[str, Any]], list[str]]:
     rng = random.Random(seed)
     style = seed % 3
     works = rng.sample(_WORKS, 6)
-    lines, items, labels = [f"Bill of quantities, lot {seed}"], [], []
+    day, month, sheet = rng.randint(10, 28), rng.randint(10, 12), rng.randint(11, 99)
+    lines = [f"Bill of quantities, lot {seed}, issued {day}.{month}.2026, drawing {sheet}"]
+    items, labels = [], []
     for i, (desc, unit, cat, spellings) in enumerate(works, 1):
         qty = round(rng.uniform(1.5, 2500.0), 2)
-        lines.append(f"{i:02d}  {desc}  {_fmt(qty, style)} {unit}")
+        lines.append(f"{i:02d}  Ground floor: {desc}  {_fmt(qty, style)} {unit}")
+        conf = round(rng.uniform(0.65, 0.95), 2)
         items.append(
-            {"description": desc, "quantity": qty, "unit": rng.choice(spellings), "category": cat, "confidence": 0.85}
+            {"description": desc, "quantity": qty, "unit": rng.choice(spellings), "category": cat, "confidence": conf}
         )
         labels.append("true")
     for it in rng.sample(items[:6], 2):
-        items.append(dict(it, unit=it["unit"]))
-        labels.append("repeat")
-    for desc, unit, cat, _sp in rng.sample([w for w in _WORKS if w not in works], 2):
-        items.append(
-            {
-                "description": desc,
-                "quantity": round(rng.uniform(1.5, 2500.0), 2),
-                "unit": unit,
-                "category": cat,
-                "confidence": 0.8,
-            }
+        lines.append(
+            f"    Upper floor: {it['description']}  {_fmt(it['quantity'], style)} {canon_unit(it['description'])}"
         )
+        items.append(dict(it))
+        labels.append("repeat")
+    unused = [w for w in _WORKS if w not in works]
+    for k, (desc, unit, cat, _sp) in enumerate(rng.sample(unused, 2)):
+        qty = float(f"{day}.{month}") if k == 0 else float(sheet)
+        if seed % 2:
+            qty = round(rng.uniform(1.5, 2500.0), 2)
+        items.append({"description": desc, "quantity": qty, "unit": unit, "category": cat, "confidence": 0.8})
         labels.append("invented")
     return "\n".join(lines), items, labels
 
 
+def canon_unit(desc: str) -> str:
+    return next(w[1] for w in _WORKS if w[0] == desc)
+
+
 def evaluate(seeds: list[int], pipeline: str = "current") -> dict[str, Any]:
-    inv_caught = inv = true_kept = true_n = rep_merged = rep_n = 0
+    inv_caught = inv = true_kept = true_n = rep_kept = rep_n = raised = 0
     unit_buckets = 0
     canon = {w[0]: w[1] for w in _WORKS}
     for seed in seeds:
@@ -81,6 +88,7 @@ def evaluate(seeds: list[int], pipeline: str = "current") -> dict[str, Any]:
         else:
             checked = check_items(items, text)
             rows = [(r.description, r.unit, r.quantity, r.confidence) for r in checked]
+            raised += sum(r.confidence > it["confidence"] + 1e-9 for r, it in zip(checked, items, strict=True))
         spellings: dict[str, set[str]] = {}
         for d, u, _q, _c in rows:
             spellings.setdefault(canon[d], set()).add(u)
@@ -98,12 +106,13 @@ def evaluate(seeds: list[int], pipeline: str = "current") -> dict[str, Any]:
                 true_kept += int(any(c >= MEDIUM for _u, c in hits))
             else:
                 rep_n += 1
-                rep_merged += int(len(hits) == 1)
+                rep_kept += int(len(hits) == 2)
     return {
         "cases": len(seeds),
         "invented_caught": round(inv_caught / inv, 4),
         "true_kept_confident": round(true_kept / true_n, 4),
-        "repeats_merged": round(rep_merged / rep_n, 4),
+        "second_floor_rows_kept": round(rep_kept / rep_n, 4),
+        "scores_raised": raised,
         "extra_unit_spellings": unit_buckets,
     }
 
