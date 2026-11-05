@@ -46835,6 +46835,11 @@ const resource = {
     "settings.tab_developer_desc": "API keys and signed webhooks for your own systems",
     "settings.tab_identity": "Identity",
     "settings.tab_identity_desc": "Connect your identity provider: SCIM provisioning and group roles",
+    "settings.learning_tips_title": "Learning tips",
+    "settings.learning_tips_subtitle": "A small \"Learn this step\" button on screens that have videos or courses.",
+    "settings.learning_tips_toggle": "Show learning tips on screens",
+    "settings.learning_tips_hidden_count": "Hidden on screens: {{number}}",
+    "settings.learning_tips_show_all": "Show on all screens again",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",
@@ -47213,6 +47218,7 @@ const resource = {
     "nav.doc_assistant": "Document Assistant",
     "nav.project_agents": "Project Agents",
     "nav.win_loss": "Bid outcomes",
+    "nav.courses": "Courses and guides",
     "sidebar.group.learn": "Learn",
     "sidebar.learn.hide": "Hide video guides & use cases",
     "sidebar.learn.hide_short": "Hide",
@@ -57839,6 +57845,22 @@ const resource = {
     "lessons_learned.finding.has_tag": "Add a trade, cost code or risk category.",
     "lessons_learned.finding.has_content": "Describe what happened or what to do.",
     "lessons_learned.finding.confirmed_has_recommendation": "Add what to do next time.",
+    "learn.for_this_step": "Learn this step",
+    "learn.all_courses": "All courses and guides",
+    "learn.page_subtitle": "Short courses, checklists and guides from OpenConstruction Academy. Opens in your browser.",
+    "learn.kind.course": "Course",
+    "learn.kind.lesson": "Lesson",
+    "learn.kind.checklist": "Checklist",
+    "learn.kind.article": "Guide",
+    "learn.filter.topic": "Topic",
+    "learn.filter.track": "Track",
+    "learn.filter.this_screen": "This screen only: {{module}}",
+    "learn.opens_academy": "Opens on Academy",
+    "learn.opens_new_tab": "(opens in a new tab)",
+    "learn.in_language": "In {{language}}",
+    "learn.paid_tooltip": "Paid training course",
+    "learn.paid_lesson_tooltip": "Lesson from a paid training course",
+    "learn.empty_title": "Nothing matches these filters",
   }
 } as { translation: Record<string, string> };
 
