@@ -90,6 +90,33 @@ def test_label_mismatch_lowers_confidence_continuously() -> None:
     assert values[1] < 0.62
 
 
+def test_big_snap_needs_a_label_or_dimensions_that_fit_it() -> None:
+    def room() -> pr.RefinedRoom:
+        snapped = [(0.0, 0.0), (4.0, 0.0), (4.0, 3.0), (0.0, 3.0)]
+        raw = [(-0.2, -0.2), (4.2, -0.2), (4.2, 3.2), (-0.2, 3.2)]
+        return pr.RefinedRoom("x", snapped, 0.8, 0.0, "ok", snapped=True, wall_support=1.0, raw_points=raw)
+
+    alone = room()
+    pr._confirm_snaps([alone], 1.0, [])
+    assert not alone.snapped
+    assert "room:snap_unconfirmed" in alone.flags
+
+    dimensioned = room()
+    pr._confirm_snaps([dimensioned], 1.0, [3.0, 4.0])
+    assert dimensioned.snapped
+
+    # Dimensions that fit the model's ring instead (axis to axis) do not back the snap.
+    axis = room()
+    pr._confirm_snaps([axis], 1.0, [3.0, 3.4, 4.0, 4.4])
+    assert not axis.snapped
+
+    labelled = room()
+    labelled.area_label_m2 = 12.0
+    pr._confirm_snaps([labelled], 1.0, [])
+    assert labelled.snapped
+    assert labelled.corroborated
+
+
 def test_two_floors_on_one_sheet_are_not_isolated(house) -> None:
     for name in ("Living room", "Dining room", "Chamber mid", "Chamber left"):
         assert "room:isolated" not in house[name].flags, name
