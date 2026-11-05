@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -44,13 +45,28 @@ _MIN_AREA_PX2 = 600.0
 _SYMBOL_MAX_DIAG_PX = 46.0
 # A repeated-symbol cluster needs at least this many near-identical members.
 _MIN_CLUSTER = 3
-# Never return more than this many candidates. A floor plan with 30 rooms has
-# about as many walls plus a few symbol counts, so the cap sits well above that.
-_MAX_CANDIDATES = 200
+# Every proposal is a row someone has to confirm or reject before the quantities can
+# go to a bill, so a sheet may not bury its reviewer: a floor of 30 rooms has about
+# twice as many wall runs and a few symbol counts. Past this, rooms go first and the
+# weakest walls are held back; the response says how many.
+_MAX_CANDIDATES = 100
+# Below this a proposal costs the reviewer more than it can save.
+_MIN_CONFIDENCE = 0.35
 # A drawing without a wall structure is read by the simple shape detectors only
-# when it is this small: on a full sheet its closed loops are table cells,
-# title blocks and legends, not rooms.
+# when it is this small and says this little: closed loops on a full sheet or on a
+# page of text are table cells, title blocks and legends, not rooms.
 _SKETCH_MAX_PATHS = 60
+_SKETCH_MAX_WORDS = 60
+# A page that takes longer than this comes back with what was read by then.
+_TIME_BUDGET_S = 30.0
+# Scans are rendered for reading at this resolution, or less on large sheets: an A0
+# at 150 dpi would hold 100 MB for no better a wall mask.
+_RENDER_DPI = 150.0
+_RENDER_MAX_PX = 16_000_000
+
+_AREA_TAG_RE = re.compile(r"^(\d{1,6}(?:[.,]\d{1,3})?)\s*(m²|m2|м²|м2|qm|sf|sq\.?\s*ft\.?|ft²|sqm)?$", re.IGNORECASE)
+_AREA_UNIT_RE = re.compile(r"^(m²|m2|м²|м2|qm|sqm|sf|sq\.?\s*ft\.?|ft²)\.?$", re.IGNORECASE)
+_SQFT_M2 = 0.09290304
 
 Point = tuple[float, float]
 
@@ -343,6 +359,16 @@ def detect_counts(prims: list[_Primitive]) -> list[dict[str, Any]]:
     return out
 
 
+def _rank_and_cap(candidates: list[dict[str, Any]], limit: int) -> tuple[list[dict[str, Any]], int]:
+    """The strongest proposals, rooms before counts before walls, and how many were held back."""
+    kept = [c for c in candidates if c.get("confidence", 0.0) >= _MIN_CONFIDENCE]
+    order = {"area": 0, "count": 1}
+    kept.sort(key=lambda c: (order.get(c.get("dimension"), 2), -c.get("confidence", 0.0)))
+    chosen = kept[:limit]
+    chosen.sort(key=lambda c: c.get("confidence", 0.0), reverse=True)
+    return chosen, len(kept) - len(chosen)
+
+
 def recognize_candidates(
     drawings: list[Any],
     scale_pixels_per_unit: float | None = None,
@@ -356,40 +382,248 @@ def recognize_candidates(
     returned (``value`` is ``None``) so the user can calibrate, then accept.
     Candidates are sorted by confidence and capped at ``max_candidates``.
     """
-    scale = float(scale_pixels_per_unit or 0.0)
+    candidates, _note = _read_vector_page(drawings, float(scale_pixels_per_unit or 0.0), None, [], None, None)
+    return _rank_and_cap(candidates, max_candidates)[0]
+
+
+def _read_vector_page(
+    drawings: list[Any],
+    scale: float,
+    page_size: tuple[float, float] | None,
+    words: list[Any],
+    budget: Any,
+    verdict: Any,
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Candidates of a page with line art, and a note when they are limited or absent."""
+    from app.modules.takeoff import sheet_type  # noqa: PLC0415
+
+    if verdict is not None and verdict.from_title_block:
+        if verdict.kind in sheet_type.NOT_A_PLAN:
+            return [], "not_a_floor_plan"
+        if verdict.kind == sheet_type.STRUCTURAL:
+            # Columns and footings are worth counting; its outlines are not rooms.
+            return detect_counts(primitives_from_drawings(drawings)), "not_a_floor_plan"
+    note: str | None = None
     plan = None
     try:
         from app.modules.takeoff import vector_plan  # noqa: PLC0415 - numpy/OpenCV only when a page is read
 
-        plan = vector_plan.read_plan(drawings, scale or None)
+        try:
+            plan = vector_plan.read_plan(drawings, scale or None, page_size=page_size, budget=budget)
+        except vector_plan.TimeBudgetExceeded:
+            return [], "time_budget"
     except Exception:  # a malformed path must not cost the user the simple detectors
         logger.exception("takeoff.recognize: floor-plan reader failed, using the shape detectors")
+    if plan is not None and plan.out_of_time:
+        note = "time_budget"
+    is_rooms = plan is not None and plan.found_structure and vector_plan.looks_like_rooms(plan)
+    if is_rooms:
+        return plan_candidates(plan, scale, words), note
+    prims = primitives_from_drawings(drawings)
+    if len(drawings or []) <= _SKETCH_MAX_PATHS and len(words) <= _SKETCH_MAX_WORDS:
+        return detect_areas(prims, scale) + detect_lengths(prims, scale) + detect_counts(prims), note
+    # Rooms did not come out, whatever the sheet is: what repeats on it can still be counted.
     if plan is not None and plan.found_structure:
-        candidates = plan_candidates(plan, scale)
-    elif len(drawings or []) <= _SKETCH_MAX_PATHS:
-        prims = primitives_from_drawings(drawings)
-        candidates = detect_areas(prims, scale) + detect_lengths(prims, scale) + detect_counts(prims)
+        note = note or "not_a_floor_plan"
+    return detect_counts(prims), note
+
+
+def recognize_pdf_page(
+    pdf: bytes,
+    page: int,
+    scale_pixels_per_unit: float | None = None,
+    *,
+    budget_s: float | None = _TIME_BUDGET_S,
+    max_candidates: int = _MAX_CANDIDATES,
+) -> dict[str, Any]:
+    """Read one page of a PDF: the single path the service and the benchmark share.
+
+    Blocking and CPU-bound, so the service runs it in a worker thread. Returns
+    ``{candidates, source, notes, truncated}``. ``notes`` is ``None`` or one of
+    ``no_features``, ``raster_no_features``, ``not_a_floor_plan``, ``time_budget``,
+    ``raster_cv_unavailable``; a sheet that is not a floor plan and a sheet that ran
+    out of time are both clear results rather than errors.
+    """
+    from app.core import pdf_reader  # noqa: PLC0415
+    from app.modules.takeoff import sheet_type, vector_plan  # noqa: PLC0415
+
+    budget = vector_plan.Budget(budget_s)
+    scale = float(scale_pixels_per_unit or 0.0)
+    samples = None
+    with pdf_reader.open_pdf(pdf) as doc:
+        pg = doc[page - 1]
+        drawings = pg.drawings(with_clip=True)
+        width, height = float(pg.rect.width), float(pg.rect.height)
+        words = pg.words() if drawings else []
+        rotation = pg.rotation
+        if not drawings:
+            dpi = min(_RENDER_DPI, 72.0 * (_RENDER_MAX_PX / max(1.0, width * height)) ** 0.5)
+            try:
+                pix = pg.render(dpi=dpi)
+                samples = (pix.samples, pix.height, pix.width, pix.n)
+            except Exception:
+                logger.exception("takeoff.recognize: page render failed")
+                return {"candidates": [], "source": "vector_recognize", "notes": "no_vector_layer", "truncated": 0}
+    if samples is None:
+        # Line art and words come in the frame of the unrotated page, the size as viewed.
+        frame = (height, width) if rotation in (90, 270) else (width, height)
+        verdict = sheet_type.classify(_as_viewed(words, rotation, frame), width, height)
+        candidates, note = _read_vector_page(drawings, scale, frame, words, budget, verdict)
+        kept, held_back = _rank_and_cap(candidates, max_candidates)
+        return {
+            "candidates": kept,
+            "source": "vector_recognize",
+            "notes": note if note or kept else "no_features",
+            "truncated": held_back,
+        }
+    return _read_scan_page(samples, width, height, scale, budget, max_candidates)
+
+
+def _as_viewed(words: list[Any], rotation: int, frame: tuple[float, float]) -> list[Any]:
+    """Word boxes as the sheet is viewed: title blocks are found by where a reader sees them."""
+    if rotation == 90:
+        return [(frame[1] - w[3], w[0], frame[1] - w[1], w[2], w[4]) for w in words]
+    if rotation == 180:
+        return [(frame[0] - w[2], frame[1] - w[3], frame[0] - w[0], frame[1] - w[1], w[4]) for w in words]
+    if rotation == 270:
+        return [(w[1], frame[0] - w[2], w[3], frame[0] - w[0], w[4]) for w in words]
+    return words
+
+
+def _read_scan_page(
+    samples: tuple[bytes, int, int, int],
+    width: float,
+    height: float,
+    scale: float,
+    budget: Any,
+    max_candidates: int,
+) -> dict[str, Any]:
+    try:
+        import numpy as np  # noqa: PLC0415
+
+        from app.modules.takeoff import raster_recognize, vector_plan  # noqa: PLC0415
+    except ImportError:
+        return {"candidates": [], "source": "raster_recognize", "notes": "raster_cv_unavailable", "truncated": 0}
+    data, rows, cols, channels = samples
+    arr = np.frombuffer(data, dtype=np.uint8).reshape(rows, cols, channels)
+    image = np.ascontiguousarray(arr[:, :, 2::-1]) if channels >= 3 else arr.reshape(rows, cols)
+    try:
+        candidates = raster_recognize.recognize_raster(image, width, height, scale, budget=budget)
+    except vector_plan.TimeBudgetExceeded:
+        return {"candidates": [], "source": "raster_recognize", "notes": "time_budget", "truncated": 0}
+    except Exception:
+        logger.exception("takeoff.recognize: raster detection failed")
+        return {"candidates": [], "source": "vector_recognize", "notes": "no_vector_layer", "truncated": 0}
+    kept, held_back = _rank_and_cap(candidates, max_candidates)
+    return {
+        "candidates": kept,
+        "source": "raster_recognize",
+        "notes": None if kept else "raster_no_features",
+        "truncated": held_back,
+    }
+
+
+def _inside_poly(x: float, y: float, poly: list[Point]) -> bool:
+    hit = False
+    x1, y1 = poly[-1]
+    for x2, y2 in poly:
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            hit = not hit
+        x1, y1 = x2, y2
+    return hit
+
+
+def _printed_area_m2(words: list[Any], i: int) -> float | None:
+    """The area a room tag prints at word ``i`` ("33.41 m²", "120 SF"), in square metres."""
+    tok = str(words[i][4])
+    m = _AREA_TAG_RE.match(tok)
+    if not m:
+        return None
+    unit = m.group(2)
+    if not unit and i + 1 < len(words) and _AREA_UNIT_RE.match(str(words[i + 1][4])):
+        unit = str(words[i + 1][4])
+    if not unit:
+        return None
+    value = float(m.group(1).replace(",", "."))
+    return value * _SQFT_M2 if unit.lower().startswith(("sf", "sq.", "sq ", "ft", "sqf")) else value
+
+
+def _room_labels(pts: list[Point], words: list[Any]) -> tuple[bool, float | None]:
+    """Whether a name is printed inside a room, and the area its tag prints if it has one."""
+    x0, y0 = min(p[0] for p in pts), min(p[1] for p in pts)
+    x1, y1 = max(p[0] for p in pts), max(p[1] for p in pts)
+    named = False
+    printed: float | None = None
+    for i, w in enumerate(words):
+        cx, cy = 0.5 * (w[0] + w[2]), 0.5 * (w[1] + w[3])
+        if not (x0 <= cx <= x1 and y0 <= cy <= y1) or not _inside_poly(cx, cy, pts):
+            continue
+        tok = str(w[4])
+        if sum(c.isalpha() for c in tok) >= 3 and all(c.isalpha() or c in ".-'/" for c in tok):
+            named = True
+        area = _printed_area_m2(words, i)
+        if area is not None and printed is None:
+            printed = area
+    return named, printed
+
+
+def _room_confidence(
+    room: dict[str, Any], area_m2: float | None, named: bool, printed: float | None, name_weight: float
+) -> tuple[float, list[str]]:
+    """How likely this outline is a real room, from what can be checked about it.
+
+    Nothing here depends on how exactly the outline snapped to CAD lines, which garbage
+    does as readily as a room: the walls have to close it, the shape has to be one a room
+    has, the size has to be one a room has, and if the sheet names its rooms this one has
+    to be named. A printed area that agrees with the outline settles it either way.
+    """
+    why: list[str] = []
+    score = 0.2 + 0.15 * room["closure"]
+    rect = float(room["rectangularity"])
+    aspect = float(room["aspect"])
+    shape = rect * min(1.0, 6.0 / max(aspect, 1.0)) * (0.8 if room["vertices"] > 12 else 1.0)
+    score += 0.12 * shape
+    score += 0.06 if room["neighbours"] else 0.0
+    if area_m2 is None:
+        score += 0.06
     else:
-        candidates = []
-    candidates.sort(key=lambda c: c.get("confidence", 0.0), reverse=True)
-    return candidates[:max_candidates]
+        score += 0.12 * min(1.0, area_m2 / 2.0, 200.0 / max(area_m2, 1e-6))
+    score += 0.03 * room["snapped"]
+    if named:
+        score += name_weight
+        why.append("named on the sheet")
+    if printed is not None and area_m2 is not None:
+        if abs(printed - area_m2) <= 0.1 * printed:
+            score += 0.2
+            why.append("printed area agrees")
+        else:
+            score -= 0.25
+            why.append("printed area differs")
+    return max(0.2, min(0.97, score)), why
 
 
-def plan_candidates(plan: Any, scale: float) -> list[dict[str, Any]]:
+def plan_candidates(plan: Any, scale: float, words: list[Any] | None = None) -> list[dict[str, Any]]:
     """Candidates from a :class:`~app.modules.takeoff.vector_plan.PlanResult`."""
     out: list[dict[str, Any]] = []
-    for room in plan.rooms:
+    words = words or []
+    labels = [_room_labels(room["points"], words) for room in plan.rooms]
+    share = sum(1 for named, _p in labels if named) / len(labels) if labels else 0.0
+    # With no text to read a name is no evidence either way; on a sheet that names its
+    # rooms an outline without a name has to earn its place by the rest.
+    name_weight = 0.2 + 0.15 * share if words else 0.0
+    base = 0.0 if words else 0.1
+    for room, (named, printed) in zip(plan.rooms, labels, strict=True):
         pts = room["points"]
-        # Confidence: snapped onto CAD face lines and a simple outline score higher.
-        conf = 0.6 + 0.3 * room["snapped"] - (0.1 if room["vertices"] > 8 else 0.0)
+        value = _area_value(pts, scale)
+        conf, why = _room_confidence(room, value, named, printed, name_weight)
         out.append(
             {
                 "type": "area",
                 "points": [{"x": p[0], "y": p[1]} for p in pts],
-                "value": _area_value(pts, scale),
+                "value": value,
                 "dimension": "area",
-                "confidence": round(max(0.3, min(0.95, conf)), 2),
-                "reason": "Room enclosed by walls in the vector layer",
+                "confidence": round(min(0.97, conf + base), 2),
+                "reason": "; ".join(["Room enclosed by walls in the vector layer", *why]),
             }
         )
     for wall in plan.walls:

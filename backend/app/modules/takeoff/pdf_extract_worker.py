@@ -327,7 +327,11 @@ def extract_pdf_data(pdf_path: str, max_pages: int | None = None, *, filename: s
                     for table in tables or []:
                         cleaned = [[str(cell or "") for cell in row] for row in table]
                         page_tables.append(cleaned)
-                        page_text += ("\n" if page_text else "") + "\n".join("\t".join(row) for row in cleaned)
+                        # extract_text already holds what is printed in the cells; a cell
+                        # it lost (rotated or overlapping text) is the only thing to add.
+                        lost = [cell for row in cleaned for cell in row if cell.strip() and cell not in page_text]
+                        if lost:
+                            page_text += ("\n" if page_text else "") + "\n".join(lost)
 
                 has_text = bool(page_text.strip())
                 if not has_text:
@@ -338,6 +342,8 @@ def extract_pdf_data(pdf_path: str, max_pages: int | None = None, *, filename: s
                         "text": page_text.strip(),
                         "tables": page_tables,
                         "has_text": has_text,
+                        "width_pt": float(getattr(page, "width", 0.0)),
+                        "height_pt": float(getattr(page, "height", 0.0)),
                     }
                 )
             if empty:

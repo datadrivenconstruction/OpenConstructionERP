@@ -114,31 +114,32 @@ _SCALE_WORDS: tuple[str, ...] = (
     "पैमाना",  # HI
 )
 
-# Long keywords may sit a few characters before the ratio ("Scale = 1:100") or
-# on the title-block line above it; the one-letter abbreviations only count
-# directly before the ratio.
-_LONG_SCALE_WORDS: tuple[str, ...] = tuple(w for w in _SCALE_WORDS if len(w) >= 4 or not w.isascii())
+# Long keywords may sit a few characters before the ratio ("Scale = 1:100") or on
+# the title-block line above it, as whole words. Abbreviations of one or two letters
+# ("M 1:100", "E 1:50") are initials of anything, so they count only directly before
+# the ratio and only when they do not follow a number ("gutter 10 m 1:80" is a fall).
+_LONG_SCALE_WORDS: tuple[str, ...] = tuple(w for w in _SCALE_WORDS if len(w) >= 3)
+_INITIAL_SCALE_WORDS: frozenset[str] = frozenset(w for w in _SCALE_WORDS if len(w) < 3)
 
-# A ratio after one of these is a mix, a fall or a gradient, never a paper scale.
-_NOT_SCALE_WORDS: tuple[str, ...] = (
-    "mix",
-    "mortar",
-    "slope",
-    "fall",
-    "gradient",
-    "ramp",
-    "pitch",
-    "drain",
-    "ratio",
-    "aspect",
-    "pente",
-    "gefälle",
-    "neigung",
-    "mischung",
-    "pendiente",
-    "pendenza",
-    "уклон",
-)
+# What else a ratio on a drawing can be: the proportions of a mix, and the fall of a
+# surface. Stems, matched at the start of a word in the text before the ratio.
+_NOT_SCALE_STEMS: tuple[str, ...] = (
+    # mixes: mortar, concrete, cement, grout, plaster, screed
+    "mix", "mortar", "concrete", "cement", "grout", "plaster", "render", "screed", "lime",
+    "mörtel", "moertel", "beton", "zement", "putz", "estrich", "mischung",
+    "mortier", "béton", "ciment", "enduit", "chape",
+    "mortero", "hormig", "cemento", "lechada", "malta", "calcestruzz",
+    "zapraw", "tynk", "wylewk", "mortel", "cement",
+    "раствор", "бетон", "цемент", "штукатур", "стяжк", "смес",
+    "砂浆", "混凝土", "モルタル", "コンクリート", "몰탈", "콘크리트",
+    # falls: slope, gradient, ramp, pitch, drainage
+    "slope", "fall", "gradient", "ramp", "pitch", "drain", "gutter", "batter", "taper", "incline",
+    "gefälle", "gefaelle", "neigung", "rampe", "pente", "pendiente", "rampa", "pendenza",
+    "spadek", "nachyl", "pochyl", "helling", "afschot",
+    "уклон", "рампа", "пандус", "скат", "坡度", "勾配", "경사",
+    # not drawings at all
+    "ratio", "aspect", "odds",
+)  # fmt: skip
 
 # Words that mark a ratio as the scale of a detail or section callout.
 _DETAIL_WORDS: tuple[str, ...] = (
@@ -152,9 +153,47 @@ _DETAIL_WORDS: tuple[str, ...] = (
     "dettaglio",
     "detalle",
     "doorsnede",
+    "przekrój",
+    "szczegół",
     "разрез",
     "узел",
+    "деталь",
+    "詳細",
+    "详图",
+    "剖面",
+    "断面",
 )
+
+
+def _unspaced(word: str) -> bool:
+    """True for a word of a script written without spaces, where it has no word start."""
+    return any("\u3040" <= c <= "\ud7af" for c in word)
+
+
+def _has_word(text: str, words: tuple[str, ...]) -> bool:
+    """True when one of the words stands in ``text`` as a whole word, ignoring digits around it."""
+    for word in words:
+        pos = text.find(word)
+        while pos >= 0:
+            if _unspaced(word):
+                return True
+            end = pos + len(word)
+            if not (pos > 0 and text[pos - 1].isalpha()) and not (end < len(text) and text[end].isalpha()):
+                return True
+            pos = text.find(word, pos + 1)
+    return False
+
+
+def _has_stem(text: str, stems: tuple[str, ...]) -> bool:
+    """True when a word in ``text`` starts with one of the stems."""
+    for stem in stems:
+        pos = text.find(stem)
+        while pos >= 0:
+            if _unspaced(stem) or pos == 0 or not text[pos - 1].isalpha():
+                return True
+            pos = text.find(stem, pos + 1)
+    return False
+
 
 # Sheets that say they are not to scale.
 _NTS_RE = re.compile(
@@ -169,7 +208,13 @@ _STANDARD_RATIOS = frozenset(
     | {4, 8, 12, 16, 24, 32, 48, 64, 96, 120, 128, 192, 240, 360, 480, 600, 720, 960, 1200}
 )
 
+# ISO 216 sheet sizes, long side and short side.
+_ISO_A_MM = {0: (1189.0, 841.0), 1: (841.0, 594.0), 2: (594.0, 420.0), 3: (420.0, 297.0), 4: (297.0, 210.0)}
+
 # Pre-compiled patterns ------------------------------------------------------
+
+# A ratio stated for a paper size: "1:100 @ A1", "1:50 at A3", "1:100 auf A1".
+_AT_PAPER_RE = re.compile(r"\s*(?:@|at|auf|en|in|à|на)\s*A([0-4])(?![\w])", re.IGNORECASE)
 
 # Ratio token: "1:100", "1 : 50", "1:1 000" (some locales space-group the
 # right-hand side). We capture the left and right numbers separately and reject
@@ -190,7 +235,7 @@ _SLASH_RE = re.compile(r"(?<![\d./])1\s*/\s*(\d{1,5})(?![\d./\"'\u2033])")
 # Right side: feet (with ' or ft) and optional residual inches.
 _IMPERIAL_RE = re.compile(
     r"""
-    (?<![\d./-])
+    (?<![\w./-])
     (?P<lmeas>\d+(?:\s+\d+)?(?:\s*/\s*\d+)?)   # 1 | 1/4 | 1 1/2
     \s*(?P<lunit>"|''|\u2033|in\b|inch\b|inches\b)  # inch mark on the left
     \s*=\s*
@@ -294,7 +339,17 @@ def _named_callout(text: str, start: int, cap: float | None) -> bool:
         return False
     line_start, _line_end = _line_bounds(text, start)
     before = text[max(line_start, start - _SCALE_KEYWORD_WINDOW) : start].lower()
-    return any(w in before for w in _LONG_SCALE_WORDS)
+    return _has_word(before, _LONG_SCALE_WORDS)
+
+
+def _is_initial(text: str, start: int) -> bool:
+    """True for a scale initial directly before the token and not after a number."""
+    word = _word_before(text, start)
+    if word not in _INITIAL_SCALE_WORDS:
+        return False
+    i = len(text[:start].rstrip(" \t:\uff1a=.-\u00a0")) - len(word)
+    before = text[:i].rstrip()
+    return not (before and before[-1].isdigit())
 
 
 def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
@@ -304,11 +359,10 @@ def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
     tail = text[end : end + 2]
     if re.match(r"\s*[:\uff1a]\s*\d", tail):
         return False, 0.0  # "1:2:3" is a mix
-    if any(w in before for w in _NOT_SCALE_WORDS):
+    if _has_stem(before, _NOT_SCALE_STEMS):
         return False, 0.0
-    cap = _CONF_DETAIL if any(w in before for w in _DETAIL_WORDS) else None
-    word = _word_before(text, start)
-    if word in _SCALE_WORDS or any(w in before for w in _LONG_SCALE_WORDS):
+    cap = _CONF_DETAIL if _has_word(before, _DETAIL_WORDS) else None
+    if _is_initial(text, start) or _has_word(before, _LONG_SCALE_WORDS):
         return True, cap
     if line_start > 0:
         # A title block prints the label at the end of the line above its value;
@@ -319,6 +373,11 @@ def _context(text: str, start: int, end: int) -> tuple[bool, float | None]:
             if not _RATIO_RE.search(prev):
                 return True, cap if cap is not None else _CONF_LABEL_ABOVE
     return False, cap
+
+
+def _stated_paper(text: str, end: int) -> dict[str, object]:
+    m = _AT_PAPER_RE.match(text, end)
+    return {"at_paper": int(m.group(1))} if m else {}
 
 
 def _ratio_is_plausible(ratio: int) -> bool:
@@ -364,6 +423,7 @@ def _scan_ratios(text: str, page: int) -> list[ScaleCandidate]:
                     "near_keyword": near_keyword,
                     "antecedent": left,
                     "callout": _named_callout(text, m.start(), cap),
+                    **_stated_paper(text, m.end()),
                 },
             )
         )
@@ -453,11 +513,14 @@ def _scan_imperial(text: str, page: int) -> list[ScaleCandidate]:
             right_label += f"{_trim(rf)}'"
         if ri:
             right_label += f'-{_trim(ri)}"' if rf else f'{_trim(ri)}"'
+        line_start, _line_end = _line_bounds(text, m.start())
+        before = text[max(line_start, m.start() - _SCALE_KEYWORD_WINDOW) : m.start()].lower()
+        is_detail = _has_word(before, _DETAIL_WORDS)
         out.append(
             ScaleCandidate(
                 ratio=ratio,
                 label=f"1:{ratio}",
-                confidence=_CONF_IMPERIAL,
+                confidence=_CONF_DETAIL if is_detail else _CONF_IMPERIAL,
                 page=page,
                 evidence=m.group(0).strip(),
                 source="imperial",
@@ -516,13 +579,46 @@ def rank_candidates(candidates: list[ScaleCandidate]) -> list[ScaleCandidate]:
     Sort key (descending priority):
       1. confidence (keyword-adjacent and imperial equations rank highest),
       2. earliest page (the title-block scale is usually on the first sheet),
-      3. ratio (stable tiebreak so the result is deterministic).
+      3. largest ratio: a sheet's main drawing is the one at the smallest scale,
+         the views enlarged from it take less paper and carry larger scales.
     Across pages, the same ratio+source is collapsed once more so a scale that
     repeats on every sheet is offered a single time.
     """
     deduped = _dedupe(candidates)
-    deduped.sort(key=lambda c: (-c.confidence, c.page, c.ratio))
+    deduped.sort(key=lambda c: (-c.confidence, c.page, -c.ratio))
     return deduped
+
+
+def _paper_of(width_pt: float, height_pt: float) -> int | None:
+    """The ISO A size of a page, None when it is not one."""
+    long_mm = max(width_pt, height_pt) * 25.4 / 72.0
+    short_mm = min(width_pt, height_pt) * 25.4 / 72.0
+    for size, (a, b) in _ISO_A_MM.items():
+        if abs(long_mm - a) <= 0.02 * a and abs(short_mm - b) <= 0.02 * b:
+            return size
+    return None
+
+
+def _as_plotted(cand: ScaleCandidate, page: dict[str, object]) -> ScaleCandidate:
+    """A scale stated for one paper size ("1:100 @ A1") read on the page it is actually on."""
+    stated = cand.detail.get("at_paper")
+    width, height = page.get("width_pt"), page.get("height_pt")
+    if not isinstance(stated, int) or not isinstance(width, (int, float)) or not isinstance(height, (int, float)):
+        return cand
+    actual = _paper_of(float(width), float(height))
+    if actual is None or actual == stated:
+        return cand
+    # Each A size is a linear factor of the square root of two from the next.
+    ratio = round(cand.ratio * 2 ** ((actual - stated) / 2))
+    return ScaleCandidate(
+        ratio,
+        f"1:{ratio}",
+        cand.confidence,
+        cand.page,
+        cand.evidence,
+        cand.source,
+        {**cand.detail, "stated_ratio": cand.ratio},
+    )
 
 
 def detect_best_scale(
@@ -547,7 +643,7 @@ def detect_best_scale(
         except (TypeError, ValueError):
             page_int = idx + 1
         if isinstance(text, str) and text:
-            found.extend(detect_scales_in_text(text, page_int))
+            found.extend(_as_plotted(c, page) for c in detect_scales_in_text(text, page_int))
     ranked = rank_candidates(found)
     best = None
     if ranked:
