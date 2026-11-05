@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Ennek a projektnek már {count} költségvetése van; a mellé felvett koncepcionális költségvetés ugyanazt a tartalmat kétszer számolja."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "A tervezett befejezés ({end}) a tervezett kezdés ({start}) előtt van.",
+      "suggestion": "A tervezett befejezést állítsa a kezdés napjára vagy későbbre."
+    },
+    "actual_dates_order": {
+      "fail": "A tényleges befejezés ({end}) a tényleges kezdés ({start}) előtt van.",
+      "suggestion": "Javítsa a tényleges kezdési vagy befejezési dátumot."
+    },
+    "actual_end_without_start": {
+      "fail": "A tényleges befejezés ({end}) rögzítve van, de a tényleges kezdés üres.",
+      "suggestion": "Adja meg a tényleges kezdés dátumát, vagy törölje a befejezést."
+    },
+    "actual_in_future": {
+      "fail": "A(z) {field} {date}, ez a dátum még a jövőben van.",
+      "suggestion": "A tényleges dátumokat akkor rögzítse, amikor megtörténtek; a tervet hagyja a tervezett dátumokban."
+    },
+    "money_without_currency": {
+      "fail": "A(z) {field} ({value}) projektpénznem nélkül van megadva.",
+      "suggestion": "Állítsa be a projekt pénznemét, hogy az összeg összesíthető legyen."
+    },
+    "contingency_missing": {
+      "fail": "A(z) {budget} költségvetésben nincs tartalék előre nem látható kiadásokra.",
+      "suggestion": "Adja meg a tartalék százalékát, akkor is, ha 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "A fájl üres (0 bájt).",
+      "suggestion": "Töltse fel újra a fájlt; az üres fájl általában sikertelen átvitelt jelent."
+    },
+    "published_unidentified": {
+      "fail": "A kiadott rajzról hiányzik: {missing}.",
+      "suggestion": "Adja meg a rajzszámot és a revíziókódot, mielőtt a lapot kiadják az építkezésre."
+    },
+    "archived_current": {
+      "fail": "Egy archivált dokumentum még aktuális revízióként van megjelölve.",
+      "suggestion": "Törölje az aktuális revízió jelölést, vagy hagyja a dokumentumot az archívumon kívül."
+    },
+    "photo_location": {
+      "fail": "A fénykép helye ({lat}, {lon}) nem érvényes koordinátapár.",
+      "suggestion": "Adja meg a szélességet (-90 és 90 között) és a hosszúságot (-180 és 180 között), vagy egyiket sem."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "A '{code}' konténerkód szóközt vagy törtvonalat tartalmaz.",
+      "suggestion": "Használjon betűket, számjegyeket és kötőjeleket, hogy a kód működjön fájlnevekben és transzmittálokban."
+    },
+    "suitability_missing": {
+      "fail": "A konténer állapota {state}, de nincs alkalmassági kódja.",
+      "suggestion": "Válassza ki az alkalmassági kódot, amely megmondja, mire használható az információ."
+    },
+    "file_size_invalid": {
+      "fail": "A '{value}' fájlméret nem egész számú bájt.",
+      "suggestion": "Adja meg a méretet bájtban, csak számjegyekkel."
+    },
+    "content_hash_invalid": {
+      "fail": "A tartalom hash-e nem SHA-256 érték (64 hexadecimális karakter).",
+      "suggestion": "Hagyja üresen a hash-t, hogy kiszámítsuk, vagy adja meg a teljes SHA-256 értéket."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "A karbantartás '{value}' dátuma nem valódi dátum.",
+      "suggestion": "A dátumot év-hónap-nap formában adja meg, például 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "A karbantartás '{value}' költsége nem nulla vagy annál nagyobb szám.",
+      "suggestion": "A költséget egyszerű számként adja meg, pénznemjel nélkül."
+    },
+    "service_in_future": {
+      "fail": "A karbantartás dátuma {date}, ez még a jövőben van.",
+      "suggestion": "A karbantartást csak az elvégzése után rögzítse."
+    }
   }
 }

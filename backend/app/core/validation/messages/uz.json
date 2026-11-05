@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Loyihada hajmlar qaydnomasi allaqachon {count} ta; yoniga qoʻshilgan konseptual qaydnoma oʻsha hajmni ikki marta hisoblaydi."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Rejalashtirilgan tugash sanasi {end} rejalashtirilgan boshlanish sanasi {start} dan oldin.",
+      "suggestion": "Rejalashtirilgan tugashni boshlanish sanasiga yoki undan keyingi sanaga qoʻying."
+    },
+    "actual_dates_order": {
+      "fail": "Haqiqiy tugash sanasi {end} haqiqiy boshlanish sanasi {start} dan oldin.",
+      "suggestion": "Haqiqiy boshlanish yoki tugash sanasini tuzating."
+    },
+    "actual_end_without_start": {
+      "fail": "Haqiqiy tugash sanasi {end} kiritilgan, lekin haqiqiy boshlanish sanasi boʻsh.",
+      "suggestion": "Haqiqiy boshlanish sanasini kiriting yoki tugash sanasini oʻchiring."
+    },
+    "actual_in_future": {
+      "fail": "{field} qiymati {date}, bu sana hali kelmagan.",
+      "suggestion": "Haqiqiy sanalarni voqea boʻlgandan keyin kiriting, rejani rejalashtirilgan sanalarda qoldiring."
+    },
+    "money_without_currency": {
+      "fail": "{value} summadagi {field} loyiha valyutasisiz kiritilgan.",
+      "suggestion": "Summani qoʻshish mumkin boʻlishi uchun loyiha valyutasini belgilang."
+    },
+    "contingency_missing": {
+      "fail": "{budget} byudjetida kutilmagan xarajatlar uchun zaxira yoʻq.",
+      "suggestion": "Zaxira foizini kiriting, u 0 boʻlsa ham."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Fayl boʻsh (0 bayt).",
+      "suggestion": "Faylni qayta yuklang; boʻsh fayl odatda uzatish muvaffaqiyatsiz tugaganini bildiradi."
+    },
+    "published_unidentified": {
+      "fail": "Chiqarilgan chizmada yoʻq: {missing}.",
+      "suggestion": "Varaqni obyektga chiqarishdan oldin chizma raqami va tahrir kodini qoʻshing."
+    },
+    "archived_current": {
+      "fail": "Arxivlangan hujjat hali ham joriy tahrir sifatida belgilangan.",
+      "suggestion": "Joriy tahrir belgisini olib tashlang yoki hujjatni arxivdan tashqarida qoldiring."
+    },
+    "photo_location": {
+      "fail": "Surat joylashuvi ({lat}, {lon}) yaroqli koordinatalar jufti emas.",
+      "suggestion": "Kenglik (-90 dan 90 gacha) va uzunlikni (-180 dan 180 gacha) birga kiriting yoki ikkalasini ham qoldiring."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "'{code}' konteyner kodida boʻsh joy yoki qiya chiziq bor.",
+      "suggestion": "Kod fayl nomlari va transmittallarda ishlashi uchun harf, raqam va defisdan foydalaning."
+    },
+    "suitability_missing": {
+      "fail": "Konteyner {state} holatida, lekin uning yaroqlilik kodi yoʻq.",
+      "suggestion": "Axborotdan nima uchun foydalanish mumkinligini koʻrsatuvchi yaroqlilik kodini tanlang."
+    },
+    "file_size_invalid": {
+      "fail": "Fayl hajmi '{value}' baytlarning butun soni emas.",
+      "suggestion": "Hajmni bayt bilan, faqat raqamlar bilan kiriting."
+    },
+    "content_hash_invalid": {
+      "fail": "Mazmun heshi SHA-256 qiymati emas (64 ta oltmish oltilik belgi).",
+      "suggestion": "Heshni hisoblanishi uchun boʻsh qoldiring yoki SHA-256 qiymatini toʻliq kiriting."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Xizmat sanasi '{value}' haqiqiy sana emas.",
+      "suggestion": "Sanani yil-oy-kun koʻrinishida kiriting, masalan 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Xizmat narxi '{value}' nolga teng yoki undan katta son emas.",
+      "suggestion": "Narxni valyuta belgisisiz oddiy son sifatida kiriting."
+    },
+    "service_in_future": {
+      "fail": "Xizmat sanasi {date}, bu sana hali kelmagan.",
+      "suggestion": "Xizmatni bajarilgandan keyingina yozing."
+    }
   }
 }

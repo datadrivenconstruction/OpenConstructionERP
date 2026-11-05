@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Prosjektet har allerede {count} mengdebeskrivelse(r); en konseptuell beskrivelse ved siden av teller samme omfang to ganger."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Planlagt slutt {end} ligger før planlagt start {start}.",
+      "suggestion": "Sett planlagt slutt til startdatoen eller senere."
+    },
+    "actual_dates_order": {
+      "fail": "Faktisk slutt {end} ligger før faktisk start {start}.",
+      "suggestion": "Rett den faktiske start- eller sluttdatoen."
+    },
+    "actual_end_without_start": {
+      "fail": "Faktisk slutt {end} er registrert, men faktisk start mangler.",
+      "suggestion": "Oppgi datoen for faktisk start, eller fjern sluttdatoen."
+    },
+    "actual_in_future": {
+      "fail": "{field} er {date}, en dato som ennå ikke har inntruffet.",
+      "suggestion": "Før inn faktiske datoer når de har inntruffet, og la planen stå i de planlagte datoene."
+    },
+    "money_without_currency": {
+      "fail": "{field} på {value} er oppgitt uten prosjektets valuta.",
+      "suggestion": "Angi prosjektets valuta slik at beløpet kan summeres."
+    },
+    "contingency_missing": {
+      "fail": "Budsjettet på {budget} har ingen post for uforutsett.",
+      "suggestion": "Oppgi prosentsatsen for uforutsett, selv om den er 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Filen er tom (0 byte).",
+      "suggestion": "Last opp filen på nytt; en tom fil skyldes som regel en mislykket overføring."
+    },
+    "published_unidentified": {
+      "fail": "Den utstedte tegningen mangler: {missing}.",
+      "suggestion": "Legg til tegningsnummer og revisjonskode før arket utleveres til byggeplassen."
+    },
+    "archived_current": {
+      "fail": "Et arkivert dokument er fortsatt merket som gjeldende revisjon.",
+      "suggestion": "Fjern merket som gjeldende revisjon, eller la dokumentet bli liggende utenfor arkivet."
+    },
+    "photo_location": {
+      "fail": "Bildets posisjon ({lat}, {lon}) er ikke et gyldig koordinatpar.",
+      "suggestion": "Oppgi både breddegrad (-90 til 90) og lengdegrad (-180 til 180), eller ingen av dem."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Containerkoden '{code}' inneholder et mellomrom eller en skråstrek.",
+      "suggestion": "Bruk bokstaver, tall og bindestreker slik at koden fungerer i filnavn og transmittals."
+    },
+    "suitability_missing": {
+      "fail": "Containeren har status {state}, men mangler egnethetskode.",
+      "suggestion": "Velg egnethetskoden som angir hva informasjonen kan brukes til."
+    },
+    "file_size_invalid": {
+      "fail": "Filstørrelsen '{value}' er ikke et helt antall byte.",
+      "suggestion": "Oppgi størrelsen i byte, kun sifre."
+    },
+    "content_hash_invalid": {
+      "fail": "Innholdets hash er ikke en SHA-256-verdi (64 heksadesimale tegn).",
+      "suggestion": "La hashen stå tom så beregnes den, eller oppgi hele SHA-256-verdien."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Servicedatoen '{value}' er ikke en ekte dato.",
+      "suggestion": "Skriv datoen som år-måned-dag, for eksempel 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Servicekostnaden '{value}' er ikke et tall på null eller mer.",
+      "suggestion": "Skriv kostnaden som et vanlig tall uten valutategn."
+    },
+    "service_in_future": {
+      "fail": "Servicen er datert {date}, en dato som ennå ikke har inntruffet.",
+      "suggestion": "Før inn service først når den er utført."
+    }
   }
 }

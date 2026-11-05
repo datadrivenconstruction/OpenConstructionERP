@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Projektil on juba {count} mahutabelit; kõrvale lisatud kontseptsioonitabel loeb sama mahtu kaks korda."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Kavandatud lõpp {end} on enne kavandatud algust {start}.",
+      "suggestion": "Seadke kavandatud lõpp alguskuupäevaks või hilisemaks."
+    },
+    "actual_dates_order": {
+      "fail": "Tegelik lõpp {end} on enne tegelikku algust {start}.",
+      "suggestion": "Parandage tegelik alguse või lõpu kuupäev."
+    },
+    "actual_end_without_start": {
+      "fail": "Tegelik lõpp {end} on märgitud, kuid tegelik algus on tühi.",
+      "suggestion": "Sisestage tegeliku alguse kuupäev või tühjendage lõpp."
+    },
+    "actual_in_future": {
+      "fail": "{field} on {date}, mis on veel tulevikus.",
+      "suggestion": "Sisestage tegelikud kuupäevad siis, kui need on toimunud, ja hoidke plaan plaanilistes kuupäevades."
+    },
+    "money_without_currency": {
+      "fail": "{field} summas {value} on sisestatud ilma projekti valuutata.",
+      "suggestion": "Määrake projekti valuuta, et summat saaks kokku liita."
+    },
+    "contingency_missing": {
+      "fail": "Eelarvel {budget} puudub reserv ettenägematuteks kuludeks.",
+      "suggestion": "Sisestage reservi protsent, isegi kui see on 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Fail on tühi (0 baiti).",
+      "suggestion": "Laadige fail uuesti üles; tühi fail tähendab tavaliselt ebaõnnestunud edastust."
+    },
+    "published_unidentified": {
+      "fail": "Väljastatud joonisel puudub: {missing}.",
+      "suggestion": "Lisage joonise number ja redaktsiooni kood enne lehe väljastamist ehitusplatsile."
+    },
+    "archived_current": {
+      "fail": "Arhiveeritud dokument on ikka märgitud kehtivaks redaktsiooniks.",
+      "suggestion": "Eemaldage kehtiva redaktsiooni märge või jätke dokument arhiivist välja."
+    },
+    "photo_location": {
+      "fail": "Foto asukoht ({lat}, {lon}) ei ole kehtiv koordinaatide paar.",
+      "suggestion": "Sisestage nii laiuskraad (-90 kuni 90) kui ka pikkuskraad (-180 kuni 180) või mõlemad tühjaks."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Konteineri kood '{code}' sisaldab tühikut või kaldkriipsu.",
+      "suggestion": "Kasutage tähti, numbreid ja sidekriipse, et kood toimiks failinimedes ja transmittalites."
+    },
+    "suitability_missing": {
+      "fail": "Konteiner on olekus {state}, kuid tal puudub sobivuse kood.",
+      "suggestion": "Valige sobivuse kood, mis näitab, milleks infot võib kasutada."
+    },
+    "file_size_invalid": {
+      "fail": "Faili suurus '{value}' ei ole täisarv baite.",
+      "suggestion": "Sisestage suurus baitides, ainult numbrid."
+    },
+    "content_hash_invalid": {
+      "fail": "Sisu räsi ei ole SHA-256 väärtus (64 kuueteistkümnendmärki).",
+      "suggestion": "Jätke räsi tühjaks, et see arvutataks, või sisestage täielik SHA-256 väärtus."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Hoolduse kuupäev '{value}' ei ole tegelik kuupäev.",
+      "suggestion": "Sisestage kuupäev kujul aasta-kuu-päev, näiteks 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Hoolduse kulu '{value}' ei ole null või suurem arv.",
+      "suggestion": "Sisestage kulu tavalise arvuna ilma valuutamärgita."
+    },
+    "service_in_future": {
+      "fail": "Hoolduse kuupäev on {date}, mis on veel tulevikus.",
+      "suggestion": "Märkige hooldus sisse alles pärast selle tegemist."
+    }
   }
 }

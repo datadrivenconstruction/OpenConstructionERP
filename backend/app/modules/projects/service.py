@@ -27,6 +27,7 @@ from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.messages import translate
+from app.core.validation.quality_rules import gate_record
 
 # Per-process lock + reservation set guarding ``_generate_project_code``.
 # The Project model does NOT carry a DB-level UniqueConstraint on
@@ -515,6 +516,31 @@ class ProjectService:
 
     # ── Create ────────────────────────────────────────────────────────────
 
+    async def _gate(
+        self,
+        source: Any,
+        changes: dict[str, Any] | None = None,
+        *,
+        operation: str,
+        target_id: str = "",
+        warnings_only: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Run the ``projects`` rule set over the record as it will be; errors the write introduces raise 422."""
+        from app.modules.projects.validators import PROJECT_FIELDS, PROJECTS_RULE_SET
+
+        return await gate_record(
+            PROJECTS_RULE_SET,
+            "project",
+            source,
+            PROJECT_FIELDS,
+            changes,
+            operation=operation,
+            project_id=target_id or None,
+            error_code="project_rules_failed",
+            target_id=target_id,
+            warnings_only=warnings_only,
+        )
+
     async def create_project(
         self,
         data: ProjectCreate,
@@ -726,6 +752,8 @@ class ProjectService:
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
             _rule_sets = list(data.validation_rule_sets or [])
 
+        _rule_warnings = await self._gate(data, operation="create")
+
         project = Project(
             name=data.name,
             description=data.description,
@@ -800,6 +828,8 @@ class ProjectService:
         # session commits, and the request lifecycle (``get_session``)
         # commits on success. The generator's pre-lock prune step below
         # GC's reservations whose code is now committed in the DB.
+
+        project.validation_warnings = _rule_warnings  # type: ignore[attr-defined]
 
         # Seed the status timeline with the initial status (from=None) so a
         # project's history is complete from creation, not only from the
@@ -1072,10 +1102,13 @@ class ProjectService:
                     if _resolved:
                         fields["country_code"] = _resolved
 
+        _rule_warnings = await self._gate(project, fields, operation="update", target_id=str(project_id))
+
         await self.repo.update_fields(project_id, **fields)
 
         # Refresh the project object
         await self.session.refresh(project)
+        project.validation_warnings = _rule_warnings  # type: ignore[attr-defined]
 
         # Record the status transition (active -> on_hold, etc.) so the UI
         # can show who changed status from X to Y and when. Only when the
@@ -1264,6 +1297,7 @@ class ProjectService:
         #    about whether it should clone - much safer than a sweeping
         #    ``copy.deepcopy`` that could silently propagate IDs/timestamps.
         new_project_code = await self._generate_project_code()
+        await self._gate(source, operation="duplicate", warnings_only=True)
         new_project = Project(
             name=f"{source.name} (Copy)",
             description=source.description,
@@ -2041,6 +2075,7 @@ class ProjectService:
 
         meta = data.project
 
+        await self._gate(meta, operation="restore", warnings_only=True)
         # Create the project row
         project = Project(
             name=meta.name,

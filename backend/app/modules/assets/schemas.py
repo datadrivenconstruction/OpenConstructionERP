@@ -176,3 +176,5 @@ class ServiceLogResponse(BaseModel):
     asset_id: UUID
     service_log: list[dict[str, Any]] = Field(default_factory=list)
     health: AssetHealthSchema
+    # Non-blocking findings of the assets rule set for the entry just appended.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)

@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "This project already has {count} bill(s) of quantities; a concept bill added beside them counts the same scope twice."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "The planned finish {end} is before the planned start {start}.",
+      "suggestion": "Move the planned finish to the start date or later."
+    },
+    "actual_dates_order": {
+      "fail": "The actual finish {end} is before the actual start {start}.",
+      "suggestion": "Correct the actual start or finish date."
+    },
+    "actual_end_without_start": {
+      "fail": "The actual finish {end} is recorded but the actual start is empty.",
+      "suggestion": "Enter the actual start date, or clear the finish."
+    },
+    "actual_in_future": {
+      "fail": "{field} is {date}, which is still in the future.",
+      "suggestion": "Record actual dates once they have happened and keep the plan in the planned dates."
+    },
+    "money_without_currency": {
+      "fail": "{field} of {value} is entered without a project currency.",
+      "suggestion": "Set the project currency so the figure can be totalled."
+    },
+    "contingency_missing": {
+      "fail": "The budget of {budget} has no contingency allowance.",
+      "suggestion": "Enter the contingency percentage, even if it is 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "The file is empty (0 bytes).",
+      "suggestion": "Upload the file again; an empty file is usually a failed transfer."
+    },
+    "published_unidentified": {
+      "fail": "The published drawing has no {missing}.",
+      "suggestion": "Add the drawing number and revision code before the sheet is issued to site."
+    },
+    "archived_current": {
+      "fail": "An archived document is still marked as the current revision.",
+      "suggestion": "Clear the current revision flag, or keep the document out of the archive."
+    },
+    "photo_location": {
+      "fail": "The photo location ({lat}, {lon}) is not a valid coordinate pair.",
+      "suggestion": "Give both latitude (-90 to 90) and longitude (-180 to 180), or neither."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "The container code '{code}' contains a space or a slash.",
+      "suggestion": "Use letters, digits and hyphens so the code works in file names and transmittals."
+    },
+    "suitability_missing": {
+      "fail": "The container is {state} but has no suitability code.",
+      "suggestion": "Select the suitability code that states what the information may be used for."
+    },
+    "file_size_invalid": {
+      "fail": "The file size '{value}' is not a whole number of bytes.",
+      "suggestion": "Enter the size in bytes, digits only."
+    },
+    "content_hash_invalid": {
+      "fail": "The content hash is not a SHA-256 value (64 hexadecimal characters).",
+      "suggestion": "Leave the hash empty to have it computed, or supply the full SHA-256 digest."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "The service date '{value}' is not a real date.",
+      "suggestion": "Enter the date as year-month-day, for example 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "The service cost '{value}' is not a number of zero or more.",
+      "suggestion": "Enter the cost as a plain number without a currency sign."
+    },
+    "service_in_future": {
+      "fail": "The service is dated {date}, which is still in the future.",
+      "suggestion": "Log a service once it has been carried out."
+    }
   }
 }

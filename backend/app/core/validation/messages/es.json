@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Este proyecto ya tiene {count} presupuesto(s) de mediciones; uno conceptual añadido al lado cuenta dos veces el mismo alcance."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "La fecha de fin prevista {end} es anterior a la de inicio prevista {start}.",
+      "suggestion": "Sitúe el fin previsto en la fecha de inicio o después."
+    },
+    "actual_dates_order": {
+      "fail": "El fin real {end} es anterior al inicio real {start}.",
+      "suggestion": "Corrija la fecha real de inicio o de fin."
+    },
+    "actual_end_without_start": {
+      "fail": "Se ha registrado el fin real {end} pero el inicio real está vacío.",
+      "suggestion": "Introduzca la fecha de inicio real o borre el fin."
+    },
+    "actual_in_future": {
+      "fail": "{field} es {date}, una fecha que aún no ha llegado.",
+      "suggestion": "Registre las fechas reales cuando ocurran y deje el plan en las fechas previstas."
+    },
+    "money_without_currency": {
+      "fail": "{field} de {value} se ha introducido sin moneda del proyecto.",
+      "suggestion": "Defina la moneda del proyecto para poder totalizar la cifra."
+    },
+    "contingency_missing": {
+      "fail": "El presupuesto de {budget} no tiene partida de contingencia.",
+      "suggestion": "Indique el porcentaje de contingencia, aunque sea 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "El archivo está vacío (0 bytes).",
+      "suggestion": "Suba el archivo de nuevo; un archivo vacío suele ser una transferencia fallida."
+    },
+    "published_unidentified": {
+      "fail": "Al plano publicado le falta: {missing}.",
+      "suggestion": "Añada el número de plano y el código de revisión antes de emitir la hoja a obra."
+    },
+    "archived_current": {
+      "fail": "Un documento archivado sigue marcado como revisión vigente.",
+      "suggestion": "Quite la marca de revisión vigente o mantenga el documento fuera del archivo."
+    },
+    "photo_location": {
+      "fail": "La ubicación de la foto ({lat}, {lon}) no es un par de coordenadas válido.",
+      "suggestion": "Indique latitud (-90 a 90) y longitud (-180 a 180), o ninguna de las dos."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "El código de contenedor '{code}' contiene un espacio o una barra.",
+      "suggestion": "Use letras, dígitos y guiones para que el código sirva en nombres de archivo y transmittals."
+    },
+    "suitability_missing": {
+      "fail": "El contenedor está en estado {state} pero no tiene código de idoneidad.",
+      "suggestion": "Seleccione el código de idoneidad que indica para qué puede usarse la información."
+    },
+    "file_size_invalid": {
+      "fail": "El tamaño de archivo '{value}' no es un número entero de bytes.",
+      "suggestion": "Introduzca el tamaño en bytes, solo dígitos."
+    },
+    "content_hash_invalid": {
+      "fail": "El hash del contenido no es un valor SHA-256 (64 caracteres hexadecimales).",
+      "suggestion": "Deje el hash vacío para que se calcule, o aporte el SHA-256 completo."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "La fecha de mantenimiento '{value}' no es una fecha real.",
+      "suggestion": "Introduzca la fecha como año-mes-día, por ejemplo 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "El coste de mantenimiento '{value}' no es un número igual o mayor que cero.",
+      "suggestion": "Introduzca el coste como número simple, sin símbolo de moneda."
+    },
+    "service_in_future": {
+      "fail": "El mantenimiento tiene fecha {date}, que aún no ha llegado.",
+      "suggestion": "Registre el mantenimiento una vez realizado."
+    }
   }
 }

@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Ten projekt ma już przedmiarów: {count}; dodany obok przedmiar koncepcyjny liczy ten sam zakres dwukrotnie."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Planowane zakończenie {end} jest przed planowanym rozpoczęciem {start}.",
+      "suggestion": "Ustaw planowane zakończenie na datę rozpoczęcia lub później."
+    },
+    "actual_dates_order": {
+      "fail": "Rzeczywiste zakończenie {end} jest przed rzeczywistym rozpoczęciem {start}.",
+      "suggestion": "Popraw rzeczywistą datę rozpoczęcia lub zakończenia."
+    },
+    "actual_end_without_start": {
+      "fail": "Podano rzeczywiste zakończenie {end}, ale rzeczywiste rozpoczęcie jest puste.",
+      "suggestion": "Wpisz rzeczywistą datę rozpoczęcia lub wyczyść zakończenie."
+    },
+    "actual_in_future": {
+      "fail": "{field} to {date}, czyli data jeszcze przed nami.",
+      "suggestion": "Wpisuj daty rzeczywiste, gdy zdarzenia nastąpią, a plan zostaw w datach planowanych."
+    },
+    "money_without_currency": {
+      "fail": "{field} w kwocie {value} wpisano bez waluty projektu.",
+      "suggestion": "Ustaw walutę projektu, aby kwotę można było sumować."
+    },
+    "contingency_missing": {
+      "fail": "Budżet {budget} nie ma rezerwy na nieprzewidziane wydatki.",
+      "suggestion": "Podaj procent rezerwy, nawet jeśli wynosi 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Plik jest pusty (0 bajtów).",
+      "suggestion": "Prześlij plik ponownie; pusty plik zwykle oznacza nieudany transfer."
+    },
+    "published_unidentified": {
+      "fail": "W opublikowanym rysunku brakuje: {missing}.",
+      "suggestion": "Dodaj numer rysunku i kod rewizji przed wydaniem arkusza na budowę."
+    },
+    "archived_current": {
+      "fail": "Zarchiwizowany dokument nadal jest oznaczony jako bieżąca rewizja.",
+      "suggestion": "Zdejmij oznaczenie bieżącej rewizji lub zostaw dokument poza archiwum."
+    },
+    "photo_location": {
+      "fail": "Lokalizacja zdjęcia ({lat}, {lon}) nie jest poprawną parą współrzędnych.",
+      "suggestion": "Podaj szerokość (od -90 do 90) i długość (od -180 do 180) geograficzną albo żadnej z nich."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Kod kontenera '{code}' zawiera spację lub ukośnik.",
+      "suggestion": "Użyj liter, cyfr i myślników, aby kod działał w nazwach plików i transmitalach."
+    },
+    "suitability_missing": {
+      "fail": "Kontener ma stan {state}, ale nie ma kodu przydatności.",
+      "suggestion": "Wybierz kod przydatności, który określa, do czego wolno używać informacji."
+    },
+    "file_size_invalid": {
+      "fail": "Rozmiar pliku '{value}' nie jest całkowitą liczbą bajtów.",
+      "suggestion": "Podaj rozmiar w bajtach, tylko cyfry."
+    },
+    "content_hash_invalid": {
+      "fail": "Skrót zawartości nie jest wartością SHA-256 (64 znaki szesnastkowe).",
+      "suggestion": "Zostaw skrót pusty, aby został obliczony, albo podaj pełną wartość SHA-256."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Data przeglądu '{value}' nie jest prawdziwą datą.",
+      "suggestion": "Wpisz datę jako rok-miesiąc-dzień, na przykład 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Koszt przeglądu '{value}' nie jest liczbą równą zero lub większą.",
+      "suggestion": "Wpisz koszt jako zwykłą liczbę bez znaku waluty."
+    },
+    "service_in_future": {
+      "fail": "Przegląd ma datę {date}, czyli jeszcze przed nami.",
+      "suggestion": "Zapisuj przegląd dopiero po jego wykonaniu."
+    }
   }
 }

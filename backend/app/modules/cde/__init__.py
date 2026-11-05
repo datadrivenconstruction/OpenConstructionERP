@@ -12,3 +12,7 @@ async def on_startup() -> None:
     from app.modules.cde.permissions import register_cde_permissions
 
     register_cde_permissions()
+
+    from app.modules.cde.validators import register_cde_validation_rules
+
+    register_cde_validation_rules()

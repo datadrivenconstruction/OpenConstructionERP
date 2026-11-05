@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Bu projede zaten {count} metraj cetveli var; yanına eklenen kavramsal cetvel aynı kapsamı iki kez sayar."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Planlanan bitiş {end}, planlanan başlangıç {start} tarihinden önce.",
+      "suggestion": "Planlanan bitişi başlangıç tarihine veya sonrasına alın."
+    },
+    "actual_dates_order": {
+      "fail": "Gerçekleşen bitiş {end}, gerçekleşen başlangıç {start} tarihinden önce.",
+      "suggestion": "Gerçekleşen başlangıç veya bitiş tarihini düzeltin."
+    },
+    "actual_end_without_start": {
+      "fail": "Gerçekleşen bitiş {end} girilmiş ama gerçekleşen başlangıç boş.",
+      "suggestion": "Gerçekleşen başlangıç tarihini girin veya bitişi temizleyin."
+    },
+    "actual_in_future": {
+      "fail": "{field} değeri {date}, bu tarih henüz gelmedi.",
+      "suggestion": "Gerçekleşen tarihleri olduklarında girin, planı planlanan tarihlerde tutun."
+    },
+    "money_without_currency": {
+      "fail": "{value} tutarındaki {field}, proje para birimi olmadan girilmiş.",
+      "suggestion": "Tutarın toplanabilmesi için proje para birimini belirleyin."
+    },
+    "contingency_missing": {
+      "fail": "{budget} tutarındaki bütçede beklenmeyen giderler için pay yok.",
+      "suggestion": "Sıfır olsa bile beklenmeyen gider yüzdesini girin."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Dosya boş (0 bayt).",
+      "suggestion": "Dosyayı yeniden yükleyin; boş dosya genellikle başarısız bir aktarım demektir."
+    },
+    "published_unidentified": {
+      "fail": "Yayımlanan çizimde eksik: {missing}.",
+      "suggestion": "Pafta şantiyeye verilmeden önce çizim numarasını ve revizyon kodunu ekleyin."
+    },
+    "archived_current": {
+      "fail": "Arşivlenmiş bir belge hâlâ güncel revizyon olarak işaretli.",
+      "suggestion": "Güncel revizyon işaretini kaldırın veya belgeyi arşivin dışında tutun."
+    },
+    "photo_location": {
+      "fail": "Fotoğraf konumu ({lat}, {lon}) geçerli bir koordinat çifti değil.",
+      "suggestion": "Hem enlemi (-90 ile 90) hem boylamı (-180 ile 180) girin ya da hiçbirini girmeyin."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "'{code}' konteyner kodu boşluk veya eğik çizgi içeriyor.",
+      "suggestion": "Kodun dosya adlarında ve transmittal'larda çalışması için harf, rakam ve tire kullanın."
+    },
+    "suitability_missing": {
+      "fail": "Konteyner {state} durumunda ama uygunluk kodu yok.",
+      "suggestion": "Bilginin ne için kullanılabileceğini belirten uygunluk kodunu seçin."
+    },
+    "file_size_invalid": {
+      "fail": "'{value}' dosya boyutu tam sayı bayt değil.",
+      "suggestion": "Boyutu bayt olarak girin, yalnızca rakam."
+    },
+    "content_hash_invalid": {
+      "fail": "İçerik özeti SHA-256 değeri değil (64 onaltılık karakter).",
+      "suggestion": "Özeti hesaplanması için boş bırakın ya da tam SHA-256 değerini girin."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "'{value}' bakım tarihi gerçek bir tarih değil.",
+      "suggestion": "Tarihi yıl-ay-gün olarak girin, örneğin 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "'{value}' bakım maliyeti sıfır veya daha büyük bir sayı değil.",
+      "suggestion": "Maliyeti para birimi işareti olmadan düz sayı olarak girin."
+    },
+    "service_in_future": {
+      "fail": "Bakım {date} tarihli, bu tarih henüz gelmedi.",
+      "suggestion": "Bakımı yapıldıktan sonra kaydedin."
+    }
   }
 }

@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "May {count} nang bill of quantities ang proyektong ito; ang konseptwal na bill na idinagdag sa tabi ay dalawang beses bibilangin ang parehong saklaw."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Ang planong pagtatapos na {end} ay mas maaga kaysa sa planong simula na {start}.",
+      "suggestion": "Ilipat ang planong pagtatapos sa petsa ng simula o mas huli."
+    },
+    "actual_dates_order": {
+      "fail": "Ang aktuwal na pagtatapos na {end} ay mas maaga kaysa sa aktuwal na simula na {start}.",
+      "suggestion": "Ayusin ang aktuwal na petsa ng simula o pagtatapos."
+    },
+    "actual_end_without_start": {
+      "fail": "Naitala ang aktuwal na pagtatapos na {end} ngunit walang laman ang aktuwal na simula.",
+      "suggestion": "Ilagay ang aktuwal na petsa ng simula, o burahin ang pagtatapos."
+    },
+    "actual_in_future": {
+      "fail": "Ang {field} ay {date}, petsang hindi pa dumarating.",
+      "suggestion": "Itala ang mga aktuwal na petsa kapag nangyari na at panatilihin ang plano sa mga planong petsa."
+    },
+    "money_without_currency": {
+      "fail": "Ang {field} na {value} ay nailagay nang walang currency ng proyekto.",
+      "suggestion": "Itakda ang currency ng proyekto para maisama ang halaga sa kabuuan."
+    },
+    "contingency_missing": {
+      "fail": "Ang budget na {budget} ay walang contingency allowance.",
+      "suggestion": "Ilagay ang porsiyento ng contingency, kahit 0 ito."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Walang laman ang file (0 byte).",
+      "suggestion": "I-upload muli ang file; kadalasang bigong paglilipat ang walang lamang file."
+    },
+    "published_unidentified": {
+      "fail": "Kulang ang inilabas na drawing ng: {missing}.",
+      "suggestion": "Idagdag ang numero ng drawing at revision code bago ilabas ang sheet sa site."
+    },
+    "archived_current": {
+      "fail": "Ang naka-archive na dokumento ay nakamarkang kasalukuyang rebisyon pa rin.",
+      "suggestion": "Alisin ang marka ng kasalukuyang rebisyon o iwan ang dokumento sa labas ng archive."
+    },
+    "photo_location": {
+      "fail": "Ang lokasyon ng larawan ({lat}, {lon}) ay hindi wastong pares ng coordinate.",
+      "suggestion": "Ibigay ang latitude (-90 hanggang 90) at longitude (-180 hanggang 180), o wala sa dalawa."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Ang container code na '{code}' ay may espasyo o slash.",
+      "suggestion": "Gumamit ng mga titik, numero at gitling para gumana ang code sa mga pangalan ng file at transmittal."
+    },
+    "suitability_missing": {
+      "fail": "Ang container ay nasa estadong {state} ngunit walang suitability code.",
+      "suggestion": "Piliin ang suitability code na nagsasabi kung para saan magagamit ang impormasyon."
+    },
+    "file_size_invalid": {
+      "fail": "Ang laki ng file na '{value}' ay hindi buong bilang ng byte.",
+      "suggestion": "Ilagay ang laki sa byte, mga numero lamang."
+    },
+    "content_hash_invalid": {
+      "fail": "Ang content hash ay hindi halagang SHA-256 (64 hexadecimal na karakter).",
+      "suggestion": "Iwanang walang laman ang hash para makalkula ito, o ibigay ang buong SHA-256."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Ang petsa ng serbisyo na '{value}' ay hindi totoong petsa.",
+      "suggestion": "Ilagay ang petsa bilang taon-buwan-araw, halimbawa 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Ang gastos sa serbisyo na '{value}' ay hindi numerong zero o higit pa.",
+      "suggestion": "Ilagay ang gastos bilang simpleng numero na walang simbolo ng currency."
+    },
+    "service_in_future": {
+      "fail": "Ang serbisyo ay may petsang {date}, na hindi pa dumarating.",
+      "suggestion": "Itala ang serbisyo pagkatapos itong maisagawa."
+    }
   }
 }

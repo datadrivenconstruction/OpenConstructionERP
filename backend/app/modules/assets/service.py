@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
 from app.core.sql_json import json_path_text
+from app.core.validation.quality_rules import gate_record
 from app.modules.assets import discovery as disc
 from app.modules.assets import lifecycle as lc
 from app.modules.assets.schemas import (
@@ -39,6 +40,7 @@ from app.modules.assets.schemas import (
     WarrantyAlertItem,
     WarrantyAlertResponse,
 )
+from app.modules.assets.validators import ASSETS_RULE_SET, SERVICE_FIELDS
 from app.modules.bim_hub.models import BIMElement, BIMModel
 
 logger = logging.getLogger(__name__)
@@ -413,6 +415,16 @@ class AssetOpsService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Asset not found")
         await verify_project_access(model.project_id, actor_user_id or "", self.session)
 
+        rule_warnings = await gate_record(
+            ASSETS_RULE_SET,
+            "service",
+            entry,
+            SERVICE_FIELDS,
+            operation="service_log",
+            project_id=model.project_id,
+            error_code="asset_rules_failed",
+        )
+
         info = dict(element.asset_info or {})
         log = info.get("service_log")
         if not isinstance(log, list):
@@ -436,6 +448,7 @@ class AssetOpsService:
             asset_id=updated.id,
             service_log=final_info.get("service_log", []),
             health=_health_schema(final_info, date.today()),
+            validation_warnings=rule_warnings,
         )
 
 

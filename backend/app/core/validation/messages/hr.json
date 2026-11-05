@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Ovaj projekt već ima troškovnika: {count}; konceptualni troškovnik dodan uz njih dvaput broji isti opseg."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Planirani završetak {end} je prije planiranog početka {start}.",
+      "suggestion": "Postavite planirani završetak na datum početka ili kasnije."
+    },
+    "actual_dates_order": {
+      "fail": "Stvarni završetak {end} je prije stvarnog početka {start}.",
+      "suggestion": "Ispravite stvarni datum početka ili završetka."
+    },
+    "actual_end_without_start": {
+      "fail": "Stvarni završetak {end} je upisan, ali je stvarni početak prazan.",
+      "suggestion": "Unesite datum stvarnog početka ili obrišite završetak."
+    },
+    "actual_in_future": {
+      "fail": "{field} je {date}, datum koji tek dolazi.",
+      "suggestion": "Stvarne datume upisujte kad se dogode, a plan ostavite u planiranim datumima."
+    },
+    "money_without_currency": {
+      "fail": "{field} u iznosu {value} unesen je bez valute projekta.",
+      "suggestion": "Postavite valutu projekta kako bi se iznos mogao zbrajati."
+    },
+    "contingency_missing": {
+      "fail": "Proračun od {budget} nema stavku za nepredviđene troškove.",
+      "suggestion": "Unesite postotak za nepredviđeno, čak i ako je 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Datoteka je prazna (0 bajtova).",
+      "suggestion": "Učitajte datoteku ponovno; prazna datoteka obično znači neuspjeli prijenos."
+    },
+    "published_unidentified": {
+      "fail": "Objavljenom crtežu nedostaje: {missing}.",
+      "suggestion": "Dodajte broj crteža i oznaku revizije prije izdavanja lista na gradilište."
+    },
+    "archived_current": {
+      "fail": "Arhivirani dokument još je označen kao trenutna revizija.",
+      "suggestion": "Uklonite oznaku trenutne revizije ili ostavite dokument izvan arhive."
+    },
+    "photo_location": {
+      "fail": "Lokacija fotografije ({lat}, {lon}) nije ispravan par koordinata.",
+      "suggestion": "Navedite i geografsku širinu (od -90 do 90) i dužinu (od -180 do 180), ili nijednu."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Šifra kontejnera '{code}' sadrži razmak ili kosu crtu.",
+      "suggestion": "Koristite slova, znamenke i crtice kako bi šifra radila u nazivima datoteka i transmitalima."
+    },
+    "suitability_missing": {
+      "fail": "Kontejner je u stanju {state}, ali nema šifru prikladnosti.",
+      "suggestion": "Odaberite šifru prikladnosti koja kaže za što se informacija smije koristiti."
+    },
+    "file_size_invalid": {
+      "fail": "Veličina datoteke '{value}' nije cijeli broj bajtova.",
+      "suggestion": "Unesite veličinu u bajtovima, samo znamenke."
+    },
+    "content_hash_invalid": {
+      "fail": "Sažetak sadržaja nije SHA-256 vrijednost (64 heksadecimalna znaka).",
+      "suggestion": "Ostavite sažetak praznim da se izračuna ili unesite cijelu SHA-256 vrijednost."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Datum servisa '{value}' nije stvaran datum.",
+      "suggestion": "Unesite datum kao godina-mjesec-dan, na primjer 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Trošak servisa '{value}' nije broj jednak nuli ili veći.",
+      "suggestion": "Unesite trošak kao običan broj bez oznake valute."
+    },
+    "service_in_future": {
+      "fail": "Servis je datiran {date}, datum koji tek dolazi.",
+      "suggestion": "Upišite servis tek nakon što je obavljen."
+    }
   }
 }

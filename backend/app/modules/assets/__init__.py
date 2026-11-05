@@ -23,3 +23,7 @@ async def on_startup() -> None:
     from app.modules.assets.permissions import register_assets_permissions
 
     register_assets_permissions()
+
+    from app.modules.assets.validators import register_assets_validation_rules
+
+    register_assets_validation_rules()

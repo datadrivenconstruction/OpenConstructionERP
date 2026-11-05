@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Projektet har redan {count} mängdförteckning(ar); en konceptuell förteckning bredvid räknar samma omfattning två gånger."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Planerat slut {end} ligger före planerad start {start}.",
+      "suggestion": "Sätt planerat slut till startdatumet eller senare."
+    },
+    "actual_dates_order": {
+      "fail": "Faktiskt slut {end} ligger före faktisk start {start}.",
+      "suggestion": "Rätta det faktiska start- eller slutdatumet."
+    },
+    "actual_end_without_start": {
+      "fail": "Faktiskt slut {end} är registrerat men faktisk start saknas.",
+      "suggestion": "Ange datumet för faktisk start eller rensa slutet."
+    },
+    "actual_in_future": {
+      "fail": "{field} är {date}, ett datum som ännu inte har inträffat.",
+      "suggestion": "För in faktiska datum när de har inträffat och låt planen stå i de planerade datumen."
+    },
+    "money_without_currency": {
+      "fail": "{field} på {value} är angivet utan projektets valuta.",
+      "suggestion": "Ange projektets valuta så att beloppet kan summeras."
+    },
+    "contingency_missing": {
+      "fail": "Budgeten på {budget} har ingen post för oförutsett.",
+      "suggestion": "Ange procentsatsen för oförutsett, även om den är 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Filen är tom (0 byte).",
+      "suggestion": "Ladda upp filen igen; en tom fil beror oftast på en misslyckad överföring."
+    },
+    "published_unidentified": {
+      "fail": "Den utgivna ritningen saknar: {missing}.",
+      "suggestion": "Lägg till ritningsnummer och revisionskod innan bladet ges ut till arbetsplatsen."
+    },
+    "archived_current": {
+      "fail": "Ett arkiverat dokument är fortfarande markerat som aktuell revision.",
+      "suggestion": "Ta bort markeringen som aktuell revision eller låt dokumentet ligga utanför arkivet."
+    },
+    "photo_location": {
+      "fail": "Fotots plats ({lat}, {lon}) är inte ett giltigt koordinatpar.",
+      "suggestion": "Ange både latitud (-90 till 90) och longitud (-180 till 180), eller ingen av dem."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Containerkoden '{code}' innehåller ett mellanslag eller ett snedstreck.",
+      "suggestion": "Använd bokstäver, siffror och bindestreck så att koden fungerar i filnamn och transmittals."
+    },
+    "suitability_missing": {
+      "fail": "Containern har status {state} men saknar lämplighetskod.",
+      "suggestion": "Välj den lämplighetskod som anger vad informationen får användas till."
+    },
+    "file_size_invalid": {
+      "fail": "Filstorleken '{value}' är inte ett helt antal byte.",
+      "suggestion": "Ange storleken i byte, endast siffror."
+    },
+    "content_hash_invalid": {
+      "fail": "Innehållets hash är inte ett SHA-256-värde (64 hexadecimala tecken).",
+      "suggestion": "Lämna hashen tom så beräknas den, eller ange hela SHA-256-värdet."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Servicedatumet '{value}' är inte ett riktigt datum.",
+      "suggestion": "Ange datumet som år-månad-dag, till exempel 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Servicekostnaden '{value}' är inte ett tal som är noll eller större.",
+      "suggestion": "Ange kostnaden som ett vanligt tal utan valutatecken."
+    },
+    "service_in_future": {
+      "fail": "Servicen är daterad {date}, ett datum som ännu inte har inträffat.",
+      "suggestion": "För in service först när den har utförts."
+    }
   }
 }

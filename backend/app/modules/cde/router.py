@@ -92,6 +92,7 @@ def _container_to_response(container: object) -> ContainerResponse:
         metadata=getattr(container, "metadata_", {}),
         created_at=container.created_at,  # type: ignore[attr-defined]
         updated_at=container.updated_at,  # type: ignore[attr-defined]
+        validation_warnings=list(getattr(container, "validation_warnings", None) or []),
     )
 
 

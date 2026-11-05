@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Ce projet compte déjà {count} bordereau(x) de quantités ; un bordereau conceptuel ajouté à côté compte deux fois le même périmètre."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "La fin prévue {end} précède le début prévu {start}.",
+      "suggestion": "Placez la fin prévue à la date de début ou après."
+    },
+    "actual_dates_order": {
+      "fail": "La fin réelle {end} précède le début réel {start}.",
+      "suggestion": "Corrigez la date de début ou de fin réelle."
+    },
+    "actual_end_without_start": {
+      "fail": "La fin réelle {end} est saisie mais le début réel est vide.",
+      "suggestion": "Saisissez la date de début réelle ou effacez la fin."
+    },
+    "actual_in_future": {
+      "fail": "{field} est au {date}, une date encore à venir.",
+      "suggestion": "Saisissez les dates réelles une fois les faits survenus et gardez le plan dans les dates prévues."
+    },
+    "money_without_currency": {
+      "fail": "{field} de {value} est saisi sans devise de projet.",
+      "suggestion": "Définissez la devise du projet pour que le montant puisse être totalisé."
+    },
+    "contingency_missing": {
+      "fail": "Le budget de {budget} n'a pas de provision pour aléas.",
+      "suggestion": "Indiquez le pourcentage d'aléas, même s'il est de 0."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Le fichier est vide (0 octet).",
+      "suggestion": "Téléversez de nouveau le fichier ; un fichier vide indique en général un transfert échoué."
+    },
+    "published_unidentified": {
+      "fail": "Le plan diffusé n'a pas de : {missing}.",
+      "suggestion": "Ajoutez le numéro de plan et l'indice de révision avant la diffusion du plan au chantier."
+    },
+    "archived_current": {
+      "fail": "Un document archivé est encore marqué comme révision en cours.",
+      "suggestion": "Retirez le marquage de révision en cours ou laissez le document hors de l'archive."
+    },
+    "photo_location": {
+      "fail": "L'emplacement de la photo ({lat}, {lon}) n'est pas un couple de coordonnées valide.",
+      "suggestion": "Indiquez la latitude (-90 à 90) et la longitude (-180 à 180), ou aucune des deux."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Le code de conteneur '{code}' contient un espace ou une barre oblique.",
+      "suggestion": "Utilisez des lettres, des chiffres et des tirets pour que le code fonctionne dans les noms de fichiers et les transmittals."
+    },
+    "suitability_missing": {
+      "fail": "Le conteneur est à l'état {state} mais n'a pas de code d'aptitude.",
+      "suggestion": "Choisissez le code d'aptitude qui indique l'usage autorisé de l'information."
+    },
+    "file_size_invalid": {
+      "fail": "La taille de fichier '{value}' n'est pas un nombre entier d'octets.",
+      "suggestion": "Saisissez la taille en octets, chiffres uniquement."
+    },
+    "content_hash_invalid": {
+      "fail": "L'empreinte du contenu n'est pas une valeur SHA-256 (64 caractères hexadécimaux).",
+      "suggestion": "Laissez l'empreinte vide pour qu'elle soit calculée, ou fournissez l'empreinte SHA-256 complète."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "La date d'intervention '{value}' n'est pas une date réelle.",
+      "suggestion": "Saisissez la date sous la forme année-mois-jour, par exemple 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Le coût d'intervention '{value}' n'est pas un nombre supérieur ou égal à zéro.",
+      "suggestion": "Saisissez le coût sous forme de nombre simple, sans symbole monétaire."
+    },
+    "service_in_future": {
+      "fail": "L'intervention est datée du {date}, une date encore à venir.",
+      "suggestion": "Consignez une intervention une fois qu'elle a été réalisée."
+    }
   }
 }

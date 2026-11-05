@@ -2290,5 +2290,81 @@
     "boq_beside_detailed": {
       "fail": "Dieses Projekt hat bereits {count} Leistungsverzeichnis(se); ein daneben angelegtes Grobkosten-LV zählt denselben Umfang doppelt."
     }
+  },
+  "projects": {
+    "planned_dates_order": {
+      "fail": "Das geplante Ende {end} liegt vor dem geplanten Beginn {start}.",
+      "suggestion": "Setzen Sie das geplante Ende auf den Beginn oder später."
+    },
+    "actual_dates_order": {
+      "fail": "Das tatsächliche Ende {end} liegt vor dem tatsächlichen Beginn {start}.",
+      "suggestion": "Korrigieren Sie das tatsächliche Beginn- oder Enddatum."
+    },
+    "actual_end_without_start": {
+      "fail": "Das tatsächliche Ende {end} ist erfasst, der tatsächliche Beginn fehlt.",
+      "suggestion": "Tragen Sie den tatsächlichen Beginn ein oder löschen Sie das Ende."
+    },
+    "actual_in_future": {
+      "fail": "{field} ist {date} und liegt noch in der Zukunft.",
+      "suggestion": "Tragen Sie Ist-Termine erst ein, wenn sie eingetreten sind; die Planung gehört in die Plantermine."
+    },
+    "money_without_currency": {
+      "fail": "{field} von {value} ist ohne Projektwährung erfasst.",
+      "suggestion": "Legen Sie die Projektwährung fest, damit der Betrag summiert werden kann."
+    },
+    "contingency_missing": {
+      "fail": "Das Budget von {budget} hat keine Reserve für Unvorhergesehenes.",
+      "suggestion": "Geben Sie den Reserveprozentsatz an, auch wenn er 0 ist."
+    }
+  },
+  "documents": {
+    "file_empty": {
+      "fail": "Die Datei ist leer (0 Byte).",
+      "suggestion": "Laden Sie die Datei erneut hoch; eine leere Datei ist meist ein abgebrochener Transfer."
+    },
+    "published_unidentified": {
+      "fail": "Der veröffentlichten Zeichnung fehlt: {missing}.",
+      "suggestion": "Ergänzen Sie Plannummer und Revisionsstand, bevor der Plan auf die Baustelle ausgegeben wird."
+    },
+    "archived_current": {
+      "fail": "Ein archiviertes Dokument ist noch als aktuelle Revision markiert.",
+      "suggestion": "Entfernen Sie die Markierung als aktuelle Revision oder lassen Sie das Dokument aus dem Archiv."
+    },
+    "photo_location": {
+      "fail": "Der Fotostandort ({lat}, {lon}) ist kein gültiges Koordinatenpaar.",
+      "suggestion": "Geben Sie Breite (-90 bis 90) und Länge (-180 bis 180) an, oder keines von beiden."
+    }
+  },
+  "cde": {
+    "container_code_format": {
+      "fail": "Der Containercode '{code}' enthält ein Leerzeichen oder einen Schrägstrich.",
+      "suggestion": "Verwenden Sie Buchstaben, Ziffern und Bindestriche, damit der Code in Dateinamen und Transmittals funktioniert."
+    },
+    "suitability_missing": {
+      "fail": "Der Container ist {state}, hat aber keinen Eignungscode.",
+      "suggestion": "Wählen Sie den Eignungscode, der angibt, wofür die Information verwendet werden darf."
+    },
+    "file_size_invalid": {
+      "fail": "Die Dateigröße '{value}' ist keine ganze Zahl von Bytes.",
+      "suggestion": "Geben Sie die Größe in Byte an, nur Ziffern."
+    },
+    "content_hash_invalid": {
+      "fail": "Der Inhalts-Hash ist kein SHA-256-Wert (64 Hexadezimalzeichen).",
+      "suggestion": "Lassen Sie den Hash leer, damit er berechnet wird, oder geben Sie den vollständigen SHA-256-Wert an."
+    }
+  },
+  "assets": {
+    "service_date_invalid": {
+      "fail": "Das Wartungsdatum '{value}' ist kein gültiges Datum.",
+      "suggestion": "Geben Sie das Datum als Jahr-Monat-Tag ein, zum Beispiel 2026-11-04."
+    },
+    "service_cost_invalid": {
+      "fail": "Die Wartungskosten '{value}' sind keine Zahl von null oder mehr.",
+      "suggestion": "Geben Sie die Kosten als einfache Zahl ohne Währungszeichen ein."
+    },
+    "service_in_future": {
+      "fail": "Die Wartung ist auf {date} datiert und liegt noch in der Zukunft.",
+      "suggestion": "Erfassen Sie eine Wartung erst, wenn sie durchgeführt wurde."
+    }
   }
 }

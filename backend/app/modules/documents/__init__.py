@@ -12,3 +12,7 @@ async def on_startup() -> None:
     from app.modules.documents.permissions import register_document_permissions
 
     register_document_permissions()
+
+    from app.modules.documents.validators import register_documents_validation_rules
+
+    register_documents_validation_rules()
