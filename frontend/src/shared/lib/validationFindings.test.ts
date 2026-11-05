@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useToastStore } from '@/stores/useToastStore';
 import { ApiError, apiGet, apiPost, extractErrorMessageFromBody } from './api';
-import { findingText, joinFindings, surfaceValidationWarnings } from './validationFindings';
+import { findingText, joinFindings, resetWarningDedupe, surfaceValidationWarnings } from './validationFindings';
 
 const catalogue: Record<string, string> = { 'api_errors.demo_rule': 'Cost {{cost}} exceeds the budget.' };
 
@@ -17,6 +17,7 @@ vi.mock('i18next', () => ({
 
 beforeEach(() => {
   vi.unstubAllGlobals();
+  resetWarningDedupe();
   useToastStore.setState({ toasts: [], history: [] });
 });
 
@@ -43,6 +44,12 @@ describe('surfaceValidationWarnings', () => {
     const toasts = useToastStore.getState().toasts;
     expect(toasts).toHaveLength(1);
     expect(toasts[0]).toMatchObject({ type: 'warning', title: 'Saved with warnings', message: 'Cost 9 exceeds the budget.; Check unit.' });
+  });
+  it('shows an identical repeated warning once', () => {
+    const body = { validation_warnings: [{ message: 'Check unit.' }] };
+    surfaceValidationWarnings(body);
+    surfaceValidationWarnings(body);
+    expect(useToastStore.getState().toasts).toHaveLength(1);
   });
   it('stays silent without warnings', () => {
     surfaceValidationWarnings({ validation_warnings: [] });

@@ -37,6 +37,14 @@ export function joinFindings(findings: unknown[], limit = 3): string | null {
   return more > 0 ? `${head} (+${more})` : head;
 }
 
+const DEDUPE_MS = 8000;
+let lastShown = { message: '', at: 0 };
+
+/** Test hook: forget the last toast so dedupe does not leak between cases. */
+export function resetWarningDedupe(): void {
+  lastShown = { message: '', at: 0 };
+}
+
 /**
  * Show the non-blocking findings a write endpoint returns in `validation_warnings`
  * as one warning toast. The save already happened, so nothing is thrown.
@@ -47,6 +55,10 @@ export function surfaceValidationWarnings(data: unknown): void {
   if (!Array.isArray(warnings) || warnings.length === 0) return;
   const message = joinFindings(warnings);
   if (!message) return;
+  // Autosave and repeated edits return the same findings; one toast is enough.
+  const now = Date.now();
+  if (message === lastShown.message && now - lastShown.at < DEDUPE_MS) return;
+  lastShown = { message, at: now };
   useToastStore.getState().addToast({
     type: 'warning',
     title: i18next.t('validation.saved_with_warnings', { defaultValue: 'Saved with warnings' }),
