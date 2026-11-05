@@ -30,6 +30,9 @@ async def on_startup() -> None:
     from app.modules.waste_factors.permissions import register_waste_factors_permissions
 
     register_waste_factors_permissions()
+    from app.modules.waste_factors.validators import register_waste_factors_validation_rules
+
+    register_waste_factors_validation_rules()
 
     try:
         from app.database import async_session_factory

@@ -23,6 +23,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
+from app.core.i18n import get_locale
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.price_index.models import CostIndexSeries
 from app.modules.price_index.resource_index_router import router as resource_index_router
@@ -48,6 +49,7 @@ from app.modules.price_index.service import (
     ProjectNotFoundError,
     SeriesNotFoundError,
 )
+from app.modules.price_index.validators import series_jump_warnings
 
 router = APIRouter(tags=["price-index"])
 router.include_router(resource_index_router)
@@ -138,7 +140,12 @@ async def import_statssa_p0151(
             detail={"problem": exc.problem, "message": str(exc)},
         ) from exc
     summary = await import_p0151_table(session, table)
+    # Published data is imported as it stands; a leap between neighbours is reported, never blocked.
+    warnings: list[dict[str, object]] = []
+    for group in table.work_groups:
+        warnings.extend(await series_jump_warnings(group.series_name, group.points, locale=get_locale()))
     return {
+        "warnings": warnings[:200],
         "series_created": summary.series_created,
         "points_created": summary.points_created,
         "points_updated": summary.points_updated,
@@ -209,7 +216,9 @@ async def add_point(
     if await service.get_series(series_id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cost-index series not found")
     point = await service.add_point(series_id, data)
-    return CostIndexPointResponse.model_validate(point)
+    created = CostIndexPointResponse.model_validate(point)
+    created.warnings = service.warnings
+    return created
 
 
 @router.patch(
@@ -231,7 +240,9 @@ async def update_point(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cost-index point not found")
     point = await service.update_point(point_id, data)
     assert point is not None  # existence proven above
-    return CostIndexPointResponse.model_validate(point)
+    updated = CostIndexPointResponse.model_validate(point)
+    updated.warnings = service.warnings
+    return updated
 
 
 @router.delete(
@@ -279,7 +290,9 @@ async def create_location_factor(
 ) -> LocationFactorResponse:
     """Create a regional cost factor."""
     service = PriceIndexService(session)
-    return LocationFactorResponse.model_validate(await service.create_location_factor(data))
+    created = LocationFactorResponse.model_validate(await service.create_location_factor(data))
+    created.warnings = service.warnings
+    return created
 
 
 @router.patch(
@@ -298,7 +311,9 @@ async def update_location_factor(
     factor = await service.update_location_factor(factor_id, data)
     if factor is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Location factor not found")
-    return LocationFactorResponse.model_validate(factor)
+    updated = LocationFactorResponse.model_validate(factor)
+    updated.warnings = service.warnings
+    return updated
 
 
 @router.delete(
