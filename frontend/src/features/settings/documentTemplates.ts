@@ -31,6 +31,7 @@ import type { DocumentAppearance } from '@/features/property-dev/api';
 export const DOCUMENT_TYPE_FIELDS = [
   'show_letterhead',
   'logo_align',
+  'logo_size',
   'accent_color',
   'footer_text',
   'footer_color',

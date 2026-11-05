@@ -164,8 +164,10 @@ def render_offer(
     }
     side_l, side_r, top_m, bottom_m = 20 * MM, 15 * MM, 10 * MM, 22 * MM
     frame_w = page_w - side_l - side_r
-    appearance = pdf_branding.branded_appearance()
-    accent = colors.HexColor(appearance.get("accent_color") or "#0b5394")
+    appearance = pdf_branding.branded_appearance("customer_offer")
+    letterhead = pdf_branding.branded_letterhead(frame_w, "customer_offer")
+    # The accent is the letterhead's colour: with no letterhead the offer prints in the neutral blue.
+    accent = colors.HexColor((appearance.get("accent_color") if letterhead is not None else None) or "#0b5394")
     muted = colors.HexColor("#666666")
     align = TA_RIGHT if rtl else TA_LEFT
 
@@ -183,7 +185,6 @@ def render_offer(
     h2 = style("OfferH2", 10.5, bold=True, textColor=accent, spaceBefore=10, spaceAfter=4)
 
     story: list[Any] = []
-    letterhead = pdf_branding.branded_letterhead(frame_w)
     lh_height = 0.0
     if letterhead is not None:
         story.append(letterhead)
@@ -525,11 +526,9 @@ def render_offer(
     mirror = rtl
 
     def furniture(canvas: Any, doc: Any, first: bool) -> None:
+        pdf_branding._draw_page_furniture(canvas, doc, header=not first, caller="offer_pdf", doc_type="customer_offer")
         if first:
-            pdf_branding.branded_footer(canvas, doc)
             _draw_address(canvas, data, window, page_h, page_w, labels, mirror)
-        else:
-            pdf_branding.branded_header_footer(canvas, doc)
         canvas.saveState()
         canvas.setFont(pdf_font_for_text(footer_label), 7)
         canvas.setFillColor(muted)

@@ -3559,6 +3559,7 @@ export interface DocumentAppearance {
   page_size: string;
   margin_mm: number;
   logo_align: string;
+  logo_size?: string;
   footer_text: string;
   show_page_numbers: boolean;
   /**

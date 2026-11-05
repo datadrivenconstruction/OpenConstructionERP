@@ -71,6 +71,7 @@ from app.core.pdf_appearance import (
     DEFAULT_APPEARANCE,
     DOCUMENT_TYPES,
     LOGO_ALIGNMENTS,
+    LOGO_SIZES,
     MAX_FONT_SIZE,
     MAX_FOOTER_TEXT,
     MAX_MARGIN_MM,
@@ -277,6 +278,7 @@ class DocumentAppearanceResponse(BaseModel):
     page_size: str = DEFAULT_APPEARANCE["page_size"]
     margin_mm: int = DEFAULT_APPEARANCE["margin_mm"]
     logo_align: str = DEFAULT_APPEARANCE["logo_align"]
+    logo_size: str = DEFAULT_APPEARANCE["logo_size"]
     footer_text: str = DEFAULT_APPEARANCE["footer_text"]
     show_page_numbers: bool = DEFAULT_APPEARANCE["show_page_numbers"]
     show_letterhead: bool = DEFAULT_APPEARANCE["show_letterhead"]
@@ -336,6 +338,7 @@ class DocumentAppearanceUpdate(BaseModel):
     page_size: str | None = None
     margin_mm: int | None = None
     logo_align: str | None = None
+    logo_size: Literal["s", "m", "l"] | None = None
     footer_text: str | None = Field(default=None, max_length=MAX_FOOTER_TEXT)
     show_page_numbers: bool | None = None
     show_letterhead: bool | None = None
@@ -539,6 +542,7 @@ _VALUE_HINTS = {
     "accent_color": "a hex colour such as #1a1a2e",
     "footer_color": "a hex colour such as #999999",
     "logo_align": "one of: " + ", ".join(LOGO_ALIGNMENTS),
+    "logo_size": "one of: " + ", ".join(LOGO_SIZES),
     "page_orientation": "one of: " + ", ".join(PAGE_ORIENTATIONS),
     "page_number_format": "one of: " + ", ".join(PAGE_NUMBER_FORMATS),
     "print_stamp": "one of: " + ", ".join(PRINT_STAMPS),

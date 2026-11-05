@@ -43,6 +43,7 @@ export const NEW_APPEARANCE_DEFAULTS = {
   page_number_format: 'page_of',
   print_stamp: 'auto',
   footer_show_registration: false,
+  logo_size: 'm',
 } as const;
 
 export type ResolvedAppearance = DocumentAppearance &

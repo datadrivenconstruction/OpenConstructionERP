@@ -1082,6 +1082,8 @@ _LETTERHEAD_LOGO_MAX_H = 20.0 * MM
 _LETTERHEAD_STACKED_LOGO_MAX_H = 15.0 * MM
 #: Space between the logo and the company block when they sit side by side.
 _LETTERHEAD_GAP = 6.0 * MM
+#: ``logo_size`` setting to a multiple of the logo box height; "m" is the size drawn before the setting existed.
+_LOGO_SIZE_SCALE = {"s": 0.6, "m": 1.0, "l": 1.4}
 #: The company details under the name, and the rule under the letterhead. The
 #: same greys the RFI form and the header band already print with.
 _LETTERHEAD_MUTED = "#666666"
@@ -1134,7 +1136,9 @@ def branded_letterhead(width: float, doc_type: str | None = None) -> Any | None:
         return None
 
 
-def _letterhead_logo(branding: dict[str, Any], profile: dict[str, Any], *, max_h: float) -> Any | None:
+def _letterhead_logo(
+    branding: dict[str, Any], profile: dict[str, Any], *, max_h: float, max_w: float = _LETTERHEAD_LOGO_MAX_W
+) -> Any | None:
     """The best logo that decodes, as an Image fitted to the letterhead box."""
     from io import BytesIO
 
@@ -1159,7 +1163,7 @@ def _letterhead_logo(branding: dict[str, Any], profile: dict[str, Any], *, max_h
             # pixel per point prints soft. An SVG is rasterised large, so it
             # always fills the box. Worked out before the logo is shrunk, and
             # passed explicitly, so the box is the same either way.
-            scale = min(_LETTERHEAD_LOGO_MAX_W / float(iw), max_h / float(ih), 1.0)
+            scale = min(max_w / float(iw), max_h / float(ih), 1.0)
             return Image(
                 BytesIO(_logo_raster_for_pdf(raw)),
                 width=float(iw) * scale,
@@ -1194,7 +1198,9 @@ def _build_letterhead(
     if align not in ("left", "center", "right"):
         align = "left"
     logo_max_h = _LETTERHEAD_STACKED_LOGO_MAX_H if align == "center" else _LETTERHEAD_LOGO_MAX_H
-    logo = _letterhead_logo(branding, profile, max_h=logo_max_h)
+    size_scale = _LOGO_SIZE_SCALE.get(str(appearance.get("logo_size") or "m"), 1.0)
+    logo_max_h *= size_scale
+    logo = _letterhead_logo(branding, profile, max_h=logo_max_h, max_w=_LETTERHEAD_LOGO_MAX_W * size_scale)
     stacked = logo is not None and align == "center"
 
     # Opposite the logo when there is one; where the logo would have been when

@@ -125,6 +125,8 @@ PAGE_SIZES: dict[str, tuple[float, float]] = {name: _PAPER_SIZES[name] for name 
 #: draw their own left-aligned title, so honouring this setting there would
 #: push the logo underneath that title.
 LOGO_ALIGNMENTS = ("left", "center", "right")
+#: Letterhead logo size; "m" is the size every document has always printed.
+LOGO_SIZES = ("s", "m", "l")
 
 #: Body text bounds. Below 7pt a printed contract stops being readable; above
 #: 14pt the tables in these documents no longer fit their columns.
@@ -189,6 +191,7 @@ DEFAULT_APPEARANCE: dict[str, Any] = {
     "page_size": "A4",
     "margin_mm": 25,
     "logo_align": "left",
+    "logo_size": "m",
     "footer_text": "",
     "show_page_numbers": True,
     "show_letterhead": True,
@@ -239,6 +242,7 @@ _CHOICES: dict[str, tuple[str, ...]] = {
     "page_number_format": PAGE_NUMBER_FORMATS,
     "print_stamp": PRINT_STAMPS,
     "watermark_layout": WATERMARK_LAYOUTS,
+    "logo_size": LOGO_SIZES,
 }
 
 #: Fields that are an on/off switch.
@@ -482,6 +486,14 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             # Minutes are circulated to attendees who were in the room, so the
             # footer stays empty unless the workspace puts something in it.
             default_footer_line=False,
+        ),
+        DocumentType(
+            "customer_offer",
+            "Customer offer",
+            "settings.document_templates.types.customer_offer",
+            _LETTERHEAD_FIELDS + ("logo_size",) + _FOOTER_FIELDS,
+            # app.modules.offers.pdf: A4 with the DIN 5008 margins, an unpadded frame.
+            DocumentSheet("A4", False, (20.0, 15.0, 10.0, 22.0), 0.0),
         ),
         DocumentType(
             "daily_report",

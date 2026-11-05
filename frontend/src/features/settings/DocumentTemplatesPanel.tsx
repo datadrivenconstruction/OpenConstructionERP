@@ -578,6 +578,8 @@ function FieldEditor({
         });
       case 'logo_align':
         return t('property_dev.doc_appearance.logo_align', { defaultValue: 'Header position' });
+      case 'logo_size':
+        return t('offers.layout.logo_size_label', { defaultValue: 'Logo size' });
       case 'accent_color':
         return t('property_dev.doc_appearance.accent_color', { defaultValue: 'Heading colour' });
       case 'footer_text':
@@ -637,6 +639,22 @@ function FieldEditor({
             {(options?.logo_alignments ?? [String(value)]).map((a) => (
               <option key={a} value={a}>
                 {alignLabel(a)}
+              </option>
+            ))}
+          </select>
+        );
+      case 'logo_size':
+        return (
+          <select
+            value={String(value)}
+            disabled={controlDisabled}
+            onChange={(e) => onChange(e.target.value)}
+            className={SELECT_CLS}
+            aria-labelledby={labelId}
+          >
+            {['s', 'm', 'l'].map((size) => (
+              <option key={size} value={size}>
+                {t(`offers.layout.logo_size.${size}`, { defaultValue: size.toUpperCase() })}
               </option>
             ))}
           </select>

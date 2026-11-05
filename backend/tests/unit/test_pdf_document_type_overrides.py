@@ -64,6 +64,7 @@ WORKSPACE = {"accent_color": "#123456", "footer_text": "Workspace footer", "wate
 OVERRIDE_VALUES: dict[str, Any] = {
     "show_letterhead": False,
     "logo_align": "right",
+    "logo_size": "s",
     "accent_color": "#b22222",
     "footer_text": "Per-type footer",
     "footer_color": "#00aa44",
@@ -371,6 +372,34 @@ def _daily_report(long: bool = False) -> bytes:
     return generate_diary_pdf(diary, project_name="Harbour Tower", entries=entries, supervisor_name="Maria Keller")
 
 
+def _customer_offer() -> bytes:
+    from app.modules.offers import pack as offer_pack
+    from app.modules.offers import pricing
+    from app.modules.offers.pdf import render_offer
+
+    built = pricing.compose(
+        [
+            {
+                "kind": "item",
+                "ordinal": "1",
+                "description": "Foundations",
+                "unit": "m3",
+                "quantity": "10",
+                "unit_rate": "100",
+            }
+        ],
+        currency="EUR",
+        tax_rate=pricing.dec("19"),
+    )
+    data = {
+        "number": "AN-2026-0001", "revision": "A", "locale": "en", "currency": "EUR", "title": "Offer",
+        "issue_date": "2026-11-05", "pack": offer_pack.pack_for("DE", None), "tax_mode": "standard",
+        "customer": {"name": "Muster GmbH"}, "texts": {}, "schedule": [], "tax_label": "VAT",
+        "lines": built["lines"], "totals": built["totals"], "project_name": "House",
+    }  # fmt: skip
+    return render_offer(data)[0]
+
+
 RENDERERS: dict[str, Callable[[], bytes]] = {
     "rfi": _rfi,
     "pay_application": _pay_application,
@@ -379,6 +408,7 @@ RENDERERS: dict[str, Callable[[], bytes]] = {
     "transmittal": _transmittal,
     "meeting_minutes": _meeting_minutes,
     "daily_report": _daily_report,
+    "customer_offer": _customer_offer,
     # The record forms of app.core.register_export.build_record_pdf.
     "purchase_order": record_pdf_samples.render_purchase_order,
     "goods_receipt": record_pdf_samples.render_goods_receipt,
