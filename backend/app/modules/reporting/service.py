@@ -21,6 +21,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.validation.quality_rules import gate_record
 from app.modules.reporting.cron import CronParseError, next_occurrence
 from app.modules.reporting.currency_resolver import resolve_template_currency
 from app.modules.reporting.models import GeneratedReport, KPISnapshot, ReportTemplate
@@ -37,6 +38,7 @@ from app.modules.reporting.schemas import (
     ReportScheduleRequest,
     ReportTemplateCreate,
 )
+from app.modules.reporting.validators import KPI_FIELDS, REPORTING_RULE_SET, SCHEDULE_FIELDS
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
@@ -180,6 +182,30 @@ class ReportingService:
         self.template_repo = ReportTemplateRepository(session)
         self.report_repo = GeneratedReportRepository(session)
 
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID | None,
+        target_id: str = "",
+    ) -> list[dict[str, Any]]:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422."""
+        return await gate_record(
+            REPORTING_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="reporting_rules_failed",
+            target_id=target_id,
+        )
+
     # ── KPI Snapshots ─────────────────────────────────────────────────────
 
     async def get_latest_kpi(self, project_id: uuid.UUID) -> KPISnapshot | None:
@@ -221,6 +247,17 @@ class ReportingService:
             )
         ).scalar_one_or_none()
 
+        changes = {name: getattr(data, name) for name in KPI_FIELDS}
+        findings = await self._gate(
+            "kpi",
+            existing if existing is not None else {},
+            KPI_FIELDS,
+            changes,
+            operation="update" if existing is not None else "create",
+            project_id=data.project_id,
+            target_id=str(existing.id) if existing is not None else "",
+        )
+
         if existing is not None:
             existing.cpi = data.cpi
             existing.spi = data.spi
@@ -255,6 +292,7 @@ class ReportingService:
         # the event payload reads them and the router serializes the snapshot,
         # otherwise asyncpg emits a sync lazy reload outside the greenlet.
         await self.session.refresh(snapshot)
+        snapshot.validation_warnings = findings
 
         await _safe_publish(
             "reporting.kpi_snapshot.created",
@@ -342,6 +380,30 @@ class ReportingService:
         """
         template = await self.get_template(template_id)
 
+        next_run = None
+        if data.schedule_cron is not None:
+            try:
+                next_run = next_occurrence(data.schedule_cron, datetime.now(UTC))
+            except CronParseError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid cron expression: {exc}",
+                ) from exc
+
+        findings = await self._gate(
+            "schedule",
+            template,
+            SCHEDULE_FIELDS,
+            {
+                "is_scheduled": data.is_scheduled if data.schedule_cron is not None else False,
+                "schedule_cron": data.schedule_cron,
+                "recipients": list(data.recipients),
+            },
+            operation="update",
+            project_id=data.project_id_scope,
+            target_id=str(template.id),
+        )
+
         template.recipients = list(data.recipients)
         template.project_id_scope = data.project_id_scope
 
@@ -350,21 +412,12 @@ class ReportingService:
             template.next_run_at = None
             template.is_scheduled = False
         else:
-            try:
-                next_run = next_occurrence(
-                    data.schedule_cron,
-                    datetime.now(UTC),
-                )
-            except CronParseError as exc:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid cron expression: {exc}",
-                ) from exc
             template.schedule_cron = data.schedule_cron
             template.next_run_at = next_run.strftime("%Y-%m-%dT%H:%M:%SZ")
             template.is_scheduled = data.is_scheduled
 
         await self.template_repo.update(template)
+        template.validation_warnings = findings
 
         await _safe_publish(
             "reporting.template.scheduled",
@@ -1595,6 +1648,36 @@ class ReportingService:
             KPISnapshot.snapshot_date == today,
         )
         existing = (await session.execute(existing_stmt)).scalar_one_or_none()
+
+        computed = {
+            "snapshot_date": today,
+            "cpi": cpi,
+            "spi": spi,
+            "risk_score_avg": risk_score_avg,
+            "budget_consumed_pct": budget_consumed_pct,
+            "schedule_progress_pct": schedule_progress_pct,
+            "open_defects": open_defects,
+            "open_observations": open_observations,
+            "open_rfis": open_rfis,
+            "open_submittals": open_submittals,
+        }
+        findings = await gate_record(
+            REPORTING_RULE_SET,
+            "kpi",
+            {},
+            KPI_FIELDS,
+            computed,
+            operation="recalculate",
+            project_id=pid,
+            error_code="reporting_rules_failed",
+            warnings_only=True,
+        )
+        if findings:
+            logger.warning(
+                "reporting.kpi_recalc project_id=%s: %s",
+                pid,
+                "; ".join(f["code"] for f in findings),
+            )
 
         if existing:
             existing.cpi = cpi
