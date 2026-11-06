@@ -27,6 +27,7 @@ from collections.abc import AsyncIterator
 
 import pytest
 import pytest_asyncio
+from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 
@@ -226,14 +227,14 @@ async def test_thresholds_get_seeds_for_editor(app_factory, db_session):
 
 
 async def test_update_threshold_rejects_inverted_warn_error(app_factory, db_session):
-    """update_threshold raises on warn > error (regression guard)."""
+    """update_threshold refuses warn > error with the coded rule error (regression guard)."""
     from decimal import Decimal
 
     from app.modules.coordination_hub.service import CoordinationHubService
 
     _user_id, project_id = await _seed_user_and_project(db_session)
     svc = CoordinationHubService(db_session)
-    with pytest.raises(ValueError, match="warn_value must be less than or equal"):
+    with pytest.raises(HTTPException) as refused:
         await svc.update_threshold(
             project_id,
             "open_clashes_total",
@@ -241,3 +242,5 @@ async def test_update_threshold_rejects_inverted_warn_error(app_factory, db_sess
             error_value=Decimal("100"),
             enabled=None,
         )
+    assert refused.value.status_code == 422
+    assert refused.value.detail["code"] == "coordination_hub.threshold_order"
