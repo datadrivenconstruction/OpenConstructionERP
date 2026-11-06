@@ -10,11 +10,14 @@ Frontend is found in two locations (checked in order):
 2. ../frontend/dist/   - development mode (repo checkout)
 """
 
+import contextlib
 import hashlib
+import importlib.metadata
 import logging
 import lzma
 import mimetypes
 import os
+import re
 import shutil
 import tempfile
 import threading
@@ -23,7 +26,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
-from starlette.responses import FileResponse, JSONResponse, Response
+from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 
 logger = logging.getLogger(__name__)
 
@@ -202,47 +205,191 @@ def get_frontend_dir() -> Path:
     )
 
 
-def _packed_cache_dir(base: Path) -> Path:
-    key = hashlib.sha256(str(base.resolve()).encode("utf-8")).hexdigest()[:16]
-    return Path(tempfile.gettempdir()) / "openconstructionerp-ui" / key
+class PackedAssetError(RuntimeError):
+    """A shipped ``.xz`` asset exists but cannot be expanded (corrupt, truncated, unreadable)."""
+
+
+# Vite's content hash: ``name-AB12cd_-.js``. Only these may be cached as immutable.
+_HASHED_ASSET = re.compile(r"-[A-Za-z0-9_-]{8,}\.[A-Za-z0-9]+$")
+_EXPANDED_LIST = ".xz-expanded"
+
+_locks_guard = threading.Lock()
+_expand_locks: dict[Path, threading.Lock] = {}
+_failed_packed: set[Path] = set()
+_expansion_roots: dict[Path, Path] = {}
+
+
+def _dir_writable(directory: Path) -> bool:
+    try:
+        fd, probe = tempfile.mkstemp(prefix=".oe-probe-", dir=directory)
+    except OSError:
+        return False
+    os.close(fd)
+    with contextlib.suppress(OSError):
+        os.unlink(probe)
+    return True
+
+
+def _expansion_root(base: Path) -> Path:
+    """Where expanded copies of the packed assets under ``base`` live: ``base`` itself, else a cache dir.
+
+    In place when writable, so the static mount finds the plain file on its own after the
+    first expansion. Read-only installs (system site-packages, a desktop bundle under
+    Program Files) fall back to a temp cache keyed by path and package version.
+    """
+    root = base.resolve()
+    with _locks_guard:
+        known = _expansion_roots.get(root)
+    if known is not None:
+        return known
+    if _dir_writable(root):
+        chosen = root
+    else:
+        try:
+            version = importlib.metadata.version("openconstructionerp")
+        except importlib.metadata.PackageNotFoundError:
+            version = "dev"
+        key = hashlib.sha256(f"{root}|{version}".encode()).hexdigest()[:16]
+        chosen = Path(tempfile.gettempdir()) / "openconstructionerp-ui" / key
+    with _locks_guard:
+        _expansion_roots[root] = chosen
+    return chosen
+
+
+def _lock_for(target: Path) -> threading.Lock:
+    with _locks_guard:
+        return _expand_locks.setdefault(target, threading.Lock())
+
+
+def _decompress(packed: Path, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_name(f".{target.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    try:
+        with lzma.open(packed) as src, tmp.open("wb") as dst:
+            shutil.copyfileobj(src, dst, 1 << 20)
+        try:
+            os.replace(tmp, target)
+        except PermissionError:
+            # Windows refuses to replace a file another process holds open; that copy is identical.
+            if not target.is_file():
+                raise
+    finally:
+        with contextlib.suppress(OSError):
+            tmp.unlink()
+
+
+def _packed_and_target(base: Path, relative: str) -> tuple[Path, Path] | None:
+    if not relative:
+        return None
+    root = base.resolve()
+    packed = (root / f"{relative}.xz").resolve()
+    if os.path.commonpath([packed, root]) != str(root) or not packed.is_file():
+        return None
+    return packed, _expansion_root(root) / packed.relative_to(root).with_suffix("")
 
 
 def expand_packed_asset(base: Path, relative: str) -> Path | None:
     """Return a plain copy of ``<base>/<relative>`` when only its ``.xz`` is shipped.
 
     The release wheel carries large assets xz-packed (scripts/pack_frontend_dist.py)
-    to stay inside PyPI's project quota. They are expanded once, on first request,
-    into a temp cache rather than next to the package, so site-packages stays
-    read-only and pip uninstall leaves nothing behind. A dist without ``.xz`` files
-    never reaches the cache.
+    to stay inside PyPI's project quota. Each one is expanded at most once per
+    install: atomically (temp file, then rename), under a per-file lock so concurrent
+    requests for a cold asset wait for one decompression instead of each doing their own.
+    ``expand_all_packed`` normally does this at startup; this path covers requests
+    that arrive before it has finished.
 
     Args:
         base: Directory the request path is relative to.
         relative: Request path below ``base``.
 
     Returns:
-        Path of the expanded file, or None when there is no packed copy or it
-        cannot be expanded.
+        Path of the expanded file, or None when there is no packed copy.
+
+    Raises:
+        PackedAssetError: The packed copy exists but cannot be expanded.
     """
-    if not relative:
+    found = _packed_and_target(base, relative)
+    if found is None:
         return None
-    root = base.resolve()
-    packed = (base / f"{relative}.xz").resolve()
-    if os.path.commonpath([packed, root]) != str(root) or not packed.is_file():
-        return None
-    target = _packed_cache_dir(base) / packed.relative_to(root).with_suffix("")
-    try:
-        if target.is_file() and target.stat().st_mtime >= packed.stat().st_mtime:
+    packed, target = found
+    if target.is_file():
+        return target
+    with _lock_for(target):
+        if target.is_file():
             return target
-        target.parent.mkdir(parents=True, exist_ok=True)
-        tmp = target.with_name(f"{target.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-        with lzma.open(packed) as src, tmp.open("wb") as dst:
-            shutil.copyfileobj(src, dst, 1 << 20)
-        os.replace(tmp, target)
-    except (OSError, lzma.LZMAError):
-        logger.exception("Could not expand packed frontend asset %s", packed)
-        return None
+        if packed in _failed_packed:
+            raise PackedAssetError(str(packed))
+        try:
+            _decompress(packed, target)
+        except (OSError, lzma.LZMAError, EOFError) as exc:
+            # Remembered so a broken file costs one failed decompression, not one per request.
+            _failed_packed.add(packed)
+            logger.error("Could not expand packed frontend asset %s: %s", packed, exc)
+            raise PackedAssetError(str(packed)) from exc
     return target
+
+
+def expand_all_packed(dist: Path) -> int:
+    """Expand every ``.xz`` asset under ``dist`` once; already expanded files are skipped.
+
+    Also removes expanded copies whose ``.xz`` a later install no longer ships, so
+    upgrades in place do not accumulate old bundles.
+
+    Returns:
+        Number of files expanded by this call.
+    """
+    root = dist.resolve()
+    out = _expansion_root(root)
+    listing = out / _EXPANDED_LIST
+    with contextlib.suppress(OSError):
+        for rel in listing.read_text(encoding="utf-8").splitlines():
+            if rel and not (root / f"{rel}.xz").is_file():
+                with contextlib.suppress(OSError):
+                    (out / rel).unlink()
+    expanded = 0
+    shipped: list[str] = []
+    for packed in sorted(root.rglob("*.xz")):
+        rel = packed.relative_to(root).as_posix()[:-3]
+        shipped.append(rel)
+        if (out / rel).is_file():
+            continue
+        try:
+            expand_packed_asset(root, rel)
+        except PackedAssetError:
+            continue
+        expanded += 1
+    if shipped:
+        with contextlib.suppress(OSError):
+            tmp = listing.with_name(f"{listing.name}.{os.getpid()}.tmp")
+            tmp.write_text("\n".join(shipped) + "\n", encoding="utf-8")
+            os.replace(tmp, listing)
+    return expanded
+
+
+def _expand_in_background(dist: Path) -> None:
+    if hasattr(os, "setpriority"):
+        # A thread id, not 0: on Linux this lowers only this thread, never the request workers.
+        with contextlib.suppress(OSError):
+            os.setpriority(os.PRIO_PROCESS, threading.get_native_id(), 19)
+    try:
+        count = expand_all_packed(dist)
+    except Exception:
+        logger.exception("Expanding packed frontend assets under %s failed", dist)
+        return
+    if count:
+        logger.info("Expanded %d packed frontend assets under %s", count, dist)
+
+
+def start_background_expansion(dist: Path) -> threading.Thread:
+    """Expand the packed assets of ``dist`` on one low-priority daemon thread; never blocks startup."""
+    thread = threading.Thread(target=_expand_in_background, args=(dist,), name="oe-expand-assets", daemon=True)
+    thread.start()
+    return thread
+
+
+def asset_cache_control(name: str) -> str:
+    """Cache policy for a file under ``/assets``: immutable only when Vite hashed its name."""
+    return "public, max-age=31536000, immutable" if _HASHED_ASSET.search(name) else "no-cache"
 
 
 def _mount_api_only_404(app: FastAPI) -> None:
@@ -267,7 +414,7 @@ def _mount_api_only_404(app: FastAPI) -> None:
         return _bundle_missing_404(_NO_BUNDLE_DETAIL)
 
 
-def mount_frontend(app: FastAPI) -> None:
+def mount_frontend(app: FastAPI, *, expand_in_background: bool = True) -> None:
     """Mount frontend static files on the FastAPI app.
 
     Serves:
@@ -286,6 +433,11 @@ def mount_frontend(app: FastAPI) -> None:
     When no frontend is found at all, a 404 handler is registered anyway (see
     ``_mount_api_only_404``) so UI paths say why they have nothing to serve
     instead of denying the path and leaving the operator to guess.
+
+    Args:
+        app: The FastAPI application to mount on.
+        expand_in_background: Expand xz-packed wheel assets once on a background
+            thread. Requests that arrive first expand their own file under a lock.
     """
     try:
         frontend_dir = get_frontend_dir()
@@ -298,6 +450,8 @@ def mount_frontend(app: FastAPI) -> None:
 
     global _mounted_frontend_dir
     _mounted_frontend_dir = frontend_dir
+    if expand_in_background:
+        start_background_expansion(frontend_dir)
 
     logger.info("Serving frontend from %s", frontend_dir)
 
@@ -354,9 +508,12 @@ def mount_frontend(app: FastAPI) -> None:
             return full_path, stat
 
         async def get_response(self, path: str, scope):  # noqa: ANN001, ANN202
-            response = await super().get_response(path, scope)
-            if response.status_code == 200:
-                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            try:
+                response = await super().get_response(path, scope)
+            except PackedAssetError:
+                return PlainTextResponse("Packed frontend asset is unreadable", status_code=500)
+            if response.status_code in (200, 304):
+                response.headers["Cache-Control"] = asset_cache_control(path)
             return response
 
     assets_dir = frontend_dir / "assets"
@@ -438,7 +595,10 @@ def mount_frontend(app: FastAPI) -> None:
             if candidate.suffix in _root_static_extensions:
                 from starlette.concurrency import run_in_threadpool
 
-                expanded = await run_in_threadpool(expand_packed_asset, frontend_dir, relative)
+                try:
+                    expanded = await run_in_threadpool(expand_packed_asset, frontend_dir, relative)
+                except PackedAssetError:
+                    return PlainTextResponse("Packed frontend asset is unreadable", status_code=500)
                 if expanded is not None:
                     return FileResponse(str(expanded))
 
