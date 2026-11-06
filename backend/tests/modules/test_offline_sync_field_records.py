@@ -362,3 +362,33 @@ async def test_demo_seed_is_idempotent_and_shows_a_resolved_conflict(session: As
     page = await merge_audit_page(session, "punchlist_item", conflict.id)
     assert (page.total, len(page.items), page.offset) == (1, 1, 0)
     assert (await merge_audit_page(session, "punchlist_item", conflict.id, offset=1)).items == []
+
+
+async def test_demo_seed_opens_no_second_diary_when_rerun_on_another_day(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import datetime as dt
+
+    from sqlalchemy import func, select
+
+    from app.modules.daily_diary import offline_demo
+    from app.modules.daily_diary.models import DailyDiary, DiaryEntry
+
+    class _Clock(dt.datetime):
+        current = dt.datetime(2026, 11, 5, 23, 59, tzinfo=dt.UTC)
+
+        @classmethod
+        def now(cls, tz=None):  # noqa: ANN001, ANN206
+            return cls.current
+
+    monkeypatch.setattr(offline_demo, "datetime", _Clock)
+    pid = uuid.uuid4()
+    first = await offline_demo.seed_offline_conflict_demo(session, pid)
+    _Clock.current = dt.datetime(2026, 11, 6, 0, 1, tzinfo=dt.UTC)
+    again = await offline_demo.seed_offline_conflict_demo(session, pid)
+
+    assert first == again
+    count_diaries = select(func.count()).select_from(DailyDiary).where(DailyDiary.project_id == pid)
+    diaries = (await session.execute(count_diaries)).scalar_one()
+    entries = (await session.execute(select(func.count()).select_from(DiaryEntry))).scalar_one()
+    assert (diaries, entries) == (1, 1)

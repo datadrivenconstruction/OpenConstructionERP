@@ -57,11 +57,19 @@ async def seed_offline_conflict_demo(session: AsyncSession, project_id: uuid.UUI
     """
     from app.modules.punchlist.models import PunchItem  # lazy: punchlist is an optional module
 
-    diary = await _diary_for_today(session, project_id)
     now = datetime.now(UTC)
 
-    entry = await find_by_client_op_id(session, DiaryEntry, OP_ENTRY, DiaryEntry.diary_id == diary.id)
+    # Found by its operation id across the project's diaries, not through
+    # today's diary: a re-run on another calendar day must not open a new
+    # diary just to look for an entry that already exists.
+    entry = await find_by_client_op_id(
+        session,
+        DiaryEntry,
+        OP_ENTRY,
+        DiaryEntry.diary_id.in_(select(DailyDiary.id).where(DailyDiary.project_id == project_id)),
+    )
     if entry is None:
+        diary = await _diary_for_today(session, project_id)
         entry = DiaryEntry(
             diary_id=diary.id,
             entry_type="general",
