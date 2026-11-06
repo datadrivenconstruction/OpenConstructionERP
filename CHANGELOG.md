@@ -7,13 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
-## [Unreleased]
+## [19.1.0] - 2026-11-06
 
 ### Added
 
-- Capital plan module: set the yearly budget, spread each project's cost over its years and see where demand runs over the budget. Copy a scenario to try a delay without touching the baseline, compare the two, and get a funding suggestion by priority, score and cost that you confirm before it is applied. Imports projects from a portfolio node and exports to Excel.
-- Data feeds: read-only CSV, Parquet and JSON tables over projects, BOQ positions, invoices, purchase orders and schedule activities for Excel, Power Query and BI tools, with a Settings page, `bi:read` API keys and optional PostgreSQL views (`bi enable`).
-- SCIM 2.0 provisioning (Users and Groups) for Entra, Okta, Keycloak and other identity providers: people appear, change role through groups an admin maps in Settings > Identity, and lose access (sessions and API keys included) when they leave. New setting `SSO_ENFORCED_DOMAINS` turns off password sign-in for chosen email domains, with a break-glass admin exemption. SAML is covered by an identity provider side SAML-to-OIDC bridge, see `docs/scim.md`.
+- Academy links in the app: a "Watch how" chip beside the section a lesson teaches, a Courses page, and courses and guides in the Help menu and the command palette. Paid training courses are marked in their own colour.
+- Capital plan module: set the yearly budget, spread each project's cost over its years and see where demand runs over the budget, with what-if scenarios that leave the baseline untouched.
+- Data feeds: read-only CSV, Parquet and JSON tables over projects, BOQ positions, invoices, purchase orders and schedule activities for Excel, Power Query and BI tools.
+- SCIM 2.0 provisioning for identity providers, enforced SSO domains, and scoped partner API keys with signed, retried webhooks.
+- New modules: dispatch board for crews, people and machines; haul tickets with weighbridge import; estimate checks before submission; win-loss ledger with hit rate; lessons learned across projects; bid-day board and go / no-go scorecard per tender; accounting sync with review before posting.
+- One photo archive for every module, with grid, timeline, map, albums and before/after, and linked photos on BOQ, schedule, punch, inspection, report and diary.
+- Budget ledger with transfers, plant cost board with a rent-or-return suggestion, foreman productivity and trade demand forecast, rate updates proposed from closed projects.
+- Estimating: Monte Carlo contingency, risk-register contingency as a percentage, review of Excel changes before they apply, owner bid schedule import, takeoff carried across revisions.
+- E-invoicing driven by country packs, with inbound UBL and CII, and a Peru country pack with IGV, detraccion and SUNAT UBL 2.1.
+- Offline capture of NCRs, safety observations and haul tickets; site survey captures with observed progress.
+- Appearance: a Classic interface style, style presets, high-contrast themes and project colours; saved list views; page x of y and a shared signature block in branded PDFs; profile photos.
+- Validation rule sets for NCR, inspections, safety, daily diary, HSE, change orders, cost recovery, claims, transmittals, commissioning and cost data, enforced where records are written.
+
+### Fixed
+
+- The person who completes an inspection is recorded as its inspector.
+- Payment, purchase order, claim and invoice amounts keep their exact decimal values through calculation and display.
+- Money totals use the currency's own number of decimals, and names sort in the language chosen in the app.
+- Reinstalling a country pack around midnight no longer adds a second demo diary entry.
+- Missing translations for supplier RFQ and the academy links added in every language.
 
 ## [19.0.0] - 2026-11-02
 

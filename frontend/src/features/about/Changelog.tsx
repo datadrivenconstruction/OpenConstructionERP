@@ -53,13 +53,7 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = {
-  version: 'Unreleased',
-  date: '2026-11-05',
-  tag: 'NEW',
-  summary:
-    'Capital plan with yearly budgets and what-if scenarios, read-only data feeds for Excel and BI tools, and SCIM 2.0 provisioning for identity providers.',
-};
+const UNRELEASED: ChangelogEntry | null = null;
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.
@@ -72,6 +66,13 @@ const UNRELEASED: ChangelogEntry | null = {
 // The entries from 15.3.0 up read at the new length; the older ones below still
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '19.1.0',
+    date: '2026-11-06',
+    tag: 'NEW',
+    summary:
+      'Academy courses linked from the pages they teach, a capital plan, data feeds for BI tools, SCIM provisioning, a photo archive, dispatch, haul tickets, estimate checks and a win-loss ledger. Exact money amounts and the right inspector on completed inspections.',
+  },
   {
     version: '19.0.0',
     date: '2026-11-02',
