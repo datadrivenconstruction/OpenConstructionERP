@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, type KeyboardEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquarePlus } from 'lucide-react';
+import { VoiceDictation, appendDictation } from '@/features/voice/VoiceDictation';
 
 interface InputBarProps {
   onSend: (text: string) => void;
@@ -15,6 +16,7 @@ interface InputBarProps {
 export default function InputBar({ onSend, onClear, hasMessages, isStreaming, suggestions }: InputBarProps) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -45,6 +47,30 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
     [handleSend],
   );
 
+  // A finished dictation is appended for the person to read and send;
+  // "send when I stop" sends it at once.
+  const handleTranscript = useCallback(
+    (text: string, opts: { send: boolean }) => {
+      const joined = appendDictation(textareaRef.current?.value ?? value, text);
+      if (opts.send && !isStreaming) {
+        onSend(joined);
+        setValue('');
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        return;
+      }
+      setValue(joined);
+      window.requestAnimationFrame(() => {
+        const el = textareaRef.current;
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      });
+    },
+    [isStreaming, onSend, value],
+  );
+
   const handleSuggestion = useCallback(
     (text: string) => {
       if (isStreaming) return;
@@ -57,6 +83,7 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
 
   return (
     <div
+      ref={rootRef}
       style={{
         flexShrink: 0,
         borderTop: '1px solid var(--chat-border-subtle)',
@@ -199,6 +226,7 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
             e.currentTarget.style.borderColor = 'var(--chat-border)';
           }}
         />
+        <VoiceDictation onTranscript={handleTranscript} scopeRef={rootRef} disabled={isStreaming} />
         <button
           type="button"
           onClick={handleSend}

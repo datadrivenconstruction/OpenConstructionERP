@@ -115,7 +115,7 @@ import { pendingActions, useLiveChatActions } from './actions/useChatActions';
 import type { ChatAction } from './actions/types';
 // Direct import, not the feature barrel: the dock is always loaded and the
 // barrel also carries the voice-to-draft modal.
-import { VoiceDictation } from '@/features/voice/VoiceDictation';
+import { VoiceDictation, appendDictation } from '@/features/voice/VoiceDictation';
 
 // Reuse the full-page renderer registry so the tool-result cards inside the
 // floating panel look identical to /chat. The single shared RENDERER_REGISTRY
@@ -2286,7 +2286,7 @@ export function FloatingChatPanel() {
   const handleTranscript = useCallback(
     (text: string, opts: { send: boolean }) => {
       const current = textareaRef.current?.value ?? value;
-      const joined = current.trim() ? `${current.replace(/\s+$/, '')} ${text}` : text;
+      const joined = appendDictation(current, text);
       if (opts.send && aiConfigured !== false) {
         sendMessage(joined);
         return;

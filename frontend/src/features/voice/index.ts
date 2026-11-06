@@ -31,7 +31,7 @@ export type {
   ConfirmedVoiceDraft,
 } from './types';
 
-export { VoiceDictation, isVoiceShortcut, HOLD_TO_TALK_MS } from './VoiceDictation';
+export { VoiceDictation, appendDictation, isVoiceShortcut, HOLD_TO_TALK_MS } from './VoiceDictation';
 export type { VoiceDictationProps } from './VoiceDictation';
 export { useSpeechInput, speechLang, pickEngine, recognitionCtor } from './useSpeechInput';
 export type { UseSpeechInput, UseSpeechInputOptions, SpeechEngine, SpeechStatus, SpeechErrorCode } from './useSpeechInput';

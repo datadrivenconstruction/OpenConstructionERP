@@ -24,6 +24,11 @@ export function isVoiceShortcut(e: Pick<KeyboardEvent, 'altKey' | 'ctrlKey' | 'm
   return e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.code === 'KeyV';
 }
 
+/** A finished dictation appended to whatever is already typed. */
+export function appendDictation(current: string, text: string): string {
+  return current.trim() ? `${current.replace(/\s+$/, '')} ${text}` : text;
+}
+
 function formatSeconds(total: number): string {
   const m = Math.floor(total / 60);
   const s = total % 60;

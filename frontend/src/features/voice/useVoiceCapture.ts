@@ -10,6 +10,7 @@
 // component confirms it and the target feature saves it through its own API.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '@/shared/lib/api';
 import { requestVoiceDraft } from './api';
 import type { VoiceDraft, VoiceTargetType } from './types';
@@ -74,6 +75,7 @@ export interface UseVoiceCapture {
 
 export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCapture {
   const { projectId, target, targetLanguage } = options;
+  const { t } = useTranslation();
 
   const [phase, setPhase] = useState<VoicePhase>('idle');
   const [seconds, setSeconds] = useState(0);
@@ -118,7 +120,7 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCaptur
   const runDraft = useCallback(
     (payload: { file?: File; text?: string }) => {
       if (!projectId) {
-        setError('No project selected.');
+        setError(t('voice.capture.error.no_project', { defaultValue: 'No project selected.' }));
         setPhase('error');
         return;
       }
@@ -150,13 +152,17 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCaptur
           setPhase('error');
         });
     },
-    [projectId, target, targetLanguage],
+    [projectId, target, targetLanguage, t],
   );
 
   const startRecording = useCallback(async () => {
     const recType = pickRecordingType();
     if (!micSupported || !recType) {
-      setError('Recording is not supported in this browser. Upload a file or type the note.');
+      setError(
+        t('voice.capture.error.unsupported', {
+          defaultValue: 'Recording is not supported in this browser. Upload a file or type the note.',
+        }),
+      );
       setPhase('error');
       return;
     }
@@ -177,7 +183,7 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCaptur
         const blob = new Blob(chunksRef.current, { type: type.mime });
         chunksRef.current = [];
         if (blob.size === 0) {
-          setError('The recording was empty. Please try again.');
+          setError(t('voice.capture.error.empty', { defaultValue: 'The recording was empty. Please try again.' }));
           setPhase('error');
           return;
         }
@@ -201,10 +207,14 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCaptur
       }, 1000);
     } catch {
       stopStream();
-      setError('Microphone access was blocked. Allow the microphone, upload a file, or type the note.');
+      setError(
+        t('voice.capture.error.blocked', {
+          defaultValue: 'Microphone access was blocked. Allow the microphone, upload a file, or type the note.',
+        }),
+      );
       setPhase('error');
     }
-  }, [micSupported, runDraft, stopStream, stopTimer]);
+  }, [micSupported, runDraft, stopStream, stopTimer, t]);
 
   const stopRecording = useCallback(() => {
     const recorder = recorderRef.current;
@@ -227,13 +237,13 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions): UseVoiceCaptur
     (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) {
-        setError('Type or edit the note text first.');
+        setError(t('voice.capture.error.no_text', { defaultValue: 'Type or edit the note text first.' }));
         setPhase('error');
         return;
       }
       runDraft({ text: trimmed });
     },
-    [runDraft],
+    [runDraft, t],
   );
 
   const setField = useCallback((name: string, value: string) => {
