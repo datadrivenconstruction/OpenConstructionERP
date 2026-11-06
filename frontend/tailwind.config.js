@@ -143,11 +143,14 @@ export default {
         '4xl': ['37px', { lineHeight: '1.1' }],
       },
       borderRadius: {
+        DEFAULT: 'var(--oe-radius-xs)',
         xs: 'var(--oe-radius-xs)',
         sm: 'var(--oe-radius-sm)',
         md: 'var(--oe-radius-md)',
         lg: 'var(--oe-radius-lg)',
         xl: 'var(--oe-radius-xl)',
+        '2xl': 'var(--oe-radius-2xl)',
+        '3xl': 'var(--oe-radius-3xl)',
       },
       boxShadow: {
         xs: 'var(--oe-shadow-xs)',

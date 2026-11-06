@@ -195,6 +195,8 @@
   --oe-radius-md: 8px;
   --oe-radius-lg: 10px;
   --oe-radius-xl: 12px;
+  --oe-radius-2xl: 16px;
+  --oe-radius-3xl: 24px;
   --oe-radius-full: 9999px;
 
   /* Spacing scale — 4px base */
@@ -2116,6 +2118,8 @@ html[data-radius='sharp'] {
   --oe-radius-md: 4px;
   --oe-radius-lg: 4px;
   --oe-radius-xl: 6px;
+  --oe-radius-2xl: 8px;
+  --oe-radius-3xl: 10px;
 }
 html[data-radius='round'] {
   --oe-radius-xs: 6px;
@@ -2123,6 +2127,8 @@ html[data-radius='round'] {
   --oe-radius-md: 12px;
   --oe-radius-lg: 14px;
   --oe-radius-xl: 18px;
+  --oe-radius-2xl: 22px;
+  --oe-radius-3xl: 28px;
 }
 
 /* Density: Tailwind spacing and control heights are rem, the type scale is px,
