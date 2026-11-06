@@ -42,7 +42,7 @@ class FakeRecognition {
   // Like the real list: final results stay, the trailing guess is replaced.
   results: { isFinal: boolean; 0: { transcript: string } }[] = [];
   say(parts: { text: string; final: boolean }[]) {
-    while (this.results.length && !this.results[this.results.length - 1].isFinal) this.results.pop();
+    while (this.results.length && !this.results[this.results.length - 1]?.isFinal) this.results.pop();
     const resultIndex = this.results.length;
     this.results.push(...parts.map((p) => ({ isFinal: p.final, 0: { transcript: p.text } })));
     this.onresult?.({ resultIndex, results: this.results });
@@ -225,7 +225,7 @@ describe('without browser recognition', () => {
       result.current.stop();
     });
     expect(api.transcribeDictation).toHaveBeenCalledTimes(1);
-    const [file, opts] = vi.mocked(api.transcribeDictation).mock.calls[0];
+    const [file, opts] = vi.mocked(api.transcribeDictation).mock.calls[0] ?? [];
     expect((file as File).name).toBe('dictation.webm');
     expect(opts?.language).toBe('pt-BR');
     expect(onFinal).toHaveBeenCalledWith('add a task for tomorrow');

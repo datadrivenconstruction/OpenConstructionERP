@@ -263,6 +263,7 @@ export function useSpeechInput(options: UseSpeechInputOptions): UseSpeechInput {
         let guess = '';
         for (let i = event.resultIndex; i < event.results.length; i += 1) {
           const result = event.results[i];
+          if (!result) continue;
           if (result.isFinal) finalTextRef.current += `${result[0].transcript} `;
           else guess += result[0].transcript;
         }
