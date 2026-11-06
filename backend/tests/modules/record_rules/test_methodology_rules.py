@@ -45,7 +45,7 @@ async def _run(rule, key, record, locale="en"):
 
 CASES = [
     (CascadeRateRule, "methodology", _meth(cascade_steps=[_step(rate="450")]), "methodology.cascade_rate"),
-    (CascadeRateRule, "methodology", _meth(cascade_steps=[_step(rate="-1")]), "methodology.cascade_rate"),
+    (CascadeRateRule, "methodology", _meth(cascade_steps=[_step(rate="-101")]), "methodology.cascade_rate"),
     (
         CascadeRateRule,
         "methodology",
@@ -82,6 +82,12 @@ async def test_rule_fires_on_a_violation_and_passes_a_valid_record(rule, key, ba
     assert [r.rule_id for r in failed] == [rule_id]
     assert "{" not in failed[0].message
     assert all(r.passed for r in await _run(rule, key, VALID[key]))
+
+
+@pytest.mark.asyncio
+async def test_a_tender_discount_is_a_valid_negative_percentage_step():
+    discounted = _meth(cascade_steps=[_step(rate="-3")])
+    assert all(r.passed for r in await _run(CascadeRateRule, "methodology", discounted))
 
 
 @pytest.mark.asyncio
