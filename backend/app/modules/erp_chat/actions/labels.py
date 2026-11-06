@@ -29,6 +29,7 @@ TITLES: dict[str, str] = {
     "risk.create": "Log risk",
     "punch.create_item": "Add punch item",
     "schedule.update_progress": "Update schedule progress",
+    "schedule.shift_activity": "Move schedule activity",
 }
 
 FIELDS: dict[str, str] = {
@@ -66,6 +67,9 @@ FIELDS: dict[str, str] = {
     "rework_cost": "Rework cost",
     # schedule.update_progress
     "progress": "Progress",
+    # schedule.shift_activity
+    "start_date": "Start",
+    "end_date": "Finish",
 }
 
 OPTIONS: dict[str, dict[str, str]] = {
@@ -164,6 +168,14 @@ NOTES: dict[str, str] = {
         "This is a summary activity. Its progress is normally worked out from the activities under it, "
         "so the next progress update of one of them replaces this value."
     ),
+    "activity_started": "This activity has already started ({{progress}} % done). Check that moving its dates is intended.",
+    "successors_not_moved": (
+        "Only this activity moves. Activities linked to it keep their dates until the schedule is recalculated."
+    ),
+    "summary_dates": (
+        "This is a summary activity. Its dates normally follow the activities under it, "
+        "so the next recalculation may move it back."
+    ),
 }
 
 REVERT_HINTS: dict[str, str] = {
@@ -190,6 +202,7 @@ REVERT_HINTS: dict[str, str] = {
         "The risk was escalated as soon as it was logged, and the escalation notice has already gone out. "
         "Undo deletes the risk but cannot take that notice back."
     ),
+    "schedule_dates": "Undo puts the old start and finish back. Linked activities moved in the meantime stay where they are.",
     "schedule_status": (
         "Undo restores the old progress, and the activity's status is worked out from it again, "
         "so the status it had before is not brought back."
@@ -239,6 +252,7 @@ ERRORS: dict[str, str] = {
     ),
     "activity_not_found": "That schedule activity was not found in this project.",
     "activity_ambiguous": "Several schedule activities match. Say which one to use.",
+    "activity_no_dates": "That activity has no start and finish dates yet, so it cannot be moved. Set its dates first.",
 }
 
 FIELD_ERRORS: dict[str, str] = {
@@ -253,6 +267,9 @@ FIELD_ERRORS: dict[str, str] = {
     "invalid_id": "This reference is not valid.",
     "not_whole_number": "Enter a whole number.",
     "percent_range": "Enter a percentage from 0 to 100.",
+    "end_before_start": "The finish cannot be before the start.",
+    "shift_required": "Say how many days to move it, or the new start date.",
+    "shift_range": "Move it by at most five years.",
 }
 
 BLOCKED: dict[str, str] = {

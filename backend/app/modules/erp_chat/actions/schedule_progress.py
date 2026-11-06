@@ -74,6 +74,8 @@ class ActivityRow:
     progress_pct: str
     status: str
     activity_type: str
+    start_date: str = ""
+    end_date: str = ""
 
     @property
     def label(self) -> str:
@@ -104,11 +106,13 @@ def _select_activities() -> Any:
         Activity.progress_pct,
         Activity.status,
         Activity.activity_type,
+        Activity.start_date,
+        Activity.end_date,
     ).join(Schedule, Schedule.id == Activity.schedule_id)
 
 
 def _row(values: Any) -> ActivityRow:
-    aid, sid, sname, pid, name, wbs, progress, status, kind = values
+    aid, sid, sname, pid, name, wbs, progress, status, kind, start, end = values
     return ActivityRow(
         id=aid,
         schedule_id=sid,
@@ -119,6 +123,8 @@ def _row(values: Any) -> ActivityRow:
         progress_pct=str(progress or "0"),
         status=str(status or ""),
         activity_type=str(kind or ""),
+        start_date=str(start or "")[:10],
+        end_date=str(end or "")[:10],
     )
 
 
@@ -172,6 +178,34 @@ def match_activities(needle: str, rows: list[ActivityRow]) -> list[ActivityRow]:
     return exact or [r for r in rows if typed in r.name.casefold()]
 
 
+async def resolve_activity(ctx: ActionContext, args: dict[str, Any], errors: FieldErrors) -> ActivityRow:
+    """The activity named by ``activity_id``, or by name or WBS code within the project's schedules."""
+    raw_id = args.get("activity_id")
+    if raw_id not in (None, ""):
+        activity = await get_activity(ctx, coerce_uuid(raw_id))
+        if activity is None:
+            raise ActionValidationError(code="activity_not_found")
+        try:
+            await ctx.require_project_access(activity.project_id)
+        except ActionNotFoundError as exc:
+            raise ActionNotFoundError(code="activity_not_found") from exc
+        return activity
+    needle = parse_text(args, "activity", errors, required=True, max_length=255)
+    errors.raise_if_any()
+    project = await resolve_project(ctx, args)
+    schedule_id = coerce_uuid(args.get("schedule_id"))
+    hits = await search_activities(ctx, project.id, needle or "", schedule_id=schedule_id)
+    if not hits:
+        raise ActionValidationError(code="activity_not_found", params={"activity": needle})
+    if len(hits) > 1:
+        raise ActionValidationError(
+            code="activity_ambiguous",
+            params={"activity": needle},
+            options=[hit.candidate() for hit in hits[:MAX_CANDIDATES]],
+        )
+    return hits[0]
+
+
 def derived_status(progress: Any) -> str:
     """The status ``ScheduleService.update_progress`` gives an activity at ``progress``."""
     number = Decimal(str(progress or "0"))
@@ -218,30 +252,7 @@ class ScheduleUpdateProgressSpec(ActionSpec):
     modules: ClassVar[tuple[str, ...]] = ("oe_schedule",)
 
     async def _resolve(self, ctx: ActionContext, args: dict[str, Any], errors: FieldErrors) -> ActivityRow:
-        raw_id = args.get("activity_id")
-        if raw_id not in (None, ""):
-            activity = await get_activity(ctx, coerce_uuid(raw_id))
-            if activity is None:
-                raise ActionValidationError(code="activity_not_found")
-            try:
-                await ctx.require_project_access(activity.project_id)
-            except ActionNotFoundError as exc:
-                raise ActionNotFoundError(code="activity_not_found") from exc
-            return activity
-        needle = parse_text(args, "activity", errors, required=True, max_length=255)
-        errors.raise_if_any()
-        project = await resolve_project(ctx, args)
-        schedule_id = coerce_uuid(args.get("schedule_id"))
-        hits = await search_activities(ctx, project.id, needle or "", schedule_id=schedule_id)
-        if not hits:
-            raise ActionValidationError(code="activity_not_found", params={"activity": needle})
-        if len(hits) > 1:
-            raise ActionValidationError(
-                code="activity_ambiguous",
-                params={"activity": needle},
-                options=[hit.candidate() for hit in hits[:MAX_CANDIDATES]],
-            )
-        return hits[0]
+        return await resolve_activity(ctx, args, errors)
 
     async def build(
         self,
