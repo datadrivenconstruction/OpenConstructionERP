@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.2.0] - 2026-11-06
+
+### Added
+
+- Customer offers: turn a bill of quantities into a priced offer for the client, with selling prices, a text library for terms and conditions, optional and alternative positions, and a signed PDF. The BOQ export menu now separates the internal estimate PDF from the customer offer.
+- Voice input in the AI assistant: dictate into the chat dock and the full-page chat, and ask the assistant to shift a schedule activity.
+- Fresh videos and academy courses linked from the pages they teach, including the country playlists with real project cases.
+
+### Fixed
+
+- Packed static assets are unpacked once at startup instead of on every request, which removes the load spikes on small servers, and the wheel fits the PyPI size limit again.
+- The customer offer text and position role endpoints check that the project belongs to the caller.
+- Missing translations for the customer offer page title and the voice capture errors added in every language.
+
 ## [19.1.0] - 2026-11-06
 
 ### Added

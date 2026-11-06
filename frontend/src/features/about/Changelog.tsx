@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.2.0',
+    date: '2026-11-06',
+    tag: 'NEW',
+    summary:
+      'Customer offers with selling prices, terms and a signed PDF, voice input in the AI assistant, and fresh videos and academy courses. Static assets are unpacked once at startup, so small servers stay fast.',
+  },
+  {
     version: '19.1.0',
     date: '2026-11-06',
     tag: 'NEW',
