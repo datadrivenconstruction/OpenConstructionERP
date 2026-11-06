@@ -100,9 +100,6 @@ jobs:
 
       - name: Build wheel
         run: |
-          # Comments only, on this throwaway checkout: AST, docstrings and line
-          # numbers are unchanged, the provenance mark and headers stay. About 2 MiB.
-          python scripts/strip_wheel_comments.py backend/app backend/alembic backend/openconstructionerp
           cd backend
           python -m build --wheel --outdir ../dist/
 
@@ -140,7 +137,8 @@ jobs:
           # 18.8.3 (2026-10-25): large frontend assets ship xz-packed
           # (scripts/pack_frontend_dist.py), the wheel fell to about 75 MiB and the
           # budget is that plus 6.
-          LIMIT_MIB = 81
+          # 19.1.1: back to 95; project space is freed by removing old releases.
+          LIMIT_MIB = 95
           HARD_CAP_MIB = 100
 
           whl = sorted(glob.glob("dist/*.whl"))
