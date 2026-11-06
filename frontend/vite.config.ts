@@ -17,6 +17,15 @@ import { LOCALE_KEYS_CHUNK, isLocaleKeysId, localeKeyIndex } from './vite.locale
 
 const cesiumSource = path.resolve(__dirname, 'node_modules/cesium/Build/Cesium');
 const cesiumDirs = ['Workers', 'ThirdParty', 'Assets', 'Widgets'] as const;
+// Never fetched by the two viewers in src/features/geo-hub: both pass their own
+// baseLayer with baseLayerPicker off (NaturalEarthII, ImageryProviders icons) and
+// create no lens flare stage or PinBuilder (LensFlare, maki). About 1.3 MiB of the wheel.
+const cesiumUnused = [
+  'Assets/Textures/NaturalEarthII',
+  'Assets/Textures/LensFlare',
+  'Assets/Textures/maki',
+  'Widgets/Images/ImageryProviders',
+].map((rel) => path.join(cesiumSource, rel));
 
 // Cesium's runtime fetches Workers / Widgets / Assets / ThirdParty from
 // ``window.CESIUM_BASE_URL`` (we set it to ``/cesium/`` in main.tsx). At build
@@ -72,7 +81,10 @@ function cesiumAssets(): Plugin {
         const src = path.join(cesiumSource, sub);
         const dest = path.join(outDir, 'cesium', sub);
         if (existsSync(src)) {
-          cpSync(src, dest, { recursive: true });
+          cpSync(src, dest, {
+            recursive: true,
+            filter: (from) => !cesiumUnused.some((skip) => from === skip || from.startsWith(skip + path.sep)),
+          });
         }
       }
     },

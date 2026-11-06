@@ -494,6 +494,8 @@ exclude = [
     "**/*.pyc",
     "app/scripts/showcase_snapshot.json.gz",
     "app/scripts/showcase_geometry/**",
+    # Module-local test suites run from the repository, never from an install.
+    "app/modules/*/tests/**",
 ]
 
 # The twelve bundled demo site photos are real shipped seed assets, and the
