@@ -77,3 +77,28 @@ class VoiceDraftResponse(BaseModel):
             target_language=target_language,
             transcription=transcription,
         )
+
+
+class VoiceCapabilities(BaseModel):
+    """What the server can do for voice input, so the browser picks its engine.
+
+    ``server_transcription`` is True when a speech-to-text provider is configured
+    for this caller; the browser then may fall back to it where its own speech
+    recognition is missing. Audio sent to it is transcribed and dropped.
+    """
+
+    server_transcription: bool = False
+    provider: str | None = None
+    max_upload_bytes: int = 0
+    max_seconds: int = 0
+
+
+class DictationResponse(BaseModel):
+    """The text of one dictated message. Nothing is stored."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = ""
+    language: str | None = None
+    available: bool = False
+    error: str | None = Field(default=None, description="Short, non-sensitive reason when nothing came back.")
