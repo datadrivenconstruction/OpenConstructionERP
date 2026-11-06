@@ -3,7 +3,7 @@
 Run between ``npm run build`` and ``python -m build --wheel``. The wheel is a
 deflate zip, and xz takes roughly another third off minified JS and the locale
 chunks, which is what keeps the wheel inside PyPI's project quota. The server
-expands a packed asset on its first request (``app.cli_static``), so URLs and
+expands every packed asset once at startup (``app.cli_static``), so URLs and
 contents are unchanged for the browser.
 
 Root-level files (index.html, sw.js, registerSW.js, manifests) are never
