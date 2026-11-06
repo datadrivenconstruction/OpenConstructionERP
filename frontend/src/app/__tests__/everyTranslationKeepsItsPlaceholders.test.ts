@@ -251,6 +251,7 @@ describe('every translation keeps the placeholders its sentence needs', () => {
     // stating the empty case as a sentence without the number, and the spelled-out
     // forms to 347, Arabic and Hebrew naming one and two in words.
     // The geofenced clock and offline sync counters took it to 363, Arabic again.
+    // Customer offers added three duals in words (Arabic items and days, Hebrew days).
     let zeroForms = 0;
     let spelledOut = 0;
     for (const { key, missing } of comparisons) {
@@ -259,6 +260,6 @@ describe('every translation keeps the placeholders its sentence needs', () => {
       else if (missing.length === 1 && missing[0] === 'count') spelledOut += 1;
     }
     expect(zeroForms, 'zero forms dropping a placeholder').toBeLessThanOrEqual(80);
-    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(375);
+    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(380);
   });
 });
