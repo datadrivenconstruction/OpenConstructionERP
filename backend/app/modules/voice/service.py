@@ -40,6 +40,8 @@ async def transcribe(
     content: bytes,
     filename: str,
     user_id: str | None,
+    *,
+    language: str | None = None,
 ) -> phonelog_transcription.TranscriptionResult:
     """Transcribe a recording, degrading to an unavailable result with no provider.
 
@@ -56,7 +58,7 @@ async def transcribe(
             available=False,
             error="no transcription provider configured",
         )
-    return await provider.transcribe(content, filename)
+    return await provider.transcribe(content, filename, language=language)
 
 
 async def build_draft(
