@@ -55,7 +55,7 @@ class CallTimesOrderedRule(_PhonelogRule):
         call = section(context, "call")
         ref = str(call.get("id", ""))
         started, ended = _moment(call.get("occurred_at")), _moment(call.get("ended_at"))
-        if started is not None and ended is not None and ended < started:
+        if started is not None and ended is not None and _before(ended, started, call):
             return [
                 self.fail(
                     context, "call_ends_before_start", ref=ref, started=started.isoformat(), ended=ended.isoformat()
@@ -94,6 +94,13 @@ class InstructionNamesPartyRule(_PhonelogRule):
         if call.get("instructions") and not parties:
             return [self.fail(context, "instruction_without_party", ref=ref)]
         return [self.ok(ref)]
+
+
+def _before(ended: datetime, started: datetime, call: dict) -> bool:
+    """Whether the call ends before it starts; a bare date on either side is compared by day only."""
+    if any(len(str(call.get(name) or "").strip()) <= 10 for name in ("occurred_at", "ended_at")):
+        return ended.date() < started.date()
+    return ended < started
 
 
 def _moment(value: object) -> datetime | None:
