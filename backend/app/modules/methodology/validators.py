@@ -47,7 +47,7 @@ class CascadeRateRule(_MethodologyRule):
 
     rule_id = "methodology.cascade_rate"
     name = "Markup step rate is within range"
-    description = "a percentage step is 0 to 300%, a gross-up step 0 to under 100%"
+    description = "a percentage step is -100 to 300%, a gross-up step 0 to under 100%"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         methodology = section(context, "methodology")
@@ -58,9 +58,11 @@ class CascadeRateRule(_MethodologyRule):
             rate = to_dec(step.get("rate"))
             if rate is None or kind not in ("percentage", "gross_up"):
                 continue
+            # A tender discount is a negative percentage step, so a percentage may go below zero.
+            low = -_HUNDRED if kind == "percentage" else Decimal(0)
             high = MAX_MARKUP_PERCENT if kind == "percentage" else _HUNDRED
             below_ceiling = rate < high if kind == "gross_up" else rate <= high
-            if rate < 0 or not below_ceiling:
+            if rate < low or not below_ceiling:
                 found.append(
                     self.fail(
                         context,
@@ -68,7 +70,7 @@ class CascadeRateRule(_MethodologyRule):
                         ref=ref,
                         step=step.get("key", ""),
                         rate=rate,
-                        low=0,
+                        low=low,
                         high=high,
                     )
                 )

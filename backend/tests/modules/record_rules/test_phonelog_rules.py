@@ -176,3 +176,10 @@ async def test_a_legacy_record_without_content_stays_editable(client, admin_auth
     legacy = await _insert(project_id, status="logged", transcript="", summary="")
     edited = await client.patch(f"{BASE}/{legacy}", json={"raw_parties": "Foreman", "channel": "phone"}, headers=h)
     assert edited.status_code == 200, edited.text
+
+
+@pytest.mark.asyncio
+async def test_a_bare_end_date_on_the_start_day_is_not_before_the_start():
+    call = {"id": "c1", "occurred_at": "2026-11-03T10:00:00", "ended_at": "2026-11-03"}
+    context = ValidationContext(data={"call": call}, metadata={"locale": "en"})
+    assert all(r.passed for r in await CallTimesOrderedRule().validate(context))
