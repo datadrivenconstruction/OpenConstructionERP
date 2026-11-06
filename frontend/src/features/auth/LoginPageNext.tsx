@@ -585,8 +585,8 @@ export function LoginPageNext() {
 
         {/* ── RIGHT: clean white form pane ─────────────────────────────── */}
         <div className="flex items-center justify-center px-5 py-10 sm:px-10 relative z-10">
-          <div className="oe-form-pane w-full max-w-[420px] rounded-[24px]">
-            <div className="rounded-[24px] p-7 sm:p-9">
+          <div className="oe-form-pane w-full max-w-[420px] rounded-3xl">
+            <div className="rounded-3xl p-7 sm:p-9">
               {/* Mobile-only logo */}
               <div className="lg:hidden mb-6 flex flex-col items-center">
                 <Logo size="md" animate />

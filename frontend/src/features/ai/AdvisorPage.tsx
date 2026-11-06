@@ -230,8 +230,8 @@ function ChatBubble({
       <div
         className={`relative max-w-[85%] sm:max-w-[75%] px-[14px] py-[9px] text-[15px] leading-[1.38] ${
           isUser
-            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-[6px]'
-            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-[6px]'
+            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-sm'
+            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-sm'
         }`}
       >
         <div className="whitespace-pre-wrap break-words">
@@ -874,7 +874,7 @@ export function AdvisorPage() {
           {/* Typing indicator */}
           {loading && (
             <div className="flex items-start animate-msg-in">
-              <div className="rounded-[20px] rounded-bl-[6px] bg-surface-secondary">
+              <div className="rounded-[20px] rounded-bl-sm bg-surface-secondary">
                 <TypingDots />
               </div>
             </div>
