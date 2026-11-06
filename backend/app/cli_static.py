@@ -339,6 +339,10 @@ def expand_all_packed(dist: Path) -> int:
         Number of files expanded by this call.
     """
     root = dist.resolve()
+    packed_files = sorted(root.rglob("*.xz"))
+    if not packed_files:
+        # Plain dist (Docker, desktop, tests): nothing to expand, so never probe it for write access.
+        return 0
     out = _expansion_root(root)
     listing = out / _EXPANDED_LIST
     with contextlib.suppress(OSError):
@@ -348,7 +352,7 @@ def expand_all_packed(dist: Path) -> int:
                     (out / rel).unlink()
     expanded = 0
     shipped: list[str] = []
-    for packed in sorted(root.rglob("*.xz")):
+    for packed in packed_files:
         rel = packed.relative_to(root).as_posix()[:-3]
         shipped.append(rel)
         if (out / rel).is_file():
