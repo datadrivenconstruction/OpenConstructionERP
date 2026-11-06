@@ -228,6 +228,9 @@
     "backend/app/modules/webhook_leads/router.py::POST /incoming/{source_slug}/"
   ],
   "module_state": [
+    "backend/app/cli_static.py::_expand_locks",
+    "backend/app/cli_static.py::_expansion_roots",
+    "backend/app/cli_static.py::_failed_packed",
     "backend/app/core/acceptance_effects.py::_HANDLERS",
     "backend/app/core/app_branding.py::_branding_cache",
     "backend/app/core/calendar.py::_holiday_cache",
