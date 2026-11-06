@@ -76,6 +76,7 @@ CVR_RULE_SET = "cvr"
 class CvrCurrencyConsistentRule(MoneyRule):
     """A line states no currency of its own, or the report's currency."""
 
+    standard = CVR_RULE_SET
     rule_id = "cvr.currency_consistent"
     name = "CVR line currency matches the report"
     description = "Every line of a CVR report shares the report currency; a blank line currency inherits it"
