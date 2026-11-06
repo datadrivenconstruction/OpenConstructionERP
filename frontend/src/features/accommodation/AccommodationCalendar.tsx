@@ -117,7 +117,7 @@ const STATE_BLOCK_CLASS: Record<BookingStatus, string> = {
   reserved: 'bg-amber-200 text-amber-900 border-amber-400',
   checked_in: 'bg-emerald-300 text-emerald-900 border-emerald-500',
   checked_out:
-    'bg-slate-200 text-slate-700 border-slate-300 line-through opacity-70',
+    'bg-slate-200 text-content-secondary border-border line-through opacity-70',
   cancelled: 'bg-rose-200 text-rose-900 border-rose-400 line-through',
 };
 

@@ -3908,7 +3908,7 @@ function CostItemRow({
                         equipment: 'text-blue-600 bg-blue-50',
                         operator: 'text-violet-600 bg-violet-50',
                         electricity: 'text-cyan-600 bg-cyan-50',
-                        other: 'text-gray-600 bg-gray-50',
+                        other: 'text-content-secondary bg-surface-secondary',
                       };
                       // Component numbers arrive as Decimal-strings and `cost`
                       // is often absent; coerce + derive so `.toFixed` never
@@ -3916,7 +3916,7 @@ function CostItemRow({
                       // the Cost column shows a real figure, not a dash.
                       const { qty, unitRate, lineCost } = componentDisplayNumbers(comp);
                       const compType = comp.type || 'other';
-                      const typeColor = TYPE_COLOR_MAP[compType] || 'text-gray-600 bg-gray-50';
+                      const typeColor = TYPE_COLOR_MAP[compType] || 'text-content-secondary bg-surface-secondary';
                       const typeLabel = t(`costs.component_${compType}`, { defaultValue: compType.charAt(0).toUpperCase() + compType.slice(1) });
                       return (
                         <tr key={`${comp.name}-${compType}-${i}`} className="hover:bg-surface-secondary/30">

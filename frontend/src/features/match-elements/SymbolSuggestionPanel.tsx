@@ -129,7 +129,7 @@ export function SymbolSuggestionPanel({
       </p>
 
       {q.isLoading && (
-        <p className="text-xs text-slate-500" data-testid="symbol-loading">
+        <p className="text-xs text-content-tertiary" data-testid="symbol-loading">
           {t('match_elements.symbols.loading', { defaultValue: 'Analysing…' })}
         </p>
       )}
@@ -146,7 +146,7 @@ export function SymbolSuggestionPanel({
         !q.isError &&
         (q.data?.suggestions.length ?? 0) === 0 && (
           <p
-            className="text-xs text-slate-500"
+            className="text-xs text-content-tertiary"
             data-testid="symbol-empty"
           >
             {t('match_elements.symbols.empty', {
@@ -168,7 +168,7 @@ export function SymbolSuggestionPanel({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-content-tertiary">
                       #{s.rank + 1}
                     </span>
                     <span className="text-sm font-medium capitalize text-slate-800 dark:text-slate-100">
@@ -185,7 +185,7 @@ export function SymbolSuggestionPanel({
                     <button
                       type="button"
                       data-testid={`symbol-why-${s.symbol}`}
-                      className="text-xs text-slate-500 underline-offset-2 hover:underline"
+                      className="text-xs text-content-tertiary underline-offset-2 hover:underline"
                       onClick={() => setExpanded(isOpen ? null : s.symbol)}
                       aria-expanded={isOpen}
                     >
@@ -214,7 +214,7 @@ export function SymbolSuggestionPanel({
                     className="mt-2 space-y-1 border-t border-slate-100 pt-2 dark:border-slate-800"
                   >
                     {s.factors.length === 0 && (
-                      <li className="text-xs text-slate-400">
+                      <li className="text-xs text-content-tertiary">
                         {t('match_elements.symbols.no_factors', {
                           defaultValue: 'No contributing factors.',
                         })}
@@ -225,7 +225,7 @@ export function SymbolSuggestionPanel({
                         key={`${s.symbol}-${f.name}-${i}`}
                         className="text-xs text-slate-600 dark:text-slate-300"
                       >
-                        <span className="font-mono text-slate-400">
+                        <span className="font-mono text-content-tertiary">
                           {f.name}
                         </span>
                         {f.detail ? ` - ${f.detail}` : ''}

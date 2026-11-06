@@ -168,7 +168,7 @@ export function VideoPlayerDialog({
                       className="absolute inset-0 flex items-center justify-center bg-black/25 transition-colors hover:bg-black/35 focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-oe-blue"
                       aria-label={t('videos.play', { defaultValue: 'Play: {{title}}', title: video.title })}
                     >
-                      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-slate-900 shadow-xl">
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-content-primary shadow-xl">
                         <Play size={26} strokeWidth={2.4} className="translate-x-0.5" fill="currentColor" />
                       </span>
                       {start > 0 && (

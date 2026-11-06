@@ -2122,7 +2122,7 @@ export function CesiumViewer({
               >
                 Cesium
               </a>{' '}
-              <span className="text-slate-400">Apache 2.0 · 3D globe runtime</span>
+              <span className="text-content-tertiary">Apache 2.0 · 3D globe runtime</span>
             </li>
             <li>
               <a
@@ -2133,7 +2133,7 @@ export function CesiumViewer({
               >
                 OpenStreetMap
               </a>{' '}
-              <span className="text-slate-400">ODbL · map data and geocoding</span>
+              <span className="text-content-tertiary">ODbL · map data and geocoding</span>
             </li>
             <li>
               <a
@@ -2144,7 +2144,7 @@ export function CesiumViewer({
               >
                 OpenFreeMap
               </a>{' '}
-              <span className="text-slate-400">ODbL · keyless tile hosting</span>
+              <span className="text-content-tertiary">ODbL · keyless tile hosting</span>
             </li>
             <li>
               <a
@@ -2155,12 +2155,12 @@ export function CesiumViewer({
               >
                 Natural Earth
               </a>{' '}
-              <span className="text-slate-400">public domain · shaded relief base imagery</span>
+              <span className="text-content-tertiary">public domain · shaded relief base imagery</span>
             </li>
             {globeImagery?.streets && (
               <li data-testid="geo-hub-globe-streets-credit">
                 <span className="text-sky-300">{globeImagery.credit}</span>{' '}
-                <span className="text-slate-400">
+                <span className="text-content-tertiary">
                   {t('geo_hub.licenses_globe_streets', {
                     defaultValue: 'street base imagery on the globe',
                   })}
@@ -2176,7 +2176,7 @@ export function CesiumViewer({
               >
                 Nominatim
               </a>{' '}
-              <span className="text-slate-400">ODbL · structured geocoding</span>
+              <span className="text-content-tertiary">ODbL · structured geocoding</span>
             </li>
             <li>
               <a
@@ -2187,10 +2187,10 @@ export function CesiumViewer({
               >
                 Photon
               </a>{' '}
-              <span className="text-slate-400">Apache 2.0 · autocomplete geocoder</span>
+              <span className="text-content-tertiary">Apache 2.0 · autocomplete geocoder</span>
             </li>
           </ul>
-          <div className="mt-2 text-[10px] text-slate-400">
+          <div className="mt-2 text-[10px] text-content-tertiary">
             {t('geo_hub.licenses_footer', {
               defaultValue:
                 'No vendor lock-in. Self-host the entire stack. Cesium Ion + commercial imagery providers are intentionally not used.',
@@ -2216,7 +2216,7 @@ export function CesiumViewer({
               defaultValue: 'Loading Cesium...',
             })}
           </span>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-content-tertiary">
             {t('geo_hub.cesium_loading_hint', {
               defaultValue: 'Streaming the 3D globe runtime (~3 MB).',
             })}
@@ -2286,15 +2286,15 @@ export function CesiumViewer({
                 data-testid="geo-hub-cesium-retry"
                 className={[
                   'mt-5 inline-flex items-center gap-1.5 rounded-md',
-                  'bg-white px-3 py-1.5 text-xs font-semibold text-slate-900',
-                  'shadow-sm transition hover:bg-slate-100',
+                  'bg-white px-3 py-1.5 text-xs font-semibold text-content-primary',
+                  'shadow-sm transition hover:bg-surface-tertiary',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
               >
                 <RefreshCw size={13} strokeWidth={2.25} />
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>
-              <p className="mt-3 text-2xs text-slate-400">
+              <p className="mt-3 text-2xs text-content-tertiary">
                 {t('geo_hub.cesium_init_failed_check', {
                   defaultValue:
                     'Tip: enable hardware acceleration in your browser settings, then click Retry.',

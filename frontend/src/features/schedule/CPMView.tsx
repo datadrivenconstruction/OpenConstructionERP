@@ -249,7 +249,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
       <Card>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+            <thead className="bg-surface-secondary text-left text-xs font-semibold uppercase tracking-wide text-content-secondary">
               <tr>
                 <th className="px-3 py-2">{t('schedule.cpm.col_wbs')}</th>
                 <th className="px-3 py-2">{t('schedule.cpm.col_name')}</th>
@@ -266,7 +266,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               {activities.map((a) => (
                 <tr
                   key={a.id}
-                  className={a.is_critical ? 'bg-red-50' : 'hover:bg-gray-50'}
+                  className={a.is_critical ? 'bg-red-50' : 'hover:bg-surface-secondary'}
                 >
                   <td className="px-3 py-2 font-mono text-xs">{a.wbs_code}</td>
                   <td className="px-3 py-2">{a.name}</td>
@@ -300,7 +300,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               ))}
               {activities.length === 0 && !activitiesQuery.isLoading && (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-3 py-8 text-center text-content-tertiary">
                     {t('schedule.cpm.empty')}
                   </td>
                 </tr>
@@ -330,7 +330,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               <button
                 type="button"
                 onClick={closeLevelModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-content-tertiary hover:text-content-secondary"
                 aria-label={t('common.close', { defaultValue: 'Close' })}
               >
                 <X className="h-5 w-5" />
@@ -339,11 +339,11 @@ export function CPMView({ scheduleId }: CPMViewProps) {
 
             {!levelResult ? (
               <>
-                <p className="mb-3 text-sm text-gray-600">
+                <p className="mb-3 text-sm text-content-secondary">
                   {t('schedule.cpm.level_modal_hint')}
                 </p>
                 {distinctResources.length === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-content-tertiary">
                     {t('schedule.cpm.level_modal_no_resources')}
                   </p>
                 ) : (
@@ -352,7 +352,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                       <div key={code} className="flex items-center justify-between gap-2">
                         <label
                           htmlFor={`limit-${code}`}
-                          className="text-sm font-medium text-gray-700"
+                          className="text-sm font-medium text-content-secondary"
                         >
                           {code}
                         </label>
@@ -368,7 +368,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                               [code]: e.target.value,
                             }))
                           }
-                          className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
+                          className="w-24 rounded border border-border px-2 py-1 text-sm"
                           placeholder="∞"
                         />
                       </div>
@@ -424,9 +424,9 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                     </ul>
                   </div>
                 )}
-                <div className="max-h-60 overflow-y-auto rounded border border-gray-200">
+                <div className="max-h-60 overflow-y-auto rounded border border-border-light">
                   <table className="min-w-full text-xs">
-                    <thead className="bg-gray-50 text-left">
+                    <thead className="bg-surface-secondary text-left">
                       <tr>
                         <th className="px-2 py-1">{t('schedule.cpm.col_activity')}</th>
                         <th className="px-2 py-1 text-right">{t('schedule.cpm.col_es_old')}</th>
@@ -452,7 +452,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                       ))}
                       {levelResult.shifts.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="px-2 py-4 text-center text-gray-500">
+                          <td colSpan={4} className="px-2 py-4 text-center text-content-tertiary">
                             {t('schedule.cpm.level_no_change')}
                           </td>
                         </tr>

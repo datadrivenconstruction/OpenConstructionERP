@@ -104,7 +104,7 @@ export function GeoOverlayHud({
           </span>
         </div>
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.altitude', { defaultValue: 'ALT' })}
           </span>
           <span className="font-mono tabular-nums text-white">
@@ -119,13 +119,13 @@ export function GeoOverlayHud({
         data-testid="geo-tour-hud"
       >
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.lat', { defaultValue: 'LAT' })}
           </span>
           <span className="font-mono tabular-nums text-white min-w-[70px]">
             {active && cursorLat !== null ? formatDegrees(cursorLat) : '—'}
           </span>
-          <span className="ml-1 text-slate-400 uppercase tracking-wider">
+          <span className="ml-1 text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.lon', { defaultValue: 'LON' })}
           </span>
           <span className="font-mono tabular-nums text-white min-w-[70px]">
@@ -133,7 +133,7 @@ export function GeoOverlayHud({
           </span>
         </div>
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.scale', { defaultValue: 'SCALE' })}
           </span>
           <div className="flex items-center gap-1.5">

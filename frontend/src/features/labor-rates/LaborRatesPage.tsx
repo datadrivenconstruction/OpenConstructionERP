@@ -668,7 +668,7 @@ export function LaborRatesPage() {
                       placeholder="0"
                       aria-label={t('laborRates.oncost_value', { defaultValue: 'Value' })}
                     />
-                    <span className="pointer-events-none absolute right-2 top-1.5 text-xs text-gray-400">
+                    <span className="pointer-events-none absolute right-2 top-1.5 text-xs text-content-tertiary">
                       {row.kind === 'percentage' ? '%' : currency || '/h'}
                     </span>
                   </div>
@@ -689,7 +689,7 @@ export function LaborRatesPage() {
           <div className={cardClass}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                <Users size={16} className="text-gray-500" />
+                <Users size={16} className="text-content-tertiary" />
                 {t('laborRates.crew', { defaultValue: 'Crew composer' })}
               </h2>
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addCrew}>

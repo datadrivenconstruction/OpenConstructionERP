@@ -39,7 +39,7 @@ export function TextDisplayControl({ value, onChange }: Props) {
   const isDefault = visible && scale === DEFAULT_TEXT_DISPLAY.scale;
 
   const btn = 'flex h-7 w-7 items-center justify-center rounded-md transition-colors';
-  const enabled = 'text-slate-800 hover:bg-slate-100';
+  const enabled = 'text-content-primary hover:bg-surface-tertiary';
   const disabled = 'text-slate-300 cursor-not-allowed';
 
   return (
@@ -59,7 +59,7 @@ export function TextDisplayControl({ value, onChange }: Props) {
         aria-pressed={!visible}
         className={clsx(
           'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
-          visible ? 'text-slate-700 hover:bg-slate-100' : 'bg-emerald-500/20 text-emerald-700',
+          visible ? 'text-content-secondary hover:bg-surface-tertiary' : 'bg-emerald-500/20 text-emerald-700',
         )}
       >
         {visible ? <Eye size={13} /> : <EyeOff size={13} />}
@@ -86,7 +86,7 @@ export function TextDisplayControl({ value, onChange }: Props) {
         data-testid="dwg-text-size"
         className={clsx(
           'w-10 text-center text-[11px] font-semibold tabular-nums',
-          visible ? 'text-slate-700' : 'text-slate-300',
+          visible ? 'text-content-secondary' : 'text-slate-300',
         )}
       >
         {t('dwg_takeoff.text_size_percent', { defaultValue: '{{percent}}%', percent })}

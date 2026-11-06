@@ -328,7 +328,7 @@ export function PipelineNode({ id, data, selected }: PipelineNodeProps) {
               aria-label={t('pipeline.node.rename', {
                 defaultValue: 'Rename node',
               })}
-              className="h-6 w-full rounded border-0 bg-white/95 px-1 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-white/60"
+              className="h-6 w-full rounded border-0 bg-white/95 px-1 text-sm font-semibold text-content-primary focus:outline-none focus:ring-2 focus:ring-white/60"
             />
           ) : (
             <button

@@ -132,7 +132,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                     <o.icon className="w-4 h-4" />
                     {o.title}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">{o.sub}</div>
+                  <div className="text-xs text-content-tertiary mt-0.5">{o.sub}</div>
                 </div>
               </div>
             </label>

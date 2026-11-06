@@ -89,7 +89,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                 <span aria-hidden="true" className="absolute inset-0 bg-black/15 transition-colors group-hover:bg-black/30 motion-reduce:transition-none" />
                 <span
                   aria-hidden="true"
-                  className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-md transition-colors group-hover:bg-white motion-reduce:transition-none"
+                  className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-content-primary shadow-md transition-colors group-hover:bg-white motion-reduce:transition-none"
                 >
                   <Play size={15} className="ms-0.5" fill="currentColor" />
                 </span>

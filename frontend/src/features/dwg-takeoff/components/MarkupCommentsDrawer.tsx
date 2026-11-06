@@ -136,7 +136,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
     >
       <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-zinc-500" />
+          <MessageSquare className="h-4 w-4 text-content-tertiary" />
           <h2 className="text-sm font-semibold">
             {t('takeoff.markup.comments_title', { defaultValue: 'Comments' })}
           </h2>
@@ -153,7 +153,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {isLoading ? (
-          <div className="flex items-center justify-center py-8 text-zinc-500">
+          <div className="flex items-center justify-center py-8 text-content-tertiary">
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         ) : error ? (
@@ -163,7 +163,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
             })}
           </p>
         ) : !data || data.length === 0 ? (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-content-tertiary">
             {t('takeoff.markup.comments_empty', {
               defaultValue: 'No comments yet - be the first to add one.',
             })}
@@ -177,7 +177,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
                   key={c.id}
                   className="rounded border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800"
                 >
-                  <div className="mb-1 flex items-center justify-between text-xs text-zinc-500">
+                  <div className="mb-1 flex items-center justify-between text-xs text-content-tertiary">
                     <span className="font-medium">{c.user_id}</span>
                     <span>{formatTimestamp(c.created_at)}</span>
                   </div>
@@ -188,7 +188,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
                         type="button"
                         onClick={() => deleteMut.mutate(c.id)}
                         disabled={deleteMut.isPending}
-                        className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-red-600"
+                        className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-red-600"
                         aria-label={t('takeoff.markup.comment_delete', {
                           defaultValue: 'Delete comment',
                         })}
@@ -230,7 +230,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
           }}
         />
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-content-tertiary">
             {t('takeoff.markup.comment_hint', {
               defaultValue: 'Ctrl/Cmd+Enter to send',
             })}

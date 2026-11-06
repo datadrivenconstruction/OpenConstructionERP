@@ -288,7 +288,7 @@ function GlobalNoProjectsEmpty({
               <ArrowUpRight size={13} strokeWidth={2.25} />
             </Link>
           </div>
-          <p className="mt-3 text-2xs text-slate-400">
+          <p className="mt-3 text-2xs text-content-tertiary">
             {t('geo_hub.empty.bulk_attribution', {
               defaultValue:
                 'Auto-anchor uses OpenStreetMap Nominatim (1 req/sec, cached 30 days).',
@@ -1128,7 +1128,7 @@ export function GeoHubPage() {
                     defaultValue: 'Loading 3D globe runtime',
                   })}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-content-tertiary">
                   {t('geo_hub.loading_viewer_hint', {
                     defaultValue: 'Streaming Cesium chunks (~3 MB) - first load only.',
                   })}

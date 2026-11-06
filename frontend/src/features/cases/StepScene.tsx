@@ -1697,7 +1697,7 @@ export function StepScene({
       {scene ? (
         <svg
           viewBox={VB}
-          className="h-full w-full p-3 text-slate-400"
+          className="h-full w-full p-3 text-content-tertiary"
           fill="none"
           stroke="currentColor"
           strokeWidth={2.4}
@@ -1711,7 +1711,7 @@ export function StepScene({
         <>
           <svg
             viewBox={VB}
-            className="absolute inset-0 h-full w-full text-slate-400"
+            className="absolute inset-0 h-full w-full text-content-tertiary"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -1723,7 +1723,7 @@ export function StepScene({
           <Glyph
             size={38}
             strokeWidth={1.5}
-            className="relative text-slate-400"
+            className="relative text-content-tertiary"
           />
         </>
       )}

@@ -2131,7 +2131,7 @@ export function CaseScene({
   return (
     <svg
       viewBox={VB}
-      className={clsx('h-full w-full p-3 text-slate-400', className)}
+      className={clsx('h-full w-full p-3 text-content-tertiary', className)}
       fill="none"
       stroke="currentColor"
       strokeWidth={2.4}

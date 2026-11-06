@@ -151,7 +151,7 @@ const TYPE_LABELS: Record<MarkupType, string> = {
 const TYPE_COLORS: Record<MarkupType, string> = {
   cloud: 'text-blue-500',
   arrow: 'text-orange-500',
-  text: 'text-gray-500',
+  text: 'text-content-tertiary',
   rectangle: 'text-indigo-500',
   highlight: 'text-yellow-500',
   distance: 'text-purple-500',

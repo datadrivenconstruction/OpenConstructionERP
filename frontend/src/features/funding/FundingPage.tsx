@@ -632,7 +632,7 @@ export function FundingPage() {
         <Card>
           <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 p-3 dark:border-gray-800">
             <div className="relative">
-              <Search className="pointer-events-none absolute start-2 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="pointer-events-none absolute start-2 top-2.5 h-4 w-4 text-content-tertiary" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

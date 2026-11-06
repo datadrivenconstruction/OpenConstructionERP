@@ -165,7 +165,7 @@ export function renderDocMarkdown(md: string): string {
       i += 1; // skip the closing fence
       const code = escapeHtml(buf.join('\n'));
       const label = lang
-        ? `<span class="absolute right-2 top-2 text-[9px] uppercase tracking-wider text-gray-400">${escapeHtml(lang)}</span>`
+        ? `<span class="absolute right-2 top-2 text-[9px] uppercase tracking-wider text-content-tertiary">${escapeHtml(lang)}</span>`
         : '';
       out.push(
         `<pre class="relative my-4 overflow-x-auto rounded-lg border border-border-light bg-gray-900 dark:bg-gray-950 p-4 pt-5 text-[12px] leading-relaxed font-mono text-gray-100">${label}<code class="whitespace-pre">${code}</code></pre>`,

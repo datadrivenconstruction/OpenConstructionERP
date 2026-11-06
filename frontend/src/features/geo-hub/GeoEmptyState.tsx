@@ -317,7 +317,7 @@ export function GeoEmptyState({
             onClick={() => setDismissed(true)}
             className={[
               'absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md',
-              'text-slate-400 transition hover:bg-white/10 hover:text-slate-100',
+              'text-content-tertiary transition hover:bg-white/10 hover:text-slate-100',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
             ].join(' ')}
             aria-label={t('geo_hub.empty.dismiss', {
@@ -411,7 +411,7 @@ export function GeoEmptyState({
                   'inline-flex items-center gap-1.5 rounded-md',
                   hasPrimaryAction
                     ? 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
-                    : 'bg-white text-slate-900 hover:bg-slate-100',
+                    : 'bg-white text-content-primary hover:bg-surface-tertiary',
                   'px-3 py-1.5 text-xs font-semibold shadow-sm transition',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
@@ -422,7 +422,7 @@ export function GeoEmptyState({
             )}
           </div>
           {kind === 'no_anchor' && (
-            <p className="mt-3 text-2xs text-slate-400">
+            <p className="mt-3 text-2xs text-content-tertiary">
               {t('geo_hub.empty.auto_anchor_attribution', {
                 defaultValue:
                   'Geocoded via OpenStreetMap Nominatim. Cached for 30 days.',

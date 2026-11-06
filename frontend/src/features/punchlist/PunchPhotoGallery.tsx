@@ -187,7 +187,7 @@ function PhotoThumb({
               type="button"
               onClick={() => setConfirming(false)}
               disabled={deleting}
-              className="rounded-md bg-white/90 px-2 py-1 text-2xs font-medium text-gray-800 hover:bg-white disabled:opacity-60"
+              className="rounded-md bg-white/90 px-2 py-1 text-2xs font-medium text-content-primary hover:bg-white disabled:opacity-60"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>

@@ -99,7 +99,7 @@ function LogoSlot({
         {src ? (
           <img src={src} alt={label} className="max-h-full max-w-full object-contain" draggable={false} />
         ) : (
-          <span className={`text-xs ${dark ? 'text-slate-400' : 'text-content-tertiary'}`}>
+          <span className={`text-xs ${dark ? 'text-content-tertiary' : 'text-content-tertiary'}`}>
             {t('settings.brand_no_logo', { defaultValue: 'Default logo' })}
           </span>
         )}

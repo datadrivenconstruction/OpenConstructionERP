@@ -36,9 +36,9 @@ export function FederatedViewerLegend({ disciplines, onToggleVisible }: Props) {
   return (
     <div
       data-testid="federated-viewer-legend"
-      className="absolute right-3 top-3 z-10 max-w-xs rounded-lg border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur"
+      className="absolute right-3 top-3 z-10 max-w-xs rounded-lg border border-border-light bg-white/95 p-3 shadow-md backdrop-blur"
     >
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
         {t('bim.federation.viewer.legend_title', {
           defaultValue: 'Models',
         })}
@@ -51,7 +51,7 @@ export function FederatedViewerLegend({ disciplines, onToggleVisible }: Props) {
             <li
               key={d.modelId}
               data-testid={`federated-viewer-legend-row-${d.modelId}`}
-              className="flex items-center gap-2 text-xs text-slate-700"
+              className="flex items-center gap-2 text-xs text-content-secondary"
             >
               <input
                 type="checkbox"
@@ -69,11 +69,11 @@ export function FederatedViewerLegend({ disciplines, onToggleVisible }: Props) {
                 aria-hidden
               />
               <span className="truncate font-medium">{d.modelName}</span>
-              <span className="ml-auto rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-500">
+              <span className="ml-auto rounded bg-surface-tertiary px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-content-tertiary">
                 {disciplineLabel(t, d.discipline)}
               </span>
               {typeof d.elementCount === 'number' ? (
-                <span className="font-mono text-[10px] text-slate-400">
+                <span className="font-mono text-[10px] text-content-tertiary">
                   {d.elementCount.toLocaleString(getNumberLocale())}
                 </span>
               ) : null}

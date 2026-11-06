@@ -2389,7 +2389,7 @@ function CaseCard({
                 the accessible name; the picture alone never carries it. */}
             {pb.region && (
               <span
-                className="inline-flex h-6 items-center gap-1 rounded-md bg-white/90 px-1.5 text-2xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
+                className="inline-flex h-6 items-center gap-1 rounded-md bg-white/90 px-1.5 text-2xs font-semibold text-content-primary shadow-sm ring-1 ring-inset ring-slate-900/10"
                 title={regionDisplayName(pb.region, i18n.language)}
                 aria-label={regionDisplayName(pb.region, i18n.language)}
               >

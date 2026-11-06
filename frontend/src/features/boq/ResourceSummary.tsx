@@ -38,7 +38,7 @@ const TYPE_BADGE_STYLES: Record<string, string> = {
   machinery: 'bg-teal-500/10 text-teal-600',
   equipment: 'bg-violet-500/10 text-violet-600',
   subcontractor: 'bg-rose-500/10 text-rose-600',
-  other: 'bg-gray-500/10 text-gray-600',
+  other: 'bg-gray-500/10 text-content-secondary',
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {

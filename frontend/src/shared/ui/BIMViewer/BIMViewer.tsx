@@ -4828,7 +4828,7 @@ export function BIMViewer({
           <div className="text-gray-300 text-[10px]">
             {hoveredElement.element_type}
             {hoveredElement.storey && (
-              <span className="ml-1.5 text-gray-400">{hoveredElement.storey}</span>
+              <span className="ml-1.5 text-content-tertiary">{hoveredElement.storey}</span>
             )}
           </div>
           {/* BOQ progress on hover — only when the viewer is in progress
@@ -6131,7 +6131,7 @@ export function BIMViewer({
                           ? 'text-rose-600'
                           : req.priority === 'should'
                             ? 'text-amber-600'
-                            : 'text-slate-500';
+                            : 'text-content-tertiary';
                       return (
                         <li
                           key={req.id}

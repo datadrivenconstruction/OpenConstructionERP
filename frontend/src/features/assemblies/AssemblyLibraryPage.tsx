@@ -148,7 +148,7 @@ export function AssemblyLibraryPage() {
 
       {/* Search bar */}
       <div className="relative">
-        <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-content-tertiary" />
         <input
           type="search"
           value={search}
@@ -577,7 +577,7 @@ function TemplateDrawer({
               <ul className="space-y-1 text-sm">
                 {Object.entries(template.name_translations).map(([k, v]) => (
                   <li key={k} className="flex gap-2">
-                    <span className="w-8 font-mono text-zinc-400">{k}</span>
+                    <span className="w-8 font-mono text-content-tertiary">{k}</span>
                     <span className="text-zinc-700 dark:text-zinc-300">{v}</span>
                   </li>
                 ))}
@@ -621,7 +621,7 @@ function TemplateDrawer({
                 <li key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
                   <div>
                     <div className="text-zinc-800 dark:text-zinc-200">{c.description}</div>
-                    <div className="text-xs text-zinc-500">{roleLabel(c.role, t)}</div>
+                    <div className="text-xs text-content-tertiary">{roleLabel(c.role, t)}</div>
                   </div>
                   <div className="text-right font-mono text-xs text-zinc-600 dark:text-zinc-400">
                     {c.factor} {unitGlyph(c.unit)}
@@ -723,7 +723,7 @@ function TemplateDrawer({
                 </div>
               )}
               <table className="w-full text-xs">
-                <thead className="text-left text-zinc-500">
+                <thead className="text-left text-content-tertiary">
                   <tr>
                     <th className="py-1 pr-2">
                       {t('assemblies.library.component', 'Component')}
@@ -754,7 +754,7 @@ function TemplateDrawer({
                             )}
                           </div>
                           {c.matched_code && (
-                            <div className="font-mono text-[10px] text-zinc-500">
+                            <div className="font-mono text-[10px] text-content-tertiary">
                               {c.matched_code}
                             </div>
                           )}

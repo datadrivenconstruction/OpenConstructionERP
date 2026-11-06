@@ -262,7 +262,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
             >
               {group.display_label || group.group_key}
             </div>
-            <div className="text-xs text-slate-500 mt-0.5">
+            <div className="text-xs text-content-tertiary mt-0.5">
               {t('match_elements.detail.elements_count', '{{count}} elements', {
                 count: group.element_count,
               })}{' '}
@@ -343,7 +343,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
 
         <div className="flex-1 overflow-auto p-4">
           {detailQ.isLoading && (
-            <div className="text-center text-slate-500 py-8">
+            <div className="text-center text-content-tertiary py-8">
               <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
               {t('match_elements.loading_detail', 'Loading detail…')}
             </div>
@@ -377,7 +377,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
           {tab === 'methods' && detailQ.data && (
             <div role="tabpanel" id="detail-tabpanel-methods" aria-labelledby="detail-tab-methods">
               {methodNames.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
+                <div className="text-center py-12 text-content-tertiary">
                   <AlertCircle className="w-6 h-6 mx-auto mb-2 opacity-40" />
                   <p className="text-sm">{t('match_elements.detail.no_matchers_run', 'No matchers run yet for this group.')}</p>
                   <p className="text-xs mt-1">{t('match_elements.detail.use_action_bar', 'Use the action bar buttons above.')}</p>
@@ -499,7 +499,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                   groupKey={group.group_key}
                 />
               </div>
-              <p className="text-xs text-slate-500 mb-2">
+              <p className="text-xs text-content-tertiary mb-2">
                 {t('match_elements.detail.element_ids_count', '{{count}} element id(s)', { count: detailQ.data.element_ids.length })}
               </p>
               <div className="font-mono text-xs leading-tight max-h-[60vh] overflow-auto bg-slate-50 dark:bg-slate-800 p-2 rounded">
@@ -507,7 +507,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                   <div key={id} className="truncate text-slate-600 dark:text-slate-300">{id}</div>
                 ))}
                 {detailQ.data.element_ids.length > 200 && (
-                  <div className="text-slate-500">{t('match_elements.detail.and_more', '…and {{count}} more', { count: detailQ.data.element_ids.length - 200 })}</div>
+                  <div className="text-content-tertiary">{t('match_elements.detail.and_more', '…and {{count}} more', { count: detailQ.data.element_ids.length - 200 })}</div>
                 )}
               </div>
             </div>
@@ -517,7 +517,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
           {tab === 'apply' && (
             <div role="tabpanel" id="detail-tabpanel-apply" aria-labelledby="detail-tab-apply">
               {applyQ.isLoading && (
-                <div className="text-center text-slate-500 py-8">
+                <div className="text-center text-content-tertiary py-8">
                   <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
                   {t('match_elements.detail.building_preview', 'Building preview…')}
                 </div>
@@ -535,7 +535,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
               )}
               {applyQ.data && applyQ.data.positions.map((p) => (
                 <div key={p.group_key} className="mb-4 border border-slate-200 dark:border-slate-700 rounded p-3">
-                  <div className="text-xs text-slate-500 mb-1">{p.section_path.join(' → ')}</div>
+                  <div className="text-xs text-content-tertiary mb-1">{p.section_path.join(' → ')}</div>
                   <div className="font-medium text-sm">{p.description}</div>
                   <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
                     {(() => {
@@ -548,7 +548,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                   </div>
                   {p.resources.length > 0 && (
                     <div className="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-700">
-                      <div className="text-xs text-slate-500 mb-1">{t('match_elements.detail.auto_loaded_resources', 'Auto-loaded resources:')}</div>
+                      <div className="text-xs text-content-tertiary mb-1">{t('match_elements.detail.auto_loaded_resources', 'Auto-loaded resources:')}</div>
                       {p.resources.map((r, i) => {
                         const dr = q.convert(Number(r.quantity), r.unit || '');
                         return (
@@ -563,7 +563,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                 </div>
               ))}
               {applyQ.data && applyQ.data.positions.length === 0 && (
-                <div className="text-center text-slate-500 py-8 text-sm">
+                <div className="text-center text-content-tertiary py-8 text-sm">
                   {t('match_elements.detail.confirm_first', 'Confirm a match first to see the BOQ preview.')}
                 </div>
               )}
@@ -574,12 +574,12 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
         <footer className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <button
             onClick={() => setNoMatchOpen(true)}
-            className="text-xs text-slate-600 hover:text-rose-600 inline-flex items-center gap-1"
+            className="text-xs text-content-secondary hover:text-rose-600 inline-flex items-center gap-1"
           >
             <XCircle className="w-3.5 h-3.5" />
             {t('match_elements.no_match', 'No match…')}
           </button>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
             {t('match_elements.col.status', 'Status')}: <strong>{t(`match_elements.status.${group.status}`, { defaultValue: group.status })}</strong>
             <ChevronRight className="w-3 h-3" />
             <CheckCircle2 className={`w-4 h-4 ${group.status === 'confirmed' ? 'text-emerald-500' : 'text-slate-300'}`} />

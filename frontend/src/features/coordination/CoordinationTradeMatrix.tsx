@@ -53,7 +53,7 @@ export interface CoordinationTradeMatrixProps {
 
 /** Background-color ramp by clash count. Pure Tailwind so it tree-shakes. */
 function tintForCount(open: number, maxOpen: number): string {
-  if (open <= 0) return 'bg-slate-50';
+  if (open <= 0) return 'bg-surface-secondary';
   // Map (open / maxOpen) into one of five tints. Avoid a continuous
   // gradient because Tailwind purges unused classes — we need explicit
   // class strings.
@@ -131,8 +131,8 @@ export function CoordinationTradeMatrix({
         <div
           className={
             embedded
-              ? 'h-64 w-full rounded bg-slate-100'
-              : 'mt-4 h-64 w-full rounded bg-slate-100'
+              ? 'h-64 w-full rounded bg-surface-tertiary'
+              : 'mt-4 h-64 w-full rounded bg-surface-tertiary'
           }
         />
       </div>

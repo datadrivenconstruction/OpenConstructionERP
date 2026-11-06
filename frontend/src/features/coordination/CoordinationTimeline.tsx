@@ -144,7 +144,7 @@ function SkeletonRow() {
       <div className="h-4 w-4 rounded bg-slate-200" />
       <div className="flex-1">
         <div className="h-3 w-2/3 rounded bg-slate-200" />
-        <div className="mt-2 h-3 w-1/4 rounded bg-slate-100" />
+        <div className="mt-2 h-3 w-1/4 rounded bg-surface-tertiary" />
       </div>
     </li>
   );

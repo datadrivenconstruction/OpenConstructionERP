@@ -3308,7 +3308,7 @@ function UploadConvertZone({
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {CAD_FORMATS.map((fmt) => (
-                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-surface-tertiary text-content-secondary'}`}>.{fmt.toLowerCase()}</span>
                 ))}
               </div>
               <p className="text-2xs text-content-quaternary">

@@ -81,7 +81,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
         ) : (
           <span
             aria-hidden="true"
-            className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 opacity-0 shadow-lg transition-all group-hover:opacity-100 group-focus-within:opacity-100"
+            className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-content-primary opacity-0 shadow-lg transition-all group-hover:opacity-100 group-focus-within:opacity-100"
           >
             <Play size={18} strokeWidth={2.4} className="translate-x-px" fill="currentColor" />
           </span>

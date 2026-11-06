@@ -24,7 +24,7 @@ const STATUS_TONE: Record<TilesetStatus, string> = {
     'bg-blue-50 text-blue-700 border-blue-200 ' +
     'dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/60',
   draft:
-    'bg-slate-50 text-slate-600 border-slate-200 ' +
+    'bg-surface-secondary text-content-secondary border-border-light ' +
     'dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700',
   failed:
     'bg-red-50 text-red-700 border-red-200 ' +

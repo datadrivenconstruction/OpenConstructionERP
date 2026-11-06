@@ -238,7 +238,7 @@ export function AnchorAdjustPanel({
           <MapPinned size={13} strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-2xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <div className="text-2xs font-semibold uppercase tracking-[0.12em] text-content-tertiary">
             {t('geo_hub.adjust.title', { defaultValue: 'Project anchor' })}
           </div>
           <div className="font-mono text-2xs text-slate-200 tabular-nums">
@@ -250,7 +250,7 @@ export function AnchorAdjustPanel({
           onClick={() => setCollapsed(true)}
           className={[
             'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
-            'text-slate-400 hover:bg-white/10 hover:text-slate-100',
+            'text-content-tertiary hover:bg-white/10 hover:text-slate-100',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           aria-expanded
@@ -333,7 +333,7 @@ export function AnchorAdjustPanel({
         </button>
       </div>
 
-      <div className="pt-1 text-2xs text-slate-400">
+      <div className="pt-1 text-2xs text-content-tertiary">
         {t('geo_hub.adjust.source_prefix', { defaultValue: 'Source:' })}{' '}
         <span className="text-slate-300">{sourceLabel}</span>
       </div>

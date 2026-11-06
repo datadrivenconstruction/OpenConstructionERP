@@ -18,9 +18,9 @@ type Enqueue = (input: EnqueueInput) => Promise<void>;
 type RaiseProps = Parameters<typeof FieldRaiseIssueTab>[0];
 type Level = 1 | 3 | 5;
 
-const inputCls = 'h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900';
-const areaCls = 'min-h-[88px] w-full rounded-xl border border-slate-300 bg-white p-3 text-base text-slate-900';
-const labelCls = 'flex flex-col gap-1 text-sm font-medium text-slate-700';
+const inputCls = 'h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-content-primary';
+const areaCls = 'min-h-[88px] w-full rounded-xl border border-border bg-white p-3 text-base text-content-primary';
+const labelCls = 'flex flex-col gap-1 text-sm font-medium text-content-secondary';
 
 const LEVELS = [
   { value: 1, key: 'low', fallback: 'Low' },
@@ -69,7 +69,7 @@ function LevelPicker({ value, onChange, label }: { value: Level; onChange: (v: L
   const { t } = useTranslation();
   return (
     <fieldset className="flex flex-col gap-1">
-      <legend className="text-sm font-medium text-slate-700">{label}</legend>
+      <legend className="text-sm font-medium text-content-secondary">{label}</legend>
       <div className="flex gap-2">
         {LEVELS.map((l) => (
           <button

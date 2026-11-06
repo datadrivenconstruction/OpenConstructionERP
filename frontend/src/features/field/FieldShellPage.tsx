@@ -133,12 +133,12 @@ function HowFieldWorks() {
   ];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+    <div className="rounded-xl border border-border-light bg-surface-secondary p-4">
+      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
         <Network size={15} className="text-sky-600" />
         {t('field.flow_title', { defaultValue: 'How field work connects' })}
       </h2>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-content-tertiary">
         {t('field.flow_intro', {
           defaultValue: 'Capture your day on site and it flows straight through to the office.',
         })}
@@ -148,24 +148,24 @@ function HowFieldWorks() {
         {steps.map((s, i) => (
           <li
             key={s.title}
-            className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3"
+            className="flex items-start gap-2 rounded-lg border border-border-light bg-white p-3"
           >
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-50 text-2xs font-bold text-sky-600">
               {i + 1}
             </span>
             <div className="min-w-0">
-              <span className="flex items-center gap-1 text-xs font-semibold text-slate-900">
+              <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
                 {s.icon}
                 {s.title}
               </span>
-              <p className="mt-0.5 text-2xs leading-relaxed text-slate-500">{s.desc}</p>
+              <p className="mt-0.5 text-2xs leading-relaxed text-content-tertiary">{s.desc}</p>
             </div>
           </li>
         ))}
       </ol>
 
-      <div className="mt-3 border-t border-slate-200 pt-3 text-2xs text-slate-500">
-        <span className="font-medium text-slate-600">
+      <div className="mt-3 border-t border-border-light pt-3 text-2xs text-content-tertiary">
+        <span className="font-medium text-content-secondary">
           {t('field.flow_feeds', { defaultValue: 'Feeds the office:' })}
         </span>{' '}
         <Link to="/schedule" className="font-medium text-sky-600 hover:underline">
@@ -255,8 +255,8 @@ export function FieldShellPage() {
       }}
     >
       {/* Sticky 56 px header — project name placeholder + offline/sync badge. */}
-      <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b border-slate-200 bg-white px-4">
-        <span className="min-w-0 truncate text-base font-semibold text-slate-900">
+      <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b border-border-light bg-white px-4">
+        <span className="min-w-0 truncate text-base font-semibold text-content-primary">
           {session
             ? t('field.header', { defaultValue: 'Field time' })
             : t('field.header_no_session', { defaultValue: 'Field - sign in' })}
@@ -294,12 +294,12 @@ export function FieldShellPage() {
               <HowFieldWorks />
             </div>
             <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-content-tertiary">
                 {session
                   ? t('field.profile_signed_in', { defaultValue: 'Signed in as a field worker.' })
                   : t('field.no_session', { defaultValue: 'Open the link from your SMS to start.' })}
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-content-tertiary">
                 {online
                   ? t('field.sync_online', { defaultValue: 'Online - changes sync automatically.' })
                   : t('field.sync_offline', { defaultValue: 'Offline - changes are saved and will sync.' })}
@@ -312,7 +312,7 @@ export function FieldShellPage() {
                 with per-item retry/dismiss. */}
             <SyncQueuePanel
               state={{ online, pendingOps, heldOps: allHeld, exportHeld: exportAllHeld, discardHeld: discardAllHeld, syncing, syncNow, discard, lastResults, extraItems: timeItems }}
-              className="border-t border-slate-100"
+              className="border-t border-border-light"
             />
           </div>
         )}
@@ -320,7 +320,7 @@ export function FieldShellPage() {
 
       {/* Bottom nav — fixed 64 px, 4 tabs. */}
       <nav
-        className="sticky bottom-0 flex border-t border-slate-200 bg-white"
+        className="sticky bottom-0 flex border-t border-border-light bg-white"
         aria-label={t('field.nav_label', { defaultValue: 'Field navigation' })}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -335,7 +335,7 @@ export function FieldShellPage() {
               aria-current={active ? 'page' : undefined}
               aria-label={tabLabel}
               className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-xs ${
-                active ? 'text-sky-600' : 'text-slate-500'
+                active ? 'text-sky-600' : 'text-content-tertiary'
               }`}
             >
               <Icon size={28} aria-hidden="true" />

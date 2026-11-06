@@ -244,12 +244,12 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
                 type="button"
                 onClick={() => onPlay(start)}
                 data-testid="videos-start-here"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-md transition-transform hover:-translate-y-px focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-content-primary shadow-md transition-transform hover:-translate-y-px focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
               >
                 <Play size={15} fill="currentColor" aria-hidden />
                 {t('videos.start_here', { defaultValue: 'Start here' })}
                 {start.duration ? (
-                  <span className="font-mono text-xs tabular-nums text-slate-500">{formatClock(start.duration)}</span>
+                  <span className="font-mono text-xs tabular-nums text-content-tertiary">{formatClock(start.duration)}</span>
                 ) : null}
               </button>
             )}
@@ -288,7 +288,7 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
           >
             <VideoCover src={start.cover} eager className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
             <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-            <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-slate-900 shadow-xl transition-transform group-hover:scale-105">
+            <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-content-primary shadow-xl transition-transform group-hover:scale-105">
               <Play size={26} className="translate-x-0.5" fill="currentColor" />
             </span>
             <span className="absolute inset-x-0 bottom-0 p-3 text-left">

@@ -62,7 +62,7 @@ const FACET_COLOR: Record<string, string> = {
   oe_submittals_submittals: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   oe_correspondence_correspondence: 'bg-teal-50 text-teal-700 border-teal-200',
   oe_validation: 'bg-orange-50 text-orange-700 border-orange-200',
-  oe_chat: 'bg-slate-50 text-slate-700 border-slate-200',
+  oe_chat: 'bg-surface-secondary text-content-secondary border-border-light',
 };
 
 /* ── Saved searches (localStorage) ─────────────────────────────────────── */

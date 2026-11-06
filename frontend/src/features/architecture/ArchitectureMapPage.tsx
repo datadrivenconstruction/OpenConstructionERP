@@ -1300,7 +1300,7 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         </Panel>
         {highlightActive && (
           <Panel position="top-center">
-            <div className="flex items-center gap-2 rounded-full border border-blue-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm">
+            <div className="flex items-center gap-2 rounded-full border border-blue-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-content-secondary shadow-sm backdrop-blur-sm">
               <Waypoints size={13} className="text-blue-500" />
               <span>
                 {t('architecture.connected_count', {
@@ -1312,12 +1312,12 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
                 <button
                   type="button"
                   onClick={onPaneClick}
-                  className="ml-1 rounded-full px-2 py-0.5 text-[11px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  className="ml-1 rounded-full px-2 py-0.5 text-[11px] text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-secondary"
                 >
                   {t('architecture.clear_highlight', { defaultValue: 'Clear' })}
                 </button>
               ) : (
-                <span className="ml-1 text-[11px] font-normal text-slate-400">
+                <span className="ml-1 text-[11px] font-normal text-content-tertiary">
                   {t('architecture.click_to_lock', { defaultValue: 'click to lock' })}
                 </span>
               )}

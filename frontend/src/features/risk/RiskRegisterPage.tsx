@@ -135,8 +135,8 @@ function matrixColor(prob: string, impact: string) {
   if (score === 0) return 'bg-surface-secondary text-content-quaternary';
   if (score >= 2.7) return 'bg-red-500/80 text-white';
   if (score >= 1.5) return 'bg-orange-400/80 text-white';
-  if (score >= 0.6) return 'bg-yellow-400/80 text-gray-900';
-  return 'bg-green-400/70 text-gray-900';
+  if (score >= 0.6) return 'bg-yellow-400/80 text-content-primary';
+  return 'bg-green-400/70 text-content-primary';
 }
 
 /* ── Risk Matrix ──────────────────────────────────────────────────────── */
@@ -187,7 +187,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
 function heatmapColor(score: number): string {
   if (score >= 16) return 'bg-red-500 text-white';
   if (score >= 11) return 'bg-orange-500 text-white';
-  if (score >= 6) return 'bg-yellow-400 text-gray-900';
+  if (score >= 6) return 'bg-yellow-400 text-content-primary';
   if (score >= 1) return 'bg-green-500 text-white';
   return 'bg-surface-secondary text-content-quaternary';
 }

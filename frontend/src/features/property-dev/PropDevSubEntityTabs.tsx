@@ -1507,7 +1507,7 @@ export function BrokersTab() {
                           'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
                           b.active
                             ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-slate-200 text-slate-700',
+                            : 'bg-slate-200 text-content-secondary',
                         )}
                         title={t('propdev.broker.toggle_active', {
                           defaultValue: 'Toggle active',

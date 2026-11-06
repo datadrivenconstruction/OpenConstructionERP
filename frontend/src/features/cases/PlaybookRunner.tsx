@@ -635,7 +635,7 @@ function MoreCaseTile({
         )}
         {playbook.region && (
           <span
-            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-[9px] font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
+            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-[9px] font-semibold text-content-primary shadow-sm ring-1 ring-inset ring-slate-900/10"
             title={regionDisplayName(playbook.region, language)}
             aria-label={regionDisplayName(playbook.region, language)}
           >

@@ -1246,7 +1246,7 @@ function StatCard({
 }) {
   const colorCls = {
     default: 'text-content-primary',
-    gray: 'text-gray-500',
+    gray: 'text-content-tertiary',
     blue: 'text-blue-600 dark:text-blue-400',
     green: 'text-green-600 dark:text-green-400',
     amber: 'text-amber-600 dark:text-amber-400',

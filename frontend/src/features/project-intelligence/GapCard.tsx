@@ -62,7 +62,7 @@ const SEVERITY_CONFIG: Record<
     label: 'WARNING',
   },
   suggestion: {
-    color: 'text-gray-400',
+    color: 'text-content-tertiary',
     bg: 'bg-gray-500/10',
     border: 'border-l-gray-500',
     icon: Info,

@@ -85,7 +85,7 @@ const PRIORITIES: readonly PriorityOption[] = [
     value: 'low',
     labelKey: 'field.issue_priority_low',
     defaultLabel: 'Low',
-    activeClass: 'border-slate-500 bg-slate-100 text-slate-800',
+    activeClass: 'border-slate-500 bg-surface-tertiary text-content-primary',
     dotClass: 'bg-slate-400',
   },
   {
@@ -323,7 +323,7 @@ export function FieldRaiseIssueTab({
 
   if (!session) {
     return (
-      <p className="px-4 py-8 text-center text-slate-400">
+      <p className="px-4 py-8 text-center text-content-tertiary">
         {t('field.no_session', { defaultValue: 'Open the link from your SMS to start.' })}
       </p>
     );
@@ -334,11 +334,11 @@ export function FieldRaiseIssueTab({
   return (
     <div className="flex w-full flex-col gap-4 px-4 py-4">
       <div>
-        <h2 className="flex items-center gap-1.5 text-base font-semibold text-slate-900">
+        <h2 className="flex items-center gap-1.5 text-base font-semibold text-content-primary">
           <AlertTriangle size={18} className="text-amber-500" aria-hidden="true" />
           {t('field.issue_title', { defaultValue: 'Raise a site issue' })}
         </h2>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-xs text-content-tertiary">
           {t('field.issue_intro', {
             defaultValue: 'Flag a defect with a photo. It saves offline and sends when you are back online.',
           })}
@@ -347,7 +347,7 @@ export function FieldRaiseIssueTab({
 
       {/* Title */}
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-slate-600">
+        <span className="text-content-secondary">
           {t('field.issue_field_title', { defaultValue: 'What is the issue?' })}
         </span>
         <input
@@ -357,13 +357,13 @@ export function FieldRaiseIssueTab({
             defaultValue: 'e.g. Cracked tile in stairwell',
           })}
           maxLength={255}
-          className="h-12 rounded-xl border border-slate-300 px-3 text-base"
+          className="h-12 rounded-xl border border-border px-3 text-base"
         />
       </label>
 
       {/* Priority */}
       <div className="flex flex-col gap-1 text-sm">
-        <span className="text-slate-600">
+        <span className="text-content-secondary">
           {t('field.issue_priority', { defaultValue: 'Priority' })}
         </span>
         <div className="grid grid-cols-4 gap-2">
@@ -376,7 +376,7 @@ export function FieldRaiseIssueTab({
                 aria-pressed={active}
                 onClick={() => setPriority(p.value)}
                 className={`h-11 rounded-xl border text-sm font-medium ${
-                  active ? p.activeClass : 'border-slate-300 bg-white text-slate-600'
+                  active ? p.activeClass : 'border-border bg-white text-content-secondary'
                 }`}
               >
                 {t(p.labelKey, { defaultValue: p.defaultLabel })}
@@ -388,7 +388,7 @@ export function FieldRaiseIssueTab({
 
       {/* Note */}
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-slate-600">
+        <span className="text-content-secondary">
           {t('field.issue_note', { defaultValue: 'Details (optional)' })}
         </span>
         <textarea
@@ -396,15 +396,15 @@ export function FieldRaiseIssueTab({
           onChange={(e) => setNote(e.target.value)}
           rows={3}
           maxLength={5000}
-          className="rounded-xl border border-slate-300 px-3 py-2 text-base"
+          className="rounded-xl border border-border px-3 py-2 text-base"
         />
       </label>
 
       {/* Photo */}
       <div className="flex flex-col gap-2 text-sm">
-        <span className="text-slate-600">{t('field.issue_photo', { defaultValue: 'Photo' })}</span>
+        <span className="text-content-secondary">{t('field.issue_photo', { defaultValue: 'Photo' })}</span>
         {photoPreview ? (
-          <div className="relative overflow-hidden rounded-xl border border-slate-200">
+          <div className="relative overflow-hidden rounded-xl border border-border-light">
             <img
               src={photoPreview}
               alt={t('field.issue_photo_alt', { defaultValue: 'Preview of what you are flagging' })}
@@ -420,7 +420,7 @@ export function FieldRaiseIssueTab({
             </button>
           </div>
         ) : (
-          <label className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-base font-medium text-slate-700">
+          <label className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-surface-secondary text-base font-medium text-content-secondary">
             <input
               type="file"
               accept="image/*"
@@ -443,17 +443,17 @@ export function FieldRaiseIssueTab({
 
       {/* Location */}
       <div className="flex flex-col gap-2 text-sm">
-        <span className="text-slate-600">
+        <span className="text-content-secondary">
           {t('field.issue_location', { defaultValue: 'Location (optional)' })}
         </span>
         {geo ? (
-          <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <span className="flex min-w-0 items-center gap-2 text-sm text-slate-700">
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-border-light bg-surface-secondary px-3 py-2">
+            <span className="flex min-w-0 items-center gap-2 text-sm text-content-secondary">
               <MapPin size={18} className="shrink-0 text-emerald-600" aria-hidden="true" />
               <span className="truncate">
                 {geo.lat.toFixed(5)}, {geo.lon.toFixed(5)}
                 {typeof geo.accuracyM === 'number' && (
-                  <span className="text-slate-400">
+                  <span className="text-content-tertiary">
                     {' '}
                     {t('field.issue_geo_accuracy', {
                       defaultValue: '+/-{{m}} m',
@@ -467,7 +467,7 @@ export function FieldRaiseIssueTab({
               type="button"
               onClick={() => setGeo(null)}
               aria-label={t('field.issue_geo_remove', { defaultValue: 'Remove location' })}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-content-tertiary hover:bg-slate-200"
             >
               <Trash2 size={18} aria-hidden="true" />
             </button>
@@ -477,7 +477,7 @@ export function FieldRaiseIssueTab({
             type="button"
             onClick={captureGeo}
             disabled={geoBusy}
-            className="flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white text-base font-medium text-slate-700 disabled:opacity-50"
+            className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white text-base font-medium text-content-secondary disabled:opacity-50"
           >
             {geoBusy ? (
               <Loader2 size={20} className="animate-spin" aria-hidden="true" />
@@ -512,26 +512,26 @@ export function FieldRaiseIssueTab({
 
       {/* Recently raised */}
       {records.length > 0 && (
-        <div className="mt-2 flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <h3 className="text-sm font-semibold text-slate-900">
+        <div className="mt-2 flex flex-col gap-2 border-t border-border-light pt-3">
+          <h3 className="text-sm font-semibold text-content-primary">
             {t('field.issue_recent', { defaultValue: 'Recently raised' })}
           </h3>
           <ul className="flex flex-col gap-2">
             {records.slice(0, 8).map((rec) => {
               const queued = pendingOps.some((o) => o.clientOpId === rec.clientOpId);
               return (
-                <li key={rec.clientOpId} className="rounded-xl border border-slate-200 p-3">
+                <li key={rec.clientOpId} className="rounded-xl border border-border-light p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
                       <span
                         className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${priorityDot(rec.priority)}`}
                         aria-hidden="true"
                       />
-                      <span className="truncate text-sm font-medium text-slate-900">
+                      <span className="truncate text-sm font-medium text-content-primary">
                         {rec.title}
                       </span>
                     </div>
-                    <span className="shrink-0 text-2xs text-slate-400">
+                    <span className="shrink-0 text-2xs text-content-tertiary">
                       {new Date(rec.createdAt).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -552,7 +552,7 @@ export function FieldRaiseIssueTab({
                     )}
                     {rec.hasPhoto &&
                       (rec.photoPending ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-2xs font-medium text-slate-600">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-secondary">
                           <Camera size={12} aria-hidden="true" />
                           {t('field.issue_photo_waiting', { defaultValue: 'Photo waiting' })}
                         </span>

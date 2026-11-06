@@ -322,7 +322,7 @@ function CategoryBar({
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between text-xs">
-        <span className={`font-medium capitalize ${CATEGORY_TEXT_CLASSES[category.type] ?? 'text-gray-600'}`}>
+        <span className={`font-medium capitalize ${CATEGORY_TEXT_CLASSES[category.type] ?? 'text-content-secondary'}`}>
           {t(`boq.cost_category_${category.type}`, { defaultValue: category.type })}
           <span className="text-content-tertiary ml-1.5">
             ({category.item_count} {t('boq.cost_breakdown_items', { defaultValue: 'items' })})

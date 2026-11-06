@@ -525,7 +525,7 @@ export function AssemblyEditorPage() {
                       { rt: 'equipment', icon: Wrench, color: 'text-amber-700' },
                       { rt: 'operator', icon: Hammer, color: 'text-orange-700' },
                       { rt: 'subcontractor', icon: Briefcase, color: 'text-violet-700' },
-                      { rt: 'overhead', icon: Plus, color: 'text-slate-700' },
+                      { rt: 'overhead', icon: Plus, color: 'text-content-secondary' },
                     ] as const
                   ).map(({ rt, icon: Icon, color }) => (
                     <button

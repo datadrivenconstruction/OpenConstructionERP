@@ -3370,7 +3370,7 @@ function ResourceTypePicker({
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const baseBadge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+  const baseBadge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-surface-tertiary text-content-secondary', label: '?' };
   const baseLabel = getResourceTypeLabel(value, t);
   const variantLabel = t('boq.resource_type_variant_chip', { defaultValue: 'Variant' });
   const label = isVariant ? variantLabel : baseLabel;
@@ -3453,7 +3453,7 @@ function ResourceTypePicker({
           onMouseDown={(e) => e.stopPropagation()}
         >
           {RESOURCE_TYPES.map((rt) => {
-            const b = RESOURCE_TYPE_BADGE[rt.value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+            const b = RESOURCE_TYPE_BADGE[rt.value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-surface-tertiary text-content-secondary', label: '?' };
             const selected = rt.value === value;
             return (
               <button

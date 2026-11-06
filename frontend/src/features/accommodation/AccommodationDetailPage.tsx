@@ -119,7 +119,7 @@ import { AccommodationCalendar } from './AccommodationCalendar';
 const BOOKING_STATUS_BADGE: Record<BookingStatus, string> = {
   reserved: 'bg-sky-100 text-sky-800 border-sky-300',
   checked_in: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  checked_out: 'bg-slate-200 text-slate-700 border-slate-300',
+  checked_out: 'bg-slate-200 text-content-secondary border-border',
   cancelled: 'bg-rose-100 text-rose-800 border-rose-300',
 };
 
@@ -127,7 +127,7 @@ const CHARGE_STATUS_BADGE: Record<ChargeStatus, string> = {
   pending: 'bg-amber-100 text-amber-800 border-amber-300',
   invoiced: 'bg-sky-100 text-sky-800 border-sky-300',
   paid: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  waived: 'bg-slate-200 text-slate-700 border-slate-300',
+  waived: 'bg-slate-200 text-content-secondary border-border',
 };
 
 /** Status filter pill keys in display order (incl. `all`). */
@@ -151,7 +151,7 @@ const OCCUPANCY_TAB_IDS: readonly OccupancyTab[] = ['bookings', 'calendar'];
 const ROOM_STATUS_STYLES: Record<RoomStatus, string> = {
   available: 'bg-emerald-100 text-emerald-800 border-emerald-300',
   occupied: 'bg-amber-100 text-amber-800 border-amber-300',
-  maintenance: 'bg-slate-200 text-slate-700 border-slate-300',
+  maintenance: 'bg-slate-200 text-content-secondary border-border',
   blocked: 'bg-rose-100 text-rose-800 border-rose-300',
 };
 

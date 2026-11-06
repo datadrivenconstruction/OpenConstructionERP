@@ -232,7 +232,7 @@ function ConverterCard({
   disabled: boolean;
 }) {
   const { t } = useTranslation();
-  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
+  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-border-light', icon: 'bg-gray-500' };
   const installed = converter.installed;
   const updateAvailable = installed && Boolean(versionEntry?.is_outdated);
   const installedVersion = versionEntry?.installed_version || converter.version;
@@ -1138,7 +1138,7 @@ export function QuantitiesPage() {
         {converters.length === 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
             {['dwg', 'rvt', 'ifc'].map((id) => {
-              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
+              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-border-light', icon: 'bg-gray-500' };
               return (
                 <div
                   key={id}

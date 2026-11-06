@@ -3305,13 +3305,13 @@ export function DwgTakeoffPage() {
                   <p className="text-base font-semibold text-gray-200">
                     {t('dwg_takeoff.opening_document', { defaultValue: 'Opening document…' })}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1.5 max-w-xs">
+                  <p className="text-sm text-content-tertiary mt-1.5 max-w-xs">
                     {t('dwg_takeoff.opening_document_hint', {
                       defaultValue: 'Preparing this drawing for takeoff. This can take a few minutes for large DWG files.',
                     })}
                   </p>
                   {deepLinkDocName && (
-                    <p className="text-xs font-mono text-gray-600 mt-3 truncate max-w-xs">
+                    <p className="text-xs font-mono text-content-secondary mt-3 truncate max-w-xs">
                       {decodeURIComponent(deepLinkDocName)}
                     </p>
                   )}
@@ -3384,14 +3384,14 @@ export function DwgTakeoffPage() {
                         </div>
                         <div>
                           <p className="text-base font-semibold text-gray-200">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
-                          <p className="text-sm text-gray-500 mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
+                          <p className="text-sm text-content-tertiary mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
                         </div>
                         <div className="flex items-center gap-2.5">
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dwg</span>
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dxf</span>
                         </div>
                         {dwgRange && (
-                          <p className="text-[11px] text-gray-600 leading-relaxed mt-1 text-center">
+                          <p className="text-[11px] text-content-secondary leading-relaxed mt-1 text-center">
                             {dwgRange}
                           </p>
                         )}
@@ -3413,11 +3413,11 @@ export function DwgTakeoffPage() {
                         />
                         <ModuleGuideButton content={dwgTakeoffGuide} />
                       </div>
-                      <p className="text-base text-gray-400 mt-3 leading-relaxed">
+                      <p className="text-base text-content-tertiary mt-3 leading-relaxed">
                         {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
                       </p>
                       {dwgRange && (
-                        <p className="text-xs text-gray-600 mt-3 leading-relaxed">
+                        <p className="text-xs text-content-secondary mt-3 leading-relaxed">
                           {dwgRange}
                         </p>
                       )}
@@ -3431,7 +3431,7 @@ export function DwgTakeoffPage() {
                           <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"><f.icon size={15} className="text-orange-400" /></div>
                           <div className="min-w-0">
                             <h3 className="text-xs font-semibold text-gray-200 leading-tight">{f.title}</h3>
-                            <p className="text-[11px] text-gray-500 leading-snug mt-1">{f.desc}</p>
+                            <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -3667,7 +3667,7 @@ export function DwgTakeoffPage() {
                       className={clsx(
                         'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
                         canUndoFn(undoState)
-                          ? 'text-slate-800 hover:bg-slate-100'
+                          ? 'text-content-primary hover:bg-surface-tertiary'
                           : 'text-slate-300 cursor-not-allowed',
                       )}
                     >
@@ -3685,7 +3685,7 @@ export function DwgTakeoffPage() {
                       className={clsx(
                         'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
                         canRedoFn(undoState)
-                          ? 'text-slate-800 hover:bg-slate-100'
+                          ? 'text-content-primary hover:bg-surface-tertiary'
                           : 'text-slate-300 cursor-not-allowed',
                       )}
                     >
@@ -3709,7 +3709,7 @@ export function DwgTakeoffPage() {
                           'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
                           snapModes.endpoint || snapModes.midpoint || snapModes.intersection
                             ? 'bg-emerald-500/20 text-emerald-700'
-                            : 'text-slate-700 hover:bg-slate-100',
+                            : 'text-content-secondary hover:bg-surface-tertiary',
                         )}
                       >
                         <Target size={13} />
@@ -3720,10 +3720,10 @@ export function DwgTakeoffPage() {
                       {snapMenuOpen && (
                         <div
                           data-testid="dwg-snap-menu"
-                          className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-slate-200 bg-white p-2 shadow-xl"
+                          className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-border-light bg-white p-2 shadow-xl"
                           onMouseLeave={() => setSnapMenuOpen(false)}
                         >
-                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-endpoint"
@@ -3736,7 +3736,7 @@ export function DwgTakeoffPage() {
                               defaultValue: 'Endpoint snap',
                             })}
                           </label>
-                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-midpoint"
@@ -3749,7 +3749,7 @@ export function DwgTakeoffPage() {
                               defaultValue: 'Midpoint snap',
                             })}
                           </label>
-                          <label className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-400">
+                          <label className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-tertiary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-intersection"
@@ -3812,8 +3812,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-tertiary cursor-not-allowed',
                     )}
                     title={t('dwg_compare.compare_revisions', {
                       defaultValue: 'Compare revisions with cost delta',
@@ -3832,8 +3832,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-tertiary cursor-not-allowed',
                     )}
                     title={t('dwg_takeoff.upload_revision_title', {
                       defaultValue: 'Upload a new revision of this drawing (adds a version)',
@@ -3872,8 +3872,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-tertiary cursor-not-allowed',
                     )}
                     title={t('dwg_takeoff.download_pdf', {
                       defaultValue: 'Download current viewport as PDF',
@@ -4106,7 +4106,7 @@ export function DwgTakeoffPage() {
                         onClick={() => setLinkingEntityId(null)}
                         aria-label={t('common.close', { defaultValue: 'Close' })}
                         title={t('common.close', { defaultValue: 'Close' })}
-                        className="text-slate-400 hover:text-slate-100 transition-colors"
+                        className="text-content-tertiary hover:text-slate-100 transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -4126,16 +4126,16 @@ export function DwgTakeoffPage() {
                       {/* Entity summary */}
                       <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-[11px] space-y-0.5">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">{t('dwg_takeoff.prop_type', 'Type')}</span>
+                          <span className="text-content-tertiary">{t('dwg_takeoff.prop_type', 'Type')}</span>
                           <span className="font-mono text-slate-100">{selectedEntity.type}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
+                          <span className="text-content-tertiary">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
                           <span className="font-mono text-slate-100 truncate ml-2">{selectedEntity.layer}</span>
                         </div>
                         {measurement && (
                           <div className="flex justify-between">
-                            <span className="text-slate-400">
+                            <span className="text-content-tertiary">
                               {measurement.kind === 'area'
                                 ? t('dwg_takeoff.area', 'Area')
                                 : measurement.kind === 'radius'
@@ -4211,7 +4211,7 @@ export function DwgTakeoffPage() {
 
                       {linkPickerMode === 'pick' ? (
                         !linkPickerBoqId ? (
-                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                          <p className="text-[11px] text-content-tertiary py-2 text-center">
                             {t('dwg_takeoff.link_need_project_boq', {
                               defaultValue: 'Pick a project and BOQ above.',
                             })}
@@ -4219,12 +4219,12 @@ export function DwgTakeoffPage() {
                         ) : linkPositionsLoading ? (
                           <div className="flex items-center justify-center gap-1.5 py-3">
                             <Loader2 size={12} className="animate-spin text-blue-400" />
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] text-content-tertiary">
                               {t('common.loading', 'Loading...')}
                             </span>
                           </div>
                         ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
-                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                          <p className="text-[11px] text-content-tertiary py-2 text-center">
                             {t('dwg_takeoff.link_boq_empty', {
                               defaultValue: 'BOQ is empty - switch to "Create new".',
                             })}
@@ -4272,7 +4272,7 @@ export function DwgTakeoffPage() {
                                     <span className="text-slate-100 truncate flex-1">
                                       {pos.description}
                                     </span>
-                                    <span className="text-slate-400 shrink-0 text-[10px]">
+                                    <span className="text-content-tertiary shrink-0 text-[10px]">
                                       {pos.unit}
                                     </span>
                                   </button>
@@ -4284,7 +4284,7 @@ export function DwgTakeoffPage() {
                         /* Create new position */
                         <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 space-y-1.5">
                           <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
-                            <span className="text-slate-400">
+                            <span className="text-content-tertiary">
                               {t('dwg_takeoff.description', { defaultValue: 'Description' })}:
                             </span>
                             <span className="text-slate-100 truncate">
@@ -4293,7 +4293,7 @@ export function DwgTakeoffPage() {
                                 layer: selectedEntity.layer,
                               })}
                             </span>
-                            <span className="text-slate-400">
+                            <span className="text-content-tertiary">
                               {t('dwg_takeoff.quantity', { defaultValue: 'Quantity' })}:
                             </span>
                             <span className="text-slate-100 font-mono">
@@ -5447,13 +5447,13 @@ function DrawingFilmstrip({
         <span className="text-[11px] font-semibold text-slate-100">
           {t('dwg_takeoff.drawings', 'Drawings')}
         </span>
-        <span className="text-[10px] text-slate-400 ml-1">({drawings.length})</span>
+        <span className="text-[10px] text-content-tertiary ml-1">({drawings.length})</span>
       </div>
 
       {/* Drawing cards - always visible, horizontally scrolling if needed. */}
       <div className="flex items-center gap-1.5 px-3 pb-2 pt-0.5 overflow-x-auto">
         {isLoading ? (
-          <Loader2 size={12} className="animate-spin text-slate-400" />
+          <Loader2 size={12} className="animate-spin text-content-tertiary" />
         ) : drawings.length > 0 ? (
           drawings.map((d) => {
             // Prefer date-fns' formatDistanceToNow for the upload label;
@@ -5509,7 +5509,7 @@ function DrawingFilmstrip({
                       size={10}
                       className={clsx(
                         'shrink-0',
-                        activeDrawingId === d.id ? 'text-blue-400' : 'text-slate-400',
+                        activeDrawingId === d.id ? 'text-blue-400' : 'text-content-tertiary',
                       )}
                     />
                     <span
@@ -5521,7 +5521,7 @@ function DrawingFilmstrip({
                       {d.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-[9px] text-slate-400">
+                  <div className="flex items-center gap-1 text-[9px] text-content-tertiary">
                     <span className="capitalize truncate">{d.discipline}</span>
                     <span>&middot;</span>
                     <span className="tabular-nums">
@@ -5532,7 +5532,7 @@ function DrawingFilmstrip({
                   </div>
                   {uploadedLabel && (
                     <div
-                      className="text-[9px] text-slate-500 truncate"
+                      className="text-[9px] text-content-tertiary truncate"
                       title={uploadedLabel}
                     >
                       {uploadedLabel}
@@ -5549,7 +5549,7 @@ function DrawingFilmstrip({
                   aria-label={t('dwg_takeoff.delete_drawing', { defaultValue: 'Delete drawing' })}
                   title={t('dwg_takeoff.delete_drawing', { defaultValue: 'Delete drawing' })}
                   className="absolute top-0.5 right-0.5 h-4 w-4 rounded flex items-center justify-center
-                             text-transparent group-hover:text-slate-400 hover:!text-red-400 hover:bg-red-500/20
+                             text-transparent group-hover:text-content-tertiary hover:!text-red-400 hover:bg-red-500/20
                              transition-all"
                 >
                   <Trash2 size={9} />
@@ -5558,7 +5558,7 @@ function DrawingFilmstrip({
             );
           })
         ) : (
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[10px] text-content-tertiary">
             {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
           </span>
         )}
@@ -5569,7 +5569,7 @@ function DrawingFilmstrip({
                      border-[#4a4a4a] hover:border-blue-400/60 hover:bg-blue-500/10 transition-all group"
           title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
         >
-          <Plus size={14} className="text-slate-400 group-hover:text-blue-300 transition-colors" />
+          <Plus size={14} className="text-content-tertiary group-hover:text-blue-300 transition-colors" />
         </button>
       </div>
     </div>
