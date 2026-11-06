@@ -122,6 +122,38 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "playlistId": "PLOCZ6EOWyC_A"
     },
     {
+      "id": "playbook-brazil",
+      "title": "Builder's Playbook Brasil: orçamento e gestão de obras públicas",
+      "language": "pt-BR",
+      "market": "BR",
+      "channel": "academy",
+      "playlistId": "PLLe-gfSauXTY"
+    },
+    {
+      "id": "playbook-poland",
+      "title": "Budowa domu: kosztorys, umowa i rozliczenie",
+      "language": "pl",
+      "market": "PL",
+      "channel": "academy",
+      "playlistId": "PLVLOe3pv2_oo"
+    },
+    {
+      "id": "playbook-turkey",
+      "title": "Okul ek binası: yaklaşık maliyetten kesin hesaba",
+      "language": "tr",
+      "market": "TR",
+      "channel": "academy",
+      "playlistId": "PLL2jqtV6A934"
+    },
+    {
+      "id": "playbook-saudi",
+      "title": "عظم فيلا في الرياض: التسعير والعقد والمستخلص",
+      "language": "ar",
+      "market": "SA",
+      "channel": "academy",
+      "playlistId": "PLO8UfCu9nokM"
+    },
+    {
       "id": "ddc-walkthroughs",
       "title": "Product walkthroughs and talks",
       "titleKey": "videos.series.walkthroughs",
@@ -4686,6 +4718,57 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ]
     },
     {
+      "id": "IT05",
+      "youtubeId": "p4veyF4FY4s",
+      "status": "published",
+      "channel": "academy",
+      "language": "it",
+      "market": "IT",
+      "series": "playbook-italy",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "change-register-and-impact"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/change-intelligence"
+      ],
+      "result": "change",
+      "title": "Varianti in cantiere: nuovi prezzi e ordini di modifica",
+      "description": "Da una richiesta di variante a un importo che entra nel contratto: nel caso didattico, le fondazioni aggiungono 41.400 euro e ventilazione meccanica e fotovoltaico altri 133.400 euro. Il contratto passa così da 2.421.000 a 2.595.800 euro.",
+      "duration": 313,
+      "cover": "https://i.ytimg.com/vi/p4veyF4FY4s/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Ordine"
+        },
+        {
+          "t": 113,
+          "title": "Prezzo"
+        },
+        {
+          "t": 208,
+          "title": "Limiti"
+        },
+        {
+          "t": 249,
+          "title": "Contratto"
+        }
+      ]
+    },
+    {
       "id": "IT06",
       "youtubeId": "1xuPD4FZmjM",
       "status": "published",
@@ -5993,6 +6076,1403 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ]
     },
     {
+      "id": "BR01",
+      "youtubeId": "2B5WhzXi8hE",
+      "status": "published",
+      "channel": "academy",
+      "language": "pt-BR",
+      "market": "BR",
+      "series": "playbook-brazil",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "price-the-orcamento-de-referencia-from-the-sinapi-base",
+        "build-a-composicao-de-custo-unitario-propria",
+        "compose-the-bdi-under-acordao-2622-2013-tcu"
+      ],
+      "routes": [
+        "/costs",
+        "/boq",
+        "/validation",
+        "/estimate-basis",
+        "/cost-explorer",
+        "/reports",
+        "/catalog",
+        "/norm-expansion",
+        "/assemblies",
+        "/preliminaries",
+        "/allowances"
+      ],
+      "result": "bill",
+      "title": "Orçamento de obra pública: SINAPI, composição e BDI",
+      "description": "Como montar um orçamento de referência para uma obra pública? Neste estudo prático, orçamos a ampliação de uma escola municipal de 160 m²: consultamos o SINAPI, entendemos insumos e coeficientes, montamos composições, apuramos o custo direto e calculamos o BDI com base nas referências do TCU. Ao final, fazemos três verificações importantes antes de fechar a planilha.",
+      "duration": 575,
+      "cover": "https://i.ytimg.com/vi/2B5WhzXi8hE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Quanto custa a obra?"
+        },
+        {
+          "t": 12,
+          "title": "Para quem é"
+        },
+        {
+          "t": 43,
+          "title": "O projeto"
+        },
+        {
+          "t": 64,
+          "title": "O que é o SINAPI"
+        },
+        {
+          "t": 93,
+          "title": "O que a lei exige"
+        },
+        {
+          "t": 123,
+          "title": "A planilha no aplicativo"
+        },
+        {
+          "t": 140,
+          "title": "Composição: a receita"
+        },
+        {
+          "t": 195,
+          "title": "Custo unitário e encargos"
+        },
+        {
+          "t": 234,
+          "title": "Da composição à linha"
+        },
+        {
+          "t": 286,
+          "title": "Custo direto"
+        },
+        {
+          "t": 305,
+          "title": "O que é BDI"
+        },
+        {
+          "t": 329,
+          "title": "Faixas de referência do TCU"
+        },
+        {
+          "t": 364,
+          "title": "A fórmula do BDI"
+        },
+        {
+          "t": 400,
+          "title": "O BDI no aplicativo"
+        },
+        {
+          "t": 462,
+          "title": "Preço de venda"
+        },
+        {
+          "t": 495,
+          "title": "Três conferências"
+        },
+        {
+          "t": 551,
+          "title": "Próximo episódio"
+        }
+      ]
+    },
+    {
+      "id": "BR02",
+      "youtubeId": "fwkAAeGl5hI",
+      "status": "published",
+      "channel": "academy",
+      "language": "pt-BR",
+      "market": "BR",
+      "series": "playbook-brazil",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "keep-the-orcamento-estimado-sigiloso-under-lei-14133",
+        "compare-bids-and-award",
+        "sense-check-an-estimate-with-benchmarks"
+      ],
+      "routes": [
+        "/boq",
+        "/tendering",
+        "/reports",
+        "/files",
+        "/bid-management",
+        "/correspondence",
+        "/cost-explorer",
+        "/validation"
+      ],
+      "result": "award",
+      "title": "Licitação de obras públicas: proposta e regra dos 75%",
+      "description": "Como uma pequena construtora monta uma proposta para licitação de obra pública? Neste exemplo, partimos do orçamento de referência da ampliação de uma escola municipal de 160 m²: trocamos preços de tabela por cotações, calculamos o desconto e comparamos três propostas. Depois, analisamos os critérios da Lei nº 14.133/2021, incluindo a regra de inexequibilidade prevista no art. 59 e a garantia adicional. O edital e a análise do caso concreto continuam essenciais.",
+      "duration": 446,
+      "cover": "https://i.ytimg.com/vi/fwkAAeGl5hI/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "O piso da proposta"
+        },
+        {
+          "t": 13,
+          "title": "Para quem é"
+        },
+        {
+          "t": 56,
+          "title": "Licitação em 1 minuto"
+        },
+        {
+          "t": 76,
+          "title": "Referência x proposta"
+        },
+        {
+          "t": 94,
+          "title": "Dois orçamentos no aplicativo"
+        },
+        {
+          "t": 133,
+          "title": "O total da proposta"
+        },
+        {
+          "t": 150,
+          "title": "O desconto"
+        },
+        {
+          "t": 168,
+          "title": "O teto"
+        },
+        {
+          "t": 185,
+          "title": "O piso de 75%"
+        },
+        {
+          "t": 231,
+          "title": "A faixa da garantia"
+        },
+        {
+          "t": 256,
+          "title": "As três propostas"
+        },
+        {
+          "t": 279,
+          "title": "O sistema avisa, a lei decide"
+        },
+        {
+          "t": 307,
+          "title": "Os lances"
+        },
+        {
+          "t": 333,
+          "title": "Sobrepreço"
+        },
+        {
+          "t": 376,
+          "title": "A planilha final"
+        },
+        {
+          "t": 410,
+          "title": "Quatro perguntas"
+        },
+        {
+          "t": 426,
+          "title": "Próximo episódio"
+        }
+      ]
+    },
+    {
+      "id": "BR03",
+      "youtubeId": "a5qbM2drFkE",
+      "status": "published",
+      "channel": "academy",
+      "language": "pt-BR",
+      "market": "BR",
+      "series": "playbook-brazil",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "planner",
+        "project-manager"
+      ],
+      "cases": [
+        "build-the-cronograma-fisico-financeiro-from-the-orcamento",
+        "forecast-project-cash-flow",
+        "build-the-baseline-programme"
+      ],
+      "routes": [
+        "/boq",
+        "/schedule",
+        "/5d",
+        "/finance",
+        "/validation",
+        "/reports",
+        "/schedule-advanced"
+      ],
+      "result": "programme",
+      "title": "Cronograma físico-financeiro de obra: Gantt, caminho crítico e curva S",
+      "description": "Quanto dinheiro uma obra precisa em cada mês? Neste estudo prático, montamos o cronograma físico-financeiro da ampliação de uma escola municipal de 160 m², com contrato didático de R$ 309.002 e prazo de sete meses. Você verá como organizar etapas e dependências, estimar durações com apoio das composições SINAPI, montar o gráfico de Gantt e identificar o caminho crítico. Depois, distribuímos os valores ao longo do prazo para visualizar a curva S e discutimos como o calendário de medição e pagamento afeta o capital de giro da construtora. O exemplo é demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+      "duration": 427,
+      "cover": "https://i.ytimg.com/vi/a5qbM2drFkE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Quando entra o dinheiro"
+        },
+        {
+          "t": 21,
+          "title": "Para quem é"
+        },
+        {
+          "t": 45,
+          "title": "O projeto"
+        },
+        {
+          "t": 65,
+          "title": "Físico-financeiro, sem mistério"
+        },
+        {
+          "t": 90,
+          "title": "As doze etapas"
+        },
+        {
+          "t": 114,
+          "title": "O cronograma no aplicativo"
+        },
+        {
+          "t": 127,
+          "title": "Quanto dura cada etapa"
+        },
+        {
+          "t": 152,
+          "title": "A obra inteira"
+        },
+        {
+          "t": 173,
+          "title": "Gantt e caminho crítico"
+        },
+        {
+          "t": 196,
+          "title": "O dinheiro de cada etapa"
+        },
+        {
+          "t": 217,
+          "title": "O valor de cada mês"
+        },
+        {
+          "t": 241,
+          "title": "A curva S"
+        },
+        {
+          "t": 262,
+          "title": "A curva da nossa escola"
+        },
+        {
+          "t": 278,
+          "title": "Medição mensal e caixa"
+        },
+        {
+          "t": 299,
+          "title": "O buraco no caixa"
+        },
+        {
+          "t": 320,
+          "title": "Administração local"
+        },
+        {
+          "t": 345,
+          "title": "Jogo de planilha"
+        },
+        {
+          "t": 364,
+          "title": "A lista completa"
+        },
+        {
+          "t": 381,
+          "title": "Aviso"
+        },
+        {
+          "t": 393,
+          "title": "Quatro perguntas"
+        },
+        {
+          "t": 409,
+          "title": "Próximo vídeo"
+        }
+      ]
+    },
+    {
+      "id": "BR04",
+      "youtubeId": "FXrYc6XxRHY",
+      "status": "published",
+      "channel": "academy",
+      "language": "pt-BR",
+      "market": "BR",
+      "series": "playbook-brazil",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "contract-administrator",
+        "site-manager"
+      ],
+      "cases": [
+        "attest-the-boletim-de-medicao-and-invoice-the-period",
+        "apply-the-annual-reajustamento-to-a-brazilian-contract",
+        "assess-and-price-a-variation"
+      ],
+      "routes": [
+        "/contracts",
+        "/progress",
+        "/boq",
+        "/governance",
+        "/finance",
+        "/reconciliation",
+        "/price-index",
+        "/variations",
+        "/changeorders",
+        "/value",
+        "/reports"
+      ],
+      "result": "change",
+      "title": "Medição de obra pública: boletim, aditivo de 25% e reajuste INCC",
+      "description": "Como medir o que foi executado, formalizar um aditivo e calcular o reajuste de uma obra pública? Neste estudo prático, acompanhamos a primeira medição da ampliação de uma escola municipal, comparamos o previsto com o realizado e registramos o avanço na curva S. Em seguida, analisamos um serviço novo, o limite contratual do aditivo, a manutenção do desconto da proposta e a aplicação do INCC conforme a data-base e as condições do contrato. O processo é demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+      "duration": 449,
+      "cover": "https://i.ytimg.com/vi/FXrYc6XxRHY/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "O fiscal na obra"
+        },
+        {
+          "t": 12,
+          "title": "Para quem é"
+        },
+        {
+          "t": 35,
+          "title": "O projeto"
+        },
+        {
+          "t": 57,
+          "title": "O que é medição"
+        },
+        {
+          "t": 80,
+          "title": "As medições no aplicativo"
+        },
+        {
+          "t": 93,
+          "title": "Quantidade por linha"
+        },
+        {
+          "t": 117,
+          "title": "A primeira medição"
+        },
+        {
+          "t": 134,
+          "title": "Plano x real"
+        },
+        {
+          "t": 157,
+          "title": "Medir a mais"
+        },
+        {
+          "t": 171,
+          "title": "A curva real"
+        },
+        {
+          "t": 191,
+          "title": "O aditivo"
+        },
+        {
+          "t": 220,
+          "title": "O limite de 25%"
+        },
+        {
+          "t": 245,
+          "title": "Preço de serviço novo"
+        },
+        {
+          "t": 274,
+          "title": "O aditivo no aplicativo"
+        },
+        {
+          "t": 295,
+          "title": "O novo valor do contrato"
+        },
+        {
+          "t": 312,
+          "title": "Primeiro o aditivo"
+        },
+        {
+          "t": 334,
+          "title": "O reajuste"
+        },
+        {
+          "t": 359,
+          "title": "O peso do INCC"
+        },
+        {
+          "t": 378,
+          "title": "A conta do reajuste"
+        },
+        {
+          "t": 399,
+          "title": "Aviso"
+        },
+        {
+          "t": 415,
+          "title": "Quatro perguntas"
+        },
+        {
+          "t": 431,
+          "title": "Próximo vídeo"
+        }
+      ]
+    },
+    {
+      "id": "BR05",
+      "youtubeId": "tpBk_sSiuH4",
+      "status": "published",
+      "channel": "academy",
+      "language": "pt-BR",
+      "market": "BR",
+      "series": "playbook-brazil",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "accountant",
+        "finance-manager"
+      ],
+      "cases": [
+        "issue-an-electronic-invoice",
+        "manage-retention-across-the-supply-chain",
+        "payment-application-and-reconciliation"
+      ],
+      "routes": [
+        "/contracts",
+        "/finance",
+        "/reconciliation",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "Nota fiscal de obra (NFS-e): retenções de ISS e INSS",
+      "description": "Por que o valor líquido recebido é menor que o total da nota? Neste episódio, acompanhamos a emissão de uma NFS-e a partir da medição aprovada de uma obra pública e vemos como ISS, INSS, garantias e etapas de recebimento afetam o caixa da construtora. O exemplo mostra uma nota de R$ 22.414,16 e um líquido de R$ 19.276,18, com o fluxo demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+      "duration": 452,
+      "cover": "https://i.ytimg.com/vi/tpBk_sSiuH4/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "A nota e o que cai na conta"
+        },
+        {
+          "t": 18,
+          "title": "Para quem é"
+        },
+        {
+          "t": 40,
+          "title": "O projeto"
+        },
+        {
+          "t": 56,
+          "title": "A NFS-e"
+        },
+        {
+          "t": 85,
+          "title": "As faturas no aplicativo"
+        },
+        {
+          "t": 108,
+          "title": "O que é retenção"
+        },
+        {
+          "t": 130,
+          "title": "O ISS"
+        },
+        {
+          "t": 153,
+          "title": "O INSS"
+        },
+        {
+          "t": 180,
+          "title": "A retenção no RPS"
+        },
+        {
+          "t": 210,
+          "title": "O que caiu na conta"
+        },
+        {
+          "t": 229,
+          "title": "A reforma tributária"
+        },
+        {
+          "t": 248,
+          "title": "A fila de pagamento"
+        },
+        {
+          "t": 276,
+          "title": "Cada nota até o pagamento"
+        },
+        {
+          "t": 297,
+          "title": "A garantia"
+        },
+        {
+          "t": 323,
+          "title": "A garantia no contrato"
+        },
+        {
+          "t": 342,
+          "title": "Recebimento provisório e definitivo"
+        },
+        {
+          "t": 365,
+          "title": "Os marcos da entrega"
+        },
+        {
+          "t": 383,
+          "title": "Resumo da série"
+        },
+        {
+          "t": 403,
+          "title": "Aviso"
+        },
+        {
+          "t": 420,
+          "title": "Quatro perguntas"
+        },
+        {
+          "t": 436,
+          "title": "Fim da série"
+        }
+      ]
+    },
+    {
+      "id": "PL01",
+      "youtubeId": "e4J8OVG9xiU",
+      "status": "published",
+      "channel": "academy",
+      "language": "pl",
+      "market": "PL",
+      "series": "playbook-poland",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "Jak zrobić kosztorys budowy domu? Przedmiar, ceny i narzuty",
+      "description": "Jak zrobić kosztorys budowy domu i sprawdzić, z czego wynika końcowa kwota? W pierwszym odcinku serii „Budowa domu” pracujemy na przykładzie parterowego domu o powierzchni 140 m² pod Radomiem w OpenConstructionERP.",
+      "duration": 413,
+      "cover": "https://i.ytimg.com/vi/e4J8OVG9xiU/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Po co kosztorys"
+        },
+        {
+          "t": 64,
+          "title": "Przedmiar i ceny"
+        },
+        {
+          "t": 246,
+          "title": "Narzuty i VAT"
+        },
+        {
+          "t": 345,
+          "title": "Wydruk i kontrola"
+        }
+      ]
+    },
+    {
+      "id": "PL02",
+      "youtubeId": "b4Ow_AavjCE",
+      "status": "published",
+      "channel": "academy",
+      "language": "pl",
+      "market": "PL",
+      "series": "playbook-poland",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "tender-from-boq",
+        "respond-to-an-invitation-to-tender-as-a-subcontractor",
+        "sense-check-an-estimate-with-benchmarks"
+      ],
+      "routes": [
+        "/boq",
+        "/tendering",
+        "/bid-management",
+        "/files",
+        "/cost-explorer",
+        "/validation"
+      ],
+      "result": "bill",
+      "title": "Kosztorys ofertowy: wycena robót i porównanie kosztów",
+      "description": "Jak przygotować kosztorys ofertowy na podstawie kosztorysu inwestorskiego? W drugim odcinku serii „Budowa domu” wyceniamy roboty z perspektywy wykonawcy i porównujemy koszty w OpenConstructionERP.",
+      "duration": 410,
+      "cover": "https://i.ytimg.com/vi/b4Ow_AavjCE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Oferta i przetarg"
+        },
+        {
+          "t": 101,
+          "title": "Twoje ceny"
+        },
+        {
+          "t": 217,
+          "title": "Narzuty i porównanie"
+        },
+        {
+          "t": 290,
+          "title": "Granica i kontrola"
+        }
+      ]
+    },
+    {
+      "id": "PL03",
+      "youtubeId": "Av_Zk5RBMVU",
+      "status": "published",
+      "channel": "academy",
+      "language": "pl",
+      "market": "PL",
+      "series": "playbook-poland",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "planner"
+      ],
+      "cases": [
+        "build-a-milestone-payment-schedule",
+        "build-the-baseline-programme",
+        "forecast-project-cash-flow"
+      ],
+      "routes": [
+        "/schedule",
+        "/contracts",
+        "/finance",
+        "/boq",
+        "/schedule-advanced",
+        "/reports"
+      ],
+      "result": "programme",
+      "title": "Umowa o roboty budowlane: harmonogram i plan płatności",
+      "description": "Jak połączyć umowę o roboty budowlane, harmonogram i płatności za etapy? W trzecim odcinku serii „Budowa domu” wykorzystujemy kosztorys ofertowy do zaplanowania realizacji w OpenConstructionERP.",
+      "duration": 432,
+      "cover": "https://i.ytimg.com/vi/Av_Zk5RBMVU/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Umowa o roboty"
+        },
+        {
+          "t": 77,
+          "title": "Kosztorysowe czy ryczałt"
+        },
+        {
+          "t": 208,
+          "title": "Harmonogram"
+        },
+        {
+          "t": 307,
+          "title": "Raty i podpis"
+        }
+      ]
+    },
+    {
+      "id": "PL04",
+      "youtubeId": "FNMEizW21Ho",
+      "status": "published",
+      "channel": "academy",
+      "language": "pl",
+      "market": "PL",
+      "series": "playbook-poland",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "accountant",
+        "contract-administrator"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "issue-an-electronic-invoice",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "Odbiór robót i faktura: rozliczenie etapu budowy",
+      "description": "Etap budowy jest gotowy. Jak przejść od odbioru robót do rozliczenia i faktury? W czwartym odcinku serii „Budowa domu” pokazujemy ten proces w OpenConstructionERP.",
+      "duration": 419,
+      "cover": "https://i.ytimg.com/vi/FNMEizW21Ho/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Odbiór etapu"
+        },
+        {
+          "t": 109,
+          "title": "Rozliczenie i kaucja"
+        },
+        {
+          "t": 191,
+          "title": "Faktura i VAT"
+        },
+        {
+          "t": 290,
+          "title": "Gwarancja zapłaty"
+        }
+      ]
+    },
+    {
+      "id": "PL05",
+      "youtubeId": "nQ3KtajmJP0",
+      "status": "published",
+      "channel": "academy",
+      "language": "pl",
+      "market": "PL",
+      "series": "playbook-poland",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "adjust-a-material-price-with-a-cost-index"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/price-index",
+        "/correspondence"
+      ],
+      "result": "change",
+      "title": "Roboty dodatkowe: wycena zmiany, aneks i waloryzacja",
+      "description": "Inwestor chce dodać garderobę w trakcie budowy. Jak wycenić dodatkowe roboty i zapisać zmianę w umowie? W piątym odcinku serii „Budowa domu” liczymy zmianę w OpenConstructionERP i omawiamy waloryzację wynagrodzenia.",
+      "duration": 430,
+      "cover": "https://i.ytimg.com/vi/nQ3KtajmJP0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Roboty dodatkowe"
+        },
+        {
+          "t": 153,
+          "title": "Aneks w programie"
+        },
+        {
+          "t": 223,
+          "title": "Waloryzacja"
+        },
+        {
+          "t": 288,
+          "title": "Klauzula i próg"
+        }
+      ]
+    },
+    {
+      "id": "TR01",
+      "youtubeId": "VXdmpHvVHqE",
+      "status": "published",
+      "channel": "academy",
+      "language": "tr",
+      "market": "TR",
+      "series": "playbook-turkey",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "price-a-tender-on-the-schedule-of-rates-that-governs-it",
+        "evaluate-a-government-tender-against-the-estimated-cost"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/contracts",
+        "/costs",
+        "/estimate-basis",
+        "/tendering",
+        "/bid-management",
+        "/cost-explorer"
+      ],
+      "result": "bill",
+      "title": "Yaklaşık Maliyet Nasıl Hesaplanır? Metrajdan Keşif Özetine Adım Adım (2026)",
+      "description": "840 m²'lik bir okul ek binası, Bakanlığın 2026 yapı yaklaşık birim maliyetiyle kabaca 17.682.000 TL. Ama ihaleye bu kaba sayıyla değil, kalem kalem hesaplanmış bir yaklaşık maliyetle çıkılır.",
+      "duration": 442,
+      "cover": "https://i.ytimg.com/vi/VXdmpHvVHqE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Neden önemli"
+        },
+        {
+          "t": 95,
+          "title": "Metraj ve analiz"
+        },
+        {
+          "t": 260,
+          "title": "Keşif ve KDV"
+        },
+        {
+          "t": 377,
+          "title": "Çıktı ve kontrol"
+        }
+      ]
+    },
+    {
+      "id": "TR02",
+      "youtubeId": "Qfhkq7cXXWg",
+      "status": "published",
+      "channel": "academy",
+      "language": "tr",
+      "market": "TR",
+      "series": "playbook-turkey",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "compare-bids-and-award",
+        "evaluate-a-government-tender-against-the-estimated-cost",
+        "level-bids-to-a-common-scope"
+      ],
+      "routes": [
+        "/tendering",
+        "/bid-management",
+        "/reports",
+        "/estimate-basis",
+        "/cost-explorer",
+        "/contracts"
+      ],
+      "result": "award",
+      "title": "İhale Teklifi Nasıl Hazırlanır? Teklif Hesabı, Sınır Değer ve Aşırı Düşük Teklif (2026)",
+      "description": "Beş teklif açıldı. En ucuzu İstekli D: yaklaşık maliyetin %30,4 altında, 3.886.720,09 TL. İhaleyi o mu alır? Her zaman değil. Kamu ihalesinde en ucuz teklif, sınır değerin altında kalırsa aşırı düşük teklif sayılır ve açıklama istenir.",
+      "duration": 448,
+      "cover": "https://i.ytimg.com/vi/Qfhkq7cXXWg/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Teklif hesabı"
+        },
+        {
+          "t": 164,
+          "title": "Teklifler açılıyor"
+        },
+        {
+          "t": 227,
+          "title": "Sınır değer"
+        },
+        {
+          "t": 370,
+          "title": "Sonuç ve kontrol"
+        }
+      ]
+    },
+    {
+      "id": "TR03",
+      "youtubeId": "NoCG36uilqc",
+      "status": "published",
+      "channel": "academy",
+      "language": "tr",
+      "market": "TR",
+      "series": "playbook-turkey",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "project-manager"
+      ],
+      "cases": [
+        "set-the-securities-and-work-through-to-final-completion",
+        "build-a-milestone-payment-schedule",
+        "build-the-baseline-programme"
+      ],
+      "routes": [
+        "/contracts",
+        "/files",
+        "/finance",
+        "/inspections",
+        "/closeout",
+        "/punchlist",
+        "/defects-liability",
+        "/schedule",
+        "/boq",
+        "/schedule-advanced",
+        "/reports"
+      ],
+      "result": "programme",
+      "title": "Yapım Sözleşmesi Nasıl İmzalanır? Kesin Teminat, Götürü Bedel ve İş Programı (2026)",
+      "description": "İhaleyi 5.134.654,97 TL'lik teklifle kazandınız. Ama imza olmadan iş de yok: davetten sonra 10 gününüz var. Bu sürede kesin teminatı getirmezseniz geçici teminatınız gelir kaydedilir.",
+      "duration": 448,
+      "cover": "https://i.ytimg.com/vi/NoCG36uilqc/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "İmza"
+        },
+        {
+          "t": 133,
+          "title": "Sözleşme kaydı"
+        },
+        {
+          "t": 196,
+          "title": "İş programı"
+        },
+        {
+          "t": 294,
+          "title": "Ödeme planı"
+        }
+      ]
+    },
+    {
+      "id": "TR04",
+      "youtubeId": "S5-fKPABLp8",
+      "status": "published",
+      "channel": "academy",
+      "language": "tr",
+      "market": "TR",
+      "series": "playbook-turkey",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "value-the-month-and-certify-the-progress-payment",
+        "issue-an-electronic-invoice"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/inspections",
+        "/progress",
+        "/payment-clock"
+      ],
+      "result": "invoice",
+      "title": "Hakediş Nasıl Hazırlanır? Metrajdan Ödemeye Örnek Hakediş (2026)",
+      "description": "Mart ayı bitti. Bu ay yapılan işin karşılığı 1.704.331,97 TL. Peki hesabınıza ne kadar girer? Önce KDV eklenir, sonra stopaj, KDV tevkifatı, teminat kesintisi ve damga vergisi düşülür. Örneğimizde hesaba giren tutar 1.756.348,17 TL.",
+      "duration": 453,
+      "cover": "https://i.ytimg.com/vi/S5-fKPABLp8/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Ölçüm"
+        },
+        {
+          "t": 88,
+          "title": "Yapılan işler"
+        },
+        {
+          "t": 210,
+          "title": "Hakediş raporu"
+        },
+        {
+          "t": 266,
+          "title": "Kesintiler"
+        }
+      ]
+    },
+    {
+      "id": "TR05",
+      "youtubeId": "P-f3NV654og",
+      "status": "published",
+      "channel": "academy",
+      "language": "tr",
+      "market": "TR",
+      "series": "playbook-turkey",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "agree-the-final-account-and-release-retention",
+        "assess-and-price-a-variation",
+        "adjust-a-material-price-with-a-cost-index"
+      ],
+      "routes": [
+        "/contracts",
+        "/finance",
+        "/reports",
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/price-index",
+        "/correspondence"
+      ],
+      "result": "handover",
+      "title": "Fiyat Farkı, İlave İş ve Kesin Hesap: Bir Yapım İşini Örnekle Kapatmak (2026)",
+      "description": "İş bitti. Peki hesap da bitti mi? Nisanda yeraltı suyu çıktı, radyeye su yalıtımı eklendi: 46 m² × 413,23 TL = 19.008,58 TL'lik ilave iş. Fiyatlar da arttı: deneme hesabında fiyat farkı yaklaşık 114.781 TL. Sonunda kesin hesap ve kilitli paraların ne zaman açıldığı.",
+      "duration": 470,
+      "cover": "https://i.ytimg.com/vi/P-f3NV654og/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "İlave iş"
+        },
+        {
+          "t": 126,
+          "title": "Yeni birim fiyat"
+        },
+        {
+          "t": 189,
+          "title": "Fiyat farkı"
+        },
+        {
+          "t": 331,
+          "title": "Kesin hesap"
+        }
+      ]
+    },
+    {
+      "id": "AR01",
+      "youtubeId": "qUU14PaPHCI",
+      "status": "published",
+      "channel": "academy",
+      "language": "ar",
+      "market": "SA",
+      "series": "playbook-saudi",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "escalate-an-estimate-with-price-indices"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/price-index",
+        "/estimate-basis"
+      ],
+      "result": "bill",
+      "title": "كم تكلّف مواد عظم فيلا في الرياض؟ جدول كميات خطوة بخطوة",
+      "description": "في سنة واحدة ارتفع سعر حديد التسليح مقاس 16 مم نحو 22.9% (متوسط وطني، الهيئة العامة للإحصاء، سبتمبر 2025 ← سبتمبر 2026)، أي أكثر من 13 ألف ريال على مواد عظم فيلا من دورين.",
+      "duration": 600,
+      "cover": "https://i.ytimg.com/vi/qUU14PaPHCI/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "لماذا يهمّك"
+        },
+        {
+          "t": 41,
+          "title": "الكميات وسعر الوحدة"
+        },
+        {
+          "t": 152,
+          "title": "التسعير في التطبيق"
+        },
+        {
+          "t": 416,
+          "title": "قراءة النتيجة"
+        },
+        {
+          "t": 522,
+          "title": "الخلاصة"
+        }
+      ]
+    },
+    {
+      "id": "AR02",
+      "youtubeId": "RmKbLkeXmm0",
+      "status": "published",
+      "channel": "academy",
+      "language": "ar",
+      "market": "SA",
+      "series": "playbook-saudi",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "procurement-buyer",
+        "estimator"
+      ],
+      "cases": [
+        "level-subcontract-bids-and-flow-the-terms-down",
+        "compare-bids-and-award",
+        "package-a-subcontract-under-saudization-and-local-content"
+      ],
+      "routes": [
+        "/tendering",
+        "/subcontractors",
+        "/contracts",
+        "/reports",
+        "/bid-management",
+        "/procurement",
+        "/deadlines",
+        "/finance"
+      ],
+      "result": "award",
+      "title": "مصنعية العظم: ثلاثة عروض لعظم واحد، أيها الأرخص فعلاً؟",
+      "description": "ثلاثة مقاولين لعظم فيلا واحدة: 57 ألفاً و67 ألفاً و78 ألف ريال. الأرخص على الورق ترك خانة خشب الشدّة فارغة، وبعد إكمالها بسعرنا المرجعي صار أغلى من العرض أ بنحو 1,600 ريال.",
+      "duration": 481,
+      "cover": "https://i.ytimg.com/vi/RmKbLkeXmm0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "الحزمة"
+        },
+        {
+          "t": 155,
+          "title": "العروض"
+        },
+        {
+          "t": 203,
+          "title": "المقارنة"
+        },
+        {
+          "t": 309,
+          "title": "الترسية"
+        },
+        {
+          "t": 345,
+          "title": "السعر النهائي"
+        }
+      ]
+    },
+    {
+      "id": "AR03",
+      "youtubeId": "F9ipxHvCegQ",
+      "status": "published",
+      "channel": "academy",
+      "language": "ar",
+      "market": "SA",
+      "series": "playbook-saudi",
+      "seriesOrder": 3,
+      "stage": "procure",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "set-the-vat-treatment-on-a-saudi-construction-contract",
+        "manage-retention-across-the-supply-chain",
+        "build-a-milestone-payment-schedule"
+      ],
+      "routes": [
+        "/contracts",
+        "/boq",
+        "/finance",
+        "/property-dev",
+        "/tax-withholding",
+        "/reports",
+        "/subcontractors",
+        "/reconciliation",
+        "/schedule"
+      ],
+      "result": "order",
+      "title": "عقد العظم: من 240 ألفاً، كم تقبض فعلاً؟",
+      "description": "عقد عظم فيلا بقيمة 239,987 ريالاً، لكنك لا تقبض من كل مستخلص إلا نحو 80%: 10% تُستردّ بها الدفعة المقدمة، و10% محتجزة حتى التسليم. وتأخير 100 يوم قد يكلّفك قرابة 24 ألف ريال، ولولا سقف الغرامة لكان أكثر.",
+      "duration": 460,
+      "cover": "https://i.ytimg.com/vi/F9ipxHvCegQ/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "نوع العقد"
+        },
+        {
+          "t": 163,
+          "title": "الدفعة المقدمة"
+        },
+        {
+          "t": 231,
+          "title": "المحتجزات"
+        },
+        {
+          "t": 281,
+          "title": "غرامة التأخير"
+        },
+        {
+          "t": 333,
+          "title": "التوقيع"
+        }
+      ]
+    },
+    {
+      "id": "AR04",
+      "youtubeId": "naomR5B8ywE",
+      "status": "published",
+      "channel": "academy",
+      "language": "ar",
+      "market": "SA",
+      "series": "playbook-saudi",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "set-the-vat-treatment-on-a-saudi-construction-contract",
+        "clear-a-standard-invoice-through-zatca-phase-two"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/property-dev",
+        "/tax-withholding",
+        "/settings",
+        "/validation",
+        "/einvoice-clearance",
+        "/files"
+      ],
+      "result": "invoice",
+      "title": "أول مستخلص: 42 ألفاً من العمل… كم يصل حسابك؟",
+      "description": "أعمال شهر نوفمبر في الفيلا تساوي 41,832 ريالاً، وتُضاف إليها الضريبة، ومع ذلك لا يصل إلى حسابك إلا 39,113 ريالاً، ومنها 5,647 ضريبة تورّدها أنت للهيئة. أين ذهب الفرق؟",
+      "duration": 422,
+      "cover": "https://i.ytimg.com/vi/naomR5B8ywE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "القياس"
+        },
+        {
+          "t": 103,
+          "title": "التسعير"
+        },
+        {
+          "t": 164,
+          "title": "الخصومات"
+        },
+        {
+          "t": 211,
+          "title": "الضريبة"
+        },
+        {
+          "t": 281,
+          "title": "الاعتماد والصرف"
+        }
+      ]
+    },
+    {
+      "id": "AR05",
+      "youtubeId": "liaEeAmEzoM",
+      "status": "published",
+      "channel": "academy",
+      "language": "ar",
+      "market": "SA",
+      "series": "playbook-saudi",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "commercial-manager",
+        "accountant"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "clear-a-standard-invoice-through-zatca-phase-two"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/settings",
+        "/finance",
+        "/validation",
+        "/einvoice-clearance",
+        "/files"
+      ],
+      "result": "change",
+      "title": "«أريد بلكونة»: أمر تغيير وفاتورة ضريبية إلكترونية",
+      "description": "المالك يطلب بلكونة في الموقع. إن صببتها بلا أمر تغيير مكتوب، فقد لا يدفع أحد قرابة 3,000 ريال. والفاتورة المكتوبة باليد لم تعد فاتورة ضريبية منذ 2021.",
+      "duration": 429,
+      "cover": "https://i.ytimg.com/vi/liaEeAmEzoM/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "الطلب"
+        },
+        {
+          "t": 99,
+          "title": "التسعير"
+        },
+        {
+          "t": 148,
+          "title": "الاعتماد"
+        },
+        {
+          "t": 203,
+          "title": "الفاتورة الضريبية"
+        },
+        {
+          "t": 284,
+          "title": "الفوترة الإلكترونية"
+        }
+      ]
+    },
+    {
       "id": "ddc-walkthrough-v15",
       "youtubeId": "vENnh7bBVVM",
       "status": "published",
@@ -6117,6 +7597,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/files"
       ]
     },
+    "apply-the-annual-reajustamento-to-a-brazilian-contract": {
+      "titleKey": "cases.apply_the_annual_reajustamento_to_a_brazilian_contract.title",
+      "titleDefault": "Apply the annual reajustamento to a Brazilian contract",
+      "region": "BR",
+      "stage": "build",
+      "routes": [
+        "/contracts",
+        "/price-index",
+        "/progress",
+        "/boq",
+        "/variations",
+        "/finance"
+      ]
+    },
     "appraise-a-development-scheme": {
       "titleKey": "cases.appraise_a_development_scheme.title",
       "titleDefault": "Appraise a development scheme",
@@ -6139,6 +7633,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/value",
         "/contracts",
         "/reports"
+      ]
+    },
+    "attest-the-boletim-de-medicao-and-invoice-the-period": {
+      "titleKey": "cases.attest_the_boletim_de_medicao_and_invoice_the_period.title",
+      "titleDefault": "Attest the boletim de medicao and invoice the period",
+      "region": "BR",
+      "stage": "build",
+      "routes": [
+        "/contracts",
+        "/progress",
+        "/boq",
+        "/governance",
+        "/finance",
+        "/reconciliation"
       ]
     },
     "balance-the-portfolio-and-level-resources": {
@@ -6174,6 +7682,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/boq",
         "/5d",
         "/schedule"
+      ]
+    },
+    "build-a-composicao-de-custo-unitario-propria": {
+      "titleKey": "cases.build_a_composicao_de_custo_unitario_propria.title",
+      "titleDefault": "Build a composicao de custo unitario propria",
+      "region": "BR",
+      "stage": "estimate",
+      "routes": [
+        "/catalog",
+        "/norm-expansion",
+        "/assemblies",
+        "/boq",
+        "/estimate-basis",
+        "/costs"
       ]
     },
     "build-a-comprehensive-unit-rate-under-gb-50500": {
@@ -6268,6 +7790,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "build-the-cronograma-fisico-financeiro-from-the-orcamento": {
+      "titleKey": "cases.build_the_cronograma_fisico_financeiro_from_the_orcamento.title",
+      "titleDefault": "Build the cronograma fisico-financeiro from the orcamento",
+      "region": "BR",
+      "stage": "plan",
+      "routes": [
+        "/boq",
+        "/schedule",
+        "/5d",
+        "/finance",
+        "/validation",
+        "/reports"
+      ]
+    },
     "build-the-resource-library-and-rates": {
       "titleKey": "cases.build_the_resource_library_and_rates.title",
       "titleDefault": "Build the resource library and rates",
@@ -6358,6 +7894,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "clear-a-standard-invoice-through-zatca-phase-two": {
+      "titleKey": "cases.clear_a_standard_invoice_through_zatca_phase_two.title",
+      "titleDefault": "Clear a standard invoice through ZATCA phase two",
+      "region": "SA",
+      "stage": "build",
+      "routes": [
+        "/settings",
+        "/finance",
+        "/validation",
+        "/einvoice-clearance",
+        "/files",
+        "/reports"
+      ]
+    },
     "clear-the-snag-list-before-handover": {
       "titleKey": "cases.clear_the_snag_list_before_handover.title",
       "titleDefault": "Clear the snag list before handover",
@@ -6430,6 +7980,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/boq",
         "/cost-explorer",
         "/tendering"
+      ]
+    },
+    "compose-the-bdi-under-acordao-2622-2013-tcu": {
+      "titleKey": "cases.compose_the_bdi_under_acordao_2622_2013_tcu.title",
+      "titleDefault": "Compose the BDI under Acordao 2622/2013-TCU",
+      "region": "BR",
+      "stage": "build",
+      "routes": [
+        "/preliminaries",
+        "/allowances",
+        "/boq",
+        "/estimate-basis",
+        "/reports"
       ]
     },
     "control-cost-against-budget": {
@@ -6545,6 +8108,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "escalate-an-estimate-with-price-indices": {
+      "titleKey": "cases.escalate_an_estimate_with_price_indices.title",
+      "titleDefault": "Escalate an estimate with price indices",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/price-index",
+        "/boq",
+        "/estimate-basis"
+      ]
+    },
     "estimate-from-cost-database": {
       "titleKey": "cases.estimate_from_cost_database.title",
       "titleDefault": "Estimate from a cost database",
@@ -6568,6 +8142,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/waste-factors",
         "/assemblies",
         "/price-index"
+      ]
+    },
+    "evaluate-a-government-tender-against-the-estimated-cost": {
+      "titleKey": "cases.evaluate_a_government_tender_against_the_estimated_cost.title",
+      "titleDefault": "Evaluate a government tender against the estimated cost",
+      "region": "IN",
+      "stage": "procure",
+      "routes": [
+        "/estimate-basis",
+        "/tendering",
+        "/bid-management",
+        "/cost-explorer",
+        "/contracts"
       ]
     },
     "feasibility-budget-before-design": {
@@ -6709,6 +8296,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "keep-the-orcamento-estimado-sigiloso-under-lei-14133": {
+      "titleKey": "cases.keep_the_orcamento_estimado_sigiloso_under_lei_14133.title",
+      "titleDefault": "Keep the orcamento estimado sigiloso under Lei 14.133",
+      "region": "BR",
+      "stage": "procure",
+      "routes": [
+        "/boq",
+        "/tendering",
+        "/reports",
+        "/files",
+        "/bid-management",
+        "/correspondence"
+      ]
+    },
     "level-bids-to-a-common-scope": {
       "titleKey": "cases.level_bids_to_a_common_scope.title",
       "titleDefault": "Level bids to a common scope",
@@ -6815,6 +8416,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ]
     },
+    "measure-the-drawing-into-a-coded-bill-item": {
+      "titleKey": "cases.measure_the_drawing_into_a_coded_bill_item.title",
+      "titleDefault": "Measure the drawing into a coded bill item",
+      "region": "CN",
+      "stage": "estimate",
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation"
+      ]
+    },
     "nachtrag-with-evidence-not-argument": {
       "titleKey": "cases.nachtrag_with_evidence_not_argument.title",
       "titleDefault": "Build a Nachtrag on evidence, not argument",
@@ -6827,6 +8440,21 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/field-time",
         "/boq",
         "/claims-evidence"
+      ]
+    },
+    "package-a-subcontract-under-saudization-and-local-content": {
+      "titleKey": "cases.package_a_subcontract_under_saudization_and_local_content.title",
+      "titleDefault": "Package a subcontract under Saudization and local content",
+      "region": "SA",
+      "stage": "procure",
+      "routes": [
+        "/procurement",
+        "/subcontractors",
+        "/tendering",
+        "/contracts",
+        "/deadlines",
+        "/reports",
+        "/finance"
       ]
     },
     "payment-application-and-reconciliation": {
@@ -6853,6 +8481,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ]
     },
+    "price-a-tender-on-the-schedule-of-rates-that-governs-it": {
+      "titleKey": "cases.price_a_tender_on_the_schedule_of_rates_that_governs_it.title",
+      "titleDefault": "Price a tender on the schedule of rates that governs it",
+      "region": "IN",
+      "stage": "estimate",
+      "routes": [
+        "/contracts",
+        "/costs",
+        "/boq",
+        "/validation",
+        "/estimate-basis"
+      ]
+    },
     "price-a-variation-and-agree-the-extension-of-time": {
       "titleKey": "cases.price_a_variation_and_agree_the_extension_of_time.title",
       "titleDefault": "Price a variation and agree the extension of time",
@@ -6875,6 +8516,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/catalog",
         "/boq",
         "/estimate-basis",
+        "/reports"
+      ]
+    },
+    "price-the-orcamento-de-referencia-from-the-sinapi-base": {
+      "titleKey": "cases.price_the_orcamento_de_referencia_from_the_sinapi_base.title",
+      "titleDefault": "Price the orcamento de referencia from the SINAPI base",
+      "region": "BR",
+      "stage": "estimate",
+      "routes": [
+        "/costs",
+        "/boq",
+        "/validation",
+        "/estimate-basis",
+        "/cost-explorer",
         "/reports"
       ]
     },
@@ -7063,6 +8718,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "respond-to-an-invitation-to-tender-as-a-subcontractor": {
+      "titleKey": "cases.respond_to_an_invitation_to_tender_as_a_subcontractor.title",
+      "titleDefault": "Respond to an invitation to tender as a subcontractor",
+      "region": null,
+      "stage": "procure",
+      "routes": [
+        "/bid-management",
+        "/boq",
+        "/files"
+      ]
+    },
     "review-ai-takeoff-proposals": {
       "titleKey": "cases.review_ai_takeoff_proposals.title",
       "titleDefault": "Review what the AI read off the drawing",
@@ -7186,6 +8852,35 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/signing",
         "/payment-clock",
         "/deadlines"
+      ]
+    },
+    "set-the-securities-and-work-through-to-final-completion": {
+      "titleKey": "cases.set_the_securities_and_work_through_to_final_completion.title",
+      "titleDefault": "Set the securities and work through to final completion",
+      "region": "ZA",
+      "stage": "handover",
+      "routes": [
+        "/contracts",
+        "/files",
+        "/finance",
+        "/inspections",
+        "/closeout",
+        "/punchlist",
+        "/defects-liability"
+      ]
+    },
+    "set-the-vat-treatment-on-a-saudi-construction-contract": {
+      "titleKey": "cases.set_the_vat_treatment_on_a_saudi_construction_contract.title",
+      "titleDefault": "Set the VAT treatment on a Saudi construction contract",
+      "region": "SA",
+      "stage": "procure",
+      "routes": [
+        "/contracts",
+        "/boq",
+        "/finance",
+        "/property-dev",
+        "/tax-withholding",
+        "/reports"
       ]
     },
     "set-up-a-new-project": {

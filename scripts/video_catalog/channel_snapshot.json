@@ -3254,6 +3254,863 @@
    ],
    "duration": 488,
    "published": "2026-10-24"
+  },
+  {
+   "youtubeId": "a5qbM2drFkE",
+   "title": "Cronograma físico-financeiro de obra: Gantt, caminho crítico e curva S | BR 03/05",
+   "summary": "Quanto dinheiro uma obra precisa em cada mês? Neste estudo prático, montamos o cronograma físico-financeiro da ampliação de uma escola municipal de 160 m², com contrato didático de R$ 309.002 e prazo de sete meses. Você verá como organizar etapas e dependências, estimar durações com apoio das composições SINAPI, montar o gráfico de Gantt e identificar o caminho crítico. Depois, distribuímos os valores ao longo do prazo para visualizar a curva S e discutimos como o calendário de medição e pagamento afeta o capital de giro da construtora. O exemplo é demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Quando entra o dinheiro"
+    },
+    {
+     "t": 21,
+     "title": "Para quem é"
+    },
+    {
+     "t": 45,
+     "title": "O projeto"
+    },
+    {
+     "t": 65,
+     "title": "Físico-financeiro, sem mistério"
+    },
+    {
+     "t": 90,
+     "title": "As doze etapas"
+    },
+    {
+     "t": 114,
+     "title": "O cronograma no aplicativo"
+    },
+    {
+     "t": 127,
+     "title": "Quanto dura cada etapa"
+    },
+    {
+     "t": 152,
+     "title": "A obra inteira"
+    },
+    {
+     "t": 173,
+     "title": "Gantt e caminho crítico"
+    },
+    {
+     "t": 196,
+     "title": "O dinheiro de cada etapa"
+    },
+    {
+     "t": 217,
+     "title": "O valor de cada mês"
+    },
+    {
+     "t": 241,
+     "title": "A curva S"
+    },
+    {
+     "t": 262,
+     "title": "A curva da nossa escola"
+    },
+    {
+     "t": 278,
+     "title": "Medição mensal e caixa"
+    },
+    {
+     "t": 299,
+     "title": "O buraco no caixa"
+    },
+    {
+     "t": 320,
+     "title": "Administração local"
+    },
+    {
+     "t": 345,
+     "title": "Jogo de planilha"
+    },
+    {
+     "t": 364,
+     "title": "A lista completa"
+    },
+    {
+     "t": 381,
+     "title": "Aviso"
+    },
+    {
+     "t": 393,
+     "title": "Quatro perguntas"
+    },
+    {
+     "t": 409,
+     "title": "Próximo vídeo"
+    }
+   ],
+   "duration": 427,
+   "published": "2026-10-28"
+  },
+  {
+   "youtubeId": "fwkAAeGl5hI",
+   "title": "Licitação de obras públicas: proposta e regra dos 75% | BR 02/05",
+   "summary": "Como uma pequena construtora monta uma proposta para licitação de obra pública? Neste exemplo, partimos do orçamento de referência da ampliação de uma escola municipal de 160 m²: trocamos preços de tabela por cotações, calculamos o desconto e comparamos três propostas. Depois, analisamos os critérios da Lei nº 14.133/2021, incluindo a regra de inexequibilidade prevista no art. 59 e a garantia adicional. O edital e a análise do caso concreto continuam essenciais.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "O piso da proposta"
+    },
+    {
+     "t": 13,
+     "title": "Para quem é"
+    },
+    {
+     "t": 56,
+     "title": "Licitação em 1 minuto"
+    },
+    {
+     "t": 76,
+     "title": "Referência x proposta"
+    },
+    {
+     "t": 94,
+     "title": "Dois orçamentos no aplicativo"
+    },
+    {
+     "t": 133,
+     "title": "O total da proposta"
+    },
+    {
+     "t": 150,
+     "title": "O desconto"
+    },
+    {
+     "t": 168,
+     "title": "O teto"
+    },
+    {
+     "t": 185,
+     "title": "O piso de 75%"
+    },
+    {
+     "t": 231,
+     "title": "A faixa da garantia"
+    },
+    {
+     "t": 256,
+     "title": "As três propostas"
+    },
+    {
+     "t": 279,
+     "title": "O sistema avisa, a lei decide"
+    },
+    {
+     "t": 307,
+     "title": "Os lances"
+    },
+    {
+     "t": 333,
+     "title": "Sobrepreço"
+    },
+    {
+     "t": 376,
+     "title": "A planilha final"
+    },
+    {
+     "t": 410,
+     "title": "Quatro perguntas"
+    },
+    {
+     "t": 426,
+     "title": "Próximo episódio"
+    }
+   ],
+   "duration": 446,
+   "published": "2026-10-28"
+  },
+  {
+   "youtubeId": "FXrYc6XxRHY",
+   "title": "Medição de obra pública: boletim, aditivo de 25% e reajuste INCC | BR 04/05",
+   "summary": "Como medir o que foi executado, formalizar um aditivo e calcular o reajuste de uma obra pública? Neste estudo prático, acompanhamos a primeira medição da ampliação de uma escola municipal, comparamos o previsto com o realizado e registramos o avanço na curva S. Em seguida, analisamos um serviço novo, o limite contratual do aditivo, a manutenção do desconto da proposta e a aplicação do INCC conforme a data-base e as condições do contrato. O processo é demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "O fiscal na obra"
+    },
+    {
+     "t": 12,
+     "title": "Para quem é"
+    },
+    {
+     "t": 35,
+     "title": "O projeto"
+    },
+    {
+     "t": 57,
+     "title": "O que é medição"
+    },
+    {
+     "t": 80,
+     "title": "As medições no aplicativo"
+    },
+    {
+     "t": 93,
+     "title": "Quantidade por linha"
+    },
+    {
+     "t": 117,
+     "title": "A primeira medição"
+    },
+    {
+     "t": 134,
+     "title": "Plano x real"
+    },
+    {
+     "t": 157,
+     "title": "Medir a mais"
+    },
+    {
+     "t": 171,
+     "title": "A curva real"
+    },
+    {
+     "t": 191,
+     "title": "O aditivo"
+    },
+    {
+     "t": 220,
+     "title": "O limite de 25%"
+    },
+    {
+     "t": 245,
+     "title": "Preço de serviço novo"
+    },
+    {
+     "t": 274,
+     "title": "O aditivo no aplicativo"
+    },
+    {
+     "t": 295,
+     "title": "O novo valor do contrato"
+    },
+    {
+     "t": 312,
+     "title": "Primeiro o aditivo"
+    },
+    {
+     "t": 334,
+     "title": "O reajuste"
+    },
+    {
+     "t": 359,
+     "title": "O peso do INCC"
+    },
+    {
+     "t": 378,
+     "title": "A conta do reajuste"
+    },
+    {
+     "t": 399,
+     "title": "Aviso"
+    },
+    {
+     "t": 415,
+     "title": "Quatro perguntas"
+    },
+    {
+     "t": 431,
+     "title": "Próximo vídeo"
+    }
+   ],
+   "duration": 449,
+   "published": "2026-10-28"
+  },
+  {
+   "youtubeId": "tpBk_sSiuH4",
+   "title": "Nota fiscal de obra (NFS-e): retenções de ISS e INSS | BR 05/05",
+   "summary": "Por que o valor líquido recebido é menor que o total da nota? Neste episódio, acompanhamos a emissão de uma NFS-e a partir da medição aprovada de uma obra pública e vemos como ISS, INSS, garantias e etapas de recebimento afetam o caixa da construtora. O exemplo mostra uma nota de R$ 22.414,16 e um líquido de R$ 19.276,18, com o fluxo demonstrado no OpenConstructionERP, software gratuito e de código aberto para orçamento e gestão de obras.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "A nota e o que cai na conta"
+    },
+    {
+     "t": 18,
+     "title": "Para quem é"
+    },
+    {
+     "t": 40,
+     "title": "O projeto"
+    },
+    {
+     "t": 56,
+     "title": "A NFS-e"
+    },
+    {
+     "t": 85,
+     "title": "As faturas no aplicativo"
+    },
+    {
+     "t": 108,
+     "title": "O que é retenção"
+    },
+    {
+     "t": 130,
+     "title": "O ISS"
+    },
+    {
+     "t": 153,
+     "title": "O INSS"
+    },
+    {
+     "t": 180,
+     "title": "A retenção no RPS"
+    },
+    {
+     "t": 210,
+     "title": "O que caiu na conta"
+    },
+    {
+     "t": 229,
+     "title": "A reforma tributária"
+    },
+    {
+     "t": 248,
+     "title": "A fila de pagamento"
+    },
+    {
+     "t": 276,
+     "title": "Cada nota até o pagamento"
+    },
+    {
+     "t": 297,
+     "title": "A garantia"
+    },
+    {
+     "t": 323,
+     "title": "A garantia no contrato"
+    },
+    {
+     "t": 342,
+     "title": "Recebimento provisório e definitivo"
+    },
+    {
+     "t": 365,
+     "title": "Os marcos da entrega"
+    },
+    {
+     "t": 383,
+     "title": "Resumo da série"
+    },
+    {
+     "t": 403,
+     "title": "Aviso"
+    },
+    {
+     "t": 420,
+     "title": "Quatro perguntas"
+    },
+    {
+     "t": 436,
+     "title": "Fim da série"
+    }
+   ],
+   "duration": 452,
+   "published": "2026-10-28"
+  },
+  {
+   "youtubeId": "2B5WhzXi8hE",
+   "title": "Orçamento de obra pública: SINAPI, composição e BDI | BR 01/05",
+   "summary": "Como montar um orçamento de referência para uma obra pública? Neste estudo prático, orçamos a ampliação de uma escola municipal de 160 m²: consultamos o SINAPI, entendemos insumos e coeficientes, montamos composições, apuramos o custo direto e calculamos o BDI com base nas referências do TCU. Ao final, fazemos três verificações importantes antes de fechar a planilha.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Quanto custa a obra?"
+    },
+    {
+     "t": 12,
+     "title": "Para quem é"
+    },
+    {
+     "t": 43,
+     "title": "O projeto"
+    },
+    {
+     "t": 64,
+     "title": "O que é o SINAPI"
+    },
+    {
+     "t": 93,
+     "title": "O que a lei exige"
+    },
+    {
+     "t": 123,
+     "title": "A planilha no aplicativo"
+    },
+    {
+     "t": 140,
+     "title": "Composição: a receita"
+    },
+    {
+     "t": 195,
+     "title": "Custo unitário e encargos"
+    },
+    {
+     "t": 234,
+     "title": "Da composição à linha"
+    },
+    {
+     "t": 286,
+     "title": "Custo direto"
+    },
+    {
+     "t": 305,
+     "title": "O que é BDI"
+    },
+    {
+     "t": 329,
+     "title": "Faixas de referência do TCU"
+    },
+    {
+     "t": 364,
+     "title": "A fórmula do BDI"
+    },
+    {
+     "t": 400,
+     "title": "O BDI no aplicativo"
+    },
+    {
+     "t": 462,
+     "title": "Preço de venda"
+    },
+    {
+     "t": 495,
+     "title": "Três conferências"
+    },
+    {
+     "t": 551,
+     "title": "Próximo episódio"
+    }
+   ],
+   "duration": 575,
+   "published": "2026-10-28"
+  },
+  {
+   "youtubeId": "P-f3NV654og",
+   "title": "Fiyat Farkı, İlave İş ve Kesin Hesap: Bir Yapım İşini Örnekle Kapatmak (2026) | TR 05/05",
+   "summary": "İş bitti. Peki hesap da bitti mi? Nisanda yeraltı suyu çıktı, radyeye su yalıtımı eklendi: 46 m² × 413,23 TL = 19.008,58 TL'lik ilave iş. Fiyatlar da arttı: deneme hesabında fiyat farkı yaklaşık 114.781 TL. Sonunda kesin hesap ve kilitli paraların ne zaman açıldığı.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "İlave iş"
+    },
+    {
+     "t": 126,
+     "title": "Yeni birim fiyat"
+    },
+    {
+     "t": 189,
+     "title": "Fiyat farkı"
+    },
+    {
+     "t": 331,
+     "title": "Kesin hesap"
+    }
+   ],
+   "duration": 470,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "S5-fKPABLp8",
+   "title": "Hakediş Nasıl Hazırlanır? Metrajdan Ödemeye Örnek Hakediş (2026) | TR 04/05",
+   "summary": "Mart ayı bitti. Bu ay yapılan işin karşılığı 1.704.331,97 TL. Peki hesabınıza ne kadar girer? Önce KDV eklenir, sonra stopaj, KDV tevkifatı, teminat kesintisi ve damga vergisi düşülür. Örneğimizde hesaba giren tutar 1.756.348,17 TL.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Ölçüm"
+    },
+    {
+     "t": 88,
+     "title": "Yapılan işler"
+    },
+    {
+     "t": 210,
+     "title": "Hakediş raporu"
+    },
+    {
+     "t": 266,
+     "title": "Kesintiler"
+    }
+   ],
+   "duration": 453,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "e4J8OVG9xiU",
+   "title": "Jak zrobić kosztorys budowy domu? Przedmiar, ceny i narzuty | PL 01/05",
+   "summary": "Jak zrobić kosztorys budowy domu i sprawdzić, z czego wynika końcowa kwota? W pierwszym odcinku serii „Budowa domu” pracujemy na przykładzie parterowego domu o powierzchni 140 m² pod Radomiem w OpenConstructionERP.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Po co kosztorys"
+    },
+    {
+     "t": 64,
+     "title": "Przedmiar i ceny"
+    },
+    {
+     "t": 246,
+     "title": "Narzuty i VAT"
+    },
+    {
+     "t": 345,
+     "title": "Wydruk i kontrola"
+    }
+   ],
+   "duration": 413,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "b4Ow_AavjCE",
+   "title": "Kosztorys ofertowy: wycena robót i porównanie kosztów | PL 02/05",
+   "summary": "Jak przygotować kosztorys ofertowy na podstawie kosztorysu inwestorskiego? W drugim odcinku serii „Budowa domu” wyceniamy roboty z perspektywy wykonawcy i porównujemy koszty w OpenConstructionERP.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Oferta i przetarg"
+    },
+    {
+     "t": 101,
+     "title": "Twoje ceny"
+    },
+    {
+     "t": 217,
+     "title": "Narzuty i porównanie"
+    },
+    {
+     "t": 290,
+     "title": "Granica i kontrola"
+    }
+   ],
+   "duration": 410,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "FNMEizW21Ho",
+   "title": "Odbiór robót i faktura: rozliczenie etapu budowy | PL 04/05",
+   "summary": "Etap budowy jest gotowy. Jak przejść od odbioru robót do rozliczenia i faktury? W czwartym odcinku serii „Budowa domu” pokazujemy ten proces w OpenConstructionERP.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Odbiór etapu"
+    },
+    {
+     "t": 109,
+     "title": "Rozliczenie i kaucja"
+    },
+    {
+     "t": 191,
+     "title": "Faktura i VAT"
+    },
+    {
+     "t": 290,
+     "title": "Gwarancja zapłaty"
+    }
+   ],
+   "duration": 419,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "nQ3KtajmJP0",
+   "title": "Roboty dodatkowe: wycena zmiany, aneks i waloryzacja | PL 05/05",
+   "summary": "Inwestor chce dodać garderobę w trakcie budowy. Jak wycenić dodatkowe roboty i zapisać zmianę w umowie? W piątym odcinku serii „Budowa domu” liczymy zmianę w OpenConstructionERP i omawiamy waloryzację wynagrodzenia.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Roboty dodatkowe"
+    },
+    {
+     "t": 153,
+     "title": "Aneks w programie"
+    },
+    {
+     "t": 223,
+     "title": "Waloryzacja"
+    },
+    {
+     "t": 288,
+     "title": "Klauzula i próg"
+    }
+   ],
+   "duration": 430,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "Av_Zk5RBMVU",
+   "title": "Umowa o roboty budowlane: harmonogram i plan płatności | PL 03/05",
+   "summary": "Jak połączyć umowę o roboty budowlane, harmonogram i płatności za etapy? W trzecim odcinku serii „Budowa domu” wykorzystujemy kosztorys ofertowy do zaplanowania realizacji w OpenConstructionERP.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Umowa o roboty"
+    },
+    {
+     "t": 77,
+     "title": "Kosztorysowe czy ryczałt"
+    },
+    {
+     "t": 208,
+     "title": "Harmonogram"
+    },
+    {
+     "t": 307,
+     "title": "Raty i podpis"
+    }
+   ],
+   "duration": 432,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "VXdmpHvVHqE",
+   "title": "Yaklaşık Maliyet Nasıl Hesaplanır? Metrajdan Keşif Özetine Adım Adım (2026) | TR 01/05",
+   "summary": "840 m²'lik bir okul ek binası, Bakanlığın 2026 yapı yaklaşık birim maliyetiyle kabaca 17.682.000 TL. Ama ihaleye bu kaba sayıyla değil, kalem kalem hesaplanmış bir yaklaşık maliyetle çıkılır.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Neden önemli"
+    },
+    {
+     "t": 95,
+     "title": "Metraj ve analiz"
+    },
+    {
+     "t": 260,
+     "title": "Keşif ve KDV"
+    },
+    {
+     "t": 377,
+     "title": "Çıktı ve kontrol"
+    }
+   ],
+   "duration": 442,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "NoCG36uilqc",
+   "title": "Yapım Sözleşmesi Nasıl İmzalanır? Kesin Teminat, Götürü Bedel ve İş Programı (2026) | TR 03/05",
+   "summary": "İhaleyi 5.134.654,97 TL'lik teklifle kazandınız. Ama imza olmadan iş de yok: davetten sonra 10 gününüz var. Bu sürede kesin teminatı getirmezseniz geçici teminatınız gelir kaydedilir.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "İmza"
+    },
+    {
+     "t": 133,
+     "title": "Sözleşme kaydı"
+    },
+    {
+     "t": 196,
+     "title": "İş programı"
+    },
+    {
+     "t": 294,
+     "title": "Ödeme planı"
+    }
+   ],
+   "duration": 448,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "liaEeAmEzoM",
+   "title": "«أريد بلكونة»: أمر تغيير وفاتورة ضريبية إلكترونية | AR 05/05",
+   "summary": "المالك يطلب بلكونة في الموقع. إن صببتها بلا أمر تغيير مكتوب، فقد لا يدفع أحد قرابة 3,000 ريال. والفاتورة المكتوبة باليد لم تعد فاتورة ضريبية منذ 2021.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "الطلب"
+    },
+    {
+     "t": 99,
+     "title": "التسعير"
+    },
+    {
+     "t": 148,
+     "title": "الاعتماد"
+    },
+    {
+     "t": 203,
+     "title": "الفاتورة الضريبية"
+    },
+    {
+     "t": 284,
+     "title": "الفوترة الإلكترونية"
+    }
+   ],
+   "duration": 429,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "Qfhkq7cXXWg",
+   "title": "İhale Teklifi Nasıl Hazırlanır? Teklif Hesabı, Sınır Değer ve Aşırı Düşük Teklif (2026) | TR 02/05",
+   "summary": "Beş teklif açıldı. En ucuzu İstekli D: yaklaşık maliyetin %30,4 altında, 3.886.720,09 TL. İhaleyi o mu alır? Her zaman değil. Kamu ihalesinde en ucuz teklif, sınır değerin altında kalırsa aşırı düşük teklif sayılır ve açıklama istenir.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Teklif hesabı"
+    },
+    {
+     "t": 164,
+     "title": "Teklifler açılıyor"
+    },
+    {
+     "t": 227,
+     "title": "Sınır değer"
+    },
+    {
+     "t": 370,
+     "title": "Sonuç ve kontrol"
+    }
+   ],
+   "duration": 448,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "naomR5B8ywE",
+   "title": "أول مستخلص: 42 ألفاً من العمل… كم يصل حسابك؟ | AR 04/05",
+   "summary": "أعمال شهر نوفمبر في الفيلا تساوي 41,832 ريالاً، وتُضاف إليها الضريبة، ومع ذلك لا يصل إلى حسابك إلا 39,113 ريالاً، ومنها 5,647 ضريبة تورّدها أنت للهيئة. أين ذهب الفرق؟",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "القياس"
+    },
+    {
+     "t": 103,
+     "title": "التسعير"
+    },
+    {
+     "t": 164,
+     "title": "الخصومات"
+    },
+    {
+     "t": 211,
+     "title": "الضريبة"
+    },
+    {
+     "t": 281,
+     "title": "الاعتماد والصرف"
+    }
+   ],
+   "duration": 422,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "F9ipxHvCegQ",
+   "title": "عقد العظم: من 240 ألفاً، كم تقبض فعلاً؟ | AR 03/05",
+   "summary": "عقد عظم فيلا بقيمة 239,987 ريالاً، لكنك لا تقبض من كل مستخلص إلا نحو 80%: 10% تُستردّ بها الدفعة المقدمة، و10% محتجزة حتى التسليم. وتأخير 100 يوم قد يكلّفك قرابة 24 ألف ريال، ولولا سقف الغرامة لكان أكثر.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "نوع العقد"
+    },
+    {
+     "t": 163,
+     "title": "الدفعة المقدمة"
+    },
+    {
+     "t": 231,
+     "title": "المحتجزات"
+    },
+    {
+     "t": 281,
+     "title": "غرامة التأخير"
+    },
+    {
+     "t": 333,
+     "title": "التوقيع"
+    }
+   ],
+   "duration": 460,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "qUU14PaPHCI",
+   "title": "كم تكلّف مواد عظم فيلا في الرياض؟ جدول كميات خطوة بخطوة | AR 01/05",
+   "summary": "في سنة واحدة ارتفع سعر حديد التسليح مقاس 16 مم نحو 22.9% (متوسط وطني، الهيئة العامة للإحصاء، سبتمبر 2025 ← سبتمبر 2026)، أي أكثر من 13 ألف ريال على مواد عظم فيلا من دورين.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "لماذا يهمّك"
+    },
+    {
+     "t": 41,
+     "title": "الكميات وسعر الوحدة"
+    },
+    {
+     "t": 152,
+     "title": "التسعير في التطبيق"
+    },
+    {
+     "t": 416,
+     "title": "قراءة النتيجة"
+    },
+    {
+     "t": 522,
+     "title": "الخلاصة"
+    }
+   ],
+   "duration": 600,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "RmKbLkeXmm0",
+   "title": "مصنعية العظم: ثلاثة عروض لعظم واحد، أيها الأرخص فعلاً؟ | AR 02/05",
+   "summary": "ثلاثة مقاولين لعظم فيلا واحدة: 57 ألفاً و67 ألفاً و78 ألف ريال. الأرخص على الورق ترك خانة خشب الشدّة فارغة، وبعد إكمالها بسعرنا المرجعي صار أغلى من العرض أ بنحو 1,600 ريال.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "الحزمة"
+    },
+    {
+     "t": 155,
+     "title": "العروض"
+    },
+    {
+     "t": 203,
+     "title": "المقارنة"
+    },
+    {
+     "t": 309,
+     "title": "الترسية"
+    },
+    {
+     "t": 345,
+     "title": "السعر النهائي"
+    }
+   ],
+   "duration": 481,
+   "published": "2026-11-05"
+  },
+  {
+   "youtubeId": "p4veyF4FY4s",
+   "title": "🇮🇹 IT • 05/08 | Varianti in cantiere: nuovi prezzi e ordini di modifica",
+   "summary": "Da una richiesta di variante a un importo che entra nel contratto: nel caso didattico, le fondazioni aggiungono 41.400 euro e ventilazione meccanica e fotovoltaico altri 133.400 euro. Il contratto passa così da 2.421.000 a 2.595.800 euro.",
+   "chapters": [
+    {
+     "t": 0,
+     "title": "Ordine"
+    },
+    {
+     "t": 113,
+     "title": "Prezzo"
+    },
+    {
+     "t": 208,
+     "title": "Limiti"
+    },
+    {
+     "t": 249,
+     "title": "Contratto"
+    }
+   ],
+   "duration": 313,
+   "published": "2026-11-05"
   }
  ],
  "playlists": [
@@ -3311,6 +4168,39 @@
     "G0a5pEiXaS4",
     "uBhNqXw2dm0",
     "OJ1FMzwY3FM"
+   ]
+  },
+  {
+   "id": "PLL2jqtV6A934",
+   "title": "Okul ek binası: yaklaşık maliyetten kesin hesaba | OpenConstructionERP",
+   "videos": [
+    "VXdmpHvVHqE",
+    "Qfhkq7cXXWg",
+    "NoCG36uilqc",
+    "S5-fKPABLp8",
+    "P-f3NV654og"
+   ]
+  },
+  {
+   "id": "PLLe-gfSauXTY",
+   "title": "Builder's Playbook Brasil: orçamento e gestão de obras públicas",
+   "videos": [
+    "tpBk_sSiuH4",
+    "FXrYc6XxRHY",
+    "a5qbM2drFkE",
+    "fwkAAeGl5hI",
+    "2B5WhzXi8hE"
+   ]
+  },
+  {
+   "id": "PLO8UfCu9nokM",
+   "title": "عظم فيلا في الرياض: التسعير والعقد والمستخلص | OpenConstructionERP",
+   "videos": [
+    "qUU14PaPHCI",
+    "RmKbLkeXmm0",
+    "F9ipxHvCegQ",
+    "naomR5B8ywE",
+    "liaEeAmEzoM"
    ]
   },
   {
@@ -3373,6 +4263,17 @@
     "1tstow0n_Ew",
     "SWwlmU4y-L4",
     "KV-PbKMGISk"
+   ]
+  },
+  {
+   "id": "PLVLOe3pv2_oo",
+   "title": "Budowa domu: kosztorys, umowa i rozliczenie | OpenConstructionERP",
+   "videos": [
+    "e4J8OVG9xiU",
+    "b4Ow_AavjCE",
+    "Av_Zk5RBMVU",
+    "FNMEizW21Ho",
+    "nQ3KtajmJP0"
    ]
   },
   {

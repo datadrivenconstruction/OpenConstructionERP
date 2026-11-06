@@ -1,0 +1,37 @@
+# Weekly check that the Videos catalogue and the academy items are current.
+#
+# Reads only public pages (YouTube channel, Academy sitemaps), writes nothing
+# and opens nothing. The run goes red when the channel has an upload the
+# catalogue lacks, or the Academy site has a new, removed, changed or unmapped
+# item; the step summary lists them. Fix: run scripts/fetch_video_channel.py
+# and scripts/fetch_academy_items.py, classify the new items, rebuild.
+name: Video catalog weekly
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Channel uploads versus catalogue
+        id: channel
+        run: python scripts/fetch_video_channel.py --check 2>&1 | tee channel.txt; exit "${PIPESTATUS[0]}"
+      - name: Academy site versus snapshot
+        id: academy
+        if: ${{ !cancelled() }}
+        run: python scripts/fetch_academy_items.py --check 2>&1 | tee academy.txt; exit "${PIPESTATUS[0]}"
+      - name: Summary
+        if: ${{ !cancelled() }}
+        run: |
+          { echo '### Video catalog'; echo '```'; cat channel.txt academy.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

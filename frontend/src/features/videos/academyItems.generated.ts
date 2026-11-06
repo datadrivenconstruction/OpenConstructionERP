@@ -112,13 +112,12 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 150,
     "topics": [
       "BIM",
       "Clash detection"
     ],
-    "track": "Information, BIM and sustainability",
     "routes": [
       "/bim",
       "/clash"
@@ -228,13 +227,12 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "CVR",
       "Earned value"
     ],
-    "track": "Contract and commercial control",
     "routes": [
       "/full-evm",
       "/cost-control",
@@ -350,12 +348,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "Carbon"
     ],
-    "track": "Information, BIM and sustainability",
     "routes": [
       "/carbon"
     ]
@@ -407,12 +404,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "BOQ"
     ],
-    "track": "Estimate and buy",
     "routes": [
       "/boq"
     ]
@@ -464,7 +460,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "Closeout",
@@ -472,7 +468,6 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Inspections",
       "Punch list"
     ],
-    "track": "Information, BIM and sustainability",
     "routes": [
       "/closeout",
       "/inspections",
@@ -583,12 +578,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 150,
     "topics": [
       "Variations"
     ],
-    "track": "Contract and commercial control",
     "routes": [
       "/variations",
       "/changeorders"
@@ -641,12 +635,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "Contracts"
     ],
-    "track": "Contract and commercial control",
     "routes": [
       "/contracts"
     ]
@@ -755,7 +748,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "Closeout",
@@ -764,7 +757,6 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Punch list",
       "RFI"
     ],
-    "track": "Plan, build and assure",
     "routes": [
       "/inspections",
       "/ncr",
@@ -820,12 +812,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 150,
     "topics": [
       "Risk register"
     ],
-    "track": "Contract and commercial control",
     "routes": [
       "/risks"
     ]
@@ -1000,12 +991,11 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "paid",
+    "access": "free",
     "durationMin": 150,
     "topics": [
       "Bid management"
     ],
-    "track": "Estimate and buy",
     "routes": [
       "/tendering",
       "/bid-management"
@@ -1058,14 +1048,13 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "bg",
-    "access": "paid",
+    "access": "free",
     "durationMin": 210,
     "topics": [
       "Inspections",
       "NCR",
       "Site diary"
     ],
-    "track": "Plan, build and assure",
     "routes": [
       "/daily-diary",
       "/inspections",
@@ -1119,7 +1108,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "bg",
-    "access": "paid",
+    "access": "free",
     "durationMin": 240,
     "topics": [
       "BOQ",
@@ -1127,7 +1116,6 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
-    "track": "Estimate and buy",
     "routes": [
       "/boq",
       "/tendering",
@@ -1240,7 +1228,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "bg",
-    "access": "paid",
+    "access": "free",
     "durationMin": 210,
     "topics": [
       "Closeout",
@@ -1248,7 +1236,6 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Defects",
       "Punch list"
     ],
-    "track": "Information, BIM and sustainability",
     "routes": [
       "/punchlist",
       "/contracts",
@@ -1366,14 +1353,13 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "bg",
-    "access": "paid",
+    "access": "free",
     "durationMin": 180,
     "topics": [
       "Inspections",
       "RFI",
       "Schedule"
     ],
-    "track": "Plan, build and assure",
     "routes": [
       "/inspections",
       "/schedule",
@@ -1427,12 +1413,13 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "free",
+    "access": "paid",
     "durationMin": 240,
     "topics": [
       "BOQ",
       "Bid management"
     ],
+    "track": "Estimate and buy",
     "routes": [
       "/boq",
       "/tendering",
@@ -1913,7 +1900,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "en",
-    "access": "free",
+    "access": "paid",
     "durationMin": 300,
     "topics": [
       "BOQ",
@@ -1921,6 +1908,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Documents",
       "PDF takeoff"
     ],
+    "track": "Estimate and buy",
     "routes": [
       "/documents",
       "/takeoff",
@@ -2093,13 +2081,12 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "el"
     ],
     "contentLanguage": "pt-BR",
-    "access": "paid",
+    "access": "free",
     "durationMin": 240,
     "topics": [
       "BOQ",
       "Bid management"
     ],
-    "track": "Estimate and buy",
     "routes": [
       "/boq",
       "/tendering",
