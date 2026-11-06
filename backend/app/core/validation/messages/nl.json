@@ -2544,5 +2544,105 @@
       "fail": "Een afstandscontrole heeft een vrije afstand groter dan nul nodig.",
       "suggestion": "Voer de minimale vrije afstand in meters in of gebruik een controle op harde botsingen."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Het gesprek is gedateerd op {occurred}, wat in de toekomst ligt.",
+      "suggestion": "Voer de dag en het tijdstip van het gesprek in."
+    },
+    "call_ends_before_start": {
+      "fail": "Het gesprek eindigt om {ended}, voordat het begint om {started}.",
+      "suggestion": "Controleer de begin- en eindtijd."
+    },
+    "logged_without_content": {
+      "fail": "Een vastgelegd gesprek heeft geen transcriptie en geen samenvatting en legt dus niets vast.",
+      "suggestion": "Voeg de transcriptie of een korte samenvatting toe."
+    },
+    "instruction_without_party": {
+      "fail": "Het gesprek legt instructies vast maar noemt geen enkele deelnemer.",
+      "suggestion": "Voeg de deelnemers aan het gesprek toe."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "De koppeling noemt niet beide records die zij verbindt.",
+      "suggestion": "Selecteer beide records."
+    },
+    "link_to_itself": {
+      "fail": "Het record {record} kan niet aan zichzelf worden gekoppeld.",
+      "suggestion": "Kies een ander tweede record."
+    },
+    "record_type_unknown": {
+      "fail": "Het recordtype '{record_type}' kan niet worden afgestemd.",
+      "suggestion": "Gebruik een record voor correspondentie, wijzigingsopdracht, meerwerk, kennisgeving of methodewijziging."
+    },
+    "confidence_out_of_range": {
+      "fail": "De betrouwbaarheid van de overeenkomst {confidence} valt buiten het bereik van 0 tot 1.",
+      "suggestion": "Geef een score tussen 0 en 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "De koppeling is bevestigd met een betrouwbaarheid van {confidence}, onder de suggestiedrempel van {threshold}.",
+      "suggestion": "Controleer of beide records dezelfde gebeurtenis beschrijven."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Opslagstap '{step}' heeft een percentage van {rate}%, buiten het toegestane bereik van {low}% tot {high}%.",
+      "suggestion": "Voer een percentage binnen het toegestane bereik in."
+    },
+    "cascade_base_unknown": {
+      "fail": "Opslagstap '{step}' is gebaseerd op '{base}', dat geen kostenbasis, samengestelde basis of eerdere stap is.",
+      "suggestion": "Baseer de stap op een kostenbasis, een samengestelde basis of een stap erboven."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Het btw-tarief {rate}% valt buiten het bereik van 0% tot 100%.",
+      "suggestion": "Voer het tarief in als percentage van 0 tot 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "De code '{code}' van de financieringsbron wordt in dit project al gebruikt.",
+      "suggestion": "Gebruik een code die nog niet bezet is."
+    },
+    "dimension_value_duplicate": {
+      "fail": "De dimensie '{dimension}' bevat de waardecode '{code}' meer dan eens.",
+      "suggestion": "Geef elke waarde een eigen code."
+    },
+    "dimension_parent_unknown": {
+      "fail": "De waarde '{code}' van dimensie '{dimension}' noemt de bovenliggende waarde '{parent}', die niet tot haar waarden behoort.",
+      "suggestion": "Noem een bovenliggende waarde die in dezelfde dimensie bestaat."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "De momentopnamedatum '{date}' is geen kalenderdatum in de vorm JJJJ-MM-DD.",
+      "suggestion": "Voer de datum in als JJJJ-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "De momentopnamedatum {date} ligt in de toekomst.",
+      "suggestion": "Gebruik vandaag of een eerdere dag."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' is geen getal van nul of meer.",
+      "suggestion": "Voer een getal in zoals 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% valt buiten het bereik van 0% tot 100%.",
+      "suggestion": "Voer een percentage van 0 tot 100 in."
+    },
+    "budget_overrun": {
+      "fail": "{value}% van het budget is verbruikt, dus het project overschrijdt het budget.",
+      "suggestion": "Vergelijk de kostengegevens met het goedgekeurde budget."
+    },
+    "count_negative": {
+      "fail": "{field} mag niet negatief zijn ({value}).",
+      "suggestion": "Voer nul of een positief geheel getal in."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' is geen geldig e-mailadres.",
+      "suggestion": "Corrigeer het adres."
+    },
+    "schedule_without_recipients": {
+      "fail": "Een geplande rapportage heeft minstens één ontvanger nodig.",
+      "suggestion": "Voeg een ontvanger toe of schakel de planning uit."
+    }
   }
 }

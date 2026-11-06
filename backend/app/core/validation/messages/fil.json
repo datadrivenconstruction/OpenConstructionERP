@@ -2544,5 +2544,105 @@
       "fail": "Kailangan ng clearance run ng clearance na higit sa zero.",
       "suggestion": "Ilagay ang pinakamababang clearance sa metro o gumamit ng run para sa matitigas na banggaan."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Ang tawag ay may petsang {occurred}, na nasa hinaharap.",
+      "suggestion": "Ilagay ang araw at oras kung kailan naganap ang tawag."
+    },
+    "call_ends_before_start": {
+      "fail": "Ang tawag ay nagtatapos nang {ended}, bago ito magsimula nang {started}.",
+      "suggestion": "Suriin ang oras ng simula at wakas."
+    },
+    "logged_without_content": {
+      "fail": "Ang naitalang tawag ay walang transcript o buod, kaya wala itong naitatala.",
+      "suggestion": "Idagdag ang transcript o isang maikling buod."
+    },
+    "instruction_without_party": {
+      "fail": "Nagtatala ang tawag ng mga tagubilin ngunit walang pinangalanang kalahok.",
+      "suggestion": "Idagdag ang mga taong kasama sa tawag."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Hindi pinangalanan ng link ang dalawang rekord na kinokonekta nito.",
+      "suggestion": "Piliin ang dalawang rekord."
+    },
+    "link_to_itself": {
+      "fail": "Ang rekord na {record} ay hindi maaaring i-link sa sarili nito.",
+      "suggestion": "Pumili ng ibang pangalawang rekord."
+    },
+    "record_type_unknown": {
+      "fail": "Ang uri ng rekord na '{record_type}' ay hindi maaaring itugma.",
+      "suggestion": "Gumamit ng rekord ng korespondensiya, change order, variation, abiso o pagbabago ng pamamaraan."
+    },
+    "confidence_out_of_range": {
+      "fail": "Ang kumpiyansa ng tugma na {confidence} ay wala sa saklaw na 0 hanggang 1.",
+      "suggestion": "Maglagay ng marka sa pagitan ng 0 at 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Kinumpirma ang link sa kumpiyansang {confidence}, na mas mababa sa limitasyon ng mungkahi na {threshold}.",
+      "suggestion": "Tiyaking inilalarawan ng dalawang rekord ang iisang pangyayari."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Ang hakbang ng dagdag na '{step}' ay may rate na {rate}%, wala sa pinapayagang saklaw na {low}% hanggang {high}%.",
+      "suggestion": "Maglagay ng rate sa loob ng pinapayagang saklaw."
+    },
+    "cascade_base_unknown": {
+      "fail": "Ang hakbang ng dagdag na '{step}' ay nakabatay sa '{base}', na hindi batayan ng gastos, composite o naunang hakbang.",
+      "suggestion": "Ibatay ang hakbang sa batayan ng gastos, composite o hakbang sa itaas nito."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Ang rate ng VAT na {rate}% ay wala sa saklaw na 0% hanggang 100%.",
+      "suggestion": "Ilagay ang rate bilang porsiyento mula 0 hanggang 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Ang code ng pinagmumulan ng pondo na '{code}' ay ginagamit na sa proyektong ito.",
+      "suggestion": "Gumamit ng code na hindi pa nagagamit."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Inilista ng dimensyong '{dimension}' ang code ng halaga na '{code}' nang higit sa isang beses.",
+      "suggestion": "Bigyan ang bawat halaga ng sarili nitong code."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Ang halagang '{code}' ng dimensyong '{dimension}' ay nagpapangalan ng magulang na '{parent}', na wala sa mga halaga nito.",
+      "suggestion": "Magpangalan ng magulang na umiiral sa parehong dimensyon."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Ang petsa ng snapshot na '{date}' ay hindi petsa ng kalendaryo sa anyong YYYY-MM-DD.",
+      "suggestion": "Ilagay ang petsa bilang YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Ang petsa ng snapshot na {date} ay nasa hinaharap.",
+      "suggestion": "Gamitin ang ngayon o mas naunang araw."
+    },
+    "index_invalid": {
+      "fail": "Ang {field} na '{value}' ay hindi numerong zero o higit pa.",
+      "suggestion": "Maglagay ng numero tulad ng 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "Ang {field} na {value}% ay wala sa saklaw na 0% hanggang 100%.",
+      "suggestion": "Maglagay ng porsiyento mula 0 hanggang 100."
+    },
+    "budget_overrun": {
+      "fail": "Nagamit na ang {value}% ng badyet, kaya lampas na sa badyet ang proyekto.",
+      "suggestion": "Ihambing ang datos ng gastos sa aprubadong badyet."
+    },
+    "count_negative": {
+      "fail": "Ang {field} ay hindi maaaring negatibo ({value}).",
+      "suggestion": "Maglagay ng zero o positibong buong numero."
+    },
+    "recipient_invalid": {
+      "fail": "Ang '{recipient}' ay hindi wastong email address.",
+      "suggestion": "Itama ang address."
+    },
+    "schedule_without_recipients": {
+      "fail": "Ang naka-iskedyul na ulat ay nangangailangan ng kahit isang tatanggap.",
+      "suggestion": "Magdagdag ng tatanggap o patayin ang iskedyul."
+    }
   }
 }

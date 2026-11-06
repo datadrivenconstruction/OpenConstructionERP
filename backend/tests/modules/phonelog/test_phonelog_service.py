@@ -100,6 +100,7 @@ async def test_explicit_duration_wins_over_timestamps(session: AsyncSession) -> 
         PhoneLogCreate(
             project_id=pid,
             duration_seconds=42,
+            summary="Short call",
             started_at="2026-06-25T09:00:00",
             ended_at="2026-06-25T09:05:00",
             channel="voice",
@@ -162,10 +163,12 @@ async def test_list_filters_by_direction_and_channel(session: AsyncSession) -> N
     pid = await _project(session, owner)
 
     await service.create_phone_log(
-        session, PhoneLogCreate(project_id=pid, direction="incoming", channel="phone"), user_id=str(owner)
+        session, PhoneLogCreate(project_id=pid, direction="incoming", channel="phone", summary="In"), user_id=str(owner)
     )
     await service.create_phone_log(
-        session, PhoneLogCreate(project_id=pid, direction="outgoing", channel="voice"), user_id=str(owner)
+        session,
+        PhoneLogCreate(project_id=pid, direction="outgoing", channel="voice", summary="Out"),
+        user_id=str(owner),
     )
 
     outbound, outbound_total = await service.list_phone_logs(session, pid, direction="outbound")

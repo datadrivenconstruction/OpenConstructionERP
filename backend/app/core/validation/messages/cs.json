@@ -2544,5 +2544,105 @@
       "fail": "Kontrola odstupu potřebuje odstup větší než nula.",
       "suggestion": "Zadejte minimální odstup v metrech nebo použijte kontrolu tvrdých kolizí."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Hovor je datován {occurred}, což je v budoucnosti.",
+      "suggestion": "Zadejte den a čas, kdy hovor proběhl."
+    },
+    "call_ends_before_start": {
+      "fail": "Hovor končí v {ended}, dříve než začíná v {started}.",
+      "suggestion": "Zkontrolujte čas začátku a konce."
+    },
+    "logged_without_content": {
+      "fail": "Zaznamenaný hovor nemá ani přepis, ani shrnutí, takže nic nedokládá.",
+      "suggestion": "Doplňte přepis nebo krátké shrnutí."
+    },
+    "instruction_without_party": {
+      "fail": "Hovor obsahuje pokyny, ale neuvádí nikoho, kdo se ho zúčastnil.",
+      "suggestion": "Doplňte osoby účastnící se hovoru."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Vazba neuvádí oba záznamy, které spojuje.",
+      "suggestion": "Vyberte oba záznamy."
+    },
+    "link_to_itself": {
+      "fail": "Záznam {record} nelze propojit sám se sebou.",
+      "suggestion": "Vyberte jiný druhý záznam."
+    },
+    "record_type_unknown": {
+      "fail": "Typ záznamu '{record_type}' nelze párovat.",
+      "suggestion": "Použijte korespondenci, změnovou objednávku, vícepráci, oznámení nebo změnu metody."
+    },
+    "confidence_out_of_range": {
+      "fail": "Jistota shody {confidence} je mimo rozsah 0 až 1.",
+      "suggestion": "Zadejte skóre mezi 0 a 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Vazba je potvrzena s jistotou shody {confidence}, pod prahem návrhu {threshold}.",
+      "suggestion": "Ověřte, že oba záznamy popisují tutéž událost."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Krok přirážky '{step}' má sazbu {rate} %, mimo povolený rozsah {low} % až {high} %.",
+      "suggestion": "Zadejte sazbu v povoleném rozsahu."
+    },
+    "cascade_base_unknown": {
+      "fail": "Krok přirážky '{step}' vychází z '{base}', což není nákladový základ, složený základ ani dřívější krok.",
+      "suggestion": "Založte krok na nákladovém základu, složeném základu nebo kroku nad ním."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Sazba DPH {rate} % je mimo rozsah 0 % až 100 %.",
+      "suggestion": "Zadejte sazbu jako procento od 0 do 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Kód zdroje financování '{code}' se v tomto projektu již používá.",
+      "suggestion": "Použijte kód, který ještě není obsazen."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimenze '{dimension}' uvádí kód hodnoty '{code}' více než jednou.",
+      "suggestion": "Dejte každé hodnotě vlastní kód."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Hodnota '{code}' dimenze '{dimension}' uvádí nadřazenou hodnotu '{parent}', která mezi jejími hodnotami není.",
+      "suggestion": "Uveďte nadřazenou hodnotu, která v téže dimenzi existuje."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Datum snímku '{date}' není kalendářní datum ve tvaru RRRR-MM-DD.",
+      "suggestion": "Zadejte datum ve tvaru RRRR-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Datum snímku {date} je v budoucnosti.",
+      "suggestion": "Použijte dnešek nebo dřívější den."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' není číslo nula nebo větší.",
+      "suggestion": "Zadejte číslo, například 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % je mimo rozsah 0 % až 100 %.",
+      "suggestion": "Zadejte procento od 0 do 100."
+    },
+    "budget_overrun": {
+      "fail": "Je vyčerpáno {value} % rozpočtu, projekt tedy překračuje rozpočet.",
+      "suggestion": "Porovnejte nákladové údaje se schváleným rozpočtem."
+    },
+    "count_negative": {
+      "fail": "{field} nemůže být záporné ({value}).",
+      "suggestion": "Zadejte nulu nebo kladné celé číslo."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' není platná e-mailová adresa.",
+      "suggestion": "Opravte adresu."
+    },
+    "schedule_without_recipients": {
+      "fail": "Plánovaná zpráva potřebuje alespoň jednoho příjemce.",
+      "suggestion": "Přidejte příjemce nebo plán vypněte."
+    }
   }
 }

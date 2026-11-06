@@ -2544,5 +2544,105 @@
       "fail": "Una verifica di distanza richiede una distanza minima maggiore di zero.",
       "suggestion": "Inserire la distanza minima in metri oppure usare una verifica di interferenze dirette."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "La chiamata è datata {occurred}, che è nel futuro.",
+      "suggestion": "Inserisca il giorno e l'ora in cui si è svolta la chiamata."
+    },
+    "call_ends_before_start": {
+      "fail": "La chiamata termina alle {ended}, prima di iniziare alle {started}.",
+      "suggestion": "Controlli l'ora di inizio e di fine."
+    },
+    "logged_without_content": {
+      "fail": "Una chiamata registrata non ha né trascrizione né riepilogo, quindi non documenta nulla.",
+      "suggestion": "Aggiunga la trascrizione o un breve riepilogo."
+    },
+    "instruction_without_party": {
+      "fail": "La chiamata registra istruzioni ma non nomina alcun partecipante.",
+      "suggestion": "Aggiunga le persone presenti alla chiamata."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Il collegamento non indica entrambi i record che unisce.",
+      "suggestion": "Selezioni entrambi i record."
+    },
+    "link_to_itself": {
+      "fail": "Il record {record} non può essere collegato a se stesso.",
+      "suggestion": "Scelga un secondo record diverso."
+    },
+    "record_type_unknown": {
+      "fail": "Il tipo di record '{record_type}' non può essere riconciliato.",
+      "suggestion": "Usi un record di corrispondenza, ordine di modifica, variante, avviso o cambio di metodo."
+    },
+    "confidence_out_of_range": {
+      "fail": "L'affidabilità della corrispondenza {confidence} è fuori dall'intervallo da 0 a 1.",
+      "suggestion": "Indichi un punteggio tra 0 e 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Il collegamento è confermato con affidabilità {confidence}, sotto la soglia di suggerimento {threshold}.",
+      "suggestion": "Verifichi che entrambi i record descrivano lo stesso evento."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Il passo di maggiorazione '{step}' ha un'aliquota del {rate}%, fuori dall'intervallo consentito dal {low}% al {high}%.",
+      "suggestion": "Inserisca un'aliquota nell'intervallo consentito."
+    },
+    "cascade_base_unknown": {
+      "fail": "Il passo di maggiorazione '{step}' si basa su '{base}', che non è una base di costo, un composito né un passo precedente.",
+      "suggestion": "Basi il passo su una base di costo, un composito o un passo superiore."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "L'aliquota IVA {rate}% è fuori dall'intervallo da 0% a 100%.",
+      "suggestion": "Inserisca l'aliquota come percentuale da 0 a 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Il codice della fonte di finanziamento '{code}' è già usato in questo progetto.",
+      "suggestion": "Usi un codice non ancora occupato."
+    },
+    "dimension_value_duplicate": {
+      "fail": "La dimensione '{dimension}' elenca il codice valore '{code}' più di una volta.",
+      "suggestion": "Assegni a ogni valore un codice proprio."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Il valore '{code}' della dimensione '{dimension}' indica il genitore '{parent}', che non è tra i suoi valori.",
+      "suggestion": "Indichi un genitore esistente nella stessa dimensione."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "La data dell'istantanea '{date}' non è una data di calendario nel formato AAAA-MM-GG.",
+      "suggestion": "Inserisca la data come AAAA-MM-GG."
+    },
+    "snapshot_date_future": {
+      "fail": "La data dell'istantanea {date} è nel futuro.",
+      "suggestion": "Usi oggi o un giorno precedente."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' non è un numero pari o superiore a zero.",
+      "suggestion": "Inserisca un numero come 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% è fuori dall'intervallo da 0% a 100%.",
+      "suggestion": "Inserisca una percentuale da 0 a 100."
+    },
+    "budget_overrun": {
+      "fail": "È stato consumato il {value}% del budget, quindi il progetto lo supera.",
+      "suggestion": "Confronti i dati di costo con il budget approvato."
+    },
+    "count_negative": {
+      "fail": "{field} non può essere negativo ({value}).",
+      "suggestion": "Inserisca zero o un intero positivo."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' non è un indirizzo e-mail valido.",
+      "suggestion": "Corregga l'indirizzo."
+    },
+    "schedule_without_recipients": {
+      "fail": "Un rapporto pianificato richiede almeno un destinatario.",
+      "suggestion": "Aggiunga un destinatario o disattivi la pianificazione."
+    }
   }
 }

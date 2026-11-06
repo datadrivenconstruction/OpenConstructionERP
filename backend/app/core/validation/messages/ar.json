@@ -2544,5 +2544,105 @@
       "fail": "يحتاج فحص الخلوص إلى مسافة خلوص أكبر من صفر.",
       "suggestion": "أدخل الحد الأدنى للخلوص بالأمتار أو استخدم فحص التصادمات الصلبة."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "تاريخ المكالمة {occurred} وهو في المستقبل.",
+      "suggestion": "أدخل يوم المكالمة ووقتها الفعلي."
+    },
+    "call_ends_before_start": {
+      "fail": "تنتهي المكالمة في {ended} قبل أن تبدأ في {started}.",
+      "suggestion": "تحقق من وقت البدء ووقت الانتهاء."
+    },
+    "logged_without_content": {
+      "fail": "المكالمة المسجلة ليس لها نص مكتوب ولا ملخص، لذا فهي لا توثق شيئاً.",
+      "suggestion": "أضف النص المكتوب أو ملخصاً قصيراً."
+    },
+    "instruction_without_party": {
+      "fail": "تسجل المكالمة تعليمات لكنها لا تذكر أي مشارك.",
+      "suggestion": "أضف الأشخاص المشاركين في المكالمة."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "لا يحدد الربط السجلين اللذين يصل بينهما.",
+      "suggestion": "اختر السجلين كليهما."
+    },
+    "link_to_itself": {
+      "fail": "لا يمكن ربط السجل {record} بنفسه.",
+      "suggestion": "اختر سجلاً ثانياً مختلفاً."
+    },
+    "record_type_unknown": {
+      "fail": "لا يمكن مطابقة نوع السجل '{record_type}'.",
+      "suggestion": "استخدم سجل مراسلات أو أمر تغيير أو تعديل أو إشعار أو تغيير في الطريقة."
+    },
+    "confidence_out_of_range": {
+      "fail": "ثقة المطابقة {confidence} خارج النطاق من 0 إلى 1.",
+      "suggestion": "أدخل قيمة بين 0 و1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "تم تأكيد الربط بثقة مطابقة {confidence} وهي أقل من حد الاقتراح {threshold}.",
+      "suggestion": "تحقق من أن السجلين يصفان الحدث نفسه."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "خطوة الإضافة '{step}' نسبتها {rate}% خارج النطاق المسموح من {low}% إلى {high}%.",
+      "suggestion": "أدخل نسبة ضمن النطاق المسموح."
+    },
+    "cascade_base_unknown": {
+      "fail": "تعتمد خطوة الإضافة '{step}' على '{base}' وهو ليس أساس تكلفة ولا مركباً ولا خطوة سابقة.",
+      "suggestion": "اجعل الخطوة تعتمد على أساس تكلفة أو مركب أو خطوة أعلى منها."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "نسبة ضريبة القيمة المضافة {rate}% خارج النطاق من 0% إلى 100%.",
+      "suggestion": "أدخل النسبة كقيمة مئوية من 0 إلى 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "رمز مصدر التمويل '{code}' مستخدم بالفعل في هذا المشروع.",
+      "suggestion": "استخدم رمزاً غير مستخدم بعد."
+    },
+    "dimension_value_duplicate": {
+      "fail": "يذكر البعد '{dimension}' رمز القيمة '{code}' أكثر من مرة.",
+      "suggestion": "أعطِ كل قيمة رمزها الخاص."
+    },
+    "dimension_parent_unknown": {
+      "fail": "القيمة '{code}' في البعد '{dimension}' تحدد الأصل '{parent}' وهو ليس بين قيمه.",
+      "suggestion": "حدد أصلاً موجوداً في البعد نفسه."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "تاريخ اللقطة '{date}' ليس تاريخاً صحيحاً بالصيغة YYYY-MM-DD.",
+      "suggestion": "أدخل التاريخ بالصيغة YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "تاريخ اللقطة {date} في المستقبل.",
+      "suggestion": "استخدم اليوم أو يوماً سابقاً."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' ليس رقماً صفراً أو أكثر.",
+      "suggestion": "أدخل رقماً مثل 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% خارج النطاق من 0% إلى 100%.",
+      "suggestion": "أدخل نسبة مئوية من 0 إلى 100."
+    },
+    "budget_overrun": {
+      "fail": "تم استهلاك {value}% من الميزانية، لذا فالمشروع تجاوز ميزانيته.",
+      "suggestion": "قارن بيانات التكلفة بالميزانية المعتمدة."
+    },
+    "count_negative": {
+      "fail": "لا يمكن أن يكون {field} سالباً ({value}).",
+      "suggestion": "أدخل صفراً أو عدداً صحيحاً موجباً."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' ليس عنوان بريد إلكتروني صالحاً.",
+      "suggestion": "صحح العنوان."
+    },
+    "schedule_without_recipients": {
+      "fail": "يحتاج التقرير المجدول إلى مستلم واحد على الأقل.",
+      "suggestion": "أضف مستلماً أو أوقف الجدولة."
+    }
   }
 }

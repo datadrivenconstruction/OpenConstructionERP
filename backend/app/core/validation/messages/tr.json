@@ -2544,5 +2544,105 @@
       "fail": "Açıklık taraması sıfırdan büyük bir açıklık mesafesi gerektirir.",
       "suggestion": "En küçük açıklığı metre olarak girin veya sert çakışma taraması kullanın."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Görüşme {occurred} tarihli, bu da gelecekte.",
+      "suggestion": "Görüşmenin yapıldığı günü ve saati girin."
+    },
+    "call_ends_before_start": {
+      "fail": "Görüşme {started} saatinde başlamadan önce {ended} saatinde bitiyor.",
+      "suggestion": "Başlangıç ve bitiş saatini kontrol edin."
+    },
+    "logged_without_content": {
+      "fail": "Kaydedilen görüşmenin ne dökümü ne de özeti var, bu yüzden hiçbir şeyi belgelemiyor.",
+      "suggestion": "Dökümü veya kısa bir özet ekleyin."
+    },
+    "instruction_without_party": {
+      "fail": "Görüşme talimatları kaydediyor ancak hiçbir katılımcıyı belirtmiyor.",
+      "suggestion": "Görüşmeye katılan kişileri ekleyin."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Bağlantı, birleştirdiği iki kaydı da belirtmiyor.",
+      "suggestion": "Her iki kaydı da seçin."
+    },
+    "link_to_itself": {
+      "fail": "{record} kaydı kendisine bağlanamaz.",
+      "suggestion": "Farklı bir ikinci kayıt seçin."
+    },
+    "record_type_unknown": {
+      "fail": "'{record_type}' kayıt türü mutabakata alınamaz.",
+      "suggestion": "Yazışma, değişiklik emri, ek iş, bildirim veya yöntem değişikliği kaydı kullanın."
+    },
+    "confidence_out_of_range": {
+      "fail": "Eşleşme güvenilirliği {confidence}, 0 ile 1 aralığının dışında.",
+      "suggestion": "0 ile 1 arasında bir puan girin."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Bağlantı {confidence} eşleşme güvenilirliğiyle onaylandı; bu, öneri eşiği {threshold} değerinin altında.",
+      "suggestion": "Her iki kaydın da aynı olayı anlattığını doğrulayın."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "'{step}' ilave adımının oranı %{rate}, izin verilen %{low} ile %{high} aralığının dışında.",
+      "suggestion": "İzin verilen aralıkta bir oran girin."
+    },
+    "cascade_base_unknown": {
+      "fail": "'{step}' ilave adımı '{base}' üzerine kurulu; bu bir maliyet tabanı, bileşik taban veya önceki adım değil.",
+      "suggestion": "Adımı bir maliyet tabanına, bileşik tabana veya üstündeki bir adıma dayandırın."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "KDV oranı %{rate}, %0 ile %100 aralığının dışında.",
+      "suggestion": "Oranı 0 ile 100 arasında yüzde olarak girin."
+    },
+    "funding_code_duplicate": {
+      "fail": "'{code}' finansman kaynağı kodu bu projede zaten kullanılıyor.",
+      "suggestion": "Henüz alınmamış bir kod kullanın."
+    },
+    "dimension_value_duplicate": {
+      "fail": "'{dimension}' boyutu '{code}' değer kodunu birden fazla kez listeliyor.",
+      "suggestion": "Her değere kendi kodunu verin."
+    },
+    "dimension_parent_unknown": {
+      "fail": "'{dimension}' boyutunun '{code}' değeri, değerleri arasında olmayan '{parent}' üst öğesini belirtiyor.",
+      "suggestion": "Aynı boyutta bulunan bir üst öğe belirtin."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Anlık görüntü tarihi '{date}', YYYY-AA-GG biçiminde bir takvim tarihi değil.",
+      "suggestion": "Tarihi YYYY-AA-GG olarak girin."
+    },
+    "snapshot_date_future": {
+      "fail": "Anlık görüntü tarihi {date} gelecekte.",
+      "suggestion": "Bugünü veya daha önceki bir günü kullanın."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' sıfır veya daha büyük bir sayı değil.",
+      "suggestion": "0.95 gibi bir sayı girin."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} %{value}, %0 ile %100 aralığının dışında.",
+      "suggestion": "0 ile 100 arasında bir yüzde girin."
+    },
+    "budget_overrun": {
+      "fail": "Bütçenin %{value} kadarı harcandı, bu nedenle proje bütçeyi aşıyor.",
+      "suggestion": "Maliyet verilerini onaylı bütçeyle karşılaştırın."
+    },
+    "count_negative": {
+      "fail": "{field} negatif olamaz ({value}).",
+      "suggestion": "Sıfır veya pozitif bir tam sayı girin."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' geçerli bir e-posta adresi değil.",
+      "suggestion": "Adresi düzeltin."
+    },
+    "schedule_without_recipients": {
+      "fail": "Zamanlanmış bir rapor için en az bir alıcı gerekir.",
+      "suggestion": "Bir alıcı ekleyin veya zamanlamayı kapatın."
+    }
   }
 }

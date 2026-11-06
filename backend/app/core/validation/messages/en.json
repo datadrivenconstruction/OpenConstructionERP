@@ -2544,5 +2544,105 @@
       "fail": "A clearance run needs a clearance distance above zero.",
       "suggestion": "Enter the minimum clearance in metres, or use a hard clash run."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "The call is dated {occurred}, which is in the future.",
+      "suggestion": "Enter the day and time the call took place."
+    },
+    "call_ends_before_start": {
+      "fail": "The call ends at {ended}, before it starts at {started}.",
+      "suggestion": "Check the start and end time."
+    },
+    "logged_without_content": {
+      "fail": "A logged call has neither a transcript nor a summary, so it records nothing.",
+      "suggestion": "Add the transcript or a short summary."
+    },
+    "instruction_without_party": {
+      "fail": "The call records instructions but names nobody who took part.",
+      "suggestion": "Add the people on the call."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "The link does not name both of the records it connects.",
+      "suggestion": "Select both records."
+    },
+    "link_to_itself": {
+      "fail": "The record {record} cannot be linked to itself.",
+      "suggestion": "Choose a different second record."
+    },
+    "record_type_unknown": {
+      "fail": "The record type '{record_type}' cannot be reconciled.",
+      "suggestion": "Use a correspondence, change order, variation, notice or change-of-method record."
+    },
+    "confidence_out_of_range": {
+      "fail": "The match confidence {confidence} is outside the range 0 to 1.",
+      "suggestion": "Give a score between 0 and 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "The link is confirmed at a match confidence of {confidence}, below the suggestion threshold of {threshold}.",
+      "suggestion": "Check that both records describe the same event."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Markup step '{step}' has a rate of {rate}%, outside the allowed range of {low}% to {high}%.",
+      "suggestion": "Enter a rate within the allowed range."
+    },
+    "cascade_base_unknown": {
+      "fail": "Markup step '{step}' is based on '{base}', which is not a cost base, a composite or an earlier step.",
+      "suggestion": "Base the step on a cost base, a composite or a step above it."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "The VAT rate {rate}% is outside the range 0% to 100%.",
+      "suggestion": "Enter the rate as a percentage from 0 to 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "The funding source code '{code}' is already used in this project.",
+      "suggestion": "Use a code that is not taken yet."
+    },
+    "dimension_value_duplicate": {
+      "fail": "The dimension '{dimension}' lists the value code '{code}' more than once.",
+      "suggestion": "Give each value its own code."
+    },
+    "dimension_parent_unknown": {
+      "fail": "The value '{code}' of dimension '{dimension}' names the parent '{parent}', which is not among its values.",
+      "suggestion": "Name a parent that exists in the same dimension."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "The snapshot date '{date}' is not a calendar date in the form YYYY-MM-DD.",
+      "suggestion": "Enter the date as YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "The snapshot date {date} is in the future.",
+      "suggestion": "Use today or an earlier day."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' is not a number of zero or more.",
+      "suggestion": "Enter a number such as 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% is outside the range 0% to 100%.",
+      "suggestion": "Enter a percentage from 0 to 100."
+    },
+    "budget_overrun": {
+      "fail": "{value}% of the budget is consumed, so the project is over budget.",
+      "suggestion": "Check the cost data against the approved budget."
+    },
+    "count_negative": {
+      "fail": "{field} cannot be negative ({value}).",
+      "suggestion": "Enter zero or a positive whole number."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' is not a valid email address.",
+      "suggestion": "Correct the address."
+    },
+    "schedule_without_recipients": {
+      "fail": "A scheduled report needs at least one recipient.",
+      "suggestion": "Add a recipient or switch the schedule off."
+    }
   }
 }

@@ -2544,5 +2544,105 @@
       "fail": "Pemeriksaan jarak bebas memerlukan jarak bebas lebih dari nol.",
       "suggestion": "Masukkan jarak bebas minimum dalam meter atau gunakan pemeriksaan tabrakan keras."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Panggilan bertanggal {occurred}, yaitu di masa depan.",
+      "suggestion": "Masukkan hari dan jam panggilan berlangsung."
+    },
+    "call_ends_before_start": {
+      "fail": "Panggilan berakhir pada {ended}, sebelum dimulai pada {started}.",
+      "suggestion": "Periksa waktu mulai dan selesai."
+    },
+    "logged_without_content": {
+      "fail": "Panggilan yang dicatat tidak memiliki transkrip maupun ringkasan sehingga tidak mendokumentasikan apa pun.",
+      "suggestion": "Tambahkan transkrip atau ringkasan singkat."
+    },
+    "instruction_without_party": {
+      "fail": "Panggilan mencatat instruksi tetapi tidak menyebut seorang pun peserta.",
+      "suggestion": "Tambahkan orang yang terlibat dalam panggilan."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Tautan tidak menyebut kedua catatan yang dihubungkannya.",
+      "suggestion": "Pilih kedua catatan."
+    },
+    "link_to_itself": {
+      "fail": "Catatan {record} tidak dapat ditautkan ke dirinya sendiri.",
+      "suggestion": "Pilih catatan kedua yang berbeda."
+    },
+    "record_type_unknown": {
+      "fail": "Jenis catatan '{record_type}' tidak dapat direkonsiliasi.",
+      "suggestion": "Gunakan catatan korespondensi, perintah perubahan, variasi, pemberitahuan, atau perubahan metode."
+    },
+    "confidence_out_of_range": {
+      "fail": "Tingkat keyakinan kecocokan {confidence} berada di luar rentang 0 sampai 1.",
+      "suggestion": "Masukkan skor antara 0 dan 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Tautan dikonfirmasi dengan keyakinan kecocokan {confidence}, di bawah ambang saran {threshold}.",
+      "suggestion": "Pastikan kedua catatan menggambarkan peristiwa yang sama."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Langkah markup '{step}' memiliki tarif {rate}%, di luar rentang yang diizinkan {low}% sampai {high}%.",
+      "suggestion": "Masukkan tarif dalam rentang yang diizinkan."
+    },
+    "cascade_base_unknown": {
+      "fail": "Langkah markup '{step}' didasarkan pada '{base}', yang bukan dasar biaya, komposit, maupun langkah sebelumnya.",
+      "suggestion": "Dasarkan langkah pada dasar biaya, komposit, atau langkah di atasnya."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Tarif PPN {rate}% berada di luar rentang 0% sampai 100%.",
+      "suggestion": "Masukkan tarif sebagai persentase dari 0 sampai 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Kode sumber pendanaan '{code}' sudah dipakai di proyek ini.",
+      "suggestion": "Gunakan kode yang belum dipakai."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensi '{dimension}' mencantumkan kode nilai '{code}' lebih dari sekali.",
+      "suggestion": "Beri setiap nilai kodenya sendiri."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Nilai '{code}' pada dimensi '{dimension}' menyebut induk '{parent}', yang tidak termasuk nilainya.",
+      "suggestion": "Sebut induk yang ada dalam dimensi yang sama."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Tanggal snapshot '{date}' bukan tanggal kalender berbentuk YYYY-MM-DD.",
+      "suggestion": "Masukkan tanggal sebagai YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Tanggal snapshot {date} berada di masa depan.",
+      "suggestion": "Gunakan hari ini atau hari sebelumnya."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' bukan angka nol atau lebih.",
+      "suggestion": "Masukkan angka seperti 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% berada di luar rentang 0% sampai 100%.",
+      "suggestion": "Masukkan persentase dari 0 sampai 100."
+    },
+    "budget_overrun": {
+      "fail": "{value}% anggaran telah terpakai sehingga proyek melampaui anggaran.",
+      "suggestion": "Bandingkan data biaya dengan anggaran yang disetujui."
+    },
+    "count_negative": {
+      "fail": "{field} tidak boleh negatif ({value}).",
+      "suggestion": "Masukkan nol atau bilangan bulat positif."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' bukan alamat email yang valid.",
+      "suggestion": "Perbaiki alamat."
+    },
+    "schedule_without_recipients": {
+      "fail": "Laporan terjadwal memerlukan setidaknya satu penerima.",
+      "suggestion": "Tambahkan penerima atau matikan jadwal."
+    }
   }
 }

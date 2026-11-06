@@ -2544,5 +2544,105 @@
       "fail": "O rulare de distanță are nevoie de o distanță mai mare de zero.",
       "suggestion": "Introduceți distanța minimă în metri sau folosiți o rulare de coliziuni ferme."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Apelul este datat {occurred}, ceea ce este în viitor.",
+      "suggestion": "Introduceți ziua și ora la care a avut loc apelul."
+    },
+    "call_ends_before_start": {
+      "fail": "Apelul se încheie la {ended}, înainte de a începe la {started}.",
+      "suggestion": "Verificați ora de început și cea de sfârșit."
+    },
+    "logged_without_content": {
+      "fail": "Un apel înregistrat nu are nici transcriere, nici rezumat, deci nu documentează nimic.",
+      "suggestion": "Adăugați transcrierea sau un scurt rezumat."
+    },
+    "instruction_without_party": {
+      "fail": "Apelul consemnează instrucțiuni, dar nu numește niciun participant.",
+      "suggestion": "Adăugați persoanele care au participat la apel."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Legătura nu indică ambele înregistrări pe care le unește.",
+      "suggestion": "Selectați ambele înregistrări."
+    },
+    "link_to_itself": {
+      "fail": "Înregistrarea {record} nu poate fi legată de ea însăși.",
+      "suggestion": "Alegeți o a doua înregistrare diferită."
+    },
+    "record_type_unknown": {
+      "fail": "Tipul de înregistrare '{record_type}' nu poate fi reconciliat.",
+      "suggestion": "Folosiți o înregistrare de corespondență, ordin de modificare, variație, notificare sau schimbare de metodă."
+    },
+    "confidence_out_of_range": {
+      "fail": "Încrederea potrivirii {confidence} este în afara intervalului de la 0 la 1.",
+      "suggestion": "Introduceți un scor între 0 și 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Legătura este confirmată cu o încredere a potrivirii de {confidence}, sub pragul de sugestie {threshold}.",
+      "suggestion": "Verificați dacă ambele înregistrări descriu același eveniment."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Pasul de majorare '{step}' are o cotă de {rate}%, în afara intervalului permis de la {low}% la {high}%.",
+      "suggestion": "Introduceți o cotă în intervalul permis."
+    },
+    "cascade_base_unknown": {
+      "fail": "Pasul de majorare '{step}' se bazează pe '{base}', care nu este o bază de cost, un compus sau un pas anterior.",
+      "suggestion": "Bazați pasul pe o bază de cost, un compus sau un pas de deasupra."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Cota de TVA {rate}% este în afara intervalului de la 0% la 100%.",
+      "suggestion": "Introduceți cota ca procent de la 0 la 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Codul sursei de finanțare '{code}' este deja folosit în acest proiect.",
+      "suggestion": "Folosiți un cod care nu este încă ocupat."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensiunea '{dimension}' listează codul de valoare '{code}' de mai multe ori.",
+      "suggestion": "Dați fiecărei valori propriul cod."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Valoarea '{code}' a dimensiunii '{dimension}' indică părintele '{parent}', care nu se află printre valorile ei.",
+      "suggestion": "Indicați un părinte care există în aceeași dimensiune."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Data instantaneului '{date}' nu este o dată calendaristică în forma AAAA-LL-ZZ.",
+      "suggestion": "Introduceți data ca AAAA-LL-ZZ."
+    },
+    "snapshot_date_future": {
+      "fail": "Data instantaneului {date} este în viitor.",
+      "suggestion": "Folosiți ziua de azi sau o zi anterioară."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' nu este un număr egal cu zero sau mai mare.",
+      "suggestion": "Introduceți un număr precum 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% este în afara intervalului de la 0% la 100%.",
+      "suggestion": "Introduceți un procent de la 0 la 100."
+    },
+    "budget_overrun": {
+      "fail": "S-a consumat {value}% din buget, deci proiectul depășește bugetul.",
+      "suggestion": "Comparați datele de cost cu bugetul aprobat."
+    },
+    "count_negative": {
+      "fail": "{field} nu poate fi negativ ({value}).",
+      "suggestion": "Introduceți zero sau un număr întreg pozitiv."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' nu este o adresă de e-mail validă.",
+      "suggestion": "Corectați adresa."
+    },
+    "schedule_without_recipients": {
+      "fail": "Un raport programat necesită cel puțin un destinatar.",
+      "suggestion": "Adăugați un destinatar sau dezactivați programarea."
+    }
   }
 }

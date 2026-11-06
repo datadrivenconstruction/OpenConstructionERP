@@ -2544,5 +2544,105 @@
       "fail": "בדיקת מרווח דורשת מרווח גדול מאפס.",
       "suggestion": "הזינו את המרווח המינימלי במטרים או השתמשו בבדיקת התנגשויות קשות."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "תאריך השיחה {occurred} הוא בעתיד.",
+      "suggestion": "הזינו את היום והשעה שבהם התקיימה השיחה."
+    },
+    "call_ends_before_start": {
+      "fail": "השיחה מסתיימת ב-{ended}, לפני שהיא מתחילה ב-{started}.",
+      "suggestion": "בדקו את שעת ההתחלה והסיום."
+    },
+    "logged_without_content": {
+      "fail": "לשיחה שנרשמה אין תמלול ואין סיכום, ולכן היא אינה מתעדת דבר.",
+      "suggestion": "הוסיפו את התמלול או סיכום קצר."
+    },
+    "instruction_without_party": {
+      "fail": "השיחה מתעדת הוראות אך אינה מציינת אף משתתף.",
+      "suggestion": "הוסיפו את האנשים שהשתתפו בשיחה."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "הקישור אינו מציין את שני הרשומות שהוא מחבר.",
+      "suggestion": "בחרו את שתי הרשומות."
+    },
+    "link_to_itself": {
+      "fail": "אי אפשר לקשר את הרשומה {record} לעצמה.",
+      "suggestion": "בחרו רשומה שנייה אחרת."
+    },
+    "record_type_unknown": {
+      "fail": "סוג הרשומה '{record_type}' אינו ניתן להתאמה.",
+      "suggestion": "השתמשו ברשומת התכתבות, הוראת שינוי, תוספת, הודעה או שינוי שיטה."
+    },
+    "confidence_out_of_range": {
+      "fail": "רמת הביטחון בהתאמה {confidence} מחוץ לטווח 0 עד 1.",
+      "suggestion": "הזינו ציון בין 0 ל-1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "הקישור אושר ברמת ביטחון {confidence}, מתחת לסף ההצעה {threshold}.",
+      "suggestion": "בדקו ששתי הרשומות מתארות את אותו אירוע."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "לשלב התוספת '{step}' שיעור של {rate}%, מחוץ לטווח המותר {low}% עד {high}%.",
+      "suggestion": "הזינו שיעור בתוך הטווח המותר."
+    },
+    "cascade_base_unknown": {
+      "fail": "שלב התוספת '{step}' מבוסס על '{base}', שאינו בסיס עלות, מורכב או שלב קודם.",
+      "suggestion": "בססו את השלב על בסיס עלות, מורכב או שלב שמעליו."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "שיעור המע\"מ {rate}% מחוץ לטווח 0% עד 100%.",
+      "suggestion": "הזינו את השיעור כאחוז בין 0 ל-100."
+    },
+    "funding_code_duplicate": {
+      "fail": "קוד מקור המימון '{code}' כבר בשימוש בפרויקט זה.",
+      "suggestion": "השתמשו בקוד שעדיין לא תפוס."
+    },
+    "dimension_value_duplicate": {
+      "fail": "הממד '{dimension}' כולל את קוד הערך '{code}' יותר מפעם אחת.",
+      "suggestion": "תנו לכל ערך קוד משלו."
+    },
+    "dimension_parent_unknown": {
+      "fail": "הערך '{code}' של הממד '{dimension}' מציין הורה '{parent}' שאינו בין ערכיו.",
+      "suggestion": "ציינו הורה שקיים באותו ממד."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "תאריך התמונה '{date}' אינו תאריך לוח שנה בתבנית YYYY-MM-DD.",
+      "suggestion": "הזינו את התאריך בתבנית YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "תאריך התמונה {date} הוא בעתיד.",
+      "suggestion": "השתמשו בהיום או ביום קודם."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' אינו מספר שהוא אפס או יותר.",
+      "suggestion": "הזינו מספר כמו 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% מחוץ לטווח 0% עד 100%.",
+      "suggestion": "הזינו אחוז בין 0 ל-100."
+    },
+    "budget_overrun": {
+      "fail": "נוצלו {value}% מהתקציב, ולכן הפרויקט חורג מהתקציב.",
+      "suggestion": "השוו את נתוני העלות לתקציב המאושר."
+    },
+    "count_negative": {
+      "fail": "{field} לא יכול להיות שלילי ({value}).",
+      "suggestion": "הזינו אפס או מספר שלם חיובי."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' אינה כתובת דוא\"ל תקינה.",
+      "suggestion": "תקנו את הכתובת."
+    },
+    "schedule_without_recipients": {
+      "fail": "דוח מתוזמן דורש לפחות נמען אחד.",
+      "suggestion": "הוסיפו נמען או כבו את התזמון."
+    }
   }
 }

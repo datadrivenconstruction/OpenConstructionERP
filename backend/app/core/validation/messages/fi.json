@@ -2544,5 +2544,105 @@
       "fail": "Välysajo tarvitsee nollaa suuremman välyksen.",
       "suggestion": "Anna pienin välys metreinä tai käytä kovien törmäysten ajoa."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Puhelun päivämäärä on {occurred}, mikä on tulevaisuudessa.",
+      "suggestion": "Anna puhelun päivä ja kellonaika."
+    },
+    "call_ends_before_start": {
+      "fail": "Puhelu päättyy {ended}, ennen kuin se alkaa {started}.",
+      "suggestion": "Tarkista alkamis- ja päättymisaika."
+    },
+    "logged_without_content": {
+      "fail": "Kirjatulla puhelulla ei ole litterointia eikä yhteenvetoa, joten se ei dokumentoi mitään.",
+      "suggestion": "Lisää litterointi tai lyhyt yhteenveto."
+    },
+    "instruction_without_party": {
+      "fail": "Puhelu sisältää ohjeita, mutta ei nimeä yhtään osallistujaa.",
+      "suggestion": "Lisää puheluun osallistuneet henkilöt."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Linkki ei nimeä molempia tietueita, joita se yhdistää.",
+      "suggestion": "Valitse molemmat tietueet."
+    },
+    "link_to_itself": {
+      "fail": "Tietuetta {record} ei voi linkittää itseensä.",
+      "suggestion": "Valitse eri toinen tietue."
+    },
+    "record_type_unknown": {
+      "fail": "Tietuetyyppiä '{record_type}' ei voi täsmäyttää.",
+      "suggestion": "Käytä kirjeenvaihto-, muutostilaus-, lisätyö-, ilmoitus- tai menetelmämuutostietuetta."
+    },
+    "confidence_out_of_range": {
+      "fail": "Vastaavuuden luotettavuus {confidence} on alueen 0–1 ulkopuolella.",
+      "suggestion": "Anna pistemäärä väliltä 0–1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Linkki on vahvistettu vastaavuuden luotettavuudella {confidence}, joka alittaa ehdotusrajan {threshold}.",
+      "suggestion": "Tarkista, että molemmat tietueet kuvaavat samaa tapahtumaa."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Lisäysvaiheen '{step}' kerroin on {rate} %, sallitun alueen {low}–{high} % ulkopuolella.",
+      "suggestion": "Anna kerroin sallitulla alueella."
+    },
+    "cascade_base_unknown": {
+      "fail": "Lisäysvaihe '{step}' perustuu kohtaan '{base}', joka ei ole kustannuspohja, yhdistelmä eikä aiempi vaihe.",
+      "suggestion": "Perusta vaihe kustannuspohjaan, yhdistelmään tai sen yläpuolella olevaan vaiheeseen."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Arvonlisäveroprosentti {rate} % on alueen 0–100 % ulkopuolella.",
+      "suggestion": "Anna prosentti väliltä 0–100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Rahoituslähteen koodi '{code}' on jo käytössä tässä hankkeessa.",
+      "suggestion": "Käytä koodia, joka ei ole vielä varattu."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Ulottuvuus '{dimension}' luettelee arvokoodin '{code}' useammin kuin kerran.",
+      "suggestion": "Anna jokaiselle arvolle oma koodinsa."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Ulottuvuuden '{dimension}' arvo '{code}' nimeää ylätason '{parent}', joka ei ole sen arvojen joukossa.",
+      "suggestion": "Nimeä ylätaso, joka on samassa ulottuvuudessa."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Tilannekuvan päivämäärä '{date}' ei ole kalenteripäivä muodossa VVVV-KK-PP.",
+      "suggestion": "Anna päivämäärä muodossa VVVV-KK-PP."
+    },
+    "snapshot_date_future": {
+      "fail": "Tilannekuvan päivämäärä {date} on tulevaisuudessa.",
+      "suggestion": "Käytä tätä päivää tai aiempaa päivää."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' ei ole nolla tai suurempi luku.",
+      "suggestion": "Anna luku, esimerkiksi 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % on alueen 0–100 % ulkopuolella.",
+      "suggestion": "Anna prosentti väliltä 0–100."
+    },
+    "budget_overrun": {
+      "fail": "Budjetista on käytetty {value} %, joten hanke ylittää budjetin.",
+      "suggestion": "Vertaa kustannustietoja hyväksyttyyn budjettiin."
+    },
+    "count_negative": {
+      "fail": "{field} ei voi olla negatiivinen ({value}).",
+      "suggestion": "Anna nolla tai positiivinen kokonaisluku."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' ei ole kelvollinen sähköpostiosoite.",
+      "suggestion": "Korjaa osoite."
+    },
+    "schedule_without_recipients": {
+      "fail": "Ajastettu raportti tarvitsee vähintään yhden vastaanottajan.",
+      "suggestion": "Lisää vastaanottaja tai poista ajastus käytöstä."
+    }
   }
 }

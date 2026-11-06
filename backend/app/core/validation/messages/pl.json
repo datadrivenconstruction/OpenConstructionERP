@@ -2544,5 +2544,105 @@
       "fail": "Przebieg sprawdzania prześwitu wymaga prześwitu większego od zera.",
       "suggestion": "Wpisz minimalny prześwit w metrach lub użyj przebiegu kolizji twardych."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Rozmowa jest datowana na {occurred}, czyli w przyszłości.",
+      "suggestion": "Podaj dzień i godzinę rozmowy."
+    },
+    "call_ends_before_start": {
+      "fail": "Rozmowa kończy się o {ended}, zanim się zaczyna o {started}.",
+      "suggestion": "Sprawdź godzinę rozpoczęcia i zakończenia."
+    },
+    "logged_without_content": {
+      "fail": "Zapisana rozmowa nie ma ani transkrypcji, ani streszczenia, więc niczego nie dokumentuje.",
+      "suggestion": "Dodaj transkrypcję lub krótkie streszczenie."
+    },
+    "instruction_without_party": {
+      "fail": "Rozmowa zapisuje polecenia, ale nie wymienia żadnego uczestnika.",
+      "suggestion": "Dodaj osoby uczestniczące w rozmowie."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Powiązanie nie wskazuje obu rekordów, które łączy.",
+      "suggestion": "Wybierz oba rekordy."
+    },
+    "link_to_itself": {
+      "fail": "Rekordu {record} nie można powiązać z samym sobą.",
+      "suggestion": "Wybierz inny drugi rekord."
+    },
+    "record_type_unknown": {
+      "fail": "Typu rekordu '{record_type}' nie można uzgodnić.",
+      "suggestion": "Użyj rekordu korespondencji, polecenia zmiany, zmiany zakresu, zawiadomienia lub zmiany metody."
+    },
+    "confidence_out_of_range": {
+      "fail": "Pewność dopasowania {confidence} jest poza zakresem od 0 do 1.",
+      "suggestion": "Podaj wynik między 0 a 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Powiązanie potwierdzono z pewnością dopasowania {confidence}, poniżej progu propozycji {threshold}.",
+      "suggestion": "Sprawdź, czy oba rekordy opisują to samo zdarzenie."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Krok narzutu '{step}' ma stawkę {rate}%, poza dozwolonym zakresem od {low}% do {high}%.",
+      "suggestion": "Podaj stawkę w dozwolonym zakresie."
+    },
+    "cascade_base_unknown": {
+      "fail": "Krok narzutu '{step}' opiera się na '{base}', które nie jest podstawą kosztów, podstawą złożoną ani wcześniejszym krokiem.",
+      "suggestion": "Oprzyj krok na podstawie kosztów, podstawie złożonej lub kroku wyżej."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Stawka VAT {rate}% jest poza zakresem od 0% do 100%.",
+      "suggestion": "Podaj stawkę jako procent od 0 do 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Kod źródła finansowania '{code}' jest już używany w tym projekcie.",
+      "suggestion": "Użyj kodu, który nie jest jeszcze zajęty."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Wymiar '{dimension}' zawiera kod wartości '{code}' więcej niż raz.",
+      "suggestion": "Nadaj każdej wartości własny kod."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Wartość '{code}' wymiaru '{dimension}' wskazuje element nadrzędny '{parent}', którego nie ma wśród jego wartości.",
+      "suggestion": "Wskaż element nadrzędny istniejący w tym samym wymiarze."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Data migawki '{date}' nie jest datą kalendarzową w formacie RRRR-MM-DD.",
+      "suggestion": "Podaj datę w formacie RRRR-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Data migawki {date} jest w przyszłości.",
+      "suggestion": "Użyj dzisiejszego lub wcześniejszego dnia."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' nie jest liczbą równą zero lub większą.",
+      "suggestion": "Podaj liczbę, na przykład 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% jest poza zakresem od 0% do 100%.",
+      "suggestion": "Podaj procent od 0 do 100."
+    },
+    "budget_overrun": {
+      "fail": "Zużyto {value}% budżetu, więc projekt przekracza budżet.",
+      "suggestion": "Porównaj dane o kosztach z zatwierdzonym budżetem."
+    },
+    "count_negative": {
+      "fail": "{field} nie może być ujemne ({value}).",
+      "suggestion": "Podaj zero lub dodatnią liczbę całkowitą."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' nie jest prawidłowym adresem e-mail.",
+      "suggestion": "Popraw adres."
+    },
+    "schedule_without_recipients": {
+      "fail": "Raport zaplanowany wymaga co najmniej jednego odbiorcy.",
+      "suggestion": "Dodaj odbiorcę lub wyłącz harmonogram."
+    }
   }
 }

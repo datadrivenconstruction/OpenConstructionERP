@@ -2544,5 +2544,105 @@
       "fail": "Provjera razmaka traži razmak veći od nule.",
       "suggestion": "Unesite najmanji razmak u metrima ili upotrijebite provjeru tvrdih sudara."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Poziv je datiran {occurred}, što je u budućnosti.",
+      "suggestion": "Unesite dan i vrijeme kada je poziv obavljen."
+    },
+    "call_ends_before_start": {
+      "fail": "Poziv završava u {ended}, prije nego što počinje u {started}.",
+      "suggestion": "Provjerite vrijeme početka i završetka."
+    },
+    "logged_without_content": {
+      "fail": "Zabilježeni poziv nema ni prijepis ni sažetak pa ništa ne dokumentira.",
+      "suggestion": "Dodajte prijepis ili kratak sažetak."
+    },
+    "instruction_without_party": {
+      "fail": "Poziv bilježi upute, ali ne imenuje nijednog sudionika.",
+      "suggestion": "Dodajte osobe koje su sudjelovale u pozivu."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Veza ne navodi oba zapisa koja povezuje.",
+      "suggestion": "Odaberite oba zapisa."
+    },
+    "link_to_itself": {
+      "fail": "Zapis {record} ne može se povezati sam sa sobom.",
+      "suggestion": "Odaberite drugi, različit zapis."
+    },
+    "record_type_unknown": {
+      "fail": "Vrsta zapisa '{record_type}' ne može se uskladiti.",
+      "suggestion": "Upotrijebite zapis dopisa, naloga za izmjenu, višeg radova, obavijesti ili promjene metode."
+    },
+    "confidence_out_of_range": {
+      "fail": "Pouzdanost podudaranja {confidence} izvan je raspona od 0 do 1.",
+      "suggestion": "Unesite ocjenu između 0 i 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Veza je potvrđena uz pouzdanost podudaranja {confidence}, ispod praga prijedloga {threshold}.",
+      "suggestion": "Provjerite opisuju li oba zapisa isti događaj."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Korak dodatka '{step}' ima stopu {rate} %, izvan dopuštenog raspona od {low} % do {high} %.",
+      "suggestion": "Unesite stopu unutar dopuštenog raspona."
+    },
+    "cascade_base_unknown": {
+      "fail": "Korak dodatka '{step}' temelji se na '{base}', što nije osnovica troška, složena osnovica ni raniji korak.",
+      "suggestion": "Temeljite korak na osnovici troška, složenoj osnovici ili koraku iznad njega."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Stopa PDV-a {rate} % izvan je raspona od 0 % do 100 %.",
+      "suggestion": "Unesite stopu kao postotak od 0 do 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Šifra izvora financiranja '{code}' već se koristi u ovom projektu.",
+      "suggestion": "Upotrijebite šifru koja još nije zauzeta."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimenzija '{dimension}' navodi šifru vrijednosti '{code}' više puta.",
+      "suggestion": "Dajte svakoj vrijednosti vlastitu šifru."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Vrijednost '{code}' dimenzije '{dimension}' navodi nadređenu vrijednost '{parent}' koje nema među njezinim vrijednostima.",
+      "suggestion": "Navedite nadređenu vrijednost koja postoji u istoj dimenziji."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Datum snimke '{date}' nije kalendarski datum u obliku GGGG-MM-DD.",
+      "suggestion": "Unesite datum kao GGGG-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Datum snimke {date} je u budućnosti.",
+      "suggestion": "Upotrijebite današnji ili raniji dan."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' nije broj jednak nuli ili veći.",
+      "suggestion": "Unesite broj poput 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % izvan je raspona od 0 % do 100 %.",
+      "suggestion": "Unesite postotak od 0 do 100."
+    },
+    "budget_overrun": {
+      "fail": "Potrošeno je {value} % proračuna pa projekt premašuje proračun.",
+      "suggestion": "Usporedite podatke o troškovima s odobrenim proračunom."
+    },
+    "count_negative": {
+      "fail": "{field} ne može biti negativan ({value}).",
+      "suggestion": "Unesite nulu ili pozitivan cijeli broj."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' nije valjana adresa e-pošte.",
+      "suggestion": "Ispravite adresu."
+    },
+    "schedule_without_recipients": {
+      "fail": "Zakazano izvješće treba barem jednog primatelja.",
+      "suggestion": "Dodajte primatelja ili isključite raspored."
+    }
   }
 }

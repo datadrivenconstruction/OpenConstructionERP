@@ -2544,5 +2544,105 @@
       "fail": "En frigångskörning behöver ett frigångsavstånd över noll.",
       "suggestion": "Ange minsta frigång i meter eller använd en körning för hårda kollisioner."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Samtalet är daterat {occurred}, vilket ligger i framtiden.",
+      "suggestion": "Ange dag och tid för samtalet."
+    },
+    "call_ends_before_start": {
+      "fail": "Samtalet slutar {ended}, innan det börjar {started}.",
+      "suggestion": "Kontrollera start- och sluttid."
+    },
+    "logged_without_content": {
+      "fail": "Ett loggat samtal har varken utskrift eller sammanfattning och dokumenterar därför ingenting.",
+      "suggestion": "Lägg till utskriften eller en kort sammanfattning."
+    },
+    "instruction_without_party": {
+      "fail": "Samtalet registrerar instruktioner men namnger ingen deltagare.",
+      "suggestion": "Lägg till personerna som deltog i samtalet."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Länken anger inte båda posterna som den förbinder.",
+      "suggestion": "Välj båda posterna."
+    },
+    "link_to_itself": {
+      "fail": "Posten {record} kan inte länkas till sig själv.",
+      "suggestion": "Välj en annan andra post."
+    },
+    "record_type_unknown": {
+      "fail": "Posttypen '{record_type}' kan inte stämmas av.",
+      "suggestion": "Använd en post för korrespondens, ändringsorder, tilläggsarbete, meddelande eller metodändring."
+    },
+    "confidence_out_of_range": {
+      "fail": "Träffsäkerheten {confidence} ligger utanför intervallet 0 till 1.",
+      "suggestion": "Ange en poäng mellan 0 och 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Länken är bekräftad med träffsäkerhet {confidence}, under förslagsgränsen {threshold}.",
+      "suggestion": "Kontrollera att båda posterna beskriver samma händelse."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Påslagssteget '{step}' har en sats på {rate} %, utanför det tillåtna intervallet {low} % till {high} %.",
+      "suggestion": "Ange en sats inom det tillåtna intervallet."
+    },
+    "cascade_base_unknown": {
+      "fail": "Påslagssteget '{step}' bygger på '{base}', som varken är en kostnadsbas, en sammansatt bas eller ett tidigare steg.",
+      "suggestion": "Låt steget bygga på en kostnadsbas, en sammansatt bas eller ett steg ovanför."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Momssatsen {rate} % ligger utanför intervallet 0 % till 100 %.",
+      "suggestion": "Ange satsen som en procent från 0 till 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Finansieringskällans kod '{code}' används redan i det här projektet.",
+      "suggestion": "Använd en kod som inte är upptagen ännu."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensionen '{dimension}' anger värdekoden '{code}' mer än en gång.",
+      "suggestion": "Ge varje värde sin egen kod."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Värdet '{code}' i dimensionen '{dimension}' anger överordnad '{parent}', som inte finns bland dess värden.",
+      "suggestion": "Ange en överordnad som finns i samma dimension."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Ögonblicksbildens datum '{date}' är inte ett kalenderdatum på formen ÅÅÅÅ-MM-DD.",
+      "suggestion": "Ange datumet som ÅÅÅÅ-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Ögonblicksbildens datum {date} ligger i framtiden.",
+      "suggestion": "Använd i dag eller en tidigare dag."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' är inte ett tal på noll eller mer.",
+      "suggestion": "Ange ett tal som 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % ligger utanför intervallet 0 % till 100 %.",
+      "suggestion": "Ange en procent från 0 till 100."
+    },
+    "budget_overrun": {
+      "fail": "{value} % av budgeten är förbrukad, så projektet överskrider budgeten.",
+      "suggestion": "Jämför kostnadsdata med den godkända budgeten."
+    },
+    "count_negative": {
+      "fail": "{field} kan inte vara negativ ({value}).",
+      "suggestion": "Ange noll eller ett positivt heltal."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' är inte en giltig e-postadress.",
+      "suggestion": "Rätta adressen."
+    },
+    "schedule_without_recipients": {
+      "fail": "En schemalagd rapport behöver minst en mottagare.",
+      "suggestion": "Lägg till en mottagare eller stäng av schemat."
+    }
   }
 }

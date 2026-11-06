@@ -2544,5 +2544,105 @@
       "fail": "A távolságvizsgálathoz nullánál nagyobb távolság kell.",
       "suggestion": "Adja meg a legkisebb távolságot méterben, vagy használjon kemény ütközések vizsgálatát."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "A hívás dátuma {occurred}, ami a jövőben van.",
+      "suggestion": "Adja meg a hívás napját és időpontját."
+    },
+    "call_ends_before_start": {
+      "fail": "A hívás {ended} időpontban ér véget, mielőtt {started} időpontban elkezdődne.",
+      "suggestion": "Ellenőrizze a kezdő és a záró időpontot."
+    },
+    "logged_without_content": {
+      "fail": "A rögzített híváshoz nincs sem átirat, sem összefoglaló, így semmit sem dokumentál.",
+      "suggestion": "Adja meg az átiratot vagy egy rövid összefoglalót."
+    },
+    "instruction_without_party": {
+      "fail": "A hívás utasításokat rögzít, de nem nevez meg egyetlen résztvevőt sem.",
+      "suggestion": "Adja hozzá a hívás résztvevőit."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "A kapcsolat nem nevezi meg mindkét rekordot, amelyet összeköt.",
+      "suggestion": "Válassza ki mindkét rekordot."
+    },
+    "link_to_itself": {
+      "fail": "A(z) {record} rekord nem kapcsolható önmagához.",
+      "suggestion": "Válasszon másik, második rekordot."
+    },
+    "record_type_unknown": {
+      "fail": "A(z) '{record_type}' rekordtípus nem egyeztethető.",
+      "suggestion": "Használjon levelezési, módosítási megrendelési, pótmunka-, értesítési vagy módszerváltási rekordot."
+    },
+    "confidence_out_of_range": {
+      "fail": "Az egyezés megbízhatósága ({confidence}) a 0 és 1 közötti tartományon kívül esik.",
+      "suggestion": "Adjon meg 0 és 1 közötti pontszámot."
+    },
+    "confirmed_below_threshold": {
+      "fail": "A kapcsolat {confidence} egyezési megbízhatósággal van megerősítve, ami a javaslati küszöb ({threshold}) alatt van.",
+      "suggestion": "Ellenőrizze, hogy mindkét rekord ugyanazt az eseményt írja-e le."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "A(z) '{step}' felárlépés mértéke {rate}%, a megengedett {low}% és {high}% közötti tartományon kívül.",
+      "suggestion": "Adjon meg a megengedett tartományba eső mértéket."
+    },
+    "cascade_base_unknown": {
+      "fail": "A(z) '{step}' felárlépés alapja a(z) '{base}', amely nem költségalap, összetett alap vagy korábbi lépés.",
+      "suggestion": "Költségalapra, összetett alapra vagy a fölötte lévő lépésre alapozza a lépést."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Az áfakulcs ({rate}%) a 0% és 100% közötti tartományon kívül esik.",
+      "suggestion": "Adja meg a kulcsot 0 és 100 közötti százalékként."
+    },
+    "funding_code_duplicate": {
+      "fail": "A(z) '{code}' finanszírozási forráskód már használatban van ebben a projektben.",
+      "suggestion": "Használjon még szabad kódot."
+    },
+    "dimension_value_duplicate": {
+      "fail": "A(z) '{dimension}' dimenzió a(z) '{code}' értékkódot többször is felsorolja.",
+      "suggestion": "Adjon minden értéknek saját kódot."
+    },
+    "dimension_parent_unknown": {
+      "fail": "A(z) '{dimension}' dimenzió '{code}' értéke a(z) '{parent}' szülőt nevezi meg, amely nincs az értékei között.",
+      "suggestion": "Nevezzen meg a dimenzióban létező szülőt."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "A pillanatkép dátuma ('{date}') nem naptári dátum ÉÉÉÉ-HH-NN alakban.",
+      "suggestion": "Adja meg a dátumot ÉÉÉÉ-HH-NN alakban."
+    },
+    "snapshot_date_future": {
+      "fail": "A pillanatkép dátuma ({date}) a jövőben van.",
+      "suggestion": "Használja a mai vagy egy korábbi napot."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' nem nulla vagy annál nagyobb szám.",
+      "suggestion": "Adjon meg egy számot, például 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% a 0% és 100% közötti tartományon kívül esik.",
+      "suggestion": "Adjon meg 0 és 100 közötti százalékot."
+    },
+    "budget_overrun": {
+      "fail": "A költségvetés {value}%-a elfogyott, így a projekt túllépi a költségvetést.",
+      "suggestion": "Vesse össze a költségadatokat a jóváhagyott költségvetéssel."
+    },
+    "count_negative": {
+      "fail": "{field} nem lehet negatív ({value}).",
+      "suggestion": "Adjon meg nullát vagy pozitív egész számot."
+    },
+    "recipient_invalid": {
+      "fail": "A(z) '{recipient}' nem érvényes e-mail-cím.",
+      "suggestion": "Javítsa a címet."
+    },
+    "schedule_without_recipients": {
+      "fail": "Az ütemezett jelentéshez legalább egy címzett kell.",
+      "suggestion": "Adjon hozzá címzettet, vagy kapcsolja ki az ütemezést."
+    }
   }
 }

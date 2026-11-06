@@ -2544,5 +2544,105 @@
       "fail": "クリアランス検査には0より大きいクリアランス距離が必要です。",
       "suggestion": "最小クリアランスをメートルで入力するか、ハード干渉の検査を使用してください。"
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "通話の日付 {occurred} は未来の日付です。",
+      "suggestion": "通話が行われた日付と時刻を入力してください。"
+    },
+    "call_ends_before_start": {
+      "fail": "通話は {started} に始まる前の {ended} に終了しています。",
+      "suggestion": "開始時刻と終了時刻を確認してください。"
+    },
+    "logged_without_content": {
+      "fail": "記録された通話には文字起こしも要約もなく、何も記録されていません。",
+      "suggestion": "文字起こしまたは短い要約を追加してください。"
+    },
+    "instruction_without_party": {
+      "fail": "通話には指示が記録されていますが、参加者の名前がありません。",
+      "suggestion": "通話の参加者を追加してください。"
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "リンクが結ぶ2つのレコードが両方指定されていません。",
+      "suggestion": "両方のレコードを選択してください。"
+    },
+    "link_to_itself": {
+      "fail": "レコード {record} を自分自身にリンクすることはできません。",
+      "suggestion": "別の2つ目のレコードを選択してください。"
+    },
+    "record_type_unknown": {
+      "fail": "レコード種別 '{record_type}' は突合できません。",
+      "suggestion": "往復文書、変更指示、変更要求、通知、または工法変更のレコードを使用してください。"
+    },
+    "confidence_out_of_range": {
+      "fail": "一致の信頼度 {confidence} が 0 から 1 の範囲外です。",
+      "suggestion": "0 から 1 の間のスコアを入力してください。"
+    },
+    "confirmed_below_threshold": {
+      "fail": "リンクは一致の信頼度 {confidence} で確定されましたが、提案のしきい値 {threshold} を下回っています。",
+      "suggestion": "両方のレコードが同じ出来事を示しているか確認してください。"
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "加算ステップ '{step}' の率 {rate}% は、許容範囲 {low}% から {high}% の外です。",
+      "suggestion": "許容範囲内の率を入力してください。"
+    },
+    "cascade_base_unknown": {
+      "fail": "加算ステップ '{step}' は '{base}' に基づいていますが、これは原価ベース、複合ベース、または前のステップではありません。",
+      "suggestion": "原価ベース、複合ベース、または上位のステップに基づかせてください。"
+    },
+    "vat_rate_out_of_range": {
+      "fail": "付加価値税率 {rate}% は 0% から 100% の範囲外です。",
+      "suggestion": "税率を 0 から 100 のパーセントで入力してください。"
+    },
+    "funding_code_duplicate": {
+      "fail": "資金源コード '{code}' はこのプロジェクトで既に使われています。",
+      "suggestion": "まだ使われていないコードを使用してください。"
+    },
+    "dimension_value_duplicate": {
+      "fail": "ディメンション '{dimension}' に値コード '{code}' が複数回あります。",
+      "suggestion": "各値に固有のコードを付けてください。"
+    },
+    "dimension_parent_unknown": {
+      "fail": "ディメンション '{dimension}' の値 '{code}' は親 '{parent}' を指定していますが、その値の中にありません。",
+      "suggestion": "同じディメンションに存在する親を指定してください。"
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "スナップショットの日付 '{date}' は YYYY-MM-DD 形式の暦日ではありません。",
+      "suggestion": "日付を YYYY-MM-DD 形式で入力してください。"
+    },
+    "snapshot_date_future": {
+      "fail": "スナップショットの日付 {date} は未来の日付です。",
+      "suggestion": "今日またはそれ以前の日付を使用してください。"
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' は 0 以上の数値ではありません。",
+      "suggestion": "0.95 のような数値を入力してください。"
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% は 0% から 100% の範囲外です。",
+      "suggestion": "0 から 100 のパーセントを入力してください。"
+    },
+    "budget_overrun": {
+      "fail": "予算の {value}% が消化されており、プロジェクトは予算超過です。",
+      "suggestion": "原価データを承認済みの予算と照合してください。"
+    },
+    "count_negative": {
+      "fail": "{field} は負の値にできません ({value})。",
+      "suggestion": "0 または正の整数を入力してください。"
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' は有効なメールアドレスではありません。",
+      "suggestion": "アドレスを修正してください。"
+    },
+    "schedule_without_recipients": {
+      "fail": "スケジュールされたレポートには受信者が最低1人必要です。",
+      "suggestion": "受信者を追加するか、スケジュールをオフにしてください。"
+    }
   }
 }

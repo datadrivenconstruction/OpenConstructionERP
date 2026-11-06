@@ -2544,5 +2544,105 @@
       "fail": "کلیئرنس رن کے لیے صفر سے زیادہ کلیئرنس فاصلہ درکار ہے۔",
       "suggestion": "کم از کم کلیئرنس میٹر میں درج کریں یا سخت تصادم کا رن استعمال کریں۔"
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "کال کی تاریخ {occurred} ہے جو مستقبل میں ہے۔",
+      "suggestion": "کال کا دن اور وقت درج کریں۔"
+    },
+    "call_ends_before_start": {
+      "fail": "کال {started} پر شروع ہونے سے پہلے {ended} پر ختم ہو جاتی ہے۔",
+      "suggestion": "آغاز اور اختتام کا وقت چیک کریں۔"
+    },
+    "logged_without_content": {
+      "fail": "درج شدہ کال میں نہ ٹرانسکرپٹ ہے نہ خلاصہ، اس لیے یہ کچھ بھی ریکارڈ نہیں کرتی۔",
+      "suggestion": "ٹرانسکرپٹ یا مختصر خلاصہ شامل کریں۔"
+    },
+    "instruction_without_party": {
+      "fail": "کال میں ہدایات درج ہیں مگر کسی شریک کا نام نہیں۔",
+      "suggestion": "کال میں شامل افراد کو شامل کریں۔"
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "لنک ان دونوں ریکارڈز کا نام نہیں دیتا جنہیں وہ جوڑتا ہے۔",
+      "suggestion": "دونوں ریکارڈ منتخب کریں۔"
+    },
+    "link_to_itself": {
+      "fail": "ریکارڈ {record} کو خود سے منسلک نہیں کیا جا سکتا۔",
+      "suggestion": "کوئی مختلف دوسرا ریکارڈ منتخب کریں۔"
+    },
+    "record_type_unknown": {
+      "fail": "ریکارڈ کی قسم '{record_type}' کا مصالحت نہیں ہو سکتا۔",
+      "suggestion": "خط و کتابت، تبدیلی کا حکم، ویری ایشن، نوٹس یا طریقہ کار کی تبدیلی کا ریکارڈ استعمال کریں۔"
+    },
+    "confidence_out_of_range": {
+      "fail": "مماثلت کا اعتماد {confidence} صفر سے ایک کی حد سے باہر ہے۔",
+      "suggestion": "صفر اور ایک کے درمیان اسکور دیں۔"
+    },
+    "confirmed_below_threshold": {
+      "fail": "لنک کی تصدیق {confidence} مماثلتی اعتماد پر ہوئی ہے جو تجویز کی حد {threshold} سے کم ہے۔",
+      "suggestion": "جانچ لیں کہ دونوں ریکارڈ ایک ہی واقعے کو بیان کرتے ہیں۔"
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "مارک اپ مرحلے '{step}' کی شرح {rate}% ہے جو مجاز حد {low}% سے {high}% کے باہر ہے۔",
+      "suggestion": "مجاز حد کے اندر شرح درج کریں۔"
+    },
+    "cascade_base_unknown": {
+      "fail": "مارک اپ مرحلہ '{step}' کی بنیاد '{base}' ہے جو لاگت کی بنیاد، مرکب یا پچھلا مرحلہ نہیں۔",
+      "suggestion": "مرحلے کو لاگت کی بنیاد، مرکب یا اس سے اوپر کے مرحلے پر رکھیں۔"
+    },
+    "vat_rate_out_of_range": {
+      "fail": "ویٹ کی شرح {rate}% صفر سے 100 فیصد کی حد سے باہر ہے۔",
+      "suggestion": "شرح کو صفر سے 100 کے درمیان فیصد کے طور پر درج کریں۔"
+    },
+    "funding_code_duplicate": {
+      "fail": "فنڈنگ ذریعے کا کوڈ '{code}' اس منصوبے میں پہلے سے استعمال ہو رہا ہے۔",
+      "suggestion": "ایسا کوڈ استعمال کریں جو ابھی تک نہ لیا گیا ہو۔"
+    },
+    "dimension_value_duplicate": {
+      "fail": "جہت '{dimension}' میں قدر کا کوڈ '{code}' ایک سے زیادہ بار ہے۔",
+      "suggestion": "ہر قدر کو اس کا اپنا کوڈ دیں۔"
+    },
+    "dimension_parent_unknown": {
+      "fail": "جہت '{dimension}' کی قدر '{code}' والد '{parent}' بتاتی ہے جو اس کی قدروں میں نہیں۔",
+      "suggestion": "اسی جہت میں موجود والد کا نام دیں۔"
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "اسنیپ شاٹ کی تاریخ '{date}' YYYY-MM-DD صورت میں درست تاریخ نہیں۔",
+      "suggestion": "تاریخ YYYY-MM-DD صورت میں درج کریں۔"
+    },
+    "snapshot_date_future": {
+      "fail": "اسنیپ شاٹ کی تاریخ {date} مستقبل میں ہے۔",
+      "suggestion": "آج یا اس سے پہلے کا دن استعمال کریں۔"
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' صفر یا اس سے زیادہ کا عدد نہیں۔",
+      "suggestion": "0.95 جیسا عدد درج کریں۔"
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% صفر سے 100 فیصد کی حد سے باہر ہے۔",
+      "suggestion": "صفر سے 100 کے درمیان فیصد درج کریں۔"
+    },
+    "budget_overrun": {
+      "fail": "بجٹ کا {value}% خرچ ہو چکا ہے، اس لیے منصوبہ بجٹ سے تجاوز کر گیا ہے۔",
+      "suggestion": "لاگت کے اعداد و شمار کو منظور شدہ بجٹ سے ملائیں۔"
+    },
+    "count_negative": {
+      "fail": "{field} منفی نہیں ہو سکتا ({value})۔",
+      "suggestion": "صفر یا مثبت مکمل عدد درج کریں۔"
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' درست ای میل پتہ نہیں۔",
+      "suggestion": "پتہ درست کریں۔"
+    },
+    "schedule_without_recipients": {
+      "fail": "طے شدہ رپورٹ کے لیے کم از کم ایک وصول کنندہ درکار ہے۔",
+      "suggestion": "وصول کنندہ شامل کریں یا شیڈول بند کر دیں۔"
+    }
   }
 }
