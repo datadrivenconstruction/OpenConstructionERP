@@ -620,7 +620,7 @@ The right-hand side of the diagram is the **automatic data retrieval** layer tha
 <td align="center" width="12.5%"><b>16</b><br/><sub>watchers</sub></td>
 <td align="center" width="12.5%"><b>78</b><br/><sub>contributors</sub></td>
 <td align="center" width="12.5%"><b>305</b><br/><sub>releases</sub></td>
-<td align="center" width="12.5%"><b>19.0.0</b><br/><sub>latest&nbsp;release</sub></td>
+<td align="center" width="12.5%"><b>19.1.0</b><br/><sub>latest&nbsp;release</sub></td>
 <td align="center" width="12.5%"><b>235</b><br/><sub>issues&nbsp;closed</sub></td>
 <td align="center" width="12.5%"><b>49,094</b><br/><sub>PyPI&nbsp;downloads</sub></td>
 </tr>
