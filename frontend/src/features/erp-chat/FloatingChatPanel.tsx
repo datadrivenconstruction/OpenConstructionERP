@@ -55,7 +55,12 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
+  Copy,
   ExternalLink,
+  FolderOpen,
+  LayoutGrid,
+  Maximize2,
+  Minimize2,
   HelpCircle,
   History,
   MessageSquarePlus,
@@ -80,6 +85,7 @@ import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
 import {
+  DOCK_MAX_WIDTH,
   DOCK_MIN_WIDTH,
   DOCK_RESIZING_ATTR,
   applyDockLayout,
@@ -107,6 +113,9 @@ import { ActionsReviewTray, revealFirstWaitingAction } from './actions/ActionsRe
 import { ChangesView } from './actions/ChangesView';
 import { pendingActions, useLiveChatActions } from './actions/useChatActions';
 import type { ChatAction } from './actions/types';
+// Direct import, not the feature barrel: the dock is always loaded and the
+// barrel also carries the voice-to-draft modal.
+import { VoiceDictation } from '@/features/voice/VoiceDictation';
 
 // Reuse the full-page renderer registry so the tool-result cards inside the
 // floating panel look identical to /chat. The single shared RENDERER_REGISTRY
@@ -1481,7 +1490,20 @@ export function FloatingChatPanel() {
   // back exactly as it was.
   const suppressed = isFloatingChatHiddenOn(location.pathname);
   const dockOpen = isOpen && !suppressed;
-  const geometry = useDockGeometry();
+  // Expanded: the widest the screen allows, for tables and long answers.
+  const [expanded, setExpanded] = useState<boolean>(readDockExpanded);
+  const toggleExpanded = useCallback(() => {
+    setExpanded((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(DOCK_EXPANDED_STORAGE_KEY, next ? '1' : '0');
+      } catch {
+        // Kept for this page only.
+      }
+      return next;
+    });
+  }, []);
+  const geometry = useDockGeometry(expanded ? DOCK_MAX_WIDTH : undefined);
   const overlay = geometry.mode === 'overlay';
   const presence = useDockPresence(dockOpen);
   useDockLayoutSync({
@@ -2259,6 +2281,21 @@ export function FloatingChatPanel() {
     });
   }, []);
 
+  // A finished dictation: appended to whatever is typed, for the person to
+  // read and send. "Send when I stop" sends it at once instead.
+  const handleTranscript = useCallback(
+    (text: string, opts: { send: boolean }) => {
+      const current = textareaRef.current?.value ?? value;
+      const joined = current.trim() ? `${current.replace(/\s+$/, '')} ${text}` : text;
+      if (opts.send && aiConfigured !== false) {
+        sendMessage(joined);
+        return;
+      }
+      draftInstruction(joined);
+    },
+    [aiConfigured, draftInstruction, sendMessage, value],
+  );
+
   // The tray's Review: scroll to the first waiting card and focus it. The
   // transcript stops following new messages, the reader is looking up.
   const reviewWaiting = useCallback(() => {
@@ -2412,6 +2449,19 @@ export function FloatingChatPanel() {
           >
             <History size={16} />
           </DockHeaderButton>
+          {!geometry.fullWidth && (
+            <DockHeaderButton
+              onClick={toggleExpanded}
+              label={
+                expanded
+                  ? t('chat.dock.collapse', { defaultValue: 'Restore panel width' })
+                  : t('chat.dock.expand', { defaultValue: 'Expand panel' })
+              }
+              testId="floating-chat-expand"
+            >
+              {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </DockHeaderButton>
+          )}
           <DockHeaderButton
             onClick={() => {
               close();
@@ -2547,9 +2597,22 @@ export function FloatingChatPanel() {
             </div>
           )}
 
-          {/* Composer */}
-          <div className="shrink-0 border-t border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-1)] px-3 pb-2.5 pt-2.5">
-            <div className="flex items-end gap-2">
+          {/* Composer: one rounded card with what the assistant sees, the
+              text, and a toolbar (voice on the start side, send on the end). */}
+          <div className="shrink-0 bg-[color:var(--chat-surface-1)] px-3 pb-2.5 pt-2">
+            <div
+              className={clsx(
+                'relative rounded-2xl border bg-[color:var(--chat-bg)] shadow-sm transition-[border-color,box-shadow]',
+                'focus-within:border-oe-blue focus-within:ring-2 focus-within:ring-oe-blue/20',
+                overHard
+                  ? 'border-semantic-error'
+                  : overSoft
+                    ? 'border-semantic-warning'
+                    : 'border-[color:var(--chat-border)]',
+              )}
+              data-testid="floating-chat-composer"
+            >
+              <ContextChips projectName={activeProjectName || null} pathname={location.pathname} />
               <textarea
                 ref={textareaRef}
                 value={value}
@@ -2564,58 +2627,61 @@ export function FloatingChatPanel() {
                 })}
                 rows={2}
                 className={clsx(
-                  'max-h-40 min-w-0 flex-1 resize-none overflow-auto rounded-lg border bg-[color:var(--chat-bg)] px-2.5 py-2 text-sm text-[color:var(--chat-text-primary)] outline-none transition-colors',
-                  'placeholder:text-[color:var(--chat-text-secondary)] focus:border-oe-blue focus-visible:ring-2 focus-visible:ring-oe-blue/30',
+                  'block max-h-40 w-full min-w-0 resize-none overflow-auto border-0 bg-transparent px-3 pb-1 pt-2 text-sm text-[color:var(--chat-text-primary)] outline-none',
+                  'placeholder:text-[color:var(--chat-text-secondary)]',
                   'disabled:cursor-not-allowed disabled:opacity-70',
-                  overHard
-                    ? 'border-semantic-error'
-                    : overSoft
-                      ? 'border-semantic-warning'
-                      : 'border-[color:var(--chat-border)]',
                 )}
                 style={{ fontFamily: 'var(--chat-font-body)' }}
               />
-              <button
-                type="button"
-                onClick={() => sendMessage(value)}
-                disabled={!canSend}
-                data-testid="floating-chat-send"
-                aria-label={t('chat.panel.send', { defaultValue: 'Send' })}
-                title={t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
-                className={clsx(
-                  'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
-                  canSend
-                    ? 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover'
-                    : 'cursor-not-allowed border border-[color:var(--chat-border)] bg-[color:var(--chat-surface-2)] text-[color:var(--chat-text-secondary)]',
+              <div className="flex items-center gap-1 px-2 pb-2">
+                <VoiceDictation
+                  onTranscript={handleTranscript}
+                  scopeRef={containerRef}
+                  disabled={isStreaming || historyLoading}
+                />
+                <span className="min-w-0 flex-1" />
+                {showCounter && (
+                  <span
+                    className={clsx(
+                      'shrink-0 text-[12px] tabular-nums text-[color:var(--chat-text-secondary)]',
+                      overHard && 'font-medium text-semantic-error',
+                      !overHard && overSoft && 'font-medium text-semantic-warning',
+                    )}
+                    data-testid="floating-chat-counter"
+                  >
+                    {overHard
+                      ? t('chat.panel.token_over', { defaultValue: 'Too long - please shorten' })
+                      : overSoft
+                        ? t('chat.panel.token_warn', { defaultValue: 'Long message' })
+                        : `${charCount}/${HARD_LIMIT}`}
+                  </span>
                 )}
-              >
-                <ArrowUp size={16} strokeWidth={2.25} aria-hidden />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => sendMessage(value)}
+                  disabled={!canSend}
+                  data-testid="floating-chat-send"
+                  aria-label={t('chat.panel.send', { defaultValue: 'Send' })}
+                  title={t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
+                  className={clsx(
+                    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
+                    canSend
+                      ? 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover'
+                      : 'cursor-not-allowed bg-[color:var(--chat-surface-2)] text-[color:var(--chat-text-secondary)]',
+                  )}
+                >
+                  <ArrowUp size={16} strokeWidth={2.25} aria-hidden />
+                </button>
+              </div>
             </div>
-            <div className="mt-1.5 flex items-center gap-1.5 text-[12px] leading-4 text-[color:var(--chat-text-secondary)]">
+            <div className="mt-1.5 flex items-center gap-1.5 px-1 text-[12px] leading-4 text-[color:var(--chat-text-secondary)]">
               <ShieldCheck size={13} aria-hidden className="shrink-0" />
               <span id={composerNoteId} className="min-w-0 flex-1">
                 {t('chat.dock.composer_note', {
                   defaultValue: 'Changes are only saved after you approve them.',
                 })}
               </span>
-              {showCounter && (
-                <span
-                  className={clsx(
-                    'shrink-0 tabular-nums',
-                    overHard && 'font-medium text-semantic-error',
-                    !overHard && overSoft && 'font-medium text-semantic-warning',
-                  )}
-                  data-testid="floating-chat-counter"
-                >
-                  {overHard
-                    ? t('chat.panel.token_over', { defaultValue: 'Too long - please shorten' })
-                    : overSoft
-                      ? t('chat.panel.token_warn', { defaultValue: 'Long message' })
-                      : `${charCount}/${HARD_LIMIT}`}
-                </span>
-              )}
             </div>
             <span id={composerKeysId} className="sr-only">
               {t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
@@ -2688,6 +2754,106 @@ export function FloatingChatPanel() {
   );
 }
 
+// ── Context the assistant sees ─────────────────────────────────────────────
+
+const PAGE_CONTEXT: readonly { test: RegExp; key: string; fallback: string }[] = [
+  { test: /^\/boq(\/|$)/, key: 'nav.boq', fallback: 'Bill of Quantities' },
+  { test: /^\/schedule(\/|$)/, key: 'nav.schedule', fallback: '4D Schedule' },
+  { test: /^\/(projects\/[^/]+\/)?rfi(\/|$)/, key: 'nav.rfi', fallback: 'RFI' },
+  { test: /^\/risks(\/|$)/, key: 'nav.risk_register', fallback: 'Risk Register' },
+  { test: /^\/punchlist(\/|$)/, key: 'nav.punchlist', fallback: 'Punch List' },
+  { test: /^\/bim(\/|$)/, key: 'nav.bim', fallback: 'BIM' },
+  { test: /^\/documents(\/|$)/, key: 'nav.documents', fallback: 'Documents' },
+  { test: /^\/finance(\/|$)/, key: 'nav.finance', fallback: 'Finance' },
+  { test: /^\/costs(\/|$)/, key: 'nav.costs', fallback: 'Cost Database' },
+  { test: /^\/projects(\/|$)/, key: 'nav.projects', fallback: 'Projects' },
+  { test: /^\/(dashboard)?$/, key: 'nav.dashboard', fallback: 'Dashboard' },
+];
+
+/** The page a request is sent from, as the navigation names it; null for pages not named here. */
+export function pageContextLabel(
+  pathname: string,
+  t: (key: string, opts: { defaultValue: string }) => string,
+): string | null {
+  const hit = PAGE_CONTEXT.find((p) => p.test.test(pathname));
+  return hit ? t(hit.key, { defaultValue: hit.fallback }) : null;
+}
+
+/**
+ * What goes with every message besides the words: the open project and the
+ * page. Shown so the person knows what "this" and "here" refer to.
+ */
+function ContextChips({ projectName, pathname }: { projectName: string | null; pathname: string }) {
+  const { t } = useTranslation();
+  const page = pageContextLabel(pathname, t);
+  const chip =
+    'inline-flex min-w-0 max-w-[60%] items-center gap-1 rounded-full border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-2)] px-2 py-0.5 text-[11.5px] leading-4 text-[color:var(--chat-text-secondary)]';
+  return (
+    <div
+      className="flex min-w-0 flex-wrap items-center gap-1.5 px-2.5 pt-2"
+      data-testid="floating-chat-context"
+      aria-label={t('chat.dock.context_label', { defaultValue: 'The assistant sees' })}
+      role="group"
+    >
+      <span className={chip} title={projectName ?? undefined}>
+        <FolderOpen size={12} aria-hidden className="shrink-0" />
+        <span className="truncate">
+          {projectName || t('chat.dock.context_no_project', { defaultValue: 'No project selected' })}
+        </span>
+      </span>
+      {page && (
+        <span className={chip}>
+          <LayoutGrid size={12} aria-hidden className="shrink-0" />
+          <span className="truncate">{page}</span>
+        </span>
+      )}
+    </div>
+  );
+}
+
+function CopyMessageButton({ text }: { text: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const id = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(id);
+  }, [copied]);
+  const label = copied
+    ? t('chat.message.copied', { defaultValue: 'Copied' })
+    : t('chat.message.copy', { defaultValue: 'Copy' });
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const clipboard = typeof navigator !== 'undefined' ? navigator.clipboard : undefined;
+        if (!clipboard) return;
+        clipboard
+          .writeText(text)
+          .then(() => setCopied(true))
+          .catch(() => undefined);
+      }}
+      aria-label={label}
+      title={label}
+      data-testid="floating-chat-copy"
+      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] text-[color:var(--chat-text-secondary)] opacity-0 transition-opacity hover:bg-[color:var(--chat-surface-2)] hover:text-[color:var(--chat-text-primary)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue group-hover:opacity-100 group-focus-within:opacity-100"
+    >
+      {copied ? <Check size={12} aria-hidden /> : <Copy size={12} aria-hidden />}
+      <span aria-live="polite">{copied ? label : null}</span>
+    </button>
+  );
+}
+
+const DOCK_EXPANDED_STORAGE_KEY = 'oe_ai_dock_expanded_v1';
+
+function readDockExpanded(): boolean {
+  try {
+    return localStorage.getItem(DOCK_EXPANDED_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 // ── Individual message row ─────────────────────────────────────────────────
 function MessageRow({
   msg,
@@ -2751,6 +2917,7 @@ function MessageRow({
   // accent rule is on the inline-start side, so it follows RTL.
   return (
     <div
+      className="group"
       style={{
         borderInlineStart: '2px solid var(--chat-accent)',
         paddingInlineStart: 10,
@@ -2774,6 +2941,11 @@ function MessageRow({
           }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
+      )}
+      {html && (
+        <div className="mt-0.5 flex justify-end">
+          <CopyMessageButton text={msg.content} />
+        </div>
       )}
       {msg.errorText && (
         <ErrorCard
