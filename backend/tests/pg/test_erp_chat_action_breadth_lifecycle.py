@@ -657,3 +657,73 @@ async def test_undo_restores_the_previous_progress_only_while_it_holds_what_was_
     log = await _audit_row(pg_session, str(walls.id), "reverted")
     assert float(log.after_state["progress_pct"]) == 0
     assert log.metadata_["url"] == f"/schedule?project_id={site['project'].id}"
+
+
+# ── schedule.shift_activity ─────────────────────────────────────────────────
+
+
+async def _dates(session, activity_id: uuid.UUID) -> tuple[str, str, int]:
+    from app.modules.schedule.models import Activity
+
+    row = (
+        await session.execute(
+            select(Activity.start_date, Activity.end_date, Activity.duration_days).where(Activity.id == activity_id)
+        )
+    ).one()
+    return str(row[0])[:10], str(row[1])[:10], int(row[2] or 0)
+
+
+@pytest.mark.asyncio
+async def test_moving_an_activity_by_two_days_keeps_its_length_and_undo_puts_it_back(
+    pg_session, site, programme
+) -> None:
+    from app.modules.schedule.models import Activity
+
+    walls = programme["Walls level 1"]
+    action = await _propose(
+        pg_session, site, "propose_shift_schedule_activity", {"activity": "walls level 1", "shift_days": 2}
+    )
+    assert (action.payload["start_date"], action.payload["end_date"]) == ("2026-09-03", "2026-10-02")
+    assert (await _dates(pg_session, walls.id))[:2] == ("2026-09-01", "2026-09-30")
+
+    service = ChatActionService(pg_session)
+    director = await service.viewer(site["director"].id)
+    applied = await service.apply(action.id, director)
+    assert applied.status == "applied", applied.error
+    start, end, _days = await _dates(pg_session, walls.id)
+    assert (start, end) == ("2026-09-03", "2026-10-02")
+    log = await _audit_row(pg_session, str(walls.id), "updated")
+    _assert_assistant_row(log, site, action, "activity")
+    assert log.before_state["start_date"] == "2026-09-01"
+
+    reverted = await service.revert(action.id, director)
+    assert reverted.status == "reverted"
+    assert (await _dates(pg_session, walls.id))[:2] == ("2026-09-01", "2026-09-30")
+
+    # Moved by hand after a second apply: undo leaves the newer dates alone.
+    second = await _propose(
+        pg_session, site, "propose_shift_schedule_activity", {"activity_id": str(walls.id), "shift_days": -1}
+    )
+    await service.apply(second.id, director)
+    await pg_session.execute(update(Activity).where(Activity.id == walls.id).values(start_date="2026-09-10"))
+    with pytest.raises(ActionConflictError) as caught:
+        await service.revert(second.id, director)
+    assert caught.value.code == "changed_since_apply"
+
+
+@pytest.mark.asyncio
+async def test_a_stranger_cannot_move_an_activity(pg_session, site, programme) -> None:
+    foundations = programme["Foundations"]
+    service = ChatActionService(pg_session)
+    with pytest.raises(ActionNotFoundError):
+        await service.propose(
+            tool_name="propose_shift_schedule_activity",
+            args={"activity_id": str(foundations.id), "shift_days": 3},
+            user_id=site["stranger"].id,
+        )
+    action = await _propose(
+        pg_session, site, "propose_shift_schedule_activity", {"activity_id": str(foundations.id), "shift_days": 3}
+    )
+    with pytest.raises(ActionNotFoundError):
+        await service.apply(action.id, await service.viewer(site["stranger"].id))
+    assert (await _dates(pg_session, foundations.id))[:2] == ("2026-09-01", "2026-09-30")

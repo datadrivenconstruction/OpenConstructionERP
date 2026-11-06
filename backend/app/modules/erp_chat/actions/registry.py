@@ -59,6 +59,7 @@ def _ensure_builtins() -> None:
     from app.modules.erp_chat.actions.rfi_create import RFICreateSpec
     from app.modules.erp_chat.actions.risk_create import RiskCreateSpec
     from app.modules.erp_chat.actions.schedule_progress import ScheduleUpdateProgressSpec
+    from app.modules.erp_chat.actions.schedule_shift import ScheduleShiftActivitySpec
     from app.modules.erp_chat.actions.task_create import TaskCreateSpec
 
     builtins = (
@@ -69,6 +70,7 @@ def _ensure_builtins() -> None:
         RiskCreateSpec(),
         PunchCreateItemSpec(),
         ScheduleUpdateProgressSpec(),
+        ScheduleShiftActivitySpec(),
     )
     for spec in builtins:
         if spec.action_type not in _SPECS:
