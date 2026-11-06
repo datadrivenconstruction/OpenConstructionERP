@@ -465,6 +465,14 @@ teach identifiers that were never rule sets at all.
 | `rfq_issue` | Enquiry at the point of issue |
 | `rfq_award` | Enquiry at the point of award |
 | `subcontract` | Subcontract packages |
+| `subcontract_change` | A subcontract change against the owner change it passes down: linked, priced, within the owner value and time, owner approved |
+| `bid_leveling` | Bid leveling: plugged scope kept within a share of the total, every gap covered, a linked main tender awarded |
+| `bid_award` | Award of a package: bids leveled first, plugs and gaps within bounds |
+| `bid_outcome` | Bid outcome ledger: winner recorded, won price matching the bid, runner-up above the winner, competitors and loss reason noted |
+| `field_diary_capture` | Field diary entries captured offline: not older than the sync window |
+| `field_productivity` | Labour hours booked to a position against the progress measured in the same period |
+| `workforce` | Schedule activities that load labour: every labour resource names a trade |
+| `sheet_intake` | Uploaded drawing sheets: a number on every sheet, no duplicate number at one revision, no older revision replacing a newer one, OCR readings confirmed by a person |
 | `submittal` | Submittals |
 | `property_dev` | Development appraisal |
 | `pipeline` | Opportunity pipeline |
