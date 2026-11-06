@@ -87,7 +87,8 @@ class Collect(logging.Handler):
         self.active = False
 
     def emit(self, record: logging.LogRecord) -> None:
-        if self.active:
+        # Latency warnings describe the shared runner, not what an install wrote.
+        if self.active and record.name != "slow_requests":
             self.records.append(f"{record.levelname} {record.name}: {record.getMessage()}"[:400])
 
 
