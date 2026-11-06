@@ -205,6 +205,38 @@
       "channel": "academy",
       "order": 75
     },
+    "playbook-brazil": {
+      "title": "Builder's Playbook Brasil: orçamento e gestão de obras públicas",
+      "language": "pt-BR",
+      "market": "BR",
+      "playlist": "PLLe-gfSauXTY",
+      "channel": "academy",
+      "order": 80
+    },
+    "playbook-poland": {
+      "title": "Budowa domu: kosztorys, umowa i rozliczenie",
+      "language": "pl",
+      "market": "PL",
+      "playlist": "PLVLOe3pv2_oo",
+      "channel": "academy",
+      "order": 82
+    },
+    "playbook-turkey": {
+      "title": "Okul ek binası: yaklaşık maliyetten kesin hesaba",
+      "language": "tr",
+      "market": "TR",
+      "playlist": "PLL2jqtV6A934",
+      "channel": "academy",
+      "order": 84
+    },
+    "playbook-saudi": {
+      "title": "عظم فيلا في الرياض: التسعير والعقد والمستخلص",
+      "language": "ar",
+      "market": "SA",
+      "playlist": "PLO8UfCu9nokM",
+      "channel": "academy",
+      "order": 86
+    },
     "ddc-walkthroughs": {
       "title": "Product walkthroughs and talks",
       "titleKey": "videos.series.walkthroughs",
@@ -1077,6 +1109,237 @@
       "cases": ["estimate-from-cost-database", "draft-an-estimate-with-ai-element-matching"],
       "result": "cost",
       "provenance": "videos-agent-2026-10-24"
+    },
+    "BR01": {
+      "youtubeId": "2B5WhzXi8hE",
+      "series": "playbook-brazil",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "BR",
+      "cases": ["price-the-orcamento-de-referencia-from-the-sinapi-base", "build-a-composicao-de-custo-unitario-propria", "compose-the-bdi-under-acordao-2622-2013-tcu"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "BR02": {
+      "youtubeId": "fwkAAeGl5hI",
+      "series": "playbook-brazil",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "commercial-manager"],
+      "market": "BR",
+      "cases": ["keep-the-orcamento-estimado-sigiloso-under-lei-14133", "compare-bids-and-award", "sense-check-an-estimate-with-benchmarks"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "BR03": {
+      "youtubeId": "a5qbM2drFkE",
+      "series": "playbook-brazil",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["planner", "project-manager"],
+      "market": "BR",
+      "cases": ["build-the-cronograma-fisico-financeiro-from-the-orcamento", "forecast-project-cash-flow", "build-the-baseline-programme"],
+      "result": "programme",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "BR04": {
+      "youtubeId": "FXrYc6XxRHY",
+      "series": "playbook-brazil",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["contract-administrator", "site-manager"],
+      "market": "BR",
+      "cases": ["attest-the-boletim-de-medicao-and-invoice-the-period", "apply-the-annual-reajustamento-to-a-brazilian-contract", "assess-and-price-a-variation"],
+      "result": "change",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "BR05": {
+      "youtubeId": "tpBk_sSiuH4",
+      "series": "playbook-brazil",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": ["accountant", "finance-manager"],
+      "market": "BR",
+      "cases": ["issue-an-electronic-invoice", "manage-retention-across-the-supply-chain", "payment-application-and-reconciliation"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "PL01": {
+      "youtubeId": "e4J8OVG9xiU",
+      "series": "playbook-poland",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "PL",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "PL02": {
+      "youtubeId": "b4Ow_AavjCE",
+      "series": "playbook-poland",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "commercial-manager"],
+      "market": "PL",
+      "cases": ["tender-from-boq", "respond-to-an-invitation-to-tender-as-a-subcontractor", "sense-check-an-estimate-with-benchmarks"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "PL03": {
+      "youtubeId": "Av_Zk5RBMVU",
+      "series": "playbook-poland",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "planner"],
+      "market": "PL",
+      "cases": ["build-a-milestone-payment-schedule", "build-the-baseline-programme", "forecast-project-cash-flow"],
+      "result": "programme",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "PL04": {
+      "youtubeId": "FNMEizW21Ho",
+      "series": "playbook-poland",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["accountant", "contract-administrator"],
+      "market": "PL",
+      "cases": ["prepare-an-interim-payment-application", "issue-an-electronic-invoice", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "PL05": {
+      "youtubeId": "nQ3KtajmJP0",
+      "series": "playbook-poland",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "PL",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "adjust-a-material-price-with-a-cost-index"],
+      "result": "change",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "TR01": {
+      "youtubeId": "VXdmpHvVHqE",
+      "series": "playbook-turkey",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "TR",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "price-a-tender-on-the-schedule-of-rates-that-governs-it", "evaluate-a-government-tender-against-the-estimated-cost"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "TR02": {
+      "youtubeId": "Qfhkq7cXXWg",
+      "series": "playbook-turkey",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "TR",
+      "cases": ["compare-bids-and-award", "evaluate-a-government-tender-against-the-estimated-cost", "level-bids-to-a-common-scope"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "TR03": {
+      "youtubeId": "NoCG36uilqc",
+      "series": "playbook-turkey",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "project-manager"],
+      "market": "TR",
+      "cases": ["set-the-securities-and-work-through-to-final-completion", "build-a-milestone-payment-schedule", "build-the-baseline-programme"],
+      "result": "programme",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "TR04": {
+      "youtubeId": "S5-fKPABLp8",
+      "series": "playbook-turkey",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "TR",
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "issue-an-electronic-invoice"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "TR05": {
+      "youtubeId": "P-f3NV654og",
+      "series": "playbook-turkey",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "TR",
+      "cases": ["agree-the-final-account-and-release-retention", "assess-and-price-a-variation", "adjust-a-material-price-with-a-cost-index"],
+      "result": "handover",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "AR01": {
+      "youtubeId": "qUU14PaPHCI",
+      "series": "playbook-saudi",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "SA",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "escalate-an-estimate-with-price-indices"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "AR02": {
+      "youtubeId": "RmKbLkeXmm0",
+      "series": "playbook-saudi",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["procurement-buyer", "estimator"],
+      "market": "SA",
+      "cases": ["level-subcontract-bids-and-flow-the-terms-down", "compare-bids-and-award", "package-a-subcontract-under-saudization-and-local-content"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "AR03": {
+      "youtubeId": "F9ipxHvCegQ",
+      "series": "playbook-saudi",
+      "seriesOrder": 3,
+      "stage": "procure",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "SA",
+      "cases": ["set-the-vat-treatment-on-a-saudi-construction-contract", "manage-retention-across-the-supply-chain", "build-a-milestone-payment-schedule"],
+      "result": "order",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "AR04": {
+      "youtubeId": "naomR5B8ywE",
+      "series": "playbook-saudi",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "SA",
+      "cases": ["prepare-an-interim-payment-application", "set-the-vat-treatment-on-a-saudi-construction-contract", "clear-a-standard-invoice-through-zatca-phase-two"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "AR05": {
+      "youtubeId": "liaEeAmEzoM",
+      "series": "playbook-saudi",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": ["commercial-manager", "accountant"],
+      "market": "SA",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "clear-a-standard-invoice-through-zatca-phase-two"],
+      "result": "change",
+      "provenance": "videos-refresh-2026-11-06"
+    },
+    "IT05": {
+      "youtubeId": "p4veyF4FY4s",
+      "series": "playbook-italy",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "IT",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "change-register-and-impact"],
+      "result": "change",
+      "provenance": "videos-refresh-2026-11-06"
     }
   },
   "extras": [
