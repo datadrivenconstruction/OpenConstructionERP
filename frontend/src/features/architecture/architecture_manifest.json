@@ -64589,6 +64589,12 @@
               "nullable": true
             },
             {
+              "name": "billing_address",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
               "name": "primary_email",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -64925,6 +64931,11 @@
               "default": "None"
             },
             {
+              "name": "billing_address",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
               "name": "primary_email",
               "type": "str | None",
               "description": "Primary email address"
@@ -65033,6 +65044,11 @@
             },
             {
               "name": "address",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "billing_address",
               "type": "dict[str, Any] | None",
               "default": "None"
             },
@@ -65157,6 +65173,11 @@
             },
             {
               "name": "address",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "billing_address",
               "type": "dict[str, Any] | None",
               "default": "None"
             },
@@ -121671,6 +121692,7 @@
         "actions/risk_create.py",
         "actions/router.py",
         "actions/schedule_progress.py",
+        "actions/schedule_shift.py",
         "actions/service.py",
         "actions/task_create.py",
         "events.py",
@@ -178350,6 +178372,1476 @@
         "users",
         "validation",
         "variations"
+      ]
+    },
+    {
+      "module_id": "offers",
+      "module_label": "Customer offers",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "pack.py",
+        "pdf.py",
+        "pricing.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_offers",
+        "version": "1.0.0",
+        "display_name": "Customer offers",
+        "description": "Turns an estimate into the offer a customer receives: numbered, revisioned and frozen once sent, with market-specific titles, tax and consumer rules from the country pack, a payment schedule, reusable texts, a PDF built for the envelope window, and award to a client contract on acceptance.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_boq",
+          "oe_projects",
+          "oe_contacts"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "Offer",
+          "tablename": "oe_offers_offer",
+          "docstring": "One revision of a customer offer.\n\nA draft is re-priced from the BOQ on every save. From ``sent`` on the row is frozen: number,\nrevision, prices and texts never change, and a BOQ edit makes the next revision instead.\n``boq_id`` is a bare indexed GUID so deleting an estimate never cascades away what a customer\nholds. The customer and site addresses are snapshots for the same reason.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "group_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "revision",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "customer_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "customer",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "site_address",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "site_same_as_billing",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "pack_key",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "locale",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tax_mode",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tax_rate",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tax_label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "issue_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "Date",
+              "nullable": false
+            },
+            {
+              "name": "validity_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "valid_until",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "payment_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "reference",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "contact_person",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "licence_number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "markup_presentation",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "options",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "lines",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "totals",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "estimate_net",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "texts",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "instalments",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "schedule",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "retention_percent",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "advance_security",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "boq_fingerprint",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "sent_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "decided_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "accepted_options",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "OfferTextBlock",
+          "tablename": "oe_offers_text_block",
+          "docstring": "A reusable text of one kind in one language, company-wide or for a single project.",
+          "columns": [
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "language",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "body",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "is_default",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "pack_key",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "OfferSettings",
+          "tablename": "oe_offers_settings",
+          "docstring": "Company defaults for offers. One row, key ``default``.",
+          "columns": [
+            {
+              "name": "key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "number_pattern",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "validity_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "payment_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "markup_presentation",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "schedule_templates",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "default_schedule",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "texts_seeded_for",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/context",
+          "handler": "context",
+          "response_model": "ContextResponse",
+          "request_schema": "CanAward"
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "list_offers",
+          "response_model": "OffersListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/",
+          "handler": "create_offer",
+          "response_model": "OfferResponse",
+          "request_schema": "OfferCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/number-check",
+          "handler": "number_check",
+          "response_model": "NumberCheck"
+        },
+        {
+          "method": "GET",
+          "path": "/settings",
+          "handler": "get_settings",
+          "response_model": "SettingsOut"
+        },
+        {
+          "method": "PATCH",
+          "path": "/settings",
+          "handler": "update_settings",
+          "response_model": "SettingsOut",
+          "request_schema": "SettingsUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/texts",
+          "handler": "list_texts",
+          "response_model": "TextBlocksListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/texts",
+          "handler": "create_text",
+          "response_model": "TextBlockOut",
+          "request_schema": "TextBlockIn"
+        },
+        {
+          "method": "POST",
+          "path": "/texts/restore",
+          "handler": "restore_texts"
+        },
+        {
+          "method": "PATCH",
+          "path": "/texts/{block_id}",
+          "handler": "update_text",
+          "response_model": "TextBlockOut",
+          "request_schema": "TextBlockIn"
+        },
+        {
+          "method": "DELETE",
+          "path": "/texts/{block_id}",
+          "handler": "delete_text"
+        },
+        {
+          "method": "PATCH",
+          "path": "/positions/{position_id}/role",
+          "handler": "set_position_role",
+          "request_schema": "PositionRoleIn"
+        },
+        {
+          "method": "GET",
+          "path": "/{offer_id}",
+          "handler": "get_offer",
+          "response_model": "OfferResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{offer_id}",
+          "handler": "update_offer",
+          "response_model": "OfferResponse",
+          "request_schema": "OfferUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/{offer_id}/validate",
+          "handler": "validate_offer",
+          "response_model": "ValidationOut"
+        },
+        {
+          "method": "GET",
+          "path": "/{offer_id}/preview",
+          "handler": "preview_offer",
+          "response_model": "PreviewResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/{offer_id}/pdf",
+          "handler": "download_pdf"
+        },
+        {
+          "method": "POST",
+          "path": "/{offer_id}/texts/{kind}/reset",
+          "handler": "reset_offer_text",
+          "response_model": "OfferResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/{offer_id}/send",
+          "handler": "send_offer",
+          "response_model": "OfferResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/{offer_id}/revise",
+          "handler": "revise_offer",
+          "response_model": "OfferResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/{offer_id}/decline",
+          "handler": "decline_offer",
+          "response_model": "OfferResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/{offer_id}/accept",
+          "handler": "accept_offer",
+          "response_model": "AcceptResponse",
+          "request_schema": "AcceptRequest"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "InstalmentIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A draft instalment shaped like a contract milestone.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['deposit', 'progress', 'final']",
+              "default": "'progress'"
+            },
+            {
+              "name": "percent",
+              "type": "str | None"
+            },
+            {
+              "name": "value",
+              "type": "str | None"
+            },
+            {
+              "name": "due",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "lag_days",
+              "type": "int"
+            },
+            {
+              "name": "payment_terms_days",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TextEntryIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "source",
+              "type": "Literal['company', 'project', 'offer']",
+              "default": "'offer'"
+            },
+            {
+              "name": "body",
+              "type": "str"
+            },
+            {
+              "name": "block_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "OfferCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "OfferUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every field optional: a PATCH changes what it names.",
+          "fields": [
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "customer_kind",
+              "type": "Literal['private', 'business'] | None",
+              "default": "None"
+            },
+            {
+              "name": "number",
+              "type": "str | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "validity_days",
+              "type": "int | None"
+            },
+            {
+              "name": "valid_until",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "payment_days",
+              "type": "int | None"
+            },
+            {
+              "name": "reference",
+              "type": "str | None"
+            },
+            {
+              "name": "contact_person",
+              "type": "dict[str, str] | None",
+              "default": "None"
+            },
+            {
+              "name": "licence_number",
+              "type": "str | None"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            },
+            {
+              "name": "title",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_mode",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_rate",
+              "type": "str | None"
+            },
+            {
+              "name": "markup_presentation",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "site_same_as_billing",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "options",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "texts",
+              "type": "dict[str, TextEntryIn] | None",
+              "default": "None"
+            },
+            {
+              "name": "instalments",
+              "type": "list[InstalmentIn] | None",
+              "default": "None"
+            },
+            {
+              "name": "retention_percent",
+              "type": "str | None"
+            },
+            {
+              "name": "advance_security",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "OfferResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "group_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "revision",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "Status"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "customer_kind",
+              "type": "str"
+            },
+            {
+              "name": "customer",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "site_address",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "site_same_as_billing",
+              "type": "bool"
+            },
+            {
+              "name": "pack_key",
+              "type": "str | None"
+            },
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "tax_mode",
+              "type": "str"
+            },
+            {
+              "name": "tax_rate",
+              "type": "str"
+            },
+            {
+              "name": "tax_label",
+              "type": "str"
+            },
+            {
+              "name": "issue_date",
+              "type": "date"
+            },
+            {
+              "name": "validity_days",
+              "type": "int | None"
+            },
+            {
+              "name": "valid_until",
+              "type": "date | None"
+            },
+            {
+              "name": "payment_days",
+              "type": "int | None"
+            },
+            {
+              "name": "reference",
+              "type": "str"
+            },
+            {
+              "name": "contact_person",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "licence_number",
+              "type": "str"
+            },
+            {
+              "name": "markup_presentation",
+              "type": "str"
+            },
+            {
+              "name": "options",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "lines",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "totals",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "estimate_net",
+              "type": "str"
+            },
+            {
+              "name": "texts",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "instalments",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "schedule",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "retention_percent",
+              "type": "str"
+            },
+            {
+              "name": "advance_security",
+              "type": "bool"
+            },
+            {
+              "name": "sent_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "decided_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "accepted_options",
+              "type": "list[str]"
+            },
+            {
+              "name": "contract_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "stale",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "editable",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "OfferSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "revision",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "Status"
+            },
+            {
+              "name": "customer_name",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "gross",
+              "type": "str"
+            },
+            {
+              "name": "valid_until",
+              "type": "date | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "class_name": "OffersListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[OfferSummary]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "FindingOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "Literal['error', 'warning', 'info']"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "details",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "section",
+              "type": "Literal['customer', 'details', 'items', 'schedule', 'texts', 'layout']"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidationOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "findings",
+              "type": "list[FindingOut]"
+            },
+            {
+              "name": "errors",
+              "type": "int"
+            },
+            {
+              "name": "warnings",
+              "type": "int"
+            },
+            {
+              "name": "can_send",
+              "type": "bool"
+            },
+            {
+              "name": "first_error",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SendRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "via",
+              "type": "Literal['download', 'email']",
+              "default": "'download'"
+            }
+          ]
+        },
+        {
+          "class_name": "AcceptRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "accepted_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "optional_ordinals",
+              "type": "list[str]"
+            },
+            {
+              "name": "create_contract",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "AcceptResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "offer",
+              "type": "OfferResponse"
+            },
+            {
+              "name": "contract_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "milestones",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "contract_blocked",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "pdf_base64",
+              "type": "str"
+            },
+            {
+              "name": "page_count",
+              "type": "int"
+            },
+            {
+              "name": "filename",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ContextResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Everything the page needs before an offer exists.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "pack",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "client_contact_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "default_validity_days",
+              "type": "int"
+            },
+            {
+              "name": "default_payment_days",
+              "type": "int | None"
+            },
+            {
+              "name": "next_number",
+              "type": "str"
+            },
+            {
+              "name": "document_languages",
+              "type": "list[str]"
+            },
+            {
+              "name": "offers",
+              "type": "list[OfferSummary]"
+            },
+            {
+              "name": "permissions",
+              "type": "dict[str, bool]"
+            }
+          ]
+        },
+        {
+          "class_name": "ScheduleTemplateIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "rows",
+              "type": "list[InstalmentIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "number_pattern",
+              "type": "str"
+            },
+            {
+              "name": "validity_days",
+              "type": "int | None"
+            },
+            {
+              "name": "payment_days",
+              "type": "int | None"
+            },
+            {
+              "name": "markup_presentation",
+              "type": "str"
+            },
+            {
+              "name": "schedule_templates",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "default_schedule",
+              "type": "str"
+            },
+            {
+              "name": "next_number",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "number_pattern",
+              "type": "str | None"
+            },
+            {
+              "name": "validity_days",
+              "type": "int | None"
+            },
+            {
+              "name": "payment_days",
+              "type": "int | None"
+            },
+            {
+              "name": "markup_presentation",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_templates",
+              "type": "list[ScheduleTemplateIn] | None",
+              "default": "None"
+            },
+            {
+              "name": "default_schedule",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TextBlockIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "TextKind"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "body",
+              "type": "str"
+            },
+            {
+              "name": "scope",
+              "type": "Literal['company', 'project']",
+              "default": "'company'"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "TextBlockOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "scope",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "body",
+              "type": "str"
+            },
+            {
+              "name": "is_default",
+              "type": "bool"
+            },
+            {
+              "name": "pack_key",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TextBlocksListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[TextBlockOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "PositionRoleIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "role",
+              "type": "str"
+            },
+            {
+              "name": "alternative_of",
+              "type": "str | None"
+            },
+            {
+              "name": "by_others",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "NumberCheck",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "taken",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "contacts",
+        "contracts",
+        "estimate_basis",
+        "projects",
+        "users"
       ]
     },
     {
@@ -309932,6 +311424,19 @@
       "routes": [
         {
           "method": "GET",
+          "path": "/capabilities",
+          "handler": "voice_capabilities",
+          "response_model": "VoiceCapabilities"
+        },
+        {
+          "method": "POST",
+          "path": "/transcribe",
+          "handler": "transcribe_dictation",
+          "response_model": "DictationResponse",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "GET",
           "path": "/targets",
           "handler": "list_targets",
           "response_model": "list[str]"
@@ -310022,6 +311527,64 @@
             {
               "name": "transcription",
               "type": "TranscriptionInfo"
+            }
+          ]
+        },
+        {
+          "class_name": "VoiceCapabilities",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the server can do for voice input, so the browser picks its engine.\n\n``server_transcription`` is True when a speech-to-text provider is configured\nfor this caller; the browser then may fall back to it where its own speech\nrecognition is missing. Audio sent to it is transcribed and dropped.",
+          "fields": [
+            {
+              "name": "server_transcription",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "provider",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "max_upload_bytes",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "max_seconds",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "DictationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The text of one dictated message. Nothing is stored.",
+          "fields": [
+            {
+              "name": "text",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "language",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "available",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "error",
+              "type": "str | None",
+              "description": "Short, non-sensitive reason when nothing came back."
             }
           ]
         }
@@ -312566,10 +314129,10 @@
     },
     {
       "name": "contacts",
-      "ts_files": 7,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 7
+      "test_files": 3,
+      "total_files": 9
     },
     {
       "name": "contracts",
@@ -312825,10 +314388,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 75,
+      "ts_files": 76,
       "css_files": 2,
-      "test_files": 15,
-      "total_files": 77
+      "test_files": 16,
+      "total_files": 78
     },
     {
       "name": "esg",
@@ -313256,6 +314819,13 @@
       "css_files": 0,
       "test_files": 1,
       "total_files": 5
+    },
+    {
+      "name": "offers",
+      "ts_files": 12,
+      "css_files": 0,
+      "test_files": 4,
+      "total_files": 12
     },
     {
       "name": "onboarding",
@@ -313868,10 +315438,10 @@
     },
     {
       "name": "voice",
-      "ts_files": 7,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 7
+      "test_files": 2,
+      "total_files": 11
     },
     {
       "name": "waste-factors",
@@ -315027,6 +316597,14 @@
       "validation",
       "variations"
     ],
+    "offers": [
+      "boq",
+      "contacts",
+      "contracts",
+      "estimate_basis",
+      "projects",
+      "users"
+    ],
     "onboarding": [
       "costs",
       "projects",
@@ -315743,17 +317321,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 243,
-    "modules_with_manifests": 243,
-    "total_models": 902,
-    "total_columns": 10547,
+    "backend_modules": 244,
+    "modules_with_manifests": 244,
+    "total_models": 905,
+    "total_columns": 10606,
     "total_relationships": 261,
-    "total_routes": 5166,
-    "total_schemas": 4684,
-    "total_python_files": 3316,
-    "frontend_features": 236,
-    "frontend_ts_files": 4103,
-    "frontend_backend_mapped": 212
+    "total_routes": 5190,
+    "total_schemas": 4708,
+    "total_python_files": 3328,
+    "frontend_features": 237,
+    "frontend_ts_files": 4122,
+    "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -315901,6 +317479,7 @@
     "ncr": "ncr",
     "norm-expansion": "norm_expansion",
     "notifications": "notifications",
+    "offers": "offers",
     "onboarding": "onboarding",
     "owner-schedule": "owner_schedule",
     "payment-clock": "payment_clock",

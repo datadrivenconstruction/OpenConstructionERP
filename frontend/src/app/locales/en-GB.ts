@@ -51,6 +51,7 @@ const resource = {
     "modules.catalog.supplier_catalogs": "Supplier Catalogues & Vendor Management",
     "modules.catalog.labor_rates": "Labour & Crew Rates",
     "modules.catalog.measurement_book": "Measurement Book",
+    "modules.catalog.offers": "Customer offers",
     "dashboard.layout.customize": "Customise",
     "dashboard.layout.title": "Customise dashboard",
     "rebar_schedule.diameter": "Dia (mm)",
@@ -749,6 +750,7 @@ const resource = {
     "catalog.category_general_equipment": "General Equipment",
     "catalog.category_labor": "Labour",
     "catalog.category_operators": "Operators",
+    "contacts.field_state": "County / region",
   }
 } as { translation: Record<string, string> };
 

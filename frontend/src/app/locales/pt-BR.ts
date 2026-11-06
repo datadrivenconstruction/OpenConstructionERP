@@ -29752,6 +29752,7 @@ const resource = {
   "contacts.prequal_expired": "Expirado",
   "contacts.prequal_approved": "Aprovado",
   "contacts.prequal_pending": "Pendente",
+  "contacts.field_state": "Estado / região",
     "contracts.flow_1_desc": "Crie um contrato ciente do tipo com seu cronograma de valores e retenção.",
     "contracts.flow_1_title": "Configurar",
     "contracts.flow_2_desc": "Limpe o portão de conformidade e depois assine para ativá-lo.",
@@ -52768,6 +52769,7 @@ const resource = {
     "modules.catalog.measurement_book": "Livro de medições",
     "modules.catalog.measurement": "Medição",
     "modules.catalog.price_breakdown": "Decomposição de preços",
+    "modules.catalog.offers": "Propostas para clientes",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do contratante em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre elas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_peru_pe": "Pacote de construção Peru",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",
@@ -58915,6 +58917,9 @@ const resource = {
     "offers.contract_needs_permission": "Pode aceitar a proposta, mas criar o contrato exige a permissão de contratos.",
     "offers.widget.title": "Propostas",
     "offers.export_internal_pdf": "Orçamento interno (PDF)",
+    "offers.items_summary_many": "{{count}} itens · líquido {{net}}",
+    "offers.to_fix_many": "{{count}} por corrigir",
+    "offers.valid_days_many": "{{count}} dias",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

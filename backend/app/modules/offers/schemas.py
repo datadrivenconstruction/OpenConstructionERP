@@ -147,6 +147,13 @@ class OfferSummary(BaseModel):
     issue_date: date
 
 
+class OffersListResponse(BaseModel):
+    items: list[OfferSummary]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class FindingOut(BaseModel):
     rule_id: str
     severity: Literal["error", "warning", "info"]
@@ -266,6 +273,13 @@ class TextBlockOut(BaseModel):
     body: str
     is_default: bool
     pack_key: str | None
+
+
+class TextBlocksListResponse(BaseModel):
+    items: list[TextBlockOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
 
 
 class PositionRoleIn(BaseModel):

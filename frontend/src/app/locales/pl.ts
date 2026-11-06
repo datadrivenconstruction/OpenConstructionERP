@@ -31803,6 +31803,7 @@ const resource = {
   "contacts.prequal_expired": "Wygasło",
   "contacts.prequal_approved": "Zatwierdzone",
   "contacts.prequal_pending": "Oczekujące",
+  "contacts.field_state": "Województwo / region",
     "contracts.flow_1_desc": "Utwórz umowę świadomą typu z jej harmonogramem wartości i utrzymaniem.",
     "contracts.flow_1_title": "Skonfiguruj",
     "contracts.flow_2_desc": "Wyczyść bramę zgodności, a następnie podpisz, aby ją uaktywnić.",
@@ -57557,6 +57558,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Informacja zwrotna o wydajności",
     "modules.catalog.scim": "Zarządzanie kontami SCIM",
     "modules.catalog.win_loss": "Rejestr wyników przetargów",
+    "modules.catalog.offers": "Oferty dla klientów",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "modules.pp_name_peru_pe": "Pakiet budowlany Peru",
@@ -65363,6 +65365,12 @@ const resource = {
     "offers.contract_needs_permission": "Możesz zaakceptować ofertę, ale utworzenie umowy wymaga uprawnienia do umów.",
     "offers.widget.title": "Oferty",
     "offers.export_internal_pdf": "Kosztorys wewnętrzny (PDF)",
+    "offers.items_summary_few": "{{count}} pozycje · netto {{net}}",
+    "offers.items_summary_many": "{{count}} pozycji · netto {{net}}",
+    "offers.to_fix_few": "{{count}} do poprawy",
+    "offers.to_fix_many": "{{count}} do poprawy",
+    "offers.valid_days_few": "{{count}} dni",
+    "offers.valid_days_many": "{{count}} dni",
   }
 } as { translation: Record<string, string> };
 

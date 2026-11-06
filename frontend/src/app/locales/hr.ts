@@ -31102,6 +31102,7 @@ const resource = {
   "contacts.prequal_expired": "Isteklo",
   "contacts.prequal_approved": "Odobreno",
   "contacts.prequal_pending": "Na čekanju",
+  "contacts.field_state": "Županija / regija",
     "contracts.flow_1_desc": "Kreiraj ugovor s nasljeđem odgovarajućeg tipa i zadržavanjem.",
     "contracts.flow_1_title": "Postavka",
     "contracts.flow_2_desc": "Očisti kapiju sukladnosti, zatim potpišite da ga aktivira.",
@@ -56368,6 +56369,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Povratne informacije o cijenama",
     "modules.catalog.scim": "SCIM dodjela korisnika",
     "modules.catalog.win_loss": "Evidencija ishoda ponuda",
+    "modules.catalog.offers": "Ponude kupcima",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "modules.pp_name_peru_pe": "Građevinski paket Peru",
@@ -64140,6 +64142,9 @@ const resource = {
     "offers.contract_needs_permission": "Ponudu možete prihvatiti, ali za izradu ugovora treba dopuštenje za ugovore.",
     "offers.widget.title": "Ponude",
     "offers.export_internal_pdf": "Interni troškovnik (PDF)",
+    "offers.items_summary_few": "{{count}} stavke · neto {{net}}",
+    "offers.to_fix_few": "{{count}} za ispravak",
+    "offers.valid_days_few": "{{count}} dana",
   }
 } as { translation: Record<string, string> };
 

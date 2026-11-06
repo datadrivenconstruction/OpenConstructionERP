@@ -31272,6 +31272,7 @@ const resource = {
   "contacts.prequal_expired": "Expiré",
   "contacts.prequal_approved": "Approuvé",
   "contacts.prequal_pending": "En attente",
+  "contacts.field_state": "État / région",
     "contracts.flow_1_desc": "Créez un contrat conscient du type avec son échéancier et sa retenue.",
     "contracts.flow_1_title": "Configurer",
     "contracts.flow_2_desc": "Effacez le verrou de conformité, puis signez pour l'activer.",
@@ -58940,6 +58941,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Retour sur les rendements",
     "modules.catalog.scim": "Gestion des comptes SCIM",
     "modules.catalog.win_loss": "Historique des résultats d'offres",
+    "modules.catalog.offers": "Offres clients",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
     "modules.pp_name_peru_pe": "Pack construction Pérou",
@@ -66711,6 +66713,9 @@ const resource = {
     "offers.projects.offers_empty": "Aucun devis pour l'instant. Ouvrez une estimation et choisissez Exporter > Devis client.",
     "offers.customer_email": "E-mail",
     "offers.export_internal_pdf": "Estimation interne (PDF)",
+    "offers.items_summary_many": "{{count}} postes · net {{net}}",
+    "offers.to_fix_many": "{{count}} à corriger",
+    "offers.valid_days_many": "{{count}} jours",
   }
 } as { translation: Record<string, string> };
 

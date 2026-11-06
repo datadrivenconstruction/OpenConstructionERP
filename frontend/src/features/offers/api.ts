@@ -133,24 +133,22 @@ export type OfferPatch = Partial<
   > & { contact_id: string | null; texts: Record<string, Pick<TextEntry, 'source' | 'body' | 'block_id'>>; instalments: ScheduleRow[] }
 >;
 
-const base = '/v1/offers';
-
 export function useOfferContext(projectId: string | undefined, boqId: string | undefined) {
   return useQuery({
     queryKey: ['offers', 'context', projectId, boqId],
-    queryFn: () => apiGet<OfferContext>(`${base}/context?project_id=${projectId}&boq_id=${boqId}`),
+    queryFn: () => apiGet<OfferContext>(`/v1/offers/context?project_id=${projectId}&boq_id=${boqId}`),
     enabled: !!projectId && !!boqId,
   });
 }
 
 export function useOffer(id: string | undefined) {
-  return useQuery({ queryKey: ['offers', 'offer', id], queryFn: () => apiGet<Offer>(`${base}/${id}`), enabled: !!id });
+  return useQuery({ queryKey: ['offers', 'offer', id], queryFn: () => apiGet<Offer>(`/v1/offers/${id}`), enabled: !!id });
 }
 
 export function useOfferValidation(id: string | undefined, version: string | undefined) {
   return useQuery({
     queryKey: ['offers', 'validation', id, version],
-    queryFn: () => apiGet<OfferValidation>(`${base}/${id}/validate`),
+    queryFn: () => apiGet<OfferValidation>(`/v1/offers/${id}/validate`),
     enabled: !!id,
   });
 }
@@ -158,7 +156,7 @@ export function useOfferValidation(id: string | undefined, version: string | und
 export function useCreateOffer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { project_id: string; boq_id: string; contact_id?: string | null }) => apiPost<Offer>(`${base}/`, body),
+    mutationFn: (body: { project_id: string; boq_id: string; contact_id?: string | null }) => apiPost<Offer>(`/v1/offers/`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
@@ -166,7 +164,7 @@ export function useCreateOffer() {
 export function usePatchOffer(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (patch: OfferPatch) => apiPatch<Offer>(`${base}/${id}`, patch),
+    mutationFn: (patch: OfferPatch) => apiPatch<Offer>(`/v1/offers/${id}`, patch),
     onSuccess: (offer) => {
       qc.setQueryData(['offers', 'offer', id], offer);
       void qc.invalidateQueries({ queryKey: ['offers', 'validation', id] });
@@ -179,17 +177,17 @@ export function useOfferAction(id: string, action: 'send' | 'revise' | 'decline'
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body?: { accepted_on?: string; optional_ordinals?: string[]; create_contract?: boolean }) =>
-      apiPost<Offer | { offer: Offer; contract_id: string | null; milestones: number }>(`${base}/${id}/${action}`, body ?? {}),
+      apiPost<Offer | { offer: Offer; contract_id: string | null; milestones: number }>(`/v1/offers/${id}/${action}`, body ?? {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
 
 export function fetchPreview(id: string) {
-  return apiGet<{ pdf_base64: string; page_count: number; filename: string }>(`${base}/${id}/preview`);
+  return apiGet<{ pdf_base64: string; page_count: number; filename: string }>(`/v1/offers/${id}/preview`);
 }
 
 export function numberTaken(number: string, groupId: string) {
-  return apiGet<{ number: string; taken: boolean }>(`${base}/number-check?number=${encodeURIComponent(number)}&group_id=${groupId}`);
+  return apiGet<{ number: string; taken: boolean }>(`/v1/offers/number-check?number=${encodeURIComponent(number)}&group_id=${groupId}`);
 }
 
 export interface AcceptBody {
@@ -209,7 +207,7 @@ export interface AcceptResult {
 export function useAcceptOffer(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: AcceptBody) => apiPost<AcceptResult>(`${base}/${id}/accept`, body),
+    mutationFn: (body: AcceptBody) => apiPost<AcceptResult>(`/v1/offers/${id}/accept`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
@@ -217,7 +215,7 @@ export function useAcceptOffer(id: string) {
 export function useResetOfferText(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (kind: string) => apiPost<Offer>(`${base}/${id}/texts/${kind}/reset`, {}),
+    mutationFn: (kind: string) => apiPost<Offer>(`/v1/offers/${id}/texts/${kind}/reset`, {}),
     onSuccess: (offer) => qc.setQueryData(['offers', 'offer', id], offer),
   });
 }
@@ -271,6 +269,14 @@ export interface OfferSettings {
   next_number: string;
 }
 
+/** The page envelope every offers list answers with. */
+export interface Page<T> {
+  items: T[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 export interface TextBlock {
   id: string;
   scope: 'company' | 'project';
@@ -284,29 +290,35 @@ export interface TextBlock {
 }
 
 export function useOfferSettings() {
-  return useQuery({ queryKey: ['offers', 'settings'], queryFn: () => apiGet<OfferSettings>(`${base}/settings`) });
+  return useQuery({ queryKey: ['offers', 'settings'], queryFn: () => apiGet<OfferSettings>(`/v1/offers/settings`) });
 }
 
 export function useSaveOfferSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (patch: Partial<Omit<OfferSettings, 'next_number'>>) => apiPatch<OfferSettings>(`${base}/settings`, patch),
+    mutationFn: (patch: Partial<Omit<OfferSettings, 'next_number'>>) => apiPatch<OfferSettings>(`/v1/offers/settings`, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
 
-export function useTextBlocks(projectId?: string, country?: string) {
+/** The company texts plus this project's overrides; the server caps the library at 1000. */
+export async function fetchTextBlocks(projectId?: string, country?: string): Promise<TextBlock[]> {
   const qs = new URLSearchParams();
   if (projectId) qs.set('project_id', projectId);
   if (country) qs.set('country', country);
-  return useQuery({ queryKey: ['offers', 'texts', projectId, country], queryFn: () => apiGet<TextBlock[]>(`${base}/texts?${qs.toString()}`) });
+  qs.set('limit', '1000');
+  return (await apiGet<Page<TextBlock>>(`/v1/offers/texts?${qs.toString()}`)).items;
+}
+
+export function useTextBlocks(projectId?: string, country?: string) {
+  return useQuery({ queryKey: ['offers', 'texts', projectId, country], queryFn: () => fetchTextBlocks(projectId, country) });
 }
 
 export function useSaveTextBlock() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<TextBlock> & { id?: string; kind: TextKind }) =>
-      id ? apiPatch<TextBlock>(`${base}/texts/${id}`, body) : apiPost<TextBlock>(`${base}/texts`, body),
+      id ? apiPatch<TextBlock>(`/v1/offers/texts/${id}`, body) : apiPost<TextBlock>(`/v1/offers/texts`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
   });
 }
@@ -314,7 +326,7 @@ export function useSaveTextBlock() {
 export function useDeleteTextBlock() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete(`${base}/texts/${id}`),
+    mutationFn: (id: string) => apiDelete(`/v1/offers/texts/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
   });
 }
@@ -322,15 +334,19 @@ export function useDeleteTextBlock() {
 export function useRestoreTexts() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (country: string) => apiPost<{ restored: number }>(`${base}/texts/restore?country=${country}`, {}),
+    mutationFn: (country: string) => apiPost<{ restored: number }>(`/v1/offers/texts/restore?country=${country}`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offers', 'texts'] }),
   });
+}
+
+export async function fetchProjectOffers(projectId: string): Promise<OfferSummary[]> {
+  return (await apiGet<Page<OfferSummary>>(`/v1/offers/?project_id=${projectId}&limit=500`)).items;
 }
 
 export function useProjectOffers(projectId: string | undefined) {
   return useQuery({
     queryKey: ['offers', 'project', projectId],
-    queryFn: () => apiGet<OfferSummary[]>(`${base}/?project_id=${projectId}`),
+    queryFn: () => fetchProjectOffers(projectId as string),
     enabled: !!projectId,
   });
 }

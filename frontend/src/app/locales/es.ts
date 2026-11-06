@@ -31223,6 +31223,7 @@ const resource = {
   "contacts.prequal_expired": "Caducado",
   "contacts.prequal_approved": "Aprobado",
   "contacts.prequal_pending": "Pendiente",
+  "contacts.field_state": "Provincia / región",
     "contracts.flow_1_desc": "Cree un contrato consciente del tipo con su cronograma de valores y retención.",
     "contracts.flow_1_title": "Configurar",
     "contracts.flow_2_desc": "Despeje la puerta de cumplimiento, luego firme para hacerla activa.",
@@ -58945,6 +58946,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Retroalimentación de precios",
     "modules.catalog.scim": "Aprovisionamiento SCIM",
     "modules.catalog.win_loss": "Registro de resultados de ofertas",
+    "modules.catalog.offers": "Ofertas a clientes",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "modules.pp_name_peru_pe": "Paquete de construcción Perú",
@@ -66716,6 +66718,9 @@ const resource = {
     "offers.contract_needs_permission": "Puede aceptar la oferta, pero crear el contrato requiere el permiso de contratos.",
     "offers.widget.title": "Ofertas",
     "offers.export_internal_pdf": "Presupuesto interno (PDF)",
+    "offers.items_summary_many": "{{count}} partidas · neto {{net}}",
+    "offers.to_fix_many": "{{count}} por corregir",
+    "offers.valid_days_many": "{{count}} días",
   }
 } as { translation: Record<string, string> };
 

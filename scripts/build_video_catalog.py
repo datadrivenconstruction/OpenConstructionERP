@@ -259,7 +259,9 @@ def chapters_from_description(description: str) -> list[dict]:
 # chantier | OpenConstructionERP"). The page shows language, market and order
 # as badges of its own, so only the topic is kept.
 CHANNEL_PREFIX = re.compile(r"^(?:[^|]*•[^|]*\|\s*|\d{2}/\d{2}\s*·\s*)")
-CHANNEL_SUFFIX = re.compile(r"\s*\|\s*(?:OpenConstructionERP(?: Tutorial)?|Builder's Playbook|[A-Z]{2} \d{2}/\d{2})\s*$")
+CHANNEL_SUFFIX = re.compile(
+    r"\s*\|\s*(?:OpenConstructionERP(?: Tutorial)?|Builder's Playbook|[A-Z]{2} \d{2}/\d{2})\s*$"
+)
 
 
 def mark_trademarks(text: str) -> str:

@@ -6,7 +6,7 @@ import base64
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from app.dependencies import (
     CurrentUserId,
@@ -25,7 +25,7 @@ from app.modules.offers.schemas import (
     NumberCheck,
     OfferCreate,
     OfferResponse,
-    OfferSummary,
+    OffersListResponse,
     OfferUpdate,
     PositionRoleIn,
     PreviewResponse,
@@ -33,6 +33,7 @@ from app.modules.offers.schemas import (
     SettingsUpdate,
     TextBlockIn,
     TextBlockOut,
+    TextBlocksListResponse,
     ValidationOut,
 )
 from app.modules.offers.service import OfferService
@@ -76,14 +77,19 @@ async def context(
     return ContextResponse.model_validate(data)
 
 
-@router.get("/", response_model=list[OfferSummary], dependencies=[_READ])
+@router.get("/", response_model=OffersListResponse, dependencies=[_READ])
 async def list_offers(
-    session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID, boq_id: uuid.UUID | None = None
-) -> list[OfferSummary]:
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID,
+    boq_id: uuid.UUID | None = None,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
+) -> OffersListResponse:
     await verify_project_access(project_id, user_id, session)
     service = OfferService(session)
-    rows = await (service.repo.list_for_boq(boq_id) if boq_id else service.repo.list_for_project(project_id))
-    return [await service._summary(r) for r in rows]
+    rows, total = await service.repo.list_page(project_id, boq_id, offset=offset, limit=limit)
+    return OffersListResponse(items=[await service._summary(r) for r in rows], total=total, offset=offset, limit=limit)
 
 
 @router.post("/", response_model=OfferResponse, status_code=201, dependencies=[_WRITE])
@@ -112,18 +118,30 @@ async def update_settings(data: SettingsUpdate, session: SessionDep) -> Settings
     return SettingsOut.model_validate(row).model_copy(update={"next_number": await service.next_number()})
 
 
-@router.get("/texts", response_model=list[TextBlockOut], dependencies=[_READ])
+@router.get("/texts", response_model=TextBlocksListResponse, dependencies=[_READ])
 async def list_texts(
-    session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID | None = None, country: str | None = None
-) -> list[TextBlockOut]:
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = None,
+    country: str | None = None,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
+) -> TextBlocksListResponse:
     if project_id:
         await verify_project_access(project_id, user_id, session)
     rows = await OfferService(session).list_text_blocks(project_id, pack_mod.pack_for(country, None))
-    return [TextBlockOut.model_validate(r) for r in rows]
+    return TextBlocksListResponse(
+        items=[TextBlockOut.model_validate(r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/texts", response_model=TextBlockOut, status_code=201, dependencies=[_WRITE])
-async def create_text(data: TextBlockIn, session: SessionDep) -> TextBlockOut:
+async def create_text(data: TextBlockIn, session: SessionDep, user_id: CurrentUserId) -> TextBlockOut:
+    if data.project_id is not None:
+        await verify_project_access(data.project_id, user_id, session)
     return TextBlockOut.model_validate(await OfferService(session).save_text_block(data))
 
 
@@ -134,18 +152,41 @@ async def restore_texts(session: SessionDep, country: str | None = Query(None)) 
 
 
 @router.patch("/texts/{block_id}", response_model=TextBlockOut, dependencies=[_WRITE])
-async def update_text(block_id: uuid.UUID, data: TextBlockIn, session: SessionDep) -> TextBlockOut:
+async def update_text(
+    block_id: uuid.UUID, data: TextBlockIn, session: SessionDep, user_id: CurrentUserId
+) -> TextBlockOut:
+    block = await OfferService(session).repo.text_block(block_id)
+    if block is None:
+        raise HTTPException(status_code=404, detail="Text not found")
+    if block.project_id is not None:
+        await verify_project_access(block.project_id, user_id, session)
+    if data.project_id is not None:
+        await verify_project_access(data.project_id, user_id, session)
     return TextBlockOut.model_validate(await OfferService(session).save_text_block(data, block_id))
 
 
 @router.delete("/texts/{block_id}", status_code=204, dependencies=[_WRITE])
-async def delete_text(block_id: uuid.UUID, session: SessionDep) -> Response:
+async def delete_text(block_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    block = await OfferService(session).repo.text_block(block_id)
+    if block is None:
+        raise HTTPException(status_code=404, detail="Text not found")
+    if block.project_id is not None:
+        await verify_project_access(block.project_id, user_id, session)
     await OfferService(session).delete_text_block(block_id)
     return Response(status_code=204)
 
 
 @router.patch("/positions/{position_id}/role", dependencies=[_WRITE])
-async def set_position_role(position_id: uuid.UUID, data: PositionRoleIn, session: SessionDep) -> dict[str, Any]:
+async def set_position_role(
+    position_id: uuid.UUID, data: PositionRoleIn, session: SessionDep, user_id: CurrentUserId
+) -> dict[str, Any]:
+    from app.modules.boq.models import BOQ, Position
+
+    pos = await session.get(Position, position_id)
+    boq = await session.get(BOQ, pos.boq_id) if pos is not None else None
+    if boq is None:
+        raise HTTPException(status_code=404, detail="Position not found")
+    await verify_project_access(boq.project_id, user_id, session)
     return await OfferService(session).set_position_role(position_id, data.role, data.alternative_of, data.by_others)
 
 

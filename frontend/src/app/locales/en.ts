@@ -39214,6 +39214,7 @@ const resource = {
   "contacts.prequal_expired": "Expired",
   "contacts.prequal_approved": "Approved",
   "contacts.prequal_pending": "Pending",
+  "contacts.field_state": "State / region",
     "dwg_upload.title": "DWG Uploads",
     "dwg_upload.failed": "Upload failed",
     "dwg_upload.open": "Open",
@@ -50039,6 +50040,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Rate feedback",
     "modules.catalog.scim": "SCIM Provisioning",
     "modules.catalog.win_loss": "Bid Outcome Ledger",
+    "modules.catalog.offers": "Customer offers",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start

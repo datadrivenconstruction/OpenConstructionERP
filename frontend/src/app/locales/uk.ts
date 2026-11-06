@@ -31797,6 +31797,7 @@ const resource = {
     "contacts.prequal_expired": "Прострочено",
     "contacts.prequal_approved": "Схвалено",
     "contacts.prequal_pending": "На розгляді",
+    "contacts.field_state": "Область / регіон",
     "contracts.flow_1_desc": "Створіть контракт з урахуванням типу, графіком вартості та утриманням.",
     "contracts.flow_1_title": "Налаштування",
     "contracts.flow_2_desc": "Пройдіть перевірку відповідності, а потім підпишіть, щоб активувати.",
@@ -58104,6 +58105,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Зворотний зв'язок щодо розцінок",
     "modules.catalog.scim": "Провізіонінг SCIM",
     "modules.catalog.win_loss": "Журнал виграних і програних тендерів",
+    "modules.catalog.offers": "Комерційні пропозиції",
     "modules.pp_desc_eleven_areas_framework": "Управління проєктом із боку замовника в одинадцяти сферах управління, у два етапи: розвиток проєкту та будівельне виконання. Між ними один гейт і один затверджений рамковий документ на кожну сферу.",
     "modules.pp_name_pakistan_pk": "Будівельний пакет Пакистан",
     "modules.pp_name_peru_pe": "Будівельний пакет Перу",
@@ -65910,6 +65912,12 @@ const resource = {
     "offers.contract_needs_permission": "Ви можете прийняти пропозицію, але для створення договору потрібне право на договори.",
     "offers.widget.title": "Пропозиції",
     "offers.export_internal_pdf": "Внутрішній кошторис (PDF)",
+    "offers.items_summary_few": "{{count}} позиції · нетто {{net}}",
+    "offers.items_summary_many": "{{count}} позицій · нетто {{net}}",
+    "offers.to_fix_few": "До виправлення: {{count}}",
+    "offers.to_fix_many": "До виправлення: {{count}}",
+    "offers.valid_days_few": "{{count}} дні",
+    "offers.valid_days_many": "{{count}} днів",
   }
 } as { translation: Record<string, string> };
 

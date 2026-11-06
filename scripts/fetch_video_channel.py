@@ -35,7 +35,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = ROOT / "scripts" / "video_catalog" / "channel_snapshot.json"
 CHANNEL_ID = "UCQ3IWLMLnBFwNeG5VBxXQ5Q"
-HEADERS = {"User-Agent": "Mozilla/5.0", "Accept-Language": "en", "Cookie": "CONSENT=YES+1"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept-Language": "en",
+    "Cookie": "CONSENT=YES+1",
+}
 VIDEO_ID = re.compile(r'"videoId":"([\w-]{11})"')
 PLAYLIST_ID = re.compile(r'"playlistId":"(PL[\w-]+)"')
 CATALOGUE = ROOT / "frontend" / "src" / "features" / "videos" / "academyCatalog.generated.ts"
@@ -104,7 +108,16 @@ def all_uploads() -> list[str]:
     tokens = re.findall(r'"continuationCommand":\{"token":"([^"]+)"', page)[-1:]
     while tokens and key and version and len(uploads) < MAX_UPLOADS:
         body = json.dumps(
-            {"context": {"client": {"clientName": "WEB", "clientVersion": version.group(1), "hl": "en"}}, "continuation": tokens[0]}
+            {
+                "context": {
+                    "client": {
+                        "clientName": "WEB",
+                        "clientVersion": version.group(1),
+                        "hl": "en",
+                    }
+                },
+                "continuation": tokens[0],
+            }
         ).encode()
         request = urllib.request.Request(
             f"https://www.youtube.com/youtubei/v1/browse?key={key.group(1)}",
@@ -162,7 +175,11 @@ def main() -> None:
     """Read the channel and write the snapshot."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="Snapshot file to write.")
-    parser.add_argument("--check", action="store_true", help="Write nothing; fail if the catalogue is behind the channel.")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Write nothing; fail if the catalogue is behind the channel.",
+    )
     args = parser.parse_args()
 
     # The uploads playlist (UU + the channel id without its UC) lists every
@@ -174,7 +191,10 @@ def main() -> None:
         raise SystemExit(check_against_catalogue(uploads))
 
     playlists = []
-    for playlist_id in unique(PLAYLIST_ID, get(f"https://www.youtube.com/channel/{CHANNEL_ID}/playlists?hl=en")):
+    for playlist_id in unique(
+        PLAYLIST_ID,
+        get(f"https://www.youtube.com/channel/{CHANNEL_ID}/playlists?hl=en"),
+    ):
         page = get(f"https://www.youtube.com/playlist?list={playlist_id}&hl=en")
         title = re.search(r'<meta property="og:title" content="([^"]*)"', page)
         playlists.append(
@@ -193,7 +213,11 @@ def main() -> None:
         "playlists": sorted(playlists, key=lambda p: p["id"]),
     }
     out = Path(args.out)
-    out.write_text(json.dumps(snapshot, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    out.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=1) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     sys.stdout.reconfigure(encoding="utf-8")
     print(f"{len(videos)} public videos, {len(playlists)} playlists -> {out}")
 

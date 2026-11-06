@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.offers.models import Offer, OfferSettings, OfferTextBlock
@@ -17,13 +17,19 @@ class OfferRepository:
     async def get(self, offer_id: uuid.UUID) -> Offer | None:
         return await self.session.get(Offer, offer_id)
 
-    async def list_for_project(self, project_id: uuid.UUID) -> list[Offer]:
-        stmt = select(Offer).where(Offer.project_id == project_id).order_by(Offer.created_at.desc()).limit(500)
-        return list((await self.session.execute(stmt)).scalars().all())
-
     async def list_for_boq(self, boq_id: uuid.UUID) -> list[Offer]:
         stmt = select(Offer).where(Offer.boq_id == boq_id).order_by(Offer.created_at.desc()).limit(200)
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def list_page(
+        self, project_id: uuid.UUID, boq_id: uuid.UUID | None, *, offset: int, limit: int
+    ) -> tuple[list[Offer], int]:
+        cond = [Offer.project_id == project_id]
+        if boq_id is not None:
+            cond.append(Offer.boq_id == boq_id)
+        total = (await self.session.execute(select(func.count()).select_from(Offer).where(*cond))).scalar_one()
+        stmt = select(Offer).where(*cond).order_by(Offer.created_at.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), int(total)
 
     async def revisions(self, group_id: uuid.UUID) -> list[Offer]:
         stmt = select(Offer).where(Offer.group_id == group_id).order_by(Offer.created_at)

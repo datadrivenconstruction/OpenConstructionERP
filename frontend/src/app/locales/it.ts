@@ -31282,6 +31282,7 @@ const resource = {
   "contacts.prequal_expired": "Scaduto",
   "contacts.prequal_approved": "Approvato",
   "contacts.prequal_pending": "In attesa",
+  "contacts.field_state": "Provincia / regione",
     "contracts.flow_1_desc": "Crea un contratto consapevole del tipo con il suo calendario dei valori e della ritenzione.",
     "contracts.flow_1_title": "Configurazione",
     "contracts.flow_2_desc": "Cancella il cancello di conformità, quindi firma per renderlo attivo.",
@@ -57241,6 +57242,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Riscontro sui rendimenti",
     "modules.catalog.scim": "Gestione utenti SCIM",
     "modules.catalog.win_loss": "Registro esiti offerte",
+    "modules.catalog.offers": "Offerte ai clienti",
     "modules.pp_desc_eleven_areas_framework": "Gestione del progetto dal lato committente in undici ambiti gestionali su due fasi, sviluppo del progetto ed esecuzione dei lavori, con un gate tra le due e un documento quadro approvato per ciascun ambito.",
     "modules.pp_name_pakistan_pk": "Pacchetto Costruzioni Pakistan",
     "modules.pp_name_peru_pe": "Pacchetto costruzioni Perù",
@@ -65012,6 +65014,9 @@ const resource = {
     "offers.contract_needs_permission": "Puoi accettare l'offerta, ma per creare il contratto serve il permesso sui contratti.",
     "offers.widget.title": "Offerte",
     "offers.export_internal_pdf": "Stima interna (PDF)",
+    "offers.items_summary_many": "{{count}} voci · netto {{net}}",
+    "offers.to_fix_many": "{{count}} da correggere",
+    "offers.valid_days_many": "{{count}} giorni",
   }
 } as { translation: Record<string, string> };
 

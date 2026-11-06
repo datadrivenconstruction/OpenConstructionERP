@@ -31486,6 +31486,7 @@ const resource = {
   "contacts.prequal_expired": "Истёк срок",
   "contacts.prequal_approved": "Одобрен",
   "contacts.prequal_pending": "На рассмотрении",
+  "contacts.field_state": "Область / регион",
     "contracts.flow_1_desc": "Создайте контракт с осведомлённостью типа с его графиком стоимости и удержанием.",
     "contracts.flow_1_title": "Установить",
     "contracts.flow_2_desc": "Очистите шлюз соответствия, затем подпишите, чтобы активировать.",
@@ -59039,6 +59040,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Обратная связь по расценкам",
     "modules.catalog.scim": "Провизионинг SCIM",
     "modules.catalog.win_loss": "Журнал выигранных и проигранных тендеров",
+    "modules.catalog.offers": "Коммерческие предложения",
     "modules.pp_desc_eleven_areas_framework": "Управление проектом со стороны заказчика в одиннадцати областях управления в два этапа: развитие проекта и строительное исполнение. Между ними один гейт, а на каждую область один утверждённый рамочный документ.",
     "modules.pp_name_pakistan_pk": "Строительный пакет: Пакистан",
     "modules.pp_name_peru_pe": "Строительный пакет: Перу",
@@ -67037,6 +67039,12 @@ const resource = {
     "offers.projects.widget_offers": "Предложения",
     "offers.projects.offers_empty": "Предложений пока нет. Откройте смету и выберите Экспорт > Коммерческое предложение.",
     "offers.export_internal_pdf": "Внутренняя смета (PDF)",
+    "offers.items_summary_few": "{{count}} позиции · нетто {{net}}",
+    "offers.items_summary_many": "{{count}} позиций · нетто {{net}}",
+    "offers.to_fix_few": "К исправлению: {{count}}",
+    "offers.to_fix_many": "К исправлению: {{count}}",
+    "offers.valid_days_few": "{{count}} дня",
+    "offers.valid_days_many": "{{count}} дней",
   }
 } as { translation: Record<string, string> };
 

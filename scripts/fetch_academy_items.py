@@ -132,7 +132,11 @@ def page_facts(path: str) -> tuple[str, str, str, list[str]]:
 def course_list_facts() -> dict[str, dict]:
     """The course index's JSON-LD items by URL: free flag and study time."""
     found: dict[str, dict] = {}
-    for block in re.findall(r'<script type="application/ld\+json">(.*?)</script>', get(f"{SITE}/courses/"), re.S):
+    for block in re.findall(
+        r'<script type="application/ld\+json">(.*?)</script>',
+        get(f"{SITE}/courses/"),
+        re.S,
+    ):
         data = json.loads(block)
         if data.get("@type") == "ItemList":
             for entry in data["itemListElement"]:
@@ -225,7 +229,13 @@ def merge(old: dict[str, dict], fresh: dict[str, dict]) -> list[dict]:
     for item_id, new in fresh.items():
         was = old.get(item_id)
         if was:
-            for field in ("app_routes", "topics", "market", "content_language", "parent_course"):
+            for field in (
+                "app_routes",
+                "topics",
+                "market",
+                "content_language",
+                "parent_course",
+            ):
                 if was.get(field) and field in new and (not new[field] or new["kind"] != "course" or field != "topics"):
                     new[field] = was[field]
             if new["kind"] == "course" and not new.get("content_language"):
@@ -248,8 +258,17 @@ def report(old: dict[str, dict], merged: list[dict]) -> int:
     paid = sum(1 for i in merged if i["kind"] == "course" and i["access"] == "paid")
     courses = counts["course"]
     print(f"{len(merged)} academy items {counts}; courses {courses - paid} free, {paid} paid")
-    for label, rows in (("added", added), ("removed", removed), ("changed", changed), ("unmapped", unmapped), ("access unknown", unknown)):
-        print(f"{label}: " + ("none" if not rows else f"{len(rows)}\n  " + "\n  ".join(f"{r['id']} {r['title']}" for r in rows)))
+    for label, rows in (
+        ("added", added),
+        ("removed", removed),
+        ("changed", changed),
+        ("unmapped", unmapped),
+        ("access unknown", unknown),
+    ):
+        print(
+            f"{label}: "
+            + ("none" if not rows else f"{len(rows)}\n  " + "\n  ".join(f"{r['id']} {r['title']}" for r in rows))
+        )
     return len(added) + len(removed) + len(changed) + len(unmapped) + len(unknown)
 
 
@@ -257,7 +276,11 @@ def main() -> None:
     """Read the site and write, or check, the snapshot."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="Snapshot file to write.")
-    parser.add_argument("--check", action="store_true", help="Write nothing; fail if the snapshot is behind the site.")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Write nothing; fail if the snapshot is behind the site.",
+    )
     args = parser.parse_args()
     out = Path(args.out)
     old = {i["id"]: i for i in json.loads(out.read_text(encoding="utf-8"))} if out.is_file() else {}
@@ -275,7 +298,11 @@ def main() -> None:
     problems = report(old, merged)
     if args.check:
         raise SystemExit(1 if problems else 0)
-    out.write_text(json.dumps(merged, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    out.write_text(
+        json.dumps(merged, ensure_ascii=False, indent=1) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(f"-> {out}")
 
 

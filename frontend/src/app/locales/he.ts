@@ -30318,6 +30318,7 @@ const resource = {
     "contacts.prequal_expired": "פג תוקף",
     "contacts.prequal_approved": "אושר",
     "contacts.prequal_pending": "ממתין",
+    "contacts.field_state": "מדינה / אזור",
     "contracts.flow_1_desc": "יצירת חוזה מודע-סוג עם לוח כמויות ומחירים וניכוי עיכבון.",
     "contracts.flow_1_title": "הקמה",
     "contracts.flow_2_desc": "עברו את שער הציות, ואז חתמו כדי להפעיל אותו.",
@@ -56314,6 +56315,7 @@ const resource = {
     "modules.catalog.rate_feedback": "משוב על תעריפים",
     "modules.catalog.scim": "הקצאת משתמשים SCIM",
     "modules.catalog.win_loss": "פנקס תוצאות מכרזים",
+    "modules.catalog.offers": "הצעות מחיר ללקוחות",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
     "modules.pp_name_peru_pe": "חבילת בנייה פרו",
@@ -64089,6 +64091,9 @@ const resource = {
     "offers.contract_needs_permission": "אפשר לקבל את ההצעה, אך יצירת החוזה דורשת הרשאה לחוזים.",
     "offers.widget.title": "הצעות",
     "offers.export_internal_pdf": "אומדן פנימי (PDF)",
+    "offers.items_summary_two": "{{count}} פריטים · נטו {{net}}",
+    "offers.to_fix_two": "{{count}} לתיקון",
+    "offers.valid_days_two": "יומיים",
   }
 } as { translation: Record<string, string> };
 

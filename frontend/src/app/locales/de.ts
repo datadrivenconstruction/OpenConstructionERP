@@ -31216,6 +31216,7 @@ const resource = {
   "contacts.prequal_expired": "Abgelaufen",
   "contacts.prequal_approved": "Genehmigt",
   "contacts.prequal_pending": "Ausstehend",
+  "contacts.field_state": "Bundesland / Region",
     "contracts.flow_1_desc": "Erstellen Sie einen typbewussten Vertrag mit seinem Leistungsplan und Sicherheitsleistung.",
     "contracts.flow_1_title": "Einrichten",
     "contracts.flow_2_desc": "Löschen Sie das Compliance-Gate und unterzeichnen Sie dann, um es zu aktivieren.",
@@ -58484,6 +58485,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Rückmeldung zu Sätzen",
     "modules.catalog.scim": "SCIM-Bereitstellung",
     "modules.catalog.win_loss": "Erfolgsbilanz der Angebote",
+    "modules.catalog.offers": "Kundenangebote",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start
@@ -66306,6 +66308,7 @@ const resource = {
     "offers.section.items": "Positionen und Preise",
     "offers.section.schedule": "Zahlungsplan",
     "offers.section.texts": "Texte",
+    "offers.section.layout": "Gestaltung",
     "offers.to_fix_one": "{{count}} zu beheben",
     "offers.to_fix_other": "{{count}} zu beheben",
     "offers.send": "Angebot senden",

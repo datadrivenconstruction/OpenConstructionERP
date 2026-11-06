@@ -31131,6 +31131,7 @@ const resource = {
   "contacts.prequal_expired": "Expirat",
   "contacts.prequal_approved": "Aprobat",
   "contacts.prequal_pending": "În așteptare",
+  "contacts.field_state": "Județ / regiune",
     "contracts.flow_1_desc": "Creați un contract conștient de tip cu calendarul lui de valori și reținerea.",
     "contracts.flow_1_title": "Configurare",
     "contracts.flow_2_desc": "Curățați poarta de conformitate, apoi semnați pentru a-l face activ.",
@@ -56358,6 +56359,7 @@ const resource = {
     "modules.catalog.rate_feedback": "Feedback randamente",
     "modules.catalog.scim": "Gestionare utilizatori SCIM",
     "modules.catalog.win_loss": "Registrul rezultatelor ofertelor",
+    "modules.catalog.offers": "Oferte către clienți",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
     "modules.pp_name_pakistan_pk": "Pachet de construcții Pakistan",
     "modules.pp_name_peru_pe": "Pachet construcții Peru",
@@ -64130,6 +64132,9 @@ const resource = {
     "offers.contract_needs_permission": "Puteți accepta oferta, dar crearea contractului necesită permisiunea pentru contracte.",
     "offers.widget.title": "Oferte",
     "offers.export_internal_pdf": "Deviz intern (PDF)",
+    "offers.items_summary_few": "{{count}} articole · net {{net}}",
+    "offers.to_fix_few": "{{count}} de corectat",
+    "offers.valid_days_few": "{{count}} zile",
   }
 } as { translation: Record<string, string> };
 
