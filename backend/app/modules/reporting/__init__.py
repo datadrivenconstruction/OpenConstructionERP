@@ -20,3 +20,6 @@ async def on_startup() -> None:
     from app.modules.reporting.permissions import register_reporting_permissions
 
     register_reporting_permissions()
+    from app.modules.reporting.validators import register_reporting_validation_rules
+
+    register_reporting_validation_rules()

@@ -38,6 +38,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.methodology import templates as templates_mod
 from app.modules.methodology.bases import resolve_bases
 from app.modules.methodology.cascade import CascadeError, compute_cascade
@@ -55,6 +56,12 @@ from app.modules.methodology.schemas import (
     FundingSourceUpdate,
     MethodologyCreate,
     MethodologyUpdate,
+)
+from app.modules.methodology.validators import (
+    DIMENSION_FIELDS,
+    FUNDING_FIELDS,
+    METHODOLOGY_FIELDS,
+    METHODOLOGY_RULE_SET,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,6 +106,46 @@ class MethodologyService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+
+    async def _gate(
+        self,
+        key: str,
+        record: Any,
+        names: tuple[str, ...],
+        changes: dict[str, Any],
+        *,
+        operation: str,
+        project_id: uuid.UUID,
+        target_id: str = "",
+        warnings_only: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Run the rule set over the record as it will be; errors the edit introduces raise a coded 422.
+
+        ``warnings_only`` is for records the platform installs itself, which are reported and never refused.
+        """
+        return await gate_record(
+            METHODOLOGY_RULE_SET,
+            key,
+            record,
+            names,
+            changes,
+            operation=operation,
+            project_id=project_id,
+            error_code="methodology_rules_failed",
+            target_id=target_id,
+            warnings_only=warnings_only,
+        )
+
+    async def _funding_code_taken(self, project_id: uuid.UUID, code: str | None, own_id: uuid.UUID | None) -> bool:
+        """True when another funding source of the project already carries ``code``."""
+        if not code or not code.strip():
+            return False
+        stmt = select(FundingSource.id).where(
+            FundingSource.project_id == str(project_id), FundingSource.code == code.strip()
+        )
+        if own_id is not None:
+            stmt = stmt.where(FundingSource.id != own_id)
+        return (await self.session.execute(stmt.limit(1))).first() is not None
 
     # ── Methodology CRUD ───────────────────────────────────────────────────
 
@@ -172,6 +219,19 @@ class MethodologyService:
         globally unique. The new methodology is always editable and never a
         builtin.
         """
+        findings = await self._gate(
+            "methodology",
+            {},
+            METHODOLOGY_FIELDS,
+            {
+                "vat_rate": data.vat_rate,
+                "base_mapping": dict(data.base_mapping),
+                "composites": dict(data.composites),
+                "cascade_steps": [step.model_dump(mode="json") for step in data.cascade_steps],
+            },
+            operation="create",
+            project_id=data.project_id,
+        )
         desired_slug = _slugify(data.slug or data.name)
         slug = await self._unique_slug(desired_slug)
 
@@ -198,6 +258,7 @@ class MethodologyService:
         )
         self.session.add(obj)
         await self.session.flush()
+        obj.validation_warnings = findings
         logger.info("Methodology created: %s (project=%s)", obj.slug, data.project_id)
         return obj
 
@@ -218,6 +279,18 @@ class MethodologyService:
             )
 
         fields = data.model_dump(exclude_unset=True)
+        changes = {k: fields[k] for k in METHODOLOGY_FIELDS if k in fields}
+        if "cascade_steps" in changes and data.cascade_steps is not None:
+            changes["cascade_steps"] = [step.model_dump(mode="json") for step in data.cascade_steps]
+        findings = await self._gate(
+            "methodology",
+            obj,
+            METHODOLOGY_FIELDS,
+            changes,
+            operation="update",
+            project_id=project_id,
+            target_id=str(obj.id),
+        )
 
         if "cascade_steps" in fields and data.cascade_steps is not None:
             obj.cascade_steps = [s.model_dump(mode="json") for s in data.cascade_steps]
@@ -238,6 +311,7 @@ class MethodologyService:
             setattr(obj, key, value)
 
         await self.session.flush()
+        obj.validation_warnings = findings
         logger.info("Methodology updated: %s", obj.slug)
         return obj
 
@@ -309,6 +383,20 @@ class MethodologyService:
                     await self.set_active_methodology(project_id, existing.slug)
                 return existing
 
+        findings = await self._gate(
+            "methodology",
+            {},
+            METHODOLOGY_FIELDS,
+            {
+                "vat_rate": tpl.get("vat_rate"),
+                "base_mapping": dict(tpl.get("base_mapping", {})),
+                "composites": dict(tpl.get("composites", {})),
+                "cascade_steps": list(tpl.get("cascade_steps", [])),
+            },
+            operation="create",
+            project_id=project_id,
+            warnings_only=True,
+        )
         slug = await self._unique_slug(f"{template_slug}-{_slugify(str(project_id))[:8]}")
         obj = Methodology(
             slug=slug,
@@ -335,6 +423,7 @@ class MethodologyService:
         )
         self.session.add(obj)
         await self.session.flush()
+        obj.validation_warnings = findings
 
         # Materialise the template's analytical dimensions as real, editable
         # dimension + value rows scoped to the project + this methodology.
@@ -382,6 +471,17 @@ class MethodologyService:
 
     async def create_dimension(self, data: DimensionCreate) -> AnalyticDimension:
         """Create an analytical dimension (with optional seed values)."""
+        findings = await self._gate(
+            "dimension",
+            {},
+            DIMENSION_FIELDS,
+            {
+                "key": data.key,
+                "values": [{"code": v.code, "parent_code": v.parent_code} for v in data.values],
+            },
+            operation="create",
+            project_id=data.project_id,
+        )
         dim = AnalyticDimension(
             project_id=str(data.project_id),
             methodology_slug=data.methodology_slug,
@@ -425,6 +525,8 @@ class MethodologyService:
             data.project_id,
             len(data.values),
         )
+        await self.session.refresh(dim, ["values"])
+        dim.validation_warnings = findings
         return dim
 
     async def get_dimension_for_project(self, dimension_id: uuid.UUID, project_id: uuid.UUID) -> AnalyticDimension:
@@ -511,6 +613,14 @@ class MethodologyService:
 
     async def create_funding_source(self, data: FundingSourceCreate) -> FundingSource:
         """Create a funding-source master entry for a project."""
+        findings = await self._gate(
+            "funding",
+            {},
+            FUNDING_FIELDS,
+            {"code": data.code, "code_taken": await self._funding_code_taken(data.project_id, data.code, None)},
+            operation="create",
+            project_id=data.project_id,
+        )
         obj = FundingSource(
             project_id=str(data.project_id),
             code=data.code,
@@ -520,6 +630,7 @@ class MethodologyService:
         )
         self.session.add(obj)
         await self.session.flush()
+        obj.validation_warnings = findings
         logger.info("Funding source created: %s (project=%s)", obj.code, data.project_id)
         return obj
 
@@ -544,6 +655,16 @@ class MethodologyService:
         """Update a project-owned funding source."""
         obj = await self.get_funding_source_for_project(funding_source_id, project_id)
         fields = data.model_dump(exclude_unset=True)
+        new_code = fields.get("code", obj.code)
+        findings = await self._gate(
+            "funding",
+            {"code": obj.code, "code_taken": await self._funding_code_taken(project_id, obj.code, obj.id)},
+            FUNDING_FIELDS,
+            {"code": new_code, "code_taken": await self._funding_code_taken(project_id, new_code, obj.id)},
+            operation="update",
+            project_id=project_id,
+            target_id=str(obj.id),
+        )
         if "metadata" in fields and data.metadata is not None:
             merged = dict(obj.metadata_ or {})
             merged.update(data.metadata)
@@ -552,6 +673,7 @@ class MethodologyService:
         for key, value in fields.items():
             setattr(obj, key, value)
         await self.session.flush()
+        obj.validation_warnings = findings
         return obj
 
     async def delete_funding_source(self, funding_source_id: uuid.UUID, project_id: uuid.UUID) -> None:
