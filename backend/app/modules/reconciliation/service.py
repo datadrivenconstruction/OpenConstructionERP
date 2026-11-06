@@ -30,6 +30,7 @@ from decimal import Decimal, InvalidOperation
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.reconciliation.correlate import (
     CandidateRecord,
     ScoredLink,
@@ -41,6 +42,7 @@ from app.modules.reconciliation.models import (
     STATUS_REJECTED,
     RecordLink,
 )
+from app.modules.reconciliation.validators import LINK_FIELDS, RECONCILIATION_RULE_SET
 
 # --------------------------------------------------------------------------- #
 # Source-type tokens. One stable string per gathered source so a record's
@@ -581,11 +583,33 @@ async def decide_record_link(
     coerced = _coerce_confidence(confidence)
 
     existing = await get_record_link(session, project_id, left, right, relation)
+    changes: dict = {
+        "left_type": left[0],
+        "left_id": left[1],
+        "right_type": right[0],
+        "right_id": right[1],
+        "relation": relation or "same_event",
+        "status": status,
+    }
+    if confidence is not None:
+        changes["confidence"] = confidence
+    findings = await gate_record(
+        RECONCILIATION_RULE_SET,
+        "link",
+        existing if existing is not None else {},
+        LINK_FIELDS,
+        changes,
+        operation="update" if existing is not None else "create",
+        project_id=project_id,
+        error_code="reconciliation_rules_failed",
+        target_id=str(existing.id) if existing is not None else "",
+    )
     if existing is not None:
         existing.status = status
         if coerced is not None:
             existing.confidence = coerced
         await session.flush()
+        existing.validation_warnings = findings
         return existing
 
     row = RecordLink(
@@ -601,4 +625,5 @@ async def decide_record_link(
     )
     session.add(row)
     await session.flush()
+    row.validation_warnings = findings
     return row

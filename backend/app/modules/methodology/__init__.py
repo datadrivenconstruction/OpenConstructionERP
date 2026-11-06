@@ -15,3 +15,6 @@ async def on_startup() -> None:
     )
 
     register_methodology_permissions()
+    from app.modules.methodology.validators import register_methodology_validation_rules
+
+    register_methodology_validation_rules()
