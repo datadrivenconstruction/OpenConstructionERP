@@ -52,7 +52,7 @@ async def _project(session: AsyncSession, owner: User) -> uuid.UUID:
 
 @pytest.mark.asyncio
 async def test_empty_capture_persists_a_well_formed_row(session: AsyncSession) -> None:
-    """A capture with no transcript / parties / times still yields a clean row.
+    """A capture with only a summary still yields a clean row.
 
     Nothing is invented: the channel defaults to phone, the direction is unknown,
     parties and instructions are empty, and the duration is None.
@@ -60,7 +60,9 @@ async def test_empty_capture_persists_a_well_formed_row(session: AsyncSession) -
     owner = await _user(session)
     pid = await _project(session, owner)
 
-    row = await service.create_phone_log(session, PhoneLogCreate(project_id=pid), user_id=str(owner.id))
+    row = await service.create_phone_log(
+        session, PhoneLogCreate(project_id=pid, summary="Quick note"), user_id=str(owner.id)
+    )
 
     assert row.channel == "phone"
     assert row.direction == "unknown"
@@ -68,7 +70,7 @@ async def test_empty_capture_persists_a_well_formed_row(session: AsyncSession) -
     assert row.instructions == []
     assert row.duration_seconds is None
     assert row.word_count == 0
-    assert row.summary == ""
+    assert row.summary == "Quick note"
 
 
 @pytest.mark.asyncio
@@ -94,21 +96,24 @@ async def test_malformed_timestamps_yield_no_duration(session: AsyncSession) -> 
 
 
 @pytest.mark.asyncio
-async def test_end_before_start_yields_no_duration(session: AsyncSession) -> None:
-    """A negative span (end before start) is rejected as a duration, not stored negative."""
+async def test_end_before_start_is_refused_with_its_rule_code(session: AsyncSession) -> None:
+    """A call that ends before it starts is rejected, never stored with a negative span."""
     owner = await _user(session)
     pid = await _project(session, owner)
 
-    row = await service.create_phone_log(
-        session,
-        PhoneLogCreate(
-            project_id=pid,
-            started_at="2026-06-25T10:00:00",
-            ended_at="2026-06-25T09:00:00",
-        ),
-        user_id=str(owner.id),
-    )
-    assert row.duration_seconds is None
+    with pytest.raises(HTTPException) as excinfo:
+        await service.create_phone_log(
+            session,
+            PhoneLogCreate(
+                project_id=pid,
+                summary="Reversed times",
+                started_at="2026-06-25T10:00:00",
+                ended_at="2026-06-25T09:00:00",
+            ),
+            user_id=str(owner.id),
+        )
+    assert excinfo.value.status_code == 422
+    assert excinfo.value.detail["code"] == "phonelog.call_times_ordered"
 
 
 @pytest.mark.asyncio
@@ -119,7 +124,7 @@ async def test_unrecognised_channel_and_direction_are_safe(session: AsyncSession
 
     row = await service.create_phone_log(
         session,
-        PhoneLogCreate(project_id=pid, channel="carrier-pigeon", direction="sideways"),
+        PhoneLogCreate(project_id=pid, channel="carrier-pigeon", direction="sideways", summary="Note"),
         user_id=str(owner.id),
     )
     assert row.channel == "other"

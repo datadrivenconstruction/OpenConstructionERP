@@ -2544,5 +2544,105 @@
       "fail": "Lượt kiểm tra khoảng hở cần khoảng hở lớn hơn không.",
       "suggestion": "Hãy nhập khoảng hở tối thiểu theo mét hoặc dùng lượt kiểm tra va chạm cứng."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Cuộc gọi được ghi ngày {occurred}, tức là trong tương lai.",
+      "suggestion": "Nhập ngày và giờ diễn ra cuộc gọi."
+    },
+    "call_ends_before_start": {
+      "fail": "Cuộc gọi kết thúc lúc {ended}, trước khi bắt đầu lúc {started}.",
+      "suggestion": "Kiểm tra giờ bắt đầu và giờ kết thúc."
+    },
+    "logged_without_content": {
+      "fail": "Cuộc gọi đã ghi không có bản chép lời lẫn tóm tắt nên không lưu lại điều gì.",
+      "suggestion": "Thêm bản chép lời hoặc một bản tóm tắt ngắn."
+    },
+    "instruction_without_party": {
+      "fail": "Cuộc gọi ghi lại chỉ thị nhưng không nêu tên người tham gia nào.",
+      "suggestion": "Thêm những người tham gia cuộc gọi."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Liên kết không nêu cả hai bản ghi mà nó nối.",
+      "suggestion": "Chọn cả hai bản ghi."
+    },
+    "link_to_itself": {
+      "fail": "Bản ghi {record} không thể liên kết với chính nó.",
+      "suggestion": "Chọn một bản ghi thứ hai khác."
+    },
+    "record_type_unknown": {
+      "fail": "Loại bản ghi '{record_type}' không thể đối chiếu.",
+      "suggestion": "Dùng bản ghi thư từ, lệnh thay đổi, phát sinh, thông báo hoặc thay đổi phương pháp."
+    },
+    "confidence_out_of_range": {
+      "fail": "Độ tin cậy khớp {confidence} nằm ngoài khoảng từ 0 đến 1.",
+      "suggestion": "Nhập điểm trong khoảng 0 đến 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Liên kết được xác nhận với độ tin cậy {confidence}, thấp hơn ngưỡng gợi ý {threshold}.",
+      "suggestion": "Kiểm tra xem hai bản ghi có mô tả cùng một sự kiện không."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Bước phụ phí '{step}' có tỷ lệ {rate}%, nằm ngoài khoảng cho phép từ {low}% đến {high}%.",
+      "suggestion": "Nhập tỷ lệ trong khoảng cho phép."
+    },
+    "cascade_base_unknown": {
+      "fail": "Bước phụ phí '{step}' dựa trên '{base}', không phải cơ sở chi phí, cơ sở tổng hợp hay bước trước.",
+      "suggestion": "Dựa bước này vào cơ sở chi phí, cơ sở tổng hợp hoặc một bước phía trên."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Thuế suất VAT {rate}% nằm ngoài khoảng 0% đến 100%.",
+      "suggestion": "Nhập thuế suất dưới dạng phần trăm từ 0 đến 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Mã nguồn vốn '{code}' đã được dùng trong dự án này.",
+      "suggestion": "Dùng một mã chưa bị chiếm."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Chiều '{dimension}' liệt kê mã giá trị '{code}' nhiều hơn một lần.",
+      "suggestion": "Cho mỗi giá trị một mã riêng."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Giá trị '{code}' của chiều '{dimension}' nêu giá trị cha '{parent}' không có trong các giá trị của nó.",
+      "suggestion": "Nêu một giá trị cha có trong cùng chiều."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Ngày ảnh chụp '{date}' không phải ngày lịch theo dạng YYYY-MM-DD.",
+      "suggestion": "Nhập ngày theo dạng YYYY-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Ngày ảnh chụp {date} nằm trong tương lai.",
+      "suggestion": "Dùng hôm nay hoặc một ngày trước đó."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' không phải số lớn hơn hoặc bằng không.",
+      "suggestion": "Nhập một số như 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% nằm ngoài khoảng 0% đến 100%.",
+      "suggestion": "Nhập phần trăm từ 0 đến 100."
+    },
+    "budget_overrun": {
+      "fail": "Đã dùng {value}% ngân sách nên dự án vượt ngân sách.",
+      "suggestion": "Đối chiếu dữ liệu chi phí với ngân sách đã duyệt."
+    },
+    "count_negative": {
+      "fail": "{field} không thể âm ({value}).",
+      "suggestion": "Nhập số không hoặc số nguyên dương."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' không phải địa chỉ email hợp lệ.",
+      "suggestion": "Sửa lại địa chỉ."
+    },
+    "schedule_without_recipients": {
+      "fail": "Báo cáo theo lịch cần ít nhất một người nhận.",
+      "suggestion": "Thêm người nhận hoặc tắt lịch."
+    }
   }
 }

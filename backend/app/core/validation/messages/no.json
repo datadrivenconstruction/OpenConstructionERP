@@ -2544,5 +2544,105 @@
       "fail": "En klaringskjøring trenger en klaringsavstand over null.",
       "suggestion": "Oppgi minste klaring i meter eller bruk en kjøring for harde kollisjoner."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Samtalen er datert {occurred}, som ligger i fremtiden.",
+      "suggestion": "Angi dagen og klokkeslettet for samtalen."
+    },
+    "call_ends_before_start": {
+      "fail": "Samtalen slutter {ended}, før den begynner {started}.",
+      "suggestion": "Kontroller start- og sluttidspunktet."
+    },
+    "logged_without_content": {
+      "fail": "En loggført samtale har verken utskrift eller sammendrag og dokumenterer derfor ingenting.",
+      "suggestion": "Legg til utskriften eller et kort sammendrag."
+    },
+    "instruction_without_party": {
+      "fail": "Samtalen registrerer instrukser, men navngir ingen deltakere.",
+      "suggestion": "Legg til personene som deltok i samtalen."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Koblingen angir ikke begge postene den forbinder.",
+      "suggestion": "Velg begge postene."
+    },
+    "link_to_itself": {
+      "fail": "Posten {record} kan ikke kobles til seg selv.",
+      "suggestion": "Velg en annen post som den andre."
+    },
+    "record_type_unknown": {
+      "fail": "Posttypen '{record_type}' kan ikke avstemmes.",
+      "suggestion": "Bruk en post for korrespondanse, endringsordre, tilleggsarbeid, varsel eller metodeendring."
+    },
+    "confidence_out_of_range": {
+      "fail": "Treffsikkerheten {confidence} ligger utenfor intervallet 0 til 1.",
+      "suggestion": "Angi en poengsum mellom 0 og 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Koblingen er bekreftet med treffsikkerhet {confidence}, under forslagsgrensen {threshold}.",
+      "suggestion": "Kontroller at begge postene beskriver samme hendelse."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Påslagstrinnet '{step}' har en sats på {rate} %, utenfor det tillatte intervallet fra {low} % til {high} %.",
+      "suggestion": "Angi en sats innenfor det tillatte intervallet."
+    },
+    "cascade_base_unknown": {
+      "fail": "Påslagstrinnet '{step}' bygger på '{base}', som verken er et kostnadsgrunnlag, et sammensatt grunnlag eller et tidligere trinn.",
+      "suggestion": "La trinnet bygge på et kostnadsgrunnlag, et sammensatt grunnlag eller et trinn over."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Merverdiavgiftssatsen {rate} % ligger utenfor intervallet 0 % til 100 %.",
+      "suggestion": "Angi satsen som en prosent fra 0 til 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Finansieringskildens kode '{code}' brukes allerede i dette prosjektet.",
+      "suggestion": "Bruk en kode som ikke er opptatt ennå."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensjonen '{dimension}' oppgir verdikoden '{code}' mer enn én gang.",
+      "suggestion": "Gi hver verdi sin egen kode."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Verdien '{code}' i dimensjonen '{dimension}' oppgir overordnet '{parent}', som ikke er blant verdiene.",
+      "suggestion": "Angi et overordnet ledd som finnes i samme dimensjon."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Øyeblikksbildets dato '{date}' er ikke en kalenderdato på formen ÅÅÅÅ-MM-DD.",
+      "suggestion": "Angi datoen som ÅÅÅÅ-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Øyeblikksbildets dato {date} ligger i fremtiden.",
+      "suggestion": "Bruk i dag eller en tidligere dag."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' er ikke et tall på null eller over.",
+      "suggestion": "Angi et tall som 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % ligger utenfor intervallet 0 % til 100 %.",
+      "suggestion": "Angi en prosent fra 0 til 100."
+    },
+    "budget_overrun": {
+      "fail": "{value} % av budsjettet er brukt, så prosjektet overskrider budsjettet.",
+      "suggestion": "Sammenlign kostnadsdataene med det godkjente budsjettet."
+    },
+    "count_negative": {
+      "fail": "{field} kan ikke være negativ ({value}).",
+      "suggestion": "Angi null eller et positivt heltall."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' er ikke en gyldig e-postadresse.",
+      "suggestion": "Rett adressen."
+    },
+    "schedule_without_recipients": {
+      "fail": "En planlagt rapport trenger minst én mottaker.",
+      "suggestion": "Legg til en mottaker, eller slå av planen."
+    }
   }
 }

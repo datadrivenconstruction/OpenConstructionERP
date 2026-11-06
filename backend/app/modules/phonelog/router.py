@@ -52,6 +52,7 @@ def _to_response(row: object) -> PhoneLogResponse:
         metadata=getattr(row, "metadata_", {}) or {},
         created_at=row.created_at,  # type: ignore[attr-defined]
         updated_at=row.updated_at,  # type: ignore[attr-defined]
+        validation_warnings=list(getattr(row, "validation_warnings", None) or []),
     )
 
 

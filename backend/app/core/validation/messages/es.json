@@ -2544,5 +2544,105 @@
       "fail": "Una ejecución de holgura necesita una distancia mayor que cero.",
       "suggestion": "Introduzca la holgura mínima en metros o use una ejecución de colisiones duras."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "La llamada tiene fecha {occurred}, que está en el futuro.",
+      "suggestion": "Indique el día y la hora en que tuvo lugar la llamada."
+    },
+    "call_ends_before_start": {
+      "fail": "La llamada termina a las {ended}, antes de empezar a las {started}.",
+      "suggestion": "Compruebe la hora de inicio y la de fin."
+    },
+    "logged_without_content": {
+      "fail": "Una llamada registrada no tiene transcripción ni resumen, así que no documenta nada.",
+      "suggestion": "Añada la transcripción o un resumen breve."
+    },
+    "instruction_without_party": {
+      "fail": "La llamada recoge instrucciones pero no nombra a ningún participante.",
+      "suggestion": "Añada a las personas que intervinieron en la llamada."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "El vínculo no indica los dos registros que une.",
+      "suggestion": "Seleccione ambos registros."
+    },
+    "link_to_itself": {
+      "fail": "El registro {record} no puede vincularse consigo mismo.",
+      "suggestion": "Elija un segundo registro distinto."
+    },
+    "record_type_unknown": {
+      "fail": "El tipo de registro '{record_type}' no se puede conciliar.",
+      "suggestion": "Use un registro de correspondencia, orden de cambio, modificación, aviso o cambio de método."
+    },
+    "confidence_out_of_range": {
+      "fail": "La confianza de la coincidencia {confidence} está fuera del rango de 0 a 1.",
+      "suggestion": "Indique una puntuación entre 0 y 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "El vínculo está confirmado con una confianza de {confidence}, por debajo del umbral de sugerencia {threshold}.",
+      "suggestion": "Compruebe que ambos registros describen el mismo suceso."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "El paso de recargo '{step}' tiene una tasa del {rate} %, fuera del rango permitido de {low} % a {high} %.",
+      "suggestion": "Introduzca una tasa dentro del rango permitido."
+    },
+    "cascade_base_unknown": {
+      "fail": "El paso de recargo '{step}' se basa en '{base}', que no es una base de coste, un compuesto ni un paso anterior.",
+      "suggestion": "Base el paso en una base de coste, un compuesto o un paso anterior."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "El tipo de IVA {rate} % está fuera del rango de 0 % a 100 %.",
+      "suggestion": "Introduzca el tipo como porcentaje de 0 a 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "El código de fuente de financiación '{code}' ya se usa en este proyecto.",
+      "suggestion": "Use un código que no esté ocupado."
+    },
+    "dimension_value_duplicate": {
+      "fail": "La dimensión '{dimension}' incluye el código de valor '{code}' más de una vez.",
+      "suggestion": "Dé a cada valor su propio código."
+    },
+    "dimension_parent_unknown": {
+      "fail": "El valor '{code}' de la dimensión '{dimension}' nombra el padre '{parent}', que no está entre sus valores.",
+      "suggestion": "Indique un padre que exista en la misma dimensión."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "La fecha de la instantánea '{date}' no es una fecha de calendario con el formato AAAA-MM-DD.",
+      "suggestion": "Introduzca la fecha como AAAA-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "La fecha de la instantánea {date} está en el futuro.",
+      "suggestion": "Use hoy o un día anterior."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' no es un número igual o mayor que cero.",
+      "suggestion": "Introduzca un número como 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % está fuera del rango de 0 % a 100 %.",
+      "suggestion": "Introduzca un porcentaje de 0 a 100."
+    },
+    "budget_overrun": {
+      "fail": "Se ha consumido el {value} % del presupuesto, así que el proyecto lo supera.",
+      "suggestion": "Compare los datos de coste con el presupuesto aprobado."
+    },
+    "count_negative": {
+      "fail": "{field} no puede ser negativo ({value}).",
+      "suggestion": "Introduzca cero o un entero positivo."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' no es una dirección de correo válida.",
+      "suggestion": "Corrija la dirección."
+    },
+    "schedule_without_recipients": {
+      "fail": "Un informe programado necesita al menos un destinatario.",
+      "suggestion": "Añada un destinatario o desactive la programación."
+    }
   }
 }

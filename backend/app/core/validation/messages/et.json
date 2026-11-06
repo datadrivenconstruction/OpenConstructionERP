@@ -2544,5 +2544,105 @@
       "fail": "Vahekauguse kontroll vajab nullist suuremat vahekaugust.",
       "suggestion": "Sisestage vähim vahekaugus meetrites või kasutage kõvade kokkupõrgete kontrolli."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Kõne kuupäev on {occurred}, mis on tulevikus.",
+      "suggestion": "Sisestage kõne toimumise päev ja kellaaeg."
+    },
+    "call_ends_before_start": {
+      "fail": "Kõne lõpeb kell {ended}, enne kui see algab kell {started}.",
+      "suggestion": "Kontrollige algus- ja lõpuaega."
+    },
+    "logged_without_content": {
+      "fail": "Logitud kõnel pole ei ärakirja ega kokkuvõtet, seega ei dokumenteeri see midagi.",
+      "suggestion": "Lisage ärakiri või lühike kokkuvõte."
+    },
+    "instruction_without_party": {
+      "fail": "Kõne sisaldab juhiseid, kuid ei nimeta ühtegi osalejat.",
+      "suggestion": "Lisage kõnes osalenud isikud."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Seos ei nimeta mõlemat kirjet, mida see ühendab.",
+      "suggestion": "Valige mõlemad kirjed."
+    },
+    "link_to_itself": {
+      "fail": "Kirjet {record} ei saa iseendaga siduda.",
+      "suggestion": "Valige teine, erinev kirje."
+    },
+    "record_type_unknown": {
+      "fail": "Kirjetüüpi '{record_type}' ei saa ühitada.",
+      "suggestion": "Kasutage kirjavahetuse, muutmistellimuse, lisatöö, teate või meetodi muutmise kirjet."
+    },
+    "confidence_out_of_range": {
+      "fail": "Vastavuse usaldusväärsus {confidence} jääb väljapoole vahemikku 0 kuni 1.",
+      "suggestion": "Sisestage hinne vahemikus 0 kuni 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Seos on kinnitatud vastavuse usaldusväärsusega {confidence}, mis on alla ettepaneku lävendi {threshold}.",
+      "suggestion": "Kontrollige, et mõlemad kirjed kirjeldavad sama sündmust."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Juurdehindluse sammu '{step}' määr on {rate}%, väljaspool lubatud vahemikku {low}% kuni {high}%.",
+      "suggestion": "Sisestage määr lubatud vahemikus."
+    },
+    "cascade_base_unknown": {
+      "fail": "Juurdehindluse samm '{step}' põhineb baasil '{base}', mis pole kulubaas, liitbaas ega varasem samm.",
+      "suggestion": "Põhjendage samm kulubaasi, liitbaasi või eespool oleva sammuga."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Käibemaksumäär {rate}% on väljaspool vahemikku 0% kuni 100%.",
+      "suggestion": "Sisestage määr protsendina vahemikus 0 kuni 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Rahastusallika kood '{code}' on selles projektis juba kasutusel.",
+      "suggestion": "Kasutage koodi, mis pole veel hõivatud."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensioon '{dimension}' loetleb väärtuse koodi '{code}' rohkem kui üks kord.",
+      "suggestion": "Andke igale väärtusele oma kood."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Dimensiooni '{dimension}' väärtus '{code}' nimetab ülemaks '{parent}', mis ei kuulu selle väärtuste hulka.",
+      "suggestion": "Nimetage ülem, mis on samas dimensioonis olemas."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Hetktõmmise kuupäev '{date}' pole kalendrikuupäev kujul AAAA-KK-PP.",
+      "suggestion": "Sisestage kuupäev kujul AAAA-KK-PP."
+    },
+    "snapshot_date_future": {
+      "fail": "Hetktõmmise kuupäev {date} on tulevikus.",
+      "suggestion": "Kasutage tänast või varasemat päeva."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' pole null või suurem arv.",
+      "suggestion": "Sisestage arv, näiteks 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% on väljaspool vahemikku 0% kuni 100%.",
+      "suggestion": "Sisestage protsent vahemikus 0 kuni 100."
+    },
+    "budget_overrun": {
+      "fail": "Eelarvest on kulutatud {value}%, seega ületab projekt eelarvet.",
+      "suggestion": "Võrrelge kuluandmeid kinnitatud eelarvega."
+    },
+    "count_negative": {
+      "fail": "{field} ei või olla negatiivne ({value}).",
+      "suggestion": "Sisestage null või positiivne täisarv."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' pole kehtiv e-posti aadress.",
+      "suggestion": "Parandage aadress."
+    },
+    "schedule_without_recipients": {
+      "fail": "Ajastatud aruandel peab olema vähemalt üks saaja.",
+      "suggestion": "Lisage saaja või lülitage ajakava välja."
+    }
   }
 }

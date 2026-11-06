@@ -2544,5 +2544,105 @@
       "fail": "净距检查需要大于零的净距。",
       "suggestion": "请输入以米为单位的最小净距，或改用硬碰撞检查。"
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "通话日期 {occurred} 在未来。",
+      "suggestion": "请输入通话发生的日期和时间。"
+    },
+    "call_ends_before_start": {
+      "fail": "通话在 {ended} 结束，早于其开始时间 {started}。",
+      "suggestion": "请检查开始和结束时间。"
+    },
+    "logged_without_content": {
+      "fail": "已记录的通话既没有转写文本也没有摘要，因此没有记录任何内容。",
+      "suggestion": "请添加转写文本或简短摘要。"
+    },
+    "instruction_without_party": {
+      "fail": "通话记录了指示，但没有列出任何参与者。",
+      "suggestion": "请添加通话参与人员。"
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "该关联没有指明它所连接的两条记录。",
+      "suggestion": "请选择这两条记录。"
+    },
+    "link_to_itself": {
+      "fail": "记录 {record} 不能与自身关联。",
+      "suggestion": "请选择另一条不同的记录。"
+    },
+    "record_type_unknown": {
+      "fail": "记录类型 '{record_type}' 无法对账。",
+      "suggestion": "请使用函件、变更指令、变更、通知或方法变更记录。"
+    },
+    "confidence_out_of_range": {
+      "fail": "匹配置信度 {confidence} 超出 0 到 1 的范围。",
+      "suggestion": "请给出 0 到 1 之间的分数。"
+    },
+    "confirmed_below_threshold": {
+      "fail": "该关联以 {confidence} 的匹配置信度确认，低于建议阈值 {threshold}。",
+      "suggestion": "请核实两条记录描述的是同一事件。"
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "加成步骤 '{step}' 的费率为 {rate}%，超出允许范围 {low}% 至 {high}%。",
+      "suggestion": "请输入允许范围内的费率。"
+    },
+    "cascade_base_unknown": {
+      "fail": "加成步骤 '{step}' 以 '{base}' 为基数，而它既不是成本基数、组合基数，也不是之前的步骤。",
+      "suggestion": "请让该步骤以成本基数、组合基数或其上方的步骤为基数。"
+    },
+    "vat_rate_out_of_range": {
+      "fail": "增值税率 {rate}% 超出 0% 至 100% 的范围。",
+      "suggestion": "请以 0 到 100 的百分数输入税率。"
+    },
+    "funding_code_duplicate": {
+      "fail": "资金来源代码 '{code}' 已在该项目中使用。",
+      "suggestion": "请使用尚未被占用的代码。"
+    },
+    "dimension_value_duplicate": {
+      "fail": "维度 '{dimension}' 多次列出了取值代码 '{code}'。",
+      "suggestion": "请为每个取值指定独有的代码。"
+    },
+    "dimension_parent_unknown": {
+      "fail": "维度 '{dimension}' 的取值 '{code}' 指定的父级 '{parent}' 不在其取值之中。",
+      "suggestion": "请指定同一维度中存在的父级。"
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "快照日期 '{date}' 不是 YYYY-MM-DD 形式的有效日历日期。",
+      "suggestion": "请以 YYYY-MM-DD 形式输入日期。"
+    },
+    "snapshot_date_future": {
+      "fail": "快照日期 {date} 在未来。",
+      "suggestion": "请使用今天或更早的日期。"
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' 不是大于或等于零的数。",
+      "suggestion": "请输入 0.95 这样的数。"
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% 超出 0% 至 100% 的范围。",
+      "suggestion": "请输入 0 到 100 的百分数。"
+    },
+    "budget_overrun": {
+      "fail": "预算已使用 {value}%，项目已超出预算。",
+      "suggestion": "请将成本数据与已批准的预算核对。"
+    },
+    "count_negative": {
+      "fail": "{field} 不能为负数 ({value})。",
+      "suggestion": "请输入零或正整数。"
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' 不是有效的电子邮件地址。",
+      "suggestion": "请更正地址。"
+    },
+    "schedule_without_recipients": {
+      "fail": "定时报告至少需要一名收件人。",
+      "suggestion": "请添加收件人或关闭定时。"
+    }
   }
 }

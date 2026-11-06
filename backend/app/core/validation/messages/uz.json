@@ -2544,5 +2544,105 @@
       "fail": "Oraliq tekshiruvi noldan katta oraliq masofani talab qiladi.",
       "suggestion": "Eng kichik oraliqni metrda kiriting yoki qattiq toʻqnashuvlar tekshiruvidan foydalaning."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Qoʻngʻiroq sanasi {occurred} kelajakda.",
+      "suggestion": "Qoʻngʻiroq boʻlgan kun va vaqtni kiriting."
+    },
+    "call_ends_before_start": {
+      "fail": "Qoʻngʻiroq {started} da boshlanmasdan oldin {ended} da tugaydi.",
+      "suggestion": "Boshlanish va tugash vaqtini tekshiring."
+    },
+    "logged_without_content": {
+      "fail": "Qayd etilgan qoʻngʻiroqda na matn yozuvi, na qisqacha mazmun bor, shuning uchun u hech narsani hujjatlashtirmaydi.",
+      "suggestion": "Matn yozuvini yoki qisqacha mazmunni qoʻshing."
+    },
+    "instruction_without_party": {
+      "fail": "Qoʻngʻiroqda koʻrsatmalar qayd etilgan, ammo hech bir ishtirokchi nomi koʻrsatilmagan.",
+      "suggestion": "Qoʻngʻiroqdagi shaxslarni qoʻshing."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Bogʻlanish oʻzi biriktiradigan ikkala yozuvni ham koʻrsatmaydi.",
+      "suggestion": "Ikkala yozuvni tanlang."
+    },
+    "link_to_itself": {
+      "fail": "{record} yozuvini oʻziga bogʻlab boʻlmaydi.",
+      "suggestion": "Boshqa, ikkinchi yozuvni tanlang."
+    },
+    "record_type_unknown": {
+      "fail": "'{record_type}' yozuv turini solishtirib boʻlmaydi.",
+      "suggestion": "Yozishmalar, oʻzgartirish buyrugʻi, qoʻshimcha ish, xabarnoma yoki usulni oʻzgartirish yozuvidan foydalaning."
+    },
+    "confidence_out_of_range": {
+      "fail": "Moslik ishonchliligi {confidence} 0 dan 1 gacha boʻlgan oraliqdan tashqarida.",
+      "suggestion": "0 va 1 orasida ball kiriting."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Bogʻlanish {confidence} moslik ishonchliligi bilan tasdiqlandi, bu taklif chegarasi {threshold} dan past.",
+      "suggestion": "Ikkala yozuv ham bir voqeani tasvirlashini tekshiring."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "'{step}' ustama bosqichining stavkasi {rate}%, ruxsat etilgan {low}% dan {high}% gacha oraliqdan tashqarida.",
+      "suggestion": "Ruxsat etilgan oraliqdagi stavkani kiriting."
+    },
+    "cascade_base_unknown": {
+      "fail": "'{step}' ustama bosqichi '{base}' asosiga tayanadi, bu xarajat asosi, qoʻshma asos yoki oldingi bosqich emas.",
+      "suggestion": "Bosqichni xarajat asosiga, qoʻshma asosga yoki yuqoridagi bosqichga tayantiring."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "QQS stavkasi {rate}% 0% dan 100% gacha boʻlgan oraliqdan tashqarida.",
+      "suggestion": "Stavkani 0 dan 100 gacha foiz sifatida kiriting."
+    },
+    "funding_code_duplicate": {
+      "fail": "'{code}' moliyalashtirish manbai kodi bu loyihada allaqachon ishlatilmoqda.",
+      "suggestion": "Hali band boʻlmagan koddan foydalaning."
+    },
+    "dimension_value_duplicate": {
+      "fail": "'{dimension}' oʻlchovi '{code}' qiymat kodini bir necha marta keltiradi.",
+      "suggestion": "Har bir qiymatga oʻz kodini bering."
+    },
+    "dimension_parent_unknown": {
+      "fail": "'{dimension}' oʻlchovining '{code}' qiymati oʻz qiymatlari orasida boʻlmagan '{parent}' ota qiymatini koʻrsatadi.",
+      "suggestion": "Shu oʻlchovda mavjud ota qiymatni koʻrsating."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Lahza surati sanasi '{date}' YYYY-MM-DD shaklidagi kalendar sanasi emas.",
+      "suggestion": "Sanani YYYY-MM-DD shaklida kiriting."
+    },
+    "snapshot_date_future": {
+      "fail": "Lahza surati sanasi {date} kelajakda.",
+      "suggestion": "Bugungi yoki oldingi kundan foydalaning."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' nol yoki undan katta son emas.",
+      "suggestion": "0.95 kabi son kiriting."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value}% 0% dan 100% gacha boʻlgan oraliqdan tashqarida.",
+      "suggestion": "0 dan 100 gacha foiz kiriting."
+    },
+    "budget_overrun": {
+      "fail": "Byudjetning {value}% sarflandi, shuning uchun loyiha byudjetdan oshib ketdi.",
+      "suggestion": "Xarajat maʼlumotlarini tasdiqlangan byudjet bilan solishtiring."
+    },
+    "count_negative": {
+      "fail": "{field} manfiy boʻlishi mumkin emas ({value}).",
+      "suggestion": "Nol yoki musbat butun son kiriting."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' yaroqli elektron pochta manzili emas.",
+      "suggestion": "Manzilni tuzating."
+    },
+    "schedule_without_recipients": {
+      "fail": "Rejalashtirilgan hisobotga kamida bitta qabul qiluvchi kerak.",
+      "suggestion": "Qabul qiluvchi qoʻshing yoki jadvalni oʻchiring."
+    }
   }
 }

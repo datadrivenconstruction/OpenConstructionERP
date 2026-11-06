@@ -2544,5 +2544,105 @@
       "fail": "Et frihøjdetjek kræver en frihøjde over nul.",
       "suggestion": "Angiv den mindste frihøjde i meter, eller brug et tjek for hårde kollisioner."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Opkaldet er dateret {occurred}, hvilket ligger i fremtiden.",
+      "suggestion": "Angiv dagen og tidspunktet for opkaldet."
+    },
+    "call_ends_before_start": {
+      "fail": "Opkaldet slutter {ended}, før det begynder {started}.",
+      "suggestion": "Kontrollér start- og sluttidspunktet."
+    },
+    "logged_without_content": {
+      "fail": "Et logget opkald har hverken udskrift eller resumé og dokumenterer derfor intet.",
+      "suggestion": "Tilføj udskriften eller et kort resumé."
+    },
+    "instruction_without_party": {
+      "fail": "Opkaldet registrerer instrukser, men navngiver ingen deltagere.",
+      "suggestion": "Tilføj de personer, der deltog i opkaldet."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Koblingen angiver ikke begge de poster, den forbinder.",
+      "suggestion": "Vælg begge poster."
+    },
+    "link_to_itself": {
+      "fail": "Posten {record} kan ikke kobles til sig selv.",
+      "suggestion": "Vælg en anden post som den anden."
+    },
+    "record_type_unknown": {
+      "fail": "Posttypen '{record_type}' kan ikke afstemmes.",
+      "suggestion": "Brug en post for korrespondance, ændringsordre, tillægsarbejde, meddelelse eller metodeændring."
+    },
+    "confidence_out_of_range": {
+      "fail": "Matchsikkerheden {confidence} ligger uden for intervallet 0 til 1.",
+      "suggestion": "Angiv en score mellem 0 og 1."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Koblingen er bekræftet med matchsikkerhed {confidence}, under forslagsgrænsen {threshold}.",
+      "suggestion": "Kontrollér, at begge poster beskriver den samme hændelse."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Tillægstrinnet '{step}' har en sats på {rate} %, uden for det tilladte interval fra {low} % til {high} %.",
+      "suggestion": "Angiv en sats inden for det tilladte interval."
+    },
+    "cascade_base_unknown": {
+      "fail": "Tillægstrinnet '{step}' bygger på '{base}', som hverken er et omkostningsgrundlag, et sammensat grundlag eller et tidligere trin.",
+      "suggestion": "Lad trinnet bygge på et omkostningsgrundlag, et sammensat grundlag eller et trin ovenover."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Momssatsen {rate} % ligger uden for intervallet 0 % til 100 %.",
+      "suggestion": "Angiv satsen som en procent fra 0 til 100."
+    },
+    "funding_code_duplicate": {
+      "fail": "Finansieringskildens kode '{code}' bruges allerede i dette projekt.",
+      "suggestion": "Brug en kode, der ikke er optaget endnu."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Dimensionen '{dimension}' angiver værdikoden '{code}' mere end én gang.",
+      "suggestion": "Giv hver værdi sin egen kode."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Værdien '{code}' i dimensionen '{dimension}' angiver overordnet '{parent}', som ikke er blandt dens værdier.",
+      "suggestion": "Angiv et overordnet led, der findes i samme dimension."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Øjebliksbilledets dato '{date}' er ikke en kalenderdato på formen ÅÅÅÅ-MM-DD.",
+      "suggestion": "Angiv datoen som ÅÅÅÅ-MM-DD."
+    },
+    "snapshot_date_future": {
+      "fail": "Øjebliksbilledets dato {date} ligger i fremtiden.",
+      "suggestion": "Brug i dag eller en tidligere dag."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' er ikke et tal på nul eller derover.",
+      "suggestion": "Angiv et tal som 0.95."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % ligger uden for intervallet 0 % til 100 %.",
+      "suggestion": "Angiv en procent fra 0 til 100."
+    },
+    "budget_overrun": {
+      "fail": "{value} % af budgettet er forbrugt, så projektet overskrider budgettet.",
+      "suggestion": "Sammenhold omkostningsdata med det godkendte budget."
+    },
+    "count_negative": {
+      "fail": "{field} kan ikke være negativ ({value}).",
+      "suggestion": "Angiv nul eller et positivt heltal."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' er ikke en gyldig e-mailadresse.",
+      "suggestion": "Ret adressen."
+    },
+    "schedule_without_recipients": {
+      "fail": "En planlagt rapport skal have mindst én modtager.",
+      "suggestion": "Tilføj en modtager, eller slå planen fra."
+    }
   }
 }

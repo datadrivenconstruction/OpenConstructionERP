@@ -2544,5 +2544,105 @@
       "fail": "Ein Abstandslauf braucht einen Mindestabstand über null.",
       "suggestion": "Geben Sie den Mindestabstand in Metern ein oder verwenden Sie einen Lauf auf harte Kollisionen."
     }
+  },
+  "phonelog": {
+    "call_in_future": {
+      "fail": "Das Gespräch ist auf den {occurred} datiert, der in der Zukunft liegt.",
+      "suggestion": "Geben Sie Tag und Uhrzeit des Gesprächs ein."
+    },
+    "call_ends_before_start": {
+      "fail": "Das Gespräch endet um {ended}, bevor es um {started} beginnt.",
+      "suggestion": "Prüfen Sie Beginn und Ende."
+    },
+    "logged_without_content": {
+      "fail": "Ein protokolliertes Gespräch hat weder Mitschrift noch Zusammenfassung und hält somit nichts fest.",
+      "suggestion": "Ergänzen Sie die Mitschrift oder eine kurze Zusammenfassung."
+    },
+    "instruction_without_party": {
+      "fail": "Das Gespräch hält Anweisungen fest, nennt aber keinen Teilnehmer.",
+      "suggestion": "Ergänzen Sie die Gesprächsteilnehmer."
+    }
+  },
+  "reconciliation": {
+    "endpoints_missing": {
+      "fail": "Die Verknüpfung nennt nicht beide Datensätze, die sie verbindet.",
+      "suggestion": "Wählen Sie beide Datensätze aus."
+    },
+    "link_to_itself": {
+      "fail": "Der Datensatz {record} kann nicht mit sich selbst verknüpft werden.",
+      "suggestion": "Wählen Sie einen anderen zweiten Datensatz."
+    },
+    "record_type_unknown": {
+      "fail": "Der Datensatztyp '{record_type}' lässt sich nicht abgleichen.",
+      "suggestion": "Verwenden Sie Schriftverkehr, Änderungsauftrag, Nachtrag, Anzeige oder Methodenänderung."
+    },
+    "confidence_out_of_range": {
+      "fail": "Die Übereinstimmungssicherheit {confidence} liegt außerhalb des Bereichs 0 bis 1.",
+      "suggestion": "Geben Sie einen Wert zwischen 0 und 1 an."
+    },
+    "confirmed_below_threshold": {
+      "fail": "Die Verknüpfung ist mit einer Übereinstimmungssicherheit von {confidence} bestätigt, unter der Vorschlagsschwelle {threshold}.",
+      "suggestion": "Prüfen Sie, ob beide Datensätze dasselbe Ereignis beschreiben."
+    }
+  },
+  "methodology": {
+    "cascade_rate_out_of_range": {
+      "fail": "Der Zuschlagsschritt '{step}' hat einen Satz von {rate} %, außerhalb des zulässigen Bereichs von {low} % bis {high} %.",
+      "suggestion": "Geben Sie einen Satz im zulässigen Bereich ein."
+    },
+    "cascade_base_unknown": {
+      "fail": "Der Zuschlagsschritt '{step}' bezieht sich auf '{base}', das weder eine Kostenbasis noch eine Sammelbasis noch ein früherer Schritt ist.",
+      "suggestion": "Beziehen Sie den Schritt auf eine Kostenbasis, eine Sammelbasis oder einen Schritt darüber."
+    },
+    "vat_rate_out_of_range": {
+      "fail": "Der Mehrwertsteuersatz {rate} % liegt außerhalb des Bereichs 0 % bis 100 %.",
+      "suggestion": "Geben Sie den Satz als Prozentwert von 0 bis 100 ein."
+    },
+    "funding_code_duplicate": {
+      "fail": "Der Code '{code}' der Finanzierungsquelle wird in diesem Projekt bereits verwendet.",
+      "suggestion": "Verwenden Sie einen noch freien Code."
+    },
+    "dimension_value_duplicate": {
+      "fail": "Die Dimension '{dimension}' führt den Wertcode '{code}' mehr als einmal auf.",
+      "suggestion": "Geben Sie jedem Wert einen eigenen Code."
+    },
+    "dimension_parent_unknown": {
+      "fail": "Der Wert '{code}' der Dimension '{dimension}' nennt den übergeordneten Wert '{parent}', der nicht zu ihren Werten gehört.",
+      "suggestion": "Nennen Sie einen übergeordneten Wert aus derselben Dimension."
+    }
+  },
+  "reporting": {
+    "snapshot_date_invalid": {
+      "fail": "Das Stichtagsdatum '{date}' ist kein Kalenderdatum der Form JJJJ-MM-TT.",
+      "suggestion": "Geben Sie das Datum als JJJJ-MM-TT ein."
+    },
+    "snapshot_date_future": {
+      "fail": "Das Stichtagsdatum {date} liegt in der Zukunft.",
+      "suggestion": "Verwenden Sie heute oder einen früheren Tag."
+    },
+    "index_invalid": {
+      "fail": "{field} '{value}' ist keine Zahl von null oder mehr.",
+      "suggestion": "Geben Sie eine Zahl wie 0.95 ein."
+    },
+    "percent_out_of_range": {
+      "fail": "{field} {value} % liegt außerhalb des Bereichs 0 % bis 100 %.",
+      "suggestion": "Geben Sie einen Prozentwert von 0 bis 100 ein."
+    },
+    "budget_overrun": {
+      "fail": "{value} % des Budgets sind verbraucht, das Projekt überschreitet also sein Budget.",
+      "suggestion": "Gleichen Sie die Kostendaten mit dem genehmigten Budget ab."
+    },
+    "count_negative": {
+      "fail": "{field} darf nicht negativ sein ({value}).",
+      "suggestion": "Geben Sie null oder eine positive ganze Zahl ein."
+    },
+    "recipient_invalid": {
+      "fail": "'{recipient}' ist keine gültige E-Mail-Adresse.",
+      "suggestion": "Korrigieren Sie die Adresse."
+    },
+    "schedule_without_recipients": {
+      "fail": "Ein geplanter Bericht braucht mindestens einen Empfänger.",
+      "suggestion": "Fügen Sie einen Empfänger hinzu oder schalten Sie den Zeitplan aus."
+    }
   }
 }

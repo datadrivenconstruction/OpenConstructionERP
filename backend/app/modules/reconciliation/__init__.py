@@ -28,3 +28,6 @@ async def on_startup() -> None:
     )
 
     register_reconciliation_permissions()
+    from app.modules.reconciliation.validators import register_reconciliation_validation_rules
+
+    register_reconciliation_validation_rules()

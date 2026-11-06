@@ -125,6 +125,8 @@ class KPISnapshotResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Report Template schemas ──────────────────────────────────────────────
@@ -182,6 +184,8 @@ class ReportTemplateResponse(BaseModel):
     project_id_scope: UUID | None = None
     created_at: datetime
     updated_at: datetime
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Schedule Request / Response (v2.3.0) ────────────────────────────────
