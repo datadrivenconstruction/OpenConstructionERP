@@ -297,7 +297,7 @@ describe('exporting a bill of quantities to PDF', () => {
     await renderWithProjectPending();
     await letTheProjectArrive();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(pdfCall()).toBeDefined());
     const [url, init] = pdfCall()!;
@@ -316,7 +316,7 @@ describe('exporting a bill of quantities to PDF', () => {
   it('does not wait for the project: the server reads it for itself', async () => {
     await renderWithProjectPending();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(pdfCall()).toBeDefined());
     await waitFor(() => expect(triggerDownload).toHaveBeenCalledWith(SERVER_FILE, 'Riverside HQ Bill.pdf'));
@@ -327,7 +327,7 @@ describe('exporting a bill of quantities to PDF', () => {
     await renderWithProjectPending();
     await letTheProjectArrive();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(pdfCall()).toBeDefined());
     expect(new URL(pdfCall()![0], 'http://test').searchParams.get('measurement_system')).toBe('imperial');
@@ -345,7 +345,7 @@ describe('exporting a bill of quantities to PDF', () => {
     }));
     await renderWithProjectPending();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(errorToasts().map((toast) => toast.title)).toContain(reason));
     expect(triggerDownload).not.toHaveBeenCalled();
@@ -362,7 +362,7 @@ describe('exporting a bill of quantities to PDF', () => {
     }));
     await renderWithProjectPending();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(errorToasts().map((toast) => toast.title)).toContain('Export failed'));
   });
@@ -373,7 +373,7 @@ describe('exporting a bill of quantities to PDF', () => {
     });
     await renderWithProjectPending();
 
-    await chooseExport('PDF');
+    await chooseExport('Internal estimate (PDF)');
 
     await waitFor(() => expect(errorToasts()).toHaveLength(1));
     expect(errorToasts()[0]).toMatchObject({
