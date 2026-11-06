@@ -72,3 +72,64 @@ export async function requestVoiceDraft(
   }
   return (await res.json()) as VoiceDraft;
 }
+
+/** What the server offers for voice input (server speech-to-text or none). */
+export interface VoiceCapabilities {
+  server_transcription: boolean;
+  provider: string | null;
+  max_upload_bytes: number;
+  max_seconds: number;
+}
+
+/** The text of one dictated message. */
+export interface DictationResult {
+  text: string;
+  language: string | null;
+  available: boolean;
+  error: string | null;
+}
+
+/** An HTTP failure that keeps its status, so a 503 reads as "not configured". */
+export class VoiceHttpError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'VoiceHttpError';
+    this.status = status;
+  }
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getAuthToken();
+  return { 'X-DDC-Client': 'OE/1.0', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+}
+
+export async function fetchVoiceCapabilities(signal?: AbortSignal): Promise<VoiceCapabilities> {
+  const res = await fetch('/api/v1/voice/capabilities', { headers: authHeaders(), signal });
+  if (!res.ok) throw new VoiceHttpError(`Could not load voice capabilities (${res.status})`, res.status);
+  return (await res.json()) as VoiceCapabilities;
+}
+
+/**
+ * Send one short recording to the server's speech-to-text and get its text.
+ * The server transcribes and drops the audio; nothing is stored.
+ */
+export async function transcribeDictation(
+  file: File,
+  opts: { language?: string; signal?: AbortSignal } = {},
+): Promise<DictationResult> {
+  const params = new URLSearchParams();
+  if (opts.language) params.set('language', opts.language);
+  const form = new FormData();
+  form.append('file', file);
+  const query = params.toString();
+  const res = await fetch(`/api/v1/voice/transcribe${query ? `?${query}` : ''}`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: form,
+    signal: opts.signal,
+  });
+  if (!res.ok) throw new VoiceHttpError(`Could not transcribe the recording (${res.status})`, res.status);
+  return (await res.json()) as DictationResult;
+}
