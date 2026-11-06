@@ -9,7 +9,9 @@ does not trip the money-as-string convention the cost modules follow).
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class ThreadRecordOut(BaseModel):
@@ -119,3 +121,5 @@ class RecordLinkOut(BaseModel):
     confidence: float
     status: str
     created_by: str | None
+    # Non-blocking findings of the module rule set for the write that produced this response.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)

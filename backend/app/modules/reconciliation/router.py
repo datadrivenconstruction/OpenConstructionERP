@@ -105,6 +105,7 @@ def _link_out(row: RecordLink, subjects: dict[tuple[str, str], str] | None = Non
         confidence=float(row.confidence if row.confidence is not None else 0),
         status=row.status or "",
         created_by=row.created_by,
+        validation_warnings=list(getattr(row, "validation_warnings", None) or []),
     )
 
 

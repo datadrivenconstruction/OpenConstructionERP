@@ -18,10 +18,12 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.quality_rules import gate_record
 from app.modules.phonelog import transcription
 from app.modules.phonelog.models import PhoneLog
 from app.modules.phonelog.normalize import PhoneLogInput, normalize
 from app.modules.phonelog.schemas import PhoneLogCreate, PhoneLogFinalize
+from app.modules.phonelog.validators import CALL_FIELDS, PHONELOG_RULE_SET
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,30 @@ async def _safe_publish(name: str, data: dict, source_module: str = "oe_phonelog
         event_bus.publish_detached(name, data, source_module=source_module)
     except Exception as exc:
         logger.debug("Event publish failed for %s: %s", name, exc)
+
+
+async def _gate(
+    row: object,
+    changes: dict,
+    *,
+    operation: str,
+    project_id: uuid.UUID,
+    target_id: str = "",
+    warnings_only: bool = False,
+) -> list[dict]:
+    """Run the rule set over the call as it will be; errors the edit introduces raise a coded 422."""
+    return await gate_record(
+        PHONELOG_RULE_SET,
+        "call",
+        row,
+        CALL_FIELDS,
+        changes,
+        operation=operation,
+        project_id=project_id,
+        error_code="phonelog_rules_failed",
+        target_id=target_id,
+        warnings_only=warnings_only,
+    )
 
 
 async def create_phone_log(
@@ -60,6 +86,21 @@ async def create_phone_log(
         )
     )
 
+    findings = await _gate(
+        {},
+        {
+            "status": "logged",
+            "occurred_at": data.started_at,
+            "ended_at": data.ended_at,
+            "parties": list(normalized.parties),
+            "transcript": data.transcript,
+            "summary": normalized.summary,
+            "instructions": list(normalized.instructions),
+        },
+        operation="create",
+        project_id=data.project_id,
+    )
+
     row = PhoneLog(
         project_id=data.project_id,
         direction=normalized.direction,
@@ -78,6 +119,7 @@ async def create_phone_log(
     session.add(row)
     await session.flush()
     await session.refresh(row)
+    row.validation_warnings = findings
 
     # PII discipline: log only structural fields. Transcript / summary / parties
     # can carry personal data and must not reach structured-log sinks.
@@ -165,6 +207,22 @@ async def transcribe_recording(
         },
     }
 
+    # A system-built draft is reported on and never refused: the user reviews it before it is logged.
+    findings = await _gate(
+        {},
+        {
+            "status": status,
+            "occurred_at": occurred_at,
+            "parties": parties,
+            "transcript": transcript,
+            "summary": normalized.summary,
+            "instructions": list(normalized.instructions),
+        },
+        operation="create",
+        project_id=project_id,
+        warnings_only=True,
+    )
+
     row = PhoneLog(
         project_id=project_id,
         direction=normalized.direction,
@@ -184,6 +242,7 @@ async def transcribe_recording(
     session.add(row)
     await session.flush()
     await session.refresh(row)
+    row.validation_warnings = findings
 
     # PII discipline: log only structural fields, never transcript / parties.
     logger.info(
@@ -233,6 +292,22 @@ async def finalize_phone_log(
         )
     )
 
+    instructions = list(data.instructions) if data.instructions else list(normalized.instructions)
+    findings = await _gate(
+        row,
+        {
+            "status": "logged",
+            "occurred_at": data.occurred_at or row.occurred_at,
+            "parties": list(normalized.parties),
+            "transcript": data.transcript,
+            "summary": normalized.summary,
+            "instructions": instructions,
+        },
+        operation="update",
+        project_id=row.project_id,
+        target_id=str(row.id),
+    )
+
     row.direction = normalized.direction
     row.channel = normalized.channel
     row.parties = list(normalized.parties)
@@ -241,7 +316,7 @@ async def finalize_phone_log(
         row.duration_seconds = normalized.duration_seconds
     row.transcript = data.transcript
     row.summary = normalized.summary
-    row.instructions = list(data.instructions) if data.instructions else list(normalized.instructions)
+    row.instructions = instructions
     row.word_count = normalized.word_count
 
     # Merge the reviewed protocol into metadata, keeping the transcription record,
@@ -261,6 +336,7 @@ async def finalize_phone_log(
     row.status = "logged"
     await session.flush()
     await session.refresh(row)
+    row.validation_warnings = findings
 
     logger.info("Phone log draft confirmed: %s for project %s", row.id, row.project_id)
     await _safe_publish(
