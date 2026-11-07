@@ -898,7 +898,8 @@
   "app_routes": [
    "/bim",
    "/clash"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-cash-flow",
@@ -956,7 +957,8 @@
   "app_routes": [
    "/cvr"
   ],
-  "track": "Contract and commercial control"
+  "track": "Contract and commercial control",
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-cost-control",
@@ -1016,7 +1018,8 @@
    "/full-evm",
    "/cost-control",
    "/cvr"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-delay-and-claims",
@@ -1079,7 +1082,8 @@
    "/changeorders",
    "/schedule"
   ],
-  "track": "Contract and commercial control"
+  "track": "Contract and commercial control",
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-embodied-carbon",
@@ -1136,7 +1140,8 @@
   ],
   "app_routes": [
    "/carbon"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-estimate",
@@ -1193,7 +1198,8 @@
   ],
   "app_routes": [
    "/boq"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-handover-and-defects",
@@ -1256,7 +1262,8 @@
    "/inspections",
    "/punchlist",
    "/defects-liability"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-health-and-safety",
@@ -1313,7 +1320,8 @@
   ],
   "app_routes": [
    "/safety"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-nec4-compensation-events",
@@ -1371,7 +1379,8 @@
   "app_routes": [
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-payment-applications",
@@ -1428,7 +1437,8 @@
   ],
   "app_routes": [
    "/contracts"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-programme-critical-path",
@@ -1486,7 +1496,8 @@
   "app_routes": [
    "/schedule"
   ],
-  "track": "Plan, build and assure"
+  "track": "Plan, build and assure",
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-quality",
@@ -1551,7 +1562,8 @@
    "/rfi",
    "/punchlist",
    "/closeout"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-risk",
@@ -1608,7 +1620,8 @@
   ],
   "app_routes": [
    "/risks"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-site-diary",
@@ -1665,7 +1678,8 @@
   ],
   "app_routes": [
    "/daily-diary"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-takeoff",
@@ -1733,7 +1747,8 @@
    "/boq",
    "/costs"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "GB"
  },
  {
   "id": "course:ashbrook-tender",
@@ -1791,7 +1806,8 @@
   "app_routes": [
    "/tendering",
    "/bid-management"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:belosten-aktove-bg",
@@ -1852,7 +1868,8 @@
    "/daily-diary",
    "/inspections",
    "/ncr"
-  ]
+  ],
+  "country": "BG"
  },
  {
   "id": "course:belosten-bg",
@@ -1917,7 +1934,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "BG"
  },
  {
   "id": "course:belosten-kss-bg",
@@ -1974,7 +1992,8 @@
   ],
   "app_routes": [
    "/boq"
-  ]
+  ],
+  "country": "BG"
  },
  {
   "id": "course:belosten-predavane-bg",
@@ -2037,7 +2056,8 @@
    "/contracts",
    "/closeout",
    "/defects-liability"
-  ]
+  ],
+  "country": "BG"
  },
  {
   "id": "course:belosten-zop-bg",
@@ -2101,7 +2121,8 @@
    "/variations",
    "/changeorders"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "BG"
  },
  {
   "id": "course:belosten-zut-bg",
@@ -2162,7 +2183,8 @@
    "/inspections",
    "/schedule",
    "/rfi"
-  ]
+  ],
+  "country": "BG"
  },
  {
   "id": "course:brannock-us",
@@ -2223,7 +2245,8 @@
    "/tendering",
    "/bid-management"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "US"
  },
  {
   "id": "course:brzozowa-pl",
@@ -2288,7 +2311,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "PL"
  },
  {
   "id": "course:corvennick-us",
@@ -2353,7 +2377,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "US"
  },
  {
   "id": "course:erlengrund-de",
@@ -2418,7 +2443,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "DE"
  },
  {
   "id": "course:estimate-data-import",
@@ -2534,7 +2560,8 @@
   "app_routes": [
    "/boq"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "DE"
  },
  {
   "id": "course:haselmoor-gaeb-de",
@@ -2594,7 +2621,8 @@
    "/documents",
    "/boq"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "DE"
  },
  {
   "id": "course:haselmoor-vob-de",
@@ -2657,7 +2685,8 @@
    "/variations",
    "/changeorders"
   ],
-  "track": "Contract and commercial control"
+  "track": "Contract and commercial control",
+  "country": "DE"
  },
  {
   "id": "course:hollisyard-us",
@@ -2721,7 +2750,8 @@
    "/dwg-takeoff",
    "/boq"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "US"
  },
  {
   "id": "course:ids-bcf-model-checking",
@@ -2901,7 +2931,8 @@
    "/boq",
    "/tendering",
    "/bid-management"
-  ]
+  ],
+  "country": "BR"
  },
  {
   "id": "course:jacarandas-mx",
@@ -2962,7 +2993,8 @@
    "/variations",
    "/changeorders"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "country": "MX"
  },
  {
   "id": "course:landrevel-fr",
@@ -3027,7 +3059,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "FR"
  },
  {
   "id": "course:sidrgrove-ae",
@@ -3085,7 +3118,8 @@
   "app_routes": [
    "/contracts"
   ],
-  "track": "Contract and commercial control"
+  "track": "Contract and commercial control",
+  "country": "AE"
  },
  {
   "id": "course:tallowgate-uk",
@@ -3150,7 +3184,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "GB"
  },
  {
   "id": "course:valcerasa-it",
@@ -3215,7 +3250,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "IT"
  },
  {
   "id": "course:valdelagua-es",
@@ -3280,7 +3316,8 @@
    "/contracts",
    "/variations",
    "/changeorders"
-  ]
+  ],
+  "country": "ES"
  },
  {
   "id": "checklist:hr01-ugovoreni-troskovnik",

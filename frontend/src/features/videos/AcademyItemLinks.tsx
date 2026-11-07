@@ -152,13 +152,13 @@ function CardMedia({ item, Icon, country }: { item: AcademyItem; Icon: LucideIco
           <Icon size={32} strokeWidth={1.5} aria-hidden />
         </span>
       )}
-      {item.market && country && (
+      {(item.country ?? item.market) && country && (
         <span
           data-testid="academy-item-country"
-          data-country={item.market}
+          data-country={item.country ?? item.market}
           className="absolute start-2 top-2 inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-elevated/95 px-1.5 py-1 text-2xs font-medium text-content-primary"
         >
-          <CountryFlag code={item.market} size={16} />
+          <CountryFlag code={(item.country ?? item.market)!} size={16} />
           {country}
         </span>
       )}

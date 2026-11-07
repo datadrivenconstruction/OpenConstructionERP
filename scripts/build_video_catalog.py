@@ -875,6 +875,10 @@ def load_academy_items(snapshot: Path, root: Path) -> list[dict]:
             if not re.fullmatch(r"[A-Z]{2}", market):
                 fail(f"{item_id}: market {market!r} is not an ISO 3166-1 alpha-2 code")
             item["market"] = market
+        if raw.get("country"):
+            if not re.fullmatch(r"[A-Z]{2}", raw["country"]):
+                fail(f"{item_id}: country {raw['country']!r} is not an ISO 3166-1 alpha-2 code")
+            item["country"] = raw["country"]
         item["routes"] = routes
         if raw.get("parent_course"):
             item["parentCourse"] = raw["parent_course"]

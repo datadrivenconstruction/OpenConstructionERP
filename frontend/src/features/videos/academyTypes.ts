@@ -138,6 +138,8 @@ export interface AcademyItem {
   track?: string;
   /** ISO 3166-1 alpha-2 market whose rules the item teaches. */
   market?: string;
+  /** Country a course is set in. Unlike `market` it labels and filters, never hides. */
+  country?: string;
   routes: string[];
   parentCourse?: string;
   relatedVideoIds?: string[];

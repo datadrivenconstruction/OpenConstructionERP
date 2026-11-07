@@ -208,7 +208,7 @@ describe('the hub page', () => {
     renderAt('/courses', <CoursesPage />);
     const hr = ACADEMY_ITEMS.find((i) => i.market === 'HR')!;
     expect(screen.getByText(hr.title)).toBeTruthy();
-    expect(screen.getAllByTestId('academy-item-country').length).toBe(ACADEMY_ITEMS.filter((i) => i.market).length);
+    expect(screen.getAllByTestId('academy-item-country').length).toBe(ACADEMY_ITEMS.filter((i) => i.country ?? i.market).length);
   });
 
   it('narrows by country, shows the count and removes the filter again', () => {

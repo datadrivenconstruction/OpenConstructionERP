@@ -174,7 +174,10 @@ export function CoursesPage() {
   // Most material first, so the reader sees which country has most.
   const countries = useMemo(() => {
     const own = new Map<string, number>();
-    for (const i of ITEMS) if (i.market) own.set(i.market, (own.get(i.market) ?? 0) + 1);
+    for (const i of ITEMS) {
+      const c = i.country ?? i.market;
+      if (c) own.set(c, (own.get(c) ?? 0) + 1);
+    }
     return [...own.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([m]) => m);
   }, []);
 
@@ -484,7 +487,7 @@ export function CoursesPage() {
           {hits.map((item) => (
             <li key={item.id} className="flex">
               <div className="flex w-full flex-col [&>a]:h-full">
-                <AcademyItemCard item={item} media countryName={item.market ? labels.country(item.market) : undefined} />
+                <AcademyItemCard item={item} media countryName={item.country ?? item.market ? labels.country((item.country ?? item.market)!) : undefined} />
               </div>
             </li>
           ))}

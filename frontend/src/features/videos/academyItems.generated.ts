@@ -118,6 +118,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "BIM",
       "Clash detection"
     ],
+    "country": "GB",
     "routes": [
       "/bim",
       "/clash"
@@ -176,6 +177,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "CVR"
     ],
     "track": "Contract and commercial control",
+    "country": "GB",
     "routes": [
       "/cvr"
     ]
@@ -233,6 +235,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "CVR",
       "Earned value"
     ],
+    "country": "GB",
     "routes": [
       "/full-evm",
       "/cost-control",
@@ -294,6 +297,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Variations"
     ],
     "track": "Contract and commercial control",
+    "country": "GB",
     "routes": [
       "/risks",
       "/variations",
@@ -353,6 +357,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Carbon"
     ],
+    "country": "GB",
     "routes": [
       "/carbon"
     ]
@@ -409,6 +414,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "BOQ"
     ],
+    "country": "GB",
     "routes": [
       "/boq"
     ]
@@ -468,6 +474,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Inspections",
       "Punch list"
     ],
+    "country": "GB",
     "routes": [
       "/closeout",
       "/inspections",
@@ -527,6 +534,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Safety"
     ],
+    "country": "GB",
     "routes": [
       "/safety"
     ]
@@ -583,6 +591,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Variations"
     ],
+    "country": "GB",
     "routes": [
       "/variations",
       "/changeorders"
@@ -640,6 +649,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Contracts"
     ],
+    "country": "GB",
     "routes": [
       "/contracts"
     ]
@@ -697,6 +707,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Schedule"
     ],
     "track": "Plan, build and assure",
+    "country": "GB",
     "routes": [
       "/schedule"
     ]
@@ -757,6 +768,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Punch list",
       "RFI"
     ],
+    "country": "GB",
     "routes": [
       "/inspections",
       "/ncr",
@@ -817,6 +829,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Risk register"
     ],
+    "country": "GB",
     "routes": [
       "/risks"
     ]
@@ -873,6 +886,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Site diary"
     ],
+    "country": "GB",
     "routes": [
       "/daily-diary"
     ]
@@ -935,6 +949,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "PDF takeoff"
     ],
     "track": "Estimate and buy",
+    "country": "GB",
     "routes": [
       "/documents",
       "/takeoff",
@@ -996,6 +1011,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "Bid management"
     ],
+    "country": "GB",
     "routes": [
       "/tendering",
       "/bid-management"
@@ -1055,6 +1071,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "NCR",
       "Site diary"
     ],
+    "country": "BG",
     "routes": [
       "/daily-diary",
       "/inspections",
@@ -1116,6 +1133,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "BG",
     "routes": [
       "/boq",
       "/tendering",
@@ -1177,6 +1195,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "topics": [
       "BOQ"
     ],
+    "country": "BG",
     "routes": [
       "/boq"
     ]
@@ -1236,6 +1255,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Defects",
       "Punch list"
     ],
+    "country": "BG",
     "routes": [
       "/punchlist",
       "/contracts",
@@ -1298,6 +1318,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Variations"
     ],
     "track": "Estimate and buy",
+    "country": "BG",
     "routes": [
       "/tendering",
       "/bid-management",
@@ -1360,6 +1381,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "RFI",
       "Schedule"
     ],
+    "country": "BG",
     "routes": [
       "/inspections",
       "/schedule",
@@ -1420,6 +1442,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Bid management"
     ],
     "track": "Estimate and buy",
+    "country": "US",
     "routes": [
       "/boq",
       "/tendering",
@@ -1481,6 +1504,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "PL",
     "routes": [
       "/boq",
       "/tendering",
@@ -1545,6 +1569,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "US",
     "routes": [
       "/boq",
       "/tendering",
@@ -1609,6 +1634,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "DE",
     "routes": [
       "/boq",
       "/tendering",
@@ -1728,6 +1754,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "BOQ"
     ],
     "track": "Estimate and buy",
+    "country": "DE",
     "routes": [
       "/boq"
     ]
@@ -1786,6 +1813,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Documents"
     ],
     "track": "Estimate and buy",
+    "country": "DE",
     "routes": [
       "/documents",
       "/boq"
@@ -1846,6 +1874,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Variations"
     ],
     "track": "Contract and commercial control",
+    "country": "DE",
     "routes": [
       "/documents",
       "/boq",
@@ -1909,6 +1938,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "PDF takeoff"
     ],
     "track": "Estimate and buy",
+    "country": "US",
     "routes": [
       "/documents",
       "/takeoff",
@@ -2087,6 +2117,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "BOQ",
       "Bid management"
     ],
+    "country": "BR",
     "routes": [
       "/boq",
       "/tendering",
@@ -2147,6 +2178,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Variations"
     ],
     "track": "Estimate and buy",
+    "country": "MX",
     "routes": [
       "/boq",
       "/variations",
@@ -2208,6 +2240,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "FR",
     "routes": [
       "/boq",
       "/tendering",
@@ -2270,6 +2303,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts"
     ],
     "track": "Contract and commercial control",
+    "country": "AE",
     "routes": [
       "/contracts"
     ]
@@ -2329,6 +2363,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "GB",
     "routes": [
       "/boq",
       "/tendering",
@@ -2393,6 +2428,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "IT",
     "routes": [
       "/boq",
       "/tendering",
@@ -2457,6 +2493,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "Contracts",
       "Variations"
     ],
+    "country": "ES",
     "routes": [
       "/boq",
       "/tendering",

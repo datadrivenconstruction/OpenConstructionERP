@@ -172,7 +172,7 @@ export function facetValues(item: AcademyItem, dim: FilterDimension): string[] {
     case 'access':
       return [item.access];
     case 'country':
-      return [item.market ?? UNIVERSAL];
+      return [item.country ?? item.market ?? UNIVERSAL];
     case 'topic':
       return item.topics;
     case 'track':
@@ -211,7 +211,7 @@ export function filterItems(
   const q = fold(filters.query.trim());
   const hits = items.filter((i) => visibleInMarket(i, reader) && matches(i, filters, null, q));
   const own = (i: AcademyItem) => (baseLanguage(i.contentLanguage) === baseLanguage(reader.language) ? 0 : 1);
-  const home = (i: AcademyItem) => (reader.market && i.market === reader.market ? 0 : 1);
+  const home = (i: AcademyItem) => (reader.market && (i.country ?? i.market) === reader.market ? 0 : 1);
   const indexed = hits.map((item, index) => ({ item, index }));
   const sort = filters.sort ?? 'recommended';
   if (sort === 'az') {
