@@ -17,6 +17,11 @@ import { ACADEMY_ITEMS } from './academyItems.generated';
 import type { AcademyItem } from './academyTypes';
 import {
   academyUrlFor,
+  DURATION_KEYS,
+  UNIVERSAL,
+  durationBucket,
+  facetCounts,
+  type ItemFilters,
   filterItems,
   itemsForScreen,
   paletteItems,
@@ -193,5 +198,69 @@ describe('palette rows', () => {
   it('find the BIM course by "clash"', () => {
     const hits = paletteItems('clash', { language: 'en', market: null }, 'en', ACADEMY_ITEMS);
     expect(hits.some((i) => i.id === 'course:ashbrook-bim-clash-detection')).toBe(true);
+  });
+});
+
+describe('hub filters', () => {
+  const none: ItemFilters = { kind: null, topic: null, track: null, route: null, query: '' };
+  const reader = { language: 'en', market: null, anyMarket: true };
+  const items = [
+    item({ id: 'a', title: 'Beta', durationMin: 60, access: 'paid', market: 'GB', topics: ['boq'] }),
+    item({ id: 'b', title: 'alpha', durationMin: 240, topics: ['boq', 'bim'] }),
+    item({ id: 'c', kind: 'article', title: 'Gamma', market: 'HR' }),
+    item({ id: 'd', title: 'Delta', durationMin: 300, contentLanguage: 'de' }),
+  ];
+  const ids = (f: object, r = reader) => filterItems({ ...none, ...f }, r, items).map((i) => i.id);
+
+  it('buckets durations at the thresholds', () => {
+    expect(DURATION_KEYS).toEqual(['short', 'medium', 'long']);
+    expect([durationBucket(150), durationBucket(180), durationBucket(181), durationBucket(240), durationBucket(241)]).toEqual([
+      'short',
+      'short',
+      'medium',
+      'medium',
+      'long',
+    ]);
+    expect(durationBucket(undefined)).toBeNull();
+  });
+
+  it('filters by access, country, universal and length', () => {
+    expect(ids({ access: 'paid' })).toEqual(['a']);
+    expect(ids({ country: 'HR' })).toEqual(['c']);
+    expect(ids({ country: UNIVERSAL })).toEqual(['b', 'd']);
+    expect(ids({ duration: 'medium' })).toEqual(['b']);
+    expect(ids({ duration: 'long', access: 'free' })).toEqual(['d']);
+  });
+
+  it('sorts shortest first with unlisted lengths last, and A to Z', () => {
+    expect(ids({ sort: 'shortest' })).toEqual(['a', 'b', 'd', 'c']);
+    expect(ids({ sort: 'az' })).toEqual(['b', 'a', 'd', 'c']);
+  });
+
+  it('recommended keeps the reader language first, then the reader market', () => {
+    expect(ids({}, { language: 'de', market: null, anyMarket: true })).toEqual(['d', 'a', 'b', 'c']);
+    expect(ids({}, { language: 'en', market: 'HR', anyMarket: true })).toEqual(['c', 'a', 'b', 'd']);
+  });
+
+  it('counts each chip with every other filter applied but its own', () => {
+    const counts = facetCounts('country', { ...none, access: 'free' }, reader, items);
+    expect(counts.get('HR')).toBe(1);
+    expect(counts.get('GB')).toBeUndefined();
+    expect(counts.get(UNIVERSAL)).toBe(2);
+    expect(facetCounts('kind', none, reader, items).get('guide')).toBe(1);
+  });
+});
+
+describe('course photos', () => {
+  it('ship one small file per course', () => {
+    let total = 0;
+    for (const i of ACADEMY_ITEMS.filter((x) => x.kind === 'course')) {
+      const file = resolve(ROOT, 'frontend/public/academy-courses', `${i.id.split(':')[1]}.webp`);
+      expect(existsSync(file), i.id).toBe(true);
+      const size = readFileSync(file).length;
+      expect(size).toBeLessThan(25_000);
+      total += size;
+    }
+    expect(total).toBeLessThan(450_000);
   });
 });

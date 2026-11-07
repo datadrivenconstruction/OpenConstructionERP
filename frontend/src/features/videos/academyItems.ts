@@ -130,32 +130,116 @@ export function allTracks(items: readonly AcademyItem[] = ITEMS): string[] {
   return [...new Set(items.map((i) => i.track).filter((t): t is string => Boolean(t)))].sort();
 }
 
+/** Length buckets in minutes; the data holds courses of 2.5 to 5 h and guides without a length. */
+export const DURATION_BUCKETS = {
+  short: { max: 180 },
+  medium: { min: 180, max: 240 },
+  long: { min: 240 },
+} as const;
+export type DurationBucket = keyof typeof DURATION_BUCKETS;
+export const DURATION_KEYS = Object.keys(DURATION_BUCKETS) as DurationBucket[];
+
+/** Country filter value for items that belong to no country. */
+export const UNIVERSAL = 'none';
+
+export type ItemSort = 'recommended' | 'shortest' | 'az';
+export type FilterDimension = 'kind' | 'access' | 'country' | 'topic' | 'track' | 'duration';
+
 export interface ItemFilters {
   kind: AcademyItemKind | 'guide' | null;
   topic: string | null;
   track: string | null;
   route: string | null;
   query: string;
+  access?: 'free' | 'paid' | null;
+  /** ISO market, or `UNIVERSAL` for items without one. */
+  country?: string | null;
+  duration?: DurationBucket | null;
+  sort?: ItemSort;
 }
 
-/** Hub sort: content in the reader's language first, then catalogue order, so free and paid interleave. */
+export function durationBucket(minutes: number | undefined): DurationBucket | null {
+  if (!minutes) return null;
+  if (minutes <= DURATION_BUCKETS.short.max) return 'short';
+  return minutes <= DURATION_BUCKETS.medium.max ? 'medium' : 'long';
+}
+
+/** The facet value of an item: what a chip of that dimension would select. */
+export function facetValues(item: AcademyItem, dim: FilterDimension): string[] {
+  switch (dim) {
+    case 'kind':
+      return [item.kind === 'article' ? 'guide' : item.kind];
+    case 'access':
+      return [item.access];
+    case 'country':
+      return [item.market ?? UNIVERSAL];
+    case 'topic':
+      return item.topics;
+    case 'track':
+      return item.track ? [item.track] : [];
+    case 'duration': {
+      const b = durationBucket(item.durationMin);
+      return b ? [b] : [];
+    }
+  }
+}
+
+function matches(i: AcademyItem, filters: ItemFilters, skip: FilterDimension | null, q: string): boolean {
+  const want: Record<FilterDimension, string | null | undefined> = {
+    kind: filters.kind,
+    access: filters.access,
+    country: filters.country,
+    topic: filters.topic,
+    track: filters.track,
+    duration: filters.duration,
+  };
+  for (const dim of Object.keys(want) as FilterDimension[]) {
+    if (dim === skip || !want[dim]) continue;
+    if (!facetValues(i, dim).includes(want[dim]!)) return false;
+  }
+  if (filters.route && !i.routes.includes(filters.route)) return false;
+  return !q || fold([i.title, ...itemTopics(i), i.track ?? ''].join(' ')).includes(q);
+}
+
+/** Filtered and sorted. The default order, "recommended", puts content in the reader's language
+ *  first, then the reader's own market, then catalogue order, so free and paid interleave. */
 export function filterItems(
   filters: ItemFilters,
   reader: ItemReader,
   items: readonly AcademyItem[] = ITEMS,
 ): AcademyItem[] {
   const q = fold(filters.query.trim());
-  const hits = items.filter((i) => {
-    if (!visibleInMarket(i, reader)) return false;
-    if (filters.kind && (filters.kind === 'guide' ? i.kind !== 'article' : i.kind !== filters.kind)) return false;
-    if (filters.topic && !i.topics.includes(filters.topic)) return false;
-    if (filters.track && i.track !== filters.track) return false;
-    if (filters.route && !i.routes.includes(filters.route)) return false;
-    if (q && !fold([i.title, ...itemTopics(i), i.track ?? ''].join(' ')).includes(q)) return false;
-    return true;
-  });
+  const hits = items.filter((i) => visibleInMarket(i, reader) && matches(i, filters, null, q));
   const own = (i: AcademyItem) => (baseLanguage(i.contentLanguage) === baseLanguage(reader.language) ? 0 : 1);
-  return hits.map((item, index) => ({ item, index })).sort((a, b) => own(a.item) - own(b.item) || a.index - b.index).map((x) => x.item);
+  const home = (i: AcademyItem) => (reader.market && i.market === reader.market ? 0 : 1);
+  const indexed = hits.map((item, index) => ({ item, index }));
+  const sort = filters.sort ?? 'recommended';
+  if (sort === 'az') {
+    const collator = new Intl.Collator(reader.language || 'en', { sensitivity: 'base', numeric: true });
+    indexed.sort((a, b) => collator.compare(a.item.title, b.item.title) || a.index - b.index);
+  } else if (sort === 'shortest') {
+    const len = (i: AcademyItem) => i.durationMin ?? Number.POSITIVE_INFINITY;
+    indexed.sort((a, b) => len(a.item) - len(b.item) || a.index - b.index);
+  } else {
+    indexed.sort((a, b) => own(a.item) - own(b.item) || home(a.item) - home(b.item) || a.index - b.index);
+  }
+  return indexed.map((x) => x.item);
+}
+
+/** How many items each chip of one dimension would show: every other filter applies, this one does not. */
+export function facetCounts(
+  dim: FilterDimension,
+  filters: ItemFilters,
+  reader: ItemReader,
+  items: readonly AcademyItem[] = ITEMS,
+): Map<string, number> {
+  const q = fold(filters.query.trim());
+  const counts = new Map<string, number>();
+  for (const i of items) {
+    if (!visibleInMarket(i, reader) || !matches(i, filters, dim, q)) continue;
+    for (const v of facetValues(i, dim)) counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /** Duration as "35 min" or "4.5 h" in the reader's number format. */

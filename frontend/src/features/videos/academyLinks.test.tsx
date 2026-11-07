@@ -14,7 +14,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
-      const template = typeof opts?.defaultValue === 'string' ? opts.defaultValue : key;
+      const counted = opts?.count === 1 ? opts.defaultValue_one : opts?.defaultValue_other;
+      const template = typeof opts?.defaultValue === 'string' ? opts.defaultValue : typeof counted === 'string' ? counted : key;
       return template.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(opts?.[name] ?? ''));
     },
     i18n: { language: 'en', changeLanguage: vi.fn() },
@@ -203,13 +204,25 @@ describe('the hub page', () => {
     expect(screen.getAllByTestId('academy-item-card').length).toBeGreaterThan(20);
   });
 
-  it('never shows another country its checklist, and shows it to its own', () => {
+  it('lists a country item for every reader, flagged with its country', () => {
     renderAt('/courses', <CoursesPage />);
-    expect(screen.queryByText(ACADEMY_ITEMS.find((i) => i.market === 'HR')!.title)).toBeNull();
-    cleanup();
-    useVideosStore.setState({ market: 'HR' });
-    renderAt('/courses', <CoursesPage />);
-    expect(screen.getByText(ACADEMY_ITEMS.find((i) => i.market === 'HR')!.title)).toBeTruthy();
+    const hr = ACADEMY_ITEMS.find((i) => i.market === 'HR')!;
+    expect(screen.getByText(hr.title)).toBeTruthy();
+    expect(screen.getAllByTestId('academy-item-country').length).toBe(ACADEMY_ITEMS.filter((i) => i.market).length);
+  });
+
+  it('narrows by country, shows the count and removes the filter again', () => {
+    renderAt('/courses?country=HR&sort=az', <CoursesPage />);
+    const hrCount = ACADEMY_ITEMS.filter((i) => i.market === 'HR').length;
+    expect(screen.getAllByTestId('academy-item-card').length).toBe(hrCount);
+    expect(screen.getByTestId('courses-count').textContent).toContain(String(hrCount));
+    fireEvent.click(screen.getByLabelText(/Remove filter/));
+    expect(screen.getAllByTestId('academy-item-card').length).toBe(ACADEMY_ITEMS.length);
+  });
+
+  it('draws no flag on a universal item', () => {
+    renderAt('/courses?country=none', <CoursesPage />);
+    expect(screen.queryAllByTestId('academy-item-country')).toHaveLength(0);
   });
 });
 
