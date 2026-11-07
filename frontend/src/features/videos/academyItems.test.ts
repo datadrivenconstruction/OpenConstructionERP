@@ -22,6 +22,7 @@ import {
   durationBucket,
   facetCounts,
   type ItemFilters,
+  type ItemReader,
   filterItems,
   itemsForScreen,
   paletteItems,
@@ -203,7 +204,7 @@ describe('palette rows', () => {
 
 describe('hub filters', () => {
   const none: ItemFilters = { kind: null, topic: null, track: null, route: null, query: '' };
-  const reader = { language: 'en', market: null, anyMarket: true };
+  const reader: ItemReader = { language: 'en', market: null, anyMarket: true };
   const items = [
     item({ id: 'a', title: 'Beta', durationMin: 60, access: 'paid', market: 'GB', topics: ['boq'] }),
     item({ id: 'b', title: 'alpha', durationMin: 240, topics: ['boq', 'bim'] }),
