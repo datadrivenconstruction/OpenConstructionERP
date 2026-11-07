@@ -91,7 +91,7 @@ implementation is our own.
   [#367](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/367),
   [#368](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/368)).
 - **Aidan Koetaan** ([@aidankoetaan-tech](https://github.com/aidankoetaan-tech),
-  akoetaan@cut.ac.za): proposed a South Africa construction pack and shared a reference
+  aidan.koetaan@gmail.com): proposed a South Africa construction pack and shared a reference
   implementation covering SANS 1200 and ASAQS measurement, CIDB contractor grading, the
   PPPFA 80/20 and 90/10 procurement scoring, infrastructure delivery gates and ZAR VAT. The
   shipped South Africa pack is our own implementation, written from the public standards.
