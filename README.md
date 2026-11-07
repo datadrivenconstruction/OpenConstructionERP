@@ -126,9 +126,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 
 ## Video guides
 
-Short, practical videos, most of them from the [OpenConstruction Academy](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q) YouTube channel. Each one follows a real task in the app, from installing it to getting paid. Videos marked DE are in German, the rest are in English.
-
-**Start here, estimating and BOQ**
+**108 videos in 16 playlists**, each following a real project in one country, in its language, with its own contracts, standards and payment rules. [Browse the channel](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q/videos) or take a [free or paid course](https://openconstructionacademy.com/courses/) at the OpenConstruction Academy.
 
 <table>
 <tr>
@@ -137,71 +135,25 @@ Short, practical videos, most of them from the [OpenConstruction Academy](https:
 <td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=zGgfX19b3gc"><img src="https://i.ytimg.com/vi/zGgfX19b3gc/hqdefault.jpg" alt="Build an estimate step by step" width="100%"></a><br/><sub><b>Build an estimate step by step</b> · 4:48</sub></td>
 <td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=FRI5_7CsZT0"><img src="https://i.ytimg.com/vi/FRI5_7CsZT0/hqdefault.jpg" alt="Overhead, profit and contingency" width="100%"></a><br/><sub><b>Overhead, profit and contingency</b> · 3:54</sub></td>
 </tr>
-<tr>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=LejLQ4skfvM"><img src="https://i.ytimg.com/vi/LejLQ4skfvM/hqdefault.jpg" alt="Price a construction job" width="100%"></a><br/><sub><b>Price a construction job</b> · 4:49</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=tZEdPehNE6Q"><img src="https://i.ytimg.com/vi/tZEdPehNE6Q/hqdefault.jpg" alt="Ein Leistungsverzeichnis aufbauen" width="100%"></a><br/><sub><b>Ein Leistungsverzeichnis aufbauen</b> · 5:02 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=OJ1FMzwY3FM"><img src="https://i.ytimg.com/vi/OJ1FMzwY3FM/hqdefault.jpg" alt="Vom vollständigen LV zur Kostenbasis" width="100%"></a><br/><sub><b>Vom vollständigen LV zur Kostenbasis</b> · 10:15 · DE</sub></td>
-<td width="25%" align="center" valign="middle"><a href="https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q/videos"><img src="https://img.shields.io/badge/More_videos-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="More videos"></a><br/><sub>All guides on the OpenConstruction Academy channel</sub></td>
-</tr>
 </table>
 
-**Cost databases, quantities and schedule**
+<details>
+<summary><b>All playlists by country and language</b></summary>
 
-<table>
-<tr>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=kEN-F92hNZc"><img src="https://i.ytimg.com/vi/kEN-F92hNZc/hqdefault.jpg" alt="Check a unit rate in the cost database" width="100%"></a><br/><sub><b>Check a unit rate in the cost database</b> · 4:02</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=qFGKRIXHM8w"><img src="https://i.ytimg.com/vi/qFGKRIXHM8w/hqdefault.jpg" alt="Einheitspreise und Kosten nachvollziehen" width="100%"></a><br/><sub><b>Einheitspreise und Kosten nachvollziehen</b> · 6:36 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=uBhNqXw2dm0"><img src="https://i.ytimg.com/vi/uBhNqXw2dm0/hqdefault.jpg" alt="Kostenquellen und Ressourcen anpassen" width="100%"></a><br/><sub><b>Kostenquellen und Ressourcen anpassen</b> · 7:35 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=YEk8F3W28po"><img src="https://i.ytimg.com/vi/YEk8F3W28po/hqdefault.jpg" alt="Mengen aus PDF und DWG ermitteln" width="100%"></a><br/><sub><b>Mengen aus PDF und DWG ermitteln</b> · 5:55 · DE</sub></td>
-</tr>
-<tr>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=KI6e3s7XScY"><img src="https://i.ytimg.com/vi/KI6e3s7XScY/hqdefault.jpg" alt="BIM-Modelle verstehen und nutzen" width="100%"></a><br/><sub><b>BIM-Modelle verstehen und nutzen</b> · 5:41 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=bGUpude30wc"><img src="https://i.ytimg.com/vi/bGUpude30wc/hqdefault.jpg" alt="Abhängigkeiten und Ressourceneinsatz planen" width="100%"></a><br/><sub><b>Abhängigkeiten und Ressourceneinsatz planen</b> · 4:31 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=fKGh2e6pJqc"><img src="https://i.ytimg.com/vi/fKGh2e6pJqc/hqdefault.jpg" alt="Schedule to substantial performance" width="100%"></a><br/><sub><b>Schedule to substantial performance</b> · 4:49</sub></td>
-<td width="25%" align="center" valign="middle"><a href="https://www.youtube.com/watch?v=IM9hK6kCZCs"><img src="https://img.shields.io/badge/German_series-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="German series"></a><br/><sub>The Landshut learning project from start to finish · DE</sub></td>
-</tr>
-</table>
+| | |
+|---|---|
+| 🇺🇸 [Builder's Playbook USA](https://www.youtube.com/playlist?list=PLWgzwe9nHkSc) (10) | 🇬🇧 [Builder's Playbook UK](https://www.youtube.com/playlist?list=PLTRtkYLR23qM) (6) |
+| 🇨🇦 [Builder's Playbook Canada](https://www.youtube.com/playlist?list=PLPZV4i5ViBm8) (6) | ⚜️ [Builder's Playbook Québec](https://www.youtube.com/playlist?list=PLey59QidNON0) (5) |
+| 🇩🇪 [Auf Deutsch, Projekt Landshut](https://www.youtube.com/playlist?list=PLKN9p-CuMMkE) (12) | 🇩🇪 [Kosten nach DIN 276](https://www.youtube.com/playlist?list=PLEvGjPeBbuxQ) (8) |
+| 🇫🇷 [En français, gérer un chantier](https://www.youtube.com/playlist?list=PLEhAODe5YAXM) (4) | 🇪🇸 [Builder's Playbook España](https://www.youtube.com/playlist?list=PLHgtnDPr3Rjg) (8) |
+| 🇮🇹 [Builder's Playbook Italia](https://www.youtube.com/playlist?list=PLObqqyP8chDs) (7) | 🇧🇬 [Builder's Playbook България](https://www.youtube.com/playlist?list=PLfSvz7emI6lQ) (9) |
+| 🇭🇷 [Builder's Playbook Hrvatska](https://www.youtube.com/playlist?list=PLP4TpwP1yVyI) (5) | 🇵🇱 [Budowa domu: kosztorys i rozliczenie](https://www.youtube.com/playlist?list=PLVLOe3pv2_oo) (5) |
+| 🇹🇷 [Okul ek binası: maliyetten kesin hesaba](https://www.youtube.com/playlist?list=PLL2jqtV6A934) (5) | 🇸🇦 [عظم فيلا في الرياض](https://www.youtube.com/playlist?list=PLO8UfCu9nokM) (5) |
+| 🇧🇷 [Builder's Playbook Brasil](https://www.youtube.com/playlist?list=PLLe-gfSauXTY) (5) | 🇨🇳 [Builder's Playbook 中国](https://www.youtube.com/playlist?list=PLOCZ6EOWyC_A) (8) |
 
-**Tendering, procurement, finance and contracts**
+Also: [The uberization of construction (ETH Zürich)](https://www.youtube.com/watch?v=R_PQQHXY-rQ), a 14-minute talk on where construction software is heading.
 
-<table>
-<tr>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=7u7Ur3ZFe94"><img src="https://i.ytimg.com/vi/7u7Ur3ZFe94/hqdefault.jpg" alt="Tender work to subcontractors" width="100%"></a><br/><sub><b>Tender work to subcontractors</b> · 4:23</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=T3FBggAeFJ4"><img src="https://i.ytimg.com/vi/T3FBggAeFJ4/hqdefault.jpg" alt="GAEB-Dateien kontrolliert austauschen" width="100%"></a><br/><sub><b>GAEB-Dateien kontrolliert austauschen</b> · 5:34 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=75sjLEjXiBc"><img src="https://i.ytimg.com/vi/75sjLEjXiBc/hqdefault.jpg" alt="Angebote prüfen und Vergabe vorbereiten" width="100%"></a><br/><sub><b>Angebote prüfen und Vergabe vorbereiten</b> · 3:04 · DE</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=G0a5pEiXaS4"><img src="https://i.ytimg.com/vi/G0a5pEiXaS4/hqdefault.jpg" alt="Material und Teillieferung verfolgen" width="100%"></a><br/><sub><b>Material und Teillieferung verfolgen</b> · 7:01 · DE</sub></td>
-</tr>
-<tr>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=b-qv_emcDwc"><img src="https://i.ytimg.com/vi/b-qv_emcDwc/hqdefault.jpg" alt="Monthly progress draw (CCDC 2)" width="100%"></a><br/><sub><b>Monthly progress draw (CCDC 2)</b> · 4:58</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=aQlkuS7ShCM"><img src="https://i.ytimg.com/vi/aQlkuS7ShCM/hqdefault.jpg" alt="The construction payment clock" width="100%"></a><br/><sub><b>The construction payment clock</b> · 4:35</sub></td>
-<td width="25%" valign="top"><a href="https://www.youtube.com/watch?v=tj7McUl37X0"><img src="https://i.ytimg.com/vi/tj7McUl37X0/hqdefault.jpg" alt="Manage change orders" width="100%"></a><br/><sub><b>Manage change orders</b> · 4:45</sub></td>
-<td width="25%" align="center" valign="middle"><a href="https://www.youtube.com/watch?v=CMuMMej0zwM"><img src="https://img.shields.io/badge/French_series-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="French series"></a><br/><sub>Québec: estimating, BSDQ tenders, billing and handover · FR</sub></td>
-</tr>
-</table>
-
-**Playlists by country and language**
-
-Each series follows one construction project in one country, in that country's language, with its own contracts, standards and payment rules.
-
-| | Series | Language | Videos | What it covers |
-|:-:|---|---|:-:|---|
-| 🇺🇸 | [Builder's Playbook USA](https://www.youtube.com/playlist?list=PLWgzwe9nHkSc) | English | 10 | Install, estimate, bid leveling, budget vs actual, schedule, subcontractors, site log, KPIs |
-| 🇬🇧 | [Builder's Playbook UK](https://www.youtube.com/playlist?list=PLTRtkYLR23qM) | English | 6 | NRM 2 tender, subcontractor bids, JCT interim payments, pay less notice, CIS and VAT reverse charge, variations |
-| 🇨🇦 | [Builder's Playbook Canada](https://www.youtube.com/playlist?list=PLPZV4i5ViBm8) | English | 6 | Pricing, tendering, CCDC 2 progress draw, prompt payment, change orders, substantial performance |
-| ⚜️ | [Builder's Playbook Québec](https://www.youtube.com/playlist?list=PLey59QidNON0) | Français, English | 5 | Getting started, estimating, BSDQ bids, billing and legal hypothec, handover |
-| 🇫🇷 | [OpenConstructionERP en français, gérer un chantier](https://www.youtube.com/playlist?list=PLEhAODe5YAXM) | Français | 4 | Budget, purchasing and stock, site hours and equipment, invoice and payment |
-| 🇩🇪 | [OpenConstructionERP auf Deutsch, Projekt Landshut](https://www.youtube.com/playlist?list=PLKN9p-CuMMkE) | Deutsch | 12 | Projektstart, Planmanagement, Mengen, BIM, LV, Einheitspreise, GAEB, Vergabe, Bauablauf, Material, Kostenbasis |
-| 🇩🇪 | [Kosten nach DIN 276](https://www.youtube.com/playlist?list=PLEvGjPeBbuxQ) | Deutsch | 8 | Kostenrahmen, Kostenschätzung, Kostenberechnung, LV und GAEB, Vergabe, Baustart, Nachträge, Abnahme und Schlussrechnung |
-| 🇪🇸 | [Builder's Playbook España](https://www.youtube.com/playlist?list=PLHgtnDPr3Rjg) | Español | 8 | Certificaciones, oferta desde BC3, comparativo, precios contradictorios, cierre mensual, recepción, retención, partes de obra |
-| 🇮🇹 | [Builder's Playbook Italia](https://www.youtube.com/playlist?list=PLObqqyP8chDs) | Italiano | 7 | Computo metrico, ribasso, subappalto, giornale di cantiere, SAL, conto finale, collaudo |
-| 🇧🇬 | [Builder's Playbook България](https://www.youtube.com/playlist?list=PLfSvz7emI6lQ) | Български | 9 | Акт 19, КСС, анализ на цена, договор и график, подизпълнители, заменителна таблица, окончателен акт, паричен поток, дневник |
-| 🇭🇷 | [Builder's Playbook Hrvatska](https://www.youtube.com/playlist?list=PLP4TpwP1yVyI) | Hrvatski | 5 | Ugovoreni troškovnik, ulazni računi, podizvođači, privremena situacija, višak radova |
-| 🇨🇳 | [Builder's Playbook 中国](https://www.youtube.com/playlist?list=PLOCZ6EOWyC_A) | 中文 | 8 | 工程量清单报价, 预付款, 暂估价招标, 进度款, 签证变更, 材料调差, 成本核算, 结算审计 |
-
-Also on the channel: [The uberization of construction (ETH Zürich)](https://www.youtube.com/watch?v=R_PQQHXY-rQ) (14:22), a talk on where construction software is heading.
-
-**[Browse every video on the OpenConstruction Academy channel](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q/videos)**
-
+</details>
 
 ---
 
