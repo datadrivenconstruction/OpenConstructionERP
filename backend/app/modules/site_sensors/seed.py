@@ -1,12 +1,15 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site sensors demo​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: a slab pour with three maturity sensors, noise and dust on the fence.
-
-The core sensor of the pour reaches the strike strength and releases its
-formwork strike; the two edge sensors run colder and have not. The noise
-sensor carries one unacknowledged exceedance. Readings go through the service,
-so the alerts, the released strike and the notifications are the real ones.
-Idempotent on the device code ``CM-01`` per project.
+"""Site sensors demo​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: two weeks of readings, alerts and formwork strikes on a site.
+The module looks lived in for two weeks on every showcase project: three
+concrete pours (one struck, one past its strike strength, one approaching),
+noise, dust, vibration, wind and water-level sensors on the boundary, a few
+limit breaches with acknowledged alerts and one still open, and one vibration
+sensor that has gone silent. Limits come from the project's country through the
+service; wind and water-level limits are set on the device. Readings go through
+the service, so the alerts, the released strikes and the notifications are the
+real ones. Fixed random seed per project, readings capped at about two thousand
+per project, idempotent on the device code ``WX-01`` per project.
 """
 
 from __future__ import annotations
@@ -15,64 +18,261 @@ import math
 import random
 import uuid
 from collections.abc import Iterable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.site_sensors.models import ConcreteMix, SensorDevice
+from app.modules.site_sensors.maturity import nurse_saul, strength_from_maturity
+from app.modules.site_sensors.models import (
+    ConcreteMix,
+    FormworkStrip,
+    SensorAlert,
+    SensorDevice,
+    sensor_reading,
+    sensor_reading_hourly,
+)
 from app.modules.site_sensors.schemas import DeviceCreate, StripCreate
 from app.modules.site_sensors.service import SiteSensorsService
 
+#: Projects seeded per call; the demo shows a handful, not every imported pack.
+_MAX_PROJECTS = 6
+#: Marker of the current seed. Projects that only hold the earlier, smaller seed are replaced.
+_MARKER = "WX-01"
+_LEGACY_CODES = ("CM-01", "CM-02", "CM-03", "NS-01", "PM-01")
+_DAYS = 14
 # Calibrated on the demo mix: 15 MPa at about 1 400 degC-h, 25 MPa at about 5 000 degC-h.
 _MIX = {"code": "C30/37-CEM II", "name": "C30/37 slab mix", "curve_a": "-43.1", "curve_b": "18.4", "strip": "15"}
-# (code, name, mean temperature, swing)
-_POUR = (
-    ("CM-01", "Slab L03 core", 21.0, 3.0),
-    ("CM-02", "Slab L03 north edge", 8.0, 3.0),
-    ("CM-03", "Slab L03 east edge", 7.0, 3.5),
+_DATUM_C = -10.0
+_IMPERIAL = {"US"}
+_M_TO_FT = 3.28084
+_MS_TO_MPH = 2.23694
+#: Used where the country data holds no figure for the kind.
+_FALLBACK_LIMIT = {"noise": "70", "dust_pm10": "50", "vibration": "5"}
+_WIND_LIMIT_MS = 15.0
+_WATER_LIMIT_M = 1.8
+
+
+@dataclass(frozen=True)
+class Spike:
+    """A limit breach: ``days_ago`` at ``hour`` UTC, ``peak`` times the limit, lasting ``hours``."""
+
+    days_ago: int
+    hour: int
+    peak: float
+    hours: int
+    note: str | None  # None leaves the alert open
+
+
+@dataclass(frozen=True)
+class Pour:
+    code: str
+    name: str
+    pour_ref: str
+    cast_hours_ago: int
+    mean_c: float
+    swing_c: float
+    #: (element, target MPa, hours after reaching it that the strike was done, None = not struck, "ahead" = planned)
+    strips: tuple[tuple[str, str, int | None], ...]
+
+
+_POURS = (
+    Pour(
+        "CM-01",
+        "Wall W2 core",
+        "Wall W2, level 02",
+        13 * 24,
+        16.0,
+        3.0,
+        (("Wall W2 side forms", "15", 20), ("Wall W2 props", "25", None)),
+    ),
+    Pour("CM-02", "Slab L03 core", "Slab L03 pour 2", 5 * 24, 19.0, 3.0, (("Slab L03 pour 2 soffit", "15", None),)),
+    Pour("CM-03", "Slab L04 core", "Slab L04 pour 1", 46, 13.0, 3.5, (("Slab L04 pour 1 soffit", "15", None),)),
 )
 
+#: (code, name, kind, step hours, spikes). The only open breach is the latest one on NS-01.
+_ENV = (
+    (
+        "NS-01",
+        "Noise, north fence",
+        "noise",
+        1,
+        (
+            Spike(8, 10, 1.12, 2, "Saw cutting moved behind the acoustic screen, foreman briefed."),
+            Spike(1, 10, 1.09, 1, None),
+        ),
+    ),
+    (
+        "PM-01",
+        "Dust PM10, north fence",
+        "dust_pm10",
+        1,
+        (Spike(4, 14, 1.35, 3, "Water bowser on the haul road, dust screen repaired."),),
+    ),
+    (
+        "VB-01",
+        "Vibration, party wall",
+        "vibration",
+        2,
+        (Spike(10, 11, 1.18, 2, "Vibro piling stopped, switched to pressed piles."),),
+    ),
+    ("VB-02", "Vibration, east boundary", "vibration", 2, ()),
+    (
+        "WX-01",
+        "Wind, crane tower",
+        "weather",
+        1,
+        (Spike(6, 15, 1.08, 2, "Crane stood down until the gusts passed."),),
+    ),
+    (
+        "WL-01",
+        "Water level, excavation sump",
+        "water_level",
+        3,
+        (Spike(2, 3, 1.15, 6, "Second pump started, level back under the limit."),),
+    ),
+)
+#: This sensor stopped reporting this many hours ago.
+_SILENT = {"VB-02": 9}
 
-async def _first_activity(session: AsyncSession, project_id: uuid.UUID) -> uuid.UUID | None:
+
+def _clamp(v: float, hi: float) -> float:
+    return min(v, hi)
+
+
+def env_series(
+    kind: str,
+    now: datetime,
+    step_h: int,
+    lim_by_hour: dict[int, float],
+    spikes: Iterable[Spike],
+    rng: random.Random,
+    stop_hours_ago: int = 0,
+) -> list[tuple[datetime, float]]:
+    """Readings of one boundary sensor over ``_DAYS`` days on a grid ending at ``now``.
+
+    Values are fractions of the limit in force at that hour, with a working-day
+    cycle, quieter weekends and a few spikes. Pure: same inputs, same rows.
+    """
+    spikes = list(spikes)
+    rows: list[tuple[datetime, float]] = []
+    t = now - timedelta(days=_DAYS)
+    end = now - timedelta(hours=stop_hours_ago)
+    while t <= end:
+        lim = lim_by_hour[t.hour]
+        working = 7 <= t.hour < 19 and t.weekday() < 5
+        half = 7 <= t.hour < 15 and t.weekday() == 5
+        wave = math.sin((t.hour - 6) / 12 * math.pi) if 6 <= t.hour <= 18 else 0.0
+        if kind == "noise":
+            v = lim * ((0.78 + 0.08 * wave) if working else (0.66 if half else 0.5)) + rng.uniform(-0.05, 0.05) * lim
+            v = _clamp(v, lim * 0.93)
+        elif kind == "dust_pm10":
+            v = lim * ((0.40 + 0.12 * wave + rng.uniform(0, 0.2)) if working else 0.18 + rng.uniform(0, 0.05))
+            v = _clamp(v, lim * 0.9)
+        elif kind == "vibration":
+            quiet = lim * (0.02 + rng.uniform(0, 0.01))
+            v = lim * rng.uniform(0.05, 0.2) if working else quiet
+            if working and rng.random() < 0.05:
+                v = lim * rng.uniform(0.3, 0.5)
+            v = _clamp(v, lim * 0.6)
+        elif kind == "weather":
+            ms = 4.0 + 2.5 * math.sin((t.hour - 9) / 24 * 2 * math.pi) + rng.uniform(-1.2, 1.8)
+            v = _clamp(max(ms, 0.3) * lim / _WIND_LIMIT_MS, lim * 0.8)
+        else:  # water_level: a sump that fills and is pumped down
+            v = lim * (0.3 + 0.25 * ((t.hour // step_h) % 4) / 3 + rng.uniform(-0.02, 0.02))
+        rows.append((t, v))
+        t += timedelta(hours=step_h)
+    by_t = dict(rows)
+    for sp in spikes:
+        start = (now - timedelta(days=sp.days_ago)).replace(hour=sp.hour, minute=0, second=0, microsecond=0)
+        for j in range(max(sp.hours, step_h)):
+            tt = start + timedelta(hours=j)
+            if tt in by_t:
+                by_t[tt] = lim_by_hour[tt.hour] * sp.peak * (1 - 0.04 * j)
+    return [(t, round(by_t[t], 2)) for t, _ in rows]
+
+
+def pour_series(pour: Pour, now: datetime, rng: random.Random) -> list[tuple[datetime, float]]:
+    """Hourly core temperature of a pour: the heat of hydration on day one, then the daily swing."""
+    cast_at = now - timedelta(hours=pour.cast_hours_ago)
+    rows = []
+    t = cast_at
+    while t <= now:
+        h = (t - cast_at).total_seconds() / 3600
+        hydration = 6.0 * math.exp(-((h - 18) ** 2) / 200)
+        rows.append(
+            (
+                t,
+                round(
+                    pour.mean_c + hydration + pour.swing_c * math.sin(h / 24 * 2 * math.pi) + rng.uniform(-0.3, 0.3), 2
+                ),
+            )
+        )
+        t += timedelta(hours=1)
+    return rows
+
+
+def reached_at(rows: list[tuple[datetime, float]], target_mpa: float) -> datetime | None:
+    """First reading at which the demo mix curve gives ``target_mpa``."""
+    for t, m in nurse_saul(rows, _DATUM_C):
+        if strength_from_maturity(m, float(_MIX["curve_a"]), float(_MIX["curve_b"])) >= target_mpa:
+            return t
+    return None
+
+
+async def _activities(session: AsyncSession, project_id: uuid.UUID, n: int) -> list[uuid.UUID]:
     try:
         from app.modules.schedule.models import Activity, Schedule
 
-        row = (
+        rows = (
             await session.execute(
                 select(Activity.id)
                 .join(Schedule, Activity.schedule_id == Schedule.id)
                 .where(Schedule.project_id == project_id)
-                .limit(1)
+                .order_by(Activity.id)
+                .limit(n)
             )
-        ).first()
-        return row[0] if row else None
+        ).all()
+        return [r[0] for r in rows]
     except Exception:
-        return None
+        return []
 
 
-async def seed_site_sensors_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> dict[str, int]:
-    """Seed the pour and the environment sensors on the first of ``project_ids``. The caller commits."""
-    counts = {"devices": 0, "readings": 0, "alerts": 0}
-    ids = list(project_ids)
-    if not ids:
-        return counts
-    project_id = ids[0]
-    exists = await session.execute(
-        select(SensorDevice.id).where(SensorDevice.project_id == project_id, SensorDevice.code == "CM-01")
+async def _purge_legacy(session: AsyncSession, project_id: uuid.UUID) -> None:
+    ids = list((await session.execute(select(SensorDevice.id).where(SensorDevice.project_id == project_id))).scalars())
+    if ids:
+        for table in (sensor_reading, sensor_reading_hourly):
+            await session.execute(delete(table).where(table.c.device_id.in_(ids)))
+    await session.execute(delete(SensorAlert).where(SensorAlert.project_id == project_id))
+    await session.execute(delete(FormworkStrip).where(FormworkStrip.project_id == project_id))
+    await session.execute(delete(SensorDevice).where(SensorDevice.project_id == project_id))
+    await session.execute(
+        delete(ConcreteMix).where(ConcreteMix.project_id == project_id, ConcreteMix.code == _MIX["code"])
     )
-    if exists.first() is not None:
-        return counts
-    service = SiteSensorsService(session)
-    rng = random.Random(1074)
-    now = datetime.now(UTC).replace(second=0, microsecond=0)
-    cast_at = now - timedelta(hours=62)
+    await session.flush()
+
+
+async def _settle(alert: SensorAlert, service: SiteSensorsService, user: uuid.UUID, note: str, after_h: float) -> None:
+    await service.acknowledge(alert.id, user, note)
+    alert.acknowledged_at = alert.raised_at + timedelta(hours=after_h)
+
+
+async def _seed_pours(
+    session: AsyncSession,
+    service: SiteSensorsService,
+    project_id: uuid.UUID,
+    user: uuid.UUID,
+    now: datetime,
+    rng: random.Random,
+    counts: dict[str, int],
+) -> None:
     mix = ConcreteMix(
         project_id=project_id,
         code=_MIX["code"],
         name=_MIX["name"],
-        datum_temp_c=Decimal("-10"),
+        datum_temp_c=Decimal(str(int(_DATUM_C))),
         curve_a=Decimal(_MIX["curve_a"]),
         curve_b=Decimal(_MIX["curve_b"]),
         strip_strength_mpa=Decimal(_MIX["strip"]),
@@ -80,57 +280,165 @@ async def seed_site_sensors_demo(session: AsyncSession, project_ids: Iterable[uu
     )
     session.add(mix)
     await session.flush()
-    activity_id = await _first_activity(session, project_id)
+    activities = await _activities(session, project_id, len(_POURS))
+    for i, pour in enumerate(_POURS):
+        cast_at = now - timedelta(hours=pour.cast_hours_ago)
+        activity_id = activities[i % len(activities)] if activities else None
+        device = await service.create_device(
+            DeviceCreate(
+                project_id=project_id,
+                code=pour.code,
+                name=pour.name,
+                kind="concrete_maturity",
+                mix_id=mix.id,
+                pour_ref=pour.pour_ref,
+                cast_at=cast_at,
+                schedule_activity_id=activity_id,
+                offline_after_minutes=180,
+            )
+        )
+        strips = []
+        for element, target, _ in pour.strips:
+            planned = cast_at + timedelta(hours=72 if target == "15" else 7 * 24)
+            strips.append(
+                await service.create_strip(
+                    StripCreate(
+                        device_id=device.id,
+                        element=element,
+                        target_strength_mpa=Decimal(target),
+                        planned_at=planned,
+                        schedule_activity_id=activity_id,
+                    )
+                )
+            )
+        rows = pour_series(pour, now, rng)
+        await service.ingest(device, rows)
+        counts["devices"] += 1
+        counts["readings"] += len(rows)
+        for strip, (_, target, struck_after) in zip(strips, pour.strips, strict=True):
+            at = reached_at(rows, float(target))
+            if at is None or strip.status != "released":
+                continue
+            strip.released_at = at
+            if struck_after is not None:
+                await service.strike(strip.id, at + timedelta(hours=struck_after))
+        alert = await service.repo.any_alert(device.id, "strength_reached")
+        at15 = reached_at(rows, 15.0)
+        if alert is not None and at15 is not None:
+            alert.raised_at = at15
+            if pour.code == "CM-01":
+                await _settle(alert, service, user, "Side forms struck; props stay until 25 MPa.", 3.0)
+    await session.flush()
 
-    for code, name, mean, swing in _POUR:
+
+async def _seed_environment(
+    session: AsyncSession,
+    service: SiteSensorsService,
+    project_id: uuid.UUID,
+    country: str,
+    user: uuid.UUID,
+    now: datetime,
+    rng: random.Random,
+    counts: dict[str, int],
+) -> None:
+    imperial = country in _IMPERIAL
+    for code, name, kind, step_h, spikes in _ENV:
+        factor = 1.0
+        limit_value: Decimal | None = None
+        unit = ""
+        if kind == "weather":
+            factor = _MS_TO_MPH if imperial else 1.0
+            unit = "mph" if imperial else "m/s"
+            limit_value = Decimal(str(round(_WIND_LIMIT_MS * factor, 1)))
+        elif kind == "water_level":
+            factor = _M_TO_FT if imperial else 1.0
+            unit = "ft" if imperial else "m"
+            limit_value = Decimal(str(round(_WATER_LIMIT_M * factor, 2)))
         device = await service.create_device(
             DeviceCreate(
                 project_id=project_id,
                 code=code,
                 name=name,
-                kind="concrete_maturity",
-                mix_id=mix.id,
-                pour_ref="Slab L03 pour 2",
-                cast_at=cast_at,
-                schedule_activity_id=activity_id,
-                offline_after_minutes=120,
+                kind=kind,
+                unit=unit,
+                limit_value=limit_value,
+                offline_after_minutes=120 if step_h < 3 else 240,
             )
         )
-        await service.create_strip(StripCreate(device_id=device.id, element=f"Slab L03 pour 2 ({name})"))
-        rows = []
-        t = cast_at
-        while t <= now:
-            hours = (t - cast_at).total_seconds() / 3600
-            hydration = 6.0 * math.exp(-((hours - 18) ** 2) / 200)  # heat of hydration on the first day
-            rows.append((t, mean + hydration + swing * math.sin(hours / 24 * 2 * math.pi) + rng.uniform(-0.3, 0.3)))
-            t += timedelta(minutes=30)
-        await service.ingest(device, rows)
+        if limit_value is None and (await service.limit_of(device, now))[0] is None:
+            device.limit_value = Decimal(_FALLBACK_LIMIT[kind])
+            await session.flush()
+        lim_by_hour = {}
+        for h in range(24):
+            lim, _ = await service.limit_of(device, now.replace(hour=h, minute=0))
+            lim_by_hour[h] = float(lim or 0.0)
+        rows = env_series(kind, now, step_h, lim_by_hour, spikes, rng, _SILENT.get(code, 0))
+        # One chunk per breach so an acknowledged alert is closed before the next episode raises its own.
+        cut = 0
+        for sp in spikes:
+            start = (now - timedelta(days=sp.days_ago)).replace(hour=sp.hour, minute=0, second=0, microsecond=0)
+            end_idx = max(
+                (
+                    i
+                    for i, (t, v) in enumerate(rows)
+                    if start <= t < start + timedelta(hours=max(sp.hours, step_h)) and v > lim_by_hour[t.hour]
+                ),
+                default=None,
+            )
+            if end_idx is None:
+                continue
+            chunk = rows[cut : end_idx + 1]
+            if chunk:
+                await service.ingest(device, chunk)
+            cut = end_idx + 1
+            if sp.note is not None:
+                alert = await service.repo.open_alert(device.id, "exceedance")
+                if alert is not None:
+                    await _settle(alert, service, user, sp.note, 1.5 + rng.uniform(0, 3))
+        rest = rows[cut:]
+        if rest:
+            await service.ingest(device, rest)
         counts["devices"] += 1
         counts["readings"] += len(rows)
+        if code in _SILENT:
+            await service.sweep_offline(project_id, now)
+            offline = await service.repo.open_alert(device.id, "offline")
+            if offline is not None and device.last_seen_at is not None:
+                offline.raised_at = device.last_seen_at + timedelta(minutes=device.offline_after_minutes)
 
-    for code, name, kind, base, spread in (
-        ("NS-01", "Noise, north fence", "noise", 62.0, 4.0),
-        ("PM-01", "Dust PM10, north fence", "dust_pm10", 22.0, 8.0),
-    ):
-        device = await service.create_device(
-            DeviceCreate(project_id=project_id, code=code, name=name, kind=kind, offline_after_minutes=120)
+
+async def seed_site_sensors_demo(
+    session: AsyncSession, project_ids: Iterable[uuid.UUID], *, now: datetime | None = None
+) -> dict[str, int]:
+    """Seed each of the first ``_MAX_PROJECTS`` projects. The caller commits."""
+    from app.modules.projects.models import Project
+
+    counts = {"devices": 0, "readings": 0, "alerts": 0}
+    now = (now or datetime.now(UTC)).replace(minute=0, second=0, microsecond=0)
+    service = SiteSensorsService(session)
+    seen: set[uuid.UUID] = set()
+    for project_id in list(project_ids)[:_MAX_PROJECTS]:
+        if project_id in seen:
+            continue
+        seen.add(project_id)
+        project = await session.get(Project, project_id)
+        if project is None:
+            continue
+        codes = set(
+            (await session.execute(select(SensorDevice.code).where(SensorDevice.project_id == project_id))).scalars()
         )
-        limit, _ = await service.limit_of(device, now)
-        if limit is None:
-            device.limit_value = Decimal("70" if kind == "noise" else "50")
-            limit = float(device.limit_value)
-        rows = []
-        t = now - timedelta(days=3)
-        while t <= now:
-            v = base + rng.uniform(-spread, spread) if 6 <= t.hour < 19 else base - 15 + rng.uniform(0, 3)
-            rows.append((t, round(min(v, limit - 1), 1)))
-            t += timedelta(hours=1)
-        if kind == "noise":
-            peak_at = (now - timedelta(days=1)).replace(hour=10, minute=0)
-            rows = [(t, v) for t, v in rows if t != peak_at] + [(peak_at, round(limit + 6.5, 1))]
-        await service.ingest(device, rows)
-        counts["devices"] += 1
-        counts["readings"] += len(rows)
-
-    counts["alerts"] = len(await service.repo.alerts(project_id))
+        if _MARKER in codes:
+            continue
+        if codes & set(_LEGACY_CODES):
+            await _purge_legacy(session, project_id)
+        elif codes:
+            continue  # the project holds sensors somebody added; leave it alone
+        rng = random.Random(f"site-sensors:{project_id}")
+        user = project.owner_id or uuid.uuid5(uuid.NAMESPACE_URL, f"site-sensors:{project_id}")
+        before = counts["alerts"]
+        await _seed_pours(session, service, project_id, user, now, rng, counts)
+        await _seed_environment(
+            session, service, project_id, (project.country_code or "").upper(), user, now, rng, counts
+        )
+        counts["alerts"] = before + len(await service.repo.alerts(project_id))
     return counts
