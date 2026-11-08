@@ -533,3 +533,43 @@ async def delete_observation(
     observation = await service.get_observation(observation_id)
     await verify_project_access(observation.project_id, user_id, session)
     await service.delete_observation(observation_id)
+
+
+# ── Site sensor exceedances -> HSE register (per-project setting) ──────────
+
+
+@router.get("/sensor-exceedance-setting/")
+async def get_sensor_exceedance_setting(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("safety.read")),
+) -> dict[str, str]:
+    """What a sensor exceedance becomes: off, observation or incident."""
+    from app.modules.safety.sensor_links import get_mode
+
+    await verify_project_access(project_id, user_id, session)
+    return {"mode": await get_mode(session, project_id)}
+
+
+@router.put("/sensor-exceedance-setting/")
+async def put_sensor_exceedance_setting(
+    project_id: uuid.UUID,
+    body: dict[str, str],
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("safety.update")),
+) -> dict[str, str]:
+    from fastapi import HTTPException
+
+    from app.modules.safety.sensor_links import set_mode
+
+    await verify_project_access(project_id, user_id, session)
+    try:
+        mode = await set_mode(session, project_id, str(body.get("mode", "")))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    await session.commit()
+    return {"mode": mode}

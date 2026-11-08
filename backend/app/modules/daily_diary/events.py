@@ -219,6 +219,20 @@ async def _on_lps_commitment_completed(event: Event) -> None:
     )
 
 
+async def _on_sensor_event(event: Event) -> None:
+    """Site sensor exceedance or formwork strike -> draft diary entry."""
+    from app.database import async_session_factory  # noqa: PLC0415
+    from app.modules.daily_diary.sensor_links import record_exceedance, record_strike  # noqa: PLC0415
+
+    handler = record_strike if event.name == "site_sensors.strip.struck" else record_exceedance
+    try:
+        async with async_session_factory() as session:
+            if await handler(session, event.data or {}) is not None:
+                await session.commit()
+    except Exception:
+        logger.debug("daily_diary: site sensor entry failed", exc_info=True)
+
+
 def register_subscribers() -> None:
     """Idempotently subscribe daily-diary cross-module handlers."""
     event_bus.subscribe_once("daily_diary.closed", _on_diary_closed)
@@ -227,4 +241,6 @@ def register_subscribers() -> None:
     event_bus.subscribe_once("schedule_advanced.constraint.cleared", _on_lps_constraint_cleared)
     event_bus.subscribe_once("schedule_advanced.commitment.missed", _on_lps_commitment_missed)
     event_bus.subscribe_once("schedule_advanced.commitment.completed", _on_lps_commitment_completed)
-    logger.info("Daily Diary: 6 cross-module subscriber(s) registered")
+    event_bus.subscribe_once("site_sensors.limit.exceeded", _on_sensor_event)
+    event_bus.subscribe_once("site_sensors.strip.struck", _on_sensor_event)
+    logger.info("Daily Diary: 8 cross-module subscriber(s) registered")
