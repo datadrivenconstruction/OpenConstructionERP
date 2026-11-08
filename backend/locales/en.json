@@ -1594,6 +1594,30 @@
         "decimal_separator": ".",
         "group_separator": ","
       }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensor Evidence",
+        "register_filename": "sensor-evidence",
+        "empty_register": "No readings were recorded in this period.",
+        "device": "Device",
+        "sensor_kind": "Kind",
+        "limit": "Limit",
+        "period_from": "From (UTC)",
+        "period_to": "To (UTC)",
+        "reading_count": "Readings",
+        "peak": "Highest value",
+        "lowest": "Lowest value",
+        "mean": "Mean value",
+        "over_limit": "Limit exceedances raised",
+        "csv_digest": "Integrity code of the CSV file (SHA-256)",
+        "summarised": "Shown as hourly summaries of {total} readings. The CSV file holds every reading.",
+        "col_time": "Time (UTC)",
+        "col_value": "Value",
+        "col_min": "Lowest",
+        "col_max": "Highest",
+        "col_count": "Readings"
+      }
     }
   },
   "cost_control": {
@@ -2648,5 +2672,20 @@
       "file_missing_fix": "Upload the photo again or restore it from a backup"
     }
   },
-  "capital_plan": {"export": {"sheet": "Capital plan","col": {"title": "Project","priority": "Priority","status": "Status","total": "Total cost"},"row": {"envelope": "Envelope","demand": "Demand","gap": "Gap"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Capital plan",
+      "col": {
+        "title": "Project",
+        "priority": "Priority",
+        "status": "Status",
+        "total": "Total cost"
+      },
+      "row": {
+        "envelope": "Envelope",
+        "demand": "Demand",
+        "gap": "Gap"
+      }
+    }
+  }
 }

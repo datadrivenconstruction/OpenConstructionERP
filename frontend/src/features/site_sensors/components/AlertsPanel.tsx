@@ -11,6 +11,7 @@ import { Badge, Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { AddToClaimButton } from './AddToClaimButton';
 import { acknowledgeAlert, fetchSensorAlerts, linkAlert, type SensorAlert, type SensorDevice } from '../api';
 import { unitKeyOf } from '../units';
 import { useSensorUnits } from '../useSensorUnits';
@@ -117,6 +118,9 @@ function AlertRow({ alert, device }: { alert: SensorAlert; device?: SensorDevice
         <Button variant="secondary" size="sm" loading={linkMut.isPending} onClick={() => linkMut.mutate()}>
           {t('site_sensors.alerts.save_links', { defaultValue: 'Save links' })}
         </Button>
+        {alert.kind === 'exceedance' && (
+          <AddToClaimButton alertId={alert.id} deviceId={alert.device_id} raisedAt={alert.raised_at} />
+        )}
       </div>
     </li>
   );

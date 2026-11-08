@@ -6,10 +6,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.decimal_types import Decimal6_2, Decimal8_2, Decimal10_4, Decimal14_4
 
@@ -50,6 +50,14 @@ class DeviceCreate(BaseModel):
     noise_zone: NoiseZone = ""
     building_class: BuildingClass = ""
     frequency_band: FrequencyBand = ""
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _bim_element_needs_model(self) -> Self:
+        if self.bim_element_id is not None and self.bim_model_id is None:
+            raise ValueError("bim_element_needs_model")
+        return self
 
 
 class DeviceUpdate(BaseModel):
@@ -67,6 +75,8 @@ class DeviceUpdate(BaseModel):
     noise_zone: NoiseZone | None = None
     building_class: BuildingClass | None = None
     frequency_band: FrequencyBand | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class DeviceResponse(BaseModel):
@@ -98,6 +108,8 @@ class DeviceResponse(BaseModel):
     effective_limit: float | None = None
     limit_source: str = ""
     night_limit_by_ordinance: bool = False
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class TokenResponse(BaseModel):
@@ -218,6 +230,14 @@ class StripCreate(BaseModel):
     schedule_activity_id: UUID | None = None
     target_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
     planned_at: datetime | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _bim_element_needs_model(self) -> Self:
+        if self.bim_element_id is not None and self.bim_model_id is None:
+            raise ValueError("bim_element_needs_model")
+        return self
 
 
 class StrikeIn(BaseModel):
@@ -242,6 +262,8 @@ class StripResponse(BaseModel):
     strike_reason: str | None = None
     struck_by: UUID | None = None
     status: str
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class AlertListResponse(BaseModel):

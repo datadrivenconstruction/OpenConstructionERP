@@ -27,6 +27,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.events import event_bus
 from app.core.site_monitoring import night_noise_by_ordinance, sensor_limit
 from app.modules.site_sensors.analysis import reading_stats, rolling_mean, sparkline
+from app.core.site_monitoring import sensor_limit
+from app.modules.site_sensors.evidence import bim_link_rows, evidence_rows
 from app.modules.site_sensors.maturity import (
     DEFAULT_DATUM_C,
     fit_log_curve,
@@ -191,6 +193,8 @@ class SiteSensorsService:
             schedule_activity_id=data.schedule_activity_id or device.schedule_activity_id,
             target_strength_mpa=target,
             planned_at=data.planned_at,
+            bim_model_id=data.bim_model_id or device.bim_model_id,
+            bim_element_id=data.bim_element_id or device.bim_element_id,
         )
         self.session.add(strip)
         await self.session.flush()
@@ -757,4 +761,6 @@ class SiteSensorsService:
                 }
                 for s in strips
             ],
+            "evidence": await evidence_rows(self.session, project_id),
+            "bim_links": await bim_link_rows(self.session, project_id),
         }

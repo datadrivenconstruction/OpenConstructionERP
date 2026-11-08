@@ -24,6 +24,7 @@ GET   /sparklines/                  - Last 24 h per device, hourly, with its lim
 GET   /summary/                     - Dashboard numbers
 GET   /validation/                  - Rule results (site_sensors)
 POST  /maintenance/downsample       - Fold old raw readings into hourly rows
+POST  /devices/{id}/evidence        - File a hashed CSV and PDF of readings (evidence_routes.py)
 """
 
 from __future__ import annotations
@@ -36,6 +37,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, R
 
 from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.site_sensors.evidence_routes import router as evidence_router
 from app.modules.site_sensors.schemas import (
     AcknowledgeIn,
     AlertLinksIn,
@@ -62,6 +64,7 @@ from app.modules.site_sensors.service import SiteSensorsService
 from app.modules.site_sensors.validators import run_rules
 
 router = APIRouter(tags=["site-sensors"])
+router.include_router(evidence_router)
 
 
 async def _device_out(service: SiteSensorsService, device: Any) -> DeviceResponse:

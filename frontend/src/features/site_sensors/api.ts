@@ -45,6 +45,8 @@ export interface SensorDevice {
   effective_limit: number | null;
   limit_source: string;
   night_limit_by_ordinance: boolean;
+  bim_model_id: string | null;
+  bim_element_id: string | null;
 }
 
 export interface SensorDeviceInput {
@@ -60,6 +62,8 @@ export interface SensorDeviceInput {
   noise_zone?: string;
   building_class?: string;
   frequency_band?: string;
+  bim_model_id?: string | null;
+  bim_element_id?: string | null;
 }
 
 export type MaturityMethod = 'nurse_saul' | 'equivalent_age';
@@ -185,6 +189,8 @@ export interface FormworkStrip {
   strike_reason: string | null;
   struck_by: string | null;
   status: string;
+  bim_model_id: string | null;
+  bim_element_id: string | null;
 }
 
 export interface SensorSummary {

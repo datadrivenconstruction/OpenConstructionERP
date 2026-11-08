@@ -17,6 +17,7 @@ import {
   type SensorDevice,
   type SensorKind,
 } from '../api';
+import { BimElementSelect, type BimLink } from './BimElementSelect';
 import { KIND_LABELS, KIND_ORDER, isoFromLocal, localDateTimeValue } from '../sensorData';
 import { useSensorUnits } from '../useSensorUnits';
 
@@ -49,6 +50,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
   const [band, setBand] = useState('');
   const { country } = useSensorUnits(projectId);
   const graded = GRADED_COUNTRIES.has(country);
+  const [bim, setBim] = useState<BimLink>({ modelId: '', elementId: '' });
 
   const mixQ = useQuery({
     queryKey: ['site-sensors', 'mixes', projectId],
@@ -64,6 +66,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
         name: name.trim(),
         kind,
         limit_value: limit.trim() || null,
+        ...(bim.modelId ? { bim_model_id: bim.modelId, bim_element_id: bim.elementId || null } : {}),
         ...(kind === 'concrete_maturity'
           ? { mix_id: mixId || null, pour_ref: pourRef.trim(), cast_at: isoFromLocal(castAt) }
           : {}),
@@ -75,6 +78,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
       setName('');
       setLimit('');
       setPourRef('');
+      setBim({ modelId: '', elementId: '' });
       refresh();
     },
     onError,
@@ -169,6 +173,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
                 </label>
               </>
             )}
+            <BimElementSelect projectId={projectId} value={bim} onChange={setBim} />
             {kind === 'concrete_maturity' && (
               <>
                 <label className={LABEL}>

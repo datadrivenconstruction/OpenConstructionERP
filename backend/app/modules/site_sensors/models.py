@@ -83,6 +83,9 @@ class SensorDevice(Base):
     # Vibration: building class (DIN 4150-3 line 1-3) and the band used when a reading has no frequency.
     building_class: Mapped[str] = mapped_column(String(4), nullable=False, default="", server_default="")
     frequency_band: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
+    # Soft references to the BIM element the device sits on or measures; the model is kept with the element.
+    bim_model_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    bim_element_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -219,6 +222,8 @@ class FormworkStrip(Base):
     strike_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     struck_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="planned", server_default="planned")
+    bim_model_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    bim_element_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
         return f"<FormworkStrip {self.element} {self.status}>"
