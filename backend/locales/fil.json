@@ -1734,6 +1734,54 @@
           "refunded": "Ibinalik ang bayad"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Talaan ng pagbuhos",
+        "element": "Elemento",
+        "sensor": "Sensor",
+        "pour": "Bahagi ng buhos",
+        "mix": "Halo",
+        "cast_at": "Ibinuhos noong",
+        "struck_at": "Inalis ang porma noong",
+        "target": "Target na tibay (MPa)",
+        "strength": "Tibay sa pag-alis ng porma (MPa)",
+        "maturity": "Pagkahinog sa pag-alis",
+        "struck_by": "Inalis ni",
+        "reason": "Dahilan ng pag-alis sa ilalim ng target",
+        "no_reason": "Inalis sa target na tibay o higit pa.",
+        "curve": "Temperatura at pagkahinog",
+        "time": "Oras",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Pagkahinog (°C·oras)",
+        "index_h": "Katumbas na edad (oras)",
+        "status": "INALIS ANG PORMA",
+        "page": "Pahina {page} ng {total}",
+        "generated": "Ginawa {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Ebidensya ng sensor",
+        "empty_register": "Walang reading sa panahong ito.",
+        "device": "Device",
+        "sensor_kind": "Uri",
+        "limit": "Hangganan",
+        "period_from": "Mula (UTC)",
+        "period_to": "Hanggang (UTC)",
+        "reading_count": "Mga reading",
+        "peak": "Pinakamataas na halaga",
+        "lowest": "Pinakamababang halaga",
+        "mean": "Karaniwang halaga",
+        "over_limit": "Naitalang paglampas",
+        "csv_digest": "Integrity code ng CSV file (SHA-256)",
+        "summarised": "Oras-oras na buod ng {total} reading. Nasa CSV file ang bawat reading.",
+        "col_time": "Oras (UTC)",
+        "col_value": "Halaga",
+        "col_min": "Pinakamababa",
+        "col_max": "Pinakamataas",
+        "col_count": "Mga reading"
+      }
     }
   },
   "pdf_footer": {
@@ -2641,5 +2689,20 @@
       "file_missing_fix": "I-upload ulit ang larawan o ibalik mula sa backup"
     }
   },
-  "capital_plan": {"export": {"sheet": "Capital plan","col": {"title": "Proyekto","priority": "Prayoridad","status": "Status","total": "Kabuuang gastos"},"row": {"envelope": "Badyet","demand": "Demand","gap": "Gap"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Capital plan",
+      "col": {
+        "title": "Proyekto",
+        "priority": "Prayoridad",
+        "status": "Status",
+        "total": "Kabuuang gastos"
+      },
+      "row": {
+        "envelope": "Badyet",
+        "demand": "Demand",
+        "gap": "Gap"
+      }
+    }
+  }
 }

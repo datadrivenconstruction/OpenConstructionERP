@@ -1734,6 +1734,54 @@
           "refunded": "Reembolsado"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Registro de hormigonado",
+        "element": "Elemento",
+        "sensor": "Sensor",
+        "pour": "Tongada",
+        "mix": "Dosificación",
+        "cast_at": "Hormigonado el",
+        "struck_at": "Desencofrado el",
+        "target": "Resistencia objetivo (MPa)",
+        "strength": "Resistencia al desencofrar (MPa)",
+        "maturity": "Madurez al desencofrar",
+        "struck_by": "Desencofrado por",
+        "reason": "Motivo del desencofrado bajo la resistencia objetivo",
+        "no_reason": "Desencofrado con la resistencia objetivo o superior.",
+        "curve": "Temperatura y madurez",
+        "time": "Hora",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Madurez (°C·h)",
+        "index_h": "Edad equivalente (h)",
+        "status": "DESENCOFRADO",
+        "page": "Página {page} de {total}",
+        "generated": "Generado {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Evidencia del sensor",
+        "empty_register": "No hay lecturas en este periodo.",
+        "device": "Dispositivo",
+        "sensor_kind": "Tipo",
+        "limit": "Límite",
+        "period_from": "Desde (UTC)",
+        "period_to": "Hasta (UTC)",
+        "reading_count": "Lecturas",
+        "peak": "Valor máximo",
+        "lowest": "Valor mínimo",
+        "mean": "Valor medio",
+        "over_limit": "Superaciones del límite",
+        "csv_digest": "Código de integridad del CSV (SHA-256)",
+        "summarised": "Resúmenes horarios de {total} lecturas. El CSV contiene todas las lecturas.",
+        "col_time": "Hora (UTC)",
+        "col_value": "Valor",
+        "col_min": "Mín.",
+        "col_max": "Máx.",
+        "col_count": "Lecturas"
+      }
     }
   },
   "pdf_footer": {
@@ -2611,5 +2659,20 @@
       "file_missing_fix": "Suba la foto de nuevo o restáurela desde una copia de seguridad"
     }
   },
-  "capital_plan": {"export": {"sheet": "Plan de inversiones", "col": {"title": "Proyecto", "priority": "Prioridad", "status": "Estado", "total": "Coste total"}, "row": {"envelope": "Techo presupuestario", "demand": "Demanda", "gap": "Brecha"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Plan de inversiones",
+      "col": {
+        "title": "Proyecto",
+        "priority": "Prioridad",
+        "status": "Estado",
+        "total": "Coste total"
+      },
+      "row": {
+        "envelope": "Techo presupuestario",
+        "demand": "Demanda",
+        "gap": "Brecha"
+      }
+    }
+  }
 }

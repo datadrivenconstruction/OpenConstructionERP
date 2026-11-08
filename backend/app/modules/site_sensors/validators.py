@@ -262,6 +262,8 @@ class TemperaturePlausible(_SensorRule):
         return self._result(
             str(row.get("id")), ok, device=row.get("code", ""), low=f"{low:g}", high=f"{high:g}", jump=f"{jump:g}"
         )
+
+
 class EvidenceHashed(_SensorRule):
     """A filed sensor export carries a SHA-256 of its CSV, holds readings and has both documents."""
 

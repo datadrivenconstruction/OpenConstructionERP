@@ -1734,6 +1734,54 @@
           "refunded": "Rambursată"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Proces-verbal de betonare",
+        "element": "Element",
+        "sensor": "Senzor",
+        "pour": "Etapă",
+        "mix": "Rețetă",
+        "cast_at": "Turnat la",
+        "struck_at": "Decofrat la",
+        "target": "Rezistență țintă (MPa)",
+        "strength": "Rezistență la decofrare (MPa)",
+        "maturity": "Maturitate la decofrare",
+        "struck_by": "Decofrat de",
+        "reason": "Motivul decofrării sub rezistența țintă",
+        "no_reason": "Decofrat la rezistența țintă sau peste.",
+        "curve": "Temperatură și maturitate",
+        "time": "Ora",
+        "temp": "Temperatură (°C)",
+        "index_c_h": "Maturitate (°C·h)",
+        "index_h": "Vârstă echivalentă (h)",
+        "status": "DECOFRAT",
+        "page": "Pagina {page} din {total}",
+        "generated": "Generat {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Dovadă senzor",
+        "empty_register": "Nicio citire în această perioadă.",
+        "device": "Dispozitiv",
+        "sensor_kind": "Tip",
+        "limit": "Limită",
+        "period_from": "De la (UTC)",
+        "period_to": "Până la (UTC)",
+        "reading_count": "Citiri",
+        "peak": "Valoare maximă",
+        "lowest": "Valoare minimă",
+        "mean": "Valoare medie",
+        "over_limit": "Depășiri semnalate",
+        "csv_digest": "Cod de integritate al fișierului CSV (SHA-256)",
+        "summarised": "Rezumate orare din {total} citiri. Fișierul CSV conține fiecare citire.",
+        "col_time": "Ora (UTC)",
+        "col_value": "Valoare",
+        "col_min": "Min.",
+        "col_max": "Max.",
+        "col_count": "Citiri"
+      }
     }
   },
   "pdf_footer": {
@@ -2630,5 +2678,20 @@
       "file_missing_fix": "Încărcați din nou fotografia sau restaurați-o dintr-o copie de rezervă"
     }
   },
-  "capital_plan": {"export": {"sheet": "Plan de investiții","col": {"title": "Proiect","priority": "Prioritate","status": "Stare","total": "Cost total"},"row": {"envelope": "Buget anual","demand": "Cerere","gap": "Diferență"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Plan de investiții",
+      "col": {
+        "title": "Proiect",
+        "priority": "Prioritate",
+        "status": "Stare",
+        "total": "Cost total"
+      },
+      "row": {
+        "envelope": "Buget anual",
+        "demand": "Cerere",
+        "gap": "Diferență"
+      }
+    }
+  }
 }

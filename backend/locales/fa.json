@@ -1594,6 +1594,54 @@
           "Summary": "خلاصه"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "صورت‌جلسه بتن‌ریزی",
+        "element": "عنصر",
+        "sensor": "حسگر",
+        "pour": "مرحله",
+        "mix": "طرح اختلاط",
+        "cast_at": "بتن‌ریزی شده",
+        "struck_at": "قالب‌برداری شده",
+        "target": "مقاومت هدف (MPa)",
+        "strength": "مقاومت هنگام قالب‌برداری (MPa)",
+        "maturity": "بلوغ هنگام قالب‌برداری",
+        "struck_by": "قالب‌بردار",
+        "reason": "دلیل قالب‌برداری زیر مقاومت هدف",
+        "no_reason": "در مقاومت هدف یا بالاتر قالب‌برداری شد.",
+        "curve": "دما و بلوغ",
+        "time": "زمان",
+        "temp": "دما (°C)",
+        "index_c_h": "بلوغ (°C·h)",
+        "index_h": "سن معادل (h)",
+        "status": "قالب‌برداری شد",
+        "page": "صفحه {page} از {total}",
+        "generated": "ایجاد شده {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "مدرک حسگر",
+        "empty_register": "در این بازه قرائتی نیست.",
+        "device": "دستگاه",
+        "sensor_kind": "نوع",
+        "limit": "حد",
+        "period_from": "از (UTC)",
+        "period_to": "تا (UTC)",
+        "reading_count": "قرائت‌ها",
+        "peak": "بیشترین مقدار",
+        "lowest": "کمترین مقدار",
+        "mean": "میانگین",
+        "over_limit": "تجاوزهای ثبت‌شده",
+        "csv_digest": "کد صحت فایل CSV (SHA-256)",
+        "summarised": "خلاصه ساعتی از {total} قرائت. فایل CSV همه قرائت‌ها را دارد.",
+        "col_time": "زمان (UTC)",
+        "col_value": "مقدار",
+        "col_min": "کمترین",
+        "col_max": "بیشترین",
+        "col_count": "قرائت‌ها"
+      }
     }
   },
   "cost_control": {
@@ -2631,5 +2679,20 @@
       "file_missing_fix": "عکس را دوباره بارگذاری کنید یا از پشتیبان بازیابی کنید"
     }
   },
-  "capital_plan": {"export": {"sheet": "طرح سرمایه‌ای", "col": {"title": "پروژه", "priority": "اولویت", "status": "وضعیت", "total": "هزینه کل"}, "row": {"envelope": "سقف بودجه", "demand": "نیاز", "gap": "شکاف"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "طرح سرمایه‌ای",
+      "col": {
+        "title": "پروژه",
+        "priority": "اولویت",
+        "status": "وضعیت",
+        "total": "هزینه کل"
+      },
+      "row": {
+        "envelope": "سقف بودجه",
+        "demand": "نیاز",
+        "gap": "شکاف"
+      }
+    }
+  }
 }

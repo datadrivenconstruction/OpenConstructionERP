@@ -395,8 +395,19 @@ async def pour_record(
             media_type="text/csv; charset=utf-8",
             headers={"Content-Disposition": f'attachment; filename="{stem}.csv"'},
         )
+    from app.modules.site_sensors.evidence import file_pour_record
+
+    pdf = pour_record_pdf(record, lang)
+    await file_pour_record(
+        session,
+        project_id=strip.project_id,
+        strip_id=strip.id,
+        user_id=str(user_id),
+        filename=f"{stem}.pdf",
+        content=pdf,
+    )
     return Response(
-        content=pour_record_pdf(record, lang),
+        content=pdf,
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{stem}.pdf"'},
     )

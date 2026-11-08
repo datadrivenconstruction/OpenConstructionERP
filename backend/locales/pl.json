@@ -1734,6 +1734,54 @@
           "refunded": "Zwrócona"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Protokół betonowania",
+        "element": "Element",
+        "sensor": "Czujnik",
+        "pour": "Działka",
+        "mix": "Receptura",
+        "cast_at": "Zabetonowano",
+        "struck_at": "Rozdeskowano",
+        "target": "Wytrzymałość docelowa (MPa)",
+        "strength": "Wytrzymałość przy rozdeskowaniu (MPa)",
+        "maturity": "Dojrzałość przy rozdeskowaniu",
+        "struck_by": "Rozdeskował",
+        "reason": "Powód rozdeskowania poniżej wytrzymałości docelowej",
+        "no_reason": "Rozdeskowano przy wytrzymałości docelowej lub wyższej.",
+        "curve": "Temperatura i dojrzałość",
+        "time": "Czas",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Dojrzałość (°C·h)",
+        "index_h": "Wiek równoważny (h)",
+        "status": "ROZDESKOWANO",
+        "page": "Strona {page} z {total}",
+        "generated": "Utworzono {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Dowód z czujnika",
+        "empty_register": "Brak odczytów w tym okresie.",
+        "device": "Urządzenie",
+        "sensor_kind": "Rodzaj",
+        "limit": "Limit",
+        "period_from": "Od (UTC)",
+        "period_to": "Do (UTC)",
+        "reading_count": "Odczyty",
+        "peak": "Najwyższa wartość",
+        "lowest": "Najniższa wartość",
+        "mean": "Średnia",
+        "over_limit": "Zgłoszone przekroczenia",
+        "csv_digest": "Kod integralności pliku CSV (SHA-256)",
+        "summarised": "Podsumowania godzinowe z {total} odczytów. Plik CSV zawiera każdy odczyt.",
+        "col_time": "Czas (UTC)",
+        "col_value": "Wartość",
+        "col_min": "Min.",
+        "col_max": "Maks.",
+        "col_count": "Odczyty"
+      }
     }
   },
   "pdf_footer": {

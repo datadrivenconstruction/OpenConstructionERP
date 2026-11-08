@@ -1734,6 +1734,54 @@
           "refunded": "환급 완료"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "타설 기록",
+        "element": "부재",
+        "sensor": "센서",
+        "pour": "타설 구획",
+        "mix": "배합",
+        "cast_at": "타설 일시",
+        "struck_at": "탈형 일시",
+        "target": "목표 강도 (MPa)",
+        "strength": "탈형 시 강도 (MPa)",
+        "maturity": "탈형 시 성숙도",
+        "struck_by": "탈형자",
+        "reason": "목표 미만 탈형 사유",
+        "no_reason": "목표 강도 이상에서 탈형했습니다.",
+        "curve": "온도와 성숙도",
+        "time": "시간",
+        "temp": "온도 (°C)",
+        "index_c_h": "성숙도 (°C·h)",
+        "index_h": "등가 재령 (h)",
+        "status": "탈형 완료",
+        "page": "{page} / {total} 페이지",
+        "generated": "생성 {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "센서 증거",
+        "empty_register": "이 기간에 측정값이 없습니다.",
+        "device": "장치",
+        "sensor_kind": "종류",
+        "limit": "한계",
+        "period_from": "시작 (UTC)",
+        "period_to": "종료 (UTC)",
+        "reading_count": "측정값",
+        "peak": "최고값",
+        "lowest": "최저값",
+        "mean": "평균값",
+        "over_limit": "발생한 한계 초과",
+        "csv_digest": "CSV 파일 무결성 코드 (SHA-256)",
+        "summarised": "{total}개 측정값의 시간별 요약입니다. CSV 파일에 모든 측정값이 있습니다.",
+        "col_time": "시간 (UTC)",
+        "col_value": "값",
+        "col_min": "최저",
+        "col_max": "최고",
+        "col_count": "측정값"
+      }
     }
   },
   "pdf_footer": {
@@ -2630,5 +2678,20 @@
       "file_missing_fix": "사진을 다시 업로드하거나 백업에서 복원하세요"
     }
   },
-  "capital_plan": {"export": {"sheet": "투자 계획","col": {"title": "프로젝트","priority": "우선순위","status": "상태","total": "총비용"},"row": {"envelope": "예산 한도","demand": "수요","gap": "차액"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "투자 계획",
+      "col": {
+        "title": "프로젝트",
+        "priority": "우선순위",
+        "status": "상태",
+        "total": "총비용"
+      },
+      "row": {
+        "envelope": "예산 한도",
+        "demand": "수요",
+        "gap": "차액"
+      }
+    }
+  }
 }

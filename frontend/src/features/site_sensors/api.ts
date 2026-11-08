@@ -119,6 +119,13 @@ export interface SensorContext {
     strength_mpa: number | null;
     target_strength_mpa: number;
   }[];
+  /** Grading keys from the country data; empty lists mean the country sets one figure. */
+  limit_grading?: {
+    noise_zones: string[];
+    building_classes: string[];
+    noise_source: string;
+    vibration_source: string;
+  };
 }
 
 export type Sparklines = Record<string, { points: (number | null)[]; limit: number | null }>;
@@ -309,3 +316,18 @@ export const fetchSensorSummary = (projectId?: string) =>
 
 export const fetchSensorValidation = (projectId: string) =>
   apiGet<SensorValidation>(`/v1/site_sensors/validation/?project_id=${encodeURIComponent(projectId)}`);
+
+/** What a sensor exceedance becomes in the HSE register (safety module setting). */
+export type HseExceedanceMode = 'off' | 'observation' | 'incident';
+export const HSE_EXCEEDANCE_MODES: HseExceedanceMode[] = ['off', 'observation', 'incident'];
+
+export const fetchHseExceedanceMode = (projectId: string) =>
+  apiGet<{ mode: HseExceedanceMode }>(
+    `/v1/safety/sensor-exceedance-setting/?project_id=${encodeURIComponent(projectId)}`,
+  );
+
+export const saveHseExceedanceMode = (projectId: string, mode: HseExceedanceMode) =>
+  apiPut<{ mode: HseExceedanceMode }, { mode: HseExceedanceMode }>(
+    `/v1/safety/sensor-exceedance-setting/?project_id=${encodeURIComponent(projectId)}`,
+    { mode },
+  );

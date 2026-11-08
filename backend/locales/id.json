@@ -1734,6 +1734,54 @@
           "refunded": "Dikembalikan"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Catatan pengecoran",
+        "element": "Elemen",
+        "sensor": "Sensor",
+        "pour": "Segmen cor",
+        "mix": "Campuran",
+        "cast_at": "Dicor pada",
+        "struck_at": "Bekisting dibongkar",
+        "target": "Kuat tekan target (MPa)",
+        "strength": "Kuat tekan saat bongkar (MPa)",
+        "maturity": "Kematangan saat bongkar",
+        "struck_by": "Dibongkar oleh",
+        "reason": "Alasan bongkar di bawah target",
+        "no_reason": "Dibongkar pada atau di atas kuat tekan target.",
+        "curve": "Suhu dan kematangan",
+        "time": "Waktu",
+        "temp": "Suhu (°C)",
+        "index_c_h": "Kematangan (°C·jam)",
+        "index_h": "Umur ekuivalen (jam)",
+        "status": "DIBONGKAR",
+        "page": "Halaman {page} dari {total}",
+        "generated": "Dibuat {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Bukti sensor",
+        "empty_register": "Tidak ada pembacaan pada periode ini.",
+        "device": "Perangkat",
+        "sensor_kind": "Jenis",
+        "limit": "Batas",
+        "period_from": "Dari (UTC)",
+        "period_to": "Sampai (UTC)",
+        "reading_count": "Pembacaan",
+        "peak": "Nilai tertinggi",
+        "lowest": "Nilai terendah",
+        "mean": "Nilai rata-rata",
+        "over_limit": "Pelampauan batas tercatat",
+        "csv_digest": "Kode integritas file CSV (SHA-256)",
+        "summarised": "Ringkasan per jam dari {total} pembacaan. File CSV memuat setiap pembacaan.",
+        "col_time": "Waktu (UTC)",
+        "col_value": "Nilai",
+        "col_min": "Terendah",
+        "col_max": "Tertinggi",
+        "col_count": "Pembacaan"
+      }
     }
   },
   "pdf_footer": {

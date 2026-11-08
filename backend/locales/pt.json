@@ -1734,6 +1734,54 @@
           "refunded": "Reembolsado"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Registo de betonagem",
+        "element": "Elemento",
+        "sensor": "Sensor",
+        "pour": "Fase",
+        "mix": "Composição",
+        "cast_at": "Betonado em",
+        "struck_at": "Descofrado em",
+        "target": "Resistência alvo (MPa)",
+        "strength": "Resistência na descofragem (MPa)",
+        "maturity": "Maturidade na descofragem",
+        "struck_by": "Descofrado por",
+        "reason": "Motivo da descofragem abaixo da resistência alvo",
+        "no_reason": "Descofrado com a resistência alvo ou superior.",
+        "curve": "Temperatura e maturidade",
+        "time": "Hora",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Maturidade (°C·h)",
+        "index_h": "Idade equivalente (h)",
+        "status": "DESCOFRADO",
+        "page": "Página {page} de {total}",
+        "generated": "Gerado {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Evidência do sensor",
+        "empty_register": "Sem leituras neste período.",
+        "device": "Dispositivo",
+        "sensor_kind": "Tipo",
+        "limit": "Limite",
+        "period_from": "De (UTC)",
+        "period_to": "Até (UTC)",
+        "reading_count": "Leituras",
+        "peak": "Valor máximo",
+        "lowest": "Valor mínimo",
+        "mean": "Valor médio",
+        "over_limit": "Ultrapassagens do limite",
+        "csv_digest": "Código de integridade do CSV (SHA-256)",
+        "summarised": "Resumos horários de {total} leituras. O CSV contém todas as leituras.",
+        "col_time": "Hora (UTC)",
+        "col_value": "Valor",
+        "col_min": "Mín.",
+        "col_max": "Máx.",
+        "col_count": "Leituras"
+      }
     }
   },
   "pdf_footer": {
@@ -2609,5 +2657,20 @@
       "file_missing_fix": "Envie a foto de novo ou restaure-a de um backup"
     }
   },
-  "capital_plan": {"export": {"sheet": "Plano de investimentos", "col": {"title": "Projeto", "priority": "Prioridade", "status": "Estado", "total": "Custo total"}, "row": {"envelope": "Teto orçamental", "demand": "Procura", "gap": "Défice"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Plano de investimentos",
+      "col": {
+        "title": "Projeto",
+        "priority": "Prioridade",
+        "status": "Estado",
+        "total": "Custo total"
+      },
+      "row": {
+        "envelope": "Teto orçamental",
+        "demand": "Procura",
+        "gap": "Défice"
+      }
+    }
+  }
 }

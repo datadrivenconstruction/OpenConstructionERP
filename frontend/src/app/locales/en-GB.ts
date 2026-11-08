@@ -187,10 +187,6 @@ const resource = {
     "schedule.no_assignee": "Unassigned",
     "schedule.no_parent": "Top level (no parent)",
     "schedule.parent_section": "Parent section",
-    "schedule.strike_ready": "Strike ready",
-    "schedule.strike_ready_tooltip": "Sensor estimate {{strength}} of {{target}} MPa ({{pct}}% confidence). Start the strike today?",
-    "schedule.strike_accept": "Start strike today",
-    "schedule.strike_dismiss": "Keep planned dates",
     "about.dev_model_title": "Development and Contribution Model",
     "about.dev_model_p1": "OpenConstructionERP has been under continuous development for more than six years and has benefited from contributions, feedback, testing, and domain expertise from many different people.",
     "about.dev_model_p2": "To maintain a consistent architecture and reduce security, dependency, and integration risks, the project follows a centralised integration model. Most production code is ultimately reviewed, consolidated, tested, and published through a single maintainer account. As a result, the GitHub contributor history does not necessarily reflect the actual number of people who have contributed to the project.",
@@ -216,8 +212,6 @@ const resource = {
     "notifications.site_logistics.neighbour_issue_overdue.body": "A neighbour {{kind}} issue was due for a response by {{due}}.",
     "notifications.field_clock.outside.title": "Clock outside the site fence needs your approval",
     "notifications.field_clock.outside.body": "A clock by {{worker}} is {{distance}} m outside {{site}}. Approve or reject it with a reason.",
-    "notifications.site_sensors_offline_title": "Sensor offline",
-    "notifications.site_sensors_offline_body": "{{device}} has stopped reporting",
     "dwg_takeoff.drawing_span": "Drawing size at this scale: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.",
     "dwg_takeoff.conv_converter_said": "Converter report",
@@ -757,8 +751,6 @@ const resource = {
     "catalog.category_labor": "Labour",
     "catalog.category_operators": "Operators",
     "contacts.field_state": "County / region",
-    "siteSensors.rules.link_missing": "Linked {{field}} {{target_id}} does not exist",
-    "siteSensors.rules.link_other_project": "Linked {{field}} {{target_id}} belongs to another project",
   }
 } as { translation: Record<string, string> };
 

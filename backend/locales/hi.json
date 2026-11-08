@@ -1,5 +1,20 @@
 {
-  "capital_plan": {"export": {"sheet": "पूँजी योजना", "col": {"title": "प्रोजेक्ट", "priority": "प्राथमिकता", "status": "स्थिति", "total": "कुल लागत"}, "row": {"envelope": "बजट सीमा", "demand": "माँग", "gap": "अंतर"}}},
+  "capital_plan": {
+    "export": {
+      "sheet": "पूँजी योजना",
+      "col": {
+        "title": "प्रोजेक्ट",
+        "priority": "प्राथमिकता",
+        "status": "स्थिति",
+        "total": "कुल लागत"
+      },
+      "row": {
+        "envelope": "बजट सीमा",
+        "demand": "माँग",
+        "gap": "अंतर"
+      }
+    }
+  },
   "costs.catalog_name_unavailable": "यह नाम नए कैटलॉग के लिए उपयोग नहीं किया जा सकता। कोई दूसरा नाम चुनें।",
   "app": {
     "name": "OpenConstructionERP",
@@ -1734,6 +1749,54 @@
           "completed": "पूर्ण",
           "refunded": "वापस किया गया"
         }
+      }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "ढलाई अभिलेख",
+        "element": "तत्व",
+        "sensor": "सेंसर",
+        "pour": "ढलाई खंड",
+        "mix": "मिश्रण",
+        "cast_at": "ढलाई तिथि",
+        "struck_at": "शटरिंग हटाई",
+        "target": "लक्ष्य सामर्थ्य (MPa)",
+        "strength": "शटरिंग हटाते समय सामर्थ्य (MPa)",
+        "maturity": "हटाते समय परिपक्वता",
+        "struck_by": "हटाने वाला",
+        "reason": "लक्ष्य से कम पर हटाने का कारण",
+        "no_reason": "लक्ष्य सामर्थ्य या अधिक पर हटाई।",
+        "curve": "तापमान और परिपक्वता",
+        "time": "समय",
+        "temp": "तापमान (°C)",
+        "index_c_h": "परिपक्वता (°C·h)",
+        "index_h": "समतुल्य आयु (h)",
+        "status": "हटाई गई",
+        "page": "पृष्ठ {page} / {total}",
+        "generated": "बनाया {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "सेंसर साक्ष्य",
+        "empty_register": "इस अवधि में कोई रीडिंग नहीं।",
+        "device": "उपकरण",
+        "sensor_kind": "प्रकार",
+        "limit": "सीमा",
+        "period_from": "से (UTC)",
+        "period_to": "तक (UTC)",
+        "reading_count": "रीडिंग",
+        "peak": "उच्चतम मान",
+        "lowest": "न्यूनतम मान",
+        "mean": "औसत",
+        "over_limit": "दर्ज उल्लंघन",
+        "csv_digest": "CSV फ़ाइल का अखंडता कोड (SHA-256)",
+        "summarised": "{total} रीडिंग के प्रति घंटा सारांश। CSV फ़ाइल में हर रीडिंग है।",
+        "col_time": "समय (UTC)",
+        "col_value": "मान",
+        "col_min": "न्यूनतम",
+        "col_max": "उच्चतम",
+        "col_count": "रीडिंग"
       }
     }
   },

@@ -1,5 +1,20 @@
 {
-  "capital_plan": {"export": {"sheet": "Капитал жоспары", "col": {"title": "Жоба", "priority": "Басымдық", "status": "Күйі", "total": "Жалпы құны"}, "row": {"envelope": "Бюджет шегі", "demand": "Қажеттілік", "gap": "Тапшылық"}}},
+  "capital_plan": {
+    "export": {
+      "sheet": "Капитал жоспары",
+      "col": {
+        "title": "Жоба",
+        "priority": "Басымдық",
+        "status": "Күйі",
+        "total": "Жалпы құны"
+      },
+      "row": {
+        "envelope": "Бюджет шегі",
+        "demand": "Қажеттілік",
+        "gap": "Тапшылық"
+      }
+    }
+  },
   "costs.catalog_name_unavailable": "Бұл атауды жаңа анықтамалық үшін пайдалануға болмайды. Басқа атау таңдаңыз.",
   "app": {
     "name": "OpenConstructionERP",
@@ -1734,6 +1749,54 @@
           "completed": "Аяқталған",
           "refunded": "Қайтарылған"
         }
+      }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Бетондау хаттамасы",
+        "element": "Элемент",
+        "sensor": "Датчик",
+        "pour": "Учаске",
+        "mix": "Қоспа құрамы",
+        "cast_at": "Бетондалған",
+        "struck_at": "Қалып алынған",
+        "target": "Мақсатты беріктік (МПа)",
+        "strength": "Қалып алудағы беріктік (МПа)",
+        "maturity": "Қалып алудағы пісу",
+        "struck_by": "Қалыпты алған",
+        "reason": "Мақсатты беріктіктен төмен алу себебі",
+        "no_reason": "Мақсатты беріктікте немесе одан жоғары алынды.",
+        "curve": "Температура және пісу",
+        "time": "Уақыт",
+        "temp": "Температура (°C)",
+        "index_c_h": "Пісу (°C·сағ)",
+        "index_h": "Балама жас (сағ)",
+        "status": "ҚАЛЫП АЛЫНДЫ",
+        "page": "{total} ішінен {page}-бет",
+        "generated": "Жасалған {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Датчик дәлелі",
+        "empty_register": "Кезеңде көрсеткіш жоқ.",
+        "device": "Құрылғы",
+        "sensor_kind": "Түрі",
+        "limit": "Шек",
+        "period_from": "Бастап (UTC)",
+        "period_to": "Дейін (UTC)",
+        "reading_count": "Көрсеткіштер",
+        "peak": "Ең жоғары",
+        "lowest": "Ең төмен",
+        "mean": "Орташа",
+        "over_limit": "Шектен асулар",
+        "csv_digest": "CSV файлының бақылау коды (SHA-256)",
+        "summarised": "{total} көрсеткіштің сағаттық қорытындысы. CSV файлында барлығы бар.",
+        "col_time": "Уақыт (UTC)",
+        "col_value": "Мән",
+        "col_min": "Ең аз",
+        "col_max": "Ең көп",
+        "col_count": "Көрсеткіштер"
       }
     }
   },

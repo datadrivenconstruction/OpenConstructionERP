@@ -1573,6 +1573,54 @@
     },
     "furniture": {
       "footer_page": "Seite {page} von {total}"
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Betonierprotokoll",
+        "element": "Bauteil",
+        "sensor": "Sensor",
+        "pour": "Betonierabschnitt",
+        "mix": "Rezeptur",
+        "cast_at": "Betoniert am",
+        "struck_at": "Ausgeschalt am",
+        "target": "Zielfestigkeit (MPa)",
+        "strength": "Festigkeit beim Ausschalen (MPa)",
+        "maturity": "Reife beim Ausschalen",
+        "struck_by": "Ausgeschalt von",
+        "reason": "Begründung für Ausschalen unter Zielfestigkeit",
+        "no_reason": "Bei oder über Zielfestigkeit ausgeschalt.",
+        "curve": "Temperatur und Reife",
+        "time": "Zeit",
+        "temp": "Temperatur (°C)",
+        "index_c_h": "Reife (°C·h)",
+        "index_h": "Wirksames Alter (h)",
+        "status": "AUSGESCHALT",
+        "page": "Seite {page} von {total}",
+        "generated": "Erstellt {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensornachweis",
+        "empty_register": "Im Zeitraum wurden keine Messwerte erfasst.",
+        "device": "Gerät",
+        "sensor_kind": "Art",
+        "limit": "Grenzwert",
+        "period_from": "Von (UTC)",
+        "period_to": "Bis (UTC)",
+        "reading_count": "Messwerte",
+        "peak": "Höchstwert",
+        "lowest": "Tiefstwert",
+        "mean": "Mittelwert",
+        "over_limit": "Ausgelöste Grenzwertüberschreitungen",
+        "csv_digest": "Prüfcode der CSV-Datei (SHA-256)",
+        "summarised": "Als Stundenwerte aus {total} Messwerten dargestellt. Die CSV-Datei enthält jeden Messwert.",
+        "col_time": "Zeit (UTC)",
+        "col_value": "Wert",
+        "col_min": "Tiefster",
+        "col_max": "Höchster",
+        "col_count": "Messwerte"
+      }
     }
   },
   "cost_control": {
@@ -2606,5 +2654,20 @@
       "file_missing_fix": "Foto erneut hochladen oder aus einer Sicherung wiederherstellen"
     }
   },
-  "capital_plan": {"export": {"sheet": "Investitionsplan", "col": {"title": "Projekt", "priority": "Priorität", "status": "Status", "total": "Gesamtkosten"}, "row": {"envelope": "Budgetrahmen", "demand": "Bedarf", "gap": "Deckungslücke"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Investitionsplan",
+      "col": {
+        "title": "Projekt",
+        "priority": "Priorität",
+        "status": "Status",
+        "total": "Gesamtkosten"
+      },
+      "row": {
+        "envelope": "Budgetrahmen",
+        "demand": "Bedarf",
+        "gap": "Deckungslücke"
+      }
+    }
+  }
 }

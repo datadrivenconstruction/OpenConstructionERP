@@ -1734,6 +1734,54 @@
           "refunded": "คืนเงินแล้ว"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "บันทึกการเทคอนกรีต",
+        "element": "องค์ประกอบ",
+        "sensor": "เซ็นเซอร์",
+        "pour": "ช่วงเท",
+        "mix": "ส่วนผสม",
+        "cast_at": "เทเมื่อ",
+        "struck_at": "ถอดแบบเมื่อ",
+        "target": "กำลังอัดเป้าหมาย (MPa)",
+        "strength": "กำลังอัดขณะถอดแบบ (MPa)",
+        "maturity": "ความสุกตัวขณะถอดแบบ",
+        "struck_by": "ผู้ถอดแบบ",
+        "reason": "เหตุผลที่ถอดแบบต่ำกว่าเป้าหมาย",
+        "no_reason": "ถอดแบบที่กำลังอัดเป้าหมายหรือสูงกว่า",
+        "curve": "อุณหภูมิและความสุกตัว",
+        "time": "เวลา",
+        "temp": "อุณหภูมิ (°C)",
+        "index_c_h": "ความสุกตัว (°C·h)",
+        "index_h": "อายุเทียบเท่า (h)",
+        "status": "ถอดแบบแล้ว",
+        "page": "หน้า {page} จาก {total}",
+        "generated": "สร้างเมื่อ {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "หลักฐานจากเซ็นเซอร์",
+        "empty_register": "ไม่มีค่าที่วัดในช่วงนี้",
+        "device": "อุปกรณ์",
+        "sensor_kind": "ชนิด",
+        "limit": "ขีดจำกัด",
+        "period_from": "จาก (UTC)",
+        "period_to": "ถึง (UTC)",
+        "reading_count": "ค่าที่วัด",
+        "peak": "ค่าสูงสุด",
+        "lowest": "ค่าต่ำสุด",
+        "mean": "ค่าเฉลี่ย",
+        "over_limit": "การเกินขีดจำกัดที่แจ้ง",
+        "csv_digest": "รหัสความสมบูรณ์ของไฟล์ CSV (SHA-256)",
+        "summarised": "สรุปรายชั่วโมงจาก {total} ค่า ไฟล์ CSV มีทุกค่า",
+        "col_time": "เวลา (UTC)",
+        "col_value": "ค่า",
+        "col_min": "ต่ำสุด",
+        "col_max": "สูงสุด",
+        "col_count": "ค่าที่วัด"
+      }
     }
   },
   "pdf_footer": {
@@ -2625,5 +2673,20 @@
       "file_missing_fix": "อัปโหลดรูปใหม่หรือกู้คืนจากข้อมูลสำรอง"
     }
   },
-  "capital_plan": {"export": {"sheet": "แผนลงทุน","col": {"title": "โครงการ","priority": "ลำดับความสำคัญ","status": "สถานะ","total": "ค่าใช้จ่ายรวม"},"row": {"envelope": "วงเงินงบประมาณ","demand": "ความต้องการงบ","gap": "ส่วนต่าง"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "แผนลงทุน",
+      "col": {
+        "title": "โครงการ",
+        "priority": "ลำดับความสำคัญ",
+        "status": "สถานะ",
+        "total": "ค่าใช้จ่ายรวม"
+      },
+      "row": {
+        "envelope": "วงเงินงบประมาณ",
+        "demand": "ความต้องการงบ",
+        "gap": "ส่วนต่าง"
+      }
+    }
+  }
 }

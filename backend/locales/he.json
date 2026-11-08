@@ -1594,6 +1594,54 @@
           "Summary": "סיכום"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "יומן יציקה",
+        "element": "רכיב",
+        "sensor": "חיישן",
+        "pour": "שלב יציקה",
+        "mix": "תערובת",
+        "cast_at": "נוצק",
+        "struck_at": "טפסות פורקו",
+        "target": "חוזק יעד (MPa)",
+        "strength": "חוזק בפירוק (MPa)",
+        "maturity": "בשלות בפירוק",
+        "struck_by": "פורק על ידי",
+        "reason": "סיבת פירוק מתחת לחוזק היעד",
+        "no_reason": "פורק בחוזק היעד או מעליו.",
+        "curve": "טמפרטורה ובשלות",
+        "time": "זמן",
+        "temp": "טמפרטורה (°C)",
+        "index_c_h": "בשלות (°C·h)",
+        "index_h": "גיל שקול (h)",
+        "status": "פורק",
+        "page": "עמוד {page} מתוך {total}",
+        "generated": "נוצר {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "ראיית חיישן",
+        "empty_register": "אין קריאות בתקופה זו.",
+        "device": "מכשיר",
+        "sensor_kind": "סוג",
+        "limit": "גבול",
+        "period_from": "מ- (UTC)",
+        "period_to": "עד (UTC)",
+        "reading_count": "קריאות",
+        "peak": "ערך גבוה",
+        "lowest": "ערך נמוך",
+        "mean": "ממוצע",
+        "over_limit": "חריגות שדווחו",
+        "csv_digest": "קוד שלמות של קובץ CSV (SHA-256)",
+        "summarised": "סיכומים שעתיים של {total} קריאות. קובץ CSV מכיל כל קריאה.",
+        "col_time": "זמן (UTC)",
+        "col_value": "ערך",
+        "col_min": "נמוך",
+        "col_max": "גבוה",
+        "col_count": "קריאות"
+      }
     }
   },
   "cost_control": {
@@ -2632,5 +2680,20 @@
       "file_missing_fix": "העלו את התמונה שוב או שחזרו אותה מגיבוי"
     }
   },
-  "capital_plan": {"export": {"sheet": "תוכנית הון", "col": {"title": "פרויקט", "priority": "עדיפות", "status": "סטטוס", "total": "עלות כוללת"}, "row": {"envelope": "מסגרת תקציב", "demand": "דרישה", "gap": "פער"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "תוכנית הון",
+      "col": {
+        "title": "פרויקט",
+        "priority": "עדיפות",
+        "status": "סטטוס",
+        "total": "עלות כוללת"
+      },
+      "row": {
+        "envelope": "מסגרת תקציב",
+        "demand": "דרישה",
+        "gap": "פער"
+      }
+    }
+  }
 }

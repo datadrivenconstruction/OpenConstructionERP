@@ -1734,6 +1734,54 @@
           "refunded": "Tilbagebetalt"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Støbeprotokol",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Støbeafsnit",
+        "mix": "Recept",
+        "cast_at": "Støbt",
+        "struck_at": "Afformet",
+        "target": "Målstyrke (MPa)",
+        "strength": "Styrke ved afformning (MPa)",
+        "maturity": "Modenhed ved afformning",
+        "struck_by": "Afformet af",
+        "reason": "Begrundelse for afformning under målstyrke",
+        "no_reason": "Afformet ved eller over målstyrke.",
+        "curve": "Temperatur og modenhed",
+        "time": "Tid",
+        "temp": "Temperatur (°C)",
+        "index_c_h": "Modenhed (°C·t)",
+        "index_h": "Ækvivalent alder (t)",
+        "status": "AFFORMET",
+        "page": "Side {page} af {total}",
+        "generated": "Oprettet {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensorbevis",
+        "empty_register": "Ingen målinger i perioden.",
+        "device": "Enhed",
+        "sensor_kind": "Type",
+        "limit": "Grænse",
+        "period_from": "Fra (UTC)",
+        "period_to": "Til (UTC)",
+        "reading_count": "Målinger",
+        "peak": "Højeste værdi",
+        "lowest": "Laveste værdi",
+        "mean": "Middelværdi",
+        "over_limit": "Rejste overskridelser",
+        "csv_digest": "Integritetskode for CSV-filen (SHA-256)",
+        "summarised": "Vist som timeoversigter af {total} målinger. CSV-filen rummer hver måling.",
+        "col_time": "Tid (UTC)",
+        "col_value": "Værdi",
+        "col_min": "Laveste",
+        "col_max": "Højeste",
+        "col_count": "Målinger"
+      }
     }
   },
   "pdf_footer": {

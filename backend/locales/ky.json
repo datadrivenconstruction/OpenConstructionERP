@@ -1,5 +1,20 @@
 {
-  "capital_plan": {"export": {"sheet": "Капитал планы", "col": {"title": "Долбоор", "priority": "Артыкчылык", "status": "Абалы", "total": "Жалпы баасы"}, "row": {"envelope": "Бюджет чеги", "demand": "Муктаждык", "gap": "Тартыш"}}},
+  "capital_plan": {
+    "export": {
+      "sheet": "Капитал планы",
+      "col": {
+        "title": "Долбоор",
+        "priority": "Артыкчылык",
+        "status": "Абалы",
+        "total": "Жалпы баасы"
+      },
+      "row": {
+        "envelope": "Бюджет чеги",
+        "demand": "Муктаждык",
+        "gap": "Тартыш"
+      }
+    }
+  },
   "costs.catalog_name_unavailable": "Бул атты жаңы каталог үчүн колдонууга болбойт. Башка ат тандаңыз.",
   "app": {
     "name": "OpenConstructionERP",
@@ -1734,6 +1749,54 @@
           "completed": "Аякталды",
           "refunded": "Кайтарылды"
         }
+      }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Бетондоо протоколу",
+        "element": "Элемент",
+        "sensor": "Сенсор",
+        "pour": "Участок",
+        "mix": "Аралашманын курамы",
+        "cast_at": "Бетондолгон",
+        "struck_at": "Калып алынган",
+        "target": "Максаттуу бекемдик (МПа)",
+        "strength": "Калып алуудагы бекемдик (МПа)",
+        "maturity": "Калып алуудагы бышуу",
+        "struck_by": "Калыпты алган",
+        "reason": "Максаттуу бекемдиктен төмөн алуунун себеби",
+        "no_reason": "Максаттуу бекемдикте же андан жогору алынды.",
+        "curve": "Температура жана бышуу",
+        "time": "Убакыт",
+        "temp": "Температура (°C)",
+        "index_c_h": "Бышуу (°C·саат)",
+        "index_h": "Эквиваленттик курак (саат)",
+        "status": "КАЛЫП АЛЫНДЫ",
+        "page": "{total} ичинен {page}-бет",
+        "generated": "Түзүлгөн {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Сенсор далили",
+        "empty_register": "Мезгилде көрсөткүч жок.",
+        "device": "Түзмөк",
+        "sensor_kind": "Түрү",
+        "limit": "Чек",
+        "period_from": "Баштап (UTC)",
+        "period_to": "Чейин (UTC)",
+        "reading_count": "Көрсөткүчтөр",
+        "peak": "Эң жогору",
+        "lowest": "Эң төмөн",
+        "mean": "Орточо",
+        "over_limit": "Чектен ашуулар",
+        "csv_digest": "CSV файлынын текшерүү коду (SHA-256)",
+        "summarised": "{total} көрсөткүчтүн сааттык жыйынтыгы. CSV файлында баары бар.",
+        "col_time": "Убакыт (UTC)",
+        "col_value": "Маани",
+        "col_min": "Эң аз",
+        "col_max": "Эң көп",
+        "col_count": "Көрсөткүчтөр"
       }
     }
   },

@@ -1594,6 +1594,54 @@
           "Summary": "خلاصہ"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "ڈھلائی کا ریکارڈ",
+        "element": "عنصر",
+        "sensor": "سینسر",
+        "pour": "ڈھلائی حصہ",
+        "mix": "مکسچر",
+        "cast_at": "ڈھلائی کی تاریخ",
+        "struck_at": "سانچہ ہٹایا",
+        "target": "ہدف مضبوطی (MPa)",
+        "strength": "ہٹاتے وقت مضبوطی (MPa)",
+        "maturity": "ہٹاتے وقت پختگی",
+        "struck_by": "ہٹانے والا",
+        "reason": "ہدف سے کم پر ہٹانے کی وجہ",
+        "no_reason": "ہدف مضبوطی یا اس سے زیادہ پر ہٹایا۔",
+        "curve": "درجہ حرارت اور پختگی",
+        "time": "وقت",
+        "temp": "درجہ حرارت (°C)",
+        "index_c_h": "پختگی (°C·h)",
+        "index_h": "مساوی عمر (h)",
+        "status": "ہٹا دیا",
+        "page": "صفحہ {page} از {total}",
+        "generated": "تیار کردہ {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "سینسر ثبوت",
+        "empty_register": "اس مدت میں کوئی ریڈنگ نہیں۔",
+        "device": "آلہ",
+        "sensor_kind": "قسم",
+        "limit": "حد",
+        "period_from": "سے (UTC)",
+        "period_to": "تک (UTC)",
+        "reading_count": "ریڈنگز",
+        "peak": "بلند ترین قدر",
+        "lowest": "کم ترین قدر",
+        "mean": "اوسط",
+        "over_limit": "درج شدہ تجاوزات",
+        "csv_digest": "CSV فائل کا سالمیت کوڈ (SHA-256)",
+        "summarised": "{total} ریڈنگز کے گھنٹہ وار خلاصے۔ CSV فائل میں ہر ریڈنگ ہے۔",
+        "col_time": "وقت (UTC)",
+        "col_value": "قدر",
+        "col_min": "کم ترین",
+        "col_max": "بلند ترین",
+        "col_count": "ریڈنگز"
+      }
     }
   },
   "cost_control": {
@@ -2634,5 +2682,20 @@
       "file_missing_fix": "تصویر دوبارہ اپ لوڈ کریں یا بیک اپ سے بحال کریں"
     }
   },
-  "capital_plan": {"export": {"sheet": "سرمایہ جاتی منصوبہ", "col": {"title": "پراجیکٹ", "priority": "ترجیح", "status": "حالت", "total": "کل لاگت"}, "row": {"envelope": "بجٹ کی حد", "demand": "طلب", "gap": "فرق"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "سرمایہ جاتی منصوبہ",
+      "col": {
+        "title": "پراجیکٹ",
+        "priority": "ترجیح",
+        "status": "حالت",
+        "total": "کل لاگت"
+      },
+      "row": {
+        "envelope": "بجٹ کی حد",
+        "demand": "طلب",
+        "gap": "فرق"
+      }
+    }
+  }
 }

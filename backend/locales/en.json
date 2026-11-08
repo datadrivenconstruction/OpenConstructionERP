@@ -1618,6 +1618,31 @@
         "col_max": "Highest",
         "col_count": "Readings"
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Pour record",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Pour",
+        "mix": "Mix",
+        "cast_at": "Cast at",
+        "struck_at": "Struck at",
+        "target": "Target strength (MPa)",
+        "strength": "Strength at strike (MPa)",
+        "maturity": "Maturity at strike",
+        "struck_by": "Struck by",
+        "reason": "Reason for striking below target",
+        "no_reason": "Struck at or above target strength.",
+        "curve": "Temperature and maturity",
+        "time": "Time",
+        "temp": "Temperature (°C)",
+        "index_c_h": "Maturity (°C·h)",
+        "index_h": "Equivalent age (h)",
+        "status": "STRUCK",
+        "page": "Page {page} of {total}",
+        "generated": "Generated {timestamp}"
+      }
     }
   },
   "cost_control": {

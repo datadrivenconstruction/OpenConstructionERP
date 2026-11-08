@@ -1734,6 +1734,54 @@
           "refunded": "Đã hoàn tiền"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Biên bản đổ bê tông",
+        "element": "Cấu kiện",
+        "sensor": "Cảm biến",
+        "pour": "Đợt đổ",
+        "mix": "Cấp phối",
+        "cast_at": "Đổ lúc",
+        "struck_at": "Tháo khuôn lúc",
+        "target": "Cường độ mục tiêu (MPa)",
+        "strength": "Cường độ khi tháo khuôn (MPa)",
+        "maturity": "Độ chín khi tháo khuôn",
+        "struck_by": "Người tháo khuôn",
+        "reason": "Lý do tháo khuôn dưới cường độ mục tiêu",
+        "no_reason": "Tháo khuôn khi đạt hoặc vượt cường độ mục tiêu.",
+        "curve": "Nhiệt độ và độ chín",
+        "time": "Thời gian",
+        "temp": "Nhiệt độ (°C)",
+        "index_c_h": "Độ chín (°C·h)",
+        "index_h": "Tuổi tương đương (h)",
+        "status": "ĐÃ THÁO KHUÔN",
+        "page": "Trang {page}/{total}",
+        "generated": "Tạo lúc {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Bằng chứng cảm biến",
+        "empty_register": "Không có số đo trong kỳ này.",
+        "device": "Thiết bị",
+        "sensor_kind": "Loại",
+        "limit": "Giới hạn",
+        "period_from": "Từ (UTC)",
+        "period_to": "Đến (UTC)",
+        "reading_count": "Số đo",
+        "peak": "Giá trị cao nhất",
+        "lowest": "Giá trị thấp nhất",
+        "mean": "Giá trị trung bình",
+        "over_limit": "Lần vượt giới hạn",
+        "csv_digest": "Mã toàn vẹn của tệp CSV (SHA-256)",
+        "summarised": "Tóm tắt theo giờ từ {total} số đo. Tệp CSV chứa mọi số đo.",
+        "col_time": "Thời gian (UTC)",
+        "col_value": "Giá trị",
+        "col_min": "Thấp nhất",
+        "col_max": "Cao nhất",
+        "col_count": "Số đo"
+      }
     }
   },
   "pdf_footer": {

@@ -1734,6 +1734,54 @@
           "refunded": "Remboursé"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Fiche de bétonnage",
+        "element": "Élément",
+        "sensor": "Capteur",
+        "pour": "Levée",
+        "mix": "Formule",
+        "cast_at": "Coulé le",
+        "struck_at": "Décoffré le",
+        "target": "Résistance cible (MPa)",
+        "strength": "Résistance au décoffrage (MPa)",
+        "maturity": "Maturité au décoffrage",
+        "struck_by": "Décoffré par",
+        "reason": "Motif du décoffrage sous la résistance cible",
+        "no_reason": "Décoffré à la résistance cible ou au-delà.",
+        "curve": "Température et maturité",
+        "time": "Heure",
+        "temp": "Température (°C)",
+        "index_c_h": "Maturité (°C·h)",
+        "index_h": "Âge équivalent (h)",
+        "status": "DÉCOFFRÉ",
+        "page": "Page {page} sur {total}",
+        "generated": "Généré le {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Preuve capteur",
+        "empty_register": "Aucune mesure sur la période.",
+        "device": "Appareil",
+        "sensor_kind": "Type",
+        "limit": "Limite",
+        "period_from": "Du (UTC)",
+        "period_to": "Au (UTC)",
+        "reading_count": "Mesures",
+        "peak": "Valeur maximale",
+        "lowest": "Valeur minimale",
+        "mean": "Valeur moyenne",
+        "over_limit": "Dépassements signalés",
+        "csv_digest": "Code d'intégrité du fichier CSV (SHA-256)",
+        "summarised": "Synthèses horaires de {total} mesures. Le fichier CSV contient chaque mesure.",
+        "col_time": "Heure (UTC)",
+        "col_value": "Valeur",
+        "col_min": "Min.",
+        "col_max": "Max.",
+        "col_count": "Mesures"
+      }
     }
   },
   "pdf_footer": {

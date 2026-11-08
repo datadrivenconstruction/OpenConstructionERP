@@ -287,6 +287,32 @@ async def file_project_document(
     return document
 
 
+async def file_pour_record(
+    session: AsyncSession, *, project_id: uuid.UUID, strip_id: uuid.UUID, user_id: str, filename: str, content: bytes
+) -> Document:
+    """File a pour record PDF in ``Concrete / Pour records``; a repeat export of the same strip reuses it."""
+    folder = await ensure_folder_path(session, project_id, PATH_POUR_RECORDS)
+    existing = (
+        await session.execute(
+            select(Document).where(
+                Document.project_id == project_id, Document.folder_id == folder.id, Document.name == filename
+            )
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        return existing
+    return await file_project_document(
+        session,
+        project_id=project_id,
+        user_id=user_id,
+        filename=filename,
+        content=content,
+        folder_path=PATH_POUR_RECORDS,
+        tags=["pour-record"],
+        metadata={"format": "pdf", "strip_id": str(strip_id), "sha256": sha256_hex(content)},
+    )
+
+
 async def exceedance_count(session: AsyncSession, device_id: uuid.UUID, start: datetime, end: datetime) -> int:
     """Limit exceedance alerts the device raised in the window."""
     rows = await session.execute(

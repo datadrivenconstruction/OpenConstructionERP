@@ -45,7 +45,7 @@ _LEGACY_CODES = ("CM-01", "CM-02", "CM-03", "NS-01", "PM-01")
 _DAYS = 14
 # Calibrated on the demo mix: 15 MPa at about 1 400 degC-h, 25 MPa at about 5 000 degC-h.
 _MIX = {"code": "C30/37-CEM II", "name": "C30/37 slab mix", "curve_a": "-43.1", "curve_b": "18.4", "strip": "15"}
-_DATUM_C = -10.0
+_DATUM_C = 0.0
 _IMPERIAL = {"US"}
 _M_TO_FT = 3.28084
 _MS_TO_MPH = 2.23694

@@ -1734,6 +1734,54 @@
           "refunded": "返金済み"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "打設記録",
+        "element": "部材",
+        "sensor": "センサー",
+        "pour": "打設区画",
+        "mix": "配合",
+        "cast_at": "打設日時",
+        "struck_at": "脱型日時",
+        "target": "目標強度 (MPa)",
+        "strength": "脱型時強度 (MPa)",
+        "maturity": "脱型時積算温度",
+        "struck_by": "脱型者",
+        "reason": "目標未満で脱型した理由",
+        "no_reason": "目標強度以上で脱型しました。",
+        "curve": "温度と積算温度",
+        "time": "時刻",
+        "temp": "温度 (°C)",
+        "index_c_h": "積算温度 (°C·h)",
+        "index_h": "等価材齢 (h)",
+        "status": "脱型済み",
+        "page": "{page} / {total} ページ",
+        "generated": "作成 {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "センサー証拠",
+        "empty_register": "この期間の計測値はありません。",
+        "device": "機器",
+        "sensor_kind": "種類",
+        "limit": "上限",
+        "period_from": "開始 (UTC)",
+        "period_to": "終了 (UTC)",
+        "reading_count": "計測数",
+        "peak": "最大値",
+        "lowest": "最小値",
+        "mean": "平均値",
+        "over_limit": "発生した上限超過",
+        "csv_digest": "CSVファイルの整合性コード (SHA-256)",
+        "summarised": "{total} 件の計測値を1時間ごとに要約。CSVファイルには全件があります。",
+        "col_time": "時刻 (UTC)",
+        "col_value": "値",
+        "col_min": "最小",
+        "col_max": "最大",
+        "col_count": "計測数"
+      }
     }
   },
   "pdf_footer": {
@@ -2625,5 +2673,20 @@
       "file_missing_fix": "写真を再アップロードするか、バックアップから復元してください"
     }
   },
-  "capital_plan": {"export": {"sheet": "投資計画","col": {"title": "プロジェクト","priority": "優先度","status": "ステータス","total": "総費用"},"row": {"envelope": "予算枠","demand": "需要","gap": "過不足"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "投資計画",
+      "col": {
+        "title": "プロジェクト",
+        "priority": "優先度",
+        "status": "ステータス",
+        "total": "総費用"
+      },
+      "row": {
+        "envelope": "予算枠",
+        "demand": "需要",
+        "gap": "過不足"
+      }
+    }
+  }
 }

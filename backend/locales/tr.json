@@ -1713,6 +1713,54 @@
     },
     "furniture": {
       "footer_page": "Sayfa {page} / {total}"
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Döküm tutanağı",
+        "element": "Eleman",
+        "sensor": "Sensör",
+        "pour": "Döküm bölümü",
+        "mix": "Karışım",
+        "cast_at": "Döküldü",
+        "struck_at": "Kalıp alındı",
+        "target": "Hedef dayanım (MPa)",
+        "strength": "Kalıp almada dayanım (MPa)",
+        "maturity": "Kalıp almada olgunluk",
+        "struck_by": "Kalıbı alan",
+        "reason": "Hedef altı kalıp alma gerekçesi",
+        "no_reason": "Hedef dayanımda veya üzerinde alındı.",
+        "curve": "Sıcaklık ve olgunluk",
+        "time": "Zaman",
+        "temp": "Sıcaklık (°C)",
+        "index_c_h": "Olgunluk (°C·sa)",
+        "index_h": "Eşdeğer yaş (sa)",
+        "status": "KALIP ALINDI",
+        "page": "Sayfa {page}/{total}",
+        "generated": "Oluşturuldu {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensör kanıtı",
+        "empty_register": "Bu dönemde ölçüm yok.",
+        "device": "Cihaz",
+        "sensor_kind": "Tür",
+        "limit": "Sınır",
+        "period_from": "Başlangıç (UTC)",
+        "period_to": "Bitiş (UTC)",
+        "reading_count": "Ölçümler",
+        "peak": "En yüksek değer",
+        "lowest": "En düşük değer",
+        "mean": "Ortalama",
+        "over_limit": "Bildirilen aşımlar",
+        "csv_digest": "CSV dosyasının bütünlük kodu (SHA-256)",
+        "summarised": "{total} ölçümün saatlik özetleri. CSV dosyası her ölçümü içerir.",
+        "col_time": "Zaman (UTC)",
+        "col_value": "Değer",
+        "col_min": "En düşük",
+        "col_max": "En yüksek",
+        "col_count": "Ölçümler"
+      }
     }
   },
   "pdf_footer": {

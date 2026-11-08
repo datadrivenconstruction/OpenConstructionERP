@@ -537,8 +537,6 @@ const resource = {
     "notifications.subcontractors.retention_released.body": "{{amount}} {{currency}} retainage released.",
     "notifications.site_logistics.neighbour_issue_overdue.title": "A neighbor issue is overdue",
     "notifications.site_logistics.neighbour_issue_overdue.body": "A neighbor {{kind}} issue was due for a response by {{due}}.",
-    "notifications.site_sensors_offline_title": "Sensor offline",
-    "notifications.site_sensors_offline_body": "{{device}} has stopped reporting",
     "procurement.pipeline_cancelled": "Canceled",
     "reporting.info_body": "Live KPI dashboards for one project at a time, organized by role. For figures that span every project use Analytics; for downloadable PDF and Excel documents use Reports.",
     "reporting.no_boqs_title": "No Bid Schedules yet",
@@ -1681,18 +1679,12 @@ const resource = {
     "tax_rates.status_harmonised": "Harmonized",
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
-    "schedule.strike_ready": "Strike ready",
-    "schedule.strike_ready_tooltip": "Sensor estimate {{strength}} of {{target}} MPa ({{pct}}% confidence). Start the strike today?",
-    "schedule.strike_accept": "Start strike today",
-    "schedule.strike_dismiss": "Keep planned dates",
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
     "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",
     "measurement_book.f_breadth": "Width",
     "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
-    "siteSensors.rules.link_missing": "Linked {{field}} {{target_id}} does not exist",
-    "siteSensors.rules.link_other_project": "Linked {{field}} {{target_id}} belongs to another project",
   }
 } as { translation: Record<string, string> };
 

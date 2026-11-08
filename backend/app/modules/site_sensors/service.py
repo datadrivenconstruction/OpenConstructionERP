@@ -25,9 +25,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-from app.core.site_monitoring import night_noise_by_ordinance, sensor_limit
+from app.core.site_monitoring import limit_grading, night_noise_by_ordinance, sensor_limit
+from app.modules.integrations.validators import build_sensor_link_payload
 from app.modules.site_sensors.analysis import reading_stats, rolling_mean, sparkline
-from app.core.site_monitoring import sensor_limit
 from app.modules.site_sensors.evidence import bim_link_rows, evidence_rows
 from app.modules.site_sensors.maturity import (
     DEFAULT_DATUM_C,
@@ -648,6 +648,7 @@ class SiteSensorsService:
             "country": country,
             "unit_system": "imperial" if country in IMPERIAL_COUNTRIES else "metric",
             "strike_ready": ready,
+            "limit_grading": limit_grading(country),
         }
 
     async def sparklines(self, project_id: uuid.UUID, now: datetime | None = None) -> dict[str, Any]:
@@ -763,4 +764,6 @@ class SiteSensorsService:
             ],
             "evidence": await evidence_rows(self.session, project_id),
             "bim_links": await bim_link_rows(self.session, project_id),
+            # Read by the site_sensor_links rule set (registered on import), also run under "site_sensors".
+            "links": (await build_sensor_link_payload(self.session, project_id))["links"],
         }

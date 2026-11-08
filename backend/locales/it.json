@@ -1734,6 +1734,54 @@
           "refunded": "Rimborsato"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Verbale di getto",
+        "element": "Elemento",
+        "sensor": "Sensore",
+        "pour": "Getto",
+        "mix": "Miscela",
+        "cast_at": "Gettato il",
+        "struck_at": "Disarmato il",
+        "target": "Resistenza obiettivo (MPa)",
+        "strength": "Resistenza al disarmo (MPa)",
+        "maturity": "Maturità al disarmo",
+        "struck_by": "Disarmato da",
+        "reason": "Motivo del disarmo sotto la resistenza obiettivo",
+        "no_reason": "Disarmato alla resistenza obiettivo o superiore.",
+        "curve": "Temperatura e maturità",
+        "time": "Ora",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Maturità (°C·h)",
+        "index_h": "Età equivalente (h)",
+        "status": "DISARMATO",
+        "page": "Pagina {page} di {total}",
+        "generated": "Generato {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Prova del sensore",
+        "empty_register": "Nessuna lettura nel periodo.",
+        "device": "Dispositivo",
+        "sensor_kind": "Tipo",
+        "limit": "Limite",
+        "period_from": "Da (UTC)",
+        "period_to": "A (UTC)",
+        "reading_count": "Letture",
+        "peak": "Valore massimo",
+        "lowest": "Valore minimo",
+        "mean": "Valore medio",
+        "over_limit": "Superamenti segnalati",
+        "csv_digest": "Codice di integrità del CSV (SHA-256)",
+        "summarised": "Riepiloghi orari di {total} letture. Il CSV contiene ogni lettura.",
+        "col_time": "Ora (UTC)",
+        "col_value": "Valore",
+        "col_min": "Min.",
+        "col_max": "Max.",
+        "col_count": "Letture"
+      }
     }
   },
   "pdf_footer": {

@@ -1734,6 +1734,54 @@
           "refunded": "Visszatérítve"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Betonozási jegyzőkönyv",
+        "element": "Elem",
+        "sensor": "Érzékelő",
+        "pour": "Ütem",
+        "mix": "Receptúra",
+        "cast_at": "Betonozva",
+        "struck_at": "Kizsaluzva",
+        "target": "Célszilárdság (MPa)",
+        "strength": "Szilárdság kizsaluzáskor (MPa)",
+        "maturity": "Érettség kizsaluzáskor",
+        "struck_by": "Kizsaluzta",
+        "reason": "A célszilárdság alatti kizsaluzás oka",
+        "no_reason": "Célszilárdságon vagy felette kizsaluzva.",
+        "curve": "Hőmérséklet és érettség",
+        "time": "Idő",
+        "temp": "Hőmérséklet (°C)",
+        "index_c_h": "Érettség (°C·ó)",
+        "index_h": "Egyenértékű kor (ó)",
+        "status": "KIZSALUZVA",
+        "page": "{page}. oldal / {total}",
+        "generated": "Készült {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Érzékelő bizonyíték",
+        "empty_register": "Az időszakban nincs mérés.",
+        "device": "Eszköz",
+        "sensor_kind": "Fajta",
+        "limit": "Határérték",
+        "period_from": "Ettől (UTC)",
+        "period_to": "Eddig (UTC)",
+        "reading_count": "Mérések",
+        "peak": "Legmagasabb érték",
+        "lowest": "Legalacsonyabb érték",
+        "mean": "Átlag",
+        "over_limit": "Jelzett túllépések",
+        "csv_digest": "A CSV fájl ellenőrző kódja (SHA-256)",
+        "summarised": "Óránkénti összesítés {total} mérésből. A CSV fájl minden mérést tartalmaz.",
+        "col_time": "Idő (UTC)",
+        "col_value": "Érték",
+        "col_min": "Legkisebb",
+        "col_max": "Legnagyobb",
+        "col_count": "Mérések"
+      }
     }
   },
   "pdf_footer": {
@@ -2629,5 +2677,20 @@
       "file_missing_fix": "Töltse fel újra a fotót, vagy állítsa vissza biztonsági mentésből"
     }
   },
-  "capital_plan": {"export": {"sheet": "Tőketerv","col": {"title": "Projekt","priority": "Prioritás","status": "Állapot","total": "Teljes költség"},"row": {"envelope": "Éves keret","demand": "Igény","gap": "Hiány"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Tőketerv",
+      "col": {
+        "title": "Projekt",
+        "priority": "Prioritás",
+        "status": "Állapot",
+        "total": "Teljes költség"
+      },
+      "row": {
+        "envelope": "Éves keret",
+        "demand": "Igény",
+        "gap": "Hiány"
+      }
+    }
+  }
 }

@@ -1734,6 +1734,54 @@
           "refunded": "Vraćeno"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Zapisnik betoniranja",
+        "element": "Element",
+        "sensor": "Senzor",
+        "pour": "Takt",
+        "mix": "Receptura",
+        "cast_at": "Betonirano",
+        "struck_at": "Oplata skinuta",
+        "target": "Ciljna čvrstoća (MPa)",
+        "strength": "Čvrstoća pri skidanju oplate (MPa)",
+        "maturity": "Zrelost pri skidanju oplate",
+        "struck_by": "Skinuo",
+        "reason": "Razlog skidanja ispod ciljne čvrstoće",
+        "no_reason": "Skinuto pri ciljnoj čvrstoći ili iznad nje.",
+        "curve": "Temperatura i zrelost",
+        "time": "Vrijeme",
+        "temp": "Temperatura (°C)",
+        "index_c_h": "Zrelost (°C·h)",
+        "index_h": "Ekvivalentna starost (h)",
+        "status": "SKINUTO",
+        "page": "Stranica {page} od {total}",
+        "generated": "Izrađeno {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Dokaz senzora",
+        "empty_register": "Nema očitanja u razdoblju.",
+        "device": "Uređaj",
+        "sensor_kind": "Vrsta",
+        "limit": "Granica",
+        "period_from": "Od (UTC)",
+        "period_to": "Do (UTC)",
+        "reading_count": "Očitanja",
+        "peak": "Najviša vrijednost",
+        "lowest": "Najniža vrijednost",
+        "mean": "Srednja vrijednost",
+        "over_limit": "Prijavljena prekoračenja",
+        "csv_digest": "Kontrolni kod CSV datoteke (SHA-256)",
+        "summarised": "Satni sažeci iz {total} očitanja. CSV datoteka sadrži svako očitanje.",
+        "col_time": "Vrijeme (UTC)",
+        "col_value": "Vrijednost",
+        "col_min": "Najniža",
+        "col_max": "Najviša",
+        "col_count": "Očitanja"
+      }
     }
   },
   "pdf_footer": {

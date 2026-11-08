@@ -1,5 +1,20 @@
 {
-  "capital_plan": {"export": {"sheet": "Kapital reja", "col": {"title": "Loyiha", "priority": "Ustuvorlik", "status": "Holat", "total": "Jami xarajat"}, "row": {"envelope": "Byudjet chegarasi", "demand": "Talab", "gap": "Tafovut"}}},
+  "capital_plan": {
+    "export": {
+      "sheet": "Kapital reja",
+      "col": {
+        "title": "Loyiha",
+        "priority": "Ustuvorlik",
+        "status": "Holat",
+        "total": "Jami xarajat"
+      },
+      "row": {
+        "envelope": "Byudjet chegarasi",
+        "demand": "Talab",
+        "gap": "Tafovut"
+      }
+    }
+  },
   "costs.catalog_name_unavailable": "Bu nomdan yangi katalog uchun foydalanib boʻlmaydi. Boshqa nom tanlang.",
   "app": {
     "name": "OpenConstructionERP",
@@ -1734,6 +1749,54 @@
           "completed": "Yakunlangan",
           "refunded": "Qaytarilgan"
         }
+      }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Betonlash bayonnomasi",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Uchastka",
+        "mix": "Aralashma tarkibi",
+        "cast_at": "Betonlangan",
+        "struck_at": "Qolip olingan",
+        "target": "Maqsadli mustahkamlik (MPa)",
+        "strength": "Qolip olishdagi mustahkamlik (MPa)",
+        "maturity": "Qolip olishdagi yetilish",
+        "struck_by": "Qolipni olgan",
+        "reason": "Maqsaddan past olish sababi",
+        "no_reason": "Maqsadli mustahkamlikda yoki undan yuqori olindi.",
+        "curve": "Harorat va yetilish",
+        "time": "Vaqt",
+        "temp": "Harorat (°C)",
+        "index_c_h": "Yetilish (°C·soat)",
+        "index_h": "Ekvivalent yosh (soat)",
+        "status": "QOLIP OLINDI",
+        "page": "{page}/{total} sahifa",
+        "generated": "Yaratilgan {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensor dalili",
+        "empty_register": "Davrda ko'rsatkich yo'q.",
+        "device": "Qurilma",
+        "sensor_kind": "Turi",
+        "limit": "Chegara",
+        "period_from": "Dan (UTC)",
+        "period_to": "Gacha (UTC)",
+        "reading_count": "Ko'rsatkichlar",
+        "peak": "Eng yuqori",
+        "lowest": "Eng past",
+        "mean": "O'rtacha",
+        "over_limit": "Chegara oshishlari",
+        "csv_digest": "CSV faylining nazorat kodi (SHA-256)",
+        "summarised": "{total} ta ko'rsatkichning soatlik xulosasi. CSV faylida hammasi bor.",
+        "col_time": "Vaqt (UTC)",
+        "col_value": "Qiymat",
+        "col_min": "Eng kam",
+        "col_max": "Eng ko'p",
+        "col_count": "Ko'rsatkichlar"
       }
     }
   },

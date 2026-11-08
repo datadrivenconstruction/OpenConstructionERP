@@ -1734,6 +1734,54 @@
           "refunded": "Hyvitetty"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Valupöytäkirja",
+        "element": "Rakenneosa",
+        "sensor": "Anturi",
+        "pour": "Valuosa",
+        "mix": "Resepti",
+        "cast_at": "Valettu",
+        "struck_at": "Muotit purettu",
+        "target": "Tavoitelujuus (MPa)",
+        "strength": "Lujuus muottien purussa (MPa)",
+        "maturity": "Kypsyys muottien purussa",
+        "struck_by": "Purkaja",
+        "reason": "Peruste purulle alle tavoitelujuuden",
+        "no_reason": "Purettu tavoitelujuudessa tai sen yli.",
+        "curve": "Lämpötila ja kypsyys",
+        "time": "Aika",
+        "temp": "Lämpötila (°C)",
+        "index_c_h": "Kypsyys (°C·h)",
+        "index_h": "Ekvivalenttinen ikä (h)",
+        "status": "PURETTU",
+        "page": "Sivu {page}/{total}",
+        "generated": "Luotu {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Anturitodiste",
+        "empty_register": "Jaksolla ei ole mittauksia.",
+        "device": "Laite",
+        "sensor_kind": "Laji",
+        "limit": "Raja",
+        "period_from": "Alkaen (UTC)",
+        "period_to": "Asti (UTC)",
+        "reading_count": "Mittaukset",
+        "peak": "Suurin arvo",
+        "lowest": "Pienin arvo",
+        "mean": "Keskiarvo",
+        "over_limit": "Raportoidut ylitykset",
+        "csv_digest": "CSV-tiedoston tarkistuskoodi (SHA-256)",
+        "summarised": "Tuntikoosteet {total} mittauksesta. CSV-tiedosto sisältää jokaisen mittauksen.",
+        "col_time": "Aika (UTC)",
+        "col_value": "Arvo",
+        "col_min": "Pienin",
+        "col_max": "Suurin",
+        "col_count": "Mittaukset"
+      }
     }
   },
   "pdf_footer": {

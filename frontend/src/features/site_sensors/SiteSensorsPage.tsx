@@ -22,6 +22,7 @@ import { MaturityCard } from './components/MaturityCard';
 import { AlertsPanel } from './components/AlertsPanel';
 import { StripsPanel } from './components/StripsPanel';
 import { DeviceForms } from './components/DeviceForms';
+import { HseModeSelect } from './components/HseModeSelect';
 
 function Sparkline({ points, limit, label }: { points: (number | null)[]; limit: number | null; label: string }) {
   const { path, limitY } = sparkPath(points, limit);
@@ -220,11 +221,13 @@ const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ b
 
 export function SiteSensorsPage() {
   const { t } = useTranslation();
+  const projectId = useActiveProjectId();
   return (
     <div className="space-y-5">
       <PageHeader
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {projectId && <HseModeSelect projectId={projectId} />}
             <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => scrollTo('sensor-add-mix')}>
               {t('site_sensors.mixes.add', { defaultValue: 'Add mix' })}
             </Button>

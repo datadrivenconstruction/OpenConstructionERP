@@ -188,3 +188,20 @@ def test_pour_record_csv_and_pdf() -> None:
     assert len(text.strip().splitlines()) == 11 + 1 + 1 + 60
     assert "Betonierprotokoll" not in text and "Reife (°C·h)" in pour_record_csv(record, "de").decode("utf-8-sig")
     assert pour_record_pdf(record).startswith(b"%PDF")
+
+
+def test_limit_grading_follows_country_data() -> None:
+    from app.core.site_monitoring import limit_grading
+
+    de = limit_grading("DE")
+    assert de["noise_zones"] and de["building_classes"]
+    none = limit_grading("ZZ")
+    assert none["noise_zones"] == [] and none["building_classes"] == []
+
+
+def test_pour_record_labels_come_from_backend_locales() -> None:
+    from app.modules.site_sensors.pour_record import LABELS
+
+    assert LABELS["en"]["title"] == "Pour record"
+    assert LABELS["ru"]["title"] == "Протокол бетонирования"
+    assert set(LABELS["fr"]) == set(LABELS["en"])

@@ -1734,6 +1734,54 @@
           "refunded": "Tilbakebetalt"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Støpeprotokoll",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Støpeavsnitt",
+        "mix": "Resept",
+        "cast_at": "Støpt",
+        "struck_at": "Forskaling fjernet",
+        "target": "Målfasthet (MPa)",
+        "strength": "Fasthet ved avforskaling (MPa)",
+        "maturity": "Modenhet ved avforskaling",
+        "struck_by": "Avforskalet av",
+        "reason": "Begrunnelse for avforskaling under målfasthet",
+        "no_reason": "Avforskalet ved eller over målfasthet.",
+        "curve": "Temperatur og modenhet",
+        "time": "Tid",
+        "temp": "Temperatur (°C)",
+        "index_c_h": "Modenhet (°C·t)",
+        "index_h": "Ekvivalent alder (t)",
+        "status": "AVFORSKALET",
+        "page": "Side {page} av {total}",
+        "generated": "Opprettet {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensorbevis",
+        "empty_register": "Ingen målinger i perioden.",
+        "device": "Enhet",
+        "sensor_kind": "Type",
+        "limit": "Grense",
+        "period_from": "Fra (UTC)",
+        "period_to": "Til (UTC)",
+        "reading_count": "Målinger",
+        "peak": "Høyeste verdi",
+        "lowest": "Laveste verdi",
+        "mean": "Middelverdi",
+        "over_limit": "Rapporterte overskridelser",
+        "csv_digest": "Integritetskode for CSV-filen (SHA-256)",
+        "summarised": "Timesammendrag av {total} målinger. CSV-filen har hver måling.",
+        "col_time": "Tid (UTC)",
+        "col_value": "Verdi",
+        "col_min": "Laveste",
+        "col_max": "Høyeste",
+        "col_count": "Målinger"
+      }
     }
   },
   "pdf_footer": {

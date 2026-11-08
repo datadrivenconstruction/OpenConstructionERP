@@ -1734,6 +1734,54 @@
           "refunded": "Återbetald"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Gjutprotokoll",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Gjutetapp",
+        "mix": "Recept",
+        "cast_at": "Gjuten",
+        "struck_at": "Avformad",
+        "target": "Målhållfasthet (MPa)",
+        "strength": "Hållfasthet vid avformning (MPa)",
+        "maturity": "Mognad vid avformning",
+        "struck_by": "Avformad av",
+        "reason": "Skäl till avformning under målhållfasthet",
+        "no_reason": "Avformad vid eller över målhållfasthet.",
+        "curve": "Temperatur och mognad",
+        "time": "Tid",
+        "temp": "Temperatur (°C)",
+        "index_c_h": "Mognad (°C·h)",
+        "index_h": "Ekvivalent ålder (h)",
+        "status": "AVFORMAD",
+        "page": "Sida {page} av {total}",
+        "generated": "Skapad {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensorbevis",
+        "empty_register": "Inga mätvärden under perioden.",
+        "device": "Enhet",
+        "sensor_kind": "Typ",
+        "limit": "Gräns",
+        "period_from": "Från (UTC)",
+        "period_to": "Till (UTC)",
+        "reading_count": "Mätvärden",
+        "peak": "Högsta värde",
+        "lowest": "Lägsta värde",
+        "mean": "Medelvärde",
+        "over_limit": "Rapporterade överskridanden",
+        "csv_digest": "Integritetskod för CSV-filen (SHA-256)",
+        "summarised": "Timsammanfattningar av {total} mätvärden. CSV-filen innehåller alla.",
+        "col_time": "Tid (UTC)",
+        "col_value": "Värde",
+        "col_min": "Lägsta",
+        "col_max": "Högsta",
+        "col_count": "Mätvärden"
+      }
     }
   },
   "pdf_footer": {

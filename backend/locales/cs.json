@@ -1734,6 +1734,54 @@
           "refunded": "Vráceno"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Protokol betonáže",
+        "element": "Prvek",
+        "sensor": "Senzor",
+        "pour": "Záběr",
+        "mix": "Receptura",
+        "cast_at": "Betonováno",
+        "struck_at": "Odbedněno",
+        "target": "Cílová pevnost (MPa)",
+        "strength": "Pevnost při odbednění (MPa)",
+        "maturity": "Zralost při odbednění",
+        "struck_by": "Odbednil",
+        "reason": "Důvod odbednění pod cílovou pevností",
+        "no_reason": "Odbedněno při cílové pevnosti nebo vyšší.",
+        "curve": "Teplota a zralost",
+        "time": "Čas",
+        "temp": "Teplota (°C)",
+        "index_c_h": "Zralost (°C·h)",
+        "index_h": "Ekvivalentní stáří (h)",
+        "status": "ODBEDNĚNO",
+        "page": "Strana {page} z {total}",
+        "generated": "Vytvořeno {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Důkaz ze senzoru",
+        "empty_register": "V období nejsou žádná měření.",
+        "device": "Zařízení",
+        "sensor_kind": "Druh",
+        "limit": "Limit",
+        "period_from": "Od (UTC)",
+        "period_to": "Do (UTC)",
+        "reading_count": "Měření",
+        "peak": "Nejvyšší hodnota",
+        "lowest": "Nejnižší hodnota",
+        "mean": "Průměr",
+        "over_limit": "Hlášená překročení",
+        "csv_digest": "Kontrolní kód souboru CSV (SHA-256)",
+        "summarised": "Hodinové souhrny z {total} měření. Soubor CSV obsahuje každé měření.",
+        "col_time": "Čas (UTC)",
+        "col_value": "Hodnota",
+        "col_min": "Min.",
+        "col_max": "Max.",
+        "col_count": "Měření"
+      }
     }
   },
   "pdf_footer": {

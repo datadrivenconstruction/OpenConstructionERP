@@ -1734,6 +1734,54 @@
           "refunded": "Tagastatud"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Betoneerimisprotokoll",
+        "element": "Element",
+        "sensor": "Andur",
+        "pour": "Betoneerimisosa",
+        "mix": "Retsept",
+        "cast_at": "Betoneeritud",
+        "struck_at": "Raketis eemaldatud",
+        "target": "Sihttugevus (MPa)",
+        "strength": "Tugevus raketise eemaldamisel (MPa)",
+        "maturity": "Küpsus raketise eemaldamisel",
+        "struck_by": "Eemaldaja",
+        "reason": "Alla sihttugevuse eemaldamise põhjus",
+        "no_reason": "Eemaldati sihttugevusel või üle selle.",
+        "curve": "Temperatuur ja küpsus",
+        "time": "Aeg",
+        "temp": "Temperatuur (°C)",
+        "index_c_h": "Küpsus (°C·h)",
+        "index_h": "Ekvivalentne vanus (h)",
+        "status": "EEMALDATUD",
+        "page": "Lk {page}/{total}",
+        "generated": "Loodud {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Anduri tõend",
+        "empty_register": "Perioodil näite pole.",
+        "device": "Seade",
+        "sensor_kind": "Liik",
+        "limit": "Piir",
+        "period_from": "Alates (UTC)",
+        "period_to": "Kuni (UTC)",
+        "reading_count": "Näidud",
+        "peak": "Suurim väärtus",
+        "lowest": "Väikseim väärtus",
+        "mean": "Keskmine",
+        "over_limit": "Teatatud ületused",
+        "csv_digest": "CSV-faili kontrollkood (SHA-256)",
+        "summarised": "Tunnikokkuvõtted {total} näidust. CSV-fail sisaldab kõiki näite.",
+        "col_time": "Aeg (UTC)",
+        "col_value": "Väärtus",
+        "col_min": "Väikseim",
+        "col_max": "Suurim",
+        "col_count": "Näidud"
+      }
     }
   },
   "pdf_footer": {

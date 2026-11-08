@@ -1718,6 +1718,54 @@
           "refunded": "已退款"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "浇筑记录",
+        "element": "构件",
+        "sensor": "传感器",
+        "pour": "浇筑段",
+        "mix": "配合比",
+        "cast_at": "浇筑时间",
+        "struck_at": "拆模时间",
+        "target": "目标强度 (MPa)",
+        "strength": "拆模时强度 (MPa)",
+        "maturity": "拆模时成熟度",
+        "struck_by": "拆模人",
+        "reason": "低于目标强度拆模的原因",
+        "no_reason": "达到或超过目标强度时拆模。",
+        "curve": "温度与成熟度",
+        "time": "时间",
+        "temp": "温度 (°C)",
+        "index_c_h": "成熟度 (°C·h)",
+        "index_h": "等效龄期 (h)",
+        "status": "已拆模",
+        "page": "第 {page} / {total} 页",
+        "generated": "生成于 {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "传感器证据",
+        "empty_register": "此期间无读数。",
+        "device": "设备",
+        "sensor_kind": "类型",
+        "limit": "限值",
+        "period_from": "自 (UTC)",
+        "period_to": "至 (UTC)",
+        "reading_count": "读数",
+        "peak": "最高值",
+        "lowest": "最低值",
+        "mean": "平均值",
+        "over_limit": "已触发的超限",
+        "csv_digest": "CSV 文件完整性代码 (SHA-256)",
+        "summarised": "按小时汇总 {total} 条读数。CSV 文件包含全部读数。",
+        "col_time": "时间 (UTC)",
+        "col_value": "值",
+        "col_min": "最低",
+        "col_max": "最高",
+        "col_count": "读数"
+      }
     }
   },
   "pdf_footer": {
@@ -2608,5 +2656,20 @@
       "file_missing_fix": "请重新上传照片，或从备份中恢复"
     }
   },
-  "capital_plan": {"export": {"sheet": "投资计划","col": {"title": "项目","priority": "优先级","status": "状态","total": "总费用"},"row": {"envelope": "预算额度","demand": "需求","gap": "缺口"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "投资计划",
+      "col": {
+        "title": "项目",
+        "priority": "优先级",
+        "status": "状态",
+        "total": "总费用"
+      },
+      "row": {
+        "envelope": "预算额度",
+        "demand": "需求",
+        "gap": "缺口"
+      }
+    }
+  }
 }

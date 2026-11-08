@@ -1594,6 +1594,54 @@
           "Summary": "الملخص"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "سجل الصب",
+        "element": "العنصر",
+        "sensor": "المستشعر",
+        "pour": "مرحلة الصب",
+        "mix": "الخلطة",
+        "cast_at": "تاريخ الصب",
+        "struck_at": "تاريخ فك القوالب",
+        "target": "المقاومة المستهدفة (MPa)",
+        "strength": "المقاومة عند الفك (MPa)",
+        "maturity": "النضج عند الفك",
+        "struck_by": "فكّه",
+        "reason": "سبب الفك دون المقاومة المستهدفة",
+        "no_reason": "فُك عند المقاومة المستهدفة أو أعلى.",
+        "curve": "الحرارة والنضج",
+        "time": "الوقت",
+        "temp": "درجة الحرارة (°C)",
+        "index_c_h": "النضج (°C·h)",
+        "index_h": "العمر المكافئ (h)",
+        "status": "تم الفك",
+        "page": "صفحة {page} من {total}",
+        "generated": "أُنشئ {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "دليل المستشعر",
+        "empty_register": "لا قراءات في هذه الفترة.",
+        "device": "الجهاز",
+        "sensor_kind": "النوع",
+        "limit": "الحد",
+        "period_from": "من (UTC)",
+        "period_to": "إلى (UTC)",
+        "reading_count": "القراءات",
+        "peak": "أعلى قيمة",
+        "lowest": "أدنى قيمة",
+        "mean": "المتوسط",
+        "over_limit": "تجاوزات الحد المسجلة",
+        "csv_digest": "رمز سلامة ملف CSV (SHA-256)",
+        "summarised": "ملخصات ساعية لـ {total} قراءة. ملف CSV يحوي كل قراءة.",
+        "col_time": "الوقت (UTC)",
+        "col_value": "القيمة",
+        "col_min": "الأدنى",
+        "col_max": "الأعلى",
+        "col_count": "القراءات"
+      }
     }
   },
   "cost_control": {
@@ -2633,5 +2681,20 @@
       "file_missing_fix": "ارفع الصورة مجدداً أو استعدها من نسخة احتياطية"
     }
   },
-  "capital_plan": {"export": {"sheet": "خطة رأسمالية", "col": {"title": "المشروع", "priority": "الأولوية", "status": "الحالة", "total": "إجمالي التكلفة"}, "row": {"envelope": "سقف الميزانية", "demand": "الطلب", "gap": "العجز"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "خطة رأسمالية",
+      "col": {
+        "title": "المشروع",
+        "priority": "الأولوية",
+        "status": "الحالة",
+        "total": "إجمالي التكلفة"
+      },
+      "row": {
+        "envelope": "سقف الميزانية",
+        "demand": "الطلب",
+        "gap": "العجز"
+      }
+    }
+  }
 }

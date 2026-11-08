@@ -148,6 +148,26 @@ def _vibration_limit(
     return Limit(value=Decimal(str(round(value, 2))), source=source, confidence=str(table.get("confidence", "H")))
 
 
+def limit_grading(country: str | None) -> dict[str, Any]:
+    """How the country grades noise and vibration limits, for device forms.
+
+    ``noise_zones`` and ``building_classes`` list the keys the country data grades by (empty where it
+    does not); ``noise_source`` and ``vibration_source`` name the text the ungraded limit comes from.
+    """
+    data = (_data().get("countries") or {}).get((country or "").upper(), {})
+    zones = data.get("noise_zones")
+    table = data.get("vibration_by_frequency")
+    lines = table.get("lines") if isinstance(table, dict) else None
+    noise = sensor_limit(country, "noise")
+    vibration = sensor_limit(country, "vibration")
+    return {
+        "noise_zones": sorted(zones) if isinstance(zones, dict) else [],
+        "building_classes": sorted(lines) if isinstance(lines, dict) else [],
+        "noise_source": noise.source if noise else "",
+        "vibration_source": vibration.source if vibration else "",
+    }
+
+
 def night_noise_by_ordinance(country: str | None) -> bool:
     """True where the data says a local ordinance, not a national figure, sets the night noise limit."""
     row = _row(country, "noise_dba_night")

@@ -1734,6 +1734,54 @@
           "refunded": "Terugbetaald"
         }
       }
+    },
+    "site_sensors_pour_record": {
+      "strings": {
+        "title": "Stortrapport",
+        "element": "Element",
+        "sensor": "Sensor",
+        "pour": "Stort",
+        "mix": "Mengsel",
+        "cast_at": "Gestort op",
+        "struck_at": "Ontkist op",
+        "target": "Doelsterkte (MPa)",
+        "strength": "Sterkte bij ontkisten (MPa)",
+        "maturity": "Rijpheid bij ontkisten",
+        "struck_by": "Ontkist door",
+        "reason": "Reden voor ontkisten onder doelsterkte",
+        "no_reason": "Ontkist bij of boven doelsterkte.",
+        "curve": "Temperatuur en rijpheid",
+        "time": "Tijd",
+        "temp": "Temperatuur (°C)",
+        "index_c_h": "Rijpheid (°C·u)",
+        "index_h": "Equivalente leeftijd (u)",
+        "status": "ONTKIST",
+        "page": "Pagina {page} van {total}",
+        "generated": "Gemaakt {timestamp}"
+      }
+    },
+    "site_sensors_evidence": {
+      "strings": {
+        "register_title": "Sensorbewijs",
+        "empty_register": "Geen metingen in deze periode.",
+        "device": "Apparaat",
+        "sensor_kind": "Soort",
+        "limit": "Grens",
+        "period_from": "Van (UTC)",
+        "period_to": "Tot (UTC)",
+        "reading_count": "Metingen",
+        "peak": "Hoogste waarde",
+        "lowest": "Laagste waarde",
+        "mean": "Gemiddelde",
+        "over_limit": "Gemelde overschrijdingen",
+        "csv_digest": "Integriteitscode van het CSV-bestand (SHA-256)",
+        "summarised": "Uursamenvattingen van {total} metingen. Het CSV-bestand bevat elke meting.",
+        "col_time": "Tijd (UTC)",
+        "col_value": "Waarde",
+        "col_min": "Laagste",
+        "col_max": "Hoogste",
+        "col_count": "Metingen"
+      }
     }
   },
   "pdf_footer": {
@@ -2604,5 +2652,20 @@
       "file_missing_fix": "Upload de foto opnieuw of herstel hem vanuit een back-up"
     }
   },
-  "capital_plan": {"export": {"sheet": "Investeringsplan","col": {"title": "Project","priority": "Prioriteit","status": "Status","total": "Totale kosten"},"row": {"envelope": "Jaarbudget","demand": "Vraag","gap": "Tekort"}}}
+  "capital_plan": {
+    "export": {
+      "sheet": "Investeringsplan",
+      "col": {
+        "title": "Project",
+        "priority": "Prioriteit",
+        "status": "Status",
+        "total": "Totale kosten"
+      },
+      "row": {
+        "envelope": "Jaarbudget",
+        "demand": "Vraag",
+        "gap": "Tekort"
+      }
+    }
+  }
 }
