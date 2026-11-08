@@ -6,10 +6,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.decimal_types import Decimal6_2, Decimal8_2, Decimal10_4, Decimal14_4
 
@@ -43,6 +43,14 @@ class DeviceCreate(BaseModel):
     pour_ref: str = Field(default="", max_length=200)
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _bim_element_needs_model(self) -> Self:
+        if self.bim_element_id is not None and self.bim_model_id is None:
+            raise ValueError("bim_element_needs_model")
+        return self
 
 
 class DeviceUpdate(BaseModel):
@@ -57,6 +65,8 @@ class DeviceUpdate(BaseModel):
     pour_ref: str | None = Field(default=None, max_length=200)
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class DeviceResponse(BaseModel):
@@ -81,6 +91,8 @@ class DeviceResponse(BaseModel):
     pour_ref: str
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class TokenResponse(BaseModel):
@@ -163,6 +175,14 @@ class StripCreate(BaseModel):
     schedule_activity_id: UUID | None = None
     target_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
     planned_at: datetime | None = None
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _bim_element_needs_model(self) -> Self:
+        if self.bim_element_id is not None and self.bim_model_id is None:
+            raise ValueError("bim_element_needs_model")
+        return self
 
 
 class StrikeIn(BaseModel):
@@ -183,6 +203,8 @@ class StripResponse(BaseModel):
     struck_at: datetime | None = None
     strength_at_strike_mpa: Decimal | None = None
     status: str
+    bim_model_id: UUID | None = None
+    bim_element_id: UUID | None = None
 
 
 class AlertListResponse(BaseModel):

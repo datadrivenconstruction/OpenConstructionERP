@@ -6,7 +6,9 @@ Payload built by ``SiteSensorsService.validation_payload``::
 
     {"devices": [{"id", "code", "active", "offline"}],
      "exceedances": [{"id", "device", "status", "value", "limit"}],
-     "strips": [{"id", "element", "struck", "target_mpa", "strength_at_strike_mpa"}]}
+     "strips": [{"id", "element", "struck", "target_mpa", "strength_at_strike_mpa"}],
+     "evidence": [{"id", "device", "sha256", "readings", "filed"}],
+     "bim_links": [{"id", "label", "model_id", "element_id"}]}
 
 Each result carries ``details.message_key`` and its parameters for the client.
 """
@@ -121,7 +123,47 @@ class StrikeAfterTargetStrength(_SensorRule):
         )
 
 
-SENSOR_RULES: tuple[type[_SensorRule], ...] = (SensorOnline, ExceedanceAcknowledged, StrikeAfterTargetStrength)
+class EvidenceHashed(_SensorRule):
+    """A filed sensor export carries a SHA-256 of its CSV, holds readings and has both documents."""
+
+    key = "evidence_hashed"
+    rule_id = "site_sensors.evidence_hashed"
+    name = "Evidence Hashed"
+    description = "Every sensor evidence export has an integrity code, readings and both documents filed."
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    rows_key = "evidence"
+    text = "Evidence from {device} has no valid integrity code, no readings or a missing document"
+
+    def check(self, row: dict[str, Any]) -> RuleResult | None:
+        digest = str(row.get("sha256") or "")
+        valid = len(digest) == 64 and all(c in "0123456789abcdef" for c in digest)
+        ok = valid and int(row.get("readings") or 0) > 0 and bool(row.get("filed"))
+        return self._result(str(row.get("id")), ok, device=row.get("device", ""))
+
+
+class BimLinkComplete(_SensorRule):
+    """A device or strike that names a BIM element also names the model the element is in."""
+
+    key = "bim_link_complete"
+    rule_id = "site_sensors.bim_link_complete"
+    name = "BIM Link Complete"
+    description = "A BIM element link always carries its model."
+    category = RuleCategory.CONSISTENCY
+    rows_key = "bim_links"
+    text = "{label} links a BIM element without a model"
+
+    def check(self, row: dict[str, Any]) -> RuleResult | None:
+        return self._result(str(row.get("id")), bool(row.get("model_id")), label=row.get("label", ""))
+
+
+SENSOR_RULES: tuple[type[_SensorRule], ...] = (
+    SensorOnline,
+    ExceedanceAcknowledged,
+    StrikeAfterTargetStrength,
+    EvidenceHashed,
+    BimLinkComplete,
+)
 
 
 def register_sensor_rules() -> None:

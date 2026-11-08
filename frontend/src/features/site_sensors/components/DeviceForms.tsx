@@ -17,6 +17,7 @@ import {
   type SensorDevice,
   type SensorKind,
 } from '../api';
+import { BimElementSelect, type BimLink } from './BimElementSelect';
 import { KIND_LABELS, KIND_ORDER, isoFromLocal, localDateTimeValue } from '../sensorData';
 
 const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
@@ -37,6 +38,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
   const [mixId, setMixId] = useState('');
   const [pourRef, setPourRef] = useState('');
   const [castAt, setCastAt] = useState('');
+  const [bim, setBim] = useState<BimLink>({ modelId: '', elementId: '' });
 
   const mixQ = useQuery({
     queryKey: ['site-sensors', 'mixes', projectId],
@@ -52,6 +54,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
         name: name.trim(),
         kind,
         limit_value: limit.trim() || null,
+        ...(bim.modelId ? { bim_model_id: bim.modelId, bim_element_id: bim.elementId || null } : {}),
         ...(kind === 'concrete_maturity'
           ? { mix_id: mixId || null, pour_ref: pourRef.trim(), cast_at: isoFromLocal(castAt) }
           : {}),
@@ -61,6 +64,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
       setName('');
       setLimit('');
       setPourRef('');
+      setBim({ modelId: '', elementId: '' });
       refresh();
     },
     onError,
@@ -116,6 +120,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
               {t('site_sensors.forms.limit', { defaultValue: 'Limit (blank = country default)' })}
               <input type="number" step="any" value={limit} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
             </label>
+            <BimElementSelect projectId={projectId} value={bim} onChange={setBim} />
             {kind === 'concrete_maturity' && (
               <>
                 <label className={LABEL}>

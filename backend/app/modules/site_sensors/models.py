@@ -77,6 +77,9 @@ class SensorDevice(Base):
     pour_ref: Mapped[str] = mapped_column(String(200), nullable=False, default="", server_default="")
     cast_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     schedule_activity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Soft references to the BIM element the device sits on or measures; the model is kept with the element.
+    bim_model_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    bim_element_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -182,6 +185,8 @@ class FormworkStrip(Base):
     struck_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     strength_at_strike_mpa: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="planned", server_default="planned")
+    bim_model_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    bim_element_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
         return f"<FormworkStrip {self.element} {self.status}>"

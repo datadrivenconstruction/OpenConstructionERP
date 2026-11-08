@@ -39,6 +39,8 @@ export interface SensorDevice {
   pour_ref: string;
   cast_at: string | null;
   schedule_activity_id: string | null;
+  bim_model_id: string | null;
+  bim_element_id: string | null;
 }
 
 export interface SensorDeviceInput {
@@ -51,6 +53,8 @@ export interface SensorDeviceInput {
   mix_id?: string | null;
   pour_ref?: string;
   cast_at?: string | null;
+  bim_model_id?: string | null;
+  bim_element_id?: string | null;
 }
 
 export interface SensorMix {
@@ -113,6 +117,8 @@ export interface FormworkStrip {
   struck_at: string | null;
   strength_at_strike_mpa: string | null;
   status: string;
+  bim_model_id: string | null;
+  bim_element_id: string | null;
 }
 
 export interface SensorSummary {
