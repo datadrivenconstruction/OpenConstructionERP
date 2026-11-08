@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.3.0',
+    date: '2026-11-08',
+    tag: 'NEW',
+    summary:
+      'A courses page with photos, country flags and filters by country, topic, level and length. Site sensors show when concrete is strong enough to strike and feed the schedule and the daily diary.',
+  },
+  {
     version: '19.2.0',
     date: '2026-11-06',
     tag: 'NEW',

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.3.0] - 2026-11-08
+
+### Added
+
+- Courses page with four columns, a photo per course, the country each course is set in, and filters by country, topic, level, access and length.
+- Site sensors: calibrated concrete strength with a strike-ready signal, linked to the schedule, daily diary, inspections and safety.
+
+### Fixed
+
+- A contributor contact address in CONTRIBUTORS.md.
+
 ## [19.2.0] - 2026-11-06
 
 ### Added
