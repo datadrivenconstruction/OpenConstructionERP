@@ -167,6 +167,23 @@ class SiteSensorsService:
             strip.strength_at_strike_mpa = Decimal(str(est["strength_mpa"])).quantize(Decimal("0.01"))
         strip.status = "struck"
         await self.session.flush()
+        from app.modules.site_sensors.events import EVENT_STRIP_STRUCK
+
+        event_bus.publish_detached(
+            EVENT_STRIP_STRUCK,
+            {
+                "strip_id": str(strip.id),
+                "device_id": str(strip.device_id),
+                "project_id": str(strip.project_id),
+                "element": strip.element,
+                "struck_at": when.isoformat(),
+                "strength_mpa": float(strip.strength_at_strike_mpa)
+                if strip.strength_at_strike_mpa is not None
+                else None,
+                "target_mpa": float(strip.target_strength_mpa),
+            },
+            source_module="site_sensors",
+        )
         return strip
 
     # ── Ingest ──────────────────────────────────────────────────────────

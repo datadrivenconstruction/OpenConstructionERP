@@ -1410,3 +1410,22 @@ async def diary_dashboard(
         reality_captures_total=reality_total,
         diaries_by_date=by_date,
     )
+
+
+@router.post("/diaries/{diary_id}/sensor-weather", response_model=DailyDiaryResponse)
+async def refresh_sensor_weather(
+    diary_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("daily_diary.update")),
+    service: DailyDiaryService = Depends(_get_service),
+) -> DailyDiaryResponse:
+    """Pull the day's min and max from the project's weather sensors into the diary."""
+    from app.modules.daily_diary.sensor_links import apply_sensor_weather
+
+    diary = await service.get_diary(diary_id)
+    await verify_project_access(diary.project_id, user_id, session)
+    await apply_sensor_weather(session, diary)
+    await session.commit()
+    await session.refresh(diary)
+    return DailyDiaryResponse.model_validate(diary)

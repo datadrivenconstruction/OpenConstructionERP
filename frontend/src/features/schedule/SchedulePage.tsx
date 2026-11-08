@@ -73,6 +73,7 @@ import { DependencyEditor } from './DependencyEditor';
 import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
 import { ConfidenceBadge, activityConfidence } from './planConfidence';
+import { StrikeReadyChip } from './StrikeReadyChip';
 import {
   generateInWindow,
   generationStamp,
@@ -833,6 +834,7 @@ function GanttChart({
                       const confidence = activityConfidence(activity.metadata);
                       return confidence ? <ConfidenceBadge confidence={confidence} /> : null;
                     })()}
+                    <StrikeReadyChip activityId={activity.id} metadata={activity.metadata} />
                     {hasEstimatedDuration(activity) && (
                       <span
                         title={t('schedule.duration_estimated_tooltip', {

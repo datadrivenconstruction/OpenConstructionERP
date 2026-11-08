@@ -61,7 +61,21 @@ async def _on_threshold_alert(event: Event) -> None:
         logger.debug("safety: kpi_recompute on threshold_alert failed", exc_info=True)
 
 
+async def _on_sensor_exceedance(event: Event) -> None:
+    """``site_sensors.limit.exceeded`` -> observation or incident, per project setting."""
+    from app.database import async_session_factory
+    from app.modules.safety.sensor_links import record_exceedance
+
+    try:
+        async with async_session_factory() as session:
+            if await record_exceedance(session, event.data or {}) is not None:
+                await session.commit()
+    except Exception:
+        logger.debug("safety: sensor exceedance record failed", exc_info=True)
+
+
 def register_subscribers() -> None:
     """Idempotently subscribe the safety module's cross-module handlers."""
     event_bus.subscribe_once("safety.threshold_alert_triggered", _on_threshold_alert)
-    logger.info("Safety: 1 cross-module subscriber(s) registered")
+    event_bus.subscribe_once("site_sensors.limit.exceeded", _on_sensor_exceedance)
+    logger.info("Safety: 2 cross-module subscriber(s) registered")

@@ -3086,3 +3086,64 @@ router.include_router(_import_source_router)
 from app.modules.schedule.progress_sheet_router import progress_sheet_router as _progress_sheet_router  # noqa: E402
 
 router.include_router(_progress_sheet_router)
+
+
+# ── Formwork strike suggestions from site sensors (human confirms) ─────────
+
+
+async def _resolve_strike(
+    activity_id: uuid.UUID,
+    accept: bool,
+    user_id: str,
+    payload: dict,
+    session: SessionDep,
+    service: ScheduleService,
+) -> ActivityResponse:
+    from app.modules.schedule.models import Activity as _Activity
+    from app.modules.schedule.sensor_links import resolve_strike_suggestion
+
+    activity = await session.get(_Activity, activity_id)
+    if activity is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+    await _verify_schedule_owner(service, session, activity.schedule_id, user_id, payload)
+    try:
+        activity = await resolve_strike_suggestion(session, activity, accept=accept, user_id=user_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    await session.commit()
+    await session.refresh(activity)
+    return _activity_to_response(activity)
+
+
+@router.post(
+    "/activities/{activity_id}/strike-suggestion/accept",
+    response_model=ActivityResponse,
+    summary="Accept a formwork strike suggestion",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def accept_strike_suggestion(
+    activity_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Start the strike activity today and roll its successors."""
+    return await _resolve_strike(activity_id, True, _user_id, payload, session, service)
+
+
+@router.post(
+    "/activities/{activity_id}/strike-suggestion/dismiss",
+    response_model=ActivityResponse,
+    summary="Dismiss a formwork strike suggestion",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def dismiss_strike_suggestion(
+    activity_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Keep the planned dates; the suggestion is closed."""
+    return await _resolve_strike(activity_id, False, _user_id, payload, session, service)

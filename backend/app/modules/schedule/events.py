@@ -180,3 +180,21 @@ async def _record_schedule_progress(event: Event) -> None:
 
 
 event_bus.subscribe_once("fieldreports.report.submitted", _on_field_report_submitted)
+
+
+async def _on_strength_reached(event: Event) -> None:
+    """``site_sensors.strength.reached`` -> pending strike suggestion on the linked activity."""
+    data = event.data or {}
+    if not data.get("schedule_activity_id"):
+        return
+    from app.modules.schedule.sensor_links import record_strike_suggestion
+
+    try:
+        async with async_session_factory() as session:
+            if await record_strike_suggestion(session, data) is not None:
+                await session.commit()
+    except Exception:
+        logger.exception("site_sensors.strength.reached handler failed for strip=%s", data.get("strip_id"))
+
+
+event_bus.subscribe_once("site_sensors.strength.reached", _on_strength_reached)
