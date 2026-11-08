@@ -17,6 +17,7 @@ from app.modules.site_sensors.models import (
     ConcreteMix,
     FormworkStrip,
     SensorAlert,
+    SensorDevice,
     sensor_reading,
     sensor_reading_hourly,
 )
@@ -192,15 +193,47 @@ async def test_downsample_folds_old_raw_rows_into_hours_and_keeps_maturity(sessi
     assert after == pytest.approx(before, rel=0.03)
 
 
-async def test_demo_seed_gives_one_pour_at_strength_and_one_noise_exceedance(session) -> None:
+async def test_demo_seed_fills_a_project_idempotently_with_alerts_and_a_strike_ready_pour(session) -> None:
     project = await _project(session, "DE")
-    counts = await seed_site_sensors_demo(session, [project.id])
-    assert counts["devices"] == 5
-    assert await seed_site_sensors_demo(session, [project.id]) == {"devices": 0, "readings": 0, "alerts": 0}
+    now = datetime(2026, 11, 4, 12, tzinfo=UTC)
+    counts = await seed_site_sensors_demo(session, [project.id, project.id], now=now)
+    assert counts["devices"] == 9
+    assert counts["readings"] <= 2200
+    assert await seed_site_sensors_demo(session, [project.id], now=now) == {"devices": 0, "readings": 0, "alerts": 0}
+
     alerts = (await session.execute(select(SensorAlert).where(SensorAlert.project_id == project.id))).scalars().all()
-    kinds = sorted(a.kind for a in alerts)
-    assert kinds == ["exceedance", "strength_reached"]
+    exceed = [a for a in alerts if a.kind == "exceedance"]
+    assert len(exceed) == 6
+    assert [a.status for a in exceed].count("open") == 1
+    assert all(a.acknowledged_at is not None for a in exceed if a.status == "acknowledged")
+    assert any(a.kind == "offline" and a.status == "open" for a in alerts)
+    assert sum(a.kind == "strength_reached" for a in alerts) == 2
+
     strips = (
         (await session.execute(select(FormworkStrip).where(FormworkStrip.project_id == project.id))).scalars().all()
     )
-    assert sorted(s.status for s in strips) == ["planned", "planned", "released"]
+    assert sorted(s.status for s in strips) == ["planned", "released", "released", "struck"]
+    struck = next(s for s in strips if s.status == "struck")
+    assert struck.strength_at_strike_mpa >= struck.target_strength_mpa
+
+    rules = await run_rules(await SiteSensorsService(session).validation_payload(project.id))
+    failed = {r["rule_id"] for r in rules if not r["passed"]}
+    assert failed == {"site_sensors.sensor_online", "site_sensors.exceedance_acknowledged"}
+    assert any(r["passed"] for r in rules)
+
+
+async def test_demo_seed_replaces_the_earlier_small_seed_and_leaves_user_sensors_alone(session) -> None:
+    mine = await _project(session, "US")
+    await SiteSensorsService(session).create_device(DeviceCreate(project_id=mine.id, code="MY-1", kind="noise"))
+    legacy = await _project(session, "US")
+    await SiteSensorsService(session).create_device(DeviceCreate(project_id=legacy.id, code="CM-01", kind="noise"))
+    counts = await seed_site_sensors_demo(session, [mine.id, legacy.id])
+    assert counts["devices"] == 9
+    codes = (await session.execute(select(SensorDevice.code).where(SensorDevice.project_id == mine.id))).scalars().all()
+    assert list(codes) == ["MY-1"]
+    wind = (
+        await session.execute(
+            select(SensorDevice).where(SensorDevice.project_id == legacy.id, SensorDevice.code == "WX-01")
+        )
+    ).scalar_one()
+    assert wind.unit == "mph"

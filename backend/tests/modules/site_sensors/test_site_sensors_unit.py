@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import random
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -15,6 +16,7 @@ from app.modules.site_sensors.maturity import (
     nurse_saul,
     strength_from_maturity,
 )
+from app.modules.site_sensors.seed import _ENV, _POURS, Spike, env_series, pour_series, reached_at
 from app.modules.site_sensors.validators import run_rules as run_sensor_rules
 
 T0 = datetime(2026, 10, 20, tzinfo=UTC)
@@ -108,3 +110,38 @@ async def test_equipment_rules_flag_each_condition() -> None:
         ("equipment_telematics.idle_threshold", "e2"),
         ("equipment_telematics.inside_geofence", "e3"),
     }
+
+
+NOW = datetime(2026, 11, 4, 12, tzinfo=UTC)
+LIMITS = dict.fromkeys(range(24), 70.0)
+
+
+def test_pours_one_struck_one_past_target_one_approaching() -> None:
+    reached = {}
+    for pour in _POURS:
+        rows = pour_series(pour, NOW, random.Random(pour.code))
+        reached[pour.code] = (reached_at(rows, 15.0), reached_at(rows, 25.0))
+    assert reached["CM-01"][0] is not None and reached["CM-01"][1] is not None
+    assert reached["CM-02"][0] is not None and reached["CM-02"][1] is None
+    assert reached["CM-03"] == (None, None)
+    first, _ = reached["CM-01"]
+    assert first < NOW - timedelta(days=9)
+
+
+def test_environment_series_is_deterministic_light_and_breaches_only_where_planned() -> None:
+    spikes = (Spike(8, 10, 1.12, 2, "x"), Spike(1, 10, 1.09, 1, None))
+    a = env_series("noise", NOW, 1, LIMITS, spikes, random.Random(7))
+    b = env_series("noise", NOW, 1, LIMITS, spikes, random.Random(7))
+    assert a == b
+    assert len(a) == 14 * 24 + 1
+    breaches = [t for t, v in a if v > 70.0]
+    assert len(breaches) == 3
+    assert {t.date() for t in breaches} == {(NOW - timedelta(days=8)).date(), (NOW - timedelta(days=1)).date()}
+
+
+def test_silent_sensor_stops_and_every_kind_stays_under_its_limit_without_a_spike() -> None:
+    for _code, _name, kind, step, _spikes in _ENV:
+        rows = env_series(kind, NOW, step, LIMITS, (), random.Random(3), stop_hours_ago=9)
+        assert rows[-1][0] <= NOW - timedelta(hours=9)
+        assert all(0 < v <= 70.0 for _, v in rows), kind
+        assert len(rows) <= 14 * 24 + 1
