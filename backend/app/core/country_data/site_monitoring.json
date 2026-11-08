@@ -7,8 +7,27 @@
   },
   "countries": {
     "DE": {
-      "noise_dba_day": {"value": "70", "source": "AVV Baulaerm 3.1.1 (a): areas with only commercial or industrial use, daytime 07:00-20:00", "confidence": "H"},
-      "noise_dba_night": {"value": "70", "source": "AVV Baulaerm 3.1.1 (a), night 20:00-07:00", "confidence": "H"},
+      "noise_dba_day": {"value": "55", "source": "AVV Baulaerm 3.1.1 (d): predominantly residential areas, daytime 07:00-20:00", "confidence": "H"},
+      "noise_dba_night": {"value": "40", "source": "AVV Baulaerm 3.1.1 (d): predominantly residential areas, night 20:00-07:00", "confidence": "H"},
+      "noise_zone_default": "d",
+      "noise_zones": {
+        "a": {"day": "70", "night": "70", "source": "AVV Baulaerm 3.1.1 (a): only commercial or industrial use", "confidence": "H"},
+        "b": {"day": "65", "night": "50", "source": "AVV Baulaerm 3.1.1 (b): predominantly commercial use", "confidence": "H"},
+        "c": {"day": "60", "night": "45", "source": "AVV Baulaerm 3.1.1 (c): mixed commercial and residential use", "confidence": "H"},
+        "d": {"day": "55", "night": "40", "source": "AVV Baulaerm 3.1.1 (d): predominantly residential", "confidence": "H"},
+        "e": {"day": "50", "night": "35", "source": "AVV Baulaerm 3.1.1 (e): exclusively residential", "confidence": "H"},
+        "f": {"day": "45", "night": "35", "source": "AVV Baulaerm 3.1.1 (f): spa areas, hospitals and care homes", "confidence": "H"}
+      },
+      "vibration_by_frequency": {
+        "source": "DIN 4150-3 table 1, foundation",
+        "confidence": "H",
+        "default_line": "2",
+        "lines": {
+          "1": {"label": "commercial and industrial buildings", "points": [[1, 20], [10, 20], [50, 40], [100, 50]]},
+          "2": {"label": "residential buildings", "points": [[1, 5], [10, 5], [50, 15], [100, 20]]},
+          "3": {"label": "sensitive and listed buildings", "points": [[1, 3], [10, 3], [50, 8], [100, 10]]}
+        }
+      },
       "dust_pm10_ugm3_24h": {"value": "50", "source": "39. BImSchV para 4 (Directive 2008/50/EC annex XI), 24 hour mean", "confidence": "H"},
       "vibration_ppv_mms": {"value": "5", "source": "DIN 4150-3 table 1 line 2, residential buildings, foundation, below 10 Hz", "confidence": "H"},
       "working_hours": {"value": "07:00-20:00", "source": "AVV Baulaerm 3.1.2, daytime", "confidence": "H"},
@@ -33,6 +52,7 @@
     },
     "US": {
       "noise_dba_day": {"value": "90", "source": "FTA Transit Noise and Vibration Impact Assessment Manual (2018) table 7-2, residential, daytime 1 hour Leq", "confidence": "M"},
+      "noise_dba_night": {"value": "", "source": "Local noise ordinance sets the night limit", "confidence": "M", "ordinance": true},
       "dust_pm10_ugm3_24h": {"value": "150", "source": "40 CFR 50.6, NAAQS PM10 24 hour", "confidence": "H"},
       "vibration_ppv_mms": {"value": "12.7", "source": "FTA manual (2018) table 7-5, reinforced concrete, steel or timber, 0.5 in/s", "confidence": "M"},
       "working_hours": {"value": "07:00-19:00", "source": "Typical municipal noise ordinance; the local ordinance sets the hours", "confidence": "M"},

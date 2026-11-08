@@ -57,9 +57,10 @@ async def test_dust_above_the_country_limit_opens_one_alert_until_acknowledged(s
     report = await service.ingest(
         device, [(t0, 30.0), (t0 + timedelta(hours=1), 61.0), (t0 + timedelta(hours=2), 72.0)]
     )
-    assert report == {"accepted": 3, "exceedances": 2, "strips_released": 0}
+    # PM10 is compared as its 24 h rolling mean: 30, 45.5, 54.33.
+    assert report == {"accepted": 3, "exceedances": 1, "strips_released": 0}
     [alert] = (await session.execute(select(SensorAlert).where(SensorAlert.device_id == device.id))).scalars().all()
-    assert alert.value == 72.0 and alert.limit_value == 50.0
+    assert alert.value == pytest.approx(54.33, abs=0.01) and alert.limit_value == 50.0
     assert "39. BImSchV" in alert.limit_source
 
     failed = [r for r in await run_rules(await service.validation_payload(project.id)) if not r["passed"]]
@@ -94,6 +95,8 @@ async def test_offline_sensor_is_flagged_and_a_new_reading_closes_it(session) ->
     assert await service.sweep_offline(project.id) == 0
     failed = [r["rule_id"] for r in await run_rules(await service.validation_payload(project.id)) if not r["passed"]]
     assert failed == ["site_sensors.sensor_online"]
+    lines = await service.sparklines(project.id)
+    assert lines[str(device.id)]["limit"] == 5.0 and len(lines[str(device.id)]["points"]) == 24
     await service.ingest(device, [(datetime.now(UTC), 1.2)])
     assert (await service.repo.open_alert(device.id, "offline")) is None
 
@@ -104,6 +107,7 @@ async def test_maturity_releases_the_strike_and_an_early_strike_is_flagged(sessi
     mix = ConcreteMix(
         project_id=project.id,
         code="C30",
+        datum_temp_c=Decimal("-10"),
         curve_a=Decimal("-43.1"),
         curve_b=Decimal("18.4"),
         strip_strength_mpa=Decimal("15"),
@@ -150,14 +154,19 @@ async def test_maturity_releases_the_strike_and_an_early_strike_is_flagged(sessi
     reached = (await session.execute(select(SensorAlert).where(SensorAlert.kind == "strength_reached"))).scalars().all()
     assert [a.device_id for a in reached] == [warm.id]
 
-    await service.strike(cold_strip.id, cast + timedelta(hours=60))
+    with pytest.raises(ValueError, match="strike_reason_required"):
+        await service.strike(cold_strip.id, cast + timedelta(hours=60))
+    await service.strike(cold_strip.id, cast + timedelta(hours=60), "Back-propped, cube 15.6 MPa", project.owner_id)
     await service.strike(warm_strip.id, cast + timedelta(hours=60))
     failed = [r for r in await run_rules(await service.validation_payload(project.id)) if not r["passed"]]
-    assert [(r["rule_id"], r["element_ref"]) for r in failed] == [
-        ("site_sensors.strike_after_target_strength", str(cold_strip.id))
-    ]
+    assert "site_sensors.strike_after_target_strength" not in {r["rule_id"] for r in failed}
     struck = (await session.execute(select(FormworkStrip).where(FormworkStrip.id == cold_strip.id))).scalar_one()
     assert struck.strength_at_strike_mpa < Decimal("15")
+    assert struck.strike_reason == "Back-propped, cube 15.6 MPa" and struck.struck_by == project.owner_id
+    record = await service.pour_record(cold_strip.id)
+    assert record["strike_reason"].startswith("Back-propped") and record["series"]
+    ctx = await service.context(project.id)
+    assert ctx["unit_system"] == "metric" and ctx["strike_ready"] == []
 
 
 async def test_downsample_folds_old_raw_rows_into_hours_and_keeps_maturity(session) -> None:

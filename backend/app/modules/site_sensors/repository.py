@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.site_sensors.models import (
+    CalibrationPoint,
     SensorAlert,
     SensorDevice,
     sensor_reading,
@@ -38,11 +39,17 @@ class SiteSensorsRepository:
         stmt = select(SensorDevice).where(SensorDevice.token_hash == token_hash)
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def insert_readings(self, device_id: uuid.UUID, rows: list[tuple[datetime, float]]) -> None:
+    async def insert_readings(
+        self,
+        device_id: uuid.UUID,
+        rows: list[tuple[datetime, float]],
+        frequencies: dict[datetime, float] | None = None,
+    ) -> None:
         if not rows:
             return
+        freq = frequencies or {}
         stmt = pg_insert(sensor_reading).values(
-            [{"device_id": device_id, "recorded_at": t, "value": v} for t, v in rows]
+            [{"device_id": device_id, "recorded_at": t, "value": v, "frequency_hz": freq.get(t)} for t, v in rows]
         )
         await self.session.execute(stmt.on_conflict_do_nothing(index_elements=["device_id", "recorded_at"]))
 
@@ -107,6 +114,27 @@ class SiteSensorsRepository:
         await self.session.execute(ins)
         await self.session.execute(delete(r).where(r.c.recorded_at < before))
         return int(count)
+
+    async def calibration(self, mix_id: uuid.UUID) -> list[CalibrationPoint]:
+        stmt = (
+            select(CalibrationPoint).where(CalibrationPoint.mix_id == mix_id).order_by(CalibrationPoint.maturity_index)
+        )
+        return list((await self.session.execute(stmt)).scalars())
+
+    async def calibration_counts(self, mix_ids: list[uuid.UUID]) -> dict[uuid.UUID, int]:
+        if not mix_ids:
+            return {}
+        stmt = (
+            select(CalibrationPoint.mix_id, func.count())
+            .where(CalibrationPoint.mix_id.in_(mix_ids))
+            .group_by(CalibrationPoint.mix_id)
+        )
+        return {r[0]: int(r[1]) for r in (await self.session.execute(stmt)).all()}
+
+    async def replace_calibration(self, mix_id: uuid.UUID, points: list[CalibrationPoint]) -> None:
+        await self.session.execute(delete(CalibrationPoint).where(CalibrationPoint.mix_id == mix_id))
+        self.session.add_all(points)
+        await self.session.flush()
 
     async def open_alert(self, device_id: uuid.UUID, kind: str) -> SensorAlert | None:
         stmt = (

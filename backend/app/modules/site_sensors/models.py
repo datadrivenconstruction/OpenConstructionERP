@@ -5,6 +5,7 @@
 Tables:
     oe_site_sensors_device          - A sensor on a project (concrete, noise, dust, vibration, weather, water)
     oe_site_sensors_mix             - Strength-maturity curve of a concrete mix (ASTM C1074)
+    oe_site_sensors_calibration     - A mix's calibration cubes: maturity index against measured strength
     oe_site_sensors_reading         - Raw readings, compact: (device, time) -> value, no surrogate key
     oe_site_sensors_reading_hourly  - Hourly min / max / mean that raw readings are folded into
     oe_site_sensors_alert           - Exceedances, offline devices, strength reached; acknowledgement and links
@@ -77,6 +78,11 @@ class SensorDevice(Base):
     pour_ref: Mapped[str] = mapped_column(String(200), nullable=False, default="", server_default="")
     cast_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     schedule_activity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Noise: the zone the country grades limits by (DE AVV Baulaerm 3.1.1 a-f); blank is the country default.
+    noise_zone: Mapped[str] = mapped_column(String(4), nullable=False, default="", server_default="")
+    # Vibration: building class (DIN 4150-3 line 1-3) and the band used when a reading has no frequency.
+    building_class: Mapped[str] = mapped_column(String(4), nullable=False, default="", server_default="")
+    frequency_band: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -86,11 +92,13 @@ class SensorDevice(Base):
 
 
 class ConcreteMix(Base):
-    """A mix's strength-maturity relationship: ``S = a + b * log10(M)``, M in degC-hours.
+    """A mix's strength-maturity relationship: ``S = a + b * log10(index)``.
 
-    ``datum_temp_c`` is the Nurse-Saul datum temperature of ASTM C1074 (-10 degC
-    unless the mix was calibrated with another). The curve comes from the
-    mix's own calibration cubes; the platform ships no default curve.
+    ``method`` picks the index: ``nurse_saul`` (degC-hours above ``datum_temp_c``,
+    0 degC by default per ASTM C1074) or ``equivalent_age`` (hours at
+    ``reference_temp_c``, Arrhenius with ``activation_energy_kj_mol``). The
+    curve is fitted to the mix's own calibration cubes; ``fit_r2`` and the
+    calibrated index range come with the fit. The platform ships no default curve.
     """
 
     __tablename__ = "oe_site_sensors_mix"
@@ -100,7 +108,17 @@ class ConcreteMix(Base):
     )
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False, default="")
-    datum_temp_c: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False, default=Decimal("-10"))
+    datum_temp_c: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False, default=Decimal("0"))
+    method: Mapped[str] = mapped_column(String(20), nullable=False, default="nurse_saul", server_default="nurse_saul")
+    activation_energy_kj_mol: Mapped[Decimal] = mapped_column(
+        Numeric(6, 2), nullable=False, default=Decimal("40"), server_default="40"
+    )
+    reference_temp_c: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("20"), server_default="20"
+    )
+    fit_r2: Mapped[float | None] = mapped_column(Float, nullable=True)
+    calibrated_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    calibrated_max: Mapped[float | None] = mapped_column(Float, nullable=True)
     curve_a: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False)
     curve_b: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False)
     strip_strength_mpa: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
@@ -110,12 +128,28 @@ class ConcreteMix(Base):
         return f"<ConcreteMix {self.code}>"
 
 
+class CalibrationPoint(Base):
+    """One calibration cube result of a mix: the maturity index at test and the measured strength."""
+
+    __tablename__ = "oe_site_sensors_calibration"
+
+    mix_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_site_sensors_mix.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    maturity_index: Mapped[float] = mapped_column(Float, nullable=False)
+    strength_mpa: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
+    age_hours: Mapped[float | None] = mapped_column(Float, nullable=True)
+    note: Mapped[str] = mapped_column(String(200), nullable=False, default="", server_default="")
+
+
 sensor_reading = Table(
     "oe_site_sensors_reading",
     Base.metadata,
     Column("device_id", GUID(), ForeignKey("oe_site_sensors_device.id", ondelete="CASCADE"), primary_key=True),
     Column("recorded_at", DateTime(timezone=True), primary_key=True),
     Column("value", Float, nullable=False),
+    # Vibration: dominant frequency of the reading in Hz, when the sensor reports it.
+    Column("frequency_hz", Float, nullable=True),
 )
 
 sensor_reading_hourly = Table(
@@ -181,6 +215,9 @@ class FormworkStrip(Base):
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     struck_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     strength_at_strike_mpa: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    # Required when struck below target: the cube result or back-propping that justified it.
+    strike_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    struck_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="planned", server_default="planned")
 
     def __repr__(self) -> str:
