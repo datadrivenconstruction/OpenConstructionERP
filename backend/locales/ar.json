@@ -1623,6 +1623,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "دليل المستشعر",
+        "register_filename": "sensor-evidence",
         "empty_register": "لا قراءات في هذه الفترة.",
         "device": "الجهاز",
         "sensor_kind": "النوع",

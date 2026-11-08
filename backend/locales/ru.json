@@ -1602,6 +1602,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Данные датчика",
+        "register_filename": "dokazatelstva-datchikov",
         "empty_register": "За период показаний нет.",
         "device": "Устройство",
         "sensor_kind": "Тип",

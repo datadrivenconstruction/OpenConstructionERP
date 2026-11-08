@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Érzékelő bizonyíték",
+        "register_filename": "sensor-evidence",
         "empty_register": "Az időszakban nincs mérés.",
         "device": "Eszköz",
         "sensor_kind": "Fajta",

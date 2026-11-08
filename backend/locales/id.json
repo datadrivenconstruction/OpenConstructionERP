@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Bukti sensor",
+        "register_filename": "sensor-evidence",
         "empty_register": "Tidak ada pembacaan pada periode ini.",
         "device": "Perangkat",
         "sensor_kind": "Jenis",

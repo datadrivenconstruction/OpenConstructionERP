@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Дані датчика",
+        "register_filename": "dokazy-datchykiv",
         "empty_register": "За період показів немає.",
         "device": "Пристрій",
         "sensor_kind": "Тип",

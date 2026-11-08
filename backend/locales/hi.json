@@ -1779,6 +1779,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "सेंसर साक्ष्य",
+        "register_filename": "sensor-evidence",
         "empty_register": "इस अवधि में कोई रीडिंग नहीं।",
         "device": "उपकरण",
         "sensor_kind": "प्रकार",

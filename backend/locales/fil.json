@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Ebidensya ng sensor",
+        "register_filename": "sensor-evidence",
         "empty_register": "Walang reading sa panahong ito.",
         "device": "Device",
         "sensor_kind": "Uri",

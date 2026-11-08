@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "センサー証拠",
+        "register_filename": "sensor-evidence",
         "empty_register": "この期間の計測値はありません。",
         "device": "機器",
         "sensor_kind": "種類",

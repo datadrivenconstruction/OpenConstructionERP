@@ -1779,6 +1779,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Датчик дәлелі",
+        "register_filename": "sensor-evidence",
         "empty_register": "Кезеңде көрсеткіш жоқ.",
         "device": "Құрылғы",
         "sensor_kind": "Түрі",

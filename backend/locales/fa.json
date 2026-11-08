@@ -1623,6 +1623,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "مدرک حسگر",
+        "register_filename": "sensor-evidence",
         "empty_register": "در این بازه قرائتی نیست.",
         "device": "دستگاه",
         "sensor_kind": "نوع",

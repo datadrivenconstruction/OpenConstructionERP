@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Τεκμήριο αισθητήρα",
+        "register_filename": "sensor-evidence",
         "empty_register": "Δεν υπάρχουν μετρήσεις στην περίοδο.",
         "device": "Συσκευή",
         "sensor_kind": "Είδος",

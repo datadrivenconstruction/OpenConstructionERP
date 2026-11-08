@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Sensorbevis",
+        "register_filename": "sensorbevis",
         "empty_register": "Inga mätvärden under perioden.",
         "device": "Enhet",
         "sensor_kind": "Typ",

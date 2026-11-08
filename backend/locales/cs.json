@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Důkaz ze senzoru",
+        "register_filename": "dukazy-senzoru",
         "empty_register": "V období nejsou žádná měření.",
         "device": "Zařízení",
         "sensor_kind": "Druh",

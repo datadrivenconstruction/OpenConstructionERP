@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Preuve capteur",
+        "register_filename": "preuves-capteurs",
         "empty_register": "Aucune mesure sur la période.",
         "device": "Appareil",
         "sensor_kind": "Type",

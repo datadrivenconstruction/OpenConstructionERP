@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Anturitodiste",
+        "register_filename": "anturitodisteet",
         "empty_register": "Jaksolla ei ole mittauksia.",
         "device": "Laite",
         "sensor_kind": "Laji",

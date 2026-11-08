@@ -1779,6 +1779,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Сенсор далили",
+        "register_filename": "sensor-evidence",
         "empty_register": "Мезгилде көрсөткүч жок.",
         "device": "Түзмөк",
         "sensor_kind": "Түрү",

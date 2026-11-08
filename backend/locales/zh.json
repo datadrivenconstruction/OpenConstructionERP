@@ -1747,6 +1747,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "传感器证据",
+        "register_filename": "sensor-evidence",
         "empty_register": "此期间无读数。",
         "device": "设备",
         "sensor_kind": "类型",

@@ -1742,6 +1742,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Sensör kanıtı",
+        "register_filename": "sensor-kanitlari",
         "empty_register": "Bu dönemde ölçüm yok.",
         "device": "Cihaz",
         "sensor_kind": "Tür",

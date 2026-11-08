@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Bằng chứng cảm biến",
+        "register_filename": "sensor-evidence",
         "empty_register": "Không có số đo trong kỳ này.",
         "device": "Thiết bị",
         "sensor_kind": "Loại",

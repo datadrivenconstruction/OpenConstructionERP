@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Evidencia del sensor",
+        "register_filename": "evidencia-sensores",
         "empty_register": "No hay lecturas en este periodo.",
         "device": "Dispositivo",
         "sensor_kind": "Tipo",

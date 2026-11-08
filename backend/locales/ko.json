@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "센서 증거",
+        "register_filename": "sensor-evidence",
         "empty_register": "이 기간에 측정값이 없습니다.",
         "device": "장치",
         "sensor_kind": "종류",

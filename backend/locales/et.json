@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Anduri tõend",
+        "register_filename": "sensor-evidence",
         "empty_register": "Perioodil näite pole.",
         "device": "Seade",
         "sensor_kind": "Liik",

@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Dokaz senzora",
+        "register_filename": "sensor-evidence",
         "empty_register": "Nema očitanja u razdoblju.",
         "device": "Uređaj",
         "sensor_kind": "Vrsta",

@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Dovadă senzor",
+        "register_filename": "sensor-evidence",
         "empty_register": "Nicio citire în această perioadă.",
         "device": "Dispozitiv",
         "sensor_kind": "Tip",

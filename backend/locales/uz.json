@@ -1779,6 +1779,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Sensor dalili",
+        "register_filename": "sensor-evidence",
         "empty_register": "Davrda ko'rsatkich yo'q.",
         "device": "Qurilma",
         "sensor_kind": "Turi",

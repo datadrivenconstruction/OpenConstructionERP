@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Sensorbewijs",
+        "register_filename": "sensorbewijs",
         "empty_register": "Geen metingen in deze periode.",
         "device": "Apparaat",
         "sensor_kind": "Soort",

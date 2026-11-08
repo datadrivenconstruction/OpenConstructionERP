@@ -1763,6 +1763,7 @@
     "site_sensors_evidence": {
       "strings": {
         "register_title": "Dowód z czujnika",
+        "register_filename": "dowody-czujnikow",
         "empty_register": "Brak odczytów w tym okresie.",
         "device": "Urządzenie",
         "sensor_kind": "Rodzaj",
