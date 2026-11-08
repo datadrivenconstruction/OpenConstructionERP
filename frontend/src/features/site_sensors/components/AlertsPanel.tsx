@@ -12,6 +12,8 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { acknowledgeAlert, fetchSensorAlerts, linkAlert, type SensorAlert, type SensorDevice } from '../api';
+import { unitKeyOf } from '../units';
+import { useSensorUnits } from '../useSensorUnits';
 
 const FIELD = 'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary';
 
@@ -42,6 +44,8 @@ function AlertRow({ alert, device }: { alert: SensorAlert; device?: SensorDevice
     onError,
   });
 
+  const u = useSensorUnits(alert.project_id);
+  const unitKey = alert.kind === 'strength_reached' ? 'mpa' : unitKeyOf(device?.unit);
   const open = alert.status === 'open';
   const kindLabel =
     alert.kind === 'offline'
@@ -60,7 +64,7 @@ function AlertRow({ alert, device }: { alert: SensorAlert; device?: SensorDevice
         <span className="text-content-secondary">{kindLabel}</span>
         {alert.value !== null && alert.limit_value !== null && (
           <span className="tabular-nums text-content-secondary">
-            {alert.value} / {alert.limit_value} {device?.unit}
+            {u.num(alert.value, unitKey)} / {u.show(alert.limit_value, unitKey, device?.unit)}
           </span>
         )}
         <span className="ml-auto text-xs text-content-tertiary">

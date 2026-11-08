@@ -7,7 +7,7 @@
  * Decimals are strings; sensor values are floats.
  */
 
-import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
+import { API_BASE, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 import { fetchAllPages } from '@/shared/lib/apiHelpers';
 import type { RuleResult } from '@/shared/lib/ruleResults';
 
@@ -39,6 +39,12 @@ export interface SensorDevice {
   pour_ref: string;
   cast_at: string | null;
   schedule_activity_id: string | null;
+  noise_zone: string;
+  building_class: string;
+  frequency_band: string;
+  effective_limit: number | null;
+  limit_source: string;
+  night_limit_by_ordinance: boolean;
 }
 
 export interface SensorDeviceInput {
@@ -51,15 +57,67 @@ export interface SensorDeviceInput {
   mix_id?: string | null;
   pour_ref?: string;
   cast_at?: string | null;
+  noise_zone?: string;
+  building_class?: string;
+  frequency_band?: string;
 }
+
+export type MaturityMethod = 'nurse_saul' | 'equivalent_age';
 
 export interface SensorMix {
   id: string;
   project_id: string | null;
   code: string;
   name: string;
+  datum_temp_c: string;
+  method: MaturityMethod;
+  activation_energy_kj_mol: string;
+  reference_temp_c: string;
+  curve_a: string;
+  curve_b: string;
   strip_strength_mpa: string | null;
+  fit_r2: number | null;
+  calibrated_min: number | null;
+  calibrated_max: number | null;
 }
+
+export interface SensorMixInput {
+  project_id: string;
+  code: string;
+  name?: string;
+  method: MaturityMethod;
+  datum_temp_c: string;
+  activation_energy_kj_mol: string;
+  curve_a: string;
+  curve_b: string;
+  strip_strength_mpa?: string | null;
+}
+
+export interface CalibrationPoint {
+  maturity_index: number;
+  strength_mpa: string;
+  age_hours?: number | null;
+  note?: string;
+}
+
+export interface Calibration {
+  mix: SensorMix;
+  points: (CalibrationPoint & { id: string })[];
+}
+
+export interface SensorContext {
+  country: string;
+  unit_system: 'metric' | 'imperial';
+  strike_ready: {
+    strip_id: string;
+    element: string;
+    device_code: string;
+    strength_mpa: number | null;
+    target_strength_mpa: number;
+  }[];
+}
+
+export type Sparklines = Record<string, { points: (number | null)[]; limit: number | null }>;
 
 export interface MaturityPoint {
   t: string;
@@ -67,15 +125,27 @@ export interface MaturityPoint {
   temp: number;
 }
 
+export type StrengthStatus = 'ok' | 'below_range' | 'above_range' | 'uncalibrated' | null;
+
 export interface Maturity {
   device_id: string;
   mix_id: string | null;
+  method: MaturityMethod;
+  /** `c_h` for Nurse-Saul degree-hours, `h` for equivalent age. */
+  index_unit: 'c_h' | 'h';
   datum_temp_c: number;
+  activation_energy_kj_mol: number | null;
+  reference_temp_c: number | null;
   maturity_c_h: number;
   strength_mpa: number | null;
+  strength_status: StrengthStatus;
+  calibrated_min: number | null;
+  calibrated_max: number | null;
+  fit_r2: number | null;
   target_strength_mpa: number | null;
   target_maturity_c_h?: number;
   hours_to_target: number | null;
+  hours_to_target_range: [number, number] | null;
   series: MaturityPoint[];
 }
 
@@ -112,6 +182,8 @@ export interface FormworkStrip {
   released_at: string | null;
   struck_at: string | null;
   strength_at_strike_mpa: string | null;
+  strike_reason: string | null;
+  struck_by: string | null;
   status: string;
 }
 
@@ -203,7 +275,28 @@ export const fetchStrips = async (projectId: string) => {
 export const createStrip = (data: { device_id: string; element: string; target_strength_mpa?: string }) =>
   apiPost<FormworkStrip, typeof data>(`/v1/site_sensors/strips/`, data);
 
-export const strikeStrip = (id: string) => apiPost<FormworkStrip, Record<string, never>>(`/v1/site_sensors/strips/${id}/strike`, {});
+export const strikeStrip = (id: string, reason = '') =>
+  apiPost<FormworkStrip, { reason: string }>(`/v1/site_sensors/strips/${id}/strike`, { reason });
+
+export const downloadPourRecord = (id: string, format: 'csv' | 'pdf', lang: string, name: string) =>
+  downloadWithAuth(
+    `${API_BASE}/v1/site_sensors/strips/${id}/record?format=${format}&lang=${encodeURIComponent(lang)}`,
+    `pour-record-${name || id}.${format}`,
+  );
+
+export const createSensorMix = (data: SensorMixInput) =>
+  apiPost<SensorMix, SensorMixInput>(`/v1/site_sensors/mixes/`, data);
+
+export const fetchCalibration = (mixId: string) => apiGet<Calibration>(`/v1/site_sensors/mixes/${mixId}/calibration`);
+
+export const saveCalibration = (mixId: string, points: CalibrationPoint[]) =>
+  apiPut<Calibration, { points: CalibrationPoint[] }>(`/v1/site_sensors/mixes/${mixId}/calibration`, { points });
+
+export const fetchSensorContext = (projectId: string) =>
+  apiGet<SensorContext>(`/v1/site_sensors/context/?project_id=${encodeURIComponent(projectId)}`);
+
+export const fetchSparklines = (projectId: string) =>
+  apiGet<Sparklines>(`/v1/site_sensors/sparklines/?project_id=${encodeURIComponent(projectId)}`);
 
 export const fetchSensorSummary = (projectId?: string) =>
   apiGet<SensorSummary>(`/v1/site_sensors/summary/?${projectId ? `project_id=${encodeURIComponent(projectId)}` : ''}`);

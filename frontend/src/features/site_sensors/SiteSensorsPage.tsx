@@ -6,38 +6,70 @@
  */
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card, CardContent, CardHeader, EmptyState, ErrorState, PageHeader } from '@/shared/ui';
+import { Plus } from 'lucide-react';
+import { Badge, Button, Card, CardContent, CardHeader, EmptyState, ErrorState, PageHeader } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { RuleResultsList } from '@/shared/ui/RuleResultsList';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
-import { fmtNumber } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
-import { fetchSensorDevices, fetchSensorValidation, type SensorDevice } from './api';
-import { KIND_LABELS, groupByKind, isOnline, overLimit } from './sensorData';
+import { fetchSensorDevices, fetchSensorValidation, fetchSparklines, type SensorDevice } from './api';
+import { KIND_LABELS, groupByKind, isOnline, overLimit, sparkPath } from './sensorData';
+import { unitKeyOf } from './units';
+import { useSensorUnits } from './useSensorUnits';
+import { MixForms } from './components/MixForms';
 import { MaturityCard } from './components/MaturityCard';
 import { AlertsPanel } from './components/AlertsPanel';
 import { StripsPanel } from './components/StripsPanel';
 import { DeviceForms } from './components/DeviceForms';
 
-function DeviceRow({ device }: { device: SensorDevice }) {
+function Sparkline({ points, limit, label }: { points: (number | null)[]; limit: number | null; label: string }) {
+  const { path, limitY } = sparkPath(points, limit);
+  if (!path) return null;
+  return (
+    <svg width={96} height={24} viewBox="0 0 96 24" role="img" aria-label={label} className="shrink-0 overflow-visible">
+      {limitY !== null && (
+        <line x1={0} x2={96} y1={limitY} y2={limitY} stroke="currentColor" strokeDasharray="3 2" className="text-semantic-error" strokeWidth={1} />
+      )}
+      <path d={path} fill="none" stroke="var(--oe-blue, #0071e3)" strokeWidth={1.5} />
+    </svg>
+  );
+}
+
+function DeviceRow({ device, spark }: { device: SensorDevice; spark?: { points: (number | null)[]; limit: number | null } }) {
   const { t } = useTranslation();
+  const u = useSensorUnits(device.project_id);
   const online = isOnline(device);
-  const over = overLimit(device.last_value, device.limit_value);
+  const limit = device.effective_limit ?? (device.limit_value === null ? null : Number(device.limit_value));
+  const over = overLimit(device.last_value, limit);
+  const key = unitKeyOf(device.unit);
+  const source = device.limit_source === 'device'
+    ? t('site_sensors.devices.source_device', { defaultValue: 'set on the device' })
+    : device.limit_source;
   return (
     <li className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
       <span className="font-medium text-content-primary">{device.code}</span>
       <span className="text-content-secondary">{device.name}</span>
       <span className={`tabular-nums ${over ? 'font-semibold text-semantic-error' : 'text-content-primary'}`}>
-        {device.last_value === null ? '-' : fmtNumber(device.last_value, 1)} {device.unit}
+        {u.show(device.last_value, key, device.unit)}
       </span>
-      {device.limit_value !== null && (
+      {spark && (
+        <Sparkline
+          points={spark.points}
+          limit={spark.limit}
+          label={t('site_sensors.devices.sparkline', { defaultValue: 'Last 24 hours against the limit' })}
+        />
+      )}
+      {limit !== null && (
         <span className="text-xs text-content-tertiary">
-          {t('site_sensors.devices.limit', {
-            defaultValue: 'Limit {{limit}} {{unit}}',
-            limit: fmtNumber(device.limit_value, 1),
-            unit: device.unit,
-          })}
+          {t('site_sensors.devices.limit_value', { defaultValue: 'Limit {{value}}', value: u.show(limit, key, device.unit) })}
+          {device.kind === 'dust_pm10' && ` ${t('site_sensors.devices.rolling_24h', { defaultValue: '(24 h mean)' })}`}
+          {source && <span className="ml-1 italic">({source})</span>}
+        </span>
+      )}
+      {device.night_limit_by_ordinance && (
+        <span className="text-xs text-content-tertiary">
+          {t('site_sensors.devices.night_ordinance', { defaultValue: 'Night: local ordinance' })}
         </span>
       )}
       <Badge variant={online ? 'success' : 'neutral'} size="sm" dot>
@@ -70,9 +102,17 @@ function Content() {
     queryFn: () => fetchSensorValidation(projectId),
     enabled: !!projectId,
   });
+  const sparkQ = useQuery({
+    queryKey: ['site-sensors', 'sparklines', projectId],
+    queryFn: () => fetchSparklines(projectId),
+    enabled: !!projectId,
+    refetchInterval: 300_000,
+  });
+  const u = useSensorUnits(projectId);
   const devices = devQ.data ?? [];
   const groups = groupByKind(devices);
   const concrete = devices.filter((d) => d.kind === 'concrete_maturity' && d.active);
+  const ready = u.context?.strike_ready ?? [];
 
   if (devQ.isError) {
     return (
@@ -86,6 +126,21 @@ function Content() {
 
   return (
     <div className="space-y-5">
+      {ready.length > 0 && (
+        <div role="status" className="rounded-xl border border-semantic-success/40 bg-semantic-success/10 px-4 py-3 text-sm">
+          <div className="font-semibold text-content-primary">
+            {t('site_sensors.ready.title', { defaultValue: 'Strike-ready: reached the target strength' })}
+          </div>
+          <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-content-secondary">
+            {ready.map((r) => (
+              <li key={r.strip_id}>
+                <span className="font-medium text-content-primary">{r.element || r.device_code}</span>{' '}
+                {u.show(r.strength_mpa, 'mpa')} / {u.show(r.target_strength_mpa, 'mpa')}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {devQ.isLoading ? (
         <p className="py-8 text-center text-sm text-content-tertiary">{t('common.loading', { defaultValue: 'Loading...' })}</p>
       ) : devices.length === 0 ? (
@@ -110,7 +165,7 @@ function Content() {
             <CardContent>
               <ul className="divide-y divide-border-light rounded-lg border border-border-light">
                 {g.devices.map((d) => (
-                  <DeviceRow key={d.id} device={d} />
+                  <DeviceRow key={d.id} device={d} spark={sparkQ.data?.[d.id]} />
                 ))}
               </ul>
             </CardContent>
@@ -118,12 +173,20 @@ function Content() {
         ))
       )}
 
-      {concrete.length > 0 && (
+      {concrete.length > 0 ? (
         <div className="grid gap-5 lg:grid-cols-2">
           {concrete.map((d) => (
             <MaturityCard key={d.id} device={d} />
           ))}
         </div>
+      ) : (
+        devices.length > 0 && (
+          <p className="text-sm text-content-tertiary">
+            {t('site_sensors.maturity.none', {
+              defaultValue: 'No concrete sensors yet. Add one with a mix to follow strength and plan strikes.',
+            })}
+          </p>
+        )
       )}
 
       <AlertsPanel projectId={projectId} devices={devices} />
@@ -137,20 +200,39 @@ function Content() {
           })}
         />
         <CardContent>
-          <RuleResultsList results={rulesQ.data?.results ?? []} />
+          {(rulesQ.data?.results ?? []).length === 0 ? (
+            <p className="text-sm text-content-tertiary">
+              {t('site_sensors.rules.empty', { defaultValue: 'Nothing to check yet: checks run once devices report.' })}
+            </p>
+          ) : (
+            <RuleResultsList results={rulesQ.data?.results ?? []} />
+          )}
         </CardContent>
       </Card>
 
       <DeviceForms projectId={projectId} devices={devices} />
+      <MixForms projectId={projectId} />
     </div>
   );
 }
+
+const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 export function SiteSensorsPage() {
   const { t } = useTranslation();
   return (
     <div className="space-y-5">
       <PageHeader
+        actions={
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => scrollTo('sensor-add-mix')}>
+              {t('site_sensors.mixes.add', { defaultValue: 'Add mix' })}
+            </Button>
+            <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => scrollTo('sensor-add-device')}>
+              {t('site_sensors.forms.add_device', { defaultValue: 'Add device' })}
+            </Button>
+          </div>
+        }
         srTitle={t('site_sensors.title', { defaultValue: 'Site sensors' })}
         subtitle={t('site_sensors.subtitle', {
           defaultValue: 'Concrete strength, noise, dust, vibration, weather and water level, with limits and alerts.',

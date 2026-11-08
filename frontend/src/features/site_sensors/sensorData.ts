@@ -96,3 +96,45 @@ export function isoFromLocal(value: string): string | null {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
+
+/** A strike needs a recorded reason when the estimate is unknown or below the target. */
+export function strikeNeedsReason(strength: number | null | undefined, target: string | number): boolean {
+  const t = Number(target);
+  if (strength === null || strength === undefined || !Number.isFinite(strength)) return true;
+  return Number.isFinite(t) && strength < t;
+}
+
+/** Hours-to-target range as [low, high] rounded to whole hours, or null; a single figure when they agree. */
+export function hoursRange(range: [number, number] | null | undefined): [number, number] | null {
+  if (!range) return null;
+  const lo = Math.max(0, Math.floor(range[0]));
+  const hi = Math.max(lo, Math.ceil(range[1]));
+  return [lo, hi];
+}
+
+/** Sparkline geometry: an SVG polyline path over the points and the y of the limit line (0 top). */
+export function sparkPath(
+  points: readonly (number | null)[],
+  limit: number | null,
+  width = 96,
+  height = 24,
+): { path: string; limitY: number | null } {
+  const vals = points.filter((v): v is number => v !== null && Number.isFinite(v));
+  if (vals.length === 0) return { path: '', limitY: null };
+  const lo = Math.min(...vals, limit ?? Infinity);
+  const hi = Math.max(...vals, limit ?? -Infinity);
+  const span = hi - lo || 1;
+  const y = (v: number) => Math.round((height - ((v - lo) / span) * height) * 10) / 10;
+  const step = points.length > 1 ? width / (points.length - 1) : 0;
+  const parts: string[] = [];
+  let pen = false;
+  points.forEach((v, i) => {
+    if (v === null || !Number.isFinite(v)) {
+      pen = false;
+      return;
+    }
+    parts.push(`${pen ? 'L' : 'M'}${Math.round(i * step * 10) / 10},${y(v)}`);
+    pen = true;
+  });
+  return { path: parts.join(' '), limitY: limit === null ? null : y(limit) };
+}

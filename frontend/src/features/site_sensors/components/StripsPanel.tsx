@@ -1,39 +1,121 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Formwork strikes​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: planned strikes per concrete sensor, the Strike action and a
- * warning when formwork was struck below the target strength.
+ * Formwork strikes​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: planned strikes per concrete sensor, the Strike action, the
+ * reason the site must give when it strikes below the target strength, and the
+ * pour record (CSV, PDF) of every strike.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Download } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { fmtNumber } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { createStrip, fetchStrips, strikeStrip, type SensorDevice } from '../api';
+import {
+  createStrip,
+  downloadPourRecord,
+  fetchStrips,
+  strikeStrip,
+  type FormworkStrip,
+  type SensorDevice,
+} from '../api';
 import { struckBelowTarget } from '../sensorData';
+import { useSensorUnits } from '../useSensorUnits';
 
 const FIELD = 'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary';
 
-export function StripsPanel({ projectId, devices }: { projectId: string; devices: SensorDevice[] }) {
+function StrikeDialog({
+  strip,
+  loading,
+  onConfirm,
+  onCancel,
+}: {
+  strip: FormworkStrip;
+  loading: boolean;
+  onConfirm: (reason: string) => void;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
+  const u = useSensorUnits(strip.project_id);
+  const [reason, setReason] = useState('');
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="strike-dialog-title"
+        className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="strike-dialog-title" className="flex items-center gap-2 text-base font-semibold text-content-primary">
+          <AlertTriangle size={16} className="text-semantic-warning" />
+          {t('site_sensors.strips.below_title', { defaultValue: 'Strike below target strength?' })}
+        </h2>
+        <p className="mt-2 text-sm text-content-secondary">
+          {t('site_sensors.strips.below_message', {
+            defaultValue:
+              'The sensor has not shown {{target}} on {{element}} yet. Record why it is safe to strike, for example a cube result or back-propping.',
+            target: u.show(strip.target_strength_mpa, 'mpa'),
+            element: strip.element,
+          })}
+        </p>
+        <label className="mt-3 block text-xs text-content-secondary">
+          {t('site_sensors.strips.reason', { defaultValue: 'Reason' })}
+          <textarea
+            value={reason}
+            maxLength={2000}
+            rows={3}
+            autoFocus
+            onChange={(e) => setReason(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+          />
+        </label>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onCancel}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!reason.trim()}
+            loading={loading}
+            onClick={() => onConfirm(reason.trim())}
+          >
+            {t('site_sensors.strips.strike_anyway', { defaultValue: 'Record strike' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function StripsPanel({ projectId, devices }: { projectId: string; devices: SensorDevice[] }) {
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
+  const u = useSensorUnits(projectId);
   const addToast = useToastStore((s) => s.addToast);
   const concrete = devices.filter((d) => d.kind === 'concrete_maturity');
   const byId = new Map(devices.map((d) => [d.id, d]));
   const [deviceId, setDeviceId] = useState('');
   const [element, setElement] = useState('');
   const [target, setTarget] = useState('');
+  const [asking, setAsking] = useState<FormworkStrip | null>(null);
 
   const q = useQuery({ queryKey: ['site-sensors', 'strips', projectId], queryFn: () => fetchStrips(projectId) });
   const refresh = () => qc.invalidateQueries({ queryKey: ['site-sensors'] });
   const onError = (e: unknown) =>
     addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) });
 
-  const strikeMut = useMutation({ mutationFn: (id: string) => strikeStrip(id), onSuccess: refresh, onError });
+  const strikeMut = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => strikeStrip(id, reason),
+    onSuccess: () => {
+      setAsking(null);
+      refresh();
+    },
+    onError,
+  });
   const createMut = useMutation({
     mutationFn: () =>
       createStrip({
@@ -48,6 +130,8 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
     },
     onError,
   });
+  const download = (s: FormworkStrip, format: 'csv' | 'pdf') =>
+    downloadPourRecord(s.id, format, i18n.language, s.element || s.id).catch(onError);
 
   const strips = q.data ?? [];
 
@@ -121,9 +205,9 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                   <span className="font-medium text-content-primary">{s.element || byId.get(s.device_id)?.code}</span>
                   <span className="text-xs text-content-tertiary">{byId.get(s.device_id)?.code}</span>
                   <span className="tabular-nums text-content-secondary">
-                    {t('site_sensors.strips.target_value', {
-                      defaultValue: 'Target {{mpa}} MPa',
-                      mpa: fmtNumber(s.target_strength_mpa, 1),
+                    {t('site_sensors.strips.target_with_unit', {
+                      defaultValue: 'Target {{value}}',
+                      value: u.show(s.target_strength_mpa, 'mpa'),
                     })}
                   </span>
                   {struck ? (
@@ -132,9 +216,7 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                         {t('site_sensors.strips.struck', { defaultValue: 'Struck' })}
                       </Badge>
                       {s.strength_at_strike_mpa !== null && (
-                        <span className="tabular-nums text-content-secondary">
-                          {fmtNumber(s.strength_at_strike_mpa, 1)} MPa
-                        </span>
+                        <span className="tabular-nums text-content-secondary">{u.show(s.strength_at_strike_mpa, 'mpa')}</span>
                       )}
                       {low && (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-semantic-error">
@@ -142,8 +224,19 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                           {t('site_sensors.strips.below_target', { defaultValue: 'Struck below target strength' })}
                         </span>
                       )}
-                      <span className="ml-auto text-xs text-content-tertiary">
+                      {s.strike_reason && (
+                        <span className="basis-full text-xs text-content-secondary">
+                          {t('site_sensors.strips.reason_value', { defaultValue: 'Reason: {{reason}}', reason: s.strike_reason })}
+                        </span>
+                      )}
+                      <span className="ml-auto flex items-center gap-2 text-xs text-content-tertiary">
                         <DateDisplay value={s.struck_at} format="datetime" />
+                        <Button variant="ghost" size="sm" icon={<Download size={13} />} onClick={() => download(s, 'csv')}>
+                          {t('site_sensors.strips.record_csv', { defaultValue: 'CSV' })}
+                        </Button>
+                        <Button variant="ghost" size="sm" icon={<Download size={13} />} onClick={() => download(s, 'pdf')}>
+                          {t('site_sensors.strips.record_pdf', { defaultValue: 'PDF' })}
+                        </Button>
                       </span>
                     </>
                   ) : (
@@ -157,8 +250,8 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                         variant={s.released_at ? 'primary' : 'secondary'}
                         size="sm"
                         className="ml-auto"
-                        loading={strikeMut.isPending && strikeMut.variables === s.id}
-                        onClick={() => strikeMut.mutate(s.id)}
+                        loading={strikeMut.isPending && strikeMut.variables?.id === s.id}
+                        onClick={() => (s.released_at ? strikeMut.mutate({ id: s.id, reason: '' }) : setAsking(s))}
                       >
                         {t('site_sensors.strips.strike', { defaultValue: 'Strike' })}
                       </Button>
@@ -170,6 +263,14 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
           </ul>
         )}
       </CardContent>
+      {asking && (
+        <StrikeDialog
+          strip={asking}
+          loading={strikeMut.isPending}
+          onCancel={() => setAsking(null)}
+          onConfirm={(reason) => strikeMut.mutate({ id: asking.id, reason })}
+        />
+      )}
     </Card>
   );
 }
