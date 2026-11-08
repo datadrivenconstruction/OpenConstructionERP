@@ -18,6 +18,13 @@ import {
   type SensorKind,
 } from '../api';
 import { KIND_LABELS, KIND_ORDER, isoFromLocal, localDateTimeValue } from '../sensorData';
+import { useSensorUnits } from '../useSensorUnits';
+
+/** Country-graded limit options; shown only where the country data grades by them. */
+const NOISE_ZONES = ['a', 'b', 'c', 'd', 'e', 'f'] as const;
+const BUILDING_CLASSES = ['1', '2', '3'] as const;
+const FREQUENCY_BANDS = ['lt10', '10_50', '50_100', 'gt100'] as const;
+const GRADED_COUNTRIES = new Set(['DE']);
 
 const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
 const LABEL = 'text-xs text-content-secondary';
@@ -37,6 +44,11 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
   const [mixId, setMixId] = useState('');
   const [pourRef, setPourRef] = useState('');
   const [castAt, setCastAt] = useState('');
+  const [zone, setZone] = useState('');
+  const [buildingClass, setBuildingClass] = useState('');
+  const [band, setBand] = useState('');
+  const { country } = useSensorUnits(projectId);
+  const graded = GRADED_COUNTRIES.has(country);
 
   const mixQ = useQuery({
     queryKey: ['site-sensors', 'mixes', projectId],
@@ -55,6 +67,8 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
         ...(kind === 'concrete_maturity'
           ? { mix_id: mixId || null, pour_ref: pourRef.trim(), cast_at: isoFromLocal(castAt) }
           : {}),
+        ...(kind === 'noise' && graded ? { noise_zone: zone } : {}),
+        ...(kind === 'vibration' && graded ? { building_class: buildingClass, frequency_band: band } : {}),
       }),
     onSuccess: () => {
       setCode('');
@@ -90,7 +104,7 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card>
+      <Card id="sensor-add-device">
         <CardHeader title={t('site_sensors.forms.add_device', { defaultValue: 'Add device' })} />
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
@@ -116,6 +130,45 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
               {t('site_sensors.forms.limit', { defaultValue: 'Limit (blank = country default)' })}
               <input type="number" step="any" value={limit} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
             </label>
+            {kind === 'noise' && graded && (
+              <label className={`${LABEL} col-span-2`}>
+                {t('site_sensors.forms.noise_zone', { defaultValue: 'Noise zone' })}
+                <select value={zone} onChange={(e) => setZone(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                  <option value="">{t('site_sensors.forms.zone_default', { defaultValue: 'Country default' })}</option>
+                  {NOISE_ZONES.map((z) => (
+                    <option key={z} value={z}>
+                      {t(`site_sensors.zone.${z}`, { defaultValue: z })}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {kind === 'vibration' && graded && (
+              <>
+                <label className={LABEL}>
+                  {t('site_sensors.forms.building_class', { defaultValue: 'Building class' })}
+                  <select value={buildingClass} onChange={(e) => setBuildingClass(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                    <option value="">{t('site_sensors.forms.zone_default', { defaultValue: 'Country default' })}</option>
+                    {BUILDING_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {t(`site_sensors.building_class.${c}`, { defaultValue: c })}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={LABEL}>
+                  {t('site_sensors.forms.frequency_band', { defaultValue: 'Frequency band' })}
+                  <select value={band} onChange={(e) => setBand(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                    <option value="">{t('site_sensors.forms.band_reading', { defaultValue: 'From each reading' })}</option>
+                    {FREQUENCY_BANDS.map((b) => (
+                      <option key={b} value={b}>
+                        {t(`site_sensors.band.${b}`, { defaultValue: b })}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </>
+            )}
             {kind === 'concrete_maturity' && (
               <>
                 <label className={LABEL}>
