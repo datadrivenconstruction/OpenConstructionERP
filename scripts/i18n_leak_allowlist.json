@@ -2203,5 +2203,75 @@
     "en_value": "PDF",
     "note": "file format name, written the same way in every locale",
     "reason_category": "standard_code"
+  },
+  "site_sensors.band.10_50": {
+    "en_value": "10-50 Hz",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.band.50_100": {
+    "en_value": "50-100 Hz",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.band.gt100": {
+    "en_value": "> 100 Hz",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.band.lt10": {
+    "en_value": "< 10 Hz",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.calibration.fit": {
+    "en_value": "S = {{a}} + {{b}} · log(M), R² {{r2}}",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.strips.record_csv": {
+    "en_value": "CSV",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.strips.record_pdf": {
+    "en_value": "PDF",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.dba": {
+    "en_value": "dB(A)",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.degC": {
+    "en_value": "°C",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.degF": {
+    "en_value": "°F",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.ft": {
+    "en_value": "ft",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.in_s": {
+    "en_value": "in/s",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.mph": {
+    "en_value": "mph",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
+  },
+  "site_sensors.units.psi": {
+    "en_value": "psi",
+    "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
+    "reason_category": "abbreviation"
   }
 }

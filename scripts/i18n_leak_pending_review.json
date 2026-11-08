@@ -3430,5 +3430,117 @@
     "en_value": "v{{n}}",
     "n": 37,
     "reason": "Version abbreviation template, v plus a number, written the same in Latin-script locales; the differing locales use their own script."
+  },
+  "site_sensors.units.degC_h": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "°C·h",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.degF_h": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "°F·h",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.h": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "h",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.m": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "m",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.m_s": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "m/s",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.mm_s": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "mm/s",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.mpa": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "MPa",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "site_sensors.units.ugm3": {
+    "added_by": "release 19.3.0 (2026-11-08)",
+    "differs_in": [
+      "bg",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk"
+    ],
+    "en_value": "µg/m³",
+    "n": 32,
+    "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
   }
 }

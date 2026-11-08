@@ -89874,6 +89874,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "sensor_links.py",
         "service.py",
         "validators.py",
         "weather.py"
@@ -90961,6 +90962,13 @@
           "path": "/dashboard",
           "handler": "diary_dashboard",
           "response_model": "DiaryDashboardResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/diaries/{diary_id}/sensor-weather",
+          "handler": "refresh_sensor_weather",
+          "response_model": "DailyDiaryResponse",
           "request_schema": "None"
         }
       ],
@@ -92931,6 +92939,7 @@
         "project_governance",
         "projects",
         "punchlist",
+        "site_sensors",
         "users"
       ]
     },
@@ -160330,6 +160339,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "events.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -160337,6 +160347,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "sensor_links.py",
         "service.py",
         "validators.py"
       ],
@@ -160832,7 +160843,8 @@
       ],
       "import_dependencies": [
         "ncr",
-        "punchlist"
+        "punchlist",
+        "site_sensors"
       ]
     },
     {
@@ -160854,6 +160866,7 @@
         "slack.py",
         "teams.py",
         "telegram.py",
+        "validators.py",
         "webhook_signing.py",
         "whatsapp.py"
       ],
@@ -161627,6 +161640,7 @@
         "meetings",
         "notifications",
         "schedule",
+        "site_sensors",
         "tasks",
         "users"
       ]
@@ -177678,6 +177692,7 @@
         "_collaboration_subscribers.py",
         "_file_approvals_subscribers.py",
         "_site_register_subscribers.py",
+        "_site_sensors_subscribers.py",
         "_wave1_subscribers.py",
         "_wave23_subscribers.py",
         "_wave4_subscribers.py",
@@ -178366,9 +178381,11 @@
         "resources",
         "safety",
         "schedule",
+        "site_sensors",
         "staffing",
         "submittals",
         "supplier_catalogs",
+        "teams",
         "users",
         "validation",
         "variations"
@@ -250802,6 +250819,7 @@
         "router.py",
         "safety_indicators.py",
         "schemas.py",
+        "sensor_links.py",
         "service.py",
         "validators.py"
       ],
@@ -251243,6 +251261,18 @@
           "method": "DELETE",
           "path": "/observations/{observation_id}",
           "handler": "delete_observation",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/sensor-exceedance-setting/",
+          "handler": "get_sensor_exceedance_setting",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/sensor-exceedance-setting/",
+          "handler": "put_sensor_exceedance_setting",
           "request_schema": "None"
         }
       ],
@@ -252169,7 +252199,8 @@
       ],
       "import_dependencies": [
         "notifications",
-        "projects"
+        "projects",
+        "site_sensors"
       ]
     },
     {
@@ -253001,6 +253032,7 @@
         "schedule_clean.py",
         "schedule_interchange.py",
         "schemas.py",
+        "sensor_links.py",
         "service.py",
         "service_4d.py",
         "snapshot_cost.py",
@@ -254172,6 +254204,20 @@
           "handler": "diff_schedule",
           "response_model": "ScheduleDiffResponse",
           "request_schema": "ScheduleDiffRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/activities/{activity_id}/strike-suggestion/accept",
+          "handler": "accept_strike_suggestion",
+          "response_model": "ActivityResponse",
+          "request_schema": "ScheduleService"
+        },
+        {
+          "method": "POST",
+          "path": "/activities/{activity_id}/strike-suggestion/dismiss",
+          "handler": "dismiss_strike_suggestion",
+          "response_model": "ActivityResponse",
+          "request_schema": "ScheduleService"
         }
       ],
       "schemas": [
@@ -273163,11 +273209,15 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "analysis.py",
         "events.py",
+        "evidence.py",
+        "evidence_routes.py",
         "manifest.py",
         "maturity.py",
         "models.py",
         "permissions.py",
+        "pour_record.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -273315,6 +273365,36 @@
               "nullable": true
             },
             {
+              "name": "noise_zone",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "building_class",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "frequency_band",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "bim_model_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "bim_element_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "metadata_",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
@@ -273326,7 +273406,7 @@
         {
           "class_name": "ConcreteMix",
           "tablename": "oe_site_sensors_mix",
-          "docstring": "A mix's strength-maturity relationship: ``S = a + b * log10(M)``, M in degC-hours.\n\n``datum_temp_c`` is the Nurse-Saul datum temperature of ASTM C1074 (-10 degC\nunless the mix was calibrated with another). The curve comes from the\nmix's own calibration cubes; the platform ships no default curve.",
+          "docstring": "A mix's strength-maturity relationship: ``S = a + b * log10(index)``.\n\n``method`` picks the index: ``nurse_saul`` (degC-hours above ``datum_temp_c``,\n0 degC by default per ASTM C1074) or ``equivalent_age`` (hours at\n``reference_temp_c``, Arrhenius with ``activation_energy_kj_mol``). The\ncurve is fitted to the mix's own calibration cubes; ``fit_r2`` and the\ncalibrated index range come with the fit. The platform ships no default curve.",
           "columns": [
             {
               "name": "project_id",
@@ -273355,6 +273435,42 @@
               "nullable": false
             },
             {
+              "name": "method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "activation_energy_kj_mol",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "reference_temp_c",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "fit_r2",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "calibrated_min",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "calibrated_max",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
               "name": "curve_a",
               "annotation": "Mapped[Decimal]",
               "sql_type": "Numeric",
@@ -273377,6 +273493,46 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
               "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "CalibrationPoint",
+          "tablename": "oe_site_sensors_calibration",
+          "docstring": "One calibration cube result of a mix: the maturity index at test and the measured strength.",
+          "columns": [
+            {
+              "name": "mix_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_site_sensors_mix.id"
+            },
+            {
+              "name": "maturity_index",
+              "annotation": "Mapped[float]",
+              "sql_type": "Float",
+              "nullable": false
+            },
+            {
+              "name": "strength_mpa",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "age_hours",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -273541,10 +273697,34 @@
               "nullable": true
             },
             {
+              "name": "strike_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "struck_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "status",
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
+            },
+            {
+              "name": "bim_model_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "bim_element_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -273619,6 +273799,20 @@
         },
         {
           "method": "GET",
+          "path": "/mixes/{mix_id}/calibration",
+          "handler": "get_calibration",
+          "response_model": "CalibrationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/mixes/{mix_id}/calibration",
+          "handler": "put_calibration",
+          "response_model": "CalibrationResponse",
+          "request_schema": "CalibrationIn"
+        },
+        {
+          "method": "GET",
           "path": "/alerts/",
           "handler": "list_alerts",
           "response_model": "AlertListResponse",
@@ -273658,6 +273852,24 @@
           "handler": "strike",
           "response_model": "StripResponse",
           "request_schema": "StrikeIn"
+        },
+        {
+          "method": "GET",
+          "path": "/strips/{strip_id}/record",
+          "handler": "pour_record",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/context/",
+          "handler": "sensor_context",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/sparklines/",
+          "handler": "sparklines",
+          "request_schema": "None"
         },
         {
           "method": "GET",
@@ -273745,6 +273957,31 @@
               "name": "schedule_activity_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "noise_zone",
+              "type": "NoiseZone",
+              "default": "''"
+            },
+            {
+              "name": "building_class",
+              "type": "BuildingClass",
+              "default": "''"
+            },
+            {
+              "name": "frequency_band",
+              "type": "FrequencyBand",
+              "default": "''"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_element_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -273793,6 +274030,31 @@
             },
             {
               "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "noise_zone",
+              "type": "NoiseZone | None",
+              "default": "None"
+            },
+            {
+              "name": "building_class",
+              "type": "BuildingClass | None",
+              "default": "None"
+            },
+            {
+              "name": "frequency_band",
+              "type": "FrequencyBand | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_element_id",
               "type": "UUID | None",
               "default": "None"
             }
@@ -273888,6 +274150,46 @@
               "name": "schedule_activity_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "noise_zone",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "building_class",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "frequency_band",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "effective_limit",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_source",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "night_limit_by_ordinance",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_element_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -273926,6 +274228,10 @@
             {
               "name": "value",
               "type": "float"
+            },
+            {
+              "name": "frequency_hz",
+              "type": "float | None"
             }
           ]
         },
@@ -273964,6 +274270,19 @@
             },
             {
               "name": "datum_temp_c",
+              "type": "Decimal6_2"
+            },
+            {
+              "name": "method",
+              "type": "MaturityMethod",
+              "default": "'nurse_saul'"
+            },
+            {
+              "name": "activation_energy_kj_mol",
+              "type": "Decimal6_2"
+            },
+            {
+              "name": "reference_temp_c",
               "type": "Decimal6_2"
             },
             {
@@ -274014,6 +274333,19 @@
               "type": "Decimal"
             },
             {
+              "name": "method",
+              "type": "str",
+              "default": "'nurse_saul'"
+            },
+            {
+              "name": "activation_energy_kj_mol",
+              "type": "Decimal"
+            },
+            {
+              "name": "reference_temp_c",
+              "type": "Decimal"
+            },
+            {
               "name": "curve_a",
               "type": "Decimal"
             },
@@ -274030,6 +274362,106 @@
               "name": "notes",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "fit_r2",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "calibrated_min",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "calibrated_max",
+              "type": "float | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CalibrationPointIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "maturity_index",
+              "type": "float"
+            },
+            {
+              "name": "strength_mpa",
+              "type": "Decimal8_2"
+            },
+            {
+              "name": "age_hours",
+              "type": "float | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "CalibrationIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The whole calibration table of a mix; replaces the previous one and refits the curve.",
+          "fields": [
+            {
+              "name": "points",
+              "type": "list[CalibrationPointIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "CalibrationPointOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "maturity_index",
+              "type": "float"
+            },
+            {
+              "name": "strength_mpa",
+              "type": "Decimal"
+            },
+            {
+              "name": "age_hours",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "CalibrationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "mix",
+              "type": "MixResponse"
+            },
+            {
+              "name": "points",
+              "type": "list[CalibrationPointOut]"
             }
           ]
         },
@@ -274175,6 +274607,16 @@
               "name": "planned_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_element_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -274189,6 +274631,10 @@
               "name": "struck_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "reason",
+              "type": "str"
             }
           ]
         },
@@ -274245,8 +274691,28 @@
               "default": "None"
             },
             {
+              "name": "strike_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "struck_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "status",
               "type": "str"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bim_element_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -274360,9 +274826,12 @@
         }
       ],
       "import_dependencies": [
+        "documents",
+        "integrations",
         "notifications",
         "projects",
-        "schedule"
+        "schedule",
+        "users"
       ]
     },
     {
@@ -315172,10 +315641,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 85,
+      "ts_files": 87,
       "css_files": 0,
-      "test_files": 37,
-      "total_files": 85
+      "test_files": 38,
+      "total_files": 87
     },
     {
       "name": "schedule-advanced",
@@ -315256,10 +315725,10 @@
     },
     {
       "name": "site_sensors",
-      "ts_files": 9,
+      "ts_files": 20,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 20
     },
     {
       "name": "smart_views",
@@ -316015,6 +316484,7 @@
       "project_governance",
       "projects",
       "punchlist",
+      "site_sensors",
       "users"
     ],
     "dashboard": [
@@ -316437,6 +316907,7 @@
       "ncr",
       "projects",
       "punchlist",
+      "site_sensors",
       "users"
     ],
     "integrations": [
@@ -316445,6 +316916,7 @@
       "notifications",
       "projects",
       "schedule",
+      "site_sensors",
       "tasks",
       "users"
     ],
@@ -316590,9 +317062,11 @@
       "resources",
       "safety",
       "schedule",
+      "site_sensors",
       "staffing",
       "submittals",
       "supplier_catalogs",
+      "teams",
       "users",
       "validation",
       "variations"
@@ -317041,6 +317515,7 @@
     "safety": [
       "notifications",
       "projects",
+      "site_sensors",
       "users"
     ],
     "saved_views": [
@@ -317137,6 +317612,8 @@
       "projects"
     ],
     "site_sensors": [
+      "documents",
+      "integrations",
       "notifications",
       "projects",
       "schedule",
@@ -317323,14 +317800,14 @@
   "statistics": {
     "backend_modules": 244,
     "modules_with_manifests": 244,
-    "total_models": 905,
-    "total_columns": 10606,
+    "total_models": 906,
+    "total_columns": 10626,
     "total_relationships": 261,
-    "total_routes": 5190,
-    "total_schemas": 4708,
-    "total_python_files": 3328,
+    "total_routes": 5200,
+    "total_schemas": 4712,
+    "total_python_files": 3339,
     "frontend_features": 237,
-    "frontend_ts_files": 4122,
+    "frontend_ts_files": 4135,
     "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {
