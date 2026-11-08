@@ -14,12 +14,16 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.core.decimal_types import Decimal6_2, Decimal8_2, Decimal10_4, Decimal14_4
 
 SensorKind = Literal["concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level"]
+MaturityMethod = Literal["nurse_saul", "equivalent_age"]
+NoiseZone = Literal["", "a", "b", "c", "d", "e", "f"]
+BuildingClass = Literal["", "1", "2", "3"]
+FrequencyBand = Literal["", "lt10", "10_50", "50_100", "gt100"]
 
 #: Default unit per kind, used when a device is created without one.
 DEFAULT_UNITS: dict[str, str] = {
-    "concrete_maturity": "degC",
+    "concrete_maturity": "°C",
     "noise": "dB(A)",
-    "dust_pm10": "ug/m3",
+    "dust_pm10": "µg/m³",
     "vibration": "mm/s",
     "weather": "m/s",
     "water_level": "m",
@@ -43,6 +47,9 @@ class DeviceCreate(BaseModel):
     pour_ref: str = Field(default="", max_length=200)
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    noise_zone: NoiseZone = ""
+    building_class: BuildingClass = ""
+    frequency_band: FrequencyBand = ""
 
 
 class DeviceUpdate(BaseModel):
@@ -57,6 +64,9 @@ class DeviceUpdate(BaseModel):
     pour_ref: str | None = Field(default=None, max_length=200)
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    noise_zone: NoiseZone | None = None
+    building_class: BuildingClass | None = None
+    frequency_band: FrequencyBand | None = None
 
 
 class DeviceResponse(BaseModel):
@@ -81,6 +91,13 @@ class DeviceResponse(BaseModel):
     pour_ref: str
     cast_at: datetime | None = None
     schedule_activity_id: UUID | None = None
+    noise_zone: str = ""
+    building_class: str = ""
+    frequency_band: str = ""
+    # The limit that applies now and where it comes from (device, or the country's text).
+    effective_limit: float | None = None
+    limit_source: str = ""
+    night_limit_by_ordinance: bool = False
 
 
 class TokenResponse(BaseModel):
@@ -92,6 +109,7 @@ class TokenResponse(BaseModel):
 class ReadingIn(BaseModel):
     recorded_at: datetime
     value: float = Field(allow_inf_nan=False)
+    frequency_hz: float | None = Field(default=None, gt=0, le=1000, allow_inf_nan=False)
 
 
 class ReadingsIn(BaseModel):
@@ -104,7 +122,10 @@ class MixCreate(BaseModel):
     project_id: UUID | None = None
     code: str = Field(min_length=1, max_length=50)
     name: str = Field(default="", max_length=200)
-    datum_temp_c: Decimal6_2 = Decimal("-10")
+    datum_temp_c: Decimal6_2 = Decimal("0")
+    method: MaturityMethod = "nurse_saul"
+    activation_energy_kj_mol: Decimal6_2 = Field(default=Decimal("40"), gt=0, le=100)
+    reference_temp_c: Decimal6_2 = Decimal("20")
     curve_a: Decimal10_4
     curve_b: Decimal10_4 = Field(gt=0)
     strip_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
@@ -119,10 +140,44 @@ class MixResponse(BaseModel):
     code: str
     name: str
     datum_temp_c: Decimal
+    method: str = "nurse_saul"
+    activation_energy_kj_mol: Decimal = Decimal("40")
+    reference_temp_c: Decimal = Decimal("20")
     curve_a: Decimal
     curve_b: Decimal
     strip_strength_mpa: Decimal | None = None
     notes: str | None = None
+    fit_r2: float | None = None
+    calibrated_min: float | None = None
+    calibrated_max: float | None = None
+
+
+class CalibrationPointIn(BaseModel):
+    maturity_index: float = Field(gt=0, allow_inf_nan=False)
+    strength_mpa: Decimal8_2 = Field(gt=0)
+    age_hours: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    note: str = Field(default="", max_length=200)
+
+
+class CalibrationIn(BaseModel):
+    """The whole calibration table of a mix; replaces the previous one and refits the curve."""
+
+    points: list[CalibrationPointIn] = Field(max_length=200)
+
+
+class CalibrationPointOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    maturity_index: float
+    strength_mpa: Decimal
+    age_hours: float | None = None
+    note: str
+
+
+class CalibrationResponse(BaseModel):
+    mix: MixResponse
+    points: list[CalibrationPointOut]
 
 
 class AlertResponse(BaseModel):
@@ -167,6 +222,8 @@ class StripCreate(BaseModel):
 
 class StrikeIn(BaseModel):
     struck_at: datetime | None = None
+    # Required when the estimate is below target: cube result, back-propping.
+    reason: str = Field(default="", max_length=2000)
 
 
 class StripResponse(BaseModel):
@@ -182,6 +239,8 @@ class StripResponse(BaseModel):
     released_at: datetime | None = None
     struck_at: datetime | None = None
     strength_at_strike_mpa: Decimal | None = None
+    strike_reason: str | None = None
+    struck_by: UUID | None = None
     status: str
 
 

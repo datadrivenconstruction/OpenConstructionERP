@@ -22,11 +22,13 @@ from typing import Any
 __all__ = [
     "DATA_PATH",
     "EMISSION_CLASS_RANK",
+    "FREQUENCY_BANDS",
     "Limit",
     "emission_class_meets",
     "fuel_co2_kg_per_l",
     "inspection_interval_days",
     "limit_for",
+    "night_noise_by_ordinance",
     "sensor_limit",
     "working_hours",
 ]
@@ -95,17 +97,100 @@ def _in_hours(span: str, at: time) -> bool:
     return start <= at < end
 
 
-def sensor_limit(country: str | None, kind: str, at: time | None = None) -> Limit | None:
-    """The limit for a sensor kind, the night figure outside working hours where one exists."""
+def _noise_zone_limit(country: str | None, zone: str | None, night: bool) -> Limit | None:
+    """The day or night figure of a noise zone (``noise_zones`` in the data), the country's default zone when blank."""
+    data = (_data().get("countries") or {}).get((country or "").upper(), {})
+    zones = data.get("noise_zones")
+    if not isinstance(zones, dict):
+        return None
+    key = (zone or "").lower() or str(data.get("noise_zone_default", ""))
+    row = zones.get(key)
+    if not isinstance(row, dict):
+        return None
+    try:
+        value = Decimal(str(row["night" if night else "day"]))
+    except (KeyError, ArithmeticError, ValueError):
+        return None
+    source = f"{row.get('source', '')}, {'night' if night else 'day'}"
+    return Limit(value=value, source=source, confidence=str(row.get("confidence", "H")))
+
+
+#: Lower edge of each DIN 4150-3 frequency band, used when a reading carries no frequency.
+FREQUENCY_BANDS: dict[str, float] = {"lt10": 1.0, "10_50": 10.0, "50_100": 50.0, "gt100": 100.0}
+
+
+def _interpolate(points: list[list[float]], f: float) -> float:
+    pts = sorted((float(x), float(y)) for x, y in points)
+    if f <= pts[0][0]:
+        return pts[0][1]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:], strict=False):
+        if f <= x1:
+            return y0 + (y1 - y0) * (f - x0) / (x1 - x0)
+    return pts[-1][1]
+
+
+def _vibration_limit(
+    country: str | None, building_class: str | None, frequency_hz: float | None, band: str | None
+) -> Limit | None:
+    """PPV limit from a frequency-dependent table (``vibration_by_frequency``), interpolated within a band."""
+    data = (_data().get("countries") or {}).get((country or "").upper(), {})
+    table = data.get("vibration_by_frequency")
+    if not isinstance(table, dict):
+        return None
+    lines = table.get("lines") or {}
+    line_key = (building_class or "") or str(table.get("default_line", ""))
+    line = lines.get(line_key)
+    if not isinstance(line, dict):
+        return None
+    f = frequency_hz if frequency_hz is not None and frequency_hz > 0 else FREQUENCY_BANDS.get(band or "", 1.0)
+    value = _interpolate(line["points"], f)
+    source = f"{table.get('source', '')} line {line_key} ({line.get('label', '')}), {f:g} Hz"
+    return Limit(value=Decimal(str(round(value, 2))), source=source, confidence=str(table.get("confidence", "H")))
+
+
+def night_noise_by_ordinance(country: str | None) -> bool:
+    """True where the data says a local ordinance, not a national figure, sets the night noise limit."""
+    row = _row(country, "noise_dba_night")
+    return bool(row and row.get("ordinance"))
+
+
+def sensor_limit(
+    country: str | None,
+    kind: str,
+    at: time | None = None,
+    *,
+    zone: str | None = None,
+    building_class: str | None = None,
+    frequency_hz: float | None = None,
+    band: str | None = None,
+) -> Limit | None:
+    """The limit for a sensor kind.
+
+    Noise uses the device's zone where the country grades limits by zone, and
+    the night figure outside working hours. Vibration uses the country's
+    frequency-dependent table where it has one, for the device's building
+    class and the reading's dominant frequency (else the lower edge of the
+    device's band).
+    """
     key = _SENSOR_KEYS.get(kind)
     if key is None:
         return None
-    if kind == "noise" and at is not None:
-        span = working_hours(country)
-        if span and not _in_hours(span, at):
-            night = limit_for(country, "noise_dba_night")
-            if night is not None:
-                return night
+    if kind == "noise":
+        night = False
+        if at is not None:
+            span = working_hours(country)
+            night = bool(span and not _in_hours(span, at))
+        zoned = _noise_zone_limit(country, zone, night)
+        if zoned is not None:
+            return zoned
+        if night:
+            lim = limit_for(country, "noise_dba_night")
+            if lim is not None:
+                return lim
+    if kind == "vibration":
+        graded = _vibration_limit(country, building_class, frequency_hz, band)
+        if graded is not None:
+            return graded
     return limit_for(country, key)
 
 

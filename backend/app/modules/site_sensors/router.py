@@ -11,11 +11,16 @@ GET   /devices/{id}/readings        - Raw and hourly readings in a window
 GET   /devices/{id}/maturity        - Maturity, strength estimate, hours to strike strength
 POST  /ingest/                      - Device ingest, header ``X-Device-Token``
 GET   /mixes/  POST /mixes/         - Concrete mix curves
+GET   /mixes/{id}/calibration       - Calibration cubes of a mix
+PUT   /mixes/{id}/calibration       - Replace the cubes and refit the curve (a, b, R²)
 GET   /alerts/                      - Alerts (project_id=, status=)
 POST  /alerts/{id}/acknowledge      - Acknowledge with a note
 POST  /alerts/{id}/links            - Link a daily diary, inspection or punch list item
 GET   /strips/  POST /strips/       - Planned formwork strikes
-POST  /strips/{id}/strike           - Record the strike
+POST  /strips/{id}/strike           - Record the strike (a reason is required below target)
+GET   /strips/{id}/record           - Pour record of a strike, format=csv|pdf
+GET   /context/                     - Country, unit system and the pours ready to strike
+GET   /sparklines/                  - Last 24 h per device, hourly, with its limit
 GET   /summary/                     - Dashboard numbers
 GET   /validation/                  - Rule results (site_sensors)
 POST  /maintenance/downsample       - Fold old raw readings into hourly rows
@@ -27,7 +32,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 
 from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
@@ -36,6 +41,9 @@ from app.modules.site_sensors.schemas import (
     AlertLinksIn,
     AlertListResponse,
     AlertResponse,
+    CalibrationIn,
+    CalibrationPointOut,
+    CalibrationResponse,
     DeviceCreate,
     DeviceListResponse,
     DeviceResponse,
@@ -54,6 +62,11 @@ from app.modules.site_sensors.service import SiteSensorsService
 from app.modules.site_sensors.validators import run_rules
 
 router = APIRouter(tags=["site-sensors"])
+
+
+async def _device_out(service: SiteSensorsService, device: Any) -> DeviceResponse:
+    out = DeviceResponse.model_validate(device)
+    return out.model_copy(update=await service.describe_limit(device))
 
 
 async def _device_for_user(service: SiteSensorsService, device_id: uuid.UUID, user_id: str) -> Any:
@@ -76,8 +89,9 @@ async def list_devices(
     _perm: None = Depends(RequirePermission("site_sensors.read")),
 ) -> DeviceListResponse:
     await verify_project_access(project_id, user_id, session)
-    devices = await SiteSensorsService(session).repo.devices(project_id, kind)
-    page = [DeviceResponse.model_validate(d) for d in devices[offset : offset + limit]]
+    service = SiteSensorsService(session)
+    devices = await service.repo.devices(project_id, kind)
+    page = [await _device_out(service, d) for d in devices[offset : offset + limit]]
     return DeviceListResponse(items=page, total=len(devices), offset=offset, limit=limit)
 
 
@@ -89,7 +103,8 @@ async def create_device(
     _perm: None = Depends(RequirePermission("site_sensors.manage")),
 ) -> DeviceResponse:
     await verify_project_access(data.project_id, user_id, session)
-    return DeviceResponse.model_validate(await SiteSensorsService(session).create_device(data))
+    service = SiteSensorsService(session)
+    return await _device_out(service, await service.create_device(data))
 
 
 @router.patch("/devices/{device_id}", response_model=DeviceResponse)
@@ -102,7 +117,7 @@ async def update_device(
 ) -> DeviceResponse:
     service = SiteSensorsService(session)
     await _device_for_user(service, device_id, user_id)
-    return DeviceResponse.model_validate(await service.update_device(device_id, data))
+    return await _device_out(service, await service.update_device(device_id, data))
 
 
 @router.post("/devices/{device_id}/token", response_model=TokenResponse)
@@ -128,7 +143,7 @@ async def add_readings(
 ) -> dict[str, Any]:
     service = SiteSensorsService(session)
     device = await _device_for_user(service, device_id, user_id)
-    return await service.ingest(device, [(r.recorded_at, r.value) for r in data.readings])
+    return await service.ingest(device, [(r.recorded_at, r.value) for r in data.readings], _frequencies(data))
 
 
 @router.get("/devices/{device_id}/readings")
@@ -172,7 +187,11 @@ async def device_ingest(
     device = await service.authenticate(x_device_token)
     if device is None:
         raise HTTPException(status_code=401, detail="invalid_device_token")
-    return await service.ingest(device, [(r.recorded_at, r.value) for r in data.readings])
+    return await service.ingest(device, [(r.recorded_at, r.value) for r in data.readings], _frequencies(data))
+
+
+def _frequencies(data: ReadingsIn) -> dict[datetime, float]:
+    return {r.recorded_at: r.frequency_hz for r in data.readings if r.frequency_hz is not None}
 
 
 @router.get("/mixes/", response_model=MixListResponse)
@@ -201,6 +220,48 @@ async def create_mix(
     if data.project_id is not None:
         await verify_project_access(data.project_id, user_id, session)
     return MixResponse.model_validate(await SiteSensorsService(session).create_mix(data))
+
+
+async def _mix_for_user(service: SiteSensorsService, mix_id: uuid.UUID, user_id: str) -> Any:
+    try:
+        mix = await service.get_mix(mix_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    if mix.project_id is not None:
+        await verify_project_access(mix.project_id, user_id, service.session)
+    return mix
+
+
+@router.get("/mixes/{mix_id}/calibration", response_model=CalibrationResponse)
+async def get_calibration(
+    mix_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.read")),
+) -> CalibrationResponse:
+    service = SiteSensorsService(session)
+    mix = await _mix_for_user(service, mix_id, user_id)
+    points = await service.repo.calibration(mix.id)
+    return CalibrationResponse(
+        mix=MixResponse.model_validate(mix), points=[CalibrationPointOut.model_validate(p) for p in points]
+    )
+
+
+@router.put("/mixes/{mix_id}/calibration", response_model=CalibrationResponse)
+async def put_calibration(
+    mix_id: uuid.UUID,
+    data: CalibrationIn,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.manage")),
+) -> CalibrationResponse:
+    service = SiteSensorsService(session)
+    await _mix_for_user(service, mix_id, user_id)
+    mix = await service.set_calibration(mix_id, data.points)
+    points = await service.repo.calibration(mix.id)
+    return CalibrationResponse(
+        mix=MixResponse.model_validate(mix), points=[CalibrationPointOut.model_validate(p) for p in points]
+    )
 
 
 @router.get("/alerts/", response_model=AlertListResponse)
@@ -300,7 +361,64 @@ async def strike(
     if strip is None:
         raise HTTPException(status_code=404, detail="strip_not_found")
     await verify_project_access(strip.project_id, user_id, session)
-    return StripResponse.model_validate(await SiteSensorsService(session).strike(strip_id, data.struck_at))
+    try:
+        struck = await SiteSensorsService(session).strike(strip_id, data.struck_at, data.reason, user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return StripResponse.model_validate(struck)
+
+
+@router.get("/strips/{strip_id}/record")
+async def pour_record(
+    strip_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    format: str = Query(default="pdf", pattern="^(csv|pdf)$"),  # noqa: A002
+    lang: str = Query(default="en", max_length=10),
+    _perm: None = Depends(RequirePermission("site_sensors.read")),
+) -> Response:
+    from app.modules.site_sensors.models import FormworkStrip
+    from app.modules.site_sensors.pour_record import pour_record_csv, pour_record_pdf
+
+    strip = await session.get(FormworkStrip, strip_id)
+    if strip is None:
+        raise HTTPException(status_code=404, detail="strip_not_found")
+    await verify_project_access(strip.project_id, user_id, session)
+    record = await SiteSensorsService(session).pour_record(strip_id)
+    stem = f"pour-record-{record['element'] or record['device_code']}".replace(" ", "_")[:80]
+    if format == "csv":
+        return Response(
+            content=pour_record_csv(record, lang),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{stem}.csv"'},
+        )
+    return Response(
+        content=pour_record_pdf(record, lang),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{stem}.pdf"'},
+    )
+
+
+@router.get("/context/")
+async def sensor_context(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.read")),
+) -> dict[str, Any]:
+    await verify_project_access(project_id, user_id, session)
+    return await SiteSensorsService(session).context(project_id)
+
+
+@router.get("/sparklines/")
+async def sparklines(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.read")),
+) -> dict[str, Any]:
+    await verify_project_access(project_id, user_id, session)
+    return await SiteSensorsService(session).sparklines(project_id)
 
 
 @router.get("/summary/")

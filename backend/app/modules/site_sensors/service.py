@@ -25,22 +25,37 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-from app.core.site_monitoring import sensor_limit
+from app.core.site_monitoring import night_noise_by_ordinance, sensor_limit
+from app.modules.site_sensors.analysis import reading_stats, rolling_mean, sparkline
 from app.modules.site_sensors.maturity import (
+    DEFAULT_DATUM_C,
+    fit_log_curve,
     hours_to_strength,
+    hours_to_target_range,
     maturity_for_strength,
-    nurse_saul,
-    strength_from_maturity,
+    maturity_series,
+    strength_estimate,
 )
-from app.modules.site_sensors.models import ConcreteMix, FormworkStrip, SensorAlert, SensorDevice
+from app.modules.site_sensors.models import CalibrationPoint, ConcreteMix, FormworkStrip, SensorAlert, SensorDevice
 from app.modules.site_sensors.repository import SiteSensorsRepository
-from app.modules.site_sensors.schemas import DEFAULT_UNITS, DeviceCreate, DeviceUpdate, MixCreate, StripCreate
+from app.modules.site_sensors.schemas import (
+    DEFAULT_UNITS,
+    CalibrationPointIn,
+    DeviceCreate,
+    DeviceUpdate,
+    MixCreate,
+    StripCreate,
+)
 
 logger = logging.getLogger(__name__)
 
 TOKEN_PREFIX = "oes_"
 #: Raw readings younger than this stay raw; older ones are folded into hourly rows.
 RAW_RETENTION_DAYS = 30
+#: Kinds whose limit is a mean over a window rather than a single reading.
+ROLLING_MEAN_HOURS = {"dust_pm10": 24.0}
+#: Countries that measure in US customary units; the store stays SI.
+IMPERIAL_COUNTRIES = frozenset({"US", "LR", "MM"})
 
 EVENT_LIMIT_EXCEEDED = "site_sensors.limit.exceeded"
 EVENT_OFFLINE = "site_sensors.device.offline"
@@ -110,6 +125,46 @@ class SiteSensorsService:
         await self.session.flush()
         return mix
 
+    async def get_mix(self, mix_id: uuid.UUID) -> ConcreteMix:
+        mix = await self.session.get(ConcreteMix, mix_id)
+        if mix is None:
+            raise LookupError("mix_not_found")
+        return mix
+
+    async def set_calibration(self, mix_id: uuid.UUID, points: list[CalibrationPointIn]) -> ConcreteMix:
+        """Replace the mix's calibration table and refit ``a``, ``b`` and R² from it.
+
+        With fewer than two usable points the curve keeps its entered ``a`` and
+        ``b`` and the fit fields are cleared; the calibration rules say why.
+        """
+        mix = await self.get_mix(mix_id)
+        rows = [
+            CalibrationPoint(
+                mix_id=mix.id,
+                maturity_index=p.maturity_index,
+                strength_mpa=p.strength_mpa,
+                age_hours=p.age_hours,
+                note=p.note,
+            )
+            for p in points
+        ]
+        await self.repo.replace_calibration(mix.id, rows)
+        fit = fit_log_curve([(p.maturity_index, float(p.strength_mpa)) for p in points])
+        if fit is None:
+            mix.fit_r2 = None
+            mix.calibrated_min = None
+            mix.calibrated_max = None
+        else:
+            a, b, r2 = fit
+            if b > 0:
+                mix.curve_a = Decimal(str(round(a, 4)))
+                mix.curve_b = Decimal(str(round(b, 4)))
+            mix.fit_r2 = round(r2, 4)
+            mix.calibrated_min = min(p.maturity_index for p in points)
+            mix.calibrated_max = max(p.maturity_index for p in points)
+        await self.session.flush()
+        return mix
+
     async def list_mixes(self, project_id: uuid.UUID | None) -> list[ConcreteMix]:
         stmt = select(ConcreteMix).order_by(ConcreteMix.code)
         if project_id is not None:
@@ -150,21 +205,34 @@ class SiteSensorsService:
         stmt = select(FormworkStrip).where(FormworkStrip.project_id == project_id).order_by(FormworkStrip.created_at)
         return list((await self.session.execute(stmt)).scalars())
 
-    async def strike(self, strip_id: uuid.UUID, struck_at: datetime | None = None) -> FormworkStrip:
-        """Record the strike with the strength estimated at that moment.
+    async def strike(
+        self,
+        strip_id: uuid.UUID,
+        struck_at: datetime | None = None,
+        reason: str = "",
+        user_id: uuid.UUID | str | None = None,
+    ) -> FormworkStrip:
+        """Record the strike with the strength estimated at that moment, and who struck.
 
-        A strike before the target strength is recorded, not refused: the site
-        may have reasons (back-propping, a test cube result) the sensor does not
-        know. The validation rule flags it for a person to confirm.
+        A strike before the target strength is allowed only with a reason (a
+        cube result, back-propping): the site may know what the sensor does not.
+        Without one it is refused with ``strike_reason_required``.
         """
         strip = await self.session.get(FormworkStrip, strip_id)
         if strip is None:
             raise LookupError("strip_not_found")
         when = _aware(struck_at or datetime.now(UTC))
         est = await self.maturity(strip.device_id, until=when)
+        strength = est.get("strength_mpa")
+        below = strength is None or Decimal(str(strength)) < strip.target_strength_mpa
+        reason = (reason or "").strip()
+        if below and not reason:
+            raise ValueError("strike_reason_required")
         strip.struck_at = when
-        if est.get("strength_mpa") is not None:
-            strip.strength_at_strike_mpa = Decimal(str(est["strength_mpa"])).quantize(Decimal("0.01"))
+        if strength is not None:
+            strip.strength_at_strike_mpa = Decimal(str(strength)).quantize(Decimal("0.01"))
+        strip.strike_reason = reason or None
+        strip.struck_by = uuid.UUID(str(user_id)) if user_id else None
         strip.status = "struck"
         await self.session.flush()
         return strip
@@ -179,19 +247,51 @@ class SiteSensorsService:
         project = await self.session.get(Project, device.project_id)
         return (project.country_code or None) if project else None
 
-    async def limit_of(self, device: SensorDevice, at: datetime | None = None) -> tuple[float | None, str]:
+    async def limit_of(
+        self, device: SensorDevice, at: datetime | None = None, frequency_hz: float | None = None
+    ) -> tuple[float | None, str]:
         """The limit that applies to a device and where it comes from."""
         if device.limit_value is not None:
             return float(device.limit_value), "device"
-        lim = sensor_limit(await self._country(device), device.kind, at.timetz().replace(tzinfo=None) if at else None)
+        lim = sensor_limit(
+            await self._country(device),
+            device.kind,
+            at.timetz().replace(tzinfo=None) if at else None,
+            zone=device.noise_zone or None,
+            building_class=device.building_class or None,
+            frequency_hz=frequency_hz,
+            band=device.frequency_band or None,
+        )
         if lim is None:
             return None, ""
         return float(lim.value), lim.source
 
-    async def ingest(self, device: SensorDevice, readings: list[tuple[datetime, float]]) -> dict[str, Any]:
-        """Store readings, raise or update alerts, refresh maturity. Returns a short report."""
+    async def describe_limit(self, device: SensorDevice, at: datetime | None = None) -> dict[str, Any]:
+        """The limit shown next to a device now, its source text, and whether a local ordinance sets the night one."""
+        value, source = await self.limit_of(device, at or datetime.now(UTC))
+        country = await self._country(device)
+        return {
+            "effective_limit": value,
+            "limit_source": source,
+            "night_limit_by_ordinance": device.kind == "noise"
+            and device.limit_value is None
+            and night_noise_by_ordinance(country),
+        }
+
+    async def ingest(
+        self,
+        device: SensorDevice,
+        readings: list[tuple[datetime, float]],
+        frequencies: dict[datetime, float] | None = None,
+    ) -> dict[str, Any]:
+        """Store readings, raise or update alerts, refresh maturity. Returns a short report.
+
+        Dust is compared as its 24 hour rolling mean, as the PM10 limit is
+        written; vibration against the limit at the reading's dominant frequency.
+        """
         rows = sorted(((_aware(t), float(v)) for t, v in readings), key=lambda r: r[0])
-        await self.repo.insert_readings(device.id, rows)
+        freq = {_aware(t): f for t, f in (frequencies or {}).items() if f}
+        await self.repo.insert_readings(device.id, rows, freq)
         last_t, last_v = rows[-1]
         if device.last_seen_at is None or last_t >= _aware(device.last_seen_at):
             device.last_seen_at = last_t
@@ -201,8 +301,17 @@ class SiteSensorsService:
             offline.status = "closed"
         exceeded = 0
         if device.kind != "concrete_maturity":
-            for t, v in rows:
-                limit, source = await self.limit_of(device, t)
+            window = ROLLING_MEAN_HOURS.get(device.kind)
+            history: list[tuple[datetime, float]] = []
+            if window:
+                since = rows[0][0] - timedelta(hours=window)
+                history = [(_aware(t), v) for t, v in await self.repo.raw(device.id, since=since, until=rows[-1][0])]
+            for t, raw_v in rows:
+                v = raw_v
+                if window:
+                    mean = rolling_mean(history, t, window)
+                    v = round(mean, 2) if mean is not None else raw_v
+                limit, source = await self.limit_of(device, t, freq.get(t))
                 if limit is not None and v > limit:
                     exceeded += 1
                     await self._raise_exceedance(device, t, v, limit, source)
@@ -276,17 +385,33 @@ class SiteSensorsService:
         hourly = await self.repo.hourly(device.id, since=since, until=until)
         raw = await self.repo.raw(device.id, since=since, until=until)
         temps = sorted([(_aware(h["hour"]), float(h["avg"])) for h in hourly] + [(_aware(t), v) for t, v in raw])
-        datum = float(mix.datum_temp_c) if mix else -10.0
-        series = nurse_saul(temps, datum)
+        datum = float(mix.datum_temp_c) if mix else DEFAULT_DATUM_C
+        method = mix.method if mix and mix.method else "nurse_saul"
+        series = maturity_series(
+            temps,
+            method,
+            datum,
+            float(mix.activation_energy_kj_mol) if mix else 40.0,
+            float(mix.reference_temp_c) if mix else 20.0,
+        )
         m_now = series[-1][1] if series else 0.0
         out: dict[str, Any] = {
             "device_id": str(device.id),
             "mix_id": str(mix.id) if mix else None,
+            "method": method,
+            "index_unit": "h" if method == "equivalent_age" else "c_h",
             "datum_temp_c": datum,
+            "activation_energy_kj_mol": float(mix.activation_energy_kj_mol) if mix else None,
+            "reference_temp_c": float(mix.reference_temp_c) if mix else None,
             "maturity_c_h": round(m_now, 1),
             "strength_mpa": None,
+            "strength_status": None,
+            "calibrated_min": mix.calibrated_min if mix else None,
+            "calibrated_max": mix.calibrated_max if mix else None,
+            "fit_r2": mix.fit_r2 if mix else None,
             "target_strength_mpa": None,
             "hours_to_target": None,
+            "hours_to_target_range": None,
             "series": [
                 {"t": t.isoformat(), "maturity": round(m, 1), "temp": temp}
                 for (t, m), (_, temp) in list(zip(series, temps, strict=True))[-200:]
@@ -295,7 +420,9 @@ class SiteSensorsService:
         if mix is None:
             return out
         a, b = float(mix.curve_a), float(mix.curve_b)
-        out["strength_mpa"] = round(strength_from_maturity(m_now, a, b), 2)
+        out["strength_mpa"], out["strength_status"] = strength_estimate(
+            m_now, a, b, mix.calibrated_min, mix.calibrated_max
+        )
         target = await self._target(device, mix)
         if target is not None:
             out["target_strength_mpa"] = float(target)
@@ -304,6 +431,8 @@ class SiteSensorsService:
                 out["target_maturity_c_h"] = round(need, 1)
                 hrs = hours_to_strength(series, need)
                 out["hours_to_target"] = round(hrs, 1) if hrs is not None else None
+                rng = hours_to_target_range(series, need)
+                out["hours_to_target_range"] = [round(rng[0], 1), round(rng[1], 1)] if rng else None
         return out
 
     async def _target(self, device: SensorDevice, mix: ConcreteMix) -> Decimal | None:
@@ -472,21 +601,121 @@ class SiteSensorsService:
             ],
         }
 
+    async def context(self, project_id: uuid.UUID) -> dict[str, Any]:
+        """Country, unit system and the pours whose formwork may be struck now."""
+        from app.modules.projects.models import Project
+
+        project = await self.session.get(Project, project_id)
+        country = ((project.country_code or "") if project else "").upper()
+        devices = {d.id: d for d in await self.repo.devices(project_id)}
+        ready = []
+        for s in await self.list_strips(project_id):
+            if s.status != "released" or s.struck_at is not None:
+                continue
+            est = await self.maturity(s.device_id)
+            d = devices.get(s.device_id)
+            ready.append(
+                {
+                    "strip_id": str(s.id),
+                    "element": s.element,
+                    "device_code": d.code if d else "",
+                    "strength_mpa": est.get("strength_mpa"),
+                    "target_strength_mpa": float(s.target_strength_mpa),
+                }
+            )
+        return {
+            "country": country,
+            "unit_system": "imperial" if country in IMPERIAL_COUNTRIES else "metric",
+            "strike_ready": ready,
+        }
+
+    async def sparklines(self, project_id: uuid.UUID, now: datetime | None = None) -> dict[str, Any]:
+        """Hourly means of the last 24 hours per device, with the limit line where one applies."""
+        now = now or datetime.now(UTC)
+        out: dict[str, Any] = {}
+        for d in await self.repo.devices(project_id):
+            since = now - timedelta(hours=24)
+            rows = [(_aware(t), v) for t, v in await self.repo.raw(d.id, since=since, until=now)]
+            rows += [(_aware(h["hour"]), float(h["avg"])) for h in await self.repo.hourly(d.id, since=since, until=now)]
+            limit, _source = (None, "") if d.kind == "concrete_maturity" else await self.limit_of(d, now)
+            out[str(d.id)] = {"points": sparkline(rows, now), "limit": limit}
+        return out
+
+    async def pour_record(self, strip_id: uuid.UUID) -> dict[str, Any]:
+        """Everything a pour record prints: the strike, the strength, the temperature curve, who and why."""
+        strip = await self.session.get(FormworkStrip, strip_id)
+        if strip is None:
+            raise LookupError("strip_not_found")
+        device = await self.get_device(strip.device_id)
+        mix = await self.session.get(ConcreteMix, device.mix_id) if device.mix_id else None
+        est = await self.maturity(device.id, until=strip.struck_at)
+        struck_by = ""
+        if strip.struck_by:
+            try:
+                from app.modules.users.models import User
+
+                user = await self.session.get(User, strip.struck_by)
+                struck_by = (getattr(user, "full_name", "") or getattr(user, "email", "")) if user else ""
+            except Exception:
+                logger.debug("struck_by lookup skipped", exc_info=True)
+        return {
+            "strip_id": str(strip.id),
+            "project_id": str(strip.project_id),
+            "element": strip.element,
+            "device_code": device.code,
+            "pour_ref": device.pour_ref,
+            "cast_at": device.cast_at.isoformat() if device.cast_at else None,
+            "mix_code": mix.code if mix else "",
+            "method": est.get("method"),
+            "index_unit": est.get("index_unit"),
+            "target_strength_mpa": str(strip.target_strength_mpa),
+            "struck_at": strip.struck_at.isoformat() if strip.struck_at else None,
+            "strength_at_strike_mpa": str(strip.strength_at_strike_mpa)
+            if strip.strength_at_strike_mpa is not None
+            else None,
+            "maturity_at_strike": est.get("maturity_c_h"),
+            "struck_by": struck_by,
+            "strike_reason": strip.strike_reason or "",
+            "series": est.get("series", []),
+        }
+
     async def validation_payload(self, project_id: uuid.UUID) -> dict[str, Any]:
         await self.sweep_offline(project_id)
         devices = {d.id: d for d in await self.repo.devices(project_id)}
         alerts = await self.repo.alerts(project_id, limit=1000)
         strips = await self.list_strips(project_id)
-        return {
-            "devices": [
+        mixes = await self.list_mixes(project_id)
+        counts = await self.repo.calibration_counts([m.id for m in mixes])
+        used_mix_ids = {d.mix_id for d in devices.values() if d.mix_id}
+        device_rows = []
+        pours = []
+        for d in devices.values():
+            limit, _source = (None, "") if d.kind == "concrete_maturity" else await self.limit_of(d)
+            since = datetime.now(UTC) - timedelta(hours=48)
+            stats = reading_stats([(_aware(t), v) for t, v in await self.repo.raw(d.id, since=since)])
+            device_rows.append(
                 {
                     "id": str(d.id),
                     "code": d.code,
+                    "kind": d.kind,
                     "active": d.active,
                     "offline": any(a.device_id == d.id and a.kind == "offline" and a.status == "open" for a in alerts),
+                    "has_limit": limit is not None,
+                    "has_mix": d.mix_id is not None,
+                    **stats,
                 }
-                for d in devices.values()
+            )
+            if d.kind == "concrete_maturity" and d.mix_id and d.active:
+                est = await self.maturity(d.id)
+                pours.append({"id": str(d.id), "code": d.code, "strength_status": est.get("strength_status")})
+        return {
+            "devices": device_rows,
+            "mixes": [
+                {"id": str(m.id), "code": m.code, "points": counts.get(m.id, 0), "r2": m.fit_r2}
+                for m in mixes
+                if m.id in used_mix_ids or m.project_id == project_id
             ],
+            "pours": pours,
             "exceedances": [
                 {
                     "id": str(a.id),
@@ -507,6 +736,7 @@ class SiteSensorsService:
                     "strength_at_strike_mpa": str(s.strength_at_strike_mpa)
                     if s.strength_at_strike_mpa is not None
                     else None,
+                    "reason": s.strike_reason or "",
                 }
                 for s in strips
             ],
