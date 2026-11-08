@@ -25,6 +25,7 @@ from decimal import Decimal
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.site_sensors.analysis import rolling_mean
 from app.modules.site_sensors.maturity import nurse_saul, strength_from_maturity
 from app.modules.site_sensors.models import (
     ConcreteMix,
@@ -34,8 +35,8 @@ from app.modules.site_sensors.models import (
     sensor_reading,
     sensor_reading_hourly,
 )
-from app.modules.site_sensors.schemas import DeviceCreate, StripCreate
-from app.modules.site_sensors.service import SiteSensorsService
+from app.modules.site_sensors.schemas import CalibrationPointIn, DeviceCreate, StripCreate
+from app.modules.site_sensors.service import ROLLING_MEAN_HOURS, SiteSensorsService
 
 #: Projects seeded per call; the demo shows a handful, not every imported pack.
 _MAX_PROJECTS = 6
@@ -109,7 +110,7 @@ _ENV = (
         "Dust PM10, north fence",
         "dust_pm10",
         1,
-        (Spike(4, 14, 1.35, 3, "Water bowser on the haul road, dust screen repaired."),),
+        (Spike(4, 6, 2.4, 20, "Water bowser on the haul road, dust screen repaired."),),
     ),
     (
         "VB-01",
@@ -280,6 +281,17 @@ async def _seed_pours(
     )
     session.add(mix)
     await session.flush()
+    # Lab cubes cured at 20 degC: index = 20 degC x age, strengths around the curve.
+    await service.set_calibration(
+        mix.id,
+        [
+            CalibrationPointIn(maturity_index=480, strength_mpa=Decimal("6.4"), age_hours=24, note="1 day cube"),
+            CalibrationPointIn(maturity_index=960, strength_mpa=Decimal("11.5"), age_hours=48, note="2 day cube"),
+            CalibrationPointIn(maturity_index=1440, strength_mpa=Decimal("15.2"), age_hours=72, note="3 day cube"),
+            CalibrationPointIn(maturity_index=3360, strength_mpa=Decimal("21.6"), age_hours=168, note="7 day cube"),
+            CalibrationPointIn(maturity_index=13440, strength_mpa=Decimal("32.9"), age_hours=672, note="28 day cube"),
+        ],
+    )
     activities = await _activities(session, project_id, len(_POURS))
     for i, pour in enumerate(_POURS):
         cast_at = now - timedelta(hours=pour.cast_hours_ago)
@@ -374,6 +386,7 @@ async def _seed_environment(
             lim_by_hour[h] = float(lim or 0.0)
         rows = env_series(kind, now, step_h, lim_by_hour, spikes, rng, _SILENT.get(code, 0))
         # One chunk per breach so an acknowledged alert is closed before the next episode raises its own.
+        window = ROLLING_MEAN_HOURS.get(kind)
         cut = 0
         for sp in spikes:
             start = (now - timedelta(days=sp.days_ago)).replace(hour=sp.hour, minute=0, second=0, microsecond=0)
@@ -381,7 +394,8 @@ async def _seed_environment(
                 (
                     i
                     for i, (t, v) in enumerate(rows)
-                    if start <= t < start + timedelta(hours=max(sp.hours, step_h)) and v > lim_by_hour[t.hour]
+                    if start <= t < start + timedelta(hours=2 * window if window else max(sp.hours, step_h))
+                    and (rolling_mean(rows, t, window) if window else v) > lim_by_hour[t.hour]
                 ),
                 default=None,
             )
