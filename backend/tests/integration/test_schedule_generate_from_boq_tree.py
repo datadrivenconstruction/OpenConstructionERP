@@ -32,6 +32,7 @@ from app.modules.schedule.schemas import ActivityCreate, ScheduleCreate
 from app.modules.schedule.service import ScheduleService
 from tests._pg import transactional_session
 
+
 def _start() -> str:
     return "2026-05-04"  # a Monday
 
@@ -108,7 +109,9 @@ async def _setup(session, start_date: str | None = None):  # noqa: ANN001, ANN20
 
     project_id = await _project(session)
     service = ScheduleService(session)
-    schedule = await service.create_schedule(ScheduleCreate(project_id=project_id, name="Gen", start_date=start_date or _start()))
+    schedule = await service.create_schedule(
+        ScheduleCreate(project_id=project_id, name="Gen", start_date=start_date or _start())
+    )
     boq = BOQ(project_id=project_id, name="Computo metrico")
     session.add(boq)
     await session.flush()
