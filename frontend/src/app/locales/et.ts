@@ -13785,7 +13785,7 @@ const resource = {
     "gantt.milestone": "Verstapost",
     "gantt.start": "Algus",
     "gantt.today": "Täna",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS kood",
     "gantt.col_duration": "Päevad",
     "gantt.col_predecessors": "Eelnevad tööd",
     "gantt.col_resources": "Ressursid",

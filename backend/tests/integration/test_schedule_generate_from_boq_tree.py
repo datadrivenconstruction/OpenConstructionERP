@@ -32,7 +32,8 @@ from app.modules.schedule.schemas import ActivityCreate, ScheduleCreate
 from app.modules.schedule.service import ScheduleService
 from tests._pg import transactional_session
 
-START = "2026-05-04"  # a Monday
+def _start() -> str:
+    return "2026-05-04"  # a Monday
 
 
 async def _project(session) -> uuid.UUID:  # noqa: ANN001
@@ -102,12 +103,12 @@ class _Bill:
         return pos.id
 
 
-async def _setup(session):  # noqa: ANN001, ANN202
+async def _setup(session, start_date: str | None = None):  # noqa: ANN001, ANN202
     from app.modules.boq.models import BOQ
 
     project_id = await _project(session)
     service = ScheduleService(session)
-    schedule = await service.create_schedule(ScheduleCreate(project_id=project_id, name="Gen", start_date=START))
+    schedule = await service.create_schedule(ScheduleCreate(project_id=project_id, name="Gen", start_date=start_date or _start()))
     boq = BOQ(project_id=project_id, name="Computo metrico")
     session.add(boq)
     await session.flush()
@@ -361,7 +362,7 @@ async def test_a_big_section_runs_in_crews_to_fit_the_window() -> None:
         await service.generate_from_boq(schedule_id, bill.boq_id, 90)
         acts = await _activities(service, schedule_id)
 
-        last_day = date.fromisoformat(START) + timedelta(days=89)
+        last_day = date.fromisoformat(_start()) + timedelta(days=89)
         assert max(date.fromisoformat(a.end_date) for a in acts) <= last_day
         schedule = await service.get_schedule(schedule_id)
         generation = schedule.metadata_["boq_generation"]
@@ -383,7 +384,7 @@ async def test_a_plan_that_cannot_fit_carries_a_warning() -> None:
         warnings = schedule.metadata_["boq_generation"]["warnings"]
         assert [w["code"] for w in warnings] == ["plan_exceeds_window"]
         warning = warnings[0]
-        assert warning["requested_end"] == (date.fromisoformat(START) + timedelta(days=29)).isoformat()
+        assert warning["requested_end"] == (date.fromisoformat(_start()) + timedelta(days=29)).isoformat()
         assert warning["planned_end"] > warning["requested_end"]
 
 
@@ -639,7 +640,7 @@ async def test_the_preview_writes_nothing_and_is_the_plan_that_gets_written() ->
         preview = await service.preview_generation(schedule_id, bill.boq_id, 200, start_date=date(2026, 9, 7))
         after = sorted((a.name, a.start_date, a.end_date) for a in await _activities(service, schedule_id))
         assert after == before, "a preview must not touch the schedule"
-        assert (await service.get_schedule(schedule_id)).start_date == START
+        assert (await service.get_schedule(schedule_id)).start_date == _start()
         assert preview["existing_activity_count"] == len(before)
         assert preview["planned_start"] == "2026-09-07"
         # The lump sum goes by its cost share, the four measured positions by
@@ -804,7 +805,7 @@ async def test_without_an_end_date_the_workers_fit_the_default_window_and_say_so
         # A residential bill's default: a year from the start.
         assert preview["fitted_window"] == {
             "days": 365,
-            "end": (date.fromisoformat(START) + timedelta(days=364)).isoformat(),
+            "end": (date.fromisoformat(_start()) + timedelta(days=364)).isoformat(),
             "default": True,
             "fits": True,
         }
@@ -828,7 +829,7 @@ async def test_when_even_twenty_workers_do_not_fit_the_preview_says_so() -> None
         assert preview["workers_per_position"] == 20
         assert preview["fitted_window"]["fits"] is False
         # Years past the window, not a day: no rounding of the window decides it.
-        assert preview["planned_end"] > (date.fromisoformat(START) + timedelta(days=3 * 365)).isoformat()
+        assert preview["planned_end"] > (date.fromisoformat(_start()) + timedelta(days=3 * 365)).isoformat()
         for days in (199, 200, 201):
             explicit = await service.preview_generation(schedule_id, bill.boq_id, days)
             assert explicit["workers_per_position"] == 20, days

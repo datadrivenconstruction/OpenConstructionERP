@@ -14133,7 +14133,7 @@ const resource = {
     "gantt.milestone": "Bosqich",
     "gantt.start": "Boshlanish",
     "gantt.today": "Bugun",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS kodi",
     "gantt.col_duration": "Kunlar",
     "gantt.col_predecessors": "Oldingi ishlar",
     "gantt.col_resources": "Resurslar",

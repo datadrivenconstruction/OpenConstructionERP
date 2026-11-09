@@ -13212,7 +13212,7 @@ const resource = {
     "gantt.milestone": "Ορόσημο",
     "gantt.start": "Έναρξη",
     "gantt.today": "Σήμερα",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Κωδ. WBS",
     "gantt.col_duration": "Ημέρες",
     "gantt.col_predecessors": "Προηγούμενες",
     "gantt.col_resources": "Πόροι",

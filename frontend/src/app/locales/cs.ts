@@ -13631,7 +13631,7 @@ const resource = {
     "gantt.milestone": "Milník",
     "gantt.start": "Spustit",
     "gantt.today": "Dnes",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Kód WBS",
     "gantt.col_duration": "Dny",
     "gantt.col_predecessors": "Předchůdci",
     "gantt.col_resources": "Zdroje",

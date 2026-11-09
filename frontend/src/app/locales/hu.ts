@@ -12254,7 +12254,7 @@ const resource = {
     "gantt.milestone": "Mérföldkő",
     "gantt.start": "Kezdés",
     "gantt.today": "Ma",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS-kód",
     "gantt.col_duration": "Napok",
     "gantt.col_predecessors": "Megelőzők",
     "gantt.col_resources": "Erőforrások",

@@ -14130,7 +14130,7 @@ const resource = {
     "gantt.milestone": "Reper",
     "gantt.start": "Pornește",
     "gantt.today": "Astăzi",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Cod WBS",
     "gantt.col_duration": "Zile",
     "gantt.col_predecessors": "Predecesori",
     "gantt.col_resources": "Resurse",

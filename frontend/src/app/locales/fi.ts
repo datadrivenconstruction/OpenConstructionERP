@@ -13256,7 +13256,7 @@ const resource = {
     "gantt.milestone": "Välitavoite",
     "gantt.start": "Aloita",
     "gantt.today": "Tänään",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS-koodi",
     "gantt.col_duration": "Päivät",
     "gantt.col_predecessors": "Edeltäjät",
     "gantt.col_resources": "Resurssit",

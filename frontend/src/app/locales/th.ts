@@ -14015,7 +14015,7 @@ const resource = {
     "gantt.milestone": "เหตุการณ์สำคัญ",
     "gantt.start": "เริ่มต้น",
     "gantt.today": "วันนี้",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "รหัส WBS",
     "gantt.col_duration": "วัน",
     "gantt.col_predecessors": "งานก่อนหน้า",
     "gantt.col_resources": "ทรัพยากร",

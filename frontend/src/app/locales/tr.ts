@@ -14226,7 +14226,7 @@ const resource = {
     "gantt.milestone": "Kilometre taşı",
     "gantt.start": "Başlangıç",
     "gantt.today": "Bugün",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS kodu",
     "gantt.col_duration": "Gün",
     "gantt.col_predecessors": "Öncüller",
     "gantt.col_resources": "Kaynaklar",

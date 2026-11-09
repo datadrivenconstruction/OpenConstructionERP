@@ -12550,7 +12550,7 @@ const resource = {
     "gantt.milestone": "Milestone",
     "gantt.start": "Inizio",
     "gantt.today": "Oggi",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Codice WBS",
     "gantt.col_duration": "Giorni",
     "gantt.col_predecessors": "Predecessori",
     "gantt.col_resources": "Risorse",

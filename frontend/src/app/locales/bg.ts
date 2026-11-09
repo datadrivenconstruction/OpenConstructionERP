@@ -13524,7 +13524,7 @@ const resource = {
     "gantt.milestone": "Контролна точка",
     "gantt.start": "Начало",
     "gantt.today": "Днес",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS код",
     "gantt.col_duration": "Дни",
     "gantt.col_predecessors": "Предшественици",
     "gantt.col_resources": "Ресурси",

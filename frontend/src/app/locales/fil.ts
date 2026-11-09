@@ -12820,7 +12820,7 @@ const resource = {
     "gantt.milestone": "Yugto",
     "gantt.start": "Simula",
     "gantt.today": "Ngayon",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS code",
     "gantt.col_duration": "Araw",
     "gantt.col_predecessors": "Mga nauuna",
     "gantt.col_resources": "Mga resource",

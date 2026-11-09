@@ -13921,7 +13921,7 @@ const resource = {
     "gantt.milestone": "Cột mốc",
     "gantt.start": "Bắt đầu",
     "gantt.today": "Hôm nay",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Mã WBS",
     "gantt.col_duration": "Ngày",
     "gantt.col_predecessors": "Công việc trước",
     "gantt.col_resources": "Nguồn lực",

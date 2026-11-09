@@ -13824,7 +13824,7 @@ const resource = {
     "gantt.milestone": "Үе шат",
     "gantt.start": "Эхлэх",
     "gantt.today": "Өнөөдөр",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS код",
     "gantt.col_duration": "Өдөр",
     "gantt.col_predecessors": "Өмнөх ажлууд",
     "gantt.col_resources": "Нөөц",

@@ -12357,7 +12357,7 @@ const resource = {
     "gantt.milestone": "Mijlpaal",
     "gantt.start": "Begin",
     "gantt.today": "Vandaag",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS-code",
     "gantt.col_duration": "Dagen",
     "gantt.col_predecessors": "Voorgangers",
     "gantt.col_resources": "Middelen",

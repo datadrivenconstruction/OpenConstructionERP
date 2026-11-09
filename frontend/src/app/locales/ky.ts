@@ -12269,7 +12269,7 @@ const resource = {
     "gantt.milestone": "Этап",
     "gantt.start": "Башталышы",
     "gantt.today": "Бүгүн",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS коду",
     "gantt.col_duration": "Күндөр",
     "gantt.col_predecessors": "Мурунку иштер",
     "gantt.col_resources": "Ресурстар",

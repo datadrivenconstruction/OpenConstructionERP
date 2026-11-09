@@ -13493,7 +13493,7 @@ const resource = {
     "gantt.milestone": "मील का पत्थर",
     "gantt.start": "शुरुआत",
     "gantt.today": "आज",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS कोड",
     "gantt.col_duration": "दिन",
     "gantt.col_predecessors": "पूर्ववर्ती",
     "gantt.col_resources": "संसाधन",

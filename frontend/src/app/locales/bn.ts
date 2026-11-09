@@ -12862,7 +12862,7 @@ const resource = {
     "gantt.milestone": "মাইলফলক",
     "gantt.start": "শুরু",
     "gantt.today": "আজ",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS কোড",
     "gantt.col_duration": "দিন",
     "gantt.col_predecessors": "পূর্ববর্তী",
     "gantt.col_resources": "সম্পদ",

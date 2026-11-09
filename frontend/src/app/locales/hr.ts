@@ -13975,7 +13975,7 @@ const resource = {
     "gantt.milestone": "Prekretnica",
     "gantt.start": "Pokreni",
     "gantt.today": "Danas",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS šifra",
     "gantt.col_duration": "Dani",
     "gantt.col_predecessors": "Prethodnici",
     "gantt.col_resources": "Resursi",

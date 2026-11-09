@@ -13921,7 +13921,7 @@ const resource = {
     "gantt.milestone": "Tonggak Capaian",
     "gantt.start": "Mulai",
     "gantt.today": "Hari ini",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Kode WBS",
     "gantt.col_duration": "Hari",
     "gantt.col_predecessors": "Pendahulu",
     "gantt.col_resources": "Sumber daya",

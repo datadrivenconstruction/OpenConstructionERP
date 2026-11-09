@@ -13234,7 +13234,7 @@ const resource = {
     "gantt.milestone": "אבן דרך",
     "gantt.start": "התחלה",
     "gantt.today": "היום",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "קוד WBS",
     "gantt.col_duration": "ימים",
     "gantt.col_predecessors": "קודמים",
     "gantt.col_resources": "משאבים",

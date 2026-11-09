@@ -13997,7 +13997,7 @@ const resource = {
     "gantt.milestone": "Kamień milowy",
     "gantt.start": "Rozpocznij",
     "gantt.today": "Dziś",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "Kod WBS",
     "gantt.col_duration": "Dni",
     "gantt.col_predecessors": "Poprzednicy",
     "gantt.col_resources": "Zasoby",

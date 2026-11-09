@@ -13171,7 +13171,7 @@ const resource = {
     "gantt.milestone": "سنگ میل",
     "gantt.start": "آغاز",
     "gantt.today": "آج",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS کوڈ",
     "gantt.col_duration": "دن",
     "gantt.col_predecessors": "پیشرو",
     "gantt.col_resources": "وسائل",

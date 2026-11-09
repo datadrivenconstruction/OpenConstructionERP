@@ -13361,7 +13361,7 @@ const resource = {
     "gantt.milestone": "마일스톤",
     "gantt.start": "시작",
     "gantt.today": "오늘",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS 코드",
     "gantt.col_duration": "일수",
     "gantt.col_predecessors": "선행 작업",
     "gantt.col_resources": "자원",

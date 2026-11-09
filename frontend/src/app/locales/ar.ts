@@ -14478,7 +14478,7 @@ const resource = {
     "gantt.milestone": "معلم رئيسي",
     "gantt.start": "البداية",
     "gantt.today": "اليوم",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "رمز WBS",
     "gantt.col_duration": "أيام",
     "gantt.col_predecessors": "الأنشطة السابقة",
     "gantt.col_resources": "الموارد",

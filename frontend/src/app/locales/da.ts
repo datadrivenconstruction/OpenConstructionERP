@@ -16295,7 +16295,7 @@ const resource = {
     "gantt.milestone": "Milepæl",
     "gantt.start": "Start",
     "gantt.today": "I dag",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS-kode",
     "gantt.col_duration": "Dage",
     "gantt.col_predecessors": "Forgængere",
     "gantt.col_resources": "Ressourcer",

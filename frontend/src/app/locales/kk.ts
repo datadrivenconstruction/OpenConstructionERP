@@ -13163,7 +13163,7 @@ const resource = {
     "gantt.milestone": "Кезең",
     "gantt.start": "Басталуы",
     "gantt.today": "Бүгін",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS коды",
     "gantt.col_duration": "Күндер",
     "gantt.col_predecessors": "Алдыңғы жұмыстар",
     "gantt.col_resources": "Ресурстар",

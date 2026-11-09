@@ -13384,7 +13384,7 @@ const resource = {
     "gantt.milestone": "里程碑",
     "gantt.start": "开始",
     "gantt.today": "今天",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS 编码",
     "gantt.col_duration": "天数",
     "gantt.col_predecessors": "紧前工序",
     "gantt.col_resources": "资源",

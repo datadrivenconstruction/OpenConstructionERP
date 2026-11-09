@@ -13343,7 +13343,7 @@ const resource = {
     "gantt.milestone": "マイルストーン",
     "gantt.start": "開始",
     "gantt.today": "今日",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "WBS 番号",
     "gantt.col_duration": "日数",
     "gantt.col_predecessors": "先行タスク",
     "gantt.col_resources": "リソース",

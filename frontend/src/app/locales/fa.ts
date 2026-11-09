@@ -13129,7 +13129,7 @@ const resource = {
     "gantt.milestone": "نقطه عطف",
     "gantt.start": "شروع",
     "gantt.today": "امروز",
-    "gantt.col_wbs": "WBS",
+    "gantt.col_wbs": "کد WBS",
     "gantt.col_duration": "روز",
     "gantt.col_predecessors": "پیش‌نیازها",
     "gantt.col_resources": "منابع",
