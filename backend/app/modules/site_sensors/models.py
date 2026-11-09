@@ -8,6 +8,7 @@ Tables:
     oe_site_sensors_calibration     - A mix's calibration cubes: maturity index against measured strength
     oe_site_sensors_reading         - Raw readings, compact: (device, time) -> value, no surrogate key
     oe_site_sensors_reading_hourly  - Hourly min / max / mean that raw readings are folded into
+    oe_site_sensors_reading_audit   - Who added, changed or deleted a reading entered by hand or imported
     oe_site_sensors_alert           - Exceedances, offline devices, strength reached; acknowledgement and links
     oe_site_sensors_strip           - Planned formwork strike on a pour, gated by the estimated strength
 
@@ -41,7 +42,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
 
-SENSOR_KINDS = ("concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level")
+SENSOR_KINDS = ("concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level", "custom")
+READING_SOURCES = ("device", "manual", "import")
 ALERT_KINDS = ("exceedance", "offline", "strength_reached")
 ALERT_STATUSES = ("open", "acknowledged", "closed")
 
@@ -61,6 +63,14 @@ class SensorDevice(Base):
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
     # Overrides the country limit; required where the law sets none (water level, wind).
     limit_value: Mapped[Decimal | None] = mapped_column(Numeric(14, 4), nullable=True)
+    # A reading below this is an exceedance too (pump flow, humidity); any kind may set one.
+    lower_limit: Mapped[Decimal | None] = mapped_column(Numeric(14, 4), nullable=True)
+    # Where the device limits come from, or why the country default was overridden; shown next to the limit.
+    limit_note: Mapped[str] = mapped_column(String(300), nullable=False, default="", server_default="")
+    # Compare the mean over this many hours instead of each reading; blank keeps the kind's own rule.
+    rolling_mean_hours: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Readings are kept without any limit check (a custom sensor with nothing to enforce).
+    record_only: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     # Empty means the project's country.
     country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="", server_default="")
     offline_after_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=60, server_default="60")
@@ -153,6 +163,10 @@ sensor_reading = Table(
     Column("value", Float, nullable=False),
     # Vibration: dominant frequency of the reading in Hz, when the sensor reports it.
     Column("frequency_hz", Float, nullable=True),
+    # device (token ingest), manual (typed in) or import (pasted CSV); only the last two can be edited.
+    Column("source", String(10), nullable=False, default="device", server_default="device"),
+    Column("entered_by", GUID(), nullable=True),
+    Column("note", String(500), nullable=False, default="", server_default=""),
 )
 
 sensor_reading_hourly = Table(
@@ -165,6 +179,23 @@ sensor_reading_hourly = Table(
     Column("v_max", Float, nullable=False),
     Column("v_avg", Float, nullable=False),
 )
+
+
+class ReadingAudit(Base):
+    """One change to a reading entered by a person: created, updated or deleted, with the values before and after."""
+
+    __tablename__ = "oe_site_sensors_reading_audit"
+    __table_args__ = (Index("ix_oe_site_sensors_reading_audit_device", "device_id", "recorded_at"),)
+
+    device_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_site_sensors_device.id", ondelete="CASCADE"), nullable=False
+    )
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    action: Mapped[str] = mapped_column(String(10), nullable=False)
+    value_before: Mapped[float | None] = mapped_column(Float, nullable=True)
+    value_after: Mapped[float | None] = mapped_column(Float, nullable=True)
+    note: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
 
 class SensorAlert(Base):

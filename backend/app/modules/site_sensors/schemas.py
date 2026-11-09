@@ -13,7 +13,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.decimal_types import Decimal6_2, Decimal8_2, Decimal10_4, Decimal14_4
 
-SensorKind = Literal["concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level"]
+SensorKind = Literal["concrete_maturity", "noise", "dust_pm10", "vibration", "weather", "water_level", "custom"]
+UserReadingSource = Literal["manual", "import"]
 MaturityMethod = Literal["nurse_saul", "equivalent_age"]
 NoiseZone = Literal["", "a", "b", "c", "d", "e", "f"]
 BuildingClass = Literal["", "1", "2", "3"]
@@ -30,6 +31,28 @@ DEFAULT_UNITS: dict[str, str] = {
 }
 
 
+def check_limits(
+    kind: str,
+    unit: str,
+    upper: Decimal | None,
+    lower: Decimal | None,
+    record_only: bool,
+) -> str | None:
+    """The first broken rule of a device's limits as an error key, or None.
+
+    Any kind: the lower limit sits below the upper one. A custom sensor also
+    needs a unit and at least one limit, unless it is explicitly record-only.
+    """
+    if upper is not None and lower is not None and lower >= upper:
+        return "lower_limit_not_below_upper"
+    if kind == "custom":
+        if not (unit or "").strip():
+            return "custom_unit_required"
+        if upper is None and lower is None and not record_only:
+            return "custom_limit_or_record_only"
+    return None
+
+
 class DeviceCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
@@ -39,6 +62,10 @@ class DeviceCreate(BaseModel):
     kind: SensorKind
     unit: str = Field(default="", max_length=20)
     limit_value: Decimal14_4 | None = None
+    lower_limit: Decimal14_4 | None = None
+    limit_note: str = Field(default="", max_length=300)
+    rolling_mean_hours: float | None = Field(default=None, gt=0, le=720, allow_inf_nan=False)
+    record_only: bool = False
     country_code: str = Field(default="", max_length=2)
     offline_after_minutes: int = Field(default=60, ge=1, le=10080)
     lat: float | None = Field(default=None, ge=-90, le=90)
@@ -59,12 +86,24 @@ class DeviceCreate(BaseModel):
             raise ValueError("bim_element_needs_model")
         return self
 
+    @model_validator(mode="after")
+    def _limits_consistent(self) -> Self:
+        err = check_limits(self.kind, self.unit, self.limit_value, self.lower_limit, self.record_only)
+        if err:
+            raise ValueError(err)
+        return self
+
 
 class DeviceUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, max_length=200)
+    unit: str | None = Field(default=None, max_length=20)
     limit_value: Decimal14_4 | None = None
+    lower_limit: Decimal14_4 | None = None
+    limit_note: str | None = Field(default=None, max_length=300)
+    rolling_mean_hours: float | None = Field(default=None, gt=0, le=720, allow_inf_nan=False)
+    record_only: bool | None = None
     country_code: str | None = Field(default=None, max_length=2)
     offline_after_minutes: int | None = Field(default=None, ge=1, le=10080)
     active: bool | None = None
@@ -89,6 +128,10 @@ class DeviceResponse(BaseModel):
     kind: str
     unit: str
     limit_value: Decimal | None = None
+    lower_limit: Decimal | None = None
+    limit_note: str = ""
+    rolling_mean_hours: float | None = None
+    record_only: bool = False
     country_code: str
     offline_after_minutes: int
     token_prefix: str
@@ -108,6 +151,9 @@ class DeviceResponse(BaseModel):
     effective_limit: float | None = None
     limit_source: str = ""
     night_limit_by_ordinance: bool = False
+    # The country figure the device limit replaces, when it overrides one.
+    country_limit: float | None = None
+    country_limit_source: str = ""
     bim_model_id: UUID | None = None
     bim_element_id: UUID | None = None
 
@@ -122,10 +168,38 @@ class ReadingIn(BaseModel):
     recorded_at: datetime
     value: float = Field(allow_inf_nan=False)
     frequency_hz: float | None = Field(default=None, gt=0, le=1000, allow_inf_nan=False)
+    note: str = Field(default="", max_length=500)
 
 
 class ReadingsIn(BaseModel):
     readings: list[ReadingIn] = Field(min_length=1, max_length=5000)
+
+
+class UserReadingsIn(ReadingsIn):
+    """Readings a person adds: typed in one by one, or pasted or imported from CSV."""
+
+    source: UserReadingSource = "manual"
+
+
+class ReadingEdit(BaseModel):
+    recorded_at: datetime
+    value: float = Field(allow_inf_nan=False)
+    note: str = Field(default="", max_length=500)
+
+
+class ReadingAuditOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    device_id: UUID
+    recorded_at: datetime
+    action: str
+    value_before: float | None = None
+    value_after: float | None = None
+    note: str = ""
+    user_id: UUID | None = None
+    created_at: datetime
+    user_name: str = ""
 
 
 class MixCreate(BaseModel):
@@ -140,6 +214,22 @@ class MixCreate(BaseModel):
     reference_temp_c: Decimal6_2 = Decimal("20")
     curve_a: Decimal10_4
     curve_b: Decimal10_4 = Field(gt=0)
+    strip_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
+    notes: str | None = None
+
+
+class MixUpdate(BaseModel):
+    """Manual concrete mode: the site's own datum, method constants, curve and strike strength."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, max_length=200)
+    datum_temp_c: Decimal6_2 | None = Field(default=None, ge=-30, le=30)
+    method: MaturityMethod | None = None
+    activation_energy_kj_mol: Decimal6_2 | None = Field(default=None, gt=0, le=100)
+    reference_temp_c: Decimal6_2 | None = None
+    curve_a: Decimal10_4 | None = None
+    curve_b: Decimal10_4 | None = Field(default=None, gt=0)
     strip_strength_mpa: Decimal8_2 | None = Field(default=None, gt=0)
     notes: str | None = None
 

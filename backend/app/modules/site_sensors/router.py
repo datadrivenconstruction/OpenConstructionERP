@@ -6,11 +6,15 @@ GET   /devices/                     - Devices of a project (project_id=, kind=)
 POST  /devices/                     - Create a device
 PATCH /devices/{id}                 - Update a device
 POST  /devices/{id}/token           - Issue a new ingest token (shown once)
-POST  /devices/{id}/readings        - Add readings as a user (manual or CSV import on the client)
-GET   /devices/{id}/readings        - Raw and hourly readings in a window
+POST  /devices/{id}/readings        - Add readings as a user (source manual or import), with a note each
+GET   /devices/{id}/readings        - Raw and hourly readings in a window, raw with source and author
+PATCH /devices/{id}/readings/manual - Change a hand-entered reading (its author or a manager)
+DELETE /devices/{id}/readings/manual?recorded_at= - Delete a hand-entered reading (its author or a manager)
+GET   /devices/{id}/readings/audit  - Who added, changed or deleted hand-entered readings
 GET   /devices/{id}/maturity        - Maturity, strength estimate, hours to strike strength
 POST  /ingest/                      - Device ingest, header ``X-Device-Token``
 GET   /mixes/  POST /mixes/         - Concrete mix curves
+PATCH /mixes/{id}                   - Own datum temperature, method constants, curve or strike strength
 GET   /mixes/{id}/calibration       - Calibration cubes of a mix
 PUT   /mixes/{id}/calibration       - Replace the cubes and refit the curve (a, b, R²)
 GET   /alerts/                      - Alerts (project_id=, status=)
@@ -31,12 +35,18 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 
 from app.core.rate_limiter import client_identifier, device_ingest_limiter
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    get_current_user_payload,
+    verify_project_access,
+)
 from app.modules.site_sensors.evidence_routes import router as evidence_router
 from app.modules.site_sensors.schemas import (
     AcknowledgeIn,
@@ -53,18 +63,36 @@ from app.modules.site_sensors.schemas import (
     MixCreate,
     MixListResponse,
     MixResponse,
+    MixUpdate,
+    ReadingAuditOut,
+    ReadingEdit,
     ReadingsIn,
     StrikeIn,
     StripCreate,
     StripListResponse,
     StripResponse,
     TokenResponse,
+    UserReadingsIn,
 )
 from app.modules.site_sensors.service import SiteSensorsService
 from app.modules.site_sensors.validators import run_rules
 
 router = APIRouter(tags=["site-sensors"])
 router.include_router(evidence_router)
+
+UserPayload = Annotated[dict[str, Any], Depends(get_current_user_payload)]
+
+
+def _is_manager(payload: dict[str, Any]) -> bool:
+    """A manager may change or delete anybody's hand-entered readings."""
+    from app.core.permissions import permission_registry
+
+    role = str(payload.get("role", ""))
+    return (
+        role == "admin"
+        or "site_sensors.manage" in (payload.get("permissions") or [])
+        or permission_registry.role_has_permission(role, "site_sensors.manage")
+    )
 
 
 async def _device_out(service: SiteSensorsService, device: Any) -> DeviceResponse:
@@ -120,7 +148,11 @@ async def update_device(
 ) -> DeviceResponse:
     service = SiteSensorsService(session)
     await _device_for_user(service, device_id, user_id)
-    return await _device_out(service, await service.update_device(device_id, data))
+    try:
+        device = await service.update_device(device_id, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return await _device_out(service, device)
 
 
 @router.post("/devices/{device_id}/token", response_model=TokenResponse)
@@ -139,14 +171,71 @@ async def issue_token(
 @router.post("/devices/{device_id}/readings")
 async def add_readings(
     device_id: uuid.UUID,
-    data: ReadingsIn,
+    data: UserReadingsIn,
     user_id: CurrentUserId,
     session: SessionDep,
     _perm: None = Depends(RequirePermission("site_sensors.record")),
 ) -> dict[str, Any]:
     service = SiteSensorsService(session)
     device = await _device_for_user(service, device_id, user_id)
-    return await service.ingest(device, [(r.recorded_at, r.value) for r in data.readings], _frequencies(data))
+    return await service.add_user_readings(device, data.readings, data.source, user_id)
+
+
+def _reading_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, LookupError):
+        return HTTPException(status_code=404, detail=str(exc))
+    if isinstance(exc, PermissionError):
+        return HTTPException(status_code=403, detail=str(exc))
+    return HTTPException(status_code=422, detail=str(exc))
+
+
+@router.patch("/devices/{device_id}/readings/manual")
+async def edit_reading(
+    device_id: uuid.UUID,
+    data: ReadingEdit,
+    user_id: CurrentUserId,
+    payload: UserPayload,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.record")),
+) -> dict[str, Any]:
+    service = SiteSensorsService(session)
+    device = await _device_for_user(service, device_id, user_id)
+    try:
+        return await service.edit_reading(
+            device, data.recorded_at, data.value, data.note, user_id, is_manager=_is_manager(payload)
+        )
+    except (LookupError, PermissionError, ValueError) as exc:
+        raise _reading_error(exc) from exc
+
+
+@router.delete("/devices/{device_id}/readings/manual", status_code=204)
+async def delete_reading(
+    device_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: UserPayload,
+    session: SessionDep,
+    recorded_at: datetime = Query(...),
+    _perm: None = Depends(RequirePermission("site_sensors.record")),
+) -> Response:
+    service = SiteSensorsService(session)
+    device = await _device_for_user(service, device_id, user_id)
+    try:
+        await service.delete_reading(device, recorded_at, user_id, is_manager=_is_manager(payload))
+    except (LookupError, PermissionError, ValueError) as exc:
+        raise _reading_error(exc) from exc
+    return Response(status_code=204)
+
+
+@router.get("/devices/{device_id}/readings/audit", response_model=list[ReadingAuditOut])
+async def reading_audit(
+    device_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.read")),
+) -> list[dict[str, Any]]:
+    service = SiteSensorsService(session)
+    await _device_for_user(service, device_id, user_id)
+    return [{**r, "created_at": r["at"]} for r in await service.reading_audit(device_id)]
 
 
 @router.get("/devices/{device_id}/readings")
@@ -223,6 +312,21 @@ async def create_mix(
     if data.project_id is not None:
         await verify_project_access(data.project_id, user_id, session)
     return MixResponse.model_validate(await SiteSensorsService(session).create_mix(data))
+
+
+@router.patch("/mixes/{mix_id}", response_model=MixResponse)
+async def update_mix(
+    mix_id: uuid.UUID,
+    data: MixUpdate,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("site_sensors.manage")),
+) -> MixResponse:
+    service = SiteSensorsService(session)
+    mix = await _mix_for_user(service, mix_id, user_id)
+    if mix.project_id is None:
+        raise HTTPException(status_code=403, detail="shared_mix_read_only")
+    return MixResponse.model_validate(await service.update_mix(mix_id, data))
 
 
 async def _mix_for_user(service: SiteSensorsService, mix_id: uuid.UUID, user_id: str) -> Any:

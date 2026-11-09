@@ -273285,6 +273285,30 @@
               "nullable": true
             },
             {
+              "name": "lower_limit",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "limit_note",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "rolling_mean_hours",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "record_only",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
               "name": "country_code",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -273538,6 +273562,58 @@
           "relationships": []
         },
         {
+          "class_name": "ReadingAudit",
+          "tablename": "oe_site_sensors_reading_audit",
+          "docstring": "One change to a reading entered by a person: created, updated or deleted, with the values before and after.",
+          "columns": [
+            {
+              "name": "device_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_site_sensors_device.id"
+            },
+            {
+              "name": "recorded_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value_before",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "value_after",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
           "class_name": "SensorAlert",
           "tablename": "oe_site_sensors_alert",
           "docstring": "An event a person has to see: a limit exceeded, a sensor silent, a strength reached.",
@@ -273763,7 +273839,26 @@
           "method": "POST",
           "path": "/devices/{device_id}/readings",
           "handler": "add_readings",
-          "request_schema": "ReadingsIn"
+          "request_schema": "UserReadingsIn"
+        },
+        {
+          "method": "PATCH",
+          "path": "/devices/{device_id}/readings/manual",
+          "handler": "edit_reading",
+          "request_schema": "ReadingEdit"
+        },
+        {
+          "method": "DELETE",
+          "path": "/devices/{device_id}/readings/manual",
+          "handler": "delete_reading",
+          "request_schema": "UserPayload"
+        },
+        {
+          "method": "GET",
+          "path": "/devices/{device_id}/readings/audit",
+          "handler": "reading_audit",
+          "response_model": "list[ReadingAuditOut]",
+          "request_schema": "None"
         },
         {
           "method": "GET",
@@ -273796,6 +273891,13 @@
           "handler": "create_mix",
           "response_model": "MixResponse",
           "request_schema": "MixCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/mixes/{mix_id}",
+          "handler": "update_mix",
+          "response_model": "MixResponse",
+          "request_schema": "MixUpdate"
         },
         {
           "method": "GET",
@@ -273924,6 +274026,24 @@
               "default": "None"
             },
             {
+              "name": "lower_limit",
+              "type": "Decimal14_4 | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_note",
+              "type": "str"
+            },
+            {
+              "name": "rolling_mean_hours",
+              "type": "float | None"
+            },
+            {
+              "name": "record_only",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "country_code",
               "type": "str"
             },
@@ -273997,8 +274117,30 @@
               "type": "str | None"
             },
             {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
               "name": "limit_value",
               "type": "Decimal14_4 | None",
+              "default": "None"
+            },
+            {
+              "name": "lower_limit",
+              "type": "Decimal14_4 | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_note",
+              "type": "str | None"
+            },
+            {
+              "name": "rolling_mean_hours",
+              "type": "float | None"
+            },
+            {
+              "name": "record_only",
+              "type": "bool | None",
               "default": "None"
             },
             {
@@ -274097,6 +274239,26 @@
               "default": "None"
             },
             {
+              "name": "lower_limit",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_note",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "rolling_mean_hours",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "record_only",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "country_code",
               "type": "str"
             },
@@ -274182,6 +274344,16 @@
               "default": "False"
             },
             {
+              "name": "country_limit",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "country_limit_source",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "bim_model_id",
               "type": "UUID | None",
               "default": "None"
@@ -274232,6 +274404,10 @@
             {
               "name": "frequency_hz",
               "type": "float | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
             }
           ]
         },
@@ -274245,6 +274421,95 @@
             {
               "name": "readings",
               "type": "list[ReadingIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "UserReadingsIn",
+          "bases": [
+            "ReadingsIn"
+          ],
+          "docstring": "Readings a person adds: typed in one by one, or pasted or imported from CSV.",
+          "fields": [
+            {
+              "name": "source",
+              "type": "UserReadingSource",
+              "default": "'manual'"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadingEdit",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "recorded_at",
+              "type": "datetime"
+            },
+            {
+              "name": "value",
+              "type": "float"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadingAuditOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "device_id",
+              "type": "UUID"
+            },
+            {
+              "name": "recorded_at",
+              "type": "datetime"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "value_before",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "value_after",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "user_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "user_name",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -274292,6 +274557,55 @@
             {
               "name": "curve_b",
               "type": "Decimal10_4"
+            },
+            {
+              "name": "strip_strength_mpa",
+              "type": "Decimal8_2 | None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MixUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Manual concrete mode: the site's own datum, method constants, curve and strike strength.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "datum_temp_c",
+              "type": "Decimal6_2 | None"
+            },
+            {
+              "name": "method",
+              "type": "MaturityMethod | None",
+              "default": "None"
+            },
+            {
+              "name": "activation_energy_kj_mol",
+              "type": "Decimal6_2 | None"
+            },
+            {
+              "name": "reference_temp_c",
+              "type": "Decimal6_2 | None",
+              "default": "None"
+            },
+            {
+              "name": "curve_a",
+              "type": "Decimal10_4 | None",
+              "default": "None"
+            },
+            {
+              "name": "curve_b",
+              "type": "Decimal10_4 | None"
             },
             {
               "name": "strip_strength_mpa",
@@ -315725,10 +316039,10 @@
     },
     {
       "name": "site_sensors",
-      "ts_files": 20,
+      "ts_files": 23,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 20
+      "test_files": 4,
+      "total_files": 23
     },
     {
       "name": "smart_views",
@@ -317800,14 +318114,14 @@
   "statistics": {
     "backend_modules": 244,
     "modules_with_manifests": 244,
-    "total_models": 906,
-    "total_columns": 10626,
+    "total_models": 907,
+    "total_columns": 10637,
     "total_relationships": 261,
-    "total_routes": 5200,
-    "total_schemas": 4712,
+    "total_routes": 5204,
+    "total_schemas": 4716,
     "total_python_files": 3339,
     "frontend_features": 237,
-    "frontend_ts_files": 4135,
+    "frontend_ts_files": 4138,
     "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {

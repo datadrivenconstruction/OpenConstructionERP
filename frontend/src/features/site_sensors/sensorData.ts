@@ -14,6 +14,7 @@ export const KIND_ORDER: readonly SensorKind[] = [
   'vibration',
   'weather',
   'water_level',
+  'custom',
 ];
 
 /** English fallbacks for `site_sensors.kind.<kind>`. */
@@ -24,6 +25,7 @@ export const KIND_LABELS: Record<SensorKind, string> = {
   vibration: 'Vibration',
   weather: 'Weather',
   water_level: 'Water level',
+  custom: 'Own sensors',
 };
 
 export function isSensorKind(value: string): value is SensorKind {
@@ -72,6 +74,33 @@ export function overLimit(value: number | null | undefined, limit: string | numb
   if (value === null || value === undefined || limit === null || limit === undefined || limit === '') return false;
   const l = Number(limit);
   return Number.isFinite(l) && value > l;
+}
+
+/** True when a reading is above the upper or below the lower limit; blank limits are ignored. */
+export function outsideLimits(
+  value: number | null | undefined,
+  upper: string | number | null | undefined,
+  lower: string | number | null | undefined,
+): boolean {
+  if (overLimit(value, upper)) return true;
+  if (value === null || value === undefined || lower === null || lower === undefined || lower === '') return false;
+  const l = Number(lower);
+  return Number.isFinite(l) && value < l;
+}
+
+/** The first rule a custom sensor definition breaks, as a key under `site_sensors.custom.`, or null. */
+export function customDefinitionError(d: {
+  unit: string;
+  upper: string;
+  lower: string;
+  recordOnly: boolean;
+}): 'unit_required' | 'lower_not_below_upper' | 'limit_or_record_only' | null {
+  const up = d.upper.trim() === '' ? null : Number(d.upper);
+  const lo = d.lower.trim() === '' ? null : Number(d.lower);
+  if (!d.unit.trim()) return 'unit_required';
+  if (up !== null && lo !== null && !(lo < up)) return 'lower_not_below_upper';
+  if (up === null && lo === null && !d.recordOnly) return 'limit_or_record_only';
+  return null;
 }
 
 /** True when a struck strip reached less strength than its target. */

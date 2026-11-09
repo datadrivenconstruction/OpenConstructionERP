@@ -38,7 +38,14 @@ from app.modules.site_sensors.maturity import (
     maturity_series,
     strength_estimate,
 )
-from app.modules.site_sensors.models import CalibrationPoint, ConcreteMix, FormworkStrip, SensorAlert, SensorDevice
+from app.modules.site_sensors.models import (
+    CalibrationPoint,
+    ConcreteMix,
+    FormworkStrip,
+    ReadingAudit,
+    SensorAlert,
+    SensorDevice,
+)
 from app.modules.site_sensors.repository import SiteSensorsRepository
 from app.modules.site_sensors.schemas import (
     DEFAULT_UNITS,
@@ -46,7 +53,10 @@ from app.modules.site_sensors.schemas import (
     DeviceCreate,
     DeviceUpdate,
     MixCreate,
+    MixUpdate,
+    ReadingIn,
     StripCreate,
+    check_limits,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,6 +73,9 @@ EVENT_LIMIT_EXCEEDED = "site_sensors.limit.exceeded"
 EVENT_OFFLINE = "site_sensors.device.offline"
 EVENT_STRENGTH_REACHED = "site_sensors.strength.reached"
 EVENT_ALERT_ACKNOWLEDGED = "site_sensors.alert.acknowledged"
+EVENT_READING_CHANGED = "site_sensors.reading.changed"
+#: Readings a person may change; device readings are the instrument's record and stay as sent.
+EDITABLE_SOURCES = frozenset({"manual", "import"})
 
 
 def _hash(token: str) -> str:
@@ -100,7 +113,12 @@ class SiteSensorsService:
     async def update_device(self, device_id: uuid.UUID, data: DeviceUpdate) -> SensorDevice:
         device = await self.get_device(device_id)
         for k, v in data.model_dump(exclude_unset=True).items():
+            if v is None and k in ("record_only", "limit_note", "unit", "name"):
+                continue
             setattr(device, k, v.upper() if k == "country_code" and isinstance(v, str) else v)
+        err = check_limits(device.kind, device.unit, device.limit_value, device.lower_limit, bool(device.record_only))
+        if err:
+            raise ValueError(err)
         await self.session.flush()
         return device
 
@@ -124,6 +142,16 @@ class SiteSensorsService:
     async def create_mix(self, data: MixCreate) -> ConcreteMix:
         mix = ConcreteMix(**data.model_dump())
         self.session.add(mix)
+        await self.session.flush()
+        return mix
+
+    async def update_mix(self, mix_id: uuid.UUID, data: MixUpdate) -> ConcreteMix:
+        """Change a mix by hand: its datum temperature, method constants, curve or strike strength."""
+        mix = await self.get_mix(mix_id)
+        for k, v in data.model_dump(exclude_unset=True).items():
+            if v is None and k not in ("strip_strength_mpa", "notes"):
+                continue
+            setattr(mix, k, v)
         await self.session.flush()
         return mix
 
@@ -271,7 +299,9 @@ class SiteSensorsService:
     async def limit_of(
         self, device: SensorDevice, at: datetime | None = None, frequency_hz: float | None = None
     ) -> tuple[float | None, str]:
-        """The limit that applies to a device and where it comes from."""
+        """The upper limit that applies to a device and where it comes from."""
+        if device.record_only:
+            return None, ""
         if device.limit_value is not None:
             return float(device.limit_value), "device"
         lim = sensor_limit(
@@ -291,28 +321,62 @@ class SiteSensorsService:
         """The limit shown next to a device now, its source text, and whether a local ordinance sets the night one."""
         value, source = await self.limit_of(device, at or datetime.now(UTC))
         country = await self._country(device)
+        country_limit, country_source = None, ""
+        if device.limit_value is not None and device.kind != "custom":
+            country_limit, country_source = await self.country_limit_of(device, at or datetime.now(UTC))
         return {
             "effective_limit": value,
             "limit_source": source,
+            "country_limit": country_limit,
+            "country_limit_source": country_source,
             "night_limit_by_ordinance": device.kind == "noise"
             and device.limit_value is None
             and night_noise_by_ordinance(country),
         }
+
+    async def country_limit_of(self, device: SensorDevice, at: datetime | None = None) -> tuple[float | None, str]:
+        """The limit the country data would set for this device, ignoring the device's own figure."""
+        lim = sensor_limit(
+            await self._country(device),
+            device.kind,
+            at.timetz().replace(tzinfo=None) if at else None,
+            zone=device.noise_zone or None,
+            building_class=device.building_class or None,
+            band=device.frequency_band or None,
+        )
+        return (None, "") if lim is None else (float(lim.value), lim.source)
+
+    def window_of(self, device: SensorDevice) -> float | None:
+        """Hours of the rolling mean a device is checked on, or None for single readings."""
+        return device.rolling_mean_hours or ROLLING_MEAN_HOURS.get(device.kind)
 
     async def ingest(
         self,
         device: SensorDevice,
         readings: list[tuple[datetime, float]],
         frequencies: dict[datetime, float] | None = None,
+        *,
+        source: str = "device",
+        entered_by: uuid.UUID | None = None,
+        notes: dict[datetime, str] | None = None,
     ) -> dict[str, Any]:
         """Store readings, raise or update alerts, refresh maturity. Returns a short report.
 
         Dust is compared as its 24 hour rolling mean, as the PM10 limit is
-        written; vibration against the limit at the reading's dominant frequency.
+        written, and any device with its own window likewise; vibration against
+        the limit at the reading's dominant frequency. A reading below the
+        device's lower limit is an exceedance as well.
         """
         rows = sorted(((_aware(t), float(v)) for t, v in readings), key=lambda r: r[0])
         freq = {_aware(t): f for t, f in (frequencies or {}).items() if f}
-        await self.repo.insert_readings(device.id, rows, freq)
+        await self.repo.insert_readings(
+            device.id,
+            rows,
+            freq,
+            source=source,
+            entered_by=entered_by,
+            notes={_aware(t): n for t, n in (notes or {}).items() if n},
+        )
         last_t, last_v = rows[-1]
         if device.last_seen_at is None or last_t >= _aware(device.last_seen_at):
             device.last_seen_at = last_t
@@ -320,32 +384,49 @@ class SiteSensorsService:
         offline = await self.repo.open_alert(device.id, "offline")
         if offline is not None:
             offline.status = "closed"
-        exceeded = 0
-        if device.kind != "concrete_maturity":
-            window = ROLLING_MEAN_HOURS.get(device.kind)
-            history: list[tuple[datetime, float]] = []
-            if window:
-                since = rows[0][0] - timedelta(hours=window)
-                history = [(_aware(t), v) for t, v in await self.repo.raw(device.id, since=since, until=rows[-1][0])]
-            for t, raw_v in rows:
-                v = raw_v
-                if window:
-                    mean = rolling_mean(history, t, window)
-                    v = round(mean, 2) if mean is not None else raw_v
-                limit, source = await self.limit_of(device, t, freq.get(t))
-                if limit is not None and v > limit:
-                    exceeded += 1
-                    await self._raise_exceedance(device, t, v, limit, source)
+        exceeded = await self._check_limits(device, rows, freq)
         await self.session.flush()
         released = 0
         if device.kind == "concrete_maturity":
             released = await self._check_strength(device)
         return {"accepted": len(rows), "exceedances": exceeded, "strips_released": released}
 
-    async def _raise_exceedance(self, device: SensorDevice, t: datetime, v: float, limit: float, source: str) -> None:
+    async def _check_limits(
+        self, device: SensorDevice, rows: list[tuple[datetime, float]], freq: dict[datetime, float]
+    ) -> int:
+        """Raise or extend the exceedance alert for every reading past a limit; returns how many were."""
+        if device.kind == "concrete_maturity" or device.record_only or not rows:
+            return 0
+        window = self.window_of(device)
+        history: list[tuple[datetime, float]] = []
+        if window:
+            since = rows[0][0] - timedelta(hours=window)
+            history = [(_aware(t), v) for t, v in await self.repo.raw(device.id, since=since, until=rows[-1][0])]
+        lower = float(device.lower_limit) if device.lower_limit is not None else None
+        exceeded = 0
+        for t, raw_v in rows:
+            v = raw_v
+            if window:
+                mean = rolling_mean(history, t, window)
+                v = round(mean, 2) if mean is not None else raw_v
+            limit, source = await self.limit_of(device, t, freq.get(t))
+            if limit is not None and v > limit:
+                exceeded += 1
+                await self._raise_exceedance(device, t, v, limit, source)
+            elif lower is not None and v < lower:
+                exceeded += 1
+                await self._raise_exceedance(device, t, v, lower, "device", below=True)
+        return exceeded
+
+    async def _raise_exceedance(
+        self, device: SensorDevice, t: datetime, v: float, limit: float, source: str, *, below: bool = False
+    ) -> None:
+        if source == "device" and device.limit_note:
+            source = device.limit_note
         alert = await self.repo.open_alert(device.id, "exceedance")
         if alert is not None:
-            if alert.value is None or v > alert.value:
+            was_below = alert.value is not None and alert.limit_value is not None and alert.value < alert.limit_value
+            if alert.value is None or (was_below == below and (v < alert.value if below else v > alert.value)):
                 alert.value = v
             return
         alert = SensorAlert(
@@ -518,12 +599,175 @@ class SiteSensorsService:
     async def readings(self, device_id: uuid.UUID, since: datetime | None, until: datetime | None) -> dict[str, Any]:
         """Raw readings in the window plus the hourly rows for the part already folded."""
         await self.get_device(device_id)
+        raw = (await self.repo.raw_detailed(device_id, since, until))[-5000:]
+        names = await self._user_names({r["entered_by"] for r in raw if r["entered_by"]})
         return {
-            "raw": [{"t": t.isoformat(), "v": v} for t, v in await self.repo.raw(device_id, since, until)][-5000:],
+            "raw": [
+                {
+                    "t": r["t"].isoformat(),
+                    "v": r["v"],
+                    "source": r["source"],
+                    "entered_by": str(r["entered_by"]) if r["entered_by"] else None,
+                    "entered_by_name": names.get(str(r["entered_by"]), "") if r["entered_by"] else "",
+                    "note": r["note"],
+                }
+                for r in raw
+            ],
             "hourly": [{**h, "hour": h["hour"].isoformat()} for h in await self.repo.hourly(device_id, since, until)][
                 -5000:
             ],
         }
+
+    async def _user_names(self, ids: set[Any]) -> dict[str, str]:
+        if not ids:
+            return {}
+        try:
+            from app.modules.users.models import User
+
+            stmt = select(User).where(User.id.in_([uuid.UUID(str(i)) for i in ids]))
+            users = (await self.session.execute(stmt)).scalars()
+            return {str(u.id): (getattr(u, "full_name", "") or getattr(u, "email", "") or "") for u in users}
+        except Exception:
+            logger.debug("reading author lookup skipped", exc_info=True)
+            return {}
+
+    async def add_user_readings(
+        self, device: SensorDevice, readings: list[ReadingIn], source: str, user_id: uuid.UUID | str | None
+    ) -> dict[str, Any]:
+        """Readings typed in or imported by a person, with their author, note and an audit row each.
+
+        A time that already holds a reading is skipped and reported, never overwritten.
+        """
+        by = uuid.UUID(str(user_id)) if user_id else None
+        latest: dict[datetime, ReadingIn] = {}
+        for r in readings:
+            latest[_aware(r.recorded_at)] = r
+        taken = {_aware(t) for t in await self.repo.existing_times(device.id, list(latest))}
+        fresh = {t: r for t, r in latest.items() if t not in taken}
+        report: dict[str, Any] = {"accepted": 0, "exceedances": 0, "strips_released": 0}
+        if fresh:
+            report = await self.ingest(
+                device,
+                [(t, r.value) for t, r in fresh.items()],
+                {t: r.frequency_hz for t, r in fresh.items() if r.frequency_hz is not None},
+                source=source,
+                entered_by=by,
+                notes={t: r.note for t, r in fresh.items()},
+            )
+            self.session.add_all(
+                ReadingAudit(
+                    device_id=device.id,
+                    recorded_at=t,
+                    action="create",
+                    value_after=r.value,
+                    note=r.note,
+                    user_id=by,
+                )
+                for t, r in fresh.items()
+            )
+            await self.session.flush()
+        report["duplicates"] = sorted(t.isoformat() for t in taken)[:100]
+        report["skipped"] = len(taken)
+        return report
+
+    async def _editable_reading(
+        self, device: SensorDevice, recorded_at: datetime, user_id: uuid.UUID | str, is_manager: bool
+    ) -> dict[str, Any]:
+        row = await self.repo.reading(device.id, _aware(recorded_at))
+        if row is None:
+            raise LookupError("reading_not_found")
+        if row["source"] not in EDITABLE_SOURCES:
+            raise ValueError("device_reading_not_editable")
+        if not is_manager and str(row["entered_by"] or "") != str(user_id):
+            raise PermissionError("reading_not_yours")
+        return row
+
+    async def edit_reading(
+        self,
+        device: SensorDevice,
+        recorded_at: datetime,
+        value: float,
+        note: str,
+        user_id: uuid.UUID | str,
+        *,
+        is_manager: bool = False,
+    ) -> dict[str, Any]:
+        """Change a hand-entered reading. Its author or a manager only; the change is audited and re-checked."""
+        row = await self._editable_reading(device, recorded_at, user_id, is_manager)
+        t = _aware(row["t"])
+        await self.repo.update_reading(device.id, t, float(value), note)
+        self.session.add(
+            ReadingAudit(
+                device_id=device.id,
+                recorded_at=t,
+                action="update",
+                value_before=row["v"],
+                value_after=float(value),
+                note=note,
+                user_id=uuid.UUID(str(user_id)),
+            )
+        )
+        exceeded = await self._check_limits(device, [(t, float(value))], {})
+        await self._refresh_last(device)
+        await self.session.flush()
+        self._publish_change(device, t, "update")
+        return {"recorded_at": t.isoformat(), "value": float(value), "note": note, "exceedances": exceeded}
+
+    async def delete_reading(
+        self, device: SensorDevice, recorded_at: datetime, user_id: uuid.UUID | str, *, is_manager: bool = False
+    ) -> None:
+        """Remove a hand-entered reading. Its author or a manager only; the audit row keeps the value."""
+        row = await self._editable_reading(device, recorded_at, user_id, is_manager)
+        t = _aware(row["t"])
+        await self.repo.delete_reading(device.id, t)
+        self.session.add(
+            ReadingAudit(
+                device_id=device.id,
+                recorded_at=t,
+                action="delete",
+                value_before=row["v"],
+                note=row["note"],
+                user_id=uuid.UUID(str(user_id)),
+            )
+        )
+        await self._refresh_last(device)
+        await self.session.flush()
+        self._publish_change(device, t, "delete")
+
+    async def _refresh_last(self, device: SensorDevice) -> None:
+        last = (await self.repo.raw(device.id))[-1:]
+        device.last_seen_at, device.last_value = (last[0][0], last[0][1]) if last else (device.last_seen_at, None)
+
+    def _publish_change(self, device: SensorDevice, t: datetime, action: str) -> None:
+        event_bus.publish_detached(
+            EVENT_READING_CHANGED,
+            {
+                "device_id": str(device.id),
+                "project_id": str(device.project_id),
+                "recorded_at": t.isoformat(),
+                "action": action,
+            },
+            source_module="site_sensors",
+        )
+
+    async def reading_audit(self, device_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Who added, changed or deleted the device's hand-entered readings, newest first."""
+        rows = await self.repo.audit(device_id)
+        names = await self._user_names({r.user_id for r in rows if r.user_id})
+        return [
+            {
+                "id": str(r.id),
+                "recorded_at": r.recorded_at.isoformat(),
+                "action": r.action,
+                "value_before": r.value_before,
+                "value_after": r.value_after,
+                "note": r.note,
+                "user_id": str(r.user_id) if r.user_id else None,
+                "user_name": names.get(str(r.user_id), "") if r.user_id else "",
+                "at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ]
 
     async def downsample(self, older_than_days: int = RAW_RETENTION_DAYS) -> int:
         return await self.repo.fold_into_hourly(datetime.now(UTC) - timedelta(days=older_than_days))
@@ -722,8 +966,16 @@ class SiteSensorsService:
                     "kind": d.kind,
                     "active": d.active,
                     "offline": any(a.device_id == d.id and a.kind == "offline" and a.status == "open" for a in alerts),
-                    "has_limit": limit is not None,
+                    "has_limit": limit is not None or d.lower_limit is not None,
                     "has_mix": d.mix_id is not None,
+                    "unit": d.unit,
+                    "record_only": bool(d.record_only),
+                    "upper": float(d.limit_value) if d.limit_value is not None else None,
+                    "lower": float(d.lower_limit) if d.lower_limit is not None else None,
+                    "overrides_country": d.kind not in ("custom", "concrete_maturity")
+                    and d.limit_value is not None
+                    and (await self.country_limit_of(d))[0] is not None,
+                    "limit_note": d.limit_note or "",
                     **stats,
                 }
             )

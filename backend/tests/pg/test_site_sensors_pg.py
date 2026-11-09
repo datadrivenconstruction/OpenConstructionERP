@@ -206,7 +206,7 @@ async def test_demo_seed_fills_a_project_idempotently_with_alerts_and_a_strike_r
     project = await _project(session, "DE")
     now = datetime(2026, 11, 4, 12, tzinfo=UTC)
     counts = await seed_site_sensors_demo(session, [project.id, project.id], now=now)
-    assert counts["devices"] == 9
+    assert counts["devices"] == 10
     assert counts["readings"] <= 2200
     assert await seed_site_sensors_demo(session, [project.id], now=now) == {"devices": 0, "readings": 0, "alerts": 0}
 
@@ -237,7 +237,7 @@ async def test_demo_seed_replaces_the_earlier_small_seed_and_leaves_user_sensors
     legacy = await _project(session, "US")
     await SiteSensorsService(session).create_device(DeviceCreate(project_id=legacy.id, code="CM-01", kind="noise"))
     counts = await seed_site_sensors_demo(session, [mine.id, legacy.id])
-    assert counts["devices"] == 9
+    assert counts["devices"] == 10
     codes = (await session.execute(select(SensorDevice.code).where(SensorDevice.project_id == mine.id))).scalars().all()
     assert list(codes) == ["MY-1"]
     wind = (

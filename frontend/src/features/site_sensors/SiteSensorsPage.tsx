@@ -14,7 +14,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fetchSensorDevices, fetchSensorValidation, fetchSparklines, type SensorDevice } from './api';
-import { KIND_LABELS, groupByKind, isOnline, overLimit, sparkPath } from './sensorData';
+import { KIND_LABELS, groupByKind, isOnline, outsideLimits, sparkPath } from './sensorData';
 import { unitKeyOf } from './units';
 import { useSensorUnits } from './useSensorUnits';
 import { MixForms } from './components/MixForms';
@@ -22,6 +22,7 @@ import { MaturityCard } from './components/MaturityCard';
 import { AlertsPanel } from './components/AlertsPanel';
 import { StripsPanel } from './components/StripsPanel';
 import { DeviceForms } from './components/DeviceForms';
+import { ReadingsPanel } from './components/ReadingsPanel';
 import { HseModeSelect } from './components/HseModeSelect';
 
 function Sparkline({ points, limit, label }: { points: (number | null)[]; limit: number | null; label: string }) {
@@ -42,7 +43,7 @@ function DeviceRow({ device, spark }: { device: SensorDevice; spark?: { points: 
   const u = useSensorUnits(device.project_id);
   const online = isOnline(device);
   const limit = device.effective_limit ?? (device.limit_value === null ? null : Number(device.limit_value));
-  const over = overLimit(device.last_value, limit);
+  const over = !device.record_only && outsideLimits(device.last_value, limit, device.lower_limit);
   const key = unitKeyOf(device.unit);
   const source = device.limit_source === 'device'
     ? t('site_sensors.devices.source_device', { defaultValue: 'set on the device' })
@@ -61,11 +62,28 @@ function DeviceRow({ device, spark }: { device: SensorDevice; spark?: { points: 
           label={t('site_sensors.devices.sparkline', { defaultValue: 'Last 24 hours against the limit' })}
         />
       )}
-      {limit !== null && (
+      {(limit !== null || device.lower_limit !== null) && (
         <span className="text-xs text-content-tertiary">
-          {t('site_sensors.devices.limit_value', { defaultValue: 'Limit {{value}}', value: u.show(limit, key, device.unit) })}
+          {limit !== null &&
+            t('site_sensors.devices.limit_value', { defaultValue: 'Limit {{value}}', value: u.show(limit, key, device.unit) })}
           {device.kind === 'dust_pm10' && ` ${t('site_sensors.devices.rolling_24h', { defaultValue: '(24 h mean)' })}`}
-          {source && <span className="ml-1 italic">({source})</span>}
+          {device.lower_limit !== null &&
+            ` ${t('site_sensors.limits.lower_value', { defaultValue: 'min {{value}}', value: u.show(Number(device.lower_limit), key, device.unit) })}`}
+          {device.limit_note ? (
+            <span className="ml-1 italic">({device.limit_note})</span>
+          ) : (
+            source && <span className="ml-1 italic">({source})</span>
+          )}
+          {device.country_limit !== null && device.limit_value !== null && (
+            <span className="ml-1">
+              {t('site_sensors.limits.country_was', { defaultValue: 'country {{value}}', value: u.show(device.country_limit, key, device.unit) })}
+            </span>
+          )}
+        </span>
+      )}
+      {device.record_only && (
+        <span className="text-xs text-content-tertiary">
+          {t('site_sensors.custom.record_only', { defaultValue: 'Record only, no limit check' })}
         </span>
       )}
       {device.night_limit_by_ordinance && (
@@ -211,7 +229,8 @@ function Content() {
         </CardContent>
       </Card>
 
-      <DeviceForms projectId={projectId} devices={devices} />
+      <ReadingsPanel devices={devices} />
+      <DeviceForms projectId={projectId} />
       <MixForms projectId={projectId} />
     </div>
   );

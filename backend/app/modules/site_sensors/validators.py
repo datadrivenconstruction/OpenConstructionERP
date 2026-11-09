@@ -5,7 +5,8 @@
 Payload built by ``SiteSensorsService.validation_payload``::
 
     {"devices": [{"id", "code", "kind", "active", "offline", "has_limit", "has_mix",
-                  "interval_min", "max_gap_min", "max_jump_per_h", "min", "max"}],
+                  "interval_min", "max_gap_min", "max_jump_per_h", "min", "max",
+                  "unit", "record_only", "upper", "lower", "overrides_country", "limit_note"}],
      "mixes": [{"id", "code", "points", "r2"}],
      "pours": [{"id", "code", "strength_status"}],
      "exceedances": [{"id", "device", "status", "value", "limit"}],
@@ -146,7 +147,9 @@ class DeviceHasLimit(_SensorRule):
     text = "Sensor {device} has no limit; set one on the device"
 
     def check(self, row: dict[str, Any]) -> RuleResult | None:
-        if not row.get("active") or "has_limit" not in row or row.get("kind") in ("concrete_maturity", "weather"):
+        if not row.get("active") or "has_limit" not in row or row.get("record_only"):
+            return None
+        if row.get("kind") in ("concrete_maturity", "weather", "custom"):
             return None
         return self._result(str(row.get("id")), bool(row.get("has_limit")), device=row.get("code", ""))
 
@@ -298,6 +301,48 @@ class BimLinkComplete(_SensorRule):
         return self._result(str(row.get("id")), bool(row.get("model_id")), label=row.get("label", ""))
 
 
+class CustomSensorDefined(_SensorRule):
+    """A sensor the user defined has a unit, consistent limits, and either a limit or is marked record-only."""
+
+    key = "custom_sensor_defined"
+    rule_id = "site_sensors.custom_sensor_defined"
+    name = "Custom Sensor Defined"
+    description = "Every custom sensor has a unit, a lower limit below its upper one, and a limit unless record-only."
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    rows_key = "devices"
+    text = "Custom sensor {device} needs a unit, a lower limit below the upper one, and a limit or record-only"
+
+    def check(self, row: dict[str, Any]) -> RuleResult | None:
+        if row.get("kind") != "custom" or not row.get("active"):
+            return None
+        upper, lower = row.get("upper"), row.get("lower")
+        ok = (
+            bool(str(row.get("unit") or "").strip())
+            and (upper is None or lower is None or float(lower) < float(upper))
+            and (upper is not None or lower is not None or bool(row.get("record_only")))
+        )
+        return self._result(str(row.get("id")), ok, device=row.get("code", ""))
+
+
+class LimitOverrideExplained(_SensorRule):
+    """A device limit that replaces the country figure says why, so the next reader can check it."""
+
+    key = "limit_override_explained"
+    rule_id = "site_sensors.limit_override_explained"
+    name = "Limit Override Explained"
+    description = "A device limit that overrides the country default carries a reason."
+    rows_key = "devices"
+    text = "Sensor {device} overrides the country limit without a reason"
+
+    def check(self, row: dict[str, Any]) -> RuleResult | None:
+        if not row.get("active") or not row.get("overrides_country"):
+            return None
+        return self._result(
+            str(row.get("id")), bool(str(row.get("limit_note") or "").strip()), device=row.get("code", "")
+        )
+
+
 SENSOR_RULES: tuple[type[_SensorRule], ...] = (
     SensorOnline,
     ExceedanceAcknowledged,
@@ -311,6 +356,8 @@ SENSOR_RULES: tuple[type[_SensorRule], ...] = (
     TemperaturePlausible,
     EvidenceHashed,
     BimLinkComplete,
+    CustomSensorDefined,
+    LimitOverrideExplained,
 )
 
 

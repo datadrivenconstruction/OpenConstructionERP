@@ -3,6 +3,7 @@
 /**
  * Concrete mixes: add a mix (method, datum or activation energy, curve) and keep
  * its calibration table of cube results, from which the curve and R² are fitted.
+ * A mix's own datum temperature (or activation energy) can be changed by hand.
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,7 @@ import {
   fetchCalibration,
   fetchSensorMixes,
   saveCalibration,
+  updateSensorMix,
   type MaturityMethod,
 } from '../api';
 import { calibrationWarnings, parseCalibrationRows, type CalibrationRow } from '../calibration';
@@ -80,6 +82,22 @@ export function MixForms({ projectId }: { projectId: string }) {
   }, [calQ.data]);
   const saveMut = useMutation({
     mutationFn: () => saveCalibration(mixId, parseCalibrationRows(rows)),
+    onSuccess: refresh,
+    onError,
+  });
+  const [ownDatum, setOwnDatum] = useState('');
+  const [ownEa, setOwnEa] = useState('');
+  useEffect(() => {
+    const m = calQ.data?.mix;
+    setOwnDatum(m ? String(Number(m.datum_temp_c)) : '');
+    setOwnEa(m ? String(Number(m.activation_energy_kj_mol)) : '');
+  }, [calQ.data?.mix]);
+  const mixMut = useMutation({
+    mutationFn: () =>
+      updateSensorMix(
+        mixId,
+        calQ.data?.mix.method === 'equivalent_age' ? { activation_energy_kj_mol: ownEa } : { datum_temp_c: ownDatum },
+      ),
     onSuccess: refresh,
     onError,
   });
@@ -185,6 +203,35 @@ export function MixForms({ projectId }: { projectId: string }) {
               </select>
               {mixId && (
                 <>
+                  {fitted && fitted.project_id && (
+                    <div className="flex flex-wrap items-end gap-2">
+                      {fitted.method === 'equivalent_age' ? (
+                        <label className={LABEL}>
+                          {t('site_sensors.mixes.activation_energy', { defaultValue: 'Activation energy (kJ/mol)' })}
+                          <input type="number" step="1" min="1" value={ownEa} onChange={(e) => setOwnEa(e.target.value)} className={`${FIELD} mt-1 w-32`} />
+                        </label>
+                      ) : (
+                        <label className={LABEL}>
+                          {t('site_sensors.mixes.datum', { defaultValue: 'Datum temperature ({{unit}})', unit: u.label('degC') })}
+                          <input type="number" step="0.5" min="-30" max="30" value={ownDatum} onChange={(e) => setOwnDatum(e.target.value)} className={`${FIELD} mt-1 w-32`} />
+                        </label>
+                      )}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={fitted.method === 'equivalent_age' ? !(Number(ownEa) > 0) : ownDatum.trim() === '' || !Number.isFinite(Number(ownDatum))}
+                        loading={mixMut.isPending}
+                        onClick={() => mixMut.mutate()}
+                      >
+                        {t('site_sensors.mixes.save_own', { defaultValue: 'Use for this mix' })}
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-2xs text-content-tertiary">
+                    {t('site_sensors.calibration.manual_hint', {
+                      defaultValue: 'Enter your own strength-maturity points by hand, then save: the curve is fitted to them.',
+                    })}
+                  </p>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-xs text-content-tertiary">

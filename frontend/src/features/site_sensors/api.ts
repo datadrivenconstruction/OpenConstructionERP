@@ -7,7 +7,7 @@
  * Decimals are strings; sensor values are floats.
  */
 
-import { API_BASE, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
+import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 import { fetchAllPages } from '@/shared/lib/apiHelpers';
 import type { RuleResult } from '@/shared/lib/ruleResults';
 
@@ -17,7 +17,8 @@ export type SensorKind =
   | 'dust_pm10'
   | 'vibration'
   | 'weather'
-  | 'water_level';
+  | 'water_level'
+  | 'custom';
 
 export interface SensorDevice {
   id: string;
@@ -27,6 +28,10 @@ export interface SensorDevice {
   kind: SensorKind;
   unit: string;
   limit_value: string | null;
+  lower_limit: string | null;
+  limit_note: string;
+  rolling_mean_hours: number | null;
+  record_only: boolean;
   country_code: string;
   offline_after_minutes: number;
   token_prefix: string;
@@ -45,6 +50,8 @@ export interface SensorDevice {
   effective_limit: number | null;
   limit_source: string;
   night_limit_by_ordinance: boolean;
+  country_limit: number | null;
+  country_limit_source: string;
   bim_model_id: string | null;
   bim_element_id: string | null;
 }
@@ -56,6 +63,10 @@ export interface SensorDeviceInput {
   kind: SensorKind;
   unit?: string;
   limit_value?: string | null;
+  lower_limit?: string | null;
+  limit_note?: string;
+  rolling_mean_hours?: number | null;
+  record_only?: boolean;
   mix_id?: string | null;
   pour_ref?: string;
   cast_at?: string | null;
@@ -95,6 +106,47 @@ export interface SensorMixInput {
   curve_a: string;
   curve_b: string;
   strip_strength_mpa?: string | null;
+}
+
+export type ReadingSource = 'device' | 'manual' | 'import';
+
+export interface RawReading {
+  t: string;
+  v: number;
+  source: ReadingSource;
+  entered_by: string | null;
+  entered_by_name: string;
+  note: string;
+}
+
+export interface ReadingsWindow {
+  raw: RawReading[];
+  hourly: { hour: string; n: number; min: number; max: number; avg: number }[];
+}
+
+export interface UserReading {
+  recorded_at: string;
+  value: number;
+  note?: string;
+}
+
+export interface UserReadingsReport {
+  accepted: number;
+  exceedances: number;
+  skipped: number;
+  duplicates: string[];
+}
+
+export interface ReadingAuditEntry {
+  id: string;
+  recorded_at: string;
+  action: 'create' | 'update' | 'delete';
+  value_before: number | null;
+  value_after: number | null;
+  note: string;
+  user_id: string | null;
+  user_name: string;
+  created_at: string;
 }
 
 export interface CalibrationPoint {
@@ -244,11 +296,26 @@ export const createSensorDevice = (data: SensorDeviceInput) =>
 export const updateSensorDevice = (id: string, data: Partial<SensorDeviceInput> & { active?: boolean }) =>
   apiPatch<SensorDevice, typeof data>(`/v1/site_sensors/devices/${id}`, data);
 
-export const addSensorReadings = (id: string, readings: { recorded_at: string; value: number }[]) =>
-  apiPost<{ accepted: number; exceedances: number }, { readings: typeof readings }>(
+export const addSensorReadings = (id: string, readings: UserReading[], source: 'manual' | 'import' = 'manual') =>
+  apiPost<UserReadingsReport, { readings: UserReading[]; source: 'manual' | 'import' }>(
     `/v1/site_sensors/devices/${id}/readings`,
-    { readings },
+    { readings, source },
   );
+
+export const fetchReadings = (id: string, sinceIso: string) =>
+  apiGet<ReadingsWindow>(`/v1/site_sensors/devices/${id}/readings?since=${encodeURIComponent(sinceIso)}`);
+
+export const editReading = (id: string, data: UserReading) =>
+  apiPatch<{ exceedances: number }, UserReading>(`/v1/site_sensors/devices/${id}/readings/manual`, data);
+
+export const deleteReading = (id: string, recordedAt: string) =>
+  apiDelete(`/v1/site_sensors/devices/${id}/readings/manual?recorded_at=${encodeURIComponent(recordedAt)}`);
+
+export const fetchReadingAudit = (id: string) =>
+  apiGet<ReadingAuditEntry[]>(`/v1/site_sensors/devices/${id}/readings/audit`);
+
+export const updateSensorMix = (id: string, data: Partial<Omit<SensorMixInput, 'project_id' | 'code'>>) =>
+  apiPatch<SensorMix, typeof data>(`/v1/site_sensors/mixes/${id}`, data);
 
 export const fetchMaturity = (id: string) => apiGet<Maturity>(`/v1/site_sensors/devices/${id}/maturity`);
 

@@ -8,12 +8,13 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.site_sensors.models import (
     CalibrationPoint,
+    ReadingAudit,
     SensorAlert,
     SensorDevice,
     sensor_reading,
@@ -44,12 +45,28 @@ class SiteSensorsRepository:
         device_id: uuid.UUID,
         rows: list[tuple[datetime, float]],
         frequencies: dict[datetime, float] | None = None,
+        *,
+        source: str = "device",
+        entered_by: uuid.UUID | None = None,
+        notes: dict[datetime, str] | None = None,
     ) -> None:
         if not rows:
             return
         freq = frequencies or {}
+        notes = notes or {}
         stmt = pg_insert(sensor_reading).values(
-            [{"device_id": device_id, "recorded_at": t, "value": v, "frequency_hz": freq.get(t)} for t, v in rows]
+            [
+                {
+                    "device_id": device_id,
+                    "recorded_at": t,
+                    "value": v,
+                    "frequency_hz": freq.get(t),
+                    "source": source,
+                    "entered_by": entered_by,
+                    "note": notes.get(t, ""),
+                }
+                for t, v in rows
+            ]
         )
         await self.session.execute(stmt.on_conflict_do_nothing(index_elements=["device_id", "recorded_at"]))
 
@@ -65,6 +82,59 @@ class SiteSensorsRepository:
             stmt = stmt.where(sensor_reading.c.recorded_at <= until)
         return [(r[0], r[1]) for r in (await self.session.execute(stmt.order_by(sensor_reading.c.recorded_at))).all()]
 
+    async def existing_times(self, device_id: uuid.UUID, times: list[datetime]) -> set[datetime]:
+        """Which of these times already hold a reading on the device."""
+        if not times:
+            return set()
+        r = sensor_reading
+        stmt = select(r.c.recorded_at).where(r.c.device_id == device_id, r.c.recorded_at.in_(times))
+        return set((await self.session.execute(stmt)).scalars())
+
+    async def raw_detailed(
+        self, device_id: uuid.UUID, since: datetime | None = None, until: datetime | None = None
+    ) -> list[dict[str, Any]]:
+        r = sensor_reading
+        stmt = select(r.c.recorded_at, r.c.value, r.c.source, r.c.entered_by, r.c.note).where(
+            r.c.device_id == device_id
+        )
+        if since is not None:
+            stmt = stmt.where(r.c.recorded_at >= since)
+        if until is not None:
+            stmt = stmt.where(r.c.recorded_at <= until)
+        rows = (await self.session.execute(stmt.order_by(r.c.recorded_at))).all()
+        return [
+            {"t": x[0], "v": x[1], "source": x[2] or "device", "entered_by": x[3], "note": x[4] or ""} for x in rows
+        ]
+
+    async def reading(self, device_id: uuid.UUID, recorded_at: datetime) -> dict[str, Any] | None:
+        r = sensor_reading
+        stmt = select(r.c.recorded_at, r.c.value, r.c.source, r.c.entered_by, r.c.note).where(
+            r.c.device_id == device_id, r.c.recorded_at == recorded_at
+        )
+        x = (await self.session.execute(stmt)).first()
+        if x is None:
+            return None
+        return {"t": x[0], "v": x[1], "source": x[2] or "device", "entered_by": x[3], "note": x[4] or ""}
+
+    async def update_reading(self, device_id: uuid.UUID, recorded_at: datetime, value: float, note: str) -> None:
+        r = sensor_reading
+        await self.session.execute(
+            update(r).where(r.c.device_id == device_id, r.c.recorded_at == recorded_at).values(value=value, note=note)
+        )
+
+    async def delete_reading(self, device_id: uuid.UUID, recorded_at: datetime) -> None:
+        r = sensor_reading
+        await self.session.execute(delete(r).where(r.c.device_id == device_id, r.c.recorded_at == recorded_at))
+
+    async def audit(self, device_id: uuid.UUID, limit: int = 200) -> list[ReadingAudit]:
+        stmt = (
+            select(ReadingAudit)
+            .where(ReadingAudit.device_id == device_id)
+            .order_by(ReadingAudit.created_at.desc())
+            .limit(limit)
+        )
+        return list((await self.session.execute(stmt)).scalars())
+
     async def hourly(
         self, device_id: uuid.UUID, since: datetime | None = None, until: datetime | None = None
     ) -> list[dict[str, Any]]:
@@ -78,7 +148,10 @@ class SiteSensorsRepository:
         return [{"hour": r[0], "n": r[1], "min": r[2], "max": r[3], "avg": r[4]} for r in rows]
 
     async def fold_into_hourly(self, before: datetime) -> int:
-        """Aggregate raw rows older than ``before`` into hourly rows, then delete them. Returns rows folded."""
+        """Aggregate raw device rows older than ``before`` into hourly rows, then delete them. Returns rows folded.
+
+        Readings a person entered stay raw: they carry a note and an author, and the audit trail points at them.
+        """
         r = sensor_reading
         hour = func.date_trunc("hour", r.c.recorded_at)
         agg = (
@@ -90,7 +163,7 @@ class SiteSensorsRepository:
                 func.max(r.c.value).label("v_max"),
                 func.avg(r.c.value).label("v_avg"),
             )
-            .where(r.c.recorded_at < before)
+            .where(r.c.recorded_at < before, r.c.source == "device")
             .group_by(r.c.device_id, hour)
         )
         h = sensor_reading_hourly
@@ -107,12 +180,14 @@ class SiteSensorsRepository:
             },
         )
         count = (
-            await self.session.execute(select(func.count()).select_from(r).where(r.c.recorded_at < before))
+            await self.session.execute(
+                select(func.count()).select_from(r).where(r.c.recorded_at < before, r.c.source == "device")
+            )
         ).scalar_one()
         if not count:
             return 0
         await self.session.execute(ins)
-        await self.session.execute(delete(r).where(r.c.recorded_at < before))
+        await self.session.execute(delete(r).where(r.c.recorded_at < before, r.c.source == "device"))
         return int(count)
 
     async def calibration(self, mix_id: uuid.UUID) -> list[CalibrationPoint]:

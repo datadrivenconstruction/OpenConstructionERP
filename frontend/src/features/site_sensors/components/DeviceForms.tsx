@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Device forms​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for site sensors: add a device and add readings by hand.
+ * Device forms​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for site sensors: add a built-in or a custom device; readings live in ReadingsPanel.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,15 +10,9 @@ import { Plus } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import {
-  addSensorReadings,
-  createSensorDevice,
-  fetchSensorMixes,
-  type SensorDevice,
-  type SensorKind,
-} from '../api';
+import { createSensorDevice, fetchSensorMixes, type SensorKind } from '../api';
 import { BimElementSelect, type BimLink } from './BimElementSelect';
-import { KIND_LABELS, KIND_ORDER, isoFromLocal, localDateTimeValue } from '../sensorData';
+import { KIND_LABELS, KIND_ORDER, customDefinitionError, isoFromLocal } from '../sensorData';
 import { useSensorUnits } from '../useSensorUnits';
 
 /** Frequency bands for a graded vibration table; zones and classes come from the country data. */
@@ -27,7 +21,7 @@ const FREQUENCY_BANDS = ['lt10', '10_50', '50_100', 'gt100'] as const;
 const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
 const LABEL = 'text-xs text-content-secondary';
 
-export function DeviceForms({ projectId, devices }: { projectId: string; devices: SensorDevice[] }) {
+export function DeviceForms({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -45,6 +39,13 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
   const [zone, setZone] = useState('');
   const [buildingClass, setBuildingClass] = useState('');
   const [band, setBand] = useState('');
+  const [unit, setUnit] = useState('');
+  const [lower, setLower] = useState('');
+  const [windowH, setWindowH] = useState('');
+  const [limitNote, setLimitNote] = useState('');
+  const [recordOnly, setRecordOnly] = useState(false);
+  const isCustom = kind === 'custom';
+  const customError = isCustom ? customDefinitionError({ unit, upper: limit, lower, recordOnly }) : null;
   const { context } = useSensorUnits(projectId);
   const grading = context?.limit_grading;
   const noiseZones = grading?.noise_zones ?? [];
@@ -68,7 +69,16 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
         code: code.trim(),
         name: name.trim(),
         kind,
-        limit_value: limit.trim() || null,
+        limit_value: recordOnly ? null : limit.trim() || null,
+        ...(limitNote.trim() ? { limit_note: limitNote.trim() } : {}),
+        ...(isCustom
+          ? {
+              unit: unit.trim(),
+              lower_limit: recordOnly ? null : lower.trim() || null,
+              rolling_mean_hours: windowH.trim() ? Number(windowH) : null,
+              record_only: recordOnly,
+            }
+          : {}),
         ...(bim.modelId ? { bim_model_id: bim.modelId, bim_element_id: bim.elementId || null } : {}),
         ...(kind === 'concrete_maturity'
           ? { mix_id: mixId || null, pour_ref: pourRef.trim(), cast_at: isoFromLocal(castAt) }
@@ -81,36 +91,19 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
       setName('');
       setLimit('');
       setPourRef('');
+      setUnit('');
+      setLower('');
+      setWindowH('');
+      setLimitNote('');
+      setRecordOnly(false);
       setBim({ modelId: '', elementId: '' });
       refresh();
     },
     onError,
   });
 
-  const [deviceId, setDeviceId] = useState('');
-  const [value, setValue] = useState('');
-  const [at, setAt] = useState(() => localDateTimeValue());
-  const readingMut = useMutation({
-    mutationFn: () => {
-      const iso = isoFromLocal(at);
-      if (!iso) throw new Error(t('site_sensors.forms.bad_time', { defaultValue: 'Enter a valid date and time.' }));
-      return addSensorReadings(deviceId, [{ recorded_at: iso, value: Number(value) }]);
-    },
-    onSuccess: (r) => {
-      setValue('');
-      refresh();
-      if (r.exceedances > 0) {
-        addToast({
-          type: 'warning',
-          title: t('site_sensors.forms.limit_exceeded', { defaultValue: 'Limit exceeded' }),
-        });
-      }
-    },
-    onError,
-  });
-
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid gap-5">
       <Card id="sensor-add-device">
         <CardHeader title={t('site_sensors.forms.add_device', { defaultValue: 'Add device' })} />
         <CardContent>
@@ -134,9 +127,51 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
               </select>
             </label>
             <label className={LABEL}>
-              {t('site_sensors.forms.limit', { defaultValue: 'Limit (blank = country default)' })}
-              <input type="number" step="any" value={limit} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              {isCustom
+                ? t('site_sensors.custom.upper', { defaultValue: 'Upper limit' })
+                : t('site_sensors.forms.limit', { defaultValue: 'Limit (blank = country default)' })}
+              <input type="number" step="any" value={limit} disabled={isCustom && recordOnly} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
             </label>
+            {isCustom && (
+              <>
+                <label className={LABEL}>
+                  {t('site_sensors.custom.unit', { defaultValue: 'Unit' })}
+                  <input type="text" value={unit} maxLength={20} placeholder={t('site_sensors.custom.unit_placeholder', { defaultValue: 'e.g. kN, %RH, m3/h' })} onChange={(e) => setUnit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                </label>
+                <label className={LABEL}>
+                  {t('site_sensors.custom.lower', { defaultValue: 'Lower limit' })}
+                  <input type="number" step="any" value={lower} disabled={recordOnly} onChange={(e) => setLower(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                </label>
+                <label className={LABEL}>
+                  {t('site_sensors.custom.window', { defaultValue: 'Rolling mean (hours, optional)' })}
+                  <input type="number" step="any" min="0" value={windowH} disabled={recordOnly} onChange={(e) => setWindowH(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                </label>
+                <label className={`${LABEL} col-span-2 flex items-center gap-2`}>
+                  <input type="checkbox" checked={recordOnly} onChange={(e) => setRecordOnly(e.target.checked)} />
+                  {t('site_sensors.custom.record_only', { defaultValue: 'Record only, no limit check' })}
+                </label>
+              </>
+            )}
+            {(isCustom || limit.trim() !== '') && (
+              <label className={`${LABEL} col-span-2`}>
+                {isCustom
+                  ? t('site_sensors.custom.limit_note', { defaultValue: 'Where the limits come from' })
+                  : t('site_sensors.limits.reason', { defaultValue: 'Reason or source of the limit' })}
+                <input type="text" value={limitNote} maxLength={300} onChange={(e) => setLimitNote(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              </label>
+            )}
+            {customError && (
+              <p className="col-span-2 text-xs font-medium text-semantic-warning">
+                {t(`site_sensors.custom.error_${customError}`, {
+                  defaultValue:
+                    customError === 'unit_required'
+                      ? 'Enter the unit the sensor measures in.'
+                      : customError === 'lower_not_below_upper'
+                        ? 'The lower limit must be below the upper limit.'
+                        : 'Set an upper or a lower limit, or mark the sensor record only.',
+                })}
+              </p>
+            )}
             {ungradedSource && (
               <p className={`${LABEL} col-span-2`}>
                 {t('site_sensors.forms.limit_from', { defaultValue: 'Country limit: {{source}}', source: ungradedSource })}
@@ -211,53 +246,11 @@ export function DeviceForms({ projectId, devices }: { projectId: string; devices
             variant="primary"
             size="md"
             icon={<Plus size={14} />}
-            disabled={!code.trim()}
+            disabled={!code.trim() || (isCustom && (!name.trim() || customError !== null))}
             loading={createMut.isPending}
             onClick={() => createMut.mutate()}
           >
             {t('site_sensors.forms.add_device', { defaultValue: 'Add device' })}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader
-          title={t('site_sensors.forms.add_readings', { defaultValue: 'Add readings' })}
-          subtitle={t('site_sensors.forms.add_readings_hint', {
-            defaultValue: 'For manual readings. Connected sensors post their own with a device token.',
-          })}
-        />
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <label className={`${LABEL} col-span-2`}>
-              {t('site_sensors.forms.device', { defaultValue: 'Device' })}
-              <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)} className={`${FIELD} mt-1 w-full`}>
-                <option value="">{t('site_sensors.forms.pick_device', { defaultValue: 'Choose a device' })}</option>
-                {devices.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.code} {d.unit ? `(${d.unit})` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={LABEL}>
-              {t('site_sensors.forms.value', { defaultValue: 'Value' })}
-              <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={`${FIELD} mt-1 w-full`} />
-            </label>
-            <label className={LABEL}>
-              {t('site_sensors.forms.recorded_at', { defaultValue: 'Recorded at' })}
-              <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} className={`${FIELD} mt-1 w-full`} />
-            </label>
-          </div>
-          <Button
-            className="mt-3"
-            variant="primary"
-            size="md"
-            disabled={!deviceId || value.trim() === '' || !Number.isFinite(Number(value))}
-            loading={readingMut.isPending}
-            onClick={() => readingMut.mutate()}
-          >
-            {t('site_sensors.forms.save_reading', { defaultValue: 'Save reading' })}
           </Button>
         </CardContent>
       </Card>

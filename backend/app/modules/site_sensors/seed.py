@@ -5,7 +5,9 @@ The module looks lived in for two weeks on every showcase project: three
 concrete pours (one struck, one past its strike strength, one approaching),
 noise, dust, vibration, wind and water-level sensors on the boundary, a few
 limit breaches with acknowledged alerts and one still open, and one vibration
-sensor that has gone silent. Limits come from the project's country through the
+sensor that has gone silent. A custom sensor the site defined itself (dewatering
+pump flow in m3/h, with an upper and a lower limit) carries a few readings typed
+in from the flow meter, with notes. Limits come from the project's country through the
 service; wind and water-level limits are set on the device. Readings go through
 the service, so the alerts, the released strikes and the notifications are the
 real ones. Fixed random seed per project, readings capped at about two thousand
@@ -35,7 +37,7 @@ from app.modules.site_sensors.models import (
     sensor_reading,
     sensor_reading_hourly,
 )
-from app.modules.site_sensors.schemas import CalibrationPointIn, DeviceCreate, StripCreate
+from app.modules.site_sensors.schemas import CalibrationPointIn, DeviceCreate, ReadingIn, StripCreate
 from app.modules.site_sensors.service import ROLLING_MEAN_HOURS, SiteSensorsService
 
 #: Projects seeded per call; the demo shows a handful, not every imported pack.
@@ -54,6 +56,26 @@ _MS_TO_MPH = 2.23694
 _FALLBACK_LIMIT = {"noise": "70", "dust_pm10": "50", "vibration": "5"}
 _WIND_LIMIT_MS = 15.0
 _WATER_LIMIT_M = 1.8
+#: Why the wind and water limits sit on the device: no country figure, the site sets them.
+_LIMIT_NOTES = {
+    "weather": "Crane manufacturer's in-service wind limit",
+    "water_level": "Dewatering design: excavation sump alarm level",
+}
+#: The custom sensor: code, name, unit, lower and upper limit, where the limits come from.
+_CUSTOM = (
+    "FL-01",
+    "Dewatering pump flow, sump P1",
+    "m3/h",
+    Decimal("18"),
+    Decimal("60"),
+    "Dewatering design: minimum to hold the drawdown, maximum of the discharge consent",
+)
+#: Hand readings from the flow meter: (hours ago, share of the band, note).
+_CUSTOM_MANUAL = (
+    (52.5, 0.55, "Read off the flow meter at the morning check"),
+    (28.5, 0.62, "After the second pump was started"),
+    (4.5, 0.48, "Meter checked by the dewatering subcontractor"),
+)
 
 
 @dataclass(frozen=True)
@@ -374,6 +396,7 @@ async def _seed_environment(
                 kind=kind,
                 unit=unit,
                 limit_value=limit_value,
+                limit_note=_LIMIT_NOTES.get(kind, ""),
                 offline_after_minutes=120 if step_h < 3 else 240,
             )
         )
@@ -421,6 +444,46 @@ async def _seed_environment(
                 offline.raised_at = device.last_seen_at + timedelta(minutes=device.offline_after_minutes)
 
 
+async def _seed_custom(
+    service: SiteSensorsService,
+    project_id: uuid.UUID,
+    user: uuid.UUID,
+    now: datetime,
+    rng: random.Random,
+    counts: dict[str, int],
+) -> None:
+    """A sensor the site defined itself: pump flow logged every 6 hours, plus readings typed in by hand."""
+    code, name, unit, lower, upper, note = _CUSTOM
+    device = await service.create_device(
+        DeviceCreate(
+            project_id=project_id,
+            code=code,
+            name=name,
+            kind="custom",
+            unit=unit,
+            limit_value=upper,
+            lower_limit=lower,
+            limit_note=note,
+            offline_after_minutes=360,
+        )
+    )
+    lo, hi = float(lower), float(upper)
+    rows = []
+    t = now - timedelta(days=_DAYS)
+    while t <= now:
+        share = 0.45 + 0.15 * math.sin(t.hour / 24 * 2 * math.pi) + rng.uniform(-0.05, 0.05)
+        rows.append((t, round(lo + (hi - lo) * share, 1)))
+        t += timedelta(hours=6)
+    await service.ingest(device, rows)
+    manual = [
+        ReadingIn(recorded_at=now - timedelta(hours=h), value=round(lo + (hi - lo) * share, 1), note=text)
+        for h, share, text in _CUSTOM_MANUAL
+    ]
+    await service.add_user_readings(device, manual, "manual", user)
+    counts["devices"] += 1
+    counts["readings"] += len(rows) + len(manual)
+
+
 async def seed_site_sensors_demo(
     session: AsyncSession, project_ids: Iterable[uuid.UUID], *, now: datetime | None = None
 ) -> dict[str, int]:
@@ -442,6 +505,11 @@ async def seed_site_sensors_demo(
             (await session.execute(select(SensorDevice.code).where(SensorDevice.project_id == project_id))).scalars()
         )
         if _MARKER in codes:
+            if _CUSTOM[0] not in codes:
+                # Seeded before custom sensors existed: add only the custom one.
+                rng = random.Random(f"site-sensors-custom:{project_id}")
+                user = project.owner_id or uuid.uuid5(uuid.NAMESPACE_URL, f"site-sensors:{project_id}")
+                await _seed_custom(service, project_id, user, now, rng, counts)
             continue
         if codes & set(_LEGACY_CODES):
             await _purge_legacy(session, project_id)
@@ -454,5 +522,6 @@ async def seed_site_sensors_demo(
         await _seed_environment(
             session, service, project_id, (project.country_code or "").upper(), user, now, rng, counts
         )
+        await _seed_custom(service, project_id, user, now, rng, counts)
         counts["alerts"] = before + len(await service.repo.alerts(project_id))
     return counts
