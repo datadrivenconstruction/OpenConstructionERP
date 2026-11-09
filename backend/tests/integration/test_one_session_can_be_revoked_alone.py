@@ -62,6 +62,10 @@ _MINTERS = {"create_access_token", "create_refresh_token"}
 # and mints the pair together, so the two cannot come apart.
 _ISSUER = "_issue_token_pair"
 
+# Mints a short-lived access token that carries the caller's own sid, so signing that
+# session out also ends the token. It opens no session of its own and returns no refresh token.
+_INHERITS_CALLERS_SESSION = {"issue_ui_token"}
+
 
 @pytest.fixture(scope="module")
 def client() -> TestClient:
@@ -363,7 +367,7 @@ def test_every_token_pair_is_minted_inside_the_session_helper() -> None:
                 if name not in _MINTERS:
                     continue
                 call_sites += 1
-                if func.name != _ISSUER:
+                if func.name != _ISSUER and func.name not in _INHERITS_CALLERS_SESSION:
                     offenders.append(f"{path.relative_to(app_root.parent)}:{node.lineno} in {func.name}()")
 
     # Control. Every assertion below is satisfied by finding nothing at all, so

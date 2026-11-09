@@ -403,7 +403,7 @@ class TestThePromptAsksForTheBaseModuleAndSuggestions:
         assert service.system_prompt(None) == service.SYSTEM_PROMPT
         assert "in German." in service.system_prompt("de")
         assert "in Portuguese." in service.system_prompt("pt-BR")
-        assert "the language with the tag kk" in service.system_prompt("kk")
+        assert "the language with the tag xx" in service.system_prompt("xx")
 
     def test_every_language_the_suggester_knows_has_a_name_for_the_assistant(self) -> None:
         assert set(service.LANGUAGE_NAMES) == set(suggest.LANGUAGES)

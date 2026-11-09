@@ -343,12 +343,17 @@ async def test_dns_rebinding_to_loopback_is_blocked_at_send_time(maker, monkeypa
 
     monkeypatch.setattr(svc_mod, "_post", _post)
 
+    real_getaddrinfo = socket.getaddrinfo
+
     def fake_getaddrinfo(host, port, *a, **kw):
+        # Only the hook's host rebinds; the database driver resolves through the same call.
+        if host != "rebind.example.com":
+            return real_getaddrinfo(host, port, *a, **kw)
         return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0))]
 
-    monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
     uid = await _user(maker)
     hook_id = await _hook(maker, uid, url="https://rebind.example.com/hook")
+    monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
     async with maker() as s:
         d = await WebhookService(s).deliver_to(await s.get(WebhookEndpoint, hook_id), "a.b", {})
     assert d.status == "dead"

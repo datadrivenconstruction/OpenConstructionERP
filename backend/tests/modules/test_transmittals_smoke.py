@@ -127,7 +127,7 @@ async def test_transmittals_smoke_full_lifecycle(client: AsyncClient):
             "issued_date": "2026-05-28",
             "cover_note": "Please find attached the IFC drawings for L01.",
             "recipients": [
-                {"action_required": "review"},
+                {"recipient_name": "Site Engineer", "action_required": "review"},
             ],
             "items": [
                 {"item_number": 1, "description": "L01-A101 Floor Plan"},

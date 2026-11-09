@@ -258,9 +258,10 @@ class TestBimParquetObservability:
 
         meta = body.get("metadata") or {}
         assert meta.get("parquet_status") == "failed", f"Expected parquet_status=failed, got meta={meta}"
-        assert "simulated disk full" in (meta.get("parquet_error") or ""), (
-            f"Error string must mention the original message, got {meta.get('parquet_error')!r}"
-        )
+        # The row carries the exception class only; the message stays in the server log.
+        error = meta.get("parquet_error") or ""
+        assert error.startswith("OSError: Parquet write failed"), error
+        assert "simulated disk full" not in error
 
         # Structured log event must have fired with the right event tag.
         matched = [

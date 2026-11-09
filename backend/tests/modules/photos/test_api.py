@@ -228,7 +228,7 @@ async def test_backfill_is_idempotent_and_never_touches_the_files(client: AsyncC
 
     strip = (
         await client.get(f"{BASE}/by-target/?project_id={project_id}&kind=punch_item&id={item_id}", headers=header)
-    ).json()
+    ).json()["items"]
     assert len(strip) == 1 and strip[0]["source_module"] == "punchlist"
     file_resp = await client.get(strip[0]["file_url"], headers=header)
     assert file_resp.status_code == 200 and file_resp.content == before[0]

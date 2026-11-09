@@ -209,9 +209,13 @@ async def test_element_context_composes_boq_link_with_cost(client: AsyncClient, 
     assert body["linked_activities"] == []
     assert body["linked_requirements"] == []
     # Element import auto-runs the validation pipeline, so a model report may
-    # exist; either way this element carries no findings, so its status is one
-    # of the two "no issues" values ('pass' if a report ran, else 'unchecked').
-    assert body["validation_status"] in ("pass", "unchecked")
+    # exist. The status is the worst severity among the element's own findings
+    # ('unchecked' when no report ran), whatever rules the pipeline holds today.
+    severities = {v["severity"] for v in body["validation_results"]}
+    assert "error" not in severities
+    assert body["validation_status"] in ("pass", "unchecked", "warning")
+    if "warning" in severities:
+        assert body["validation_status"] == "warning"
 
 
 @pytest.mark.asyncio

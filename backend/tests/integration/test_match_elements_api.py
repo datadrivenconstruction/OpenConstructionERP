@@ -396,13 +396,14 @@ async def test_create_session_with_construction_stage_pin(
     """
 
     a = two_tenants["a"]
-    project_id, _ = await _seed_project_with_bim_model(owner_id=a["user_id"])
+    project_id, bim_model_id = await _seed_project_with_bim_model(owner_id=a["user_id"])
 
     resp = await http_client.post(
         "/api/v1/match_elements/sessions",
         json={
             "project_id": str(project_id),
             "source": "bim",
+            "bim_model_id": str(bim_model_id),
             "construction_stage": "06_Superstructure",
         },
         headers=a["headers"],

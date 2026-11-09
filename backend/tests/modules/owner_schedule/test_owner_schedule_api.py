@@ -123,7 +123,7 @@ async def test_round_trip(client: AsyncClient, monkeypatch):
     boq_id = boq.json()["id"]
 
     profiles = await client.get("/api/v1/owner_schedule/profiles", headers=admin)
-    assert pack.key in {p["key"] for p in profiles.json()}
+    assert pack.key in {p["key"] for p in profiles.json()["items"]}
 
     det = await client.post("/api/v1/owner_schedule/detect", files=_files(agency_workbook()), headers=admin)
     assert det.status_code == 200, det.text

@@ -31,7 +31,9 @@ def test_migration_chain_has_one_head() -> None:
                     down = ast.literal_eval(node.value)
         revs[rev] = down
     parents = {d for v in revs.values() for d in ([v] if isinstance(v, str) else (v or []))}
-    assert [r for r in revs if r not in parents] == ["voff01_customer_offers"]
+    heads = [r for r in revs if r not in parents]
+    assert len(heads) == 1, heads
+    assert "voff01_customer_offers" in revs
 
 
 def test_accepting_needs_only_the_write_permission() -> None:

@@ -171,12 +171,12 @@ async def test_the_editor_query_is_honoured(client: AsyncClient, auth: dict[str,
     # The labels are German, and the response says so.
     assert "Freigegeben von:" in text
     assert language == "de"
-    # m3 lines in cubic feet: 10 m3 is 353.15 ft3.
-    assert "353.15" in text
+    # m3 lines in cubic feet: 10 m3 is 353.147 ft3.
+    assert "353.147" in text
     # The resource under the line, scaled to it: 2 m2 per unit times 10 is
-    # 20 m2, which prints as 215.28 ft2, and 20 at 25 is 500.
+    # 20 m2, which prints as 215.278 ft2, and 20 at 25 is 500.
     assert "Plywood sheeting" in text
-    assert "215.28" in text
+    assert "215.278" in text
 
 
 @pytest.mark.asyncio

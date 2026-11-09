@@ -263,6 +263,19 @@ def upgrade() -> None:
     logger.info("v3151 cost_spine: control accounts + cost lines + linkage columns ensured")
 
 
+def _drop_table(bind, table: str) -> None:
+    """Drop ``table``; on PostgreSQL also the foreign keys later tables hold on it.
+
+    A schema built from the models carries tables added after this revision that
+    point at these two; a plain DROP would refuse, and those constraints go with
+    the tables anyway when their own revisions are downgraded first.
+    """
+    if bind.dialect.name == "postgresql":
+        op.execute(sa.text(f'DROP TABLE "{table}" CASCADE'))
+    else:
+        op.drop_table(table)
+
+
 def downgrade() -> None:
     bind = op.get_bind()
 
@@ -293,7 +306,7 @@ def downgrade() -> None:
         ):
             if _index_exists(bind, "oe_costmodel_cost_line", index_name):
                 op.drop_index(index_name, table_name="oe_costmodel_cost_line")
-        op.drop_table("oe_costmodel_cost_line")
+        _drop_table(bind, "oe_costmodel_cost_line")
 
     # ── Control accounts table ───────────────────────────────────────────
     if _table_exists(bind, "oe_costmodel_control_account"):
@@ -305,6 +318,6 @@ def downgrade() -> None:
         ):
             if _index_exists(bind, "oe_costmodel_control_account", index_name):
                 op.drop_index(index_name, table_name="oe_costmodel_control_account")
-        op.drop_table("oe_costmodel_control_account")
+        _drop_table(bind, "oe_costmodel_control_account")
 
     logger.info("v3151 cost_spine: reverted")

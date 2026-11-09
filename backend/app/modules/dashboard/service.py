@@ -1663,11 +1663,27 @@ async def compute_project_sub_insurance(
 ) -> dict[str, Any]:
     """Subcontractor insurance status counts and gated payments, across the projects."""
     from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+    from app.modules.subcontractors.models import SubcontractAgreement  # noqa: PLC0415
 
     svc = InsuranceComplianceService(session)
     counts = {"compliant": 0, "expiring": 0, "non_compliant": 0}
     blocked = 0
+    # One query names the projects that have any subcontract; the rest contribute nothing,
+    # so the per-project dashboard is not asked for them.
+    with_agreements = set(
+        (
+            await session.execute(
+                select(SubcontractAgreement.project_id)
+                .where(SubcontractAgreement.project_id.in_([p.id for p in projects]))
+                .distinct()
+            )
+        )
+        .scalars()
+        .all()
+    )
     for p in projects:
+        if p.id not in with_agreements:
+            continue
         dash = await svc.project_dashboard(p.id)
         for k, v in dash["counts"].items():
             counts[k] = counts.get(k, 0) + v

@@ -124,6 +124,9 @@ class _StubSession:
             return _ScalarOneOrNone(len(self.items))
         if "oe_boq_boq" in sql:
             return _ScalarOneOrNone(list(self.boqs))
+        # The commitment guard asks for the project's matrix; these projects have none.
+        if "oe_commitment_matrix" in sql:
+            return _ScalarOneOrNone(None)
 
         # COUNT(*) probe — used by _has_approval_chain.
         if "count(" in sql:

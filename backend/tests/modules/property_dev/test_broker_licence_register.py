@@ -116,7 +116,7 @@ async def test_demo_brokers_hold_valid_licences_so_the_rule_passes(seeded) -> No
     session, dev = seeded
     licences = (await session.execute(select(BrokerLicence))).scalars().all()
     assert len(licences) == 3
-    assert all(lic.authority_code == "REGA" and lic.licence_number.startswith("DEMO-") for lic in licences)
+    assert all(lic.authority_code == "REGA" and lic.licence_number.startswith("FAL-") for lic in licences)
     results = await PropDevBrokerLicenceValidOnDealDate().validate(_ctx(session, dev))
     assert results and all(r.passed for r in results)
 

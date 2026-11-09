@@ -1209,8 +1209,11 @@ def test_the_chain_only_column_exemptions_are_still_earned() -> None:
     back_in_the_models = sorted(column for column in CHAIN_ONLY_COLUMNS if column in declared)
     drifted: dict[str, tuple[str, list[str]]] = {}
     for qualified, (owner, _reason) in CHAIN_ONLY_COLUMNS.items():
+        table_name = qualified.split(".")[0]
         word = re.compile(rf"\b{re.escape(qualified.split('.')[-1])}\b")
-        naming = sorted(name for name, text_of in sources.items() if word.search(text_of))
+        # A generic column name (tax_rate) also appears on unrelated tables, so a
+        # revision only counts when it names this table as well.
+        naming = sorted(name for name, text_of in sources.items() if word.search(text_of) and table_name in text_of)
         if naming != [owner]:
             drifted[qualified] = (owner, naming)
 

@@ -218,7 +218,7 @@ async def test_the_safety_item_and_the_source_pass_validation(imported) -> None:
 async def test_a_native_project_file_is_refused_in_the_readers_language(http_client, auth_headers, boq_id) -> None:
     resp = await http_client.post(
         f"/api/v1/boq/boqs/{boq_id}/import/auto/",
-        files={"file": ("progetto.dcf", b"\x00\x01binary project\x00", "application/octet-stream")},
+        files={"file": ("progetto.dcf", b"AAMVHFSS\x00\x01binary project\x00", "application/octet-stream")},
         headers={**auth_headers, "Accept-Language": "de"},
     )
     assert resp.status_code == 400, resp.text[:300]

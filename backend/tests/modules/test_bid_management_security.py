@@ -289,6 +289,7 @@ def _seed_package(
         currency=currency,
         total_budget_estimate="0",
         status=status,
+        package_type="subcontract",
         confidentiality_level="limited",
         published_at=None,
         closed_at=None,

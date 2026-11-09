@@ -49,7 +49,7 @@ _NAME_RULE_SUFFIXES = ("_id", "id", "_at", "_date", "date_")
 
 # String columns named the way that rule keyed off, counted across the eight
 # kinds. Pinned so the coverage check cannot pass by finding nothing.
-_NAME_SHAPED_STRING_COLUMNS = 10
+_NAME_SHAPED_STRING_COLUMNS = 13
 
 
 @pytest_asyncio.fixture
@@ -97,6 +97,7 @@ def _kind_kwargs(kind: str, *, project_id: uuid.UUID, user_id: uuid.UUID) -> dic
             "filename": "site.jpg",
             "file_path": "/uploads/site.jpg",
             "document_id": soft_ref,
+            "source_id": soft_ref,
         },
         "sheet": {
             "project_id": project_id,
@@ -119,6 +120,8 @@ def _kind_kwargs(kind: str, *, project_id: uuid.UUID, user_id: uuid.UUID) -> dic
             "project_id": project_id,
             "type": "area",
             "document_id": soft_ref,
+            "drawing_document_id": soft_ref,
+            "drawing_sheet_id": soft_ref,
             "linked_boq_position_id": soft_ref,
         },
         "report": {

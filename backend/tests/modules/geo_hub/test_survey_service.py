@@ -205,9 +205,11 @@ async def test_progress_interpolates_and_classifies(http_client, tenant_a, surve
         )
         assert res.status_code == 200, res.text
 
-    rows = {r["code"]: r for r in (await http_client.get(f"{BASE}/{survey['id']}/progress", headers=h)).json()["items"]}
+    everything = (await http_client.get(f"{BASE}/{survey['id']}/progress", headers=h)).json()["items"]
+    rows = {r["code"]: r for r in everything}
     cut = (await http_client.get(f"{BASE}/{survey['id']}/progress?limit=1", headers=h)).json()
-    assert len(cut["items"]) == 1 and cut["total"] == 4
+    # The project is shared by the module's tests, so earlier schedules also count.
+    assert len(cut["items"]) == 1 and cut["total"] == len(everything) >= 4
     assert rows["INSIDE"]["planned_pct_on_date"] == 50.0 and rows["INSIDE"]["variance_pct"] == 20.0
     assert rows["INSIDE"]["status"] == "ahead"
     assert rows["LATER"]["planned_pct_on_date"] == 0.0 and rows["LATER"]["status"] == "on_track"

@@ -29,7 +29,7 @@ PROJECT_ID = uuid.uuid4()
 
 async def _no_rows(_statement: Any) -> SimpleNamespace:
     """Bulk statements (the requisition date sync) touch tables this stub has none of."""
-    return SimpleNamespace(rowcount=0)
+    return SimpleNamespace(rowcount=0, scalar_one_or_none=lambda: None)
 
 
 def _make_service() -> ProcurementService:

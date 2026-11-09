@@ -219,7 +219,9 @@ async def test_backfill_review_confirm_unlink_and_validation(client: AsyncClient
     by_entity: dict[str, list[dict]] = {}
     for r in reviews:
         by_entity.setdefault(r["entity_id"], []).append(r)
-    again = await client.post("/api/v1/contacts/parties/backfill/", json={}, headers=staff)
+    again = await client.post(
+        "/api/v1/contacts/parties/backfill/", json={"entity_types": ["tender_invitation"]}, headers=staff
+    )
     assert again.status_code == 200
     reviews_again = (await client.get("/api/v1/contacts/parties/review/", headers=staff)).json()["items"]
     assert sorted(r["id"] for r in reviews_again) == sorted(r["id"] for r in reviews)

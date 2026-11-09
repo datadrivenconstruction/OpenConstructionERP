@@ -216,7 +216,7 @@ class TestBimModelFromDocument:
         assert second_body["already_existed"] is True
         assert second_body["model_id"] == first_model_id
 
-    async def test_dwg_document_flagged_needs_converter(
+    async def test_dwg_document_is_sent_to_dwg_takeoff(
         self,
         fromdoc_client: AsyncClient,
         fromdoc_auth: dict[str, str],
@@ -231,12 +231,8 @@ class TestBimModelFromDocument:
         )
 
         resp = await _from_document(fromdoc_client, fromdoc_auth, doc_id)
-        assert resp.status_code == 201, resp.text
-        body = resp.json()
-        assert body["model_id"], body
-        assert body["format"] == "dwg"
-        assert body["status"] == "needs_converter"
-        assert body["error_message"], "needs_converter must explain why"
+        assert resp.status_code == 400, resp.text
+        assert resp.json()["detail"]["code"] == "drawing_use_dwg_takeoff"
 
     async def test_non_cad_document_rejected(
         self,
@@ -254,7 +250,7 @@ class TestBimModelFromDocument:
 
         resp = await _from_document(fromdoc_client, fromdoc_auth, doc_id)
         assert resp.status_code == 400, resp.text
-        assert "convertible" in (resp.json().get("detail") or "").lower()
+        assert resp.json()["detail"]["code"] == "unsupported_cad_file_type"
 
     async def test_missing_document_returns_404(
         self,

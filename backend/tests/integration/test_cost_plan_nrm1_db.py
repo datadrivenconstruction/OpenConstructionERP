@@ -368,5 +368,5 @@ async def test_export_language_follows_the_request_and_says_when_it_fell_back(se
     rows = _rows(load_workbook(io.BytesIO(german.body)).worksheets[0])
     assert _row_by_label(rows, "Kosten der Bauleistungen")
 
-    fallback = await export_nrm1_cost_plan(boq.id, str(project.owner_id), session, gifa=None, locale="fr")
+    fallback = await export_nrm1_cost_plan(boq.id, str(project.owner_id), session, gifa=None, locale="xx")
     assert fallback.headers["Content-Language"] == "en"
