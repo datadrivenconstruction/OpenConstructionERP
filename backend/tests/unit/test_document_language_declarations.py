@@ -57,6 +57,7 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/contracts/router.py": {"export_form_application_pdf", "export_claim_hakedis_pdf"},
     "modules/costmodel/router.py": {"export_cost_control"},
     "modules/daily_diary/router.py": {"diary_pdf"},
+    "modules/site_sensors/router.py": {"pour_record"},
     "modules/delivery_model/router.py": {"export"},
     "modules/bid_day/router.py": {"export_snapshot"},
     "modules/design_management/router.py": {"export"},

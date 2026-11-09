@@ -27,8 +27,14 @@ LABELS: dict[str, dict[str, str]] = form_strings("site_sensors_pour_record")
 _MAX_CURVE_ROWS = 48
 
 
+def written_language(lang: str) -> str:
+    """Return the language the pour record is actually written in."""
+    code = (lang or "en").split("-")[0].lower()
+    return code if code in LABELS else "en"
+
+
 def _labels(lang: str) -> dict[str, str]:
-    return LABELS.get((lang or "en").split("-")[0].lower(), LABELS["en"])
+    return LABELS[written_language(lang)]
 
 
 def _thin(series: list[dict[str, Any]], n: int = _MAX_CURVE_ROWS) -> list[dict[str, Any]]:

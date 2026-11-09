@@ -381,7 +381,7 @@ async def pour_record(
     _perm: None = Depends(RequirePermission("site_sensors.read")),
 ) -> Response:
     from app.modules.site_sensors.models import FormworkStrip
-    from app.modules.site_sensors.pour_record import pour_record_csv, pour_record_pdf
+    from app.modules.site_sensors.pour_record import pour_record_csv, pour_record_pdf, written_language
 
     strip = await session.get(FormworkStrip, strip_id)
     if strip is None:
@@ -393,7 +393,10 @@ async def pour_record(
         return Response(
             content=pour_record_csv(record, lang),
             media_type="text/csv; charset=utf-8",
-            headers={"Content-Disposition": f'attachment; filename="{stem}.csv"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="{stem}.csv"',
+                "Content-Language": written_language(lang),
+            },
         )
     from app.modules.site_sensors.evidence import file_pour_record
 
@@ -409,7 +412,10 @@ async def pour_record(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{stem}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{stem}.pdf"',
+            "Content-Language": written_language(lang),
+        },
     )
 
 
