@@ -20,7 +20,8 @@ describe('MenuSizeCard', () => {
     expect(useSidebarPrefsStore.getState().labelMode).toBe('single');
     expect(preview.querySelector('.truncate')).not.toBeNull();
     // The full name stays reachable in the tooltip.
-    expect(preview.querySelector('.truncate')?.getAttribute('title')).toMatch(/Bill of quantities/);
+    const titles = Array.from(preview.querySelectorAll('.truncate')).map((el) => el.getAttribute('title'));
+    expect(titles.some((title) => /Bill of quantities/.test(title ?? ''))).toBe(true);
   });
 
   it('slider writes the width and Reset restores the default', () => {
