@@ -25,6 +25,7 @@ import { WorkModesCard } from './WorkModesCard';
 import { WorkspaceBrandCard } from './WorkspaceBrandCard';
 import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
+import { MenuSizeCard } from './MenuSizeCard';
 import { SidebarFooterCard } from './SidebarFooterCard';
 import { FloatingButtonsCard } from './FloatingButtonsCard';
 import { LearningTipsCard } from './LearningTipsCard';
@@ -1898,6 +1899,7 @@ export function SettingsPage() {
               <WorkModesCard onApplied={() => setModeKey((k) => k + 1)} />
               <AppearanceStyleCard key={`style-${modeKey}`} />
               <MenuAppearanceCard />
+              <MenuSizeCard />
               <WorkspaceBrandCard />
               <WorkPrefsCard />
               <TableOptionsCard key={`tables-${modeKey}`} />

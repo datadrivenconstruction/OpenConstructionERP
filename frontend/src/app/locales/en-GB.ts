@@ -728,6 +728,15 @@ const resource = {
     "settings.style_custom_hint": "Your own mix",
     "settings.style_text": "Font size",
     "settings.style_text_large": "Large",
+    "settings.menu_size_title": "Menu size",
+    "settings.menu_size_subtitle": "How item names show in the left menu and how wide the menu is. You can also drag the menu edge.",
+    "settings.menu_size_labels": "Item names",
+    "settings.menu_size_labels_wrap": "Full names on several lines",
+    "settings.menu_size_labels_single": "One line, cut off at the panel edge",
+    "settings.menu_size_width": "Menu width",
+    "settings.menu_size_reset": "Reset",
+    "settings.menu_size_sample": "Bill of quantities and cost estimates",
+    "settings.menu_size_sample_short": "Schedule",
     "catalog.category_concrete_cement": "Concrete & Cement",
     "catalog.category_steel_metal": "Steel & Metal",
     "catalog.category_welding": "Welding",
@@ -751,6 +760,7 @@ const resource = {
     "catalog.category_labor": "Labour",
     "catalog.category_operators": "Operators",
     "contacts.field_state": "County / region",
+    "sidebar.resize_handle": "Resize the menu",
   }
 } as { translation: Record<string, string> };
 

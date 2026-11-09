@@ -46867,6 +46867,15 @@ const resource = {
     "settings.learning_tips_toggle": "Show learning tips on screens",
     "settings.learning_tips_hidden_count": "Hidden on screens: {{number}}",
     "settings.learning_tips_show_all": "Show on all screens again",
+    "settings.menu_size_title": "Menu size",
+    "settings.menu_size_subtitle": "How item names show in the left menu and how wide the menu is. You can also drag the menu edge.",
+    "settings.menu_size_labels": "Item names",
+    "settings.menu_size_labels_wrap": "Full names on several lines",
+    "settings.menu_size_labels_single": "One line, cut off at the panel edge",
+    "settings.menu_size_width": "Menu width",
+    "settings.menu_size_reset": "Reset",
+    "settings.menu_size_sample": "Bill of quantities and cost estimates",
+    "settings.menu_size_sample_short": "Schedule",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",
@@ -47380,6 +47389,7 @@ const resource = {
     "cases.featured_article.label": "Featured article: {{title}}. Read the article, opens in a new tab",
     "sidebar.learn.hint_topbar": "Tutorial videos and guided cases to learn the platform. Hide this section and it folds into the graduation cap in the top bar; one click there brings it back.",
     "sidebar.learn.hidden_toast_body_topbar": "They are now behind the graduation cap in the top bar. One click there brings them back.",
+    "sidebar.resize_handle": "Resize the menu",
     "videos.used_in_cases": "Used in these cases",
     "videos.more_cases": "+{{more}} more",
     "videos.jump_to": "From {{time}}: {{chapter}}",

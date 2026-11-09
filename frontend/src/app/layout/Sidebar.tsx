@@ -73,6 +73,8 @@ import {
   SIDEBAR_WIDTH_FULL,
   SIDEBAR_WIDTH_ICON,
 } from '@/stores/useSidebarCollapseStore';
+import { SIDEBAR_DEFAULT_WIDTH, useSidebarPrefsStore } from '@/stores/useSidebarPrefsStore';
+import { SidebarResizeHandle } from './SidebarResizeHandle';
 import { RequestCustomModuleDialog } from '@/features/modules/RequestCustomModuleDialog';
 import {
   useActiveProjectProfile,
@@ -699,12 +701,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // reset it to the full width when the component unmounts only if it
   // was the one that shrunk it, to avoid stranding a 64px gutter when
   // the user logs out.
+  const prefWidth = useSidebarPrefsStore((s) => s.width);
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--oe-sidebar-width',
-      iconified ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH_FULL,
+      iconified ? SIDEBAR_WIDTH_ICON : prefWidth === SIDEBAR_DEFAULT_WIDTH ? SIDEBAR_WIDTH_FULL : `${prefWidth}px`,
     );
-  }, [iconified]);
+  }, [iconified, prefWidth]);
 
   // Map route paths → open-item counts for sidebar badges
   const badgeMap: Record<string, number> = {
@@ -2236,6 +2239,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           />
         </Suspense>
       )}
+      {!iconified && wideScreen && <SidebarResizeHandle rtl={isRTL} />}
     </aside>
   );
 }
@@ -2676,6 +2680,7 @@ function SidebarItem({
   onRowMenu?: (target: IconTarget, x: number, y: number) => void;
 }) {
   const { t } = useTranslation();
+  const labelMode = useSidebarPrefsStore((s) => s.labelMode);
   const Icon = useMenuIcon(item.to, item.icon);
   const tone = sectionTone(item.to);
   const handleContextMenu = (e: React.MouseEvent<HTMLElement>) => {
@@ -2858,7 +2863,10 @@ function SidebarItem({
             overflow a single 264px line, so labels may wrap onto a second
             line instead of clipping mid-word. The title tooltip stays as
             the safety net for labels that exceed even two lines. */}
-        <span className="min-w-0 line-clamp-2 break-words leading-snug" title={label}>
+        <span
+          className={clsx('min-w-0 leading-snug', labelMode === 'single' ? 'truncate' : 'break-words')}
+          title={label}
+        >
           {label}
         </span>
         {/* Right-edge cluster — kbd hint first, badges last, so the
