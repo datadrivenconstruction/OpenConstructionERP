@@ -6,6 +6,7 @@
  * (`01.02 FS+3; 01.04 SS`).
  */
 
+import { fmtList } from '@/shared/lib/formatters';
 import type { GanttDependencyType } from './ganttUtils';
 
 export type GanttColumnId =
@@ -113,13 +114,14 @@ export function formatResources(
   rows: ReadonlyArray<{ name?: string | null; count?: number | null }> | null | undefined,
 ): string {
   if (!rows) return '';
-  return rows
-    .filter((r) => r.name)
-    .map((r) => {
-      const count = Number(r.count);
-      return Number.isFinite(count) && count > 1 ? `${r.name} ×${Math.trunc(count)}` : String(r.name);
-    })
-    .join(', ');
+  return fmtList(
+    rows
+      .filter((r) => r.name)
+      .map((r) => {
+        const count = Number(r.count);
+        return Number.isFinite(count) && count > 1 ? `${r.name} ×${Math.trunc(count)}` : String(r.name);
+      }),
+  );
 }
 
 /** The columns to draw: the picked ones in table order, the name always among them. */
