@@ -540,8 +540,12 @@ async def test_the_same_project_is_counted_on_one_week_by_both_paths(
     async def _row_lock(_stmt: object) -> None:
         return None
 
+    async def _no_calendar_hours(_project_id: uuid.UUID) -> None:
+        return None
+
     # No named calendar for the project: the regional week is the one drawn on.
     monkeypatch.setattr(svc, "_project_default_calendar", _no_project_calendar)
+    monkeypatch.setattr(svc, "_project_calendar_hours", _no_calendar_hours)
     svc.session.execute = _row_lock
 
     await svc.generate_from_boq(schedule.id, boq_id, total_project_days=120)
