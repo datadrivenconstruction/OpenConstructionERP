@@ -312,7 +312,7 @@ export const deleteReading = (id: string, recordedAt: string) =>
   apiDelete(`/v1/site_sensors/devices/${id}/readings/manual?recorded_at=${encodeURIComponent(recordedAt)}`);
 
 export const fetchReadingAudit = (id: string) =>
-  apiGet<ReadingAuditEntry[]>(`/v1/site_sensors/devices/${id}/readings/audit`);
+  apiGet<{ items: ReadingAuditEntry[]; total: number }>(`/v1/site_sensors/devices/${id}/readings/audit`);
 
 export const updateSensorMix = (id: string, data: Partial<Omit<SensorMixInput, 'project_id' | 'code'>>) =>
   apiPatch<SensorMix, typeof data>(`/v1/site_sensors/mixes/${id}`, data);

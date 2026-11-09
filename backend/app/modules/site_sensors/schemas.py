@@ -356,6 +356,15 @@ class StripResponse(BaseModel):
     bim_element_id: UUID | None = None
 
 
+class ReadingAuditListResponse(BaseModel):
+    """Page of ReadingAuditOut."""
+
+    items: list[ReadingAuditOut]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class AlertListResponse(BaseModel):
     """Page of AlertResponse."""
 

@@ -46,10 +46,10 @@ function ReadingsChart({ rows, upper, lower, label }: { rows: RawReading[]; uppe
     const hi = Math.max(...vs, upper ?? -Infinity, lower ?? -Infinity);
     const x = (t: number) => (t1 === t0 ? W / 2 : ((t - t0) / (t1 - t0)) * (W - 8) + 4);
     const y = (v: number) => H - 6 - ((v - lo) / (hi - lo || 1)) * (H - 12);
-    const device = rows.map((r, i) => ({ r, cx: x(ts[i]), cy: y(r.v) }));
+    const device = rows.map((r, i) => ({ r, cx: x(ts[i] ?? t0), cy: y(r.v) }));
     const line = device
       .filter((p) => p.r.source === 'device')
-      .map((p, i) => `${i ? 'L' : 'M'}${p.cx.toFixed(1)},${p.cy.toFixed(1)}`)
+      .map((p, i) => `${i ? 'L' : 'M'}${Math.round(p.cx * 10) / 10},${Math.round(p.cy * 10) / 10}`)
       .join(' ');
     return { device, line, upperY: upper === null ? null : y(upper), lowerY: lower === null ? null : y(lower) };
   }, [rows, upper, lower]);
@@ -458,8 +458,8 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
               )}
               {showAudit && (
                 <ul className="mt-2 space-y-1 text-xs text-content-secondary">
-                  {(auditQ.data ?? []).length === 0 && <li>{t('site_sensors.readings.audit_empty', { defaultValue: 'No changes recorded yet.' })}</li>}
-                  {(auditQ.data ?? []).map((a) => (
+                  {(auditQ.data?.items ?? []).length === 0 && <li>{t('site_sensors.readings.audit_empty', { defaultValue: 'No changes recorded yet.' })}</li>}
+                  {(auditQ.data?.items ?? []).map((a) => (
                     <li key={a.id} className="tabular-nums">
                       <DateDisplay value={a.created_at} format="datetime" />{' '}
                       {t(`site_sensors.readings.audit_${a.action}`, {

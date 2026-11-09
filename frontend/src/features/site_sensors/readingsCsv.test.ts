@@ -8,14 +8,14 @@ describe('parseReadingsCsv', () => {
   it('reads time,value,note lines and drops a header', () => {
     const rows = parseReadingsCsv('time,value,note\n2026-11-02T08:00Z,42.5,Meter check\n2026-11-02 09:00Z,40\n');
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toMatchObject({ line: 2, error: null });
-    expect(rows[0].reading).toEqual({ recorded_at: '2026-11-02T08:00:00.000Z', value: 42.5, note: 'Meter check' });
-    expect(rows[1].reading?.value).toBe(40);
+    expect(rows[0]!).toMatchObject({ line: 2, error: null });
+    expect(rows[0]!.reading).toEqual({ recorded_at: '2026-11-02T08:00:00.000Z', value: 42.5, note: 'Meter check' });
+    expect(rows[1]!.reading?.value).toBe(40);
   });
 
   it('accepts a semicolon with a decimal comma', () => {
     const [row] = parseReadingsCsv('2026-11-02T08:00Z;12,5');
-    expect(row.reading?.value).toBe(12.5);
+    expect(row!.reading?.value).toBe(12.5);
   });
 
   it('flags bad times, bad values and repeated times', () => {

@@ -64,7 +64,7 @@ from app.modules.site_sensors.schemas import (
     MixListResponse,
     MixResponse,
     MixUpdate,
-    ReadingAuditOut,
+    ReadingAuditListResponse,
     ReadingEdit,
     ReadingsIn,
     StrikeIn,
@@ -226,16 +226,17 @@ async def delete_reading(
     return Response(status_code=204)
 
 
-@router.get("/devices/{device_id}/readings/audit", response_model=list[ReadingAuditOut])
+@router.get("/devices/{device_id}/readings/audit", response_model=ReadingAuditListResponse)
 async def reading_audit(
     device_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
     _perm: None = Depends(RequirePermission("site_sensors.read")),
-) -> list[dict[str, Any]]:
+) -> ReadingAuditListResponse:
     service = SiteSensorsService(session)
     await _device_for_user(service, device_id, user_id)
-    return [{**r, "created_at": r["at"]} for r in await service.reading_audit(device_id)]
+    rows = [{**r, "created_at": r["at"]} for r in await service.reading_audit(device_id)]
+    return ReadingAuditListResponse.model_validate({"items": rows, "total": len(rows), "limit": 200})
 
 
 @router.get("/devices/{device_id}/readings")
