@@ -38,7 +38,6 @@ import {
   type ViewMode,
   ROW_HEIGHT,
   HEADER_HEIGHT,
-  TABLE_WIDTH,
   dateToPx,
   pxToDate,
   daysBetween,
@@ -48,6 +47,7 @@ import {
   getDateRange,
   getTimelineWidth,
 } from './ganttUtils';
+import { GanttTablePanel } from './GanttTablePanel';
 
 export type { GanttActivity };
 
@@ -292,7 +292,6 @@ export function GanttChart({
   // a language that writes "05. Mär. 2026" needs more than that. The dateless
   // width is unchanged, so a single-year programme keeps the table it had.
   const dateColWidth = showYear ? 104 : 70;
-  const tableWidth = TABLE_WIDTH + 2 * (dateColWidth - 70);
 
   const rowIndex = useMemo(() => buildRowIndex(activities), [activities]);
 
@@ -1179,126 +1178,18 @@ export function GanttChart({
       className={`flex overflow-hidden rounded-xl border border-border-light bg-surface-primary ${className}`}
       style={{ height: Math.min(bodyHeight + HEADER_HEIGHT + 2, 800) }}
     >
-      {/* ── Left panel: activity table ──────────────────────────── */}
-      <div className="flex flex-col" style={{ width: tableWidth, minWidth: tableWidth }}>
-        {/* Table header */}
-        <div
-          className="flex shrink-0 border-b border-r border-border-light bg-surface-secondary/60"
-          style={{ height: HEADER_HEIGHT }}
-        >
-          <div className="flex flex-1 items-end px-3 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.activity_name', 'Activity')}
-            </span>
-          </div>
-          <div
-            className="flex shrink-0 items-end justify-end px-2 pb-1.5"
-            style={{ width: dateColWidth }}
-          >
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.start', 'Start')}
-            </span>
-          </div>
-          <div
-            className="flex shrink-0 items-end justify-end px-2 pb-1.5"
-            style={{ width: dateColWidth }}
-          >
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.end', 'End')}
-            </span>
-          </div>
-          <div className="flex w-[36px] items-end justify-end px-1 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* Table body (scroll synced) */}
-        <div
-          ref={tableBodyRef}
-          className="flex-1 overflow-y-auto overflow-x-hidden border-r border-border-light"
-          onScroll={handleTableScroll}
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {activities.map((a, idx) => {
-            const isCritical = showCriticalPath && a.isCritical;
-
-            return (
-              <div
-                key={a.id}
-                className={`flex items-center border-b border-border-light/60 transition-colors hover:bg-surface-secondary/40 ${
-                  idx % 2 === 0 ? 'bg-surface-primary' : 'bg-surface-secondary/20'
-                } ${isCritical ? 'bg-red-50 dark:bg-red-950/20' : ''} ${
-                  onActivityClick ? 'cursor-pointer' : ''
-                }`}
-                style={{ height: ROW_HEIGHT }}
-                onClick={() => onActivityClick?.(a.id)}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-1.5 px-3">
-                  {a.isMilestone && (
-                    <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
-                      <polygon
-                        points="5,0 10,5 5,10 0,5"
-                        fill={isCritical ? '#ef4444' : '#3b82f6'}
-                      />
-                    </svg>
-                  )}
-                  {a.isGroup && (
-                    <span className="shrink-0 text-content-tertiary text-[10px] font-bold">
-                      [G]
-                    </span>
-                  )}
-                  <span
-                    className={`truncate text-xs ${
-                      a.isGroup ? 'font-bold' : 'font-medium'
-                    } text-content-primary`}
-                    title={a.name}
-                  >
-                    {a.name}
-                  </span>
-                  {isCritical && (
-                    <span className="shrink-0 rounded bg-red-500 px-1 py-0.5 text-[8px] font-bold leading-none text-white">
-                      CP
-                    </span>
-                  )}
-                </div>
-                <div
-                  className="shrink-0 px-2 text-right"
-                  data-testid={`gantt-start-${a.id}`}
-                  style={{ width: dateColWidth }}
-                >
-                  <span className="text-2xs tabular-nums text-content-tertiary">
-                    {fmtShort(a.start, showYear)}
-                  </span>
-                </div>
-                <div
-                  className="shrink-0 px-2 text-right"
-                  data-testid={`gantt-end-${a.id}`}
-                  style={{ width: dateColWidth }}
-                >
-                  <span className="text-2xs tabular-nums text-content-tertiary">
-                    {fmtShort(a.end, showYear)}
-                  </span>
-                </div>
-                <div className="w-[36px] shrink-0 px-1 text-right">
-                  <span
-                    className={`text-2xs font-medium tabular-nums ${
-                      a.progress >= 100
-                        ? 'text-green-600'
-                        : a.progress > 0
-                          ? 'text-blue-600'
-                          : 'text-content-tertiary'
-                    }`}
-                  >
-                    {a.progress}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* ── Left panel: activity table, columns the reader picks, splitter ── */}
+      <GanttTablePanel
+        activities={activities}
+        rowHeight={ROW_HEIGHT}
+        headerHeight={HEADER_HEIGHT}
+        showCriticalPath={showCriticalPath}
+        dateColWidth={dateColWidth}
+        formatDate={(iso) => fmtShort(iso, showYear)}
+        onActivityClick={onActivityClick}
+        bodyRef={tableBodyRef}
+        onBodyScroll={handleTableScroll}
+      />
 
       {/* ── Right panel: SVG timeline ───────────────────────────── */}
       <div

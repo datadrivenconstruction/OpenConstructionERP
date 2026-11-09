@@ -256,6 +256,41 @@ def iter_items(items: list[Item]) -> Iterator[tuple[Item, Group | None]]:
             stack.extend((child, item) for child in reversed(item.items))
 
 
+def group_depth(items: list[Item]) -> int:
+    """Levels of sections in the plan: 0 with none, 1 with only top-level ones."""
+    deepest = 0
+    stack: list[tuple[Item, int]] = [(i, 1) for i in items]
+    while stack:
+        item, level = stack.pop()
+        if isinstance(item, Group):
+            deepest = max(deepest, level)
+            stack.extend((child, level + 1) for child in item.items)
+    return deepest
+
+
+def rollup_groups(items: list[Item], depth: int) -> dict[str, str]:
+    """Map every item below the sections of level ``depth`` to that section's key.
+
+    Sections at level ``depth`` (top-level sections are level 1) stand for all
+    the work under them; the layout is not touched, so their dates are those of
+    the full plan. A ``depth`` below 1 rolls nothing up.
+    """
+    rolled: dict[str, str] = {}
+    if depth < 1:
+        return rolled
+    stack: list[tuple[Item, int]] = [(i, 1) for i in reversed(items)]
+    while stack:
+        item, level = stack.pop()
+        if not isinstance(item, Group):
+            continue
+        if level == depth:
+            for inner, _parent in iter_items(item.items):
+                rolled[inner.key] = item.key
+        else:
+            stack.extend((child, level + 1) for child in reversed(item.items))
+    return rolled
+
+
 def _lay_out_group(
     items: list[Item],
     origin: int,

@@ -42,6 +42,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import type { GanttLinkType } from '@/shared/ui/Gantt';
+import { formatResources } from '@/shared/ui/Gantt/ganttColumns';
 import { scheduleErrorDetail, scheduleErrorMessage } from './errors';
 import { useGanttLinking } from './useGanttLinking';
 import { replaceInstalmentSentences } from './confirmations';
@@ -1204,11 +1205,17 @@ export function ScheduleDetail({
   const [generateWorkers, setGenerateWorkers] = useState('');
   const generateWorkersValue = parseWorkers(generateWorkers);
   const generateWorkersInvalid = generateWorkers.trim() !== '' && generateWorkersValue == null;
+  // Levels of sections kept as activities; null keeps every position. It is
+  // chosen on the preview, which answers again when it changes.
+  const [generateDepth, setGenerateDepth] = useState<number | null>(null);
   // A preview answers for one bill, one pair of dates and one number of
   // workers; any change asks again.
   useEffect(() => {
     setGenerationPreview(null);
   }, [selectedBOQId, generateStartDate, generateEndDate, generateWorkers]);
+  useEffect(() => {
+    setGenerateDepth(null);
+  }, [selectedBOQId]);
   const [activityFilter, setActivityFilter] = useState('all');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const toggleCollapse = useCallback((id: string) => {
@@ -1425,7 +1432,7 @@ export function ScheduleDetail({
 
   const generateFromBOQ = useMutation({
     mutationFn: ({ boqId, replace }: { boqId: string; replace: boolean }) =>
-      generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate, replace, workersToWrite),
+      generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate, replace, workersToWrite, generateDepth),
     onSuccess: async () => {
       // The dialog stays open with its button spinning until the new plan is
       // loaded, so the toast lands on the generated schedule and not on the
@@ -1462,8 +1469,8 @@ export function ScheduleDetail({
   // Nothing is written until the reader has seen what would be: the counts,
   // the dates against the window and the positions whose durations are guesses.
   const previewGeneration = useMutation({
-    mutationFn: (boqId: string) =>
-      previewInWindow(schedule.id, boqId, generateStartDate, generateEndDate, generateWorkersValue),
+    mutationFn: ({ boqId, depth }: { boqId: string; depth: number | null }) =>
+      previewInWindow(schedule.id, boqId, generateStartDate, generateEndDate, generateWorkersValue, depth),
     onSuccess: (preview) => setGenerationPreview(preview),
     onError: (error: Error) => generateFailed(error),
   });
@@ -1478,7 +1485,15 @@ export function ScheduleDetail({
         start_date: generateStartDate || undefined,
       });
       try {
-        await generateInWindow(created.id, boqId, generateStartDate, generateEndDate, false, workersToWrite);
+        await generateInWindow(
+          created.id,
+          boqId,
+          generateStartDate,
+          generateEndDate,
+          false,
+          workersToWrite,
+          generateDepth,
+        );
       } catch (error) {
         // Retain the failed attempt in the archive; never silently purge it.
         try {
@@ -1717,7 +1732,18 @@ export function ScheduleDetail({
 
   // Map activities to SVG Gantt format
   const svgGanttActivities = useMemo<SVGGanttActivity[]>(() => {
+    // A predecessor is named by its WBS code, else by its name, whether or not
+    // a filter hides its row.
+    const nameOf = new Map((ganttData?.activities ?? []).map((x) => [x.id, x.wbs_code || x.name]));
     return filteredActivities.map((a) => ({
+      wbs: a.wbs_code || undefined,
+      durationDays: a.duration_days,
+      predecessors: (a.dependencies ?? []).map((d) => ({
+        code: nameOf.get(d.activity_id) ?? d.activity_id,
+        type: d.type,
+        lag: d.lag_days,
+      })),
+      resources: formatResources(a.resources as Array<{ name?: string; count?: number }> | undefined),
       id: a.id,
       name: a.name,
       start: a.start_date,
@@ -1737,7 +1763,7 @@ export function ScheduleDetail({
       ),
       color: a.color || undefined,
     }));
-  }, [filteredActivities, criticalActivityIds]);
+  }, [filteredActivities, criticalActivityIds, ganttData]);
 
   return (
     <div className="animate-fade-in">
@@ -2639,7 +2665,17 @@ export function ScheduleDetail({
               ))}
             </div>
           )}
-          {generationPreview && <GenerationPreviewPanel preview={generationPreview} />}
+          {generationPreview && (
+            <GenerationPreviewPanel
+              preview={generationPreview}
+              depth={generateDepth}
+              onDepthChange={(depth) => {
+                setGenerateDepth(depth);
+                previewGeneration.mutate({ boqId: selectedBOQId, depth });
+              }}
+              depthBusy={previewGeneration.isPending}
+            />
+          )}
           {generationPreview && generationPreview.existing_activity_count > 0 && (
             <div className="space-y-1 text-sm">
               <p className="text-content-primary">
@@ -2686,7 +2722,7 @@ export function ScheduleDetail({
                 disabled={!selectedBOQId || generateWindowInvalid || generateWorkersInvalid}
                 loading={previewGeneration.isPending}
                 onClick={() => {
-                  if (selectedBOQId) previewGeneration.mutate(selectedBOQId);
+                  if (selectedBOQId) previewGeneration.mutate({ boqId: selectedBOQId, depth: generateDepth });
                 }}
               >
                 {t('schedule.generate_preview', { defaultValue: 'Check the plan' })}

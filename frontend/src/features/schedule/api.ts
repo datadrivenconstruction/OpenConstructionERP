@@ -159,6 +159,16 @@ export interface GenerationPreview {
   /** Positions priced as a lump sum: each becomes one bar. */
   lump_sum_positions: number;
   summary_count: number;
+  /** Levels of sections in the bill. */
+  max_depth?: number;
+  /** The depth the plan was rolled up to; 0 when every position is its own activity. */
+  rollup_depth?: number;
+  /** Sections that stand for the work under them. */
+  rolled_up_count?: number;
+  /** Hours one person works a day, which turns labour hours into days. */
+  hours_per_day?: number;
+  /** Where that figure comes from: the project's calendar or the regional default. */
+  hours_source?: 'calendar' | 'region';
   estimated_count: number;
   skipped_count: number;
   note_counts: Record<string, number>;
@@ -209,6 +219,8 @@ export interface GenerateFromBoqOptions {
   replace?: boolean;
   /** Workers per position where the bill gives no crew, 1 to 20; omitted = the fewest that fit. */
   workersPerPosition?: number | null;
+  /** Levels of sections kept as activities; sections below roll up into one each. Omitted = every position. */
+  rollupDepth?: number | null;
 }
 
 function generateBody(boqId: string, options: GenerateFromBoqOptions) {
@@ -218,6 +230,7 @@ function generateBody(boqId: string, options: GenerateFromBoqOptions) {
     ...(options.startDate ? { start_date: options.startDate } : {}),
     ...(options.replace ? { replace: true } : {}),
     ...(options.workersPerPosition != null ? { workers_per_position: options.workersPerPosition } : {}),
+    ...(options.rollupDepth != null ? { rollup_depth: options.rollupDepth } : {}),
   };
 }
 

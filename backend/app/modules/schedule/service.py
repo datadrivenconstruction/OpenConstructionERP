@@ -1521,6 +1521,14 @@ class _BoqGenerationPlan:
     # ``score``, ``reasons``).
     confidence: dict[str, Any]
     low_confidence: list[dict[str, Any]]
+    # Levels of sections in the bill, the depth the plan was rolled up to (0
+    # when every position is its own activity) and the hours one person works
+    # a day, with where that figure came from ("calendar" or "region").
+    max_depth: int = 0
+    rollup_depth: int = 0
+    rolled_up_count: int = 0
+    hours_per_day: float = 8.0
+    hours_source: str = "region"
 
 
 class ScheduleService:
@@ -3671,6 +3679,23 @@ class ScheduleService:
         )
         return {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions}
 
+    async def _project_calendar_hours(self, project_id: uuid.UUID) -> float | None:
+        """Hours one person works a day on the project's default calendar, if it has one."""
+        from app.modules.schedule_advanced.models import Calendar
+
+        rows = await self.session.execute(
+            select(Calendar.work_hours_per_day)
+            .where(Calendar.project_id == project_id)
+            .where(Calendar.is_default.is_(True))
+            .limit(1)
+        )
+        value = rows.scalars().first()
+        try:
+            hours = float(value) if value is not None else 0.0
+        except (TypeError, ValueError):
+            return None
+        return hours if 0 < hours <= 24 else None
+
     async def working_duration(
         self,
         project_id: uuid.UUID,
@@ -3918,6 +3943,7 @@ class ScheduleService:
         start_date: date | None,
         *,
         workers_per_position: int | None = None,
+        rollup_depth: int | None = None,
     ) -> _BoqGenerationPlan:
         """Work out everything a generation would write, and write nothing.
 
@@ -3933,12 +3959,15 @@ class ScheduleService:
         from app.modules.schedule.boq_plan import (
             MAX_CREWS,
             BoqRow,
+            Group,
             Task,
             build_plan_tree,
             fit_plan,
+            group_depth,
             iter_items,
             iter_tasks,
             layout_plan,
+            rollup_groups,
         )
 
         schedule = await self.get_schedule(schedule_id)
@@ -4013,7 +4042,10 @@ class ScheduleService:
         # dates are drawn on here is the week they are recounted on later.
         project_region = await self.resolve_project_region(schedule_project_id)
         cal = get_work_calendar(project_region, await self.resolve_project_subdivision(schedule_project_id))
-        hours_per_day = cal["hours_per_day"]
+        # The project's own calendar says how long a person works a day; the
+        # regional default stands in when the project has none.
+        calendar_hours = await self._project_calendar_hours(schedule_project_id)
+        hours_per_day = calendar_hours if calendar_hours is not None else cal["hours_per_day"]
         plan_calendar, calendar_to_record = await self._generation_calendar(
             schedule, set(cal["work_days"]), cal.get("holiday_country"), week_fallback=cal.get("week_fallback")
         )
@@ -4311,10 +4343,57 @@ class ScheduleService:
                 recorded["norm_days"] = durations[position_id]
             return resources, recorded
 
+        def _score_task(item: Task, ordinal: str) -> dict[str, Any]:
+            """The confidence of one task's duration, recorded for the plan's score."""
+            data = item.row.data
+            effort = efforts.get(item.row.id)
+            planned_days = fit.durations.get(item.row.id, durations[item.row.id])
+            confidence = task_confidence(
+                sources[item.row.id],
+                capped_by_price=bool(basis.get(item.row.id, {}).get("capped_by_price")),
+                unverified=bool(effort and effort.unverified),
+                compressed_pct=(
+                    fit.compressed_pct
+                    if item.row.id not in layout.spanning and planned_days < durations[item.row.id]
+                    else None
+                ),
+                lump_sum=item.row.lump_sum,
+            )
+            scored.append((confidence["score"], max(float(data["total"]), 0.0)))
+            if confidence["band"] == "low":
+                low_confidence.append(
+                    {
+                        "position_id": item.row.id,
+                        "ordinal": ordinal,
+                        "description": data["description"][:160],
+                        "score": confidence["score"],
+                        "reasons": confidence["reasons"],
+                        "total": str(data["money"]) if data["money"] is not None else None,
+                    }
+                )
+            return confidence
+
+        # Sections below the chosen depth are rolled up into the section at
+        # that depth. The layout above is the full plan's, so the roll-up
+        # keeps its dates and the overall duration does not change.
+        max_depth = group_depth(tree.roots)
+        applied_depth = rollup_depth if rollup_depth is not None and 1 <= rollup_depth < max_depth else 0
+        rolled = rollup_groups(tree.roots, applied_depth)
+        rolled_roots = set(rolled.values())
+        rolled_up_count = 0
+
         sort_counter = 0
         for item, parent in iter_items(tree.roots):
             slot = layout.slots[item.key]
             data = item.row.data
+            collapsed = rolled.get(item.key)
+            if collapsed is not None:
+                # Work under a rolled-up section has no bar of its own, and
+                # whatever points at it points at the section.
+                ids[item.key] = ids[collapsed]
+                if isinstance(item, Task):
+                    _score_task(item, data["ordinal"])
+                continue
             activity_id = uuid.uuid4()
             ids[item.key] = activity_id
             parent_key = parent.key if parent is not None else None
@@ -4341,7 +4420,79 @@ class ScheduleService:
                 deps.append(_link(pred_key, activity_id, "SS", lag))
 
             sort_counter += 1
-            if isinstance(item, Task):
+            if isinstance(item, Group) and item.key in rolled_roots:
+                rolled_up_count += 1
+                members = list(iter_tasks(item.items))
+                labour_hours = machine_hours = 0.0
+                crew = machine_sets = 0
+                for member in members:
+                    loading, _recorded = _task_loading(member.row.id)
+                    for entry in loading:
+                        if entry["type"] == "labor":
+                            labour_hours += float(entry["hours"])
+                            crew = max(crew, int(entry["count"]))
+                        else:
+                            machine_hours += float(entry["hours"])
+                            machine_sets = max(machine_sets, int(entry["count"]))
+                rolled_resources: list[dict[str, Any]] = []
+                rolled_meta: dict[str, Any] = {
+                    "source": "boq_generation",
+                    "boq_id": str(boq_id),
+                    "rolled_up": True,
+                    "rolled_up_positions": len(members),
+                    "duration_method": "rolled_up",
+                }
+                if labour_hours > 0 and crew > 0:
+                    rolled_resources.append(
+                        {
+                            "name": labour_name,
+                            "type": "labor",
+                            "count": crew,
+                            "hours": round(labour_hours, 1),
+                            "unit": "h",
+                            "source": "boq_generation",
+                        }
+                    )
+                    rolled_meta["labor_hours_total"] = round(labour_hours, 1)
+                if machine_hours > 0 and machine_sets > 0:
+                    rolled_resources.append(
+                        {
+                            "name": machine_name,
+                            "type": "equipment",
+                            "count": machine_sets,
+                            "hours": round(machine_hours, 1),
+                            "unit": "h",
+                            "source": "boq_generation",
+                        }
+                    )
+                    rolled_meta["machine_hours_total"] = round(machine_hours, 1)
+                member_money = [m.row.data["money"] for m in members if m.row.data["money"] is not None]
+                label = data["description"] or _generated_text("section_label", ordinal=ordinal)
+                activities.append(
+                    Activity(
+                        id=activity_id,
+                        schedule_id=schedule_id,
+                        parent_id=ids[parent_key] if parent_key else None,
+                        name=label[:255],
+                        description=_generated_text("section_description", ordinal=ordinal),
+                        wbs_code=wbs,
+                        start_date=_start(slot.start),
+                        end_date=_end(slot.finish),
+                        duration_days=max(1, slot.finish - slot.start),
+                        progress_pct="0",
+                        status="not_started",
+                        activity_type="task",
+                        dependencies=deps,
+                        resources=rolled_resources,
+                        boq_position_ids=[m.row.id for m in members],
+                        color="#0071e3",
+                        sort_order=sort_counter,
+                        metadata_=rolled_meta,
+                        cost_planned=sum(member_money, Decimal(0)) if member_money else None,
+                    )
+                )
+                created.append({"id": activity_id, "activity_type": "task", "end_date": _end(slot.finish)})
+            elif isinstance(item, Task):
                 quantity = data["quantity"]
                 unit = data["unit"]
                 meta = data["metadata"]
@@ -4364,32 +4515,8 @@ class ScheduleService:
                     task_meta["parallel_gangs"] = gangs[item.row.id]
                 task_resources, recorded = _task_loading(item.row.id)
                 task_meta.update(recorded)
-                effort = efforts.get(item.row.id)
-                planned_days = fit.durations.get(item.row.id, durations[item.row.id])
-                confidence = task_confidence(
-                    sources[item.row.id],
-                    capped_by_price=bool(basis.get(item.row.id, {}).get("capped_by_price")),
-                    unverified=bool(effort and effort.unverified),
-                    compressed_pct=(
-                        fit.compressed_pct
-                        if item.row.id not in layout.spanning and planned_days < durations[item.row.id]
-                        else None
-                    ),
-                    lump_sum=item.row.lump_sum,
-                )
+                confidence = _score_task(item, ordinal)
                 task_meta["confidence"] = confidence
-                scored.append((confidence["score"], max(float(data["total"]), 0.0)))
-                if confidence["band"] == "low":
-                    low_confidence.append(
-                        {
-                            "position_id": item.row.id,
-                            "ordinal": ordinal,
-                            "description": data["description"][:160],
-                            "score": confidence["score"],
-                            "reasons": confidence["reasons"],
-                            "total": str(data["money"]) if data["money"] is not None else None,
-                        }
-                    )
                 activities.append(
                     Activity(
                         id=activity_id,
@@ -4481,7 +4608,14 @@ class ScheduleService:
         followed = {slot.predecessor for slot in layout.slots.values() if slot.predecessor is not None}
         terminal = [task for task in tasks if task.key not in followed]
         end_ms_id = uuid.uuid4()
-        end_deps = [_link(task.key, end_ms_id, "FS", 0) for task in terminal]
+        end_deps = []
+        linked_ends: set[uuid.UUID] = set()
+        for task in terminal:
+            # Work rolled into a section is waited for as that section.
+            if ids[task.key] in linked_ends:
+                continue
+            linked_ends.add(ids[task.key])
+            end_deps.append(_link(task.key, end_ms_id, "FS", 0))
         activities.append(
             Activity(
                 id=end_ms_id,
@@ -4613,6 +4747,11 @@ class ScheduleService:
                 low_confidence,
                 key=lambda row: (row["score"], -float(row["total"] or 0)),
             ),
+            max_depth=max_depth,
+            rollup_depth=applied_depth,
+            rolled_up_count=rolled_up_count,
+            hours_per_day=hours_per_day,
+            hours_source="calendar" if calendar_hours is not None else "region",
         )
 
     async def _instalment_relinks(
@@ -4800,6 +4939,7 @@ class ScheduleService:
         *,
         start_date: date | None = None,
         workers_per_position: int | None = None,
+        rollup_depth: int | None = None,
     ) -> dict[str, Any]:
         """What :meth:`generate_from_boq` would write, for a person to confirm.
 
@@ -4810,7 +4950,12 @@ class ScheduleService:
         is left out, with the numbers behind the estimate.
         """
         plan = await self._plan_from_boq(
-            schedule_id, boq_id, total_project_days, start_date, workers_per_position=workers_per_position
+            schedule_id,
+            boq_id,
+            total_project_days,
+            start_date,
+            workers_per_position=workers_per_position,
+            rollup_depth=rollup_depth,
         )
         existing = (await self.activity_repo.list_for_schedule(schedule_id, limit=1))[1]
         started = await self.activity_repo.count_started(schedule_id) if existing else 0
@@ -4826,6 +4971,11 @@ class ScheduleService:
             "positions_scheduled": plan.positions_scheduled,
             "lump_sum_positions": plan.lump_sum_positions,
             "summary_count": sum(1 for a in plan.activities if a.activity_type == "summary"),
+            "max_depth": plan.max_depth,
+            "rollup_depth": plan.rollup_depth,
+            "rolled_up_count": plan.rolled_up_count,
+            "hours_per_day": plan.hours_per_day,
+            "hours_source": plan.hours_source,
             "estimated_count": estimated,
             "skipped_count": plan.rows_skipped,
             "note_counts": plan.note_counts,
@@ -4863,6 +5013,7 @@ class ScheduleService:
         replace: bool = False,
         start_date: date | None = None,
         workers_per_position: int | None = None,
+        rollup_depth: int | None = None,
     ) -> list[dict]:
         """Generate a schedule from a BOQ, at every depth of the bill.
 
@@ -4911,7 +5062,12 @@ class ScheduleService:
         # other then finds the activities and answers 409, or replaces them.
         await self.session.execute(select(Schedule.id).where(Schedule.id == schedule_id).with_for_update())
         plan = await self._plan_from_boq(
-            schedule_id, boq_id, total_project_days, start_date, workers_per_position=workers_per_position
+            schedule_id,
+            boq_id,
+            total_project_days,
+            start_date,
+            workers_per_position=workers_per_position,
+            rollup_depth=rollup_depth,
         )
 
         relinks: list[tuple[uuid.UUID, uuid.UUID]] = []
