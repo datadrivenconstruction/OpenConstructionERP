@@ -243,6 +243,8 @@ function SearchableSelect<T extends string>({
       <button
         type="button"
         onClick={() => { setOpen(!open); setSearch(''); }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={clsx(
           'flex h-9 w-full items-center justify-between rounded-lg border px-3',
           'text-sm text-content-primary bg-surface-primary',
