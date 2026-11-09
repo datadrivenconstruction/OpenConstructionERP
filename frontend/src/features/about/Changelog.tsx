@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.3.1',
+    date: '2026-11-09',
+    tag: 'NEW',
+    summary:
+      'Move schedule activities with their subtree, keep a dragged Gantt bar where you put it, pick the level of detail when building a plan from a bill, and choose the Gantt table columns. Dropdowns in cards open above the next card.',
+  },
+  {
     version: '19.3.0',
     date: '2026-11-08',
     tag: 'NEW',

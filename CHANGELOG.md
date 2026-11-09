@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.3.1] - 2026-11-09
+
+### Added
+
+- Schedule: move an activity with everything under it up, down or into another section, from the table or with Alt+Up and Alt+Down.
+- Schedule: a Gantt bar dragged to a later date keeps that start when the plan is recalculated, shown as a start constraint you can clear.
+- Schedule from a bill of quantities: choose the level of detail, and deeper sections roll up into one activity each without changing the total duration.
+- Gantt table: pick the columns, including predecessors, resize them and drag the divider between table and chart.
+
+### Fixed
+
+- Dropdowns inside a card, such as the currency list, no longer open behind the next card.
+
 ## [19.3.0] - 2026-11-08
 
 ### Added
