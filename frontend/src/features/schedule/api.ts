@@ -232,6 +232,11 @@ export interface BoqPositionLite {
   quantity: string | number;
 }
 
+export type ActivityMoveRequest =
+  | { target_id: string; position: 'before' | 'after' }
+  | { parent_id: string }
+  | { to_top_level: true };
+
 export interface Activity {
   id: string;
   schedule_id: string;
@@ -1112,6 +1117,12 @@ export const scheduleApi = {
     ),
   updateActivity: (activityId: string, data: Partial<Activity>) =>
     apiPatch<Activity>(`/v1/schedule/activities/${activityId}`, data),
+  /**
+   * Move an activity, with its subtree, beside a sibling or into a section.
+   * Exactly one destination: `target_id` with `position`, `parent_id`, or `to_top_level`.
+   */
+  moveActivity: (activityId: string, body: ActivityMoveRequest) =>
+    apiPost<Activity>(`/v1/schedule/activities/${activityId}/move/`, body),
   /** `cascade` deletes a summary with every activity under it; without it the children move up one level. */
   deleteActivity: (activityId: string, cascade = false) =>
     apiDelete(`/v1/schedule/activities/${activityId}${cascade ? '?cascade=true' : ''}`),

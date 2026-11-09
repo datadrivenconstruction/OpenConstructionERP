@@ -60,6 +60,7 @@ from app.modules.schedule.schemas import (
     ActivityBimLinkRequest,
     ActivityCreate,
     ActivityListResponse,
+    ActivityMove,
     ActivityResponse,
     ActivityUpdate,
     BaselineCreate,
@@ -823,6 +824,31 @@ async def update_activity(
     existing = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
     activity = await service.update_activity(activity_id, data, actor_id=str(_user_id))
+    return _activity_to_response(activity)
+
+
+@router.post(
+    "/activities/{activity_id}/move/",
+    response_model=ActivityResponse,
+    summary="Move activity",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def move_activity(
+    activity_id: uuid.UUID,
+    data: ActivityMove,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Move an activity with its subtree beside a sibling or into another section.
+
+    WBS codes and the display order follow the move. A section cannot be moved
+    under itself or one of its own descendants.
+    """
+    existing = await service.get_activity(activity_id)
+    await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
+    activity = await service.move_activity(activity_id, data)
     return _activity_to_response(activity)
 
 
