@@ -16,6 +16,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Compass } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
@@ -92,10 +93,10 @@ export function DesignManagementPage() {
           { label: ui(t, 'design.ui.title') },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('design.ui.title', { defaultValue: UI['design.ui.title'] })}</h1>
-        <p className="text-sm text-content-secondary">{ui(t, 'design.ui.subtitle')}</p>
-      </div>
+      <PageHeader
+        srTitle={t('design.ui.title', { defaultValue: UI['design.ui.title'] })}
+        subtitle={ui(t, 'design.ui.subtitle')}
+      />
       <CollapsibleSection
         storageKey="design_management.how"
         icon={<Compass className="h-4 w-4" />}
@@ -114,7 +115,7 @@ export function DesignManagementPage() {
 
   if (setupQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={6} />
       </div>
@@ -122,7 +123,7 @@ export function DesignManagementPage() {
   }
   if (setupQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState title={ui(t, 'design.ui.load_failed')} hint={getErrorMessage(setupQ.error)} onRetry={() => setupQ.refetch()} />
       </div>
@@ -132,7 +133,7 @@ export function DesignManagementPage() {
   const setup = setupQ.data;
   if (!setup) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="design-management-page">
+      <div className="space-y-5 animate-fade-in" data-testid="design-management-page">
         {header}
         <DesignAccessContext.Provider value={access}>
           <SetupStart projectId={projectId} labels={labels} onDone={invalidate} />
@@ -177,7 +178,7 @@ export function DesignManagementPage() {
 
   return (
     <DesignAccessContext.Provider value={access}>
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="design-management-page">
+      <div className="space-y-5 animate-fade-in" data-testid="design-management-page">
         {header}
         <TabBar<Tab>
           ariaLabel={ui(t, 'design.ui.tabs')}

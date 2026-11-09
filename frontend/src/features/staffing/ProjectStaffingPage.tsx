@@ -16,6 +16,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CalendarClock, ClipboardList, Compass, FolderLock, Network, ShieldCheck, Timer, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -87,14 +88,12 @@ export function ProjectStaffingPage() {
             : [{ label: title }]),
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('staffing.title', { defaultValue: 'Staffing' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('staffing.subtitle', {
+      <PageHeader
+        srTitle={t('staffing.title', { defaultValue: 'Staffing' })}
+        subtitle={t('staffing.subtitle', {
             defaultValue: 'Which roles the project needs in each phase, who fills them, and whether each person is cleared to start.',
           })}
-        </p>
-      </div>
+      />
       {!fileId && (
         <CollapsibleSection
           storageKey="staffing.how"
@@ -123,7 +122,7 @@ export function ProjectStaffingPage() {
 
   if (planQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -131,7 +130,7 @@ export function ProjectStaffingPage() {
   }
   if (planQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         {failed(planQ.error, () => planQ.refetch())}
       </div>
@@ -141,7 +140,7 @@ export function ProjectStaffingPage() {
   const plan = planQ.data;
   if (!plan) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-staffing-page">
+      <div className="space-y-5 animate-fade-in" data-testid="project-staffing-page">
         {header}
         <EmptyState
           icon={<Users size={28} />}
@@ -222,7 +221,7 @@ export function ProjectStaffingPage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-staffing-page">
+    <div className="space-y-5 animate-fade-in" data-testid="project-staffing-page">
       {header}
       {!fileId && (
         <TabBar<Tab>

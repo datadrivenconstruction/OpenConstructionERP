@@ -108,6 +108,7 @@ import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from "@/shared/lib/honeycomb";
 import { CompanyArt } from "./CompanyArt";
 import { dealCaseFaces, type CaseFace } from "./caseFaces";
 import { CaseFacePhoto } from "./CaseFacePhoto";
+import { PageHeader } from '@/shared/ui/PageHeader';
 import {
   STAGE_META,
   STAGE_BY_ID,
@@ -863,85 +864,51 @@ function CasesList() {
   }, [visible, allPlaybooks, navigate]);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-border-light bg-gradient-to-br from-oe-blue/[0.08] via-oe-blue/[0.03] to-transparent p-5">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-oe-blue/10 blur-3xl"
-        />
-        {/* Wraps below `sm`: the action column is `w-full` there, and inside
-            a row that cannot wrap a full-width column leaves the title and the
-            subtitle a sliver, one word per line, with the buttons drawn past
-            the right edge of a phone. */}
-        <div className="relative flex flex-wrap items-start gap-3 sm:flex-nowrap">
-          <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue/15 text-oe-blue ring-1 ring-inset ring-oe-blue/25">
-            <Route size={22} strokeWidth={1.9} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight text-content-primary">
-                {t("cases.page_title", { defaultValue: "Use cases" })}
-              </h1>
-              {allPlaybooks.length > 0 && (
-                <span className="inline-flex items-center rounded-full bg-oe-blue/10 px-2 py-0.5 text-2xs font-semibold text-oe-blue ring-1 ring-inset ring-oe-blue/20">
-                  {t("cases.header.count", {
-                    defaultValue: "{{count}} guided cases",
-                    count: allPlaybooks.length,
-                  })}
-                </span>
-              )}
-            </div>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-content-secondary">
-              {t("cases.page_subtitle", {
-                defaultValue:
-                  "Guided, end-to-end playbooks that walk you through several modules in order. Pick a case, optionally choose a sample project to learn on, and follow each step.",
-              })}
-            </p>
-          </div>
-          {/* The catalogue is not only ours: a user writes their own case the
-              way their firm actually works, and it then lives in this same hub
-              beside the shipped ones. That route used to be a small button in
-              the corner, which reads as a footnote rather than as half of what
-              this page is for.
-
-              Three actions, because they are one decision asked three ways:
-              write one starting from ours, write one from nothing, or just
-              show me a case. The third exists because a hub of 144 equally
-              good things is easy to bounce off. */}
-          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto">
+      <PageHeader
+        srTitle={t("cases.page_title", { defaultValue: "Use cases" })}
+        subtitle={t("cases.page_subtitle", {
+          defaultValue:
+            "Guided, end-to-end playbooks that walk you through several modules in order. Pick a case, optionally choose a sample project to learn on, and follow each step.",
+        })}
+        actions={
+          <>
+            {allPlaybooks.length > 0 && (
+              <span className="inline-flex items-center rounded-full bg-oe-blue/10 px-2 py-0.5 text-2xs font-semibold text-oe-blue ring-1 ring-inset ring-oe-blue/20">
+                {t("cases.header.count", {
+                  defaultValue: "{{count}} guided cases",
+                  count: allPlaybooks.length,
+                })}
+              </span>
+            )}
             <Button
               variant="primary"
-              size="lg"
-              icon={<PenLine size={16} />}
+              size="sm"
+              icon={<PenLine size={14} />}
               onClick={() => navigate("/cases/new")}
-              className="w-full justify-center sm:w-auto"
             >
               {t("cases.write_own", { defaultValue: "Write your own case" })}
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<FilePlus2 size={13} />}
-                onClick={() => navigate("/cases/new?blank=1")}
-                className="flex-1 justify-center"
-              >
-                {t("cases.write_blank", { defaultValue: "From blank" })}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Shuffle size={13} />}
-                onClick={openRandomCase}
-                className="flex-1 justify-center"
-              >
-                {t("cases.show_me_one", { defaultValue: "Show me one" })}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<FilePlus2 size={13} />}
+              onClick={() => navigate("/cases/new?blank=1")}
+            >
+              {t("cases.write_blank", { defaultValue: "From blank" })}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Shuffle size={13} />}
+              onClick={openRandomCase}
+            >
+              {t("cases.show_me_one", { defaultValue: "Show me one" })}
+            </Button>
+          </>
+        }
+      />
 
       {/* The article on why the cases exist, moved here from the sidebar. */}
       <FeaturedArticle />

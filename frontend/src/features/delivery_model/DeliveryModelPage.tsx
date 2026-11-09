@@ -15,6 +15,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Boxes, Compass, FileSignature, FileText, Handshake, PackageOpen, Scale, ShieldAlert } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -113,14 +114,12 @@ export function DeliveryModelPage() {
           { label: t('delivery_model.ui.title', { defaultValue: 'Delivery model' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('delivery_model.ui.title', { defaultValue: 'Delivery model' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('delivery_model.ui.subtitle', {
+      <PageHeader
+        srTitle={t('delivery_model.ui.title', { defaultValue: 'Delivery model' })}
+        subtitle={t('delivery_model.ui.subtitle', {
             defaultValue: 'How the project is contracted: who designs, who builds, who carries which risk and how the work is split into packages.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="delivery_model.how"
         icon={<Compass className="h-4 w-4" />}
@@ -139,7 +138,7 @@ export function DeliveryModelPage() {
 
   if (modelQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -147,7 +146,7 @@ export function DeliveryModelPage() {
   }
   if (modelQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('delivery_model.ui.load_failed', { defaultValue: 'The delivery model could not be loaded' })}
@@ -161,7 +160,7 @@ export function DeliveryModelPage() {
   const model = modelQ.data;
   if (!model) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="delivery-model-page">
+      <div className="space-y-5 animate-fade-in" data-testid="delivery-model-page">
         {header}
         <EmptyState
           icon={<Handshake size={28} />}
@@ -281,7 +280,7 @@ export function DeliveryModelPage() {
   const catalogueSummaryName = catalogue ? catalogueText(labels, { key: catalogue.name_key, texts: catalogue.labels, code: catalogue.id }) : '';
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="delivery-model-page">
+    <div className="space-y-5 animate-fade-in" data-testid="delivery-model-page">
       {header}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-surface-elevated shadow-sm px-4 py-3" data-testid="model-strip">
         <ToneBadge tone={MODEL_TONE[model.status]} testId="model-status">

@@ -16,6 +16,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Boxes, Calendar, ClipboardList, Compass, FileText, MessageSquare, Scale, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -99,16 +100,12 @@ export function ProcurementConceptPage() {
           { label: t('procurement_concept.nav.title', { defaultValue: 'Procurement concept' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">
-          {t('procurement_concept.nav.title', { defaultValue: 'Procurement concept' })}
-        </h1>
-        <p className="text-sm text-content-secondary">
-          {t('procurement_concept.ui.page.subtitle', {
+      <PageHeader
+        srTitle={t('procurement_concept.nav.title', { defaultValue: 'Procurement concept' })}
+        subtitle={t('procurement_concept.ui.page.subtitle', {
             defaultValue: 'How each contract package is awarded: its value, the procedure, the bidders and the dates.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="procurement_concept.how"
         icon={<Compass className="h-4 w-4" />}
@@ -129,7 +126,7 @@ export function ProcurementConceptPage() {
 
   if (conceptQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={6} />
       </div>
@@ -137,7 +134,7 @@ export function ProcurementConceptPage() {
   }
   if (conceptQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('procurement_concept.ui.page.load_failed', { defaultValue: 'The procurement concept could not be loaded' })}
@@ -164,7 +161,7 @@ export function ProcurementConceptPage() {
 
   if (!concept) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="procurement-concept-page">
+      <div className="space-y-5 animate-fade-in" data-testid="procurement-concept-page">
         {header}
         <EmptyState
           icon={<ClipboardList size={28} />}
@@ -272,7 +269,7 @@ export function ProcurementConceptPage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="procurement-concept-page">
+    <div className="space-y-5 animate-fade-in" data-testid="procurement-concept-page">
       {header}
       <div className="flex flex-wrap items-center gap-3 text-sm" data-testid="concept-summary">
         <ToneBadge tone={CONCEPT_TONE[concept.state]} testId="concept-state-badge">

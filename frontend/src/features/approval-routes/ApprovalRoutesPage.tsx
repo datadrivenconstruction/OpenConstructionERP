@@ -50,6 +50,7 @@ import { RouteEditor } from './RouteEditor';
 import { RouteSimulateDrawer } from './RouteSimulateDrawer';
 import type { ApprovalRoute, InstanceStatus } from './types';
 import { compareNames } from '@/shared/lib/collator';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type TabId = 'routes' | 'instances' | 'analytics';
 
@@ -138,7 +139,7 @@ export function ApprovalRoutesPage() {
   }, [routesQuery.data]);
 
   return (
-    <div className="animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
@@ -151,20 +152,14 @@ export function ApprovalRoutesPage() {
       />
       <BetaBanner moduleKey="approval-routes" className="mt-3" />
 
-      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-lg font-bold text-content-primary flex items-center gap-2">
-            <Workflow size={20} className="text-oe-blue" />
-            {t('approvalRoutes.title', { defaultValue: 'Approval routes' })}
-          </h1>
-          <p className="mt-1 text-xs text-content-tertiary max-w-3xl">
-            {t('approvalRoutes.page_intro', {
-              defaultValue:
-                'Reusable approval workflows applied to markups, submittals, RFIs and other records. Each step pins an approver (role or user) and a decision mode.',
-            })}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <PageHeader
+        srTitle={t('approvalRoutes.title', { defaultValue: 'Approval routes' })}
+        subtitle={t('approvalRoutes.page_intro', {
+          defaultValue:
+            'Reusable approval workflows applied to markups, submittals, RFIs and other records. Each step pins an approver (role or user) and a decision mode.',
+        })}
+        actions={
+          <>
           <ModuleGuideButton
             content={approvalRoutesGuide}
             onCta={() => {
@@ -192,8 +187,9 @@ export function ApprovalRoutesPage() {
           >
             {t('approvalRoutes.newRoute', { defaultValue: 'New route' })}
           </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div
         className="mt-3 inline-flex items-center rounded-lg border border-border-light bg-surface-primary p-0.5"

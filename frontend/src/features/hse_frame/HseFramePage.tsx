@@ -14,6 +14,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { ClipboardList, HardHat, ListChecks, ShieldAlert, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
@@ -76,23 +77,19 @@ export function HseFramePage() {
           { label: t('hseFrame.title', { defaultValue: 'Health, safety and environment' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">
-          {t('hseFrame.title', { defaultValue: 'Health, safety and environment' })}
-        </h1>
-        <p className="text-sm text-content-secondary">
-          {t('hseFrame.subtitle', {
+      <PageHeader
+        srTitle={t('hseFrame.title', { defaultValue: 'Health, safety and environment' })}
+        subtitle={t('hseFrame.subtitle', {
             defaultValue:
               'The requirements, clearances, permit conditions, responsibilities and plans that frame safe and environmentally sound construction.',
           })}
-        </p>
-      </div>
+      />
     </>
   );
 
   if (frameQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -100,7 +97,7 @@ export function HseFramePage() {
   }
   if (frameQ.isError || !frameQ.data) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('hseFrame.load_failed', { defaultValue: 'The HSE frame could not be loaded' })}
@@ -113,7 +110,7 @@ export function HseFramePage() {
   const frame = frameQ.data.frame;
   if (!frame) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="hse-frame-missing">
+      <div className="space-y-5 animate-fade-in" data-testid="hse-frame-missing">
         {header}
         {write.refusal && <p className="text-sm text-semantic-error">{write.refusal}</p>}
         <EmptyState
@@ -138,7 +135,7 @@ export function HseFramePage() {
   const catalogue = catalogueQ.data;
   if (!catalogue) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -149,7 +146,7 @@ export function HseFramePage() {
   const open = frame.state === 'draft' || frame.state === 'revising';
   const failed = (checksQ.data ?? []).filter((c) => !c.passed);
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="hse-frame-page">
+    <div className="space-y-5 animate-fade-in" data-testid="hse-frame-page">
       {header}
       {write.refusal && (
         <p role="alert" className="rounded-lg border border-semantic-error/40 p-3 text-sm text-content-primary" data-testid="refusal">

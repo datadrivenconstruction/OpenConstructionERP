@@ -17,6 +17,7 @@ import { AlertTriangle, BookOpen, Download, FolderTree, Star } from 'lucide-reac
 
 import { Badge } from '@/shared/ui/Badge';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -185,20 +186,18 @@ export function ProjectHandbookPage() {
           { label: t('projectHandbook.title', { defaultValue: 'Project handbook' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('projectHandbook.title', { defaultValue: 'Project handbook' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('projectHandbook.subtitle', {
+      <PageHeader
+        srTitle={t('projectHandbook.title', { defaultValue: 'Project handbook' })}
+        subtitle={t('projectHandbook.subtitle', {
             defaultValue: 'How the project is run: principles, organisation, communication rules and the data room, with an owner and an approval for every chapter.',
           })}
-        </p>
-      </div>
+      />
     </>
   );
 
   if (handbookQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-handbook-page">
+      <div className="space-y-5 animate-fade-in" data-testid="project-handbook-page">
         {header}
         <SkeletonTable rows={6} columns={4} />
       </div>
@@ -206,7 +205,7 @@ export function ProjectHandbookPage() {
   }
   if (handbookQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-handbook-page">
+      <div className="space-y-5 animate-fade-in" data-testid="project-handbook-page">
         {header}
         <ErrorState
           title={t('projectHandbook.load_failed', { defaultValue: 'The project handbook could not be loaded' })}
@@ -218,7 +217,7 @@ export function ProjectHandbookPage() {
   }
   if (!handbook) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-handbook-page">
+      <div className="space-y-5 animate-fade-in" data-testid="project-handbook-page">
         {header}
         <EmptyState
           icon={<BookOpen size={28} />}
@@ -243,7 +242,7 @@ export function ProjectHandbookPage() {
   };
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="project-handbook-page">
+    <div className="space-y-5 animate-fade-in" data-testid="project-handbook-page">
       {header}
       <Head handbook={handbook} findings={findingsQ.data ?? []} />
       <TabBar<Tab>

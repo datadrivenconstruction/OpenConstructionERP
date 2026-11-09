@@ -16,6 +16,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { CalendarClock, Compass, Grid3x3, Handshake, Network, Settings2, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -105,14 +106,12 @@ export function StakeholdersPage() {
           { label: t('stakeholders.ui.title', { defaultValue: 'Stakeholders' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('stakeholders.ui.title', { defaultValue: 'Stakeholders' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('stakeholders.ui.subtitle', {
+      <PageHeader
+        srTitle={t('stakeholders.ui.title', { defaultValue: 'Stakeholders' })}
+        subtitle={t('stakeholders.ui.subtitle', {
             defaultValue: 'Who the project affects, how you keep them engaged, what you promised them, and who decides.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="stakeholders.how"
         icon={<Compass className="h-4 w-4" />}
@@ -130,7 +129,7 @@ export function StakeholdersPage() {
   );
 
   const frame = (body: ReactNode) => (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="stakeholders-page">
+    <div className="space-y-5 animate-fade-in" data-testid="stakeholders-page">
       {header}
       {body}
     </div>

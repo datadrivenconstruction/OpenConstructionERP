@@ -18,7 +18,6 @@ import clsx from 'clsx';
 import {
   // chrome
   Activity,
-  GraduationCap,
   Search,
   ChevronDown,
   ChevronUp,
@@ -81,7 +80,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import { ModuleGuide, type ModuleGuideContent } from '@/shared/ui';
+import { ModuleGuide, PageHeader, type ModuleGuideContent } from '@/shared/ui';
 import { StepScene } from '@/features/cases/StepScene';
 import {
   MODULE_EXPLANATIONS,
@@ -419,30 +418,19 @@ export function HowItWorksPage() {
   const totalCount = MODULE_EXPLANATIONS.length;
 
   return (
-    <div className="w-full px-4 py-6 sm:px-6 lg:px-8" data-testid="how-it-works-page">
+    <div className="space-y-5 animate-fade-in" data-testid="how-it-works-page">
       <DemoQuickStart />
 
-      {/* Header. */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-oe-blue">
-          <GraduationCap size={18} strokeWidth={2} />
-          <span className="text-2xs font-semibold uppercase tracking-wide">
-            {t('howto.eyebrow', { defaultValue: 'Help center' })}
-          </span>
-        </div>
-        <h1 className="mt-1 text-2xl font-bold text-content-primary">
-          {t('howto.page_title', { defaultValue: 'How it works' })}
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-content-secondary">
-          {t('howto.page_subtitle', {
-            defaultValue:
-              'A plain-language guide to every module: what it does, how to use it step by step, and where to find it. Search below, expand any card to learn more, or use "Show me where" to have the app point it out for you.',
-          })}
-        </p>
-      </div>
+      <PageHeader
+        srTitle={t('howto.page_title', { defaultValue: 'How it works' })}
+        subtitle={t('howto.page_subtitle', {
+          defaultValue:
+            'A plain-language guide to every module: what it does, how to use it step by step, and where to find it. Search below, expand any card to learn more, or use "Show me where" to have the app point it out for you.',
+        })}
+      />
 
       {/* Search + section order control. */}
-      <div className="sticky top-0 z-10 -mx-4 mb-6 bg-surface/80 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 z-10 -mx-4 bg-surface/80 px-4 py-2 backdrop-blur sm:-mx-7 sm:px-7">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search

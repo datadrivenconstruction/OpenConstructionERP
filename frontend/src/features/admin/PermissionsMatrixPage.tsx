@@ -63,6 +63,7 @@ import {
   type MatrixRole,
   type PermissionsMatrix,
 } from './api';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 /** Lowercase-and-trim normaliser so the search filter is forgiving. */
 function normalise(s: string): string {
@@ -1185,36 +1186,23 @@ export function PermissionsMatrixPage() {
         className="pointer-events-none absolute -bottom-40 -right-40 -z-10 h-96 w-96 rounded-full bg-gradient-radial from-emerald-400/15 to-transparent blur-3xl"
       />
 
-      <div className="space-y-5 px-4 py-5 lg:px-6 lg:py-6">
+      <div className="space-y-5">
         {/* Hero header — glass pill */}
-        <header className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 px-5 py-4 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04] dark:border-white/5 dark:bg-slate-900/40">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-16 right-1/4 h-40 w-40 rounded-full bg-gradient-radial from-sky-400/20 to-transparent blur-3xl"
-          />
-          <div className="relative flex flex-wrap items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25">
-                <ShieldCheck size={22} />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold tracking-tight text-content-primary">
-                  {t('admin.permissions.title', { defaultValue: 'Permissions Matrix' })}
-                </h1>
-                <p className="mt-0.5 text-sm text-content-secondary max-w-3xl">
-                  {canEdit
-                    ? t('admin.permissions.subtitle_edit', {
-                        defaultValue:
-                          'Click any cell to set the minimum role for that permission. Changes apply immediately and are audit-logged.',
-                      })
-                    : t('admin.permissions.subtitle', {
-                        defaultValue:
-                          'Every permission registered by every module, and which roles can use it. Admin always passes - locked cells indicate admin-only by design.',
-                      })}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
+        <PageHeader
+          srTitle={t('admin.permissions.title', { defaultValue: 'Permissions Matrix' })}
+          subtitle={
+            canEdit
+              ? t('admin.permissions.subtitle_edit', {
+                  defaultValue:
+                    'Click any cell to set the minimum role for that permission. Changes apply immediately and are audit-logged.',
+                })
+              : t('admin.permissions.subtitle', {
+                  defaultValue:
+                    'Every permission registered by every module, and which roles can use it. Admin always passes - locked cells indicate admin-only by design.',
+                })
+          }
+          actions={
+            <>
               <button
                 type="button"
                 onClick={handleExportCsv}
@@ -1242,9 +1230,9 @@ export function PermissionsMatrixPage() {
                     : t('admin.permissions.edit_on', { defaultValue: 'Enable edit mode' })}
                 </button>
               )}
-            </div>
-          </div>
-        </header>
+            </>
+          }
+        />
 
         {/* Filter bar — glass card */}
         <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 px-4 py-3 backdrop-blur-xl">

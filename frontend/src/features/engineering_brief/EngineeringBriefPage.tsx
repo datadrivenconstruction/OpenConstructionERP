@@ -15,6 +15,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { CalendarClock, ClipboardList, FileText, FlaskConical, LayoutGrid, Ruler } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
@@ -77,14 +78,12 @@ export function EngineeringBriefPage() {
           { label: t('engineeringBrief.title', { defaultValue: 'Engineering brief' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('engineeringBrief.title', { defaultValue: 'Engineering brief' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('engineeringBrief.subtitle', {
+      <PageHeader
+        srTitle={t('engineeringBrief.title', { defaultValue: 'Engineering brief' })}
+        subtitle={t('engineeringBrief.subtitle', {
             defaultValue: 'What the client needs, how the building will meet it, the room programme and the dates that frame the project.',
           })}
-        </p>
-      </div>
+      />
     </>
   );
 
@@ -99,7 +98,7 @@ export function EngineeringBriefPage() {
 
   if (briefQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="engineering-brief-page">
+      <div className="space-y-5 animate-fade-in" data-testid="engineering-brief-page">
         {header}
         {loading}
       </div>
@@ -107,7 +106,7 @@ export function EngineeringBriefPage() {
   }
   if (briefQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="engineering-brief-page">
+      <div className="space-y-5 animate-fade-in" data-testid="engineering-brief-page">
         {header}
         {failed(briefQ.error, () => briefQ.refetch())}
       </div>
@@ -117,7 +116,7 @@ export function EngineeringBriefPage() {
   const brief = briefQ.data;
   if (!brief) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="engineering-brief-page">
+      <div className="space-y-5 animate-fade-in" data-testid="engineering-brief-page">
         {header}
         <EmptyState
           icon={<FileText size={28} />}
@@ -169,7 +168,7 @@ export function EngineeringBriefPage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="engineering-brief-page">
+    <div className="space-y-5 animate-fade-in" data-testid="engineering-brief-page">
       {header}
       <ApprovalPanel
         projectId={projectId}

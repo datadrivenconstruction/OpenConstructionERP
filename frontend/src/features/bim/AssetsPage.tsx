@@ -377,7 +377,7 @@ export function AssetsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col p-6">
+    <div className="flex h-full flex-col space-y-5 animate-fade-in">
       <div className="mb-4 space-y-5">
         <Breadcrumb
           items={[

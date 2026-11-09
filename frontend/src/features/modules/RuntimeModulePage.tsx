@@ -127,7 +127,7 @@ function HostedFrame({ entry, locale }: { entry: RuntimeUiEntry; locale: string 
   const needsProject = Boolean(entry.project_param) && !projectId;
 
   return (
-    <div className="flex h-full min-h-[70vh] flex-col gap-3 p-4">
+    <div className="flex h-full min-h-[70vh] flex-col space-y-5 animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.modules', { defaultValue: 'Modules' }), to: '/modules' }, { label: title ?? entry.label }]} />
       <div className="flex items-center gap-2">
         <h1 className="text-lg font-semibold text-content-primary">{title ?? entry.label}</h1>

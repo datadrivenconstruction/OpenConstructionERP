@@ -273,8 +273,8 @@ export function CaseEditorPage() {
   }
 
   return (
-    <div className="w-full p-4 pb-28 2xl:px-8">
-      <div className="mb-5 flex flex-wrap items-center gap-3">
+    <div className="space-y-5 animate-fade-in pb-28">
+      <div className="flex flex-wrap items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate('/cases')}>
           <ArrowLeft className="h-4 w-4" />
           {t('cases.back_to_list', { defaultValue: 'All cases' })}

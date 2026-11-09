@@ -39,6 +39,7 @@ import {
   fetchRegulatorReport,
   runComplianceChecks,
 } from './api';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 const REGULATORS: { code: RegulatorCode; labelKey: string }[] = [
   { code: 'RERA', labelKey: 'propdev.compliance.regulator.rera' },
@@ -176,31 +177,27 @@ export function CompliancePage({
   };
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">
-            {t('propdev.compliance.title')}
-          </h1>
-          {developmentLabel ? (
-            <p className="text-sm text-zinc-500">{developmentLabel}</p>
-          ) : null}
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => runChecksMutation.mutate()}
-          disabled={runChecksMutation.isPending}
-          icon={
-            runChecksMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4" />
-            )
-          }
-        >
-          {t('propdev.compliance.run_checks')}
-        </Button>
-      </header>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('propdev.compliance.title')}
+        subtitle={developmentLabel || undefined}
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => runChecksMutation.mutate()}
+            disabled={runChecksMutation.isPending}
+            icon={
+              runChecksMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )
+            }
+          >
+            {t('propdev.compliance.run_checks')}
+          </Button>
+        }
+      />
 
       {/* Traffic-light tiles */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">

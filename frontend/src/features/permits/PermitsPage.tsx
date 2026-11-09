@@ -14,6 +14,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { ClipboardCheck, Compass, Download, FileCheck2, FileUp, ListChecks, Map as MapIcon, ShieldCheck } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -141,14 +142,12 @@ export function PermitsPage() {
           { label: t('permits.ui.title', { defaultValue: 'Permits' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('permits.ui.title', { defaultValue: 'Permits' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('permits.ui.subtitle', {
+      <PageHeader
+        srTitle={t('permits.ui.title', { defaultValue: 'Permits' })}
+        subtitle={t('permits.ui.subtitle', {
             defaultValue: 'Which permits the project needs, where each application stands, and what the permits ask of the site.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="permits.how"
         icon={<Compass className="h-4 w-4" />}
@@ -167,7 +166,7 @@ export function PermitsPage() {
 
   if (roadmapQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={6} />
       </div>
@@ -175,7 +174,7 @@ export function PermitsPage() {
   }
   if (roadmapQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('permits.ui.load_failed', { defaultValue: 'The permits could not be loaded' })}
@@ -189,7 +188,7 @@ export function PermitsPage() {
   const roadmap = roadmapQ.data;
   if (!roadmap) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="permits-page">
+      <div className="space-y-5 animate-fade-in" data-testid="permits-page">
         {header}
         <EmptyState
           icon={<MapIcon size={28} />}
@@ -332,7 +331,7 @@ export function PermitsPage() {
   const exportTarget = inRecord ? null : EXPORT_OF_TAB[tab];
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="permits-page">
+    <div className="space-y-5 animate-fade-in" data-testid="permits-page">
       {header}
       {!inRecord && (
         <>

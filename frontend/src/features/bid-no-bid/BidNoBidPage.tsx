@@ -115,7 +115,7 @@ export function BidNoBidPage() {
   const override = card.recommendation !== '' && reason.trim() === '';
 
   return (
-    <div className="mx-auto max-w-content space-y-5 pb-16" data-testid="bid-no-bid-page">
+    <div className="space-y-5 animate-fade-in pb-16" data-testid="bid-no-bid-page">
       <h1 className="sr-only">{t('bid_no_bid.title', { defaultValue: 'Bid / no-bid' })}</h1>
       <Breadcrumb
         items={[

@@ -135,8 +135,8 @@ export function OfferPage() {
   const readOnly = !offer.editable;
 
   return (
-    <div className="mx-auto max-w-[1600px] p-4">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+    <div className="space-y-5 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-3">
         <Link to={`/boq/${boqId}`} className="text-content-secondary hover:text-content-primary" aria-label={t('common.back', { defaultValue: 'Back' })}>
           <ArrowLeft size={18} />
         </Link>

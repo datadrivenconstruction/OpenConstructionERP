@@ -14,6 +14,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Award, Camera, CheckCircle2, CircleAlert, ClipboardCheck, Compass, FileCheck2, Handshake, Layers } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -163,16 +164,12 @@ export function QualityConceptPage() {
           { label: t('qualityConcept.title', { defaultValue: 'Quality concept' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">
-          {t('qualityConcept.title', { defaultValue: 'Quality concept' })}
-        </h1>
-        <p className="text-sm text-content-secondary">
-          {t('qualityConcept.subtitle', {
+      <PageHeader
+        srTitle={t('qualityConcept.title', { defaultValue: 'Quality concept' })}
+        subtitle={t('qualityConcept.subtitle', {
             defaultValue: 'What quality the project owes, how it is proven and how the works are accepted.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="quality_concept.how"
         icon={<Compass className="h-4 w-4" />}
@@ -212,7 +209,7 @@ export function QualityConceptPage() {
 
   if (conceptQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -220,7 +217,7 @@ export function QualityConceptPage() {
   }
   if (conceptQ.isError && isConceptMissing(conceptQ.error)) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="quality-concept-missing">
+      <div className="space-y-5 animate-fade-in" data-testid="quality-concept-missing">
         {header}
         <RefusalNote refusal={write.refusal} />
         <EmptyState
@@ -240,7 +237,7 @@ export function QualityConceptPage() {
   }
   if (conceptQ.isError || !conceptQ.data) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('qualityConcept.load_failed', { defaultValue: 'The quality concept could not be loaded' })}
@@ -273,7 +270,7 @@ export function QualityConceptPage() {
   else body = <ConceptPanel {...panel} />;
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="quality-concept-page">
+    <div className="space-y-5 animate-fade-in" data-testid="quality-concept-page">
       {header}
       <ReadinessStrip projectId={projectId} />
       {!panel.editable && (

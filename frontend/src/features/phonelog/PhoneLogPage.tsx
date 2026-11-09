@@ -64,6 +64,7 @@ import {
 import { hasRecording, isRecordingDraft, readProtocol } from './protocol';
 import type { PhoneChannel, PhoneDirection, PhoneLog } from './types';
 import { fmtList } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 // Badge variants, picker sets, translated labels, and formatDuration live in
 // ./labels so the filter bar and the edit dialog render a call the same way.
@@ -322,18 +323,13 @@ export function PhoneLogPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold text-content-primary">
-          <Phone className="h-5 w-5" />
-          {t('phonelog.title', { defaultValue: 'Phone Log' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('phonelog.subtitle', {
-            defaultValue: 'Put a phoned, spoken, or chatted instruction on the record before it is disputed.',
-          })}
-        </p>
-      </div>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('phonelog.title', { defaultValue: 'Phone Log' })}
+        subtitle={t('phonelog.subtitle', {
+          defaultValue: 'Put a phoned, spoken, or chatted instruction on the record before it is disputed.',
+        })}
+      />
 
       <DismissibleInfo
         storageKey="phonelog-intro"

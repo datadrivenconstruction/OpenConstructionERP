@@ -64,7 +64,7 @@ export function QuoteCapturePage() {
   if (!projectId) return <RequiresProject>{null}</RequiresProject>;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('quote_capture.title', 'Quote capture and levelling')}
         subtitle={t(

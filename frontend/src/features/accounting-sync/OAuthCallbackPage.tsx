@@ -49,7 +49,7 @@ export function OAuthCallbackPage() {
       : error;
 
   return (
-    <div className="mx-auto max-w-lg py-10" data-testid="accounting-sync-oauth">
+    <div className="space-y-5 animate-fade-in" data-testid="accounting-sync-oauth">
       <Card padding="lg" className="space-y-3 text-center">
         {failure ? (
           <>

@@ -45,6 +45,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getEventThread, listRecordLinks, decideRecordLink } from './api';
 import type { LinkDecision, LinkStatus, ThreadLink, ThreadRecord } from './types';
 import { fmtList, getIntlLocale } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
@@ -446,19 +447,14 @@ export function ReconciliationPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold text-content-primary">
-          <Link2 className="h-5 w-5" />
-          {t('reconciliation.title', { defaultValue: 'Event Reconciliation' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('reconciliation.subtitle', {
-            defaultValue:
-              'Stitch the scattered records of one event back together and confirm the links.',
-          })}
-        </p>
-      </div>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('reconciliation.title', { defaultValue: 'Event Reconciliation' })}
+        subtitle={t('reconciliation.subtitle', {
+          defaultValue:
+            'Stitch the scattered records of one event back together and confirm the links.',
+        })}
+      />
 
       <HowReconciliationWork />
 

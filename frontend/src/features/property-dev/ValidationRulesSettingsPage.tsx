@@ -34,7 +34,6 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
-  ShieldCheck,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -49,6 +48,7 @@ import {
   listValidationRuleSets,
   type ValidationRuleSetEntry,
 } from './api';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 const SEVERITY_VARIANT: Record<string, 'error' | 'warning' | 'blue' | 'neutral'> = {
   error: 'error',
@@ -91,7 +91,7 @@ export function ValidationRulesSettingsPage() {
   }, [rows, search]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.group_admin', { defaultValue: 'Admin' }) },
@@ -102,15 +102,10 @@ export function ValidationRulesSettingsPage() {
           },
         ]}
       />
+      <PageHeader srTitle={t('validation_rules.title', { defaultValue: 'Validation rule catalogue' })} />
       <Card className="p-4">
         <div className="flex flex-wrap items-start gap-3">
           <div className="flex-1 min-w-[260px]">
-            <h1 className="flex items-center gap-2 text-lg font-semibold text-content-primary">
-              <ShieldCheck size={18} className="text-oe-blue" />
-              {t('validation_rules.title', {
-                defaultValue: 'Validation rule catalogue',
-              })}
-            </h1>
             <div className="mt-1 space-y-1.5 text-xs text-content-tertiary">
               <p>
                 {t('validation_rules.intro_1', {

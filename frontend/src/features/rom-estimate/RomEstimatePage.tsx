@@ -30,6 +30,7 @@ import {
 } from './api';
 import { fmtPercent, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 // English fallbacks for the computed `romEstimate.reconcile.desc_*` keys. No locale
 // carries those keys yet, so this table is what every reader sees, English
@@ -158,19 +159,14 @@ export function RomEstimatePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold text-content-primary">
-          <Calculator size={22} />
-          {t('romEstimate.title', { defaultValue: 'Conceptual Estimate' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('romEstimate.subtitle', {
-            defaultValue:
-              'A rapid order-of-magnitude cost from just building type, area, quality and region. Refine it later with a detailed take-off.',
-          })}
-        </p>
-      </div>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('romEstimate.title', { defaultValue: 'Conceptual Estimate' })}
+        subtitle={t('romEstimate.subtitle', {
+          defaultValue:
+            'A rapid order-of-magnitude cost from just building type, area, quality and region. Refine it later with a detailed take-off.',
+        })}
+      />
 
       <RomReconciliationPanel />
 

@@ -62,6 +62,7 @@ import {
 import { earlierRevisionCounts, revisionOrderUnclear } from './sheetStack';
 import type { SheetRow } from './types';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 /* ── API types ────────────────────────────────────────────────────────
    `SheetRow` mirrors SheetResponse and lives in ./types so the detail
@@ -508,7 +509,7 @@ export function SheetsIndexPage() {
   );
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -521,20 +522,14 @@ export function SheetsIndexPage() {
       />
 
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-content-primary">
-            {t('sheets.page_title', { defaultValue: 'Drawing Sheets' })}
-          </h1>
-          <p className="mt-1 text-sm text-content-secondary">
-            {t('sheets.subtitle', {
-              defaultValue:
-                'Indexed drawing sheets across project documents - filter by discipline or search by number, title, revision.',
-            })}
-          </p>
-        </div>
-        <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
-      </div>
+      <PageHeader
+        srTitle={t('sheets.page_title', { defaultValue: 'Drawing Sheets' })}
+        subtitle={t('sheets.subtitle', {
+          defaultValue:
+            'Indexed drawing sheets across project documents - filter by discipline or search by number, title, revision.',
+        })}
+        actions={<InsightsToggleButton open={insights.open} onClick={insights.toggle} />}
+      />
 
       <div className="mb-4">
         <HowSheetsWork />

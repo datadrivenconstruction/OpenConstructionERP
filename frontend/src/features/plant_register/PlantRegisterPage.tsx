@@ -14,6 +14,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { CalendarClock, Compass, Factory, Grid3x3, ListChecks, Plus, Router } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -88,21 +89,19 @@ export function PlantRegisterPage() {
           { label: t('plant.nav.title', { defaultValue: 'Plant register' }) },
         ]}
       />
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-content-primary">{t('plant.nav.title', { defaultValue: 'Plant register' })}</h1>
-          <p className="text-sm text-content-secondary">
-            {t('plant.page.subtitle', {
-              defaultValue: 'The plant and equipment the project has to order early, and the latest day each one can be ordered.',
-            })}
-          </p>
-        </div>
-        {loaded && !itemId && (itemsQ.data?.items.length ?? 0) > 0 && (
-          <WriteButton icon={<Plus size={16} />} onClick={() => setAdding(true)} data-testid="plant-add-item">
-            {t('plant.item.add_submit', { defaultValue: 'Add item' })}
-          </WriteButton>
-        )}
-      </div>
+      <PageHeader
+        srTitle={t('plant.nav.title', { defaultValue: 'Plant register' })}
+        subtitle={t('plant.page.subtitle', {
+          defaultValue: 'The plant and equipment the project has to order early, and the latest day each one can be ordered.',
+        })}
+        actions={
+          loaded && !itemId && (itemsQ.data?.items.length ?? 0) > 0 ? (
+            <WriteButton icon={<Plus size={16} />} onClick={() => setAdding(true)} data-testid="plant-add-item">
+              {t('plant.item.add_submit', { defaultValue: 'Add item' })}
+            </WriteButton>
+          ) : undefined
+        }
+      />
       <CollapsibleSection
         storageKey="plant_register.how"
         icon={<Compass className="h-4 w-4" />}
@@ -122,7 +121,7 @@ export function PlantRegisterPage() {
   const failed = catalogueQ.error ?? itemsQ.error;
   if (failed) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('plant.page.load_failed', { defaultValue: 'The plant register could not be loaded' })}
@@ -139,7 +138,7 @@ export function PlantRegisterPage() {
   const page = itemsQ.data;
   if (!catalogue || !page) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={7} />
       </div>
@@ -235,7 +234,7 @@ export function PlantRegisterPage() {
 
   return (
     <PlantCanContext.Provider value={can}>
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="plant-register-page">
+    <div className="space-y-5 animate-fade-in" data-testid="plant-register-page">
       {header}
       {readOnly && (
         <div role="status" data-testid="plant-read-only" className="rounded-md border border-border bg-surface-secondary p-3 text-sm">

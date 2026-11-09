@@ -26,6 +26,7 @@ import {
   type Preview,
 } from './api';
 import { bestCandidate, countByKind, hasBlockingIssue, pricedPercent } from './logic';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 function ImportPanel({ boqId }: { boqId: string }) {
   const { t } = useTranslation();
@@ -268,7 +269,7 @@ export function OwnerSchedulePage() {
           { label: t('owner_schedule.title', { defaultValue: 'Owner bid schedule' }) },
         ]}
       />
-      <h1 className="text-xl font-semibold text-content-primary">{t('owner_schedule.title', { defaultValue: 'Owner bid schedule' })}</h1>
+      <PageHeader srTitle={t('owner_schedule.title', { defaultValue: 'Owner bid schedule' })} />
 
       {status.isLoading && <SkeletonTable rows={5} />}
       {status.isError && (

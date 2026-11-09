@@ -66,6 +66,7 @@ import { PointCloudBackground } from './PointCloudBackground';
 import { PointCloudViewer } from './PointCloudViewer';
 import { pointcloudGuide } from './pointcloudGuide';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 /* The accepted upload containers, mirrored from the backend allow-list
    (backend/app/modules/pointcloud/models.py ACCEPTED_SCAN_FORMATS). The
@@ -904,33 +905,26 @@ export function PointCloudPage() {
   ) : null;
 
   return (
-    <div className="relative space-y-5">
+    <div className="relative space-y-5 animate-fade-in">
       <PointCloudBackground />
 
       <Breadcrumb items={[{ label: t('nav.point_cloud', 'Point Cloud') }]} />
 
-      <header className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-          <ScanLine size={22} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-content-primary">
-              {t('nav.point_cloud', 'Point Cloud')}
-            </h1>
+      <PageHeader
+        srTitle={t('nav.point_cloud', 'Point Cloud')}
+        subtitle={t(
+          'pointcloud.subtitle',
+          'Reality capture for the project: laser scans, photogrammetry and LiDAR, registered against the model.',
+        )}
+        actions={
+          <>
             <Badge variant="blue" size="sm">
               {t('common.beta', 'BETA')}
             </Badge>
-          </div>
-          <p className="mt-1 text-sm text-content-secondary">
-            {t(
-              'pointcloud.subtitle',
-              'Reality capture for the project: laser scans, photogrammetry and LiDAR, registered against the model.',
-            )}
-          </p>
-        </div>
-        <ModuleGuideButton content={pointcloudGuide} />
-      </header>
+            <ModuleGuideButton content={pointcloudGuide} />
+          </>
+        }
+      />
 
       <DismissibleInfo
         storageKey="pointcloud-intro"

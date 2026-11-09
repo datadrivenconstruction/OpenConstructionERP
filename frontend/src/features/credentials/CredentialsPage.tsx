@@ -90,6 +90,7 @@ import { holderKindLabel, humanise, statusLabel, typeLabel } from './labels';
 import { buildCredentialsInsights } from './credentialsInsights';
 import { CredentialFormModal } from './CredentialFormModal';
 import { RequirementFormModal } from './RequirementFormModal';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type TabId = 'compliance' | 'register' | 'requirements';
 type HolderFilter = 'all' | 'gaps' | 'blocked';
@@ -764,24 +765,15 @@ export function CredentialsPage() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <BadgeCheck size={22} className="mt-0.5 shrink-0 text-oe-blue" />
-          <div>
-            <h1 className="text-xl font-semibold text-content-primary">
-              {t('credentials.page_title', { defaultValue: 'Credentials register' })}
-            </h1>
-            <p className="mt-0.5 text-sm text-content-secondary">
-              {t('credentials.page_subtitle', {
-                defaultValue:
-                  'Licences, certifications and training on this project, what the project requires of whom, and who that leaves unable to work today.',
-              })}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {staleCount > 0 && (
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('credentials.page_title', { defaultValue: 'Credentials register' })}
+        subtitle={t('credentials.page_subtitle', {
+          defaultValue:
+            'Licences, certifications and training on this project, what the project requires of whom, and who that leaves unable to work today.',
+        })}
+        actions={
+          staleCount > 0 ? (
             <Button
               variant="secondary"
               size="sm"
@@ -794,9 +786,9 @@ export function CredentialsPage() {
                 defaultValue: 'Refresh {{count}} stored statuses',
               })}
             </Button>
-          )}
-        </div>
-      </div>
+          ) : null
+        }
+      />
 
       <div className="mb-4">
         <HowCredentialsWork />

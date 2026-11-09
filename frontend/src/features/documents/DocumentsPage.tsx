@@ -29,6 +29,7 @@ import { documentsGuide } from './documentsGuide';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { useNameCollator } from '@/shared/lib/collator';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -938,7 +939,7 @@ export function DocumentsPage() {
 
   return (
     <div
-      className="w-full space-y-5 animate-fade-in"
+      className="space-y-5 animate-fade-in"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -952,51 +953,49 @@ export function DocumentsPage() {
       {/* No-project warning removed: the early return above already handles !projectId */}
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-content-primary">{t('documents.title', { defaultValue: 'Documents' })}</h1>
-          <p className="mt-1 text-sm text-content-secondary">
-            {t('documents.subtitle', { defaultValue: 'Upload and manage project files - drawings, contracts, specifications' })}
-          </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          {!isLoading && documentPage && documentPage.items.length > 0 && (
-            <div className="hidden sm:flex items-center gap-3 text-xs text-content-tertiary">
-              <span className="flex items-center gap-1.5">
-                <FileText size={13} />
-                {t('documents.total_count', { defaultValue: '{{count}} documents', count: stats.count })}
-              </span>
-              {!isTruncated(documentPage) && (
+      <PageHeader
+        srTitle={t('documents.title', { defaultValue: 'Documents' })}
+        subtitle={t('documents.subtitle', { defaultValue: 'Upload and manage project files - drawings, contracts, specifications' })}
+        actions={
+          <>
+            {!isLoading && documentPage && documentPage.items.length > 0 && (
+              <div className="hidden sm:flex items-center gap-3 text-xs text-content-tertiary">
                 <span className="flex items-center gap-1.5">
-                  <HardDrive size={13} />
-                  {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
+                  <FileText size={13} />
+                  {t('documents.total_count', { defaultValue: '{{count}} documents', count: stats.count })}
                 </span>
-              )}
-            </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files) handleUpload(e.target.files);
-            }}
-            aria-label={t('documents.upload_input', { defaultValue: 'Choose files to upload' })}
-          />
-          <ModuleGuideButton content={documentsGuide} />
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Upload size={14} />}
-            disabled={!projectId}
-            onClick={() => fileInputRef.current?.click()}
-            title={!projectId ? t('documents.select_project_first', { defaultValue: 'Select a project first' }) : ''}
-          >
-            {t('documents.upload', { defaultValue: 'Upload Files' })}
-          </Button>
-        </div>
-      </div>
+                {!isTruncated(documentPage) && (
+                  <span className="flex items-center gap-1.5">
+                    <HardDrive size={13} />
+                    {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
+                  </span>
+                )}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files) handleUpload(e.target.files);
+              }}
+              aria-label={t('documents.upload_input', { defaultValue: 'Choose files to upload' })}
+            />
+            <ModuleGuideButton content={documentsGuide} />
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Upload size={14} />}
+              disabled={!projectId}
+              onClick={() => fileInputRef.current?.click()}
+              title={!projectId ? t('documents.select_project_first', { defaultValue: 'Select a project first' }) : ''}
+            >
+              {t('documents.upload', { defaultValue: 'Upload Files' })}
+            </Button>
+          </>
+        }
+      />
 
       {/* ── Document flow ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 text-2xs text-content-quaternary">

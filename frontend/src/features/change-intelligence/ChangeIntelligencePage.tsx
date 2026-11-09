@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  BrainCircuit,
   ListChecks,
   Clock,
   Mail,
@@ -108,6 +107,7 @@ import {
 import { changeIntelligenceGuide } from './change_intelligenceGuide';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
@@ -3457,22 +3457,13 @@ export function ChangeIntelligencePage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <header className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-          <BrainCircuit className="h-5 w-5" />
-        </span>
-        <div>
-          <h1 className="text-xl font-semibold text-content-primary">
-            {t('change_intelligence.title', { defaultValue: 'Change Intelligence' })}
-          </h1>
-          <p className="text-sm text-content-tertiary">
-            {t('change_intelligence.subtitle', {
-              defaultValue: 'What to act on first, who owes the next action, and what the changes have committed.',
-            })}
-          </p>
-        </div>
-        <ModuleGuideButton content={changeIntelligenceGuide} className="ml-auto" />
-      </header>
+      <PageHeader
+        srTitle={t('change_intelligence.title', { defaultValue: 'Change Intelligence' })}
+        subtitle={t('change_intelligence.subtitle', {
+          defaultValue: 'What to act on first, who owes the next action, and what the changes have committed.',
+        })}
+        actions={<ModuleGuideButton content={changeIntelligenceGuide} />}
+      />
 
       <DismissibleInfo
         storageKey="change-intelligence"

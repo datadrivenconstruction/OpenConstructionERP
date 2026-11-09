@@ -4,6 +4,7 @@
  * Estimate check settings: the user's own display choice, and (for managers)
  * which figures the company checks and the ranges it accepts.
  */
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { clampInput } from '@/shared/lib/clampInput';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,11 +47,11 @@ export function EstimateChecksSettingsPage() {
     setDraft((d) => (d ? { ...d, kpis: { ...d.kpis, [id]: { ...(d.kpis[id] ?? { enabled: true }), ...patch } } } : d));
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6" data-testid="estimate-checks-settings">
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{tx(t, 'estimate_checks.settings.title')}</h1>
-        <p className="text-sm text-content-secondary">{tx(t, 'estimate_checks.settings.subtitle')}</p>
-      </div>
+    <div className="space-y-5 animate-fade-in" data-testid="estimate-checks-settings">
+      <PageHeader
+        srTitle={tx(t, 'estimate_checks.settings.title')}
+        subtitle={tx(t, 'estimate_checks.settings.subtitle')}
+      />
 
       <Card>
         <h2 className="mb-3 text-sm font-semibold text-content-primary">

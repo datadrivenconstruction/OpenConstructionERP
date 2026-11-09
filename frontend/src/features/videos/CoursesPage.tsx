@@ -11,10 +11,11 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { GraduationCap, Search, SearchX, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SearchX, SlidersHorizontal, X } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { AcademyItemCard } from './AcademyItemLinks';
 import {
   DURATION_KEYS,
@@ -228,51 +229,42 @@ export function CoursesPage() {
     'max-w-full cursor-pointer rounded-lg border bg-surface-primary px-2 py-1 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20';
 
   return (
-    <div className="mx-auto w-full max-w-screen-2xl space-y-4 animate-fade-in" data-testid="courses-page">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-2.5">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-            <GraduationCap size={16} aria-hidden />
-          </span>
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold tracking-tight text-content-primary">
-              {t('nav.courses', { defaultValue: 'Courses and guides' })}
-            </h1>
-            <p className="text-xs text-content-secondary">
-              {t('learn.page_subtitle', {
-                defaultValue:
-                  'Short courses, checklists and guides from OpenConstruction Academy. Opens in your browser.',
-              })}
-            </p>
+    <div className="space-y-5 animate-fade-in" data-testid="courses-page">
+      <PageHeader
+        srTitle={t('nav.courses', { defaultValue: 'Courses and guides' })}
+        subtitle={t('learn.page_subtitle', {
+          defaultValue:
+            'Short courses, checklists and guides from OpenConstruction Academy. Opens in your browser.',
+        })}
+        actions={
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
+              <Search size={15} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
+              <input
+                type="search"
+                value={filters.query}
+                onChange={(e) => patch({ q: e.target.value })}
+                placeholder={t('common.search', { defaultValue: 'Search' })}
+                aria-label={t('common.search', { defaultValue: 'Search' })}
+                data-testid="courses-search"
+                className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+              />
+            </div>
+            <button
+              type="button"
+              aria-expanded={panelOpen}
+              aria-controls="courses-filter-panel"
+              onClick={() => setPanelOpen((v) => !v)}
+              data-testid="courses-filters-toggle"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border-light bg-surface-primary px-3 py-2 text-sm font-medium text-content-secondary hover:border-oe-blue/40 md:hidden"
+            >
+              <SlidersHorizontal size={15} aria-hidden />
+              {t('learn.filters', { defaultValue: 'Filters' })}
+              {panelCount > 0 && <span className="rounded-full bg-oe-blue px-1.5 text-2xs text-white">{panelCount}</span>}
+            </button>
           </div>
-        </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-            <Search size={15} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
-            <input
-              type="search"
-              value={filters.query}
-              onChange={(e) => patch({ q: e.target.value })}
-              placeholder={t('common.search', { defaultValue: 'Search' })}
-              aria-label={t('common.search', { defaultValue: 'Search' })}
-              data-testid="courses-search"
-              className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
-            />
-          </div>
-          <button
-            type="button"
-            aria-expanded={panelOpen}
-            aria-controls="courses-filter-panel"
-            onClick={() => setPanelOpen((v) => !v)}
-            data-testid="courses-filters-toggle"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border-light bg-surface-primary px-3 py-2 text-sm font-medium text-content-secondary hover:border-oe-blue/40 md:hidden"
-          >
-            <SlidersHorizontal size={15} aria-hidden />
-            {t('learn.filters', { defaultValue: 'Filters' })}
-            {panelCount > 0 && <span className="rounded-full bg-oe-blue px-1.5 text-2xs text-white">{panelCount}</span>}
-          </button>
-        </div>
-      </header>
+        }
+      />
 
       <div
         id="courses-filter-panel"

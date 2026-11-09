@@ -42,6 +42,7 @@ import {
   type InboundFilterState,
 } from './InboundFilters';
 import { getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 // How many messages we pull per page from the paginated read endpoint. The
 // search / filter refinement runs over whichever page is loaded.
@@ -253,28 +254,21 @@ export function InboundCapturePage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <header className="flex flex-wrap items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-          <Mailbox className="h-5 w-5" />
-        </span>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-content-primary">
-            {t('inbound.title', { defaultValue: 'Inbound Capture' })}
-          </h1>
-          <p className="text-sm text-content-tertiary">
-            {t('inbound.subtitle', {
-              defaultValue: 'Messages captured from email and chat, and the sources that feed the record.',
-            })}
-          </p>
-        </div>
-        <a
-          href="/connectors"
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
-        >
-          {t('inbound.manage_sources', { defaultValue: 'Manage sources' })}
-          <ArrowRight className="h-4 w-4" />
-        </a>
-      </header>
+      <PageHeader
+        srTitle={t('inbound.title', { defaultValue: 'Inbound Capture' })}
+        subtitle={t('inbound.subtitle', {
+          defaultValue: 'Messages captured from email and chat, and the sources that feed the record.',
+        })}
+        actions={
+          <a
+            href="/connectors"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
+          >
+            {t('inbound.manage_sources', { defaultValue: 'Manage sources' })}
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        }
+      />
 
       <DismissibleInfo
         storageKey="inbound-capture-admin"

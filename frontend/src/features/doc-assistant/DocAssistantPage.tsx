@@ -209,7 +209,7 @@ export function DocAssistantPage() {
     setKinds((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-4">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('nav.doc_assistant', { defaultValue: 'Document Assistant' })}
         subtitle={t('doc_assistant.subtitle', {

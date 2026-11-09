@@ -41,8 +41,8 @@ export function DemoChooserPage() {
   const cards = DEMO_PROFILES.filter((p) => bySlug.has(p.slug));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <header className="mb-8 text-center">
+    <div className="space-y-5 animate-fade-in">
+      <header className="text-center">
         <h1 className="text-sm font-semibold uppercase tracking-wide text-content-tertiary">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
         </h1>

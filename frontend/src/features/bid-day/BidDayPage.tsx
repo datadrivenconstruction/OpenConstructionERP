@@ -650,7 +650,7 @@ export function BidDayPage() {
   };
 
   return (
-    <div className="mx-auto max-w-content space-y-4 pb-16">
+    <div className="space-y-5 animate-fade-in pb-16">
       <Breadcrumb
         items={[
           { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tendering' },

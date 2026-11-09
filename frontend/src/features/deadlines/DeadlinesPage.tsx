@@ -29,6 +29,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchDeadlines, type DeadlineItem, type DeadlineStatusFilter } from './api';
 import { buildDeadlinesInsights } from './deadlinesInsights';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 const FILTERS: DeadlineStatusFilter[] = ['all', 'overdue', 'approaching'];
 
@@ -315,33 +316,26 @@ export function DeadlinesPage() {
   }
 
   return (
-    <div className="w-full">
+    <div className="space-y-5 animate-fade-in">
       {/* Header */}
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <CalendarClock size={22} className="mt-0.5 shrink-0 text-oe-blue" />
-          <div>
-            <h1 className="text-xl font-semibold text-content-primary">
-              {t('deadlines.register_title', { defaultValue: 'Deadline register' })}
-            </h1>
-            <p className="mt-0.5 text-sm text-content-secondary">
-              {t('deadlines.subtitle', {
-                defaultValue: 'Overdue and upcoming items across every module, in one place.',
-              })}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
-          <Link
-            to="/notifications"
-            className="inline-flex items-center gap-1 text-sm font-medium text-oe-blue hover:underline"
-          >
-            {t('deadlines.settings_link', { defaultValue: 'Notification settings' })}
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        srTitle={t('deadlines.register_title', { defaultValue: 'Deadline register' })}
+        subtitle={t('deadlines.subtitle', {
+          defaultValue: 'Overdue and upcoming items across every module, in one place.',
+        })}
+        actions={
+          <>
+            <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <Link
+              to="/notifications"
+              className="inline-flex items-center gap-1 text-sm font-medium text-oe-blue hover:underline"
+            >
+              {t('deadlines.settings_link', { defaultValue: 'Notification settings' })}
+              <ArrowRight size={14} />
+            </Link>
+          </>
+        }
+      />
 
       <div className="mb-4">
         <HowDeadlinesWork />

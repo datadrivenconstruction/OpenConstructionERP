@@ -50,6 +50,7 @@ import {
 import type { RetrievalQuery, RetrievalResult, SavedSearch } from './types';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { compareNames } from '@/shared/lib/collator';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 type SortMode = 'relevance' | 'date' | 'type';
@@ -400,19 +401,14 @@ export function RetrievalPage() {
   const rangeTo = Math.min(page * PAGE_SIZE, total);
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold text-content-primary">
-          <FileSearch className="h-5 w-5" />
-          {t('retrieval.title', { defaultValue: 'Find Records' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('retrieval.subtitle', {
-            defaultValue:
-              'Search documents, correspondence and change orders in one place, ranked and with provenance.',
-          })}
-        </p>
-      </div>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('retrieval.title', { defaultValue: 'Find Records' })}
+        subtitle={t('retrieval.subtitle', {
+          defaultValue:
+            'Search documents, correspondence and change orders in one place, ranked and with provenance.',
+        })}
+      />
 
       <DismissibleInfo
         storageKey="retrieval-intro"

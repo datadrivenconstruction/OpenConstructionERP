@@ -15,6 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Compass, Download, Grid3x3, Plus, ShieldAlert, Stamp, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -110,16 +111,12 @@ export function CommitmentReleasePage() {
           { label: t('commitment.page.title', { defaultValue: 'Commitments and releases' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">
-          {t('commitment.page.title', { defaultValue: 'Commitments and releases' })}
-        </h1>
-        <p className="text-sm text-content-secondary">
-          {t('commitment.page.subtitle', {
+      <PageHeader
+        srTitle={t('commitment.page.title', { defaultValue: 'Commitments and releases' })}
+        subtitle={t('commitment.page.subtitle', {
             defaultValue: 'What the project will commit money to, what is released so far, who approves and what an abort would cost.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="commitment_release.how"
         icon={<Compass className="h-4 w-4" />}
@@ -140,7 +137,7 @@ export function CommitmentReleasePage() {
 
   if (matrixQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={5} columns={7} />
       </div>
@@ -148,7 +145,7 @@ export function CommitmentReleasePage() {
   }
   if (matrixQ.isError) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('commitment.page.load_failed', { defaultValue: 'The commitments could not be loaded' })}
@@ -162,7 +159,7 @@ export function CommitmentReleasePage() {
   const matrix = matrixQ.data;
   if (!matrix) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="commitment-release-page">
+      <div className="space-y-5 animate-fade-in" data-testid="commitment-release-page">
         {header}
         <EmptyState
           icon={<Stamp size={28} />}
@@ -288,7 +285,7 @@ export function CommitmentReleasePage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="commitment-release-page">
+    <div className="space-y-5 animate-fade-in" data-testid="commitment-release-page">
       {header}
       {!itemId && (
         <div className="flex flex-wrap items-end justify-between gap-3">

@@ -22,6 +22,7 @@ import { listConnectorSources, createConnectorSource, syncConnectorSource } from
 import { SourceCard } from './SourceCard';
 import { ConnectorsSummary } from './ConnectorsSummary';
 import { sourceMatchesQuery } from './utils';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type StatusFilter = 'all' | 'enabled' | 'disabled';
 
@@ -110,28 +111,21 @@ export function ConnectorsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <header className="flex flex-wrap items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-          <FolderSync className="h-5 w-5" />
-        </span>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-content-primary">
-            {t('connectors.title', { defaultValue: 'Document Connectors' })}
-          </h1>
-          <p className="text-sm text-content-secondary">
-            {t('connectors.subtitle', {
-              defaultValue: 'Bring documents from scattered places onto the project record.',
-            })}
-          </p>
-        </div>
-        <Link
-          to={inboundPath}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
-        >
-          {t('connectors.view_inbound', { defaultValue: 'View inbound capture' })}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </header>
+      <PageHeader
+        srTitle={t('connectors.title', { defaultValue: 'Document Connectors' })}
+        subtitle={t('connectors.subtitle', {
+          defaultValue: 'Bring documents from scattered places onto the project record.',
+        })}
+        actions={
+          <Link
+            to={inboundPath}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
+          >
+            {t('connectors.view_inbound', { defaultValue: 'View inbound capture' })}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        }
+      />
 
       <DismissibleInfo
         storageKey="connectors-intro"

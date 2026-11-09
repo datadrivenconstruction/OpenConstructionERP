@@ -401,7 +401,7 @@ export function ProjectAgentsPage() {
   const reviewed = (drafts.data ?? []).filter((d) => d.status !== 'pending').slice(0, 10);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4 p-4">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('nav.project_agents', { defaultValue: 'Project Agents' })}
         subtitle={t('project_agents.subtitle', {

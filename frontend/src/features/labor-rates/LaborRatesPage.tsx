@@ -8,7 +8,6 @@ import {
   Trash2,
   Save,
   Users,
-  Calculator,
   ArrowDownToLine,
   Database,
   FilePlus,
@@ -36,6 +35,7 @@ import {
   type InUseReference,
 } from './api';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 /** Debounce any value so the live compute does not fire on every keystroke. */
 function useDebounced<T>(value: T, delay: number): T {
@@ -439,25 +439,14 @@ export function LaborRatesPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-            <Calculator size={22} />
-          </span>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-content-primary">
-              {t('laborRates.title', { defaultValue: 'Labor & crew rate build-up' })}
-            </h1>
-            <p className="max-w-2xl text-sm text-content-secondary">
-              {t('laborRates.subtitle', {
-                defaultValue:
-                  'Build a fully loaded hourly rate from a base wage plus on-costs, then blend trades into a crew rate.',
-              })}
-            </p>
-          </div>
-        </div>
-        {/* Live headline - all-in rate + labour burden, always in view */}
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('laborRates.title', { defaultValue: 'Labor & crew rate build-up' })}
+        subtitle={t('laborRates.subtitle', {
+          defaultValue:
+            'Build a fully loaded hourly rate from a base wage plus on-costs, then blend trades into a crew rate.',
+        })}
+        actions={
         <div className="flex items-center gap-4 rounded-xl border border-border bg-surface-elevated px-4 py-2.5 shadow-sm">
           <div className="text-right">
             <div className="text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
@@ -478,7 +467,8 @@ export function LaborRatesPage() {
             </div>
           )}
         </div>
-      </header>
+        }
+      />
 
       {/* Template picker */}
       <div className={cardClass}>

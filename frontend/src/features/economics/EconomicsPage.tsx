@@ -17,6 +17,7 @@ import { Banknote, Calculator, Landmark, Scale, ShieldCheck } from 'lucide-react
 
 import { Badge } from '@/shared/ui/Badge';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -156,14 +157,12 @@ export function EconomicsPage() {
           { label: t('economics.ui.title', { defaultValue: 'Economics' }) },
         ]}
       />
-      <div>
-        <h1 className="text-xl font-semibold text-content-primary">{t('economics.ui.title', { defaultValue: 'Economics' })}</h1>
-        <p className="text-sm text-content-secondary">
-          {t('economics.ui.subtitle', {
+      <PageHeader
+        srTitle={t('economics.ui.title', { defaultValue: 'Economics' })}
+        subtitle={t('economics.ui.subtitle', {
             defaultValue: 'What the project may cost, whether it pays, and who finances it.',
           })}
-        </p>
-      </div>
+      />
       <CollapsibleSection
         storageKey="economics.how"
         icon={<Calculator className="h-4 w-4" />}
@@ -182,7 +181,7 @@ export function EconomicsPage() {
 
   if (planQ.isLoading) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <SkeletonTable rows={6} columns={5} />
       </div>
@@ -190,7 +189,7 @@ export function EconomicsPage() {
   }
   if (planQ.isError || !planQ.data) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5">
+      <div className="space-y-5 animate-fade-in">
         {header}
         <ErrorState
           title={t('economics.ui.load_failed', { defaultValue: 'The economics could not be loaded' })}
@@ -203,7 +202,7 @@ export function EconomicsPage() {
   const plan = planQ.data;
   if (!plan.exists) {
     return (
-      <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="economics-page">
+      <div className="space-y-5 animate-fade-in" data-testid="economics-page">
         {header}
         <EmptyState
           icon={<Banknote size={28} />}
@@ -255,7 +254,7 @@ export function EconomicsPage() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-in bg-surface-page rounded-2xl p-4 sm:p-5" data-testid="economics-page">
+    <div className="space-y-5 animate-fade-in" data-testid="economics-page">
       {header}
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant={STATUS_VARIANT[status]}>{t(PLAN_STATUS[status][0], { defaultValue: PLAN_STATUS[status][1] })}</Badge>

@@ -61,6 +61,7 @@ import { TimeFactorsEditor } from './TimeFactorsEditor';
 import { valueGuide } from './valueGuide';
 import type { Confidence, ValueSummary } from './types';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
@@ -673,20 +674,13 @@ export function ValueDashboardPage() {
 
   return (
     <div className="space-y-5 animate-fade-in print:space-y-3">
-      <header className="flex flex-wrap items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-          <Trophy className="h-5 w-5" />
-        </span>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-content-primary">
-            {t('value.title', { defaultValue: 'Value Realized' })}
-          </h1>
-          <p className="text-sm text-content-tertiary">
-            {t('value.subtitle', {
-              defaultValue: 'What disciplined, assisted change management has bought - on your own data.',
-            })}
-          </p>
-        </div>
+      <PageHeader
+        srTitle={t('value.title', { defaultValue: 'Value Realized' })}
+        subtitle={t('value.subtitle', {
+          defaultValue: 'What disciplined, assisted change management has bought - on your own data.',
+        })}
+        actions={
+          <>
         <ModuleGuideButton content={valueGuide} className="print:hidden" />
         {isAdmin ? (
           <button
@@ -722,7 +716,9 @@ export function ValueDashboardPage() {
           <Printer className="h-4 w-4" />
           {t('value.print_case', { defaultValue: 'Value case' })}
         </button>
-      </header>
+          </>
+        }
+      />
 
       {isAdmin ? (
         <TimeFactorsEditor open={factorsOpen} onClose={() => setFactorsOpen(false)} />

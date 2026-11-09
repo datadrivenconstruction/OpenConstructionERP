@@ -134,7 +134,7 @@ export function WinLossPage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-4">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('winloss.title', { defaultValue: 'Bid outcomes' })}
         subtitle={t('winloss.subtitle', {
