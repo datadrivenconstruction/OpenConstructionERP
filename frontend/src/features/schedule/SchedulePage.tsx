@@ -70,6 +70,8 @@ import { ProgressSheetDialog } from './ProgressSheetDialog';
 import { SchedulingProfilesPanel } from './SchedulingProfilesPanel';
 import { ImportSourcePanel } from './ImportSourcePanel';
 import { DependencyEditor } from './DependencyEditor';
+import { ActivityStartFloor } from './ActivityStartFloor';
+import { startFloorPatch, type StartFloorPatch } from './ganttFloor';
 import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
 import { ConfidenceBadge, activityConfidence } from './planConfidence';
@@ -1562,12 +1564,21 @@ export function ScheduleDetail({
   });
 
   const resizeActivity = useMutation({
-    mutationFn: ({ activityId, start_date, end_date }: { activityId: string; start_date: string; end_date: string }) =>
-      scheduleApi.updateActivity(activityId, { start_date, end_date }),
+    mutationFn: ({
+      activityId,
+      start_date,
+      end_date,
+      floor,
+    }: {
+      activityId: string;
+      start_date: string;
+      end_date: string;
+      floor?: StartFloorPatch | null;
+    }) => scheduleApi.updateActivity(activityId, { start_date, end_date, ...(floor ?? {}) }),
     // Optimistic update: patch the cached gantt payload so the bar stays in
     // its new position while the request flies. Snapshot the previous data
     // for revert-on-error.
-    onMutate: async ({ activityId, start_date, end_date }) => {
+    onMutate: async ({ activityId, start_date, end_date, floor }) => {
       const queryKey = ['gantt', schedule.id];
       await queryClient.cancelQueries({ queryKey });
       const prev = queryClient.getQueryData<GanttData>(queryKey);
@@ -1575,7 +1586,7 @@ export function ScheduleDetail({
         queryClient.setQueryData<GanttData>(queryKey, {
           ...prev,
           activities: prev.activities.map((a) =>
-            a.id === activityId ? { ...a, start_date, end_date } : a,
+            a.id === activityId ? { ...a, start_date, end_date, ...(floor ?? {}) } : a,
           ),
         });
       }
@@ -1592,9 +1603,16 @@ export function ScheduleDetail({
 
   const handleActivityResize = useCallback(
     (id: string, newStart: string, newEnd: string) => {
-      resizeActivity.mutate({ activityId: id, start_date: newStart, end_date: newEnd });
+      // A bar that now starts later keeps that start through a reschedule.
+      const current = ganttData?.activities.find((a) => a.id === id);
+      resizeActivity.mutate({
+        activityId: id,
+        start_date: newStart,
+        end_date: newEnd,
+        floor: startFloorPatch(current, newStart),
+      });
     },
-    [resizeActivity],
+    [resizeActivity, ganttData],
   );
 
   // Drawing and removing links on the Gantt (only for people who may edit the schedule).
@@ -2208,6 +2226,7 @@ export function ScheduleDetail({
                   showCriticalPath={!!cpmResult}
                   todayLine={true}
                   onActivityResize={handleActivityResize}
+                  onActivityDrag={canEditSchedule ? handleActivityResize : undefined}
                   onCreateLink={ganttLinking.onCreateLink}
                   onDeleteLink={ganttLinking.onDeleteLink}
                   onActivityClick={(id) => setSelectedActivityId(id)}
@@ -2451,6 +2470,7 @@ export function ScheduleDetail({
             {selectedActivity.activity_type === 'milestone' && (
               <MilestoneClientToggle scheduleId={schedule.id} activity={selectedActivity} />
             )}
+            <ActivityStartFloor scheduleId={schedule.id} activity={selectedActivity} />
             <DependencyEditor
               scheduleId={schedule.id}
               activity={selectedActivity}
