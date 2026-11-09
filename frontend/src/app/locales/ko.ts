@@ -52243,7 +52243,7 @@ const resource = {
     "settings.menu_size_labels_single": "한 줄로 표시하고 패널 가장자리에서 자르기",
     "settings.menu_size_width": "메뉴 너비",
     "settings.menu_size_reset": "초기화",
-    "settings.menu_size_sample": "물량 내역서 및 공사비 견적",
+    "settings.menu_size_sample": "내역서 및 공사비 견적",
     "settings.menu_size_sample_short": "일정",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "변경 지시",

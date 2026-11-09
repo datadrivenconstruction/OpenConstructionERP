@@ -53158,7 +53158,7 @@ const resource = {
     "settings.menu_size_labels_single": "1行で表示し、パネルの端で切り捨て",
     "settings.menu_size_width": "メニューの幅",
     "settings.menu_size_reset": "リセット",
-    "settings.menu_size_sample": "数量内訳書と工事費見積",
+    "settings.menu_size_sample": "内訳書と工事費見積",
     "settings.menu_size_sample_short": "工程表",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "変更指示",
