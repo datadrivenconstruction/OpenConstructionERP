@@ -65,11 +65,13 @@ export async function generateInWindow(
   end: string,
   replace = false,
   workers: number | null = null,
+  rollupDepth: number | null = null,
 ): Promise<unknown> {
   return scheduleApi.generateFromBOQ(scheduleId, boqId, {
     ...generationWindow(start, end),
     replace,
     ...(workers != null ? { workersPerPosition: workers } : {}),
+    ...(rollupDepth != null ? { rollupDepth } : {}),
   });
 }
 
@@ -80,10 +82,12 @@ export function previewInWindow(
   start: string,
   end: string,
   workers: number | null = null,
+  rollupDepth: number | null = null,
 ) {
   return scheduleApi.previewGenerateFromBOQ(scheduleId, boqId, {
     ...generationWindow(start, end),
     ...(workers != null ? { workersPerPosition: workers } : {}),
+    ...(rollupDepth != null ? { rollupDepth } : {}),
   });
 }
 

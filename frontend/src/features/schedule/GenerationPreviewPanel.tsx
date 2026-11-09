@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CircleAlert, Info } from 'lucide-react';
 import type { TFunction } from 'i18next';
-import { fmtCurrency, fmtDate } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtDate, fmtNumber } from '@/shared/lib/formatters';
 import type { GenerationNote, GenerationPreview, PlanConfidence, PlanCost, PlanValidation } from './api';
 import { isParallelCrewsWarning } from './generateWindow';
 import { bandLabel, confidenceReasonText, formatScore } from './planConfidence';
@@ -259,7 +259,18 @@ function ChecksSection({ validation }: { validation: PlanValidation }) {
  * ends against the end date asked for, then one line per position whose
  * duration is an estimate or that is left out, with the numbers behind it.
  */
-export function GenerationPreviewPanel({ preview }: { preview: GenerationPreview }) {
+export function GenerationPreviewPanel({
+  preview,
+  depth = null,
+  onDepthChange,
+  depthBusy = false,
+}: {
+  preview: GenerationPreview;
+  /** Levels of sections kept as activities; null keeps every position. */
+  depth?: number | null;
+  onDepthChange?: (depth: number | null) => void;
+  depthBusy?: boolean;
+}) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const notes = showAll ? preview.notes : preview.notes.slice(0, NOTES_SHOWN);
@@ -281,6 +292,43 @@ export function GenerationPreviewPanel({ preview }: { preview: GenerationPreview
         {preview.skipped_count > 0 &&
           t('schedule.preview_skipped', { defaultValue: '{{count}} rows left out.', count: preview.skipped_count })}
       </p>
+      {onDepthChange && (preview.max_depth ?? 0) > 1 && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <label htmlFor="generate-depth" className="font-medium text-content-primary">
+            {t('schedule.preview_depth_label', { defaultValue: 'Level of detail' })}
+          </label>
+          <select
+            id="generate-depth"
+            data-testid="generate-depth"
+            value={depth == null ? '' : String(depth)}
+            disabled={depthBusy}
+            onChange={(e) => onDepthChange(e.target.value === '' ? null : Number(e.target.value))}
+            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+          >
+            <option value="">{t('schedule.preview_depth_all', { defaultValue: 'Every position' })}</option>
+            {Array.from({ length: (preview.max_depth ?? 1) - 1 }, (_, i) => i + 1).map((level) => (
+              <option key={level} value={level}>
+                {t('schedule.preview_depth_level', {
+                  defaultValue: 'Sections down to level {{level}}',
+                  level,
+                })}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-content-tertiary">
+            {(preview.rolled_up_count ?? 0) > 0
+              ? t('schedule.preview_rolled', {
+                  defaultValue:
+                    '{{sections}} sections stand for the positions under them; the dates and the total duration stay those of the full plan.',
+                  sections: preview.rolled_up_count,
+                })
+              : t('schedule.preview_depth_hint', {
+                  defaultValue: 'Sections go down {{levels}} levels. Fewer levels give fewer activities.',
+                  levels: preview.max_depth,
+                })}
+          </span>
+        </div>
+      )}
       <p className={`flex items-start gap-2 text-sm ${late ? 'text-semantic-warning' : 'text-content-secondary'}`}>
         {late && <AlertTriangle size={14} className="mt-0.5 shrink-0" />}
         {preview.requested_end == null
@@ -303,6 +351,19 @@ export function GenerationPreviewPanel({ preview }: { preview: GenerationPreview
                 requested: fmtDate(preview.requested_end),
               })}
       </p>
+      {preview.hours_per_day != null && (
+        <p className="text-xs text-content-tertiary" data-testid="preview-hours-per-day">
+          {preview.hours_source === 'calendar'
+            ? t('schedule.preview_hours_calendar', {
+                defaultValue: 'Labour hours become days at {{hours}} hours a day, from the project calendar.',
+                hours: fmtNumber(preview.hours_per_day, 1),
+              })
+            : t('schedule.preview_hours_region', {
+                defaultValue: 'Labour hours become days at {{hours}} hours a day, the regional default. A project calendar sets its own.',
+                hours: fmtNumber(preview.hours_per_day, 1),
+              })}
+        </p>
+      )}
       <p className="text-xs text-content-tertiary">
         {t('schedule.preview_crews', {
           defaultValue: 'Up to {{count}} crews work side by side in each section.',

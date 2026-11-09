@@ -600,6 +600,7 @@ async def generate_from_boq(
             replace=body.replace,
             start_date=body.start_date,
             workers_per_position=body.workers_per_position,
+            rollup_depth=body.rollup_depth,
         )
         # Re-fetch activities to avoid greenlet/lazy-loading issues
         activities, _ = await service.list_activities_for_schedule(schedule_id, limit=max(len(created), 1))
@@ -643,6 +644,7 @@ async def preview_generate_from_boq(
             body.total_project_days,
             start_date=body.start_date,
             workers_per_position=body.workers_per_position,
+            rollup_depth=body.rollup_depth,
         )
     except HTTPException:
         raise

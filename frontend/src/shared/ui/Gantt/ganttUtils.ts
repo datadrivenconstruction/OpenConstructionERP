@@ -424,6 +424,14 @@ export interface GanttActivity {
   color?: string;
   /** When set and non-empty, indicates the activity is linked to BIM elements (4D). */
   bim_element_ids?: string[];
+  /** WBS code, for the optional WBS column. */
+  wbs?: string;
+  /** Working days, for the optional duration column. */
+  durationDays?: number;
+  /** Links into this activity, written in the predecessors column. */
+  predecessors?: Array<{ code: string; type?: string | null; lag?: number | null }>;
+  /** Resources and crew as one line, for the optional resources column. */
+  resources?: string;
 }
 
 /**

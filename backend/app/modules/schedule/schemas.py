@@ -834,6 +834,16 @@ class GenerateFromBOQRequest(BaseModel):
             "total_project_days, the default window). Send the value the preview returned to write that plan."
         ),
     )
+    rollup_depth: int | None = Field(
+        default=None,
+        ge=1,
+        le=20,
+        description=(
+            "Levels of sections to keep as their own activities. Sections below that level roll up into one "
+            "activity each, with the dates of the full plan and the labour and resources summed. When omitted, "
+            "or at least the bill's depth, every position is its own activity."
+        ),
+    )
 
 
 class GenerationNote(BaseModel):
@@ -867,6 +877,14 @@ class GenerationPreviewResponse(BaseModel):
     # being lump sums gives it away all the same.
     lump_sum_positions: int = 0
     summary_count: int
+    # Levels of sections in the bill, the depth the plan was rolled up to (0 for
+    # none), the sections that stand for the work under them, and the hours a
+    # person works a day with where that figure came from.
+    max_depth: int = 0
+    rollup_depth: int = 0
+    rolled_up_count: int = 0
+    hours_per_day: float = 8.0
+    hours_source: str = "region"
     estimated_count: int
     skipped_count: int
     note_counts: dict[str, int] = Field(default_factory=dict)

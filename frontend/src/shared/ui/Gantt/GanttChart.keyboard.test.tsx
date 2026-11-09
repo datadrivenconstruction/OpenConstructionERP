@@ -27,13 +27,15 @@ function chain(n: number): GanttActivity[] {
   });
 }
 
-/** Everything a Tab press can land on. */
+/** Everything a Tab press can land on inside the chart; the table's own controls are not counted. */
 function tabStops(root: ParentNode): Element[] {
   return [
     ...root.querySelectorAll(
       '[tabindex]:not([tabindex^="-"]), button:not([tabindex^="-"]), a[href], input, select, textarea',
     ),
-  ];
+  ].filter(
+    (el) => el.getAttribute('role') !== 'separator' && el.getAttribute('data-testid') !== 'gantt-columns-button',
+  );
 }
 
 function bar(id: string) {
@@ -170,6 +172,6 @@ describe('GanttChart keyboard reach', () => {
       <GanttChart activities={chain(20)} viewMode="day" todayLine={false} onActivityClick={vi.fn()} />,
     );
     expect(tabStops(container)).toHaveLength(0);
-    expect(container.querySelector('svg')!.getAttribute('role')).toBe('img');
+    expect(container.querySelector('svg.select-none')!.getAttribute('role')).toBe('img');
   });
 });
