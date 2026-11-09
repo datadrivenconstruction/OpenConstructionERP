@@ -85,6 +85,7 @@ def _normalize_deps(deps: list | None) -> list[dict]:
     return result
 
 
+from app.modules.schedule.activity_move import MoveError, plan_move
 from app.modules.schedule.boq_plan import PlanFit
 from app.modules.schedule.constraints import normalize_constraint
 from app.modules.schedule.milestone_events import announce_if_milestone_reached
@@ -105,6 +106,7 @@ from app.modules.schedule.repository import (
 )
 from app.modules.schedule.schemas import (
     ActivityCreate,
+    ActivityMove,
     ActivityUpdate,
     CPMActivityResult,
     CriticalPathResponse,
@@ -2643,6 +2645,49 @@ class ScheduleService:
         await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=actor_id)
         return refreshed
 
+    async def move_activity(self, activity_id: uuid.UUID, data: ActivityMove) -> Activity:
+        """Move an activity, with its subtree, beside a sibling or into another section.
+
+        Rewrites ``sort_order`` for the new order and the WBS codes that follow
+        the move (see :mod:`app.modules.schedule.activity_move`).
+
+        Raises:
+            HTTPException 404 for an unknown activity, target or section; 422 for
+            a move under itself or one of its own descendants.
+        """
+        activity = await self.get_activity(activity_id)
+        schedule_id = activity.schedule_id
+        outline = await self.activity_repo.list_outline(schedule_id)
+        try:
+            plan = plan_move(
+                activity_id,
+                outline,
+                target_id=data.target_id,
+                position=data.position,
+                parent_id=data.parent_id,
+                to_top_level=data.to_top_level,
+            )
+        except MoveError as exc:
+            raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+        if not plan.changed:
+            return activity
+
+        planned = [(aid, plan.parent_id if aid == activity_id else pid, o, c) for aid, pid, o, c in outline]
+        updates: dict[uuid.UUID, dict[str, object]] = {
+            aid: {"sort_order": order} for aid, order in sort_order_changes(plan.order, planned).items()
+        }
+        for aid, code in plan.codes.items():
+            updates.setdefault(aid, {})["wbs_code"] = code
+        updates.setdefault(activity_id, {})["parent_id"] = plan.parent_id
+        await self.activity_repo.bulk_update_fields([{"id": aid, **fields} for aid, fields in updates.items()])
+        publish_after_commit(
+            self.session,
+            "schedule.activity.updated",
+            {"activity_id": str(activity_id), "schedule_id": str(schedule_id), "fields": ["parent_id", "sort_order"]},
+            source_module="oe_schedule",
+        )
+        return await self.get_activity(activity_id)
+
     async def _baseline_finish(
         self, project_id: uuid.UUID, schedule_id: uuid.UUID, activity_id: uuid.UUID
     ) -> date | None:
@@ -3437,6 +3482,8 @@ class ScheduleService:
                     assignee_id=act.assignee_id,
                     assignee_name=assignee_names.get(act.assignee_id) if act.assignee_id else None,
                     client_visible=bool(act.client_visible),
+                    constraint_type=normalize_constraint(act.constraint_type),
+                    constraint_date=act.constraint_date,
                     metadata=act.metadata_ or {},
                 )
             )

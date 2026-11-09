@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, RotateCcw, GitBranch, Diamond, Minus, Users, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, RotateCcw, GitBranch, Diamond, Minus, Users, Trash2, ChevronRight, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button, Badge, Card } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { listCalendars } from '@/features/schedule-advanced/api';
 import { listAssignmentsForActivity, listResources } from '@/features/resources/api';
 import { AssigneePicker, type AssigneeValue } from '@/features/contacts/AssigneePicker';
-import { scheduleApi, type Activity } from './api';
+import { scheduleApi, type Activity, type ActivityMoveRequest } from './api';
+import { siblingMoves } from './activityMove';
 import { orderAsTree } from './activityTree';
 import { ActivityDeleteDialog, activityDeleteTarget, type ActivityDeleteTarget } from './ActivityDeleteDialog';
 import { scheduleErrorMessage } from './errors';
@@ -109,6 +110,7 @@ export function ActivityGrid({
 
   const [deleteTarget, setDeleteTarget] = useState<ActivityDeleteTarget | null>(null);
   const canDelete = useHasPermission('schedule.delete');
+  const canMove = useHasPermission('schedule.update');
 
   const invalidateGantt = () =>
     queryClient.invalidateQueries({ queryKey: ['gantt', scheduleId] });
@@ -303,6 +305,20 @@ export function ActivityGrid({
     },
   });
 
+  // Reordering keeps the subtree together and renumbers WBS codes on the server.
+  const moveMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: ActivityMoveRequest }) => scheduleApi.moveActivity(id, body),
+    onSuccess: invalidateGantt,
+    onError: (error: Error) => {
+      addToast({
+        type: 'error',
+        title: t('schedule.move_failed', { defaultValue: 'Could not move the activity' }),
+        message: scheduleErrorMessage(error, t),
+      });
+      invalidateGantt();
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: ({ id, cascade }: { id: string; cascade: boolean }) => scheduleApi.deleteActivity(id, cascade),
     onSuccess: () => {
@@ -493,6 +509,8 @@ export function ActivityGrid({
                 const isMilestone = a.activity_type === 'milestone';
                 const isSummary = a.activity_type === 'summary';
                 const assignQuery = assignmentQueries[rowIdx];
+                const moves = siblingMoves(a.id, outline);
+                const moveChoices = sectionOptions.filter((sec) => !subtreeOf(a.id).has(sec.id) && sec.id !== a.parent_id);
                 // Cancelled bookings staff nothing, so they are not shown. An
                 // id the register did not return still counts: dropping it
                 // would under-report the row rather than admit the gap.
@@ -512,6 +530,13 @@ export function ActivityGrid({
                     className={`border-b border-border-light transition-colors hover:bg-surface-secondary/20${
                       isCritical ? ' bg-semantic-error/5' : ''
                     }`}
+                    onKeyDown={(e) => {
+                      // Alt+Up / Alt+Down moves the row among its siblings.
+                      if (!canMove || !e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+                      const body = e.key === 'ArrowUp' ? moves.up : moves.down;
+                      e.preventDefault();
+                      if (body && !moveMutation.isPending) moveMutation.mutate({ id: a.id, body });
+                    }}
                   >
                     <td className="px-3 py-1.5 align-middle tabular-nums text-content-tertiary">
                       {a.wbs_code || '-'}
@@ -733,7 +758,58 @@ export function ActivityGrid({
                           : t('schedule.add_predecessor', { defaultValue: 'Add predecessor' })}
                       </button>
                     </td>
-                    <td className="px-2 py-1.5 text-right align-middle">
+                    <td className="whitespace-nowrap px-2 py-1.5 text-right align-middle">
+                      {canMove && (
+                        <>
+                          <button
+                            type="button"
+                            data-testid={`grid-move-up-${a.id}`}
+                            onClick={() => moves.up && moveMutation.mutate({ id: a.id, body: moves.up })}
+                            disabled={!moves.up || moveMutation.isPending}
+                            title={t('schedule.move_up', { defaultValue: 'Move up' })}
+                            aria-label={t('schedule.move_up', { defaultValue: 'Move up' })}
+                            className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            data-testid={`grid-move-down-${a.id}`}
+                            onClick={() => moves.down && moveMutation.mutate({ id: a.id, body: moves.down })}
+                            disabled={!moves.down || moveMutation.isPending}
+                            title={t('schedule.move_down', { defaultValue: 'Move down' })}
+                            aria-label={t('schedule.move_down', { defaultValue: 'Move down' })}
+                            className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
+                          >
+                            <ArrowDown size={14} />
+                          </button>
+                          <select
+                            data-testid={`grid-move-to-${a.id}`}
+                            aria-label={t('schedule.move_to_section', { defaultValue: 'Move to section...' })}
+                            className="ms-1 h-6 w-7 cursor-pointer rounded-md border border-border-light bg-transparent text-2xs text-content-secondary"
+                            value=""
+                            disabled={moveMutation.isPending}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (!v) return;
+                              moveMutation.mutate({
+                                id: a.id,
+                                body: v === '__top__' ? { to_top_level: true } : { parent_id: v },
+                              });
+                            }}
+                          >
+                            <option value="">{t('schedule.move_to_section', { defaultValue: 'Move to section...' })}</option>
+                            {a.parent_id && (
+                              <option value="__top__">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
+                            )}
+                            {moveChoices.map((sec) => (
+                              <option key={sec.id} value={sec.id}>
+                                {sec.wbs_code ? `${sec.wbs_code} ${sec.name}` : sec.name}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
                       {canDelete && (
                         <button
                           type="button"

@@ -332,6 +332,33 @@ class ActivityCreate(BaseModel):
         return self
 
 
+class ActivityMove(BaseModel):
+    """Move an activity, with its subtree, among its siblings or into another section.
+
+    Exactly one destination: ``target_id`` with ``position`` (beside that
+    activity, under its parent), ``parent_id`` (last child of that section), or
+    ``to_top_level`` (end of the top level).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_id: UUID | None = None
+    position: Literal["before", "after"] | None = None
+    parent_id: UUID | None = None
+    to_top_level: bool = False
+
+    @model_validator(mode="after")
+    def _one_destination(self) -> Self:
+        chosen = sum([self.target_id is not None, self.parent_id is not None, self.to_top_level])
+        if chosen != 1:
+            raise ValueError("give exactly one of target_id, parent_id or to_top_level")
+        if self.target_id is not None and self.position is None:
+            raise ValueError("position is required with target_id")
+        if self.target_id is None and self.position is not None:
+            raise ValueError("position only applies with target_id")
+        return self
+
+
 class ActivityUpdate(BaseModel):
     """Partial update for an activity.
 
@@ -691,6 +718,10 @@ class GanttActivity(BaseModel):
     assignee_name: str | None = None
     # Shown to the client in the portal's upcoming milestones.
     client_visible: bool = False
+    # Scheduling constraint, so the table and the bar's detail panel can show
+    # the "start no earlier than" floor a dragged bar leaves behind.
+    constraint_type: str | None = None
+    constraint_date: str | None = None
     # Activity metadata passthrough. Generated activities carry provenance
     # markers here (e.g. duration_source/duration_method = "estimated_fallback"
     # when the duration was estimated from unit-based production rates), which
