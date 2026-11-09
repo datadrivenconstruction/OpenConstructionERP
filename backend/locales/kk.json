@@ -1485,7 +1485,11 @@
         "status_final": "Соңғы",
         "status_archived": "Мұрағатталған",
         "subject": "Жұмыс көлемдерінің ведомосі",
-        "tax_vat": "ҚҚС"
+        "tax_vat": "ҚҚС",
+        "client": "Тапсырыс беруші",
+        "client_address": "Тапсырыс берушінің мекенжайы",
+        "project_number": "Жоба нөмірі",
+        "payment_terms": "Төлем шарттары"
       }
     },
     "einvoice_pdf": {

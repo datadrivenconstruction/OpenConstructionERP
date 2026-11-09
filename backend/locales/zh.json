@@ -1453,7 +1453,11 @@
         "gross_total": "Gross Total",
         "page": "Page",
         "of": "of",
-        "generated": "Generated:"
+        "generated": "Generated:",
+        "client": "客户",
+        "client_address": "客户地址",
+        "project_number": "项目编号",
+        "payment_terms": "付款条款"
       }
     },
     "einvoice_pdf": {

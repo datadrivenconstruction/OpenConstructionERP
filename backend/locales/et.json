@@ -1469,7 +1469,11 @@
         "status_final": "Lõplik",
         "status_archived": "Arhiveeritud",
         "subject": "Koguste nimekiri",
-        "tax_vat": "KM"
+        "tax_vat": "KM",
+        "client": "Klient",
+        "client_address": "Kliendi aadress",
+        "project_number": "Projekti number",
+        "payment_terms": "Maksetingimused"
       }
     },
     "einvoice_pdf": {

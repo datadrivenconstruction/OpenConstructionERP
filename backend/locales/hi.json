@@ -1485,7 +1485,11 @@
         "status_final": "अंतिम",
         "status_archived": "संग्रहीत",
         "subject": "मात्रा सूची (Bill of Quantities)",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "ग्राहक",
+        "client_address": "ग्राहक का पता",
+        "project_number": "परियोजना संख्या",
+        "payment_terms": "भुगतान की शर्तें"
       }
     },
     "einvoice_pdf": {

@@ -1469,7 +1469,11 @@
         "status_final": "Definitivo",
         "status_archived": "Archiviato",
         "subject": "Computo metrico estimativo",
-        "tax_vat": "IVA"
+        "tax_vat": "IVA",
+        "client": "Cliente",
+        "client_address": "Indirizzo del cliente",
+        "project_number": "Numero di progetto",
+        "payment_terms": "Condizioni di pagamento"
       }
     },
     "einvoice_pdf": {

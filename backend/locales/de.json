@@ -1450,7 +1450,11 @@
         "status_final": "Freigegeben",
         "status_archived": "Archiviert",
         "subject": "Leistungsverzeichnis",
-        "tax_vat": "MwSt."
+        "tax_vat": "MwSt.",
+        "client": "Auftraggeber",
+        "client_address": "Anschrift des Auftraggebers",
+        "project_number": "Projektnummer",
+        "payment_terms": "Zahlungsbedingungen"
       }
     },
     "report": {

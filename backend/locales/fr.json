@@ -1469,7 +1469,11 @@
         "status_final": "Validé",
         "status_archived": "Archivé",
         "subject": "Détail quantitatif estimatif",
-        "tax_vat": "TVA"
+        "tax_vat": "TVA",
+        "client": "Client",
+        "client_address": "Adresse du client",
+        "project_number": "Numéro de projet",
+        "payment_terms": "Conditions de paiement"
       }
     },
     "einvoice_pdf": {

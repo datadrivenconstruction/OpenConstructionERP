@@ -1469,7 +1469,11 @@
         "status_final": "Lopullinen",
         "status_archived": "Arkistoitu",
         "subject": "Määrä- ja kustannusluettelo",
-        "tax_vat": "ALV"
+        "tax_vat": "ALV",
+        "client": "Asiakas",
+        "client_address": "Asiakkaan osoite",
+        "project_number": "Projektinumero",
+        "payment_terms": "Maksuehdot"
       }
     },
     "einvoice_pdf": {

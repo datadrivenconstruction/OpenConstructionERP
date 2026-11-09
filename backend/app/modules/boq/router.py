@@ -133,6 +133,7 @@ from app.modules.boq.importers.excel import (
     summary_row_warning,
 )
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
+from app.modules.boq.pdf_details_router import pdf_details_router
 from app.modules.boq.resource_review_router import resource_review_router
 from app.modules.boq.roundtrip import (
     EXPORT_META_SHEET,
@@ -266,6 +267,7 @@ router.include_router(change_review_router)
 router.include_router(gaeb_exchange_router)
 router.include_router(exchange_fidelity_router)
 router.include_router(branch_router)
+router.include_router(pdf_details_router)
 _log = logging.getLogger(__name__)
 
 
@@ -5720,6 +5722,12 @@ async def export_boq_pdf(
             detail="Project not found for this BOQ",
         )
 
+    from app.modules.boq.pdf_details import read_details
+
+    _pdf_details = read_details(project.metadata_)
+    if not _pdf_details.project_number and project.project_code:
+        _pdf_details.project_number = project.project_code
+
     # Try to get the owner name for "Prepared by"
     prepared_by = ""
     owner = await session.get(User, project.owner_id)
@@ -5761,6 +5769,7 @@ async def export_boq_pdf(
                 page_format=_page_format,
                 base_currency=fx_base,
                 fx_rates=fx_map,
+                details=_pdf_details,
             )
         else:
             import asyncio
@@ -5791,6 +5800,7 @@ async def export_boq_pdf(
                 base_currency=fx_base,
                 fx_rates=fx_map,
                 include_resources=include_resources,
+                details=_pdf_details,
             )
     except Exception:
         _log.exception("PDF generation failed for BOQ %s", boq_id)

@@ -1469,7 +1469,11 @@
         "status_final": "Endelig",
         "status_archived": "Arkivert",
         "subject": "Mengdeliste",
-        "tax_vat": "Mva."
+        "tax_vat": "Mva.",
+        "client": "Kunde",
+        "client_address": "Kundens adresse",
+        "project_number": "Prosjektnummer",
+        "payment_terms": "Betalingsbetingelser"
       }
     },
     "einvoice_pdf": {

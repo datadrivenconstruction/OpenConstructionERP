@@ -1469,7 +1469,11 @@
         "status_final": "Οριστικό",
         "status_archived": "Αρχειοθετημένο",
         "subject": "Προϋπολογισμός ποσοτήτων",
-        "tax_vat": "ΦΠΑ"
+        "tax_vat": "ΦΠΑ",
+        "client": "Πελάτης",
+        "client_address": "Διεύθυνση πελάτη",
+        "project_number": "Αριθμός έργου",
+        "payment_terms": "Όροι πληρωμής"
       }
     },
     "einvoice_pdf": {

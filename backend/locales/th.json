@@ -1469,7 +1469,11 @@
         "status_final": "ฉบับสมบูรณ์",
         "status_archived": "จัดเก็บแล้ว",
         "subject": "ใบแจ้งปริมาณงาน",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "ลูกค้า",
+        "client_address": "ที่อยู่ลูกค้า",
+        "project_number": "หมายเลขโครงการ",
+        "payment_terms": "เงื่อนไขการชำระเงิน"
       }
     },
     "einvoice_pdf": {

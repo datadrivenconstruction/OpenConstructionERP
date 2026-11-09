@@ -7,6 +7,18 @@ import { toNum } from '@/shared/lib/money';
 
 /* ── Core BOQ types ──────────────────────────────────────────────────── */
 
+/** Optional columns of the printed estimate; description, position and total always print. */
+export type PdfOptionalColumn = 'qty_unit' | 'rate';
+
+export interface PdfDetails {
+  client_name: string;
+  client_address: string;
+  project_number: string;
+  site_address: string;
+  payment_terms: string;
+  hidden_columns: PdfOptionalColumn[];
+}
+
 export interface BOQ {
   id: string;
   project_id: string;
@@ -1988,6 +2000,10 @@ export const boqApi = {
   /** Rename an estimate or change its description. */
   update: (boqId: string, data: { name?: string; description?: string; metadata?: Record<string, unknown> }) =>
     apiPatch<BOQ>(`/v1/boq/boqs/${boqId}`, data),
+  /** Client, site, payment terms and hidden columns of the project's estimate PDF. */
+  getPdfDetails: (projectId: string) => apiGet<PdfDetails>(`/v1/boq/projects/${projectId}/pdf-details/`),
+  putPdfDetails: (projectId: string, body: PdfDetails) =>
+    apiPut<PdfDetails>(`/v1/boq/projects/${projectId}/pdf-details/`, body),
   /** What an export with markups folded into the unit rates would carry. Read only. */
   embeddingPreview: (boqId: string) =>
     apiGet<EmbeddingPreview>(`/v1/boq/boqs/${boqId}/export/embedding-preview/`),

@@ -1,5 +1,20 @@
 {
-  "capital_plan": {"export": {"sheet": "মূলধন পরিকল্পনা", "col": {"title": "প্রকল্প", "priority": "অগ্রাধিকার", "status": "অবস্থা", "total": "মোট ব্যয়"}, "row": {"envelope": "বাজেট সীমা", "demand": "চাহিদা", "gap": "ঘাটতি"}}},
+  "capital_plan": {
+    "export": {
+      "sheet": "মূলধন পরিকল্পনা",
+      "col": {
+        "title": "প্রকল্প",
+        "priority": "অগ্রাধিকার",
+        "status": "অবস্থা",
+        "total": "মোট ব্যয়"
+      },
+      "row": {
+        "envelope": "বাজেট সীমা",
+        "demand": "চাহিদা",
+        "gap": "ঘাটতি"
+      }
+    }
+  },
   "costs.catalog_name_unavailable": "এই নাম নতুন ক্যাটালগের জন্য ব্যবহার করা যাবে না। অন্য নাম বেছে নিন।",
   "app": {
     "name": "OpenConstructionERP",
@@ -1402,7 +1417,11 @@
         "status_final": "চূড়ান্ত",
         "status_archived": "আর্কাইভকৃত",
         "subject": "পরিমাণ বিবরণী",
-        "tax_vat": "ভ্যাট"
+        "tax_vat": "ভ্যাট",
+        "client": "ক্লায়েন্ট",
+        "client_address": "ক্লায়েন্টের ঠিকানা",
+        "project_number": "প্রকল্প নম্বর",
+        "payment_terms": "পরিশোধের শর্ত"
       }
     },
     "einvoice_pdf": {

@@ -1469,7 +1469,11 @@
         "status_final": "Jóváhagyva",
         "status_archived": "Archiválva",
         "subject": "Költségvetés",
-        "tax_vat": "ÁFA"
+        "tax_vat": "ÁFA",
+        "client": "Megrendelő",
+        "client_address": "A megrendelő címe",
+        "project_number": "Projektszám",
+        "payment_terms": "Fizetési feltételek"
       }
     },
     "einvoice_pdf": {

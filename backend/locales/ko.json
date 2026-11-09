@@ -1469,7 +1469,11 @@
         "status_final": "확정",
         "status_archived": "보관",
         "subject": "공사 내역서",
-        "tax_vat": "부가가치세"
+        "tax_vat": "부가가치세",
+        "client": "고객",
+        "client_address": "고객 주소",
+        "project_number": "프로젝트 번호",
+        "payment_terms": "지급 조건"
       }
     },
     "einvoice_pdf": {

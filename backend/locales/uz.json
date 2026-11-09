@@ -1485,7 +1485,11 @@
         "status_final": "Yakuniy",
         "status_archived": "Arxivlangan",
         "subject": "Hajmlar ro'yxati (BOQ)",
-        "tax_vat": "QQS"
+        "tax_vat": "QQS",
+        "client": "Buyurtmachi",
+        "client_address": "Buyurtmachi manzili",
+        "project_number": "Loyiha raqami",
+        "payment_terms": "Toʻlov shartlari"
       }
     },
     "einvoice_pdf": {

@@ -1469,7 +1469,11 @@
         "status_final": "Final",
         "status_archived": "Diarsipkan",
         "subject": "Daftar Kuantitas dan Harga (Bill of Quantities)",
-        "tax_vat": "PPN"
+        "tax_vat": "PPN",
+        "client": "Klien",
+        "client_address": "Alamat klien",
+        "project_number": "Nomor proyek",
+        "payment_terms": "Ketentuan pembayaran"
       }
     },
     "einvoice_pdf": {

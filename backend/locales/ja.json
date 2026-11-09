@@ -1469,7 +1469,11 @@
         "status_final": "確定",
         "status_archived": "保管済み",
         "subject": "数量内訳書",
-        "tax_vat": "消費税"
+        "tax_vat": "消費税",
+        "client": "発注者",
+        "client_address": "発注者の住所",
+        "project_number": "プロジェクト番号",
+        "payment_terms": "支払条件"
       }
     },
     "einvoice_pdf": {

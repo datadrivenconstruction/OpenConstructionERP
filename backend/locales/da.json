@@ -1469,7 +1469,11 @@
         "status_final": "Endelig",
         "status_archived": "Arkiveret",
         "subject": "Mængdefortegnelse",
-        "tax_vat": "Moms"
+        "tax_vat": "Moms",
+        "client": "Kunde",
+        "client_address": "Kundens adresse",
+        "project_number": "Projektnummer",
+        "payment_terms": "Betalingsbetingelser"
       }
     },
     "einvoice_pdf": {

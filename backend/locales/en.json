@@ -1474,7 +1474,11 @@
         "status_final": "Final",
         "status_archived": "Archived",
         "subject": "Bill of Quantities",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "Client",
+        "client_address": "Client address",
+        "project_number": "Project number",
+        "payment_terms": "Payment terms"
       }
     },
     "report": {

@@ -1474,7 +1474,11 @@
         "status_final": "نهائي",
         "status_archived": "مؤرشف",
         "subject": "جدول الكميات",
-        "tax_vat": "ضريبة القيمة المضافة"
+        "tax_vat": "ضريبة القيمة المضافة",
+        "client": "العميل",
+        "client_address": "عنوان العميل",
+        "project_number": "رقم المشروع",
+        "payment_terms": "شروط الدفع"
       }
     },
     "einvoice_pdf": {

@@ -1469,7 +1469,11 @@
         "status_final": "Aprovado",
         "status_archived": "Arquivado",
         "subject": "Orçamento",
-        "tax_vat": "IVA"
+        "tax_vat": "IVA",
+        "client": "Cliente",
+        "client_address": "Morada do cliente",
+        "project_number": "Número do projeto",
+        "payment_terms": "Condições de pagamento"
       }
     },
     "einvoice_pdf": {

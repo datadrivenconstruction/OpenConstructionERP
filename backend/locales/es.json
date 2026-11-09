@@ -1469,7 +1469,11 @@
         "status_final": "Aprobado",
         "status_archived": "Archivado",
         "subject": "Presupuesto y mediciones",
-        "tax_vat": "IVA"
+        "tax_vat": "IVA",
+        "client": "Cliente",
+        "client_address": "Dirección del cliente",
+        "project_number": "Número de proyecto",
+        "payment_terms": "Condiciones de pago"
       }
     },
     "einvoice_pdf": {

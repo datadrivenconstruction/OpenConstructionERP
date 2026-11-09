@@ -128,6 +128,7 @@ from app.core.unit_conversion import convert as convert_units
 from app.core.unit_conversion import display_rate
 from app.modules.boq.ai_provenance import AI_MARK_TOKEN, ai_origin
 from app.modules.boq.drawing_refs import export_text as drawing_export_text
+from app.modules.boq.pdf_details import PdfDetails, drop_columns
 
 # Register the bundled Unicode (DejaVu) faces with reportlab. Idempotent and
 # safe at import time because reportlab is imported at module level here.
@@ -800,6 +801,7 @@ def _build_cover_page(
     labels: dict[str, str] | None = None,
     usable_width: float = 0,
     letterhead: Any | None = None,
+    details: PdfDetails | None = None,
 ) -> list[Any]:
     """Build the list of flowables for the cover page.
 
@@ -864,6 +866,19 @@ def _build_cover_page(
         (lb["status"], _status_label(boq_data.status, lb)),
         (lb["contents"], contents),
     ]
+    if details is not None:
+        # Only what the project filled in; the labels fall back to English
+        # like every other label of this document.
+        info_rows.extend(
+            (label, value)
+            for label, value in (
+                (lb["client"], details.client_name),
+                (lb["client_address"], details.client_address.replace("\n", ", ")),
+                (lb["project_number"], details.project_number),
+                (lb["offer_site"], details.site_address.replace("\n", ", ")),
+            )
+            if value
+        )
 
     info_table_data = []
     for label, value in info_rows:
@@ -1009,6 +1024,7 @@ def _build_boq_table(
     fx_rates: Mapping[str, str] | None = None,
     include_resources: bool = False,
     page_marks: dict[str, int] | None = None,
+    hidden_columns: list[str] | None = None,
 ) -> list[Any]:
     """Build the BOQ table flowables (sections, positions, totals).
 
@@ -1299,7 +1315,9 @@ def _build_boq_table(
     row_idx += 1
 
     # Build the table
-    table = Table(table_data, colWidths=table_widths, repeatRows=1)
+    table = Table(
+        table_data, colWidths=drop_columns(table_data, list(table_widths), hidden_columns or []), repeatRows=1
+    )
 
     # Base table style
     style_commands: list[Any] = [
@@ -1529,6 +1547,18 @@ def _section_summary_table(
     return table
 
 
+def _payment_terms_block(
+    details: PdfDetails | None, styles: dict[str, ParagraphStyle], lb: dict[str, str]
+) -> list[Any]:
+    """The project's payment terms under the totals, so they close the document; empty when none are set."""
+    if details is None or not details.payment_terms:
+        return []
+    out: list[Any] = [Spacer(1, 8 * mm), _safe_para(lb["payment_terms"], styles["section_header"], bold=True)]
+    out.append(Spacer(1, 2 * mm))
+    out.extend(_safe_para(line, styles["cell"]) for line in details.payment_terms.split("\n") if line.strip())
+    return out
+
+
 def _cost_totals_table(
     boq_data: Any,
     currency: str,
@@ -1618,6 +1648,7 @@ def generate_boq_pdf(
     base_currency: str = "",
     fx_rates: Mapping[str, str] | None = None,
     include_resources: bool = False,
+    details: PdfDetails | None = None,
 ) -> bytes:
     """Generate a professional PDF cost estimate report.
 
@@ -1749,6 +1780,7 @@ def generate_boq_pdf(
                 labels=labels,
                 usable_width=uw,
                 letterhead=_letterhead(),
+                details=details,
             )
         )
         flowables.append(NextPageTemplate("table"))
@@ -1772,6 +1804,7 @@ def generate_boq_pdf(
                 fx_rates=fx_rates,
                 include_resources=include_resources,
                 page_marks=page_marks,
+                hidden_columns=details.hidden_columns if details else None,
             )
         )
         # The cost summary page: each section's subtotal on one page, then the
@@ -1796,6 +1829,7 @@ def generate_boq_pdf(
         )
         flowables.append(Spacer(1, 6 * mm))
         flowables.append(_cost_totals_table(boq_data, currency, styles, labels, uw, country_code=country_code))
+        flowables.extend(_payment_terms_block(details, styles, labels))
         return flowables
 
     # Two-pass build: the first counts the pages and records where each part of
@@ -1928,6 +1962,7 @@ def generate_boq_pdf_simple(
     *,
     base_currency: str = "",
     fx_rates: Mapping[str, str] | None = None,
+    details: PdfDetails | None = None,
 ) -> bytes:
     """Generate a simplified PDF for large BOQs (> 500 positions).
 
@@ -2037,6 +2072,7 @@ def generate_boq_pdf_simple(
             labels=lb,
             usable_width=uw,
             letterhead=branded_letterhead(uw - 12),
+            details=details,
         )
     )
 
@@ -2068,6 +2104,7 @@ def generate_boq_pdf_simple(
     flowables.append(_safe_para(f"{lb['cost_summary']}", styles["section_header"], bold=True))
     flowables.append(Spacer(1, 3 * mm))
     flowables.append(_cost_totals_table(boq_data, currency, styles, lb, uw, country_code=country_code))
+    flowables.extend(_payment_terms_block(details, styles, lb))
 
     # Single-pass build (no two-pass for page count - acceptable trade-off
     # for large BOQs; footer shows "Page X" without " of Y")

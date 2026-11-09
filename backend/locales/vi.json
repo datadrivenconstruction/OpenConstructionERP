@@ -1469,7 +1469,11 @@
         "status_final": "Chính thức",
         "status_archived": "Lưu trữ",
         "subject": "Bảng khối lượng",
-        "tax_vat": "Thuế GTGT"
+        "tax_vat": "Thuế GTGT",
+        "client": "Khách hàng",
+        "client_address": "Địa chỉ khách hàng",
+        "project_number": "Số dự án",
+        "payment_terms": "Điều khoản thanh toán"
       }
     },
     "einvoice_pdf": {

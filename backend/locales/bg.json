@@ -1469,7 +1469,11 @@
         "status_final": "Окончателна",
         "status_archived": "Архивирана",
         "subject": "Количествена сметка",
-        "tax_vat": "ДДС"
+        "tax_vat": "ДДС",
+        "client": "Клиент",
+        "client_address": "Адрес на клиента",
+        "project_number": "Номер на проекта",
+        "payment_terms": "Условия на плащане"
       }
     },
     "einvoice_pdf": {

@@ -1469,7 +1469,11 @@
         "status_final": "Ostateczny",
         "status_archived": "Zarchiwizowany",
         "subject": "Przedmiar robót",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "Klient",
+        "client_address": "Adres klienta",
+        "project_number": "Numer projektu",
+        "payment_terms": "Warunki płatności"
       }
     },
     "einvoice_pdf": {

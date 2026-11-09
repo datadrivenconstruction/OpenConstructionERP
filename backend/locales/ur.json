@@ -1474,7 +1474,11 @@
         "status_final": "حتمی",
         "status_archived": "محفوظ شدہ",
         "subject": "مقداروں کا بل",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "گاہک",
+        "client_address": "گاہک کا پتہ",
+        "project_number": "منصوبے کا نمبر",
+        "payment_terms": "ادائیگی کی شرائط"
       }
     },
     "einvoice_pdf": {

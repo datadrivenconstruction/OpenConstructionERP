@@ -1469,7 +1469,11 @@
         "status_final": "Slutlig",
         "status_archived": "Arkiverad",
         "subject": "Mängdförteckning",
-        "tax_vat": "Moms"
+        "tax_vat": "Moms",
+        "client": "Kund",
+        "client_address": "Kundens adress",
+        "project_number": "Projektnummer",
+        "payment_terms": "Betalningsvillkor"
       }
     },
     "einvoice_pdf": {

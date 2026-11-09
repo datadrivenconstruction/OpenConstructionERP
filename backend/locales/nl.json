@@ -1469,7 +1469,11 @@
         "status_final": "Definitief",
         "status_archived": "Gearchiveerd",
         "subject": "Aanbestedingsstaat",
-        "tax_vat": "btw"
+        "tax_vat": "btw",
+        "client": "Opdrachtgever",
+        "client_address": "Adres opdrachtgever",
+        "project_number": "Projectnummer",
+        "payment_terms": "Betalingsvoorwaarden"
       }
     },
     "einvoice_pdf": {

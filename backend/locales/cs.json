@@ -1469,7 +1469,11 @@
         "status_final": "Finální",
         "status_archived": "Archivováno",
         "subject": "Výkaz výměr",
-        "tax_vat": "DPH"
+        "tax_vat": "DPH",
+        "client": "Zákazník",
+        "client_address": "Adresa zákazníka",
+        "project_number": "Číslo projektu",
+        "payment_terms": "Platební podmínky"
       }
     },
     "einvoice_pdf": {

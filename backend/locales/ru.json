@@ -1450,7 +1450,11 @@
         "status_final": "Утверждена",
         "status_archived": "В архиве",
         "subject": "Смета",
-        "tax_vat": "НДС"
+        "tax_vat": "НДС",
+        "client": "Заказчик",
+        "client_address": "Адрес заказчика",
+        "project_number": "Номер проекта",
+        "payment_terms": "Условия оплаты"
       }
     },
     "report": {

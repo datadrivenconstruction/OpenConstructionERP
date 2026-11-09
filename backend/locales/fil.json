@@ -1469,7 +1469,11 @@
         "status_final": "Pinal",
         "status_archived": "Naka-arkibo",
         "subject": "Bill of Quantities",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "Kliyente",
+        "client_address": "Address ng kliyente",
+        "project_number": "Numero ng proyekto",
+        "payment_terms": "Mga tuntunin sa pagbabayad"
       }
     },
     "einvoice_pdf": {

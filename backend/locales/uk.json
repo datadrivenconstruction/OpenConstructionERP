@@ -1469,7 +1469,11 @@
         "status_final": "Затверджено",
         "status_archived": "В архіві",
         "subject": "Кошторис",
-        "tax_vat": "ПДВ"
+        "tax_vat": "ПДВ",
+        "client": "Замовник",
+        "client_address": "Адреса замовника",
+        "project_number": "Номер проєкту",
+        "payment_terms": "Умови оплати"
       }
     },
     "einvoice_pdf": {

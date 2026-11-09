@@ -1469,7 +1469,11 @@
         "status_final": "Konačno",
         "status_archived": "Arhivirano",
         "subject": "Troškovnik",
-        "tax_vat": "PDV"
+        "tax_vat": "PDV",
+        "client": "Naručitelj",
+        "client_address": "Adresa naručitelja",
+        "project_number": "Broj projekta",
+        "payment_terms": "Uvjeti plaćanja"
       }
     },
     "einvoice_pdf": {

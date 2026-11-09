@@ -1485,7 +1485,11 @@
         "status_final": "Акыркы",
         "status_archived": "Архивделген",
         "subject": "Ишке керектүү материалдар ведомосту",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "client": "Буйрутмачы",
+        "client_address": "Буйрутмачынын дареги",
+        "project_number": "Долбоордун номери",
+        "payment_terms": "Төлөм шарттары"
       }
     },
     "einvoice_pdf": {

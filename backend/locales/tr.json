@@ -1445,7 +1445,11 @@
         "status_final": "Onaylandı",
         "status_archived": "Arşivlendi",
         "subject": "Keşif ve metraj",
-        "tax_vat": "KDV"
+        "tax_vat": "KDV",
+        "client": "Müşteri",
+        "client_address": "Müşteri adresi",
+        "project_number": "Proje numarası",
+        "payment_terms": "Ödeme koşulları"
       }
     },
     "einvoice_pdf": {

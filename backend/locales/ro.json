@@ -1469,7 +1469,11 @@
         "status_final": "Final",
         "status_archived": "Arhivat",
         "subject": "Devizul de cantități",
-        "tax_vat": "TVA"
+        "tax_vat": "TVA",
+        "client": "Client",
+        "client_address": "Adresa clientului",
+        "project_number": "Număr proiect",
+        "payment_terms": "Condiții de plată"
       }
     },
     "einvoice_pdf": {
