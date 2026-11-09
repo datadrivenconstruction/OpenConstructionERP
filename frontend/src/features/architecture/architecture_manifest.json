@@ -252978,6 +252978,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "activity_move.py",
         "boq_plan.py",
         "codes_bandtree.py",
         "codes_grouped.py",
@@ -253965,6 +253966,13 @@
           "request_schema": "ActivityUpdate"
         },
         {
+          "method": "POST",
+          "path": "/activities/{activity_id}/move/",
+          "handler": "move_activity",
+          "response_model": "ActivityResponse",
+          "request_schema": "ActivityMove"
+        },
+        {
           "method": "DELETE",
           "path": "/activities/{activity_id}",
           "handler": "delete_activity",
@@ -254563,6 +254571,35 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "ActivityMove",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Move an activity, with its subtree, among its siblings or into another section.\n\nExactly one destination: ``target_id`` with ``position`` (beside that\nactivity, under its parent), ``parent_id`` (last child of that section), or\n``to_top_level`` (end of the top level).",
+          "fields": [
+            {
+              "name": "target_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "position",
+              "type": "Literal['before', 'after'] | None",
+              "default": "None"
+            },
+            {
+              "name": "parent_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "to_top_level",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -255302,6 +255339,16 @@
               "default": "False"
             },
             {
+              "name": "constraint_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "constraint_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -255560,6 +255607,11 @@
               "name": "workers_per_position",
               "type": "int | None",
               "description": "Workers on each position whose bill gives hours but no crew, at least. When omitted, the fewest from 1 to 20 that fit the window without shortening any duration (without total_project_days, the default window). Send the value the preview returned to write that plan."
+            },
+            {
+              "name": "rollup_depth",
+              "type": "int | None",
+              "description": "Levels of sections to keep as their own activities. Sections below that level roll up into one activity each, with the dates of the full plan and the labour and resources summed. When omitted, or at least the bill's depth, every position is its own activity."
             }
           ]
         },
@@ -255638,6 +255690,31 @@
             {
               "name": "summary_count",
               "type": "int"
+            },
+            {
+              "name": "max_depth",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "rollup_depth",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "rolled_up_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "hours_per_day",
+              "type": "float",
+              "default": "8.0"
+            },
+            {
+              "name": "hours_source",
+              "type": "str",
+              "default": "'region'"
             },
             {
               "name": "estimated_count",
@@ -273857,7 +273934,7 @@
           "method": "GET",
           "path": "/devices/{device_id}/readings/audit",
           "handler": "reading_audit",
-          "response_model": "list[ReadingAuditOut]",
+          "response_model": "ReadingAuditListResponse",
           "request_schema": "None"
         },
         {
@@ -275027,6 +275104,33 @@
               "name": "bim_element_id",
               "type": "UUID | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadingAuditListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Page of ReadingAuditOut.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ReadingAuditOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         },
@@ -315955,10 +316059,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 87,
+      "ts_files": 93,
       "css_files": 0,
-      "test_files": 38,
-      "total_files": 87
+      "test_files": 41,
+      "total_files": 93
     },
     {
       "name": "schedule-advanced",
@@ -315990,10 +316094,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 68,
+      "ts_files": 70,
       "css_files": 0,
-      "test_files": 23,
-      "total_files": 68
+      "test_files": 24,
+      "total_files": 70
     },
     {
       "name": "setup",
@@ -318117,11 +318221,11 @@
     "total_models": 907,
     "total_columns": 10637,
     "total_relationships": 261,
-    "total_routes": 5204,
-    "total_schemas": 4716,
-    "total_python_files": 3339,
+    "total_routes": 5205,
+    "total_schemas": 4718,
+    "total_python_files": 3340,
     "frontend_features": 237,
-    "frontend_ts_files": 4138,
+    "frontend_ts_files": 4146,
     "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {
