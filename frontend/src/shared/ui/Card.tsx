@@ -26,6 +26,10 @@ export function Card({
     <div
       className={clsx(
         'oe-card rounded-xl border border-border-light bg-surface-elevated',
+        // transform-gpu makes every card its own stacking context, so a dropdown
+        // opened inside it would paint under the next card. Lift the card that holds
+        // focus or an open popup above its siblings (below the sticky header, z-30).
+        'relative focus-within:z-20 has-[[aria-expanded=true]]:z-20',
         'shadow-xs',
         'transition-all duration-normal ease-oe transform-gpu',
         hoverable && [
