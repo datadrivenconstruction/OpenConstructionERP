@@ -52,7 +52,7 @@ export function parseReadingsCsv(text: string): CsvPreviewRow[] {
     if (!raw.trim()) return;
     const { cells, sep } = splitLine(raw);
     const at = parseTime(cells[0] ?? '');
-    const value = cells.length > 1 ? parseValue(cells[1], sep) : null;
+    const value = cells.length > 1 ? parseValue(cells[1] ?? '', sep) : null;
     if (first && at === null && value === null) {
       first = false;
       return;
