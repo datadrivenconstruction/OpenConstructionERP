@@ -326,10 +326,13 @@ describe("pack state on the tile", () => {
 describe("layout contract", () => {
   it("lets the header wrap below sm, where its action column is full width", () => {
     renderHub("en");
-    const row = screen.getByRole("heading", { level: 1 }).closest("div.relative");
+    // PageHeader owns the row: the sr-only h1 sits directly in it.
+    const row = screen.getByRole("heading", { level: 1 }).parentElement;
     expect(row).not.toBeNull();
     expect(row!.classList.contains("flex-wrap")).toBe(true);
-    expect(row!.classList.contains("sm:flex-nowrap")).toBe(true);
+    const actions = within(row!).getByRole("button", { name: /write your own case/i }).parentElement;
+    expect(actions!.classList.contains("flex-wrap")).toBe(true);
+    expect(actions!.classList.contains("max-w-full")).toBe(true);
   });
 
   it("lets a long one-word label break inside its tile", () => {
