@@ -69,14 +69,11 @@ export function EmptyState({ icon, title, description, action, className }: Empt
       )}
     >
       {icon && (
-        /* Inset Depth chip — subtle inset shadow, no color fill. Replaces the
-           old soft surface-secondary block. r=8px (rounded-md) per 2026-05-11
-           design-system tightening. */
-        <div data-decorative-icon className="mb-4 flex h-14 w-14 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),inset_0_-1px_0_rgba(255,255,255,0.6)]">
+        <div data-decorative-icon className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-light bg-surface-secondary text-content-tertiary">
           {icon}
         </div>
       )}
-      <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+      <h3 className="oe-section-title">{title}</h3>
       {description && (
         <p className="mt-1.5 max-w-sm text-sm text-content-secondary">{description}</p>
       )}

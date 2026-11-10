@@ -11,8 +11,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 const paddingStyles = {
   none: '',
   sm: 'p-4',
-  md: 'p-6',
-  lg: 'p-8',
+  md: 'p-5',
+  lg: 'p-6',
 };
 
 export function Card({
@@ -33,9 +33,7 @@ export function Card({
         'shadow-xs',
         'transition-all duration-normal ease-oe transform-gpu',
         hoverable && [
-          'hover:shadow-md hover:border-border',
-          'hover:-translate-y-0.5',
-          'active:translate-y-0 active:shadow-xs',
+          'hover:shadow-sm hover:border-border',
           'focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40',
         ],
         paddingStyles[padding],
@@ -61,9 +59,9 @@ export function CardHeader({ title, subtitle, action, className }: CardHeaderPro
   return (
     <div className={clsx('flex items-start justify-between gap-4', className)}>
       <div className="min-w-0">
-        <h3 className="text-lg font-semibold text-content-primary truncate">{title}</h3>
+        <h3 className="oe-card-title truncate">{title}</h3>
         {subtitle && (
-          <p className="mt-0.5 text-sm text-content-secondary">{subtitle}</p>
+          <p className="oe-subtitle mt-0.5">{subtitle}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}

@@ -25,7 +25,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   // index.css `--oe-purple` for the contrast measurements in both themes.
   purple: 'bg-oe-purple-subtle text-oe-purple-text',
   success: 'bg-semantic-success-bg text-semantic-success',
-  warning: 'bg-semantic-warning-bg text-[#b45309]',
+  warning: 'bg-semantic-warning-bg text-semantic-warning',
   error: 'bg-semantic-error-bg text-semantic-error',
 };
 
