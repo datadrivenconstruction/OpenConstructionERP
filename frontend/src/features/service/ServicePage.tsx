@@ -177,7 +177,7 @@ const WO_STATUS_VARIANT: Record<WorkOrderStatus, 'neutral' | 'blue' | 'success' 
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 // Note: the legacy `labelCls` style is intentionally no longer used —
 // modal forms switched to <WideModalField> which renders the label
@@ -626,7 +626,7 @@ export function ServicePage() {
           <select
             value={effectiveContractId}
             onChange={(e) => setSelectedContractId(e.target.value)}
-            className={clsx(inputCls, 'max-w-[260px]')}
+            className={clsx('oe-select', 'max-w-[260px]')}
           >
             {contracts.map((c) => (
               <option key={c.id} value={c.id}>
@@ -638,7 +638,7 @@ export function ServicePage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[180px]')}
+          className={clsx('oe-select', 'max-w-[180px]')}
         >
           <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
           {tab === 'tickets' && ['new', 'assigned', 'in_progress', 'resolved', 'closed', 'cancelled'].map((s) => (
@@ -808,15 +808,15 @@ function TicketTable({
   const nowMs = useNowMs(60_000);
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('service.ticket', { defaultValue: 'Ticket' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.title_col', { defaultValue: 'Title' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.priority', { defaultValue: 'Priority' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.sla_chip', { defaultValue: 'SLA' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.reported_at', { defaultValue: 'Reported' })}</th>
+            <th>{t('service.ticket', { defaultValue: 'Ticket' })}</th>
+            <th>{t('service.title_col', { defaultValue: 'Title' })}</th>
+            <th>{t('service.priority', { defaultValue: 'Priority' })}</th>
+            <th>{t('service.status', { defaultValue: 'Status' })}</th>
+            <th>{t('service.sla_chip', { defaultValue: 'SLA' })}</th>
+            <th>{t('service.reported_at', { defaultValue: 'Reported' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -826,19 +826,19 @@ function TicketTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.ticket_number}</td>
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[360px]">{r.title}</td>
-              <td className="px-4 py-2">
+              <td className="font-mono text-content-secondary">{r.ticket_number}</td>
+              <td className="truncate max-w-[360px]">{r.title}</td>
+              <td>
                 <Badge variant={PRIORITY_VARIANT[r.priority]}>{priorityLabel(r.priority, t)}</Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={TICKET_STATUS_VARIANT[r.status]} dot>
                   {ticketStatusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 {chip ? (
                   <Badge variant={chip.variant} dot>
                     {chip.label}
@@ -847,7 +847,7 @@ function TicketTable({
                   <span className="text-content-tertiary text-xs">—</span>
                 )}
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">
+              <td className="text-content-secondary">
                 <DateDisplay value={r.reported_at} />
               </td>
             </tr>
@@ -897,14 +897,14 @@ function WorkOrderTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('service.wo_number', { defaultValue: 'WO #' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.scheduled_for', { defaultValue: 'Scheduled' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.technician', { defaultValue: 'Technician' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('service.billed', { defaultValue: 'Billed' })}</th>
+            <th>{t('service.wo_number', { defaultValue: 'WO #' })}</th>
+            <th>{t('service.scheduled_for', { defaultValue: 'Scheduled' })}</th>
+            <th>{t('service.technician', { defaultValue: 'Technician' })}</th>
+            <th>{t('service.status', { defaultValue: 'Status' })}</th>
+            <th className="text-right">{t('service.billed', { defaultValue: 'Billed' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -912,17 +912,17 @@ function WorkOrderTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.work_order_number}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="font-mono text-content-secondary">{r.work_order_number}</td>
+              <td className="text-content-secondary">
                 {r.scheduled_for ? <DateDisplay value={r.scheduled_for} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{resolveUserName(r.technician_id) || '—'}</td>
-              <td className="px-4 py-2">
+              <td className="text-content-secondary">{resolveUserName(r.technician_id) || '—'}</td>
+              <td>
                 <Badge variant={WO_STATUS_VARIANT[r.status]} dot>{woStatusLabel(r.status, t)}</Badge>
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 <MoneyDisplay amount={Number(r.billed_amount) || 0} currency={r.currency || undefined} />
               </td>
             </tr>
@@ -960,15 +960,15 @@ function ContractTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('service.contract_number', { defaultValue: 'Contract #' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.title_col', { defaultValue: 'Title' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.period', { defaultValue: 'Period' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.sla_tier', { defaultValue: 'SLA' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('service.value', { defaultValue: 'Value' })}</th>
+            <th>{t('service.contract_number', { defaultValue: 'Contract #' })}</th>
+            <th>{t('service.title_col', { defaultValue: 'Title' })}</th>
+            <th>{t('service.period', { defaultValue: 'Period' })}</th>
+            <th>{t('service.sla_tier', { defaultValue: 'SLA' })}</th>
+            <th>{t('service.status', { defaultValue: 'Status' })}</th>
+            <th className="text-right">{t('service.value', { defaultValue: 'Value' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -976,18 +976,18 @@ function ContractTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.contract_number}</td>
-              <td className="px-4 py-2 font-medium truncate max-w-[280px]">{r.title || '—'}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="font-mono text-content-secondary">{r.contract_number}</td>
+              <td className="truncate max-w-[280px]">{r.title || '—'}</td>
+              <td className="text-content-secondary">
                 {r.period_start} → {r.period_end}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{r.sla_tier}</td>
-              <td className="px-4 py-2">
+              <td className="text-content-secondary">{r.sla_tier}</td>
+              <td>
                 <Badge variant={CONTRACT_STATUS_VARIANT[r.status]} dot>{contractStatusLabel(r.status, t)}</Badge>
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 <MoneyDisplay amount={Number(r.value) || 0} currency={r.currency || undefined} />
               </td>
             </tr>
@@ -1038,14 +1038,14 @@ function AssetTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('service.asset_tag', { defaultValue: 'Tag' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.name', { defaultValue: 'Name' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.asset_type', { defaultValue: 'Type' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.location', { defaultValue: 'Location' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('service.status', { defaultValue: 'Status' })}</th>
+            <th>{t('service.asset_tag', { defaultValue: 'Tag' })}</th>
+            <th>{t('service.name', { defaultValue: 'Name' })}</th>
+            <th>{t('service.asset_type', { defaultValue: 'Type' })}</th>
+            <th>{t('service.location', { defaultValue: 'Location' })}</th>
+            <th>{t('service.status', { defaultValue: 'Status' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -1053,13 +1053,13 @@ function AssetTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.asset_tag || '—'}</td>
-              <td className="px-4 py-2 font-medium">{r.name || '—'}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.asset_type}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.location || '—'}</td>
-              <td className="px-4 py-2">
+              <td className="font-mono text-content-secondary">{r.asset_tag || '—'}</td>
+              <td>{r.name || '—'}</td>
+              <td className="text-content-secondary">{r.asset_type}</td>
+              <td className="text-content-secondary">{r.location || '—'}</td>
+              <td>
                 <Badge variant={r.status === 'active' ? 'success' : r.status === 'maintenance' ? 'warning' : 'neutral'} dot>
                   {r.status}
                 </Badge>
@@ -1270,7 +1270,7 @@ function DetailDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
       <div
         role="dialog"
@@ -1443,21 +1443,21 @@ function DetailDrawer({
                       onChange={(e) => setDebrief((s) => ({ ...s, problem: e.target.value }))}
                       placeholder={t('service.problem', { defaultValue: 'Problem' })}
                       rows={2}
-                      className={clsx(inputCls, 'h-auto py-2')}
+                      className="oe-textarea"
                     />
                     <textarea
                       value={debrief.cause}
                       onChange={(e) => setDebrief((s) => ({ ...s, cause: e.target.value }))}
                       placeholder={t('service.cause', { defaultValue: 'Cause' })}
                       rows={2}
-                      className={clsx(inputCls, 'h-auto py-2')}
+                      className="oe-textarea"
                     />
                     <textarea
                       value={debrief.solution}
                       onChange={(e) => setDebrief((s) => ({ ...s, solution: e.target.value }))}
                       placeholder={t('service.solution', { defaultValue: 'Solution' })}
                       rows={2}
-                      className={clsx(inputCls, 'h-auto py-2')}
+                      className="oe-textarea"
                     />
                     <Button
                       variant="primary"
@@ -1836,7 +1836,7 @@ function CreateModal({
             <select
               value={ticketForm.contract_id}
               onChange={(e) => setTicketForm({ ...ticketForm, contract_id: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
               {contracts.map((c) => (
@@ -1871,7 +1871,7 @@ function CreateModal({
               value={ticketForm.description}
               onChange={(e) => setTicketForm({ ...ticketForm, description: e.target.value })}
               rows={4}
-              className={clsx(inputCls, 'h-auto py-2 resize-y')}
+              className={clsx('oe-textarea', 'resize-y')}
             />
           </WideModalField>
           <WideModalField
@@ -1880,7 +1880,7 @@ function CreateModal({
             <select
               value={ticketForm.priority}
               onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value as TicketPriority })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="low">{t('service.priority_low', { defaultValue: 'Low' })}</option>
               <option value="med">{t('service.priority_med', { defaultValue: 'Medium' })}</option>
@@ -1901,7 +1901,7 @@ function CreateModal({
             <select
               value={woForm.ticket_id}
               onChange={(e) => setWoForm({ ...woForm, ticket_id: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
               {tickets.map((tk) => (
@@ -2019,7 +2019,7 @@ function CreateModal({
               <select
                 value={contractForm.sla_tier}
                 onChange={(e) => setContractForm({ ...contractForm, sla_tier: e.target.value })}
-                className={inputCls}
+                className="oe-select"
               >
                 <option value="standard">{t('service.sla_standard', { defaultValue: 'Standard (next business day)' })}</option>
                 <option value="priority">{t('service.sla_priority', { defaultValue: 'Priority (same business day)' })}</option>
@@ -2078,7 +2078,7 @@ function CreateModal({
             <select
               value={assetForm.contract_id}
               onChange={(e) => setAssetForm({ ...assetForm, contract_id: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
               {contracts.map((c) => (
@@ -2099,7 +2099,7 @@ function CreateModal({
             <select
               value={assetForm.asset_type}
               onChange={(e) => setAssetForm({ ...assetForm, asset_type: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               {ASSET_TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>

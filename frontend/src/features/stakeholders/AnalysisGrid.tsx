@@ -157,7 +157,7 @@ function Square({ grid, items, screen, chip }: ViewProps) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-1" data-testid="grid-square">
+      <table className="oe-table min-w-[560px] table-fixed border-separate border-spacing-1" data-testid="grid-square">
         <caption className="sr-only">
           {t('stakeholders.ui.grid.caption', {
             defaultValue: '{{vertical}} against {{horizontal}}',
@@ -168,7 +168,7 @@ function Square({ grid, items, screen, chip }: ViewProps) {
         <tbody>
           {ys.map((y) => (
             <tr key={y}>
-              <th scope="row" className="w-24 pr-2 text-right text-xs font-normal text-content-tertiary">
+              <th scope="row" className="w-24 pr-2 text-right">
                 {axis(itemName(labels, yDim), y)}
               </th>
               {xs.map((x) => {
@@ -179,7 +179,7 @@ function Square({ grid, items, screen, chip }: ViewProps) {
                     data-testid="grid-cell"
                     data-x={x}
                     data-y={y}
-                    className="h-16 rounded-md bg-surface-secondary p-1 align-top"
+                    className="rounded-md align-top"
                   >
                     <div className="flex flex-wrap gap-1">{here.map(chip)}</div>
                   </td>
@@ -190,7 +190,7 @@ function Square({ grid, items, screen, chip }: ViewProps) {
           <tr>
             <td />
             {xs.map((x) => (
-              <th key={x} scope="col" className="pt-1 text-center text-xs font-normal text-content-tertiary">
+              <th key={x} scope="col" className="pt-1 text-center">
                 {axis(itemName(labels, xDim), x)}
               </th>
             ))}

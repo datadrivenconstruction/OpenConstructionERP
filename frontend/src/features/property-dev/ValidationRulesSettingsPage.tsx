@@ -152,7 +152,7 @@ export function ValidationRulesSettingsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('common.search', { defaultValue: 'Search…' })}
-            className="h-9 w-full sm:w-64 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input sm:w-64"
           />
         </div>
       </Card>
@@ -280,40 +280,40 @@ function RuleSetCard({
               })}
             </p>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-xs uppercase text-content-tertiary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.rule_id', { defaultValue: 'Rule ID' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.standard', { defaultValue: 'Standard' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.severity', { defaultValue: 'Severity' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.category', { defaultValue: 'Category' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.validation_rules.state', { defaultValue: 'State' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {ruleSet.rules.map((r) => (
-                  <tr key={r.rule_id} className="border-t border-border-light">
-                    <td className="px-3 py-2 font-mono text-xs text-content-secondary">
+                  <tr key={r.rule_id}>
+                    <td className="font-mono text-content-secondary">
                       {r.rule_id}
                     </td>
-                    <td className="px-3 py-2 text-content-primary">{r.name}</td>
-                    <td className="px-3 py-2 text-xs">
+                    <td>{r.name}</td>
+                    <td>
                       <Badge variant="neutral">{r.standard}</Badge>
                     </td>
-                    <td className="px-3 py-2 text-xs">
+                    <td>
                       <span
                         className={clsx(
                           'inline-flex items-center gap-1',
@@ -330,10 +330,10 @@ function RuleSetCard({
                         </Badge>
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       {r.category}
                     </td>
-                    <td className="px-3 py-2 text-xs">
+                    <td>
                       {r.enabled ? (
                         <Badge variant="success" dot>
                           {t('property_dev.validation_rules.enabled', { defaultValue: 'enabled' })}

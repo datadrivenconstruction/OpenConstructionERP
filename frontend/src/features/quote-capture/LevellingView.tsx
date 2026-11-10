@@ -35,10 +35,10 @@ export function LevellingView({ packageId }: { packageId: string }) {
         </p>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="oe-table min-w-[640px]">
           <thead>
             <tr className="text-left text-xs text-content-secondary">
-              <th className="py-1">{t('quote_capture.col_item', 'Item')}</th>
+              <th>{t('quote_capture.col_item', 'Item')}</th>
               <th className="text-right">{t('quote_capture.col_qty', 'Qty')}</th>
               {quotes.map((s) => (
                 <th key={s.quote_id} className="text-right">{s.supplier}</th>
@@ -47,8 +47,8 @@ export function LevellingView({ packageId }: { packageId: string }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.position_id} className="border-t">
-                <td className="py-1 pr-2" dir="auto">{`${r.ordinal} ${r.description}`.trim()}</td>
+              <tr key={r.position_id}>
+                <td className="pr-2" dir="auto">{`${r.ordinal} ${r.description}`.trim()}</td>
                 <td className="text-right">{`${formatDecimal(r.quantity, 0)} ${r.unit}`}</td>
                 {r.cells.map((c) => (
                   <td
@@ -75,7 +75,7 @@ export function LevellingView({ packageId }: { packageId: string }) {
               ] as const
             ).map(([key, label]) => (
               <tr key={key} className={`border-t ${key === 'adjusted_total' ? 'font-semibold' : ''}`}>
-                <td className="py-1" colSpan={2}>{label}</td>
+                <td colSpan={2}>{label}</td>
                 {quotes.map((s) => (
                   <td key={s.quote_id} className="text-right" data-testid={`${key}-${s.quote_id}`}>
                     {money(s[key])}
@@ -83,7 +83,7 @@ export function LevellingView({ packageId }: { packageId: string }) {
                 ))}
               </tr>
             ))}
-            <tr className="border-t text-xs text-content-secondary">
+            <tr className="text-xs text-content-secondary">
               <td colSpan={2}>{t('quote_capture.rank_gaps', 'Rank, gaps, exclusions')}</td>
               {quotes.map((s) => (
                 <td key={s.quote_id} className="text-right">{`#${s.rank} · ${s.gap_rows} · ${s.exclusions}`}</td>

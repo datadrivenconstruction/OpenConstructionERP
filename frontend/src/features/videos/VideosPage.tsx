@@ -226,7 +226,7 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
       <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
         <div className="min-w-0">
           <p className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-sky-200 ring-1 ring-inset ring-white/15">
-            <GraduationCap size={13} aria-hidden />
+            <GraduationCap size={14} aria-hidden />
             {CATALOG.channelName}
           </p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -246,7 +246,7 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
                 data-testid="videos-start-here"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-md transition-transform hover:-translate-y-px focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
               >
-                <Play size={15} fill="currentColor" aria-hidden />
+                <Play size={16} fill="currentColor" aria-hidden />
                 {t('videos.start_here', { defaultValue: 'Start here' })}
                 {start.duration ? (
                   <span className="font-mono text-xs tabular-nums text-slate-500">{formatClock(start.duration)}</span>
@@ -260,9 +260,9 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
               data-testid="videos-channel"
               className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/15 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
             >
-              <MonitorPlay size={15} aria-hidden />
+              <MonitorPlay size={16} aria-hidden />
               {t('videos.subscribe_channel', { defaultValue: 'Subscribe to the channel' })}
-              <ExternalLink size={13} className="opacity-70" aria-hidden />
+              <ExternalLink size={14} className="opacity-70" aria-hidden />
             </a>
           </div>
           <dl className="mt-6 grid max-w-lg grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
@@ -355,7 +355,7 @@ function Recommended({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Acad
             <RoleAvatar role={ctx.role} className="h-6 w-6" />
           ) : (
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-secondary text-content-tertiary">
-              <UserRound size={13} aria-hidden />
+              <UserRound size={14} aria-hidden />
             </span>
           )}
           {ctx.role ? labels.role(ctx.role) : t('videos.any_role', { defaultValue: 'Any role' })}
@@ -368,7 +368,7 @@ function Recommended({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Acad
             value={marketChoice}
             onChange={(e) => setMarket(e.target.value)}
             data-testid="videos-market-select"
-            className="max-w-[12rem] cursor-pointer bg-transparent pr-1 font-medium focus:outline-none"
+            className="oe-select max-w-[12rem] cursor-pointer bg-transparent"
           >
             <option value="auto">
               {ctx.marketSource && ctx.marketSource !== 'chosen' && ctx.marketSource !== 'any' && ctx.market
@@ -489,14 +489,14 @@ function LearningPath({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Aca
               data-testid="videos-path-stage"
               data-stage={stage.id}
               className={clsx(
-                'flex w-56 shrink-0 snap-start flex-col rounded-xl border border-border-light border-l-[3px] bg-surface-primary p-2.5',
+                'flex w-56 shrink-0 snap-start flex-col rounded-xl border border-border-light border-l-[3px] bg-surface-primary p-2',
                 stage.tint.accent,
                 list.length === 0 && 'opacity-70',
               )}
             >
               <div className="mb-2 flex items-center gap-1.5">
                 <span className={clsx('flex h-6 w-6 items-center justify-center rounded-md ring-1 ring-inset', stage.tint.tile)}>
-                  <Icon size={13} aria-hidden />
+                  <Icon size={14} aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1 truncate text-xs font-semibold text-content-primary">
                   <span className="mr-1 tabular-nums text-content-tertiary">{stage.num}</span>
@@ -595,7 +595,7 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
           <div key={series.id} data-testid="videos-series" data-series-id={series.id} className="space-y-2">
             <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
               <div className="min-w-0 flex-1">
-                <h3 lang={series.titleKey ? undefined : series.language} className="text-sm font-semibold text-content-primary">
+                <h3 lang={series.titleKey ? undefined : series.language} className="oe-card-title">
                   {labels.series(series)}
                 </h3>
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-2xs text-content-tertiary">
@@ -618,7 +618,7 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
                       className="inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
                     >
                       · {t('videos.series_playlist', { defaultValue: 'Playlist on YouTube' })}
-                      <ExternalLink size={11} aria-hidden />
+                      <ExternalLink size={12} aria-hidden />
                     </a>
                   )}
                 </p>
@@ -638,7 +638,7 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
                     onClick={() => onOpen(nextUp)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-oe-blue-hover"
                   >
-                    {done > 0 ? <ArrowRight size={13} aria-hidden /> : <Play size={12} fill="currentColor" aria-hidden />}
+                    {done > 0 ? <ArrowRight size={14} aria-hidden /> : <Play size={12} fill="currentColor" aria-hidden />}
                     {done > 0
                       ? t('videos.continue', { defaultValue: 'Continue' })
                       : t('videos.start_series', { defaultValue: 'Start the series' })}
@@ -709,9 +709,9 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
     matrix: t('videos.view_matrix', { defaultValue: 'Coverage map' }),
   };
   const viewIcon: Record<LibraryView, ReactNode> = {
-    videos: <LayoutGrid size={13} aria-hidden />,
-    moments: <ListVideo size={13} aria-hidden />,
-    matrix: <Grid3x3 size={13} aria-hidden />,
+    videos: <LayoutGrid size={14} aria-hidden />,
+    moments: <ListVideo size={14} aria-hidden />,
+    matrix: <Grid3x3 size={14} aria-hidden />,
   };
   const viewNote: Record<LibraryView, string> = {
     videos: '',
@@ -799,7 +799,7 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
 
       <div className="space-y-2 rounded-2xl border border-border-light bg-surface-primary p-3 shadow-sm">
         <div className="relative">
-          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
           <input
             type="search"
             value={filters.query}
@@ -807,7 +807,7 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
             placeholder={t('videos.search_placeholder', { defaultValue: 'Search titles and chapters, for example "GAEB" or "invoice"' })}
             aria-label={t('common.search', { defaultValue: 'Search' })}
             data-testid="videos-search"
-            className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 pl-9 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+            className="oe-input pl-9"
           />
         </div>
         {filters.route && (
@@ -824,7 +824,7 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
                 aria-label={t('common.clear', { defaultValue: 'Clear' })}
                 className="rounded-full p-0.5 hover:bg-oe-blue/15"
               >
-                <X size={11} aria-hidden />
+                <X size={12} aria-hidden />
               </button>
             </span>
           </p>
@@ -937,10 +937,10 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
 
 function SectionHeader({ id, icon, title, subtitle }: { id: string; icon: ReactNode; title: string; subtitle?: string }) {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="flex items-start gap-2">
       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">{icon}</span>
       <div className="min-w-0">
-        <h2 id={id} className="text-base font-semibold tracking-tight text-content-primary">
+        <h2 id={id} className="oe-section-title">
           {title}
         </h2>
         {subtitle && <p className="text-xs text-content-secondary">{subtitle}</p>}

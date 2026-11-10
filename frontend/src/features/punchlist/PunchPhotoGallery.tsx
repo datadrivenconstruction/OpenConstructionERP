@@ -133,7 +133,7 @@ function PhotoThumb({
     <div className="group relative aspect-square overflow-hidden rounded-lg border border-border-light bg-surface-secondary">
       {busy ? (
         <div className="flex h-full w-full items-center justify-center">
-          <Loader2 size={18} className="animate-spin text-content-tertiary" />
+          <Loader2 size={20} className="animate-spin text-content-tertiary" />
         </div>
       ) : url ? (
         <button
@@ -153,7 +153,7 @@ function PhotoThumb({
         </button>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
-          <ImageOff size={18} className="text-content-quaternary" />
+          <ImageOff size={20} className="text-content-quaternary" />
           <span className="text-2xs text-content-quaternary">
             {error
               ? t('punch.photo_preview_unavailable', { defaultValue: 'Preview unavailable' })
@@ -180,7 +180,7 @@ function PhotoThumb({
               disabled={deleting}
               className="inline-flex items-center gap-1 rounded-md bg-semantic-error px-2 py-1 text-2xs font-semibold text-white hover:bg-semantic-error disabled:opacity-60"
             >
-              {deleting ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+              {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
               {t('common.delete', { defaultValue: 'Delete' })}
             </button>
             <button
@@ -233,7 +233,7 @@ function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/80 p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -244,7 +244,7 @@ function Lightbox({
         aria-label={t('common.close', { defaultValue: 'Close' })}
         className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
       >
-        <X size={18} />
+        <X size={20} />
       </button>
       {/* Stop propagation so clicking the image itself does not close. */}
       <img

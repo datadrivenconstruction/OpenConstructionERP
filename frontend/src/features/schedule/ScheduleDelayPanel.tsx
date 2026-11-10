@@ -75,9 +75,9 @@ interface ScheduleDelayPanelProps {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 const METHODS: DelayMethod[] = [
   'tia',
@@ -330,7 +330,7 @@ export function ScheduleDelayPanel({
         <Card padding="none">
           <div className="flex items-center gap-2 border-b border-border-light px-4 py-3">
             <Scale size={16} className="text-content-secondary" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('schedule.delay.title', { defaultValue: 'Forensic delay analysis' })}
             </h3>
           </div>
@@ -424,7 +424,7 @@ export function ScheduleDelayPanel({
                 id="delay-new-method"
                 value={newMethod}
                 onChange={(e) => setNewMethod(e.target.value as DelayMethod)}
-                className={inputCls}
+                className="oe-select"
               >
                 {METHODS.map((m) => (
                   <option key={m} value={m}>
@@ -575,7 +575,7 @@ function DelayDetail({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="truncate text-base font-semibold text-content-primary">
+              <h3 className="oe-card-title truncate">
                 {analysis.name}
               </h3>
               <Badge variant={STATUS_BADGE[analysis.status]}>
@@ -596,7 +596,7 @@ function DelayDetail({
                 <select
                   value={windowMode}
                   onChange={(e) => setWindowMode(e.target.value as DelayWindowMode)}
-                  className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-sm text-content-primary"
+                  className="oe-select"
                   data-testid="delay-window-mode"
                 >
                   <option value="snapshot">
@@ -741,36 +741,36 @@ function DelayDetail({
           {/* Per-window attribution */}
           {analysis.windows.length > 0 ? (
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm" data-testid="delay-windows">
-                <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+              <table className="oe-table" data-testid="delay-windows">
+                <thead>
                   <tr>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('schedule.delay.window', { defaultValue: 'Window' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.gross_slip', { defaultValue: 'Gross slip' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.resp_employer', { defaultValue: 'Employer' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.resp_contractor', { defaultValue: 'Contractor' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.resp_neutral', { defaultValue: 'Neutral' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.concurrent_short', { defaultValue: 'Concurrent' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('schedule.delay.net_entitlement', { defaultValue: 'Net entitlement' })}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {analysis.windows.map((w, i) => (
-                    <tr key={w.id} className="border-t border-border-light align-top">
-                      <td className="px-3 py-2">
+                    <tr key={w.id} className="align-top">
+                      <td>
                         <span className="font-mono tabular-nums text-content-secondary">
                           {i + 1}
                         </span>
@@ -792,22 +792,22 @@ function DelayDetail({
                           </p>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.gross_slip_days}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.employer_days}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.contractor_days}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.neutral_days}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.concurrent_days}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">
+                      <td className="text-right font-mono tabular-nums">
                         {w.net_entitlement_days}
                       </td>
                     </tr>
@@ -968,7 +968,7 @@ function DelayDetail({
                       responsibility: e.target.value as DelayResponsibility,
                     }))
                   }
-                  className={inputCls}
+                  className="oe-select"
                 >
                   {responsibilities.map((r) => (
                     <option key={r} value={r}>

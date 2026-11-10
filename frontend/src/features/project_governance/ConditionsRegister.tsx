@@ -188,7 +188,7 @@ export function ConditionsRegister({
                     <textarea
                       rows={2}
                       data-testid="condition-action-text"
-                      className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                      className="oe-textarea"
                       aria-label={
                         active.kind === 'clear'
                           ? t('governance.project.conditions.evidence_placeholder', { defaultValue: 'What shows the condition is met' })

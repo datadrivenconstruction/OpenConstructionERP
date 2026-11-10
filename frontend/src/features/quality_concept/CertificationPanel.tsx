@@ -424,7 +424,7 @@ function TargetDialog({
       <div className="grid gap-3 md:grid-cols-2">
         <Field required label={t('qualityConcept.certification.scheme', { defaultValue: 'Scheme' })}>
           <select
-            className={inputCls}
+            className="oe-select"
             value={schemeCode}
             disabled={!!target}
             onChange={(e) => setScheme(e.target.value)}
@@ -438,7 +438,7 @@ function TargetDialog({
           </select>
         </Field>
         <Field required label={t('qualityConcept.certification.target_level', { defaultValue: 'Target level' })}>
-          <select className={inputCls} value={level} onChange={(e) => setLevel(e.target.value)} data-testid="certification-level">
+          <select className="oe-select" value={level} onChange={(e) => setLevel(e.target.value)} data-testid="certification-level">
             {(scheme?.levels ?? []).map((l) => (
               <option key={l.code} value={l.code}>
                 {catalogueName(labels, l)}
@@ -539,7 +539,7 @@ function TransitionDialog({
         )}
         {wantsLevel && (
           <Field required label={t('qualityConcept.certification.achieved_level', { defaultValue: 'Level achieved' })}>
-            <select className={inputCls} value={achieved} onChange={(e) => setAchieved(e.target.value)} data-testid="achieved-level">
+            <select className="oe-select" value={achieved} onChange={(e) => setAchieved(e.target.value)} data-testid="achieved-level">
               <option value="">{t('qualityConcept.common.choose', { defaultValue: 'Choose' })}</option>
               {levels.map((l) => (
                 <option key={l.code} value={l.code}>
@@ -551,7 +551,7 @@ function TransitionDialog({
         )}
       </div>
       <Field required={wantsReason} label={t('qualityConcept.common.reason', { defaultValue: 'Reason' })}>
-        <textarea rows={2} className={inputCls} value={rationale} onChange={(e) => setRationale(e.target.value)} data-testid="transition-reason" />
+        <textarea rows={2} className="oe-textarea" value={rationale} onChange={(e) => setRationale(e.target.value)} data-testid="transition-reason" />
       </Field>
     </FormDialog>
   );

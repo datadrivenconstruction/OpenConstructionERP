@@ -108,7 +108,7 @@ function Row({
             onChange={(e) => setOwn(e.target.value)}
             placeholder={t('postcalc.rf.own_rate')}
             aria-label={t('postcalc.rf.own_rate')}
-            className="h-8 w-24 rounded-lg border border-border bg-surface-primary px-2 text-xs"
+            className="oe-input oe-input-sm w-24"
           />
           <Button size="sm" disabled={busy} onClick={() => onConfirm(p.id, own || undefined)}>
             {t('postcalc.rf.confirm')}
@@ -169,15 +169,15 @@ export function RateFeedbackPanel() {
       {list.data && list.data.length > 0 && (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="oe-table text-left">
               <thead>
                 <tr className="text-2xs uppercase text-content-tertiary">
-                  <th className="px-3 py-2">{t('postcalc.rf.col_item')}</th>
-                  <th className="px-3 py-2 text-right">{t('postcalc.rf.col_rate')}</th>
-                  <th className="px-3 py-2 text-right">{t('postcalc.rf.col_hours')}</th>
-                  <th className="px-3 py-2">{t('postcalc.rf.col_sample')}</th>
-                  <th className="px-3 py-2">{t('postcalc.rf.col_confidence')}</th>
-                  <th className="px-3 py-2">{t('postcalc.rf.col_action')}</th>
+                  <th>{t('postcalc.rf.col_item')}</th>
+                  <th className="text-right">{t('postcalc.rf.col_rate')}</th>
+                  <th className="text-right">{t('postcalc.rf.col_hours')}</th>
+                  <th>{t('postcalc.rf.col_sample')}</th>
+                  <th>{t('postcalc.rf.col_confidence')}</th>
+                  <th>{t('postcalc.rf.col_action')}</th>
                 </tr>
               </thead>
               <tbody>

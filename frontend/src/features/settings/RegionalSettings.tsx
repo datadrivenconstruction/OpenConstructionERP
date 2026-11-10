@@ -288,13 +288,13 @@ function SearchableSelect<T extends string>({
       {open && (
         <>
           {/* Backdrop to close */}
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute z-50 mt-1 w-full rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden">
+          <div className="fixed inset-0 z-drawer" onClick={() => setOpen(false)} />
+          <div className="absolute z-dropdown mt-1 w-full rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden">
             {/* Search input */}
             <div className="px-2 py-1.5 border-b border-border-light">
               <div className="relative">
                 <Search
-                  size={13}
+                  size={14}
                   className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
                 />
                 <input
@@ -302,7 +302,7 @@ function SearchableSelect<T extends string>({
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={placeholder}
-                  className="w-full rounded-md border border-border-light bg-surface-secondary pl-7 pr-2 py-1 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
+                  className="oe-input oe-input-sm pl-7"
                   autoFocus
                 />
               </div>

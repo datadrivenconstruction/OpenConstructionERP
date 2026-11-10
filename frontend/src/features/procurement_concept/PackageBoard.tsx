@@ -105,21 +105,21 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
     <div className="space-y-3">
       {edit && (
         <p className="flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="board-locked">
-          <Info size={15} className="mt-0.5 shrink-0" aria-hidden />
+          <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
           {errorText(labels.t, edit)}
         </p>
       )}
       {move.error ? <RefusalBox error={move.error} /> : null}
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-left text-sm" data-testid="package-board">
-          <thead className="bg-surface-secondary text-xs text-content-tertiary">
+        <table className="oe-table text-left" data-testid="package-board">
+          <thead>
             <tr>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_package', { defaultValue: 'Package' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_value', { defaultValue: 'Estimated value' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_procedure', { defaultValue: 'Procedure' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_dates', { defaultValue: 'Award due' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_state', { defaultValue: 'State' })}</th>
-              <th className="px-3 py-2 font-medium">
+              <th>{t('procurement_concept.ui.package.col_package', { defaultValue: 'Package' })}</th>
+              <th>{t('procurement_concept.ui.package.col_value', { defaultValue: 'Estimated value' })}</th>
+              <th>{t('procurement_concept.ui.package.col_procedure', { defaultValue: 'Procedure' })}</th>
+              <th>{t('procurement_concept.ui.package.col_dates', { defaultValue: 'Award due' })}</th>
+              <th>{t('procurement_concept.ui.package.col_state', { defaultValue: 'State' })}</th>
+              <th>
                 <span className="sr-only">{t('procurement_concept.ui.actions', { defaultValue: 'Actions' })}</span>
               </th>
             </tr>
@@ -137,8 +137,8 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
               const vehicle = executionVehicle(view);
               const confirm = pending?.id === cp.id ? pending : null;
               return (
-                <tr key={cp.id} className="border-t border-border-light align-top" data-testid="package-row" data-package={cp.code}>
-                  <td className="px-3 py-2.5">
+                <tr key={cp.id} className="align-top" data-testid="package-row" data-package={cp.code}>
+                  <td>
                     <div className="font-medium text-content-primary">
                       {!/^[a-z][a-z0-9_]*$/.test(cp.code) && (
                         <span className="mr-2 font-mono text-xs text-content-tertiary">{cp.code}</span>
@@ -162,7 +162,7 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     <Money value={a?.estimated_value} currency={a?.currency} />
                     {view.threshold && (
                       <div className="mt-1">
@@ -172,14 +172,14 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2.5 text-content-primary">
+                  <td>
                     {a?.procedure_code ? (
                       catalogueName(labels, 'procedure', a.procedure_code)
                     ) : (
                       <span className="text-content-tertiary">{t('procurement_concept.ui.not_set', { defaultValue: 'Not set' })}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2.5 text-content-primary">
+                  <td>
                     {view.schedule?.award_date ? (
                       <>
                         {fmtDate(view.schedule.award_date)}
@@ -196,7 +196,7 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
                       <span className="text-content-tertiary">-</span>
                     )}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     {a ? (
                       <ToneBadge tone={PACKAGE_TONE[a.state]} testId="package-state">
                         {vocab(labels.t, PACKAGE_STATE, a.state)}
@@ -207,7 +207,7 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     {confirm ? (
                       <div className="max-w-xs space-y-2" data-testid="package-confirm">
                         <p className="text-xs text-content-primary">{vocab(labels.t, PACKAGE_CONFIRM, confirm.kind)}</p>
@@ -361,7 +361,7 @@ function LinkTenderDialog({
               return (
                 <li key={o.id}>
                   <label
-                    className="flex items-start gap-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-2.5 text-sm"
+                    className="flex items-start gap-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm"
                     data-testid="link-tender-option"
                     data-allowed={off ? 'no' : 'yes'}
                   >

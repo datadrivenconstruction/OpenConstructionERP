@@ -160,16 +160,16 @@ function Explainer() {
   // Keys written out in full rather than built from an index, so a scan for a
   // key finds it in the source and keeps it translated.
   const steps = [
-    { icon: <Layers size={13} className="text-oe-blue" />, title: t('postcalc.step_1_title'), desc: t('postcalc.step_1_desc') },
-    { icon: <Timer size={13} className="text-oe-blue" />, title: t('postcalc.step_2_title'), desc: t('postcalc.step_2_desc') },
-    { icon: <Package size={13} className="text-oe-blue" />, title: t('postcalc.step_3_title'), desc: t('postcalc.step_3_desc') },
-    { icon: <ListChecks size={13} className="text-oe-blue" />, title: t('postcalc.step_4_title'), desc: t('postcalc.step_4_desc') },
+    { icon: <Layers size={14} className="text-oe-blue" />, title: t('postcalc.step_1_title'), desc: t('postcalc.step_1_desc') },
+    { icon: <Timer size={14} className="text-oe-blue" />, title: t('postcalc.step_2_title'), desc: t('postcalc.step_2_desc') },
+    { icon: <Package size={14} className="text-oe-blue" />, title: t('postcalc.step_3_title'), desc: t('postcalc.step_3_desc') },
+    { icon: <ListChecks size={14} className="text-oe-blue" />, title: t('postcalc.step_4_title'), desc: t('postcalc.step_4_desc') },
   ];
 
   return (
     <CollapsibleSection
       storageKey="postcalc.how"
-      icon={<Gauge size={15} className="text-oe-blue" />}
+      icon={<Gauge size={16} className="text-oe-blue" />}
       title={t('postcalc.how_title')}
     >
       <p className="text-xs text-content-tertiary">{t('postcalc.how_intro')}</p>
@@ -333,7 +333,7 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
   }, [report.lines, sort, filter]);
 
   const selectCls =
-    'h-9 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+    'oe-select oe-input-sm';
 
   if (report.lines.length === 0) {
     return (
@@ -382,46 +382,46 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1180px] text-xs">
+        <table className="oe-table-compact min-w-[1180px]">
           <thead>
-            <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="px-3 py-2 text-left" colSpan={3}>
+            <tr className="text-2xs uppercase tracking-wide text-content-tertiary">
+              <th colSpan={3}>
                 {t('postcalc.group_position')}
               </th>
-              <th className="border-l border-border-light px-3 py-2 text-center" colSpan={3}>
+              <th className="border-l text-center" colSpan={3}>
                 {t('postcalc.group_quantity')}
               </th>
-              <th className="border-l border-border-light px-3 py-2 text-center" colSpan={3}>
+              <th className="border-l text-center" colSpan={3}>
                 {t('postcalc.group_hours')}
               </th>
-              <th className="border-l border-border-light px-3 py-2 text-center" colSpan={4}>
+              <th className="border-l text-center" colSpan={4}>
                 {t('postcalc.group_money')}
               </th>
-              <th className="border-l border-border-light px-3 py-2 text-center">
+              <th className="border-l text-center">
                 {t('postcalc.col_status')}
               </th>
             </tr>
-            <tr className="border-b border-border-light text-2xs text-content-tertiary">
-              <th className="px-3 py-2 text-left">{t('postcalc.col_ref')}</th>
-              <th className="px-3 py-2 text-left">{t('postcalc.col_description')}</th>
-              <th className="px-3 py-2 text-left">{t('postcalc.col_unit')}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+            <tr className="text-2xs text-content-tertiary">
+              <th>{t('postcalc.col_ref')}</th>
+              <th>{t('postcalc.col_description')}</th>
+              <th>{t('postcalc.col_unit')}</th>
+              <th className="border-l text-right">
                 {t('postcalc.col_planned_qty')}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_installed_qty')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_progress')}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+              <th className="text-right">{t('postcalc.col_installed_qty')}</th>
+              <th className="text-right">{t('postcalc.col_progress')}</th>
+              <th className="border-l text-right">
                 {t('postcalc.col_earned_hours')}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_actual_hours')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_factor')}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+              <th className="text-right">{t('postcalc.col_actual_hours')}</th>
+              <th className="text-right">{t('postcalc.col_factor')}</th>
+              <th className="border-l text-right">
                 {t('postcalc.col_labour_delta')}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_material_earned')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_material_actual')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_total_delta')}</th>
-              <th className="border-l border-border-light px-3 py-2 text-center" />
+              <th className="text-right">{t('postcalc.col_material_earned')}</th>
+              <th className="text-right">{t('postcalc.col_material_actual')}</th>
+              <th className="text-right">{t('postcalc.col_total_delta')}</th>
+              <th className="border-l text-center" />
             </tr>
           </thead>
           <tbody>
@@ -431,20 +431,20 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
               return (
                 <tr
                   key={`${line.ref}-${index}`}
-                  className="border-b border-border-light last:border-0 hover:bg-surface-secondary/60"
+                  className="last:border-0"
                 >
-                  <td className="px-3 py-2 font-mono text-2xs text-content-secondary">{line.ref || '-'}</td>
-                  <td className="max-w-[280px] truncate px-3 py-2 text-content-primary" title={line.description}>
+                  <td className="font-mono text-content-secondary">{line.ref || '-'}</td>
+                  <td className="max-w-[280px] truncate" title={line.description}>
                     {line.description || '-'}
                   </td>
-                  <td className="px-3 py-2 text-content-tertiary">{line.unit ? localizedUnitCode(line.unit, i18n.language) : '-'}</td>
-                  <td className="border-l border-border-light px-3 py-2 text-right">
+                  <td className="text-content-tertiary">{line.unit ? localizedUnitCode(line.unit, i18n.language) : '-'}</td>
+                  <td className="border-l text-right">
                     <Figure value={line.planned_quantity} kind="number" unknown={unknown} digits={3} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Figure value={line.actual_quantity} kind="number" unknown={unknown} digits={3} />
                   </td>
-                  <td className="px-3 py-2 text-right text-content-secondary">
+                  <td className="text-right text-content-secondary">
                     {Number.isNaN(num(line.progress_pct))
                       ? unknown
                       : t('postcalc.pct_value', {
@@ -453,10 +453,10 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
                           }),
                         })}
                   </td>
-                  <td className="border-l border-border-light px-3 py-2 text-right">
+                  <td className="border-l text-right">
                     <Figure value={line.earned_hours} kind="number" unknown={unknown} digits={1} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Figure value={line.actual_hours} kind="number" unknown={unknown} digits={1} />
                   </td>
                   <td
@@ -470,14 +470,14 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
                       ? unknown
                       : formatValue(factor, 'number', { maximumFractionDigits: 3 })}
                   </td>
-                  <td className="border-l border-border-light px-3 py-2 text-right">
+                  <td className="border-l text-right">
                     <VarianceCell
                       value={line.labour_cost_variance_earned}
                       currency={currency}
                       unknown={unknown}
                     />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Figure
                       value={line.actual_material_cost === null ? null : line.earned_material_cost}
                       kind="currency"
@@ -485,7 +485,7 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
                       unknown={unknown}
                     />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Figure
                       value={line.actual_material_cost}
                       kind="currency"
@@ -493,14 +493,14 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
                       unknown={unknown}
                     />
                   </td>
-                  <td className="px-3 py-2 text-right font-medium">
+                  <td className="text-right">
                     <VarianceCell
                       value={Number.isNaN(total) ? null : String(total)}
                       currency={currency}
                       unknown={unknown}
                     />
                   </td>
-                  <td className="border-l border-border-light px-3 py-2 text-center">
+                  <td className="border-l text-center">
                     <Badge variant={STATUS_VARIANT[line.status] ?? 'neutral'}>
                       {statusLabel(line.status, t)}
                     </Badge>
@@ -537,46 +537,46 @@ function ResourceTable({ resources, currency }: { resources: ResourceRollup[]; c
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-xs">
+        <table className="oe-table-compact min-w-[860px]">
           <thead>
-            <tr className="border-b border-border-light text-2xs text-content-tertiary">
-              <th className="px-3 py-2 text-left">{t('postcalc.col_category')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_earned_hours')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_actual_hours')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_factor')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_planned_cost')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_earned_cost')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_actual_cost')}</th>
-              <th className="px-3 py-2 text-right">{t('postcalc.col_cost_delta')}</th>
+            <tr className="text-2xs text-content-tertiary">
+              <th>{t('postcalc.col_category')}</th>
+              <th className="text-right">{t('postcalc.col_earned_hours')}</th>
+              <th className="text-right">{t('postcalc.col_actual_hours')}</th>
+              <th className="text-right">{t('postcalc.col_factor')}</th>
+              <th className="text-right">{t('postcalc.col_planned_cost')}</th>
+              <th className="text-right">{t('postcalc.col_earned_cost')}</th>
+              <th className="text-right">{t('postcalc.col_actual_cost')}</th>
+              <th className="text-right">{t('postcalc.col_cost_delta')}</th>
             </tr>
           </thead>
           <tbody>
             {resources.map((row) => (
-              <tr key={row.kind} className="border-b border-border-light last:border-0">
-                <td className="px-3 py-2 font-medium text-content-primary">
+              <tr key={row.kind} className="last:border-0">
+                <td>
                   {kindLabel(row.kind, row.label, t)}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {row.is_hour_based ? (
                     <Figure value={row.earned_hours} kind="number" unknown={unknown} digits={1} />
                   ) : (
                     <span className="text-content-tertiary">{t('postcalc.not_applicable')}</span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {row.is_hour_based ? (
                     <Figure value={row.actual_hours} kind="number" unknown={unknown} digits={1} />
                   ) : (
                     <span className="text-content-tertiary">{t('postcalc.not_applicable')}</span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <Figure value={row.productivity_factor} kind="number" unknown={unknown} digits={3} />
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <Figure value={row.planned_cost} kind="currency" currency={currency} unknown={unknown} />
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {/* The earned figure that covers the same lines as the actual
                       next to it, so Earned minus Actual is the delta shown at
                       the end of the row. Falls back to the full earned total
@@ -588,10 +588,10 @@ function ResourceTable({ resources, currency }: { resources: ResourceRollup[]; c
                     unknown={unknown}
                   />
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <Figure value={row.actual_cost} kind="currency" currency={currency} unknown={unknown} />
                 </td>
-                <td className="px-3 py-2 text-right font-medium">
+                <td className="text-right">
                   <VarianceCell value={row.cost_variance_earned} currency={currency} unknown={unknown} />
                 </td>
               </tr>
@@ -631,18 +631,18 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
       <p className="text-xs text-content-tertiary">{t('postcalc.feedback_intro')}</p>
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-xs">
+          <table className="oe-table-compact min-w-[900px]">
             <thead>
-              <tr className="border-b border-border-light text-2xs text-content-tertiary">
-                <th className="px-3 py-2 text-left">{t('postcalc.col_ref')}</th>
-                <th className="px-3 py-2 text-left">{t('postcalc.col_description')}</th>
-                <th className="px-3 py-2 text-right">{t('postcalc.col_current_norm')}</th>
-                <th className="px-3 py-2 text-right">{t('postcalc.col_observed_norm')}</th>
-                <th className="px-3 py-2 text-left" title={t('analytics.hist.postcalc_col_hint', { defaultValue: 'Median and P25 - P75 of labour hours per unit measured on your other projects for the same classification code. The badge places the achieved norm in that range.' })}>
+              <tr className="text-2xs text-content-tertiary">
+                <th>{t('postcalc.col_ref')}</th>
+                <th>{t('postcalc.col_description')}</th>
+                <th className="text-right">{t('postcalc.col_current_norm')}</th>
+                <th className="text-right">{t('postcalc.col_observed_norm')}</th>
+                <th title={t('analytics.hist.postcalc_col_hint', { defaultValue: 'Median and P25 - P75 of labour hours per unit measured on your other projects for the same classification code. The badge places the achieved norm in that range.' })}>
                   {t('analytics.hist.postcalc_col', { defaultValue: 'Other projects' })}
                 </th>
-                <th className="px-3 py-2 text-right">{t('postcalc.col_confidence')}</th>
-                <th className="px-3 py-2 text-left">{t('postcalc.col_recommendation')}</th>
+                <th className="text-right">{t('postcalc.col_confidence')}</th>
+                <th>{t('postcalc.col_recommendation')}</th>
               </tr>
             </thead>
             <tbody>
@@ -659,26 +659,26 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
                 const unit = factor.unit ? localizedUnitCode(factor.unit, i18n.language) : t('postcalc.norm_unit_fallback');
                 const overran = num(factor.productivity_factor) > 1;
                 return (
-                  <tr key={`${factor.ref}-${index}`} className="border-b border-border-light last:border-0">
-                    <td className="px-3 py-2 font-mono text-2xs text-content-secondary">
+                  <tr key={`${factor.ref}-${index}`} className="last:border-0">
+                    <td className="font-mono text-content-secondary">
                       {factor.ref || '-'}
                     </td>
-                    <td className="max-w-[240px] truncate px-3 py-2" title={factor.description}>
+                    <td className="max-w-[240px] truncate" title={factor.description}>
                       {factor.description || '-'}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       {t('postcalc.norm_value', { value: current, unit })}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       {t('postcalc.norm_value', { value: observed, unit })}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <HistoricalRangeCell
                         item={factor.position_id ? history.byId.get(factor.position_id) : undefined}
                         bandFor={num(factor.observed_hours_per_unit)}
                       />
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <Badge variant={num(factor.confidence) >= 0.6 ? 'success' : 'warning'}>
                         {t('postcalc.pct_value', {
                           value: formatValue(num(factor.confidence) * 100, 'number', {
@@ -687,7 +687,7 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
                         })}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {overran
                         ? t('postcalc.advice_raise', { variance, current, observed, unit })
                         : t('postcalc.advice_tighten', { variance, current, observed, unit })}
@@ -747,17 +747,17 @@ export function PostCalcPage() {
     {
       id: 'positions' as const,
       label: t('postcalc.tab_positions'),
-      icon: <Layers size={15} />,
+      icon: <Layers size={16} />,
     },
     {
       id: 'resources' as const,
       label: t('postcalc.tab_resources'),
-      icon: <Package size={15} />,
+      icon: <Package size={16} />,
     },
     {
       id: 'feedback' as const,
       label: t('postcalc.tab_feedback'),
-      icon: <ListChecks size={15} />,
+      icon: <ListChecks size={16} />,
     },
     {
       // Contract quantity against measured quantity, per bill position. It
@@ -765,13 +765,13 @@ export function PostCalcPage() {
       // loading or failed.
       id: 'quantities' as const,
       label: t('postcalc.qc.tab', { defaultValue: 'Quantity check' }),
-      icon: <Ruler size={15} />,
+      icon: <Ruler size={16} />,
     },
     {
       // Company-wide: closed projects against the cost database, not this project.
       id: 'rates' as const,
       label: t('postcalc.rf.tab'),
-      icon: <TrendingUp size={15} />,
+      icon: <TrendingUp size={16} />,
     },
   ];
 
@@ -791,7 +791,7 @@ export function PostCalcPage() {
               onClick={onDownload}
               disabled={!projectId || downloading || !report || isQuantityTab}
             >
-              <Download size={15} />
+              <Download size={16} />
               {t('postcalc.export_markdown')}
             </Button>
           </>

@@ -36,22 +36,22 @@ export function BoqStylePreview() {
             {t('settings.style_preview_action', { defaultValue: 'Add position' })}
           </span>
         </div>
-        <table className="w-full border-collapse bg-surface-elevated text-xs text-content-primary">
+        <table className="oe-table-compact bg-surface-elevated">
           <thead>
             <tr className="bg-surface-tertiary text-start text-content-secondary">
-              <th className="px-2 py-1.5 text-start font-medium">
+              <th>
                 {t('settings.style_preview_pos', { defaultValue: 'Pos.' })}
               </th>
-              <th className="px-2 py-1.5 text-start font-medium">
+              <th>
                 {t('settings.style_preview_description', { defaultValue: 'Description' })}
               </th>
-              <th className="px-2 py-1.5 text-end font-medium">
+              <th className="text-end">
                 {t('settings.style_preview_qty', { defaultValue: 'Qty' })}
               </th>
-              <th className="hidden px-2 py-1.5 text-end font-medium sm:table-cell">
+              <th className="hidden text-end sm:table-cell">
                 {t('settings.style_preview_rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="px-2 py-1.5 text-end font-medium">
+              <th className="text-end">
                 {t('settings.style_preview_total', { defaultValue: 'Total' })}
               </th>
             </tr>
@@ -62,25 +62,25 @@ export function BoqStylePreview() {
                 key={r.pos}
                 className={`border-t border-border-light ${i === 1 ? 'bg-oe-blue-subtle' : ''}`}
               >
-                <td className="px-2 py-1.5 tabular-nums text-content-tertiary">{r.pos}</td>
-                <td className="max-w-[12rem] truncate px-2 py-1.5">
+                <td className="tabular-nums text-content-tertiary">{r.pos}</td>
+                <td className="max-w-[12rem] truncate">
                   {t(`settings.style_preview_row_${r.key}`, { defaultValue: r.label })}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-end tabular-nums">
+                <td className="whitespace-nowrap text-end tabular-nums">
                   {num(r.qty)} <span className="text-content-tertiary">{r.unit}</span>
                 </td>
-                <td className="hidden px-2 py-1.5 text-end tabular-nums sm:table-cell">{num(r.rate)}</td>
-                <td className="px-2 py-1.5 text-end font-medium tabular-nums">{num(r.qty * r.rate)}</td>
+                <td className="hidden text-end tabular-nums sm:table-cell">{num(r.rate)}</td>
+                <td className="text-end tabular-nums">{num(r.qty * r.rate)}</td>
               </tr>
             ))}
-            <tr className="border-t-2 border-border">
-              <td colSpan={3} className="px-2 py-1.5 font-semibold sm:hidden">
+            <tr className="border-t-2">
+              <td colSpan={3} className="sm:hidden">
                 {t('settings.style_preview_sum', { defaultValue: 'Total' })}
               </td>
-              <td colSpan={4} className="hidden px-2 py-1.5 font-semibold sm:table-cell">
+              <td colSpan={4} className="hidden sm:table-cell">
                 {t('settings.style_preview_sum', { defaultValue: 'Total' })}
               </td>
-              <td className="px-2 py-1.5 text-end font-semibold tabular-nums text-oe-blue-text">{num(total)}</td>
+              <td className="text-end tabular-nums text-oe-blue-text">{num(total)}</td>
             </tr>
           </tbody>
         </table>

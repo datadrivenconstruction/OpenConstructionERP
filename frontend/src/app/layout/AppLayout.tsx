@@ -138,7 +138,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden animate-fade-in"
+          className="fixed inset-0 z-drawer bg-black/30 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={closeSidebar}
         />
       )}
@@ -150,7 +150,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       <div
         ref={sidebarRef}
         className={clsx(
-          'oe-sidebar fixed inset-y-0 z-50 transition-transform duration-normal ease-oe',
+          'oe-sidebar fixed inset-y-0 z-dropdown transition-transform duration-normal ease-oe',
           // LTR: attach to left edge; RTL: CSS overrides to right edge
           'left-0',
           'lg:translate-x-0',

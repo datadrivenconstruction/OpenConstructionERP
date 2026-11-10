@@ -48,7 +48,7 @@ export function ChecksPanel({ projectId }: { projectId: string }) {
     return (
       <section aria-label={title} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="checks-panel" data-state="clear">
         <p className="flex items-center gap-2 text-sm text-content-secondary">
-          <CheckCircle2 size={15} className="shrink-0 text-semantic-success" aria-hidden />
+          <CheckCircle2 size={16} className="shrink-0 text-semantic-success" aria-hidden />
           {t('stakeholders.ui.checks.clear', { defaultValue: 'Every check on the register, the plan, the commitments and the mandates passes.' })}
         </p>
       </section>
@@ -57,7 +57,7 @@ export function ChecksPanel({ projectId }: { projectId: string }) {
 
   return (
     <section aria-label={title} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="checks-panel" data-state="open">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h2 className="oe-overline">
         {t('stakeholders.ui.checks.open_title', { defaultValue: 'Needs attention' })}
       </h2>
       <ul className="mt-2 space-y-1.5">
@@ -66,9 +66,9 @@ export function ChecksPanel({ projectId }: { projectId: string }) {
           return (
             <li key={`${f.rule_id}-${f.element_ref ?? ''}-${i}`} className="flex items-start gap-2 text-sm" data-testid="check-finding" data-blocking={blocking}>
               {blocking ? (
-                <XCircle size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
+                <XCircle size={16} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
               ) : (
-                <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
+                <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
               )}
               <span className="min-w-0">
                 <span className="text-content-primary">{f.message}</span>

@@ -173,10 +173,10 @@ export function WebhooksCard() {
     <Card padding="md" data-testid="developer-webhooks">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 rounded-lg bg-oe-blue/10 p-2 text-oe-blue">
-          <WebhookIcon size={18} aria-hidden="true" />
+          <WebhookIcon size={20} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('developer.hooks_title', { defaultValue: 'Webhooks' })}
           </h3>
           <p className="mt-0.5 text-sm text-content-secondary">
@@ -209,19 +209,19 @@ export function WebhooksCard() {
         </p>
       ) : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm" data-testid="developer-hook-table">
+          <table className="oe-table" data-testid="developer-hook-table">
             <thead>
               <tr className="text-left text-xs text-content-tertiary">
-                <th className="py-1 pr-3 font-medium">{t('developer.col_name', { defaultValue: 'Name' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_events', { defaultValue: 'Events' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_last', { defaultValue: 'Last call' })}</th>
-                <th className="py-1" />
+                <th className="pr-3">{t('developer.col_name', { defaultValue: 'Name' })}</th>
+                <th className="pr-3">{t('developer.col_events', { defaultValue: 'Events' })}</th>
+                <th className="pr-3">{t('developer.col_last', { defaultValue: 'Last call' })}</th>
+                <th />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {hooks.map((h) => (
                 <tr key={h.id} data-testid={`developer-hook-${h.id}`}>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     <div className="font-medium text-content-primary">{h.name}</div>
                     <div className="max-w-[18rem] truncate text-xs text-content-tertiary" dir="ltr" title={h.url}>
                       {h.url}
@@ -232,12 +232,12 @@ export function WebhooksCard() {
                       </Badge>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-content-secondary">
+                  <td className="pr-3 text-content-secondary">
                     {h.events.length === 0 || h.events.includes('*')
                       ? t('developer.all_events', { defaultValue: 'All events' })
                       : t('developer.n_events', { defaultValue: '{{count}} events', count: h.events.length })}
                   </td>
-                  <td className="py-2 pr-3 text-content-secondary">
+                  <td className="pr-3 text-content-secondary">
                     {h.last_triggered_at ? (
                       <>
                         {fmtDateTime(h.last_triggered_at)}
@@ -255,7 +255,7 @@ export function WebhooksCard() {
                       t('developer.never', { defaultValue: 'Never' })
                     )}
                   </td>
-                  <td className="py-2 text-right whitespace-nowrap">
+                  <td className="text-right whitespace-nowrap">
                     <Button
                       size="sm"
                       variant="ghost"

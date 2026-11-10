@@ -164,7 +164,7 @@ function HowTeamVisibilityWorks() {
   return (
     <CollapsibleSection
       storageKey="teams.how"
-      icon={<ShieldCheck size={15} className="text-oe-blue" />}
+      icon={<ShieldCheck size={16} className="text-oe-blue" />}
       title={t('teams.flow_title', 'How teams and record visibility fit together')}
     >
       <p className="text-xs text-content-tertiary">
@@ -235,7 +235,7 @@ function ValidationBanner({ projectId }: { projectId: string }) {
     if (data.status === 'passed') {
       return (
         <div className="flex items-center gap-2 rounded-lg border border-semantic-success/40 bg-semantic-success-bg px-3 py-2 text-sm text-semantic-success">
-          <CheckCircle2 size={15} />
+          <CheckCircle2 size={16} />
           {t('teams.validation_clean', 'This project’s access configuration checks out.')}
         </div>
       );
@@ -255,7 +255,7 @@ function ValidationBanner({ projectId }: { projectId: string }) {
       )}
     >
       <div className="flex items-center gap-2 font-medium">
-        <AlertTriangle size={15} />
+        <AlertTriangle size={16} />
         {hasErrors
           ? t('teams.validation_errors', 'Problems with this project’s access setup: {{count}}', {
               count: data.error_count + data.warning_count,
@@ -295,7 +295,7 @@ interface TeamFormValues {
 }
 
 const INPUT_CLASS =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-input';
 
 function TeamForm({
   initial,
@@ -347,7 +347,7 @@ function TeamForm({
           <select
             value={values.kind}
             onChange={(e) => setValues((v) => ({ ...v, kind: e.target.value as TeamKind }))}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             {TEAM_KINDS.map((k) => (
               <option key={k} value={k}>
@@ -366,7 +366,7 @@ function TeamForm({
           onChange={(e) => setValues((v) => ({ ...v, description: e.target.value }))}
           maxLength={2000}
           rows={2}
-          className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          className="oe-textarea"
           placeholder={t(
             'teams.field_description_placeholder',
             'The client’s own cost consultants. Sees the priced bill, not our internal margins.',
@@ -488,7 +488,7 @@ function MemberPanel({ team, projectId }: { team: Team; projectId: string }) {
                   roleMutation.mutate({ userId: m.user_id, role: e.target.value as TeamRole })
                 }
                 aria-label={t('teams.role_label', 'Role')}
-                className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                className="oe-select oe-input-sm"
               >
                 {ALL_TEAM_ROLES.map((r) => (
                   <option key={r} value={r}>
@@ -510,7 +510,7 @@ function MemberPanel({ team, projectId }: { team: Team; projectId: string }) {
       )}
 
       {adding ? (
-        <div className="space-y-2 rounded-lg border border-border bg-surface-secondary/40 p-2.5">
+        <div className="space-y-2 rounded-lg border border-border bg-surface-secondary/40 p-3">
           <UserSearchInput
             value={newUserId}
             displayValue={newUserName}
@@ -525,7 +525,7 @@ function MemberPanel({ team, projectId }: { team: Team; projectId: string }) {
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as TeamRole)}
               aria-label={t('teams.role_label', 'Role')}
-              className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary"
+              className="oe-select oe-input-sm"
             >
               {ALL_TEAM_ROLES.map((r) => (
                 <option key={r} value={r}>
@@ -721,7 +721,7 @@ function TeamsTab({ projectId }: { projectId: string }) {
                 ) : null}
                 {stranded ? (
                   <p className="mt-1.5 flex items-center gap-1.5 text-xs text-semantic-error">
-                    <AlertTriangle size={13} />
+                    <AlertTriangle size={14} />
                     {t(
                       'teams.stranded_warning',
                       'This team holds restrictions but has no members, so those records are readable by nobody except the project owner.',
@@ -830,7 +830,7 @@ function RestrictedTab({ projectId }: { projectId: string }) {
               </code>
               {!row.enforced ? (
                 <Badge variant="warning" size="sm">
-                  <Info size={11} className="mr-1 inline" />
+                  <Info size={12} className="mr-1 inline" />
                   {t('teams.not_enforced', 'Recorded, not enforced')}
                 </Badge>
               ) : null}
@@ -967,19 +967,19 @@ function MatrixTab({ projectId }: { projectId: string }) {
         )}
       </p>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] text-sm">
+        <table className="oe-table min-w-[36rem]">
           <thead>
-            <tr className="border-b border-border text-left text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="py-2 pr-3 font-medium">{t('teams.col_person', 'Person')}</th>
-              <th className="py-2 pr-3 font-medium">{t('teams.col_teams', 'Teams')}</th>
-              <th className="py-2 pr-3 font-medium">{t('teams.col_can_open', 'Can open')}</th>
-              <th className="py-2 font-medium">{t('teams.col_hidden', 'Hidden from them')}</th>
+            <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+              <th className="pr-3">{t('teams.col_person', 'Person')}</th>
+              <th className="pr-3">{t('teams.col_teams', 'Teams')}</th>
+              <th className="pr-3">{t('teams.col_can_open', 'Can open')}</th>
+              <th>{t('teams.col_hidden', 'Hidden from them')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {data.members.map((m) => (
               <tr key={m.user_id}>
-                <td className="py-2 pr-3">
+                <td className="pr-3">
                   <span className="text-content-primary">
                     {m.full_name || m.email || m.user_id}
                   </span>
@@ -994,10 +994,10 @@ function MatrixTab({ projectId }: { projectId: string }) {
                     </Badge>
                   ) : null}
                 </td>
-                <td className="py-2 pr-3 text-xs text-content-secondary">
+                <td className="pr-3 text-content-secondary">
                   {fmtList(m.team_names)}
                 </td>
-                <td className="py-2 pr-3 text-content-primary">{m.visible_restricted_count}</td>
+                <td className="pr-3">{m.visible_restricted_count}</td>
                 <td
                   className={clsx(
                     'py-2',

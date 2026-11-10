@@ -18,7 +18,7 @@ import { useSensorUnits } from '../useSensorUnits';
 /** Frequency bands for a graded vibration table; zones and classes come from the country data. */
 const FREQUENCY_BANDS = ['lt10', '10_50', '50_100', 'gt100'] as const;
 
-const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
+const FIELD = 'oe-input';
 const LABEL = 'text-xs text-content-secondary';
 
 export function DeviceForms({ projectId }: { projectId: string }) {
@@ -110,15 +110,15 @@ export function DeviceForms({ projectId }: { projectId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <label className={LABEL}>
               {t('site_sensors.forms.code', { defaultValue: 'Code' })}
-              <input type="text" value={code} maxLength={50} onChange={(e) => setCode(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="text" value={code} maxLength={50} onChange={(e) => setCode(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             <label className={LABEL}>
               {t('site_sensors.forms.name', { defaultValue: 'Name' })}
-              <input type="text" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="text" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             <label className={LABEL}>
               {t('site_sensors.forms.kind', { defaultValue: 'Kind' })}
-              <select value={kind} onChange={(e) => setKind(e.target.value as SensorKind)} className={`${FIELD} mt-1 w-full`}>
+              <select value={kind} onChange={(e) => setKind(e.target.value as SensorKind)} className="oe-select mt-1">
                 {KIND_ORDER.map((k) => (
                   <option key={k} value={k}>
                     {t(`site_sensors.kind.${k}`, { defaultValue: KIND_LABELS[k] })}
@@ -130,21 +130,21 @@ export function DeviceForms({ projectId }: { projectId: string }) {
               {isCustom
                 ? t('site_sensors.custom.upper', { defaultValue: 'Upper limit' })
                 : t('site_sensors.forms.limit', { defaultValue: 'Limit (blank = country default)' })}
-              <input type="number" step="any" value={limit} disabled={isCustom && recordOnly} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="number" step="any" value={limit} disabled={isCustom && recordOnly} onChange={(e) => setLimit(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             {isCustom && (
               <>
                 <label className={LABEL}>
                   {t('site_sensors.custom.unit', { defaultValue: 'Unit' })}
-                  <input type="text" value={unit} maxLength={20} placeholder={t('site_sensors.custom.unit_placeholder', { defaultValue: 'e.g. kN, %RH, m3/h' })} onChange={(e) => setUnit(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                  <input type="text" value={unit} maxLength={20} placeholder={t('site_sensors.custom.unit_placeholder', { defaultValue: 'e.g. kN, %RH, m3/h' })} onChange={(e) => setUnit(e.target.value)} className={`${FIELD} mt-1`} />
                 </label>
                 <label className={LABEL}>
                   {t('site_sensors.custom.lower', { defaultValue: 'Lower limit' })}
-                  <input type="number" step="any" value={lower} disabled={recordOnly} onChange={(e) => setLower(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                  <input type="number" step="any" value={lower} disabled={recordOnly} onChange={(e) => setLower(e.target.value)} className={`${FIELD} mt-1`} />
                 </label>
                 <label className={LABEL}>
                   {t('site_sensors.custom.window', { defaultValue: 'Rolling mean (hours, optional)' })}
-                  <input type="number" step="any" min="0" value={windowH} disabled={recordOnly} onChange={(e) => setWindowH(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                  <input type="number" step="any" min="0" value={windowH} disabled={recordOnly} onChange={(e) => setWindowH(e.target.value)} className={`${FIELD} mt-1`} />
                 </label>
                 <label className={`${LABEL} col-span-2 flex items-center gap-2`}>
                   <input type="checkbox" checked={recordOnly} onChange={(e) => setRecordOnly(e.target.checked)} />
@@ -157,7 +157,7 @@ export function DeviceForms({ projectId }: { projectId: string }) {
                 {isCustom
                   ? t('site_sensors.custom.limit_note', { defaultValue: 'Where the limits come from' })
                   : t('site_sensors.limits.reason', { defaultValue: 'Reason or source of the limit' })}
-                <input type="text" value={limitNote} maxLength={300} onChange={(e) => setLimitNote(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                <input type="text" value={limitNote} maxLength={300} onChange={(e) => setLimitNote(e.target.value)} className={`${FIELD} mt-1`} />
               </label>
             )}
             {customError && (
@@ -180,7 +180,7 @@ export function DeviceForms({ projectId }: { projectId: string }) {
             {kind === 'noise' && noiseGraded && (
               <label className={`${LABEL} col-span-2`}>
                 {t('site_sensors.forms.noise_zone', { defaultValue: 'Noise zone' })}
-                <select value={zone} onChange={(e) => setZone(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                <select value={zone} onChange={(e) => setZone(e.target.value)} className="oe-select mt-1">
                   <option value="">{t('site_sensors.forms.zone_default', { defaultValue: 'Country default' })}</option>
                   {noiseZones.map((z) => (
                     <option key={z} value={z}>
@@ -194,7 +194,7 @@ export function DeviceForms({ projectId }: { projectId: string }) {
               <>
                 <label className={LABEL}>
                   {t('site_sensors.forms.building_class', { defaultValue: 'Building class' })}
-                  <select value={buildingClass} onChange={(e) => setBuildingClass(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                  <select value={buildingClass} onChange={(e) => setBuildingClass(e.target.value)} className="oe-select mt-1">
                     <option value="">{t('site_sensors.forms.zone_default', { defaultValue: 'Country default' })}</option>
                     {buildingClasses.map((c) => (
                       <option key={c} value={c}>
@@ -205,7 +205,7 @@ export function DeviceForms({ projectId }: { projectId: string }) {
                 </label>
                 <label className={LABEL}>
                   {t('site_sensors.forms.frequency_band', { defaultValue: 'Frequency band' })}
-                  <select value={band} onChange={(e) => setBand(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                  <select value={band} onChange={(e) => setBand(e.target.value)} className="oe-select mt-1">
                     <option value="">{t('site_sensors.forms.band_reading', { defaultValue: 'From each reading' })}</option>
                     {FREQUENCY_BANDS.map((b) => (
                       <option key={b} value={b}>
@@ -221,7 +221,7 @@ export function DeviceForms({ projectId }: { projectId: string }) {
               <>
                 <label className={LABEL}>
                   {t('site_sensors.forms.mix', { defaultValue: 'Concrete mix' })}
-                  <select value={mixId} onChange={(e) => setMixId(e.target.value)} className={`${FIELD} mt-1 w-full`}>
+                  <select value={mixId} onChange={(e) => setMixId(e.target.value)} className="oe-select mt-1">
                     <option value="">{t('site_sensors.forms.no_mix', { defaultValue: 'None' })}</option>
                     {(mixQ.data ?? []).map((m) => (
                       <option key={m.id} value={m.id}>
@@ -232,11 +232,11 @@ export function DeviceForms({ projectId }: { projectId: string }) {
                 </label>
                 <label className={LABEL}>
                   {t('site_sensors.forms.pour_ref', { defaultValue: 'Pour reference' })}
-                  <input type="text" value={pourRef} maxLength={200} onChange={(e) => setPourRef(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                  <input type="text" value={pourRef} maxLength={200} onChange={(e) => setPourRef(e.target.value)} className={`${FIELD} mt-1`} />
                 </label>
                 <label className={`${LABEL} col-span-2`}>
                   {t('site_sensors.forms.cast_at', { defaultValue: 'Cast at' })}
-                  <input type="datetime-local" value={castAt} onChange={(e) => setCastAt(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                  <input type="datetime-local" value={castAt} onChange={(e) => setCastAt(e.target.value)} className={`${FIELD} mt-1`} />
                 </label>
               </>
             )}

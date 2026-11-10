@@ -115,7 +115,7 @@ export function MandateMatrix({ screen, matrix, roles, bodies, onSaved }: Mandat
               capability="organisation"
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={() => {
                 setDraft({ ...stored.cells });
                 setScopedDraft(stored.scoped.map((r) => ({ ...r })));
@@ -151,14 +151,14 @@ export function MandateMatrix({ screen, matrix, roles, bodies, onSaved }: Mandat
       </ul>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-sm" data-testid="mandate-table">
-          <thead className="bg-surface-secondary text-xs text-content-tertiary">
+        <table className="oe-table-compact" data-testid="mandate-table">
+          <thead>
             <tr>
-              <th scope="col" className="sticky left-0 min-w-[12rem] bg-surface-secondary px-3 py-2 text-left font-medium">
+              <th scope="col" className="sticky left-0 min-w-[12rem]">
                 {t('stakeholders.ui.mandate.col_decision', { defaultValue: 'Decision' })}
               </th>
               {columns.map((c) => (
-                <th key={cellKey('', c)} scope="col" className="min-w-[5.5rem] px-2 py-2 text-center font-medium">
+                <th key={cellKey('', c)} scope="col" className="min-w-[5.5rem] text-center">
                   {columnName(labels, c, nameCtx)}
                   {c.kind === 'body' && (
                     <span className="block font-normal text-content-quaternary">{t('stakeholders.ui.mandate.body_tag', { defaultValue: 'body' })}</span>
@@ -171,8 +171,8 @@ export function MandateMatrix({ screen, matrix, roles, bodies, onSaved }: Mandat
             {matrix.decision_types.map((dt) => {
               const missing = !editing && matrix.missing.includes(dt.code);
               return (
-                <tr key={dt.code} className="border-t border-border-light" data-testid="mandate-row" data-missing={missing}>
-                  <th scope="row" className="sticky left-0 bg-surface-primary px-3 py-2 text-left font-normal text-content-primary">
+                <tr key={dt.code} data-testid="mandate-row" data-missing={missing}>
+                  <th scope="row" className="sticky left-0">
                     {itemName(labels, dt)}
                     {missing && (
                       <span className="mt-0.5 flex items-center gap-1 text-xs font-medium text-semantic-error" data-testid="mandate-missing">
@@ -185,10 +185,10 @@ export function MandateMatrix({ screen, matrix, roles, bodies, onSaved }: Mandat
                     const key = cellKey(dt.code, c);
                     const letter = cells[key] ?? '';
                     return (
-                      <td key={key} className="px-2 py-1.5 text-center">
+                      <td key={key} className="text-center">
                         {editing ? (
                           <select
-                            className="rounded border border-border-light bg-surface-primary px-1 py-0.5 text-sm"
+                            className="oe-select"
                             value={letter}
                             aria-label={t('stakeholders.ui.mandate.cell', {
                               defaultValue: '{{decision}}: {{holder}}',
@@ -325,7 +325,7 @@ export function WhoDecidesLookup({ screen, matrix, roles, bodies }: WhoDecidesLo
         {selected?.commitment_type && (
           <label className="flex w-40 flex-col gap-1 text-xs text-content-secondary">
             {t('stakeholders.ui.who.amount', { defaultValue: 'Amount (optional)' })}
-            <input className={FIELD_CLASS} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <input className="oe-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </label>
         )}
         <Button

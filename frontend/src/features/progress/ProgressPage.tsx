@@ -584,7 +584,7 @@ export function ProgressPage() {
             <Card className="p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-oe-blue" />
-                <h2 className="text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title">
                   {t('progress.s_curve_title', { defaultValue: 'Progress S-curve' })}
                 </h2>
               </div>
@@ -611,7 +611,7 @@ export function ProgressPage() {
             <Card className="p-4">
               <div className="mb-3 flex items-center gap-2">
                 <ListChecks className="h-4 w-4 text-content-tertiary" />
-                <h2 className="text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title">
                   {t('progress.periods_title', { defaultValue: 'By period' })}
                 </h2>
               </div>
@@ -632,36 +632,36 @@ export function ProgressPage() {
                 }}
               >
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="oe-table-compact">
                     <thead>
                       <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                        <th className="px-2 py-1.5 font-medium">
+                        <th>
                           {t('progress.col_period', { defaultValue: 'Period' })}
                         </th>
-                        <th className="px-2 py-1.5 text-right font-medium">
+                        <th className="text-right">
                           {t('progress.col_delta', { defaultValue: 'Delta' })}
                         </th>
-                        <th className="px-2 py-1.5 text-right font-medium">
+                        <th className="text-right">
                           {t('progress.col_cumulative', { defaultValue: 'Cumulative' })}
                         </th>
-                        <th className="px-2 py-1.5 text-right font-medium">
+                        <th className="text-right">
                           {t('progress.col_entries', { defaultValue: 'Entries' })}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {cumulative?.periods.map((p) => (
-                        <tr key={p.period_label} className="border-t border-border-light">
-                          <td className="px-2 py-1.5 font-medium text-content-primary whitespace-nowrap">
+                        <tr key={p.period_label}>
+                          <td className="whitespace-nowrap">
                             {p.period_label}
                           </td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-content-secondary">
+                          <td className="text-right tabular-nums text-content-secondary">
                             {fmtPct(p.delta_pct)}
                           </td>
-                          <td className="px-2 py-1.5 text-right tabular-nums font-medium text-content-primary">
+                          <td className="text-right tabular-nums">
                             {fmtPct(p.cumulative_pct)}
                           </td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-content-tertiary">
+                          <td className="text-right tabular-nums text-content-tertiary">
                             {p.entry_count}
                           </td>
                         </tr>
@@ -677,7 +677,7 @@ export function ProgressPage() {
           <Card className="p-4">
             <div className="mb-3 flex items-center gap-2">
               <Ruler className="h-4 w-4 text-content-tertiary" />
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('progress.variance_title', { defaultValue: 'Quantity variance' })}
               </h2>
             </div>
@@ -701,34 +701,34 @@ export function ProgressPage() {
               }}
             >
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table">
                   <thead>
                     <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                      <th className="px-3 py-2 font-medium">
+                      <th>
                         {t('progress.col_ordinal', { defaultValue: 'Ordinal' })}
                       </th>
-                      <th className="px-3 py-2 font-medium">
+                      <th>
                         {t('progress.col_description', { defaultValue: 'Description' })}
                       </th>
-                      <th className="px-3 py-2 font-medium">
+                      <th>
                         {t('progress.col_unit', { defaultValue: 'Unit' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('progress.col_design_qty', { defaultValue: 'Design qty' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('progress.col_earned_qty', { defaultValue: 'Earned qty' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('progress.col_percent', { defaultValue: 'Percent complete' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('progress.col_variance', { defaultValue: 'Variance' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('progress.col_variance_pct', { defaultValue: 'Variance %' })}
                       </th>
-                      <th className="px-3 py-2 font-medium">
+                      <th>
                         {t('progress.col_status', { defaultValue: 'Status' })}
                       </th>
                     </tr>
@@ -740,27 +740,27 @@ export function ProgressPage() {
                   </tbody>
                   {rollup && (
                     <tfoot>
-                      <tr className="border-t-2 border-border bg-surface-secondary/40 font-medium">
-                        <td className="px-3 py-2 text-content-primary" colSpan={3}>
+                      <tr className="border-t-2 bg-surface-secondary/40 font-medium">
+                        <td colSpan={3}>
                           {t('progress.rollup_total', {
                             defaultValue: 'Total ({{count}} positions)',
                             count: rollup.position_count,
                           })}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                        <td className="text-right tabular-nums whitespace-nowrap">
                           {fmtQty(rollup.design_quantity_total)}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                        <td className="text-right tabular-nums whitespace-nowrap">
                           {fmtQty(rollup.earned_quantity_total)}
                         </td>
-                        <td className="px-3 py-2" />
-                        <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                        <td />
+                        <td className="text-right tabular-nums whitespace-nowrap">
                           {fmtQty(rollup.variance_total)}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap text-content-tertiary">
+                        <td className="text-right tabular-nums whitespace-nowrap text-content-tertiary">
                           {fmtPctStr(rollup.variance_percent)}
                         </td>
-                        <td className="px-3 py-2" />
+                        <td />
                       </tr>
                     </tfoot>
                   )}

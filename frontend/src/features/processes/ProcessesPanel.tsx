@@ -64,13 +64,13 @@ const CATEGORY_ICON: Record<ProcessCategory, LucideIcon> = {
 };
 
 const STATUS_STYLE: Record<ProcessStatus, string> = {
-  running: 'bg-semantic-success/10 text-semantic-success ring-emerald-500/30 dark:text-emerald-300',
-  disabled: 'bg-slate-500/10 text-content-secondary ring-slate-500/25',
-  idle: 'bg-semantic-info/10 text-semantic-info ring-sky-500/30 dark:text-sky-300',
-  starting: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
-  stopping: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
-  degraded: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
-  error: 'bg-semantic-error/10 text-semantic-error ring-rose-500/30 dark:text-rose-300',
+  running: 'bg-semantic-success/10 text-semantic-success ring-semantic-success/30',
+  disabled: 'bg-content-tertiary text-content-secondary ring-border',
+  idle: 'bg-semantic-info/10 text-semantic-info ring-semantic-info/30',
+  starting: 'bg-semantic-warning/10 text-semantic-warning ring-semantic-warning/30',
+  stopping: 'bg-semantic-warning/10 text-semantic-warning ring-semantic-warning/30',
+  degraded: 'bg-semantic-warning/10 text-semantic-warning ring-semantic-warning/30',
+  error: 'bg-semantic-error/10 text-semantic-error ring-semantic-error/30',
 };
 
 export function statusLabel(t: TFunction, s: ProcessStatus): string {
@@ -150,7 +150,7 @@ function Toggle({
       className={clsx(
         'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50',
-        on ? 'bg-oe-blue' : 'bg-slate-300 dark:bg-slate-600',
+        on ? 'bg-oe-blue' : 'bg-border',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >
@@ -222,7 +222,7 @@ function ProcessRow({
       className="rounded-xl border border-border-light bg-surface-elevated p-3"
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue dark:text-sky-300">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue-text ">
           <Icon size={16} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -459,7 +459,7 @@ export function ProcessesPanel() {
   const title = t('processes.title', { defaultValue: 'Background services' });
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex justify-end" data-testid="processes-panel">
+    <div className="fixed inset-0 z-drawer flex justify-end" data-testid="processes-panel">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={close} aria-hidden />
       <div
         ref={panelRef}
@@ -470,7 +470,7 @@ export function ProcessesPanel() {
       >
         <header className="flex items-start gap-3 border-b border-border-light px-4 py-3 sm:px-5">
           <div className="min-w-0 flex-1">
-            <h2 id="processes-panel-title" className="text-base font-semibold text-content-primary">
+            <h2 id="processes-panel-title" className="oe-section-title">
               {title}
             </h2>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -588,7 +588,7 @@ export function ProcessesPanel() {
                 <section key={g.category} className="mt-5" aria-labelledby={`processes-cat-${g.category}`}>
                   <h3
                     id={`processes-cat-${g.category}`}
-                    className="mb-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary"
+                    className="oe-overline mb-2"
                   >
                     {categoryLabel(t, g.category)}
                   </h3>

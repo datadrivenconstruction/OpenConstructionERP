@@ -256,7 +256,7 @@ function resourceErrorMessage(err: unknown): string {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /**
  * Midnight on the first day of the current week, in the reader's locale.
@@ -833,7 +833,7 @@ export function ResourcesPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as ResourceType | '')}
-              className={clsx(inputCls, 'max-w-[180px]')}
+              className={clsx('oe-select', 'max-w-[180px]')}
               aria-label={t('resources.filter_type', { defaultValue: 'Filter by type' })}
               data-testid="resources-type-filter"
             >
@@ -858,7 +858,7 @@ export function ResourcesPage() {
               onChange={(e) =>
                 setStatusFilter(e.target.value as ResourceStatus | '')
               }
-              className={clsx(inputCls, 'max-w-[180px]')}
+              className={clsx('oe-select', 'max-w-[180px]')}
               aria-label={t('resources.filter_status', {
                 defaultValue: 'Filter by status',
               })}
@@ -881,7 +881,7 @@ export function ResourcesPage() {
               <select
                 value={currencyFilter}
                 onChange={(e) => setCurrencyFilter(e.target.value)}
-                className={clsx(inputCls, 'max-w-[140px]')}
+                className={clsx('oe-select', 'max-w-[140px]')}
                 aria-label={t('resources.filter_currency', {
                   defaultValue: 'Filter by currency',
                 })}
@@ -1200,7 +1200,7 @@ function SortableHeader({
         data-testid={`resources-sort-${columnKey}`}
       >
         {label}
-        <Arrow size={11} className={clsx(!isActive && 'opacity-40')} aria-hidden="true" />
+        <Arrow size={12} className={clsx(!isActive && 'opacity-40')} aria-hidden="true" />
       </button>
     </th>
   );
@@ -1265,7 +1265,7 @@ function InlineRateCell({ resource, pending, onSave }: InlineRateCellProps) {
         }}
         // Stop the row-click handler firing while the user types.
         onClick={(e) => e.stopPropagation()}
-        className="w-24 rounded border border-oe-blue bg-surface-primary px-2 py-0.5 text-right text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+        className="oe-input w-24 text-right tabular-nums"
         aria-label={t('resources.edit_rate_aria', {
           defaultValue: 'Edit rate for {{name}}',
           name: resource.name,
@@ -1414,7 +1414,7 @@ function ResourceTable({
       {/* Inline how-to hint above the grid — makes the edit / delete /
           inline-rate-edit affordance discoverable without a dedicated tour. */}
       <div className="flex items-center gap-2 px-4 py-2 text-xs text-content-tertiary border-b border-border-light bg-surface-secondary/40">
-        <Pencil size={11} aria-hidden="true" />
+        <Pencil size={12} aria-hidden="true" />
         <span>
           {t('resources.row_hint_v2', {
             defaultValue:
@@ -1423,10 +1423,10 @@ function ResourceTable({
         </span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" data-testid="resources-table">
-          <thead className="bg-surface-secondary text-content-tertiary text-xs">
+        <table className="oe-table" data-testid="resources-table">
+          <thead>
             <tr>
-              <th className="px-3 py-2.5 text-left w-8" scope="col">
+              <th className="w-8" scope="col">
                 <input
                   type="checkbox"
                   aria-label={t('common.select_all', { defaultValue: 'Select all' })}
@@ -1475,7 +1475,7 @@ function ResourceTable({
                 onSort={onSort}
               />
               <th
-                className="px-4 py-2.5 text-right w-24 uppercase tracking-wide font-medium"
+                className="text-right w-24"
                 scope="col"
               >
                 {t('resources.actions', { defaultValue: 'Actions' })}
@@ -1503,7 +1503,7 @@ function ResourceTable({
                   data-testid={`resource-row-${r.id}`}
                   aria-selected={isSelected}
                 >
-                  <td className="px-3 py-2">
+                  <td>
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -1515,18 +1515,18 @@ function ResourceTable({
                       data-testid={`resource-select-${r.id}`}
                     />
                   </td>
-                  <td className="px-4 py-2 font-mono text-xs tabular-nums text-content-secondary">
+                  <td className="font-mono tabular-nums text-content-secondary">
                     {r.code}
                   </td>
-                  <td className="px-4 py-2 font-medium text-content-primary">
+                  <td>
                     {r.name}
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <Badge variant={TYPE_VARIANT[r.resource_type]} size="sm">
                       {resourceTypeLabel(t, r.resource_type)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <Badge
                       variant={
                         r.status === 'active'
@@ -1541,14 +1541,14 @@ function ResourceTable({
                       {resourceStatusLabel(t, r.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right">
                     <InlineRateCell
                       resource={r}
                       pending={pendingRateId === r.id}
                       onSave={onInlineRateSave}
                     />
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right">
                     <div className="inline-flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <button
                         type="button"
@@ -1567,7 +1567,7 @@ function ResourceTable({
                         })}
                         data-testid={`resource-edit-${r.id}`}
                       >
-                        <Pencil size={13} />
+                        <Pencil size={14} />
                       </button>
                       <button
                         type="button"
@@ -1586,7 +1586,7 @@ function ResourceTable({
                         })}
                         data-testid={`resource-delete-${r.id}`}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -1808,7 +1808,7 @@ function RequestsTab({
       <Card padding="md">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[240px]">
-            <label className="block text-xs font-medium text-content-secondary mb-1">
+            <label className="oe-label">
               {t('resources.requests_project_label', {
                 defaultValue: 'Project',
               })}
@@ -1820,7 +1820,7 @@ function RequestsTab({
                 const name = projects.find((p) => p.id === id)?.name || '';
                 onProjectChange(id, name);
               }}
-              className={inputCls}
+              className="oe-select"
               disabled={projectsQ.isLoading}
               data-testid="requests-project-select"
             >
@@ -1835,13 +1835,13 @@ function RequestsTab({
             </select>
           </div>
           <div className="min-w-[140px]">
-            <label className="block text-xs font-medium text-content-secondary mb-1">
+            <label className="oe-label">
               {t('resources.requests_status_label', { defaultValue: 'Status' })}
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as RequestStatus | '')}
-              className={inputCls}
+              className="oe-select"
               data-testid="requests-status-filter"
             >
               <option value="">{t('resources.status_all', { defaultValue: 'All' })}</option>
@@ -1857,13 +1857,13 @@ function RequestsTab({
             </select>
           </div>
           <div className="min-w-[140px]">
-            <label className="block text-xs font-medium text-content-secondary mb-1">
+            <label className="oe-label">
               {t('resources.requests_priority_label', { defaultValue: 'Priority' })}
             </label>
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as RequestPriority | '')}
-              className={inputCls}
+              className="oe-select"
               data-testid="requests-priority-filter"
             >
               <option value="">{t('resources.priority_all', { defaultValue: 'All priorities' })}</option>
@@ -1874,7 +1874,7 @@ function RequestsTab({
             </select>
           </div>
           <div className="min-w-[200px] flex-1">
-            <label className="block text-xs font-medium text-content-secondary mb-1">
+            <label className="oe-label">
               {t('common.search', { defaultValue: 'Search' })}
             </label>
             <div className="relative">
@@ -2196,10 +2196,10 @@ function RequestsTable({
 
   return (
     <div className="overflow-x-auto" data-testid="requests-table">
-      <table className="min-w-full text-sm">
-        <thead className="bg-surface-secondary/50 border-b border-border-light">
+      <table className="oe-table min-w-full">
+        <thead>
           <tr className="text-xs uppercase text-content-secondary">
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               <button
                 type="button"
                 onClick={() => onSort('priority')}
@@ -2209,10 +2209,10 @@ function RequestsTable({
                 <SortArrow active={sortKey === 'priority'} />
               </button>
             </th>
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               {t('resources.req_col_title', { defaultValue: 'Title' })}
             </th>
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               <button
                 type="button"
                 onClick={() => onSort('start_at')}
@@ -2222,7 +2222,7 @@ function RequestsTable({
                 <SortArrow active={sortKey === 'start_at'} />
               </button>
             </th>
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               <button
                 type="button"
                 onClick={() => onSort('quantity')}
@@ -2232,18 +2232,18 @@ function RequestsTable({
                 <SortArrow active={sortKey === 'quantity'} />
               </button>
             </th>
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               {t('resources.req_col_skills', { defaultValue: 'Skills' })}
             </th>
-            <th className="text-left px-4 py-2 font-medium">
+            <th>
               {t('common.status', { defaultValue: 'Status' })}
             </th>
-            <th className="text-right px-4 py-2 font-medium">
+            <th className="text-right">
               {t('resources.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {rows.map((r) => (
             <RequestRow
               key={r.id}
@@ -2669,7 +2669,7 @@ function RequestFormFields({ form, setForm, skills }: RequestFormFieldsProps) {
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className={clsx(inputCls, 'h-20 py-2 resize-y')}
+            className={clsx('oe-textarea', 'h-20 resize-y')}
             placeholder={t('resources.description_placeholder', {
               defaultValue: 'Optional notes for the dispatcher…',
             })}
@@ -2709,7 +2709,7 @@ function RequestFormFields({ form, setForm, skills }: RequestFormFieldsProps) {
           <select
             value={form.priority}
             onChange={(e) => setForm({ ...form, priority: e.target.value as RequestPriority })}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="low">{t('resources.priority_low', { defaultValue: 'Low' })}</option>
             <option value="med">{t('resources.priority_med', { defaultValue: 'Medium' })}</option>
@@ -2939,7 +2939,7 @@ function FulfillRequestModal({
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className={clsx(inputCls, 'h-16 py-2 resize-y')}
+            className={clsx('oe-textarea', 'h-16 resize-y')}
             placeholder={t('resources.fulfil_notes_placeholder', {
               defaultValue: 'Optional handoff notes for the assignee…',
             })}
@@ -3154,7 +3154,7 @@ function AssignmentsTab({
                   onChange={(e) =>
                     setStatusFilter(e.target.value as AssignmentStatus | '')
                   }
-                  className={clsx(inputCls, 'max-w-[160px]')}
+                  className={clsx('oe-select', 'max-w-[160px]')}
                   aria-label={t('resources.filter_status', {
                     defaultValue: 'Filter by status',
                   })}
@@ -3231,11 +3231,11 @@ function AssignmentsTab({
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+                <table className="oe-table-compact">
+                  <thead>
                     <tr>
                       {canEdit && (
-                        <th className="px-3 py-2 text-left w-8">
+                        <th className="w-8">
                           <input
                             type="checkbox"
                             aria-label={t('common.select_all', {
@@ -3254,27 +3254,27 @@ function AssignmentsTab({
                           />
                         </th>
                       )}
-                      <th className="px-3 py-2 text-left">
+                      <th>
                         {t('resources.col_resource', { defaultValue: 'Resource' })}
                       </th>
-                      <th className="px-3 py-2 text-left">
+                      <th>
                         {t('resources.col_project_task', {
                           defaultValue: 'Project / Task',
                         })}
                       </th>
-                      <th className="px-3 py-2 text-left">
+                      <th>
                         {t('resources.start', { defaultValue: 'Start' })}
                       </th>
-                      <th className="px-3 py-2 text-left">
+                      <th>
                         {t('resources.end', { defaultValue: 'End' })}
                       </th>
-                      <th className="px-3 py-2 text-right">
+                      <th className="text-right">
                         {t('resources.alloc', { defaultValue: 'Alloc' })}
                       </th>
-                      <th className="px-3 py-2 text-left">
+                      <th>
                         {t('resources.col_status', { defaultValue: 'Status' })}
                       </th>
-                      <th className="px-3 py-2 text-right">
+                      <th className="text-right">
                         {t('resources.actions', { defaultValue: 'Actions' })}
                       </th>
                     </tr>
@@ -3303,7 +3303,7 @@ function AssignmentsTab({
                           data-testid={`assign-row-${a.id}`}
                         >
                           {canEdit && (
-                            <td className="px-3 py-1.5">
+                            <td>
                               <input
                                 type="checkbox"
                                 checked={isSelected}
@@ -3315,7 +3315,7 @@ function AssignmentsTab({
                               />
                             </td>
                           )}
-                          <td className="px-3 py-1.5">
+                          <td>
                             <button
                               type="button"
                               className="text-left font-medium text-content-primary hover:text-oe-blue"
@@ -3324,7 +3324,7 @@ function AssignmentsTab({
                               {a.resource_name}
                             </button>
                           </td>
-                          <td className="px-3 py-1.5 text-xs">
+                          <td>
                             <div className="flex flex-col gap-0.5">
                               {a.project_id ? (
                                 <button
@@ -3401,10 +3401,10 @@ function AssignmentsTab({
                               )}
                             </div>
                           </td>
-                          <td className="px-3 py-1.5 text-xs tabular-nums">
+                          <td className="tabular-nums">
                             <DateDisplay value={a.start_at} />
                           </td>
-                          <td className="px-3 py-1.5 text-xs tabular-nums">
+                          <td className="tabular-nums">
                             <DateDisplay value={a.end_at} />
                             {isPast && (
                               <span className="ms-1 text-2xs uppercase text-content-tertiary">
@@ -3412,15 +3412,15 @@ function AssignmentsTab({
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-1.5 text-xs tabular-nums text-right">
+                          <td className="tabular-nums text-right">
                             {a.allocation_percent}%
                           </td>
-                          <td className="px-3 py-1.5">
+                          <td>
                             <Badge variant={ASSIGN_VARIANT[a.status]} dot size="sm">
                               {assignmentStatusLabel(t, a.status)}
                             </Badge>
                           </td>
-                          <td className="px-3 py-1.5 text-right">
+                          <td className="text-right">
                             {canEdit ? (
                               <div className="inline-flex gap-1">
                                 <button
@@ -3431,7 +3431,7 @@ function AssignmentsTab({
                                   title={t('common.edit', { defaultValue: 'Edit' })}
                                   data-testid={`assign-edit-${a.id}`}
                                 >
-                                  <Pencil size={13} />
+                                  <Pencil size={14} />
                                 </button>
                                 <button
                                   type="button"
@@ -3443,7 +3443,7 @@ function AssignmentsTab({
                                   title={t('common.delete', { defaultValue: 'Delete' })}
                                   data-testid={`assign-delete-${a.id}`}
                                 >
-                                  <Trash2 size={13} />
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
                             ) : (
@@ -3737,7 +3737,7 @@ function EditAssignmentModal({
             onChange={(e) =>
               setForm({ ...form, status: e.target.value as AssignmentStatus })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="proposed">
               {t('resources.status_proposed', { defaultValue: 'Proposed' })}
@@ -3765,7 +3765,7 @@ function EditAssignmentModal({
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
       </WideModalSection>
@@ -3838,7 +3838,7 @@ function ResourceDrawer({
   const loadError = dashQ.isError ? dashQ.error : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -4053,7 +4053,7 @@ function Section({
 }) {
   return (
     <div>
-      <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h3 className="oe-overline mb-2 flex items-center gap-1.5">
         {icon}
         {title}
       </h3>
@@ -4087,44 +4087,44 @@ function AssignmentTable({
     userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
   return (
     <div className="overflow-x-auto rounded border border-border-light">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table-compact">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('resources.start', { defaultValue: 'Start' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('resources.end', { defaultValue: 'End' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('resources.alloc', { defaultValue: 'Alloc' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('resources.col_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('resources.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((a) => (
-            <tr key={a.id} className="border-t border-border-light">
-              <td className="px-3 py-1.5 text-xs">
+            <tr key={a.id}>
+              <td>
                 <DateDisplay value={a.start_at} />
               </td>
-              <td className="px-3 py-1.5 text-xs">
+              <td>
                 <DateDisplay value={a.end_at} />
               </td>
-              <td className="px-3 py-1.5 text-xs tabular-nums">
+              <td className="tabular-nums">
                 {a.allocation_percent}%
               </td>
-              <td className="px-3 py-1.5">
+              <td>
                 <Badge variant={ASSIGN_VARIANT[a.status]} dot size="sm">
                   {assignmentStatusLabel(t, a.status)}
                 </Badge>
               </td>
-              <td className="px-3 py-1.5 text-right">
+              <td className="text-right">
                 {a.status === 'proposed' && (canConfirm || canDecline) ? (
                   <div className="inline-flex gap-1">
                     {canConfirm && (
@@ -4266,7 +4266,7 @@ function CreateResourceModal({ onClose }: { onClose: () => void }) {
             onChange={(e) =>
               setForm({ ...form, resource_type: e.target.value as ResourceType })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="person">{t('resources.type_person', { defaultValue: 'Person' })}</option>
             <option value="crew">{t('resources.type_crew', { defaultValue: 'Crew' })}</option>
@@ -4424,7 +4424,7 @@ function EditResourceModal({
             onChange={(e) =>
               setForm({ ...form, resource_type: e.target.value as ResourceType })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="person">
               {t('resources.type_person', { defaultValue: 'Person' })}
@@ -4446,7 +4446,7 @@ function EditResourceModal({
             onChange={(e) =>
               setForm({ ...form, status: e.target.value as ResourceStatus })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="active">
               {t('resources.status_active', { defaultValue: 'Active' })}
@@ -4487,7 +4487,7 @@ function EditResourceModal({
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2 resize-y')}
+            className={clsx('oe-textarea', 'resize-y')}
             placeholder={t('resources.notes_placeholder', {
               defaultValue: 'Optional notes about this resource…',
             })}

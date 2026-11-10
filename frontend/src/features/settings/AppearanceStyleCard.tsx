@@ -97,7 +97,7 @@ function StylePreview({
   const bar = paint?.bar ?? 'var(--oe-border)';
   return (
     <div
-      className={`flex h-[7.5rem] w-full flex-col justify-between overflow-hidden border p-2.5 ${
+      className={`flex h-[7.5rem] w-full flex-col justify-between overflow-hidden border p-2 ${
         paint ? '' : 'border-border-light bg-surface-elevated text-content-primary'
       }`}
       style={{
@@ -230,7 +230,7 @@ function CustomColourRow() {
             spellCheck={false}
             aria-label={t('settings.style_custom_hex', { defaultValue: 'Hex code' })}
             aria-invalid={!hex}
-            className="h-9 w-28 rounded-lg border border-border bg-surface-primary px-2 font-mono text-sm uppercase text-content-primary"
+            className="oe-input w-28 font-mono uppercase"
           />
           {check && (
             <span

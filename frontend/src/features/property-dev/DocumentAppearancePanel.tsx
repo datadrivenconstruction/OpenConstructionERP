@@ -72,7 +72,7 @@ export const WATERMARK_PRESETS = [
 ] as const;
 
 const SELECT_CLS =
-  'h-8 w-full rounded border border-border bg-surface-primary px-2 text-xs disabled:opacity-60';
+  'oe-select oe-input-sm';
 
 interface DocumentAppearancePanelProps {
   /** Where the panel is shown; decides whether the copy may point at templates below it. */
@@ -211,7 +211,7 @@ export function DocumentAppearancePanel({
           <Palette size={16} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {inSettings
               ? t('settings.company.appearance_title', {
                   defaultValue: 'Documents and PDF',

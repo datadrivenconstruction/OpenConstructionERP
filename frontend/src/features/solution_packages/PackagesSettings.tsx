@@ -64,7 +64,7 @@ export function PackagesSettings() {
     <div className="space-y-6" data-testid="packages-settings">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-content-primary">{t('packages.installed_title')}</h3>
+          <h3 className="oe-card-title">{t('packages.installed_title')}</h3>
           <button
             type="button"
             onClick={() => setAdding((v) => !v)}
@@ -124,14 +124,14 @@ export function PackagesSettings() {
       </section>
 
       <section className="space-y-3">
-        <h3 className="text-base font-semibold text-content-primary">{t('packages.modules_title')}</h3>
+        <h3 className="oe-card-title">{t('packages.modules_title')}</h3>
         <p className="text-xs text-content-secondary">{t('packages.modules_hint')}</p>
         <input
           type="search"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           placeholder={t('packages.modules_filter')}
-          className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm"
+          className="oe-input"
         />
         {pending && (
           <div role="alert" className="rounded-lg border border-semantic-warning/50 bg-semantic-warning/10 p-3 text-sm">

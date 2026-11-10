@@ -66,8 +66,7 @@ const RECONCILE_STATUS_LABELS: Record<string, string> = {
  */
 
 const INPUT_CLASS =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary ' +
-  'placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue';
+  'oe-input';
 
 /** Format a percentage Decimal string as a signed whole-number percent. */
 function formatPct(value: string): string {
@@ -177,14 +176,14 @@ export function RomEstimatePage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Building type */}
               <div>
-                <label htmlFor="rom-type" className="mb-1.5 block text-xs font-medium text-content-secondary">
+                <label htmlFor="rom-type" className="oe-label">
                   {t('romEstimate.building_type', { defaultValue: 'Building type' })}
                 </label>
                 <select
                   id="rom-type"
                   value={buildingType}
                   onChange={(e) => setBuildingType(e.target.value)}
-                  className={INPUT_CLASS}
+                  className="oe-select"
                 >
                   {(reference?.building_types ?? []).map((opt) => (
                     <option key={opt.key} value={opt.key}>
@@ -196,7 +195,7 @@ export function RomEstimatePage() {
 
               {/* Gross floor area */}
               <div>
-                <label htmlFor="rom-area" className="mb-1.5 block text-xs font-medium text-content-secondary">
+                <label htmlFor="rom-area" className="oe-label">
                   {t('romEstimate.gross_floor_area', { defaultValue: 'Gross floor area (m²)' })}
                 </label>
                 <input
@@ -213,14 +212,14 @@ export function RomEstimatePage() {
 
               {/* Quality */}
               <div>
-                <label htmlFor="rom-quality" className="mb-1.5 block text-xs font-medium text-content-secondary">
+                <label htmlFor="rom-quality" className="oe-label">
                   {t('romEstimate.quality', { defaultValue: 'Quality level' })}
                 </label>
                 <select
                   id="rom-quality"
                   value={quality}
                   onChange={(e) => setQuality(e.target.value)}
-                  className={INPUT_CLASS}
+                  className="oe-select"
                 >
                   {(reference?.quality_levels ?? []).map((opt) => (
                     <option key={opt.key} value={opt.key}>
@@ -232,14 +231,14 @@ export function RomEstimatePage() {
 
               {/* Region */}
               <div>
-                <label htmlFor="rom-region" className="mb-1.5 block text-xs font-medium text-content-secondary">
+                <label htmlFor="rom-region" className="oe-label">
                   {t('romEstimate.region', { defaultValue: 'Region' })}
                 </label>
                 <select
                   id="rom-region"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  className={INPUT_CLASS}
+                  className="oe-select"
                 >
                   {(reference?.regions ?? []).map((opt) => (
                     <option key={opt.key} value={opt.key}>
@@ -251,7 +250,7 @@ export function RomEstimatePage() {
 
               {/* Currency (optional display label) */}
               <div>
-                <label htmlFor="rom-currency" className="mb-1.5 block text-xs font-medium text-content-secondary">
+                <label htmlFor="rom-currency" className="oe-label">
                   {t('romEstimate.currency', { defaultValue: 'Currency (optional)' })}
                 </label>
                 <input
@@ -561,47 +560,47 @@ function RomResultView({
         <CardHeader title={t('romEstimate.breakdown_title', { defaultValue: 'Elemental breakdown' })} />
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border text-left text-2xs uppercase tracking-wider text-content-tertiary">
-                  <th className="py-2 pr-4 font-medium">
+                <tr className="text-left text-2xs uppercase tracking-wider text-content-tertiary">
+                  <th className="pr-4">
                     {t('romEstimate.col_element', { defaultValue: 'Element' })}
                   </th>
-                  <th className="py-2 pr-4 text-right font-medium">
+                  <th className="pr-4 text-right">
                     {t('romEstimate.col_share', { defaultValue: 'Share' })}
                   </th>
-                  <th className="py-2 pr-4 text-right font-medium">
+                  <th className="pr-4 text-right">
                     {t('romEstimate.col_rate', { defaultValue: 'Cost / m²' })}
                   </th>
-                  <th className="py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('romEstimate.col_amount', { defaultValue: 'Amount' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {result.elements.map((line) => (
-                  <tr key={line.key} className="border-b border-border-light last:border-0">
-                    <td className="py-2 pr-4 text-content-primary">
+                  <tr key={line.key} className="last:border-0">
+                    <td className="pr-4">
                       {t(`romEstimate.element_${line.key}`, { defaultValue: line.label })}
                     </td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-content-secondary">
+                    <td className="pr-4 text-right tabular-nums text-content-secondary">
                       {fmtPercent(toNum(line.cost_share_pct), 0)}
                     </td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-content-secondary">
+                    <td className="pr-4 text-right tabular-nums text-content-secondary">
                       {formatCurrency(line.rate_per_m2, currency)}
                     </td>
-                    <td className="py-2 text-right font-medium tabular-nums text-content-primary">
+                    <td className="text-right tabular-nums">
                       {formatCurrency(line.amount, currency, undefined, { maximumFractionDigits: 0 })}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-border font-semibold">
-                  <td className="py-2 pr-4 text-content-primary" colSpan={3}>
+                <tr className="border-t-2 font-semibold">
+                  <td className="pr-4" colSpan={3}>
                     {t('romEstimate.total', { defaultValue: 'Estimated total' })}
                   </td>
-                  <td className="py-2 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     {formatCurrency(result.total, currency, undefined, { maximumFractionDigits: 0 })}
                   </td>
                 </tr>
@@ -686,7 +685,7 @@ export function RomReconciliationPanel() {
       <CardHeader
         title={
           <span className="flex items-center gap-2">
-            <Scale size={18} />
+            <Scale size={20} />
             {t('romEstimate.reconcile.title', { defaultValue: 'Concept vs detailed estimate' })}
           </span>
         }
@@ -875,22 +874,22 @@ function RomSavedEstimates({ projectId }: { projectId: string }) {
         )}
         {rows.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border text-left text-2xs uppercase tracking-wider text-content-tertiary">
-                  <th className="py-2 pr-4 font-medium">
+                <tr className="text-left text-2xs uppercase tracking-wider text-content-tertiary">
+                  <th className="pr-4">
                     {t('romEstimate.saved_col_name', { defaultValue: 'Name / type' })}
                   </th>
-                  <th className="py-2 pr-4 text-right font-medium">
+                  <th className="pr-4 text-right">
                     {t('romEstimate.saved_col_rate', { defaultValue: 'Cost / m²' })}
                   </th>
-                  <th className="py-2 pr-4 text-right font-medium">
+                  <th className="pr-4 text-right">
                     {t('romEstimate.saved_col_total', { defaultValue: 'Total' })}
                   </th>
-                  <th className="py-2 pr-4 font-medium">
+                  <th className="pr-4">
                     {t('romEstimate.saved_col_date', { defaultValue: 'Saved' })}
                   </th>
-                  <th className="py-2 text-right font-medium">
+                  <th className="text-right">
                     <span className="sr-only">
                       {t('romEstimate.saved_col_actions', { defaultValue: 'Actions' })}
                     </span>
@@ -901,8 +900,8 @@ function RomSavedEstimates({ projectId }: { projectId: string }) {
                 {rows.map((row) => {
                   const isDeleting = del.isPending && del.variables === row.id;
                   return (
-                    <tr key={row.id} className="border-b border-border-light last:border-0">
-                      <td className="py-2 pr-4 text-content-primary">
+                    <tr key={row.id} className="last:border-0">
+                      <td className="pr-4">
                         <div className="font-medium">
                           {row.name ||
                             t(`romEstimate.type_${row.building_type}`, {
@@ -915,18 +914,18 @@ function RomSavedEstimates({ projectId }: { projectId: string }) {
                           })}
                         </div>
                       </td>
-                      <td className="py-2 pr-4 text-right tabular-nums text-content-secondary">
+                      <td className="pr-4 text-right tabular-nums text-content-secondary">
                         {formatCurrency(row.cost_per_m2, row.currency)}
                       </td>
-                      <td className="py-2 pr-4 text-right font-medium tabular-nums text-content-primary">
+                      <td className="pr-4 text-right tabular-nums">
                         {formatCurrency(row.total, row.currency, undefined, {
                           maximumFractionDigits: 0,
                         })}
                       </td>
-                      <td className="py-2 pr-4 text-2xs text-content-tertiary">
+                      <td className="pr-4 text-content-tertiary">
                         {shortDate(row.created_at)}
                       </td>
-                      <td className="py-2 text-right">
+                      <td className="text-right">
                         <button
                           type="button"
                           onClick={() => del.mutate(row.id)}
@@ -934,7 +933,7 @@ function RomSavedEstimates({ projectId }: { projectId: string }) {
                           aria-label={t('romEstimate.saved_delete', { defaultValue: 'Delete estimate' })}
                           className="inline-flex items-center gap-1 rounded-md p-1.5 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </td>
                     </tr>

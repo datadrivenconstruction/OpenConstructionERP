@@ -79,7 +79,7 @@ export function PositionProcurementDrawer({
                     to={`/procurement?requisition=${encodeURIComponent(row.requisition_id)}`}
                     className="flex items-center gap-1.5 font-mono text-xs text-oe-blue hover:underline"
                   >
-                    <ClipboardList size={13} />
+                    <ClipboardList size={14} />
                     {row.req_number ?? row.requisition_id.slice(0, 8)}
                   </Link>
                   <span className="text-2xs uppercase tracking-wide text-content-tertiary">

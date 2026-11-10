@@ -22,7 +22,7 @@ import { invalidateFinanceFigures } from '@/features/finance/financeQueryKeys';
 import { fmtList } from '@/shared/lib/formatters';
 
 const fieldCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 export interface CertificateType {
   code: string;
@@ -306,7 +306,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <h3 className="oe-overline">
               {t('procurement.gr_lines_certificates', { defaultValue: 'Delivered lines and certificates' })}
             </h3>
             {data.lines.map((line) => (
@@ -352,7 +352,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
                               defaultValue: 'Remove certificate',
                             })}
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                           </button>
                         )}
                       </li>
@@ -366,7 +366,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
                         aria-label={t('procurement.gr_certificate_type', { defaultValue: 'Certificate type' })}
                         value={draft.certificate_type}
                         onChange={(e) => setDraft({ ...draft, certificate_type: e.target.value })}
-                        className={fieldCls}
+                        className="oe-select"
                       >
                         <option value="">
                           {t('procurement.gr_certificate_type', { defaultValue: 'Certificate type' })}
@@ -426,7 +426,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
                       size="sm"
                       variant="ghost"
                       className="mt-2"
-                      icon={<Plus size={13} />}
+                      icon={<Plus size={14} />}
                       onClick={() => {
                         setOpenLine(line.gr_item_id);
                         setDraft({
@@ -444,7 +444,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <h3 className="oe-overline">
               {t('procurement.gr_next_steps', { defaultValue: 'Next steps after confirming' })}
             </h3>
             {routes.length === 0 ? (
@@ -469,7 +469,7 @@ export function ConfirmReceiptDialog({ receipt, projectId, onClose }: Props) {
                     aria-label={t('procurement.gr_route', { defaultValue: 'Approval route' })}
                     value={routeId}
                     onChange={(e) => setRouteId(e.target.value)}
-                    className={fieldCls}
+                    className="oe-select"
                   >
                     <option value="">{t('procurement.gr_route', { defaultValue: 'Approval route' })}</option>
                     {routes.map((r) => (

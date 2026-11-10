@@ -45,7 +45,7 @@ export function ProjectColorField({
         style={{ background: paint }}
       >
         {active && <Check size={14} className="text-white drop-shadow" />}
-        {color === null && !active && <Sparkles size={13} className="text-white drop-shadow" />}
+        {color === null && !active && <Sparkles size={14} className="text-white drop-shadow" />}
       </button>
     );
   };

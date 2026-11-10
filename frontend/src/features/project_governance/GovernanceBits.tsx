@@ -51,7 +51,7 @@ export function VerdictReason({ verdict, id }: { verdict: Verdict; id?: string }
       data-reason={typeof verdict === 'string' ? verdict : server ? `server:${server}` : undefined}
       className="inline-flex max-w-xs items-start gap-1 text-2xs text-content-tertiary"
     >
-      <Info size={11} className="mt-px shrink-0" aria-hidden />
+      <Info size={12} className="mt-px shrink-0" aria-hidden />
       {t(reason[0], { defaultValue: reason[1] })}
       {server && !serverKnown && (
         <span className="ml-1 font-mono text-content-quaternary" data-testid="disabled-reason-code">

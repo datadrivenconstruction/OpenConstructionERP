@@ -91,12 +91,12 @@ export function DocumentAttach({ projectId, doc, areaCode, title, onDone, onCanc
         <div className="flex flex-wrap gap-4 text-sm" role="radiogroup" aria-label={t('governance.project.attach.mode', { defaultValue: 'Where the file comes from' })}>
           <label className="inline-flex items-center gap-1.5">
             <input type="radio" name={`attach-${doc.id}`} checked={mode === 'upload'} onChange={() => setMode('upload')} />
-            <Upload size={13} aria-hidden />
+            <Upload size={14} aria-hidden />
             {t('governance.project.attach.mode_upload', { defaultValue: 'Upload a file' })}
           </label>
           <label className="inline-flex items-center gap-1.5">
             <input type="radio" name={`attach-${doc.id}`} checked={mode === 'container'} onChange={() => setMode('container')} />
-            <FolderOpen size={13} aria-hidden />
+            <FolderOpen size={14} aria-hidden />
             {t('governance.project.attach.mode_container', { defaultValue: 'Use a CDE container' })}
           </label>
         </div>
@@ -136,7 +136,7 @@ export function DocumentAttach({ projectId, doc, areaCode, title, onDone, onCanc
           {list.length > 0 && (
             <select
               aria-label={t('governance.project.attach.container', { defaultValue: 'CDE container' })}
-              className="w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary"
+              className="oe-select"
               value={containerId}
               onChange={(e) => setContainerId(e.target.value)}
             >

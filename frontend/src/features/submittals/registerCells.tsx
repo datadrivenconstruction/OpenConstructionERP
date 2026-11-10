@@ -195,7 +195,7 @@ export function ApprovalNeededBy({ submittal }: { submittal: Submittal }) {
     });
     return (
       <span title={reason} className="inline-flex text-semantic-warning">
-        <AlertTriangle size={13} aria-hidden />
+        <AlertTriangle size={14} aria-hidden />
         <span className="sr-only">{reason}</span>
       </span>
     );
@@ -229,7 +229,7 @@ export function LongLeadMark({ submittal }: { submittal: Submittal }) {
         });
   return (
     <span title={title} className="inline-flex shrink-0 text-semantic-warning">
-      <Truck size={13} aria-hidden />
+      <Truck size={14} aria-hidden />
       <span className="sr-only">{title}</span>
     </span>
   );
@@ -310,8 +310,8 @@ export function SortableHeader({
         )}
       >
         <span className="truncate">{label}</span>
-        {order === 'asc' && <ArrowUp size={11} aria-hidden />}
-        {order === 'desc' && <ArrowDown size={11} aria-hidden />}
+        {order === 'asc' && <ArrowUp size={12} aria-hidden />}
+        {order === 'desc' && <ArrowDown size={12} aria-hidden />}
       </button>
     </span>
   );

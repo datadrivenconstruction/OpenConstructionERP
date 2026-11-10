@@ -262,7 +262,7 @@ export function PositionDialog({
     >
       <WideModalSection columns={2}>
         <WideModalField label={t('staffing.position.phase', { defaultValue: 'Phase' })} htmlFor="position-phase">
-          <select id="position-phase" className={FIELD_CLASS} value={draft.phase} onChange={(e) => set('phase', e.target.value as Phase)}>
+          <select id="position-phase" className="oe-select" value={draft.phase} onChange={(e) => set('phase', e.target.value as Phase)}>
             {phases.map((ph) => (
               <option key={ph} value={ph}>
                 {vocab(t, PHASE, ph)}
@@ -273,7 +273,7 @@ export function PositionDialog({
         <WideModalField label={t('staffing.position.role', { defaultValue: 'Role' })} htmlFor="position-role">
           <select
             id="position-role"
-            className={FIELD_CLASS}
+            className="oe-select"
             value={draft.role_code}
             onChange={(e) => chooseRole(e.target.value)}
             data-testid="position-role"
@@ -300,7 +300,7 @@ export function PositionDialog({
         <WideModalField label={t('staffing.position.organisation', { defaultValue: 'Organisation' })} htmlFor="position-organisation">
           <select
             id="position-organisation"
-            className={FIELD_CLASS}
+            className="oe-select"
             value={draft.organisation}
             onChange={(e) => set('organisation', e.target.value)}
           >
@@ -350,7 +350,7 @@ export function PositionDialog({
         <WideModalField label={t('staffing.position.recruiting_channel', { defaultValue: 'Recruiting channel' })} htmlFor="position-channel">
           <select
             id="position-channel"
-            className={FIELD_CLASS}
+            className="oe-select"
             value={draft.recruiting_channel}
             onChange={(e) => set('recruiting_channel', e.target.value as RecruitingChannel | '')}
           >
@@ -418,7 +418,7 @@ export function PositionDialog({
           >
             <select
               id="position-required-before"
-              className={FIELD_CLASS}
+              className="oe-select"
               value={draft.required_before}
               disabled={!gate.allowed}
               onChange={(e) => set('required_before', e.target.value)}
@@ -441,7 +441,7 @@ export function PositionDialog({
           </WideModalField>
         )}
         <WideModalField label={t('staffing.position.notes', { defaultValue: 'Notes' })} span={2} htmlFor="position-notes">
-          <textarea id="position-notes" rows={2} className={FIELD_CLASS} value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
+          <textarea id="position-notes" rows={2} className="oe-textarea" value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
         </WideModalField>
       </WideModalSection>
     </WideModal>
@@ -518,7 +518,7 @@ export function FromCatalogueDialog({
     >
       <WideModalSection columns={2}>
         <WideModalField label={t('staffing.position.phase', { defaultValue: 'Phase' })} htmlFor="from-catalogue-phase">
-          <select id="from-catalogue-phase" className={FIELD_CLASS} value={phase} onChange={(e) => setPhase(e.target.value as Phase)}>
+          <select id="from-catalogue-phase" className="oe-select" value={phase} onChange={(e) => setPhase(e.target.value as Phase)}>
             {phases.map((ph) => (
               <option key={ph} value={ph}>
                 {vocab(t, PHASE, ph)}
@@ -637,7 +637,7 @@ export function FillDialog({
           span={2}
           htmlFor="fill-person"
         >
-          <select id="fill-person" className={FIELD_CLASS} value={member} onChange={(e) => setMember(e.target.value)} data-testid="fill-person">
+          <select id="fill-person" className="oe-select" value={member} onChange={(e) => setMember(e.target.value)} data-testid="fill-person">
             <option value="">{t('staffing.choose', { defaultValue: 'Choose' })}</option>
             {roster.map((m) => (
               <option key={m.id} value={m.id}>
@@ -740,7 +740,7 @@ export function HandoverDialog({
     >
       <WideModalSection columns={2}>
         <WideModalField label={t('staffing.handover.from', { defaultValue: 'From' })} required htmlFor="handover-from">
-          <select id="handover-from" className={FIELD_CLASS} disabled={!!handover} value={fromFill} onChange={(e) => setFromFill(e.target.value)}>
+          <select id="handover-from" className="oe-select" disabled={!!handover} value={fromFill} onChange={(e) => setFromFill(e.target.value)}>
             <option value="">{t('staffing.choose', { defaultValue: 'Choose' })}</option>
             {people.map(({ position, fill }) => (
               <option key={fill.id} value={fill.id}>
@@ -754,7 +754,7 @@ export function HandoverDialog({
           </select>
         </WideModalField>
         <WideModalField label={t('staffing.handover.to', { defaultValue: 'To position' })} required htmlFor="handover-to">
-          <select id="handover-to" className={FIELD_CLASS} disabled={!!handover} value={toPosition} onChange={(e) => setToPosition(e.target.value)}>
+          <select id="handover-to" className="oe-select" disabled={!!handover} value={toPosition} onChange={(e) => setToPosition(e.target.value)}>
             <option value="">{t('staffing.choose', { defaultValue: 'Choose' })}</option>
             {targets.map((p) => (
               <option key={p.id} value={p.id}>
@@ -767,7 +767,7 @@ export function HandoverDialog({
           <input id="handover-overlap" inputMode="numeric" className={FIELD_CLASS} value={overlap} onChange={(e) => setOverlap(e.target.value)} />
         </WideModalField>
         <WideModalField label={t('staffing.handover.scope', { defaultValue: 'What is handed over' })} span={2} htmlFor="handover-scope">
-          <textarea id="handover-scope" rows={3} className={FIELD_CLASS} value={scope} onChange={(e) => setScope(e.target.value)} />
+          <textarea id="handover-scope" rows={3} className="oe-textarea" value={scope} onChange={(e) => setScope(e.target.value)} />
         </WideModalField>
       </WideModalSection>
     </WideModal>

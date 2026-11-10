@@ -75,7 +75,7 @@ export function DocumentPane({ quote, anchor }: { quote: Quote; anchor: Anchor |
           {box && (
             <div
               data-testid="quote-anchor-box"
-              className="pointer-events-none absolute rounded-sm border-2 border-semantic-warning/60 bg-amber-300/25"
+              className="pointer-events-none absolute rounded-sm border-2 border-semantic-warning/60 bg-semantic-warning/25"
               style={{
                 left: `${(box[0] / size.width) * 100}%`,
                 top: `${(box[1] / size.height) * 100}%`,

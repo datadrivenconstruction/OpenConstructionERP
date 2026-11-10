@@ -250,7 +250,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
       className="space-y-2"
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <h3 className="oe-overline">
           {t('subcontractors.lien_waivers_title', {
             defaultValue: 'Lien waivers & tax forms',
           })}
@@ -259,7 +259,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
           <select
             value={uploadType}
             onChange={(e) => setUploadType(e.target.value)}
-            className="h-8 rounded-md border border-border-light bg-surface-primary px-2 text-xs"
+            className="oe-select oe-input-sm"
             aria-label={t('subcontractors.lien_waiver_type', {
               defaultValue: 'Waiver type',
             })}
@@ -276,7 +276,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
               type="date"
               value={throughDate}
               onChange={(e) => setThroughDate(e.target.value)}
-              className="h-8 rounded-md border border-border-light bg-surface-primary px-2 text-xs"
+              className="oe-input oe-input-sm"
               aria-label={t('subcontractors.waiver_through_date', {
                 defaultValue: 'Releases work through',
               })}
@@ -318,7 +318,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
           <select
             value={payAppId}
             onChange={(e) => pickPayApp(e.target.value)}
-            className="h-8 max-w-[260px] rounded-md border border-border-light bg-surface-primary px-2 text-xs"
+            className="oe-select oe-input-sm max-w-[260px]"
             aria-label={t('subcontractors.waiver_pay_app', { defaultValue: 'Pay application' })}
             disabled={busy}
             data-testid="waiver-pay-app"
@@ -346,7 +346,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="h-8 w-28 rounded-md border border-border-light bg-surface-primary px-2 text-right text-xs tabular-nums"
+                className="oe-input oe-input-sm w-28 text-right tabular-nums"
                 aria-label={t('subcontractors.waiver_amount', { defaultValue: 'Waiver amount' })}
                 title={t('subcontractors.waiver_amount_hint', {
                   defaultValue:
@@ -365,7 +365,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
 
       {!listQ.isLoading && rows.length === 0 && (
         <EmptyState
-          icon={<FileSignature size={18} />}
+          icon={<FileSignature size={20} />}
           title={t('subcontractors.no_lien_waivers', {
             defaultValue: 'No lien waivers yet',
           })}
@@ -382,59 +382,59 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
 
       {!listQ.isLoading && rows.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+          <table className="oe-table-compact">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.waiver_type_col', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.signed_date_col', { defaultValue: 'Signed' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.through_date_col', { defaultValue: 'Through' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.waiver_pay_app', { defaultValue: 'Pay application' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('subcontractors.amount', { defaultValue: 'Amount' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.uploaded', { defaultValue: 'Uploaded' })}
                 </th>
-                <th className="px-3 py-2" />
+                <th />
               </tr>
             </thead>
             <tbody>
               {rows.map((w) => (
-                <tr key={w.id} className="border-t border-border-light">
-                  <td className="px-3 py-2">
+                <tr key={w.id}>
+                  <td>
                     <Badge variant="blue" size="sm">
                       {WAIVER_TYPES.includes(w.waiver_type)
                         ? t(`subcontractors.waiver_type.${w.waiver_type}`)
                         : w.waiver_type}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {w.signed_date || '—'}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {w.through_date || '—'}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {w.payment_application_id
                       ? (payAppById.get(w.payment_application_id)?.application_number ?? '…')
                       : '—'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {typeof w.amount === 'string' ? w.amount : fmtFixed(w.amount, 2)}{' '}
                     <span className="text-content-tertiary">{w.currency || ''}</span>
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     <DateDisplay value={w.created_at} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       onClick={() => handleDelete(w.id)}

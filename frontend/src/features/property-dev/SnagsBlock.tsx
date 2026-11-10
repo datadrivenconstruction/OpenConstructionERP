@@ -70,7 +70,7 @@ const SNAG_STATUS_LABELS: Record<string, string> = {
 
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 const SNAG_STATUS_VARIANT: Record<
   SnagStatus,
@@ -185,7 +185,7 @@ export function SnagsBlock({
           <AlertTriangle size={12} />
           {t('propdev.snags_label', { defaultValue: 'Snags' })}
           {expanded && snagsQ.isLoading ? (
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
           ) : (
             <span className="text-content-tertiary">
               ({expanded ? snags.length : handover.snag_count_at_handover || 0}
@@ -311,7 +311,7 @@ export function SnagsBlock({
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<ShieldAlert size={11} />}
+                        icon={<ShieldAlert size={12} />}
                         onClick={() => promoteMu.mutate(s.id)}
                         disabled={promoteMu.isPending}
                         title={t('propdev.snag.promote_help', {
@@ -344,7 +344,7 @@ export function SnagsBlock({
                       }}
                       disabled={deleteMu.isPending}
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={12} />
                     </Button>
                   </div>
                 </li>
@@ -411,9 +411,9 @@ function SnagPhotoButton({
         variant="ghost"
         icon={
           uploadMu.isPending ? (
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
           ) : (
-            <Camera size={11} />
+            <Camera size={12} />
           )
         }
         onClick={() => document.getElementById(inputId)?.click()}
@@ -517,7 +517,7 @@ function CreateSnagModal({
             onChange={(e) =>
               setForm({ ...form, category: e.target.value as SnagCategory })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="cosmetic">{t('propdev.snag.category_cosmetic', { defaultValue: 'Cosmetic' })}</option>
             <option value="functional">{t('propdev.snag.category_functional', { defaultValue: 'Functional' })}</option>
@@ -539,7 +539,7 @@ function CreateSnagModal({
             onChange={(e) =>
               setForm({ ...form, severity: e.target.value as SnagSeverity })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="cosmetic">{t('propdev.snag.severity_cosmetic', { defaultValue: 'Cosmetic' })}</option>
             <option value="minor">{t('propdev.snag.severity_minor', { defaultValue: 'Minor' })}</option>
@@ -572,7 +572,7 @@ function CreateSnagModal({
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className={inputCls}
+            className="oe-textarea"
             rows={3}
             placeholder={t('propdev.snag.describe', {
               defaultValue:

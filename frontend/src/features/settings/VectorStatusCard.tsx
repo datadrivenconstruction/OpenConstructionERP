@@ -249,12 +249,12 @@ export default function VectorStatusCard() {
               </div>
               {statusQuery.data.connected ? (
                 <div className="inline-flex items-center gap-1 text-semantic-success">
-                  <CheckCircle2 size={11} />
+                  <CheckCircle2 size={12} />
                   {t('vector_status.connected', { defaultValue: 'Connected' })}
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-1 text-semantic-warning">
-                  <AlertCircle size={11} />
+                  <AlertCircle size={12} />
                   {t('vector_status.disconnected', { defaultValue: 'Disconnected' })}
                 </div>
               )}
@@ -284,13 +284,13 @@ export default function VectorStatusCard() {
                           </span>
                           {col.ready ? (
                             <CheckCircle2
-                              size={11}
+                              size={12}
                               className="text-semantic-success"
                               aria-label={t('vector_status.collection_ready', { defaultValue: 'ready' })}
                             />
                           ) : (
                             <span
-                              className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300"
+                              className="inline-block h-1.5 w-1.5 rounded-full bg-border"
                               aria-label={t('vector_status.collection_empty', { defaultValue: 'empty' })}
                             />
                           )}
@@ -305,7 +305,7 @@ export default function VectorStatusCard() {
                         </div>
                         {lastTruncation && (
                           <div className="mt-1 flex items-start gap-1 text-2xs text-semantic-warning">
-                            <AlertCircle size={11} className="mt-0.5 shrink-0" />
+                            <AlertCircle size={12} className="mt-0.5 shrink-0" />
                             <span>
                               {t('vector_status.truncated_note', {
                                 defaultValue:

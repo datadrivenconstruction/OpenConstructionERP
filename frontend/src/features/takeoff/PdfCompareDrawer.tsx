@@ -308,7 +308,7 @@ export function PdfCompareDrawer({
               onChange={(e) => setFromId(e.target.value)}
               disabled={documents.length === 0}
               data-testid="takeoff-compare-from"
-              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-select oe-input-sm"
             >
               {documents.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -327,7 +327,7 @@ export function PdfCompareDrawer({
               onChange={(e) => setToId(e.target.value)}
               disabled={documents.length === 0}
               data-testid="takeoff-compare-to"
-              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-select oe-input-sm"
             >
               {documents.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -339,7 +339,7 @@ export function PdfCompareDrawer({
         </div>
 
         {documents.length < 2 && (
-          <p className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-content-secondary">
+          <p className="rounded-md border border-semantic-warning/30 bg-semantic-warning/5 px-3 py-2 text-xs text-content-secondary">
             {t('takeoff_compare.need_two_documents', {
               defaultValue:
                 'You need at least two uploaded takeoff PDFs to compare. Upload an updated revision to compare against the current one.',
@@ -384,7 +384,7 @@ export function PdfCompareDrawer({
                   : 'text-content-secondary hover:text-content-primary',
               )}
             >
-              <Icon size={13} />
+              <Icon size={14} />
               <span className="truncate">{label}</span>
               {count > 0 && (
                 <Badge variant="neutral" className="ml-0.5 text-2xs">
@@ -404,7 +404,7 @@ export function PdfCompareDrawer({
             className="inline-flex items-center gap-1.5 self-start text-xs font-medium text-oe-blue hover:underline"
             data-testid="takeoff-compare-visual"
           >
-            <GitCompare size={13} />
+            <GitCompare size={14} />
             {t('takeoff_compare.open_visual', { defaultValue: 'Compare the sheets visually and list every change' })}
           </button>
         )}
@@ -417,7 +417,7 @@ export function PdfCompareDrawer({
           </div>
         )}
         {canCompare && diffQuery.isError && (
-          <p className="rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-500">
+          <p className="rounded-md border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-xs text-semantic-error">
             {t('takeoff_compare.error', {
               defaultValue: 'Could not compute the comparison. Please try again.',
             })}
@@ -523,7 +523,7 @@ function CarryOverPanel({
       />
       {pendingCount > 0 && (
         <div
-          className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-2"
+          className="mt-3 rounded-md border border-semantic-warning/40 bg-semantic-warning/10 p-2"
           data-testid="takeoff-carry-pending"
         >
           <p className="text-xs text-content-primary">
@@ -549,7 +549,7 @@ function CarryOverPanel({
               data-testid="takeoff-carry-confirm-all"
               className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white disabled:opacity-50"
             >
-              <CheckCheck size={13} />
+              <CheckCheck size={14} />
               {t('takeoff_compare.carry_confirm_all', { defaultValue: 'Confirm all after review' })}
             </button>
           </div>
@@ -562,9 +562,9 @@ function CarryOverPanel({
 /* ── Sheet match + alignment preview (writes nothing until accepted) ────── */
 
 const BAND_CLASS: Record<string, string> = {
-  high: 'bg-emerald-500/10 text-emerald-600',
-  review: 'bg-amber-500/10 text-amber-600',
-  remeasure: 'bg-red-500/10 text-red-500',
+  high: 'bg-semantic-success/10 text-semantic-success',
+  review: 'bg-semantic-warning/10 text-semantic-warning',
+  remeasure: 'bg-semantic-error/10 text-semantic-error',
 };
 
 function CarryAlignment({
@@ -624,25 +624,25 @@ function CarryAlignment({
       )}
       {preview && (
         <div className="mt-2" data-testid="takeoff-carry-preview-result">
-          <table className="w-full text-2xs">
+          <table className="oe-table-compact text-2xs">
             <thead>
               <tr className="text-start text-content-tertiary">
-                <th className="py-1 font-medium">
+                <th>
                   {t('takeoff_compare.carry_page_old', { defaultValue: 'Old page' })}
                 </th>
-                <th className="py-1 font-medium">
+                <th>
                   {t('takeoff_compare.carry_page_new', { defaultValue: 'New page' })}
                 </th>
-                <th className="py-1 text-end font-medium">
+                <th className="text-end">
                   {t('takeoff_compare.carry_page_score', { defaultValue: 'Match' })}
                 </th>
               </tr>
             </thead>
             <tbody>
               {preview.pages.map((p) => (
-                <tr key={p.old} className="border-t border-border-light">
-                  <td className="py-1 tabular-nums">{p.old}</td>
-                  <td className="py-1">
+                <tr key={p.old}>
+                  <td className="tabular-nums">{p.old}</td>
+                  <td>
                     <select
                       aria-label={t('takeoff_compare.carry_page_override', {
                         defaultValue: 'New page for old page {{n}}',
@@ -653,7 +653,7 @@ function CarryAlignment({
                         const v = Number(e.target.value);
                         setPageMap((m) => (v ? { ...m, [p.old]: v } : m));
                       }}
-                      className="rounded border border-border bg-surface-primary px-1 py-0.5 text-2xs"
+                      className="oe-select oe-input-sm"
                     >
                       {p.new == null && !pageMap[p.old] && <option value="">-</option>}
                       {pageOptions.map((n) => (
@@ -663,7 +663,7 @@ function CarryAlignment({
                       ))}
                     </select>
                   </td>
-                  <td className="py-1 text-end tabular-nums text-content-secondary" title={p.method}>
+                  <td className="text-end tabular-nums text-content-secondary" title={p.method}>
                     {p.new == null ? '-' : `${Math.round(p.score * 100)}%`}
                   </td>
                 </tr>
@@ -722,21 +722,21 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
       <div className="text-2xs font-medium text-content-tertiary mb-2">
         {t('takeoff_compare.position_deltas', { defaultValue: 'Quantity change per BOQ position' })}
       </div>
-      <table className="w-full text-xs">
+      <table className="oe-table-compact">
         <thead>
           <tr className="text-2xs text-content-tertiary">
-            <th className="text-left font-medium pb-1">{t('takeoff_compare.position', { defaultValue: 'Position' })}</th>
-            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_in_boq', { defaultValue: 'In BOQ' })}</th>
-            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_before', { defaultValue: 'Before' })}</th>
-            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_after', { defaultValue: 'After' })}</th>
-            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_delta', { defaultValue: 'Delta' })}</th>
-            <th className="text-right font-medium pb-1">{t('takeoff_compare.cost', { defaultValue: 'Cost' })}</th>
+            <th className="pb-1">{t('takeoff_compare.position', { defaultValue: 'Position' })}</th>
+            <th className="text-right pb-1">{t('takeoff_compare.qty_in_boq', { defaultValue: 'In BOQ' })}</th>
+            <th className="text-right pb-1">{t('takeoff_compare.qty_before', { defaultValue: 'Before' })}</th>
+            <th className="text-right pb-1">{t('takeoff_compare.qty_after', { defaultValue: 'After' })}</th>
+            <th className="text-right pb-1">{t('takeoff_compare.qty_delta', { defaultValue: 'Delta' })}</th>
+            <th className="text-right pb-1">{t('takeoff_compare.cost', { defaultValue: 'Cost' })}</th>
           </tr>
         </thead>
         <tbody>
           {deltas.map((d) => (
-            <tr key={d.position_id} className="border-t border-border-light" data-testid="takeoff-position-delta">
-              <td className="py-1 pr-2 truncate max-w-[10rem]" title={d.description ?? undefined}>
+            <tr key={d.position_id} data-testid="takeoff-position-delta">
+              <td className="pr-2 truncate max-w-[10rem]" title={d.description ?? undefined}>
                 <span className="font-medium text-content-primary">{d.ordinal ?? '?'}</span>
                 {d.carried_pending > 0 && (
                   <Badge variant="warning" className="ml-1 text-2xs">
@@ -747,16 +747,16 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
                   </Badge>
                 )}
               </td>
-              <td className="py-1 text-end tabular-nums text-content-tertiary">
+              <td className="text-end tabular-nums text-content-tertiary">
                 {d.boq_quantity != null ? fmtFixed(Number(d.boq_quantity), 2) : '—'}
               </td>
-              <td className="py-1 text-end tabular-nums">{fmtFixed(d.old_quantity, 2)}</td>
-              <td className="py-1 text-end tabular-nums">{fmtFixed(d.new_quantity, 2)}</td>
+              <td className="text-end tabular-nums">{fmtFixed(d.old_quantity, 2)}</td>
+              <td className="text-end tabular-nums">{fmtFixed(d.new_quantity, 2)}</td>
               <td
                 className={clsx(
                   'py-1 text-end tabular-nums font-semibold',
                   d.delta_quantity > 0
-                    ? 'text-amber-600'
+                    ? 'text-semantic-warning'
                     : d.delta_quantity < 0
                       ? 'text-oe-blue'
                       : 'text-content-tertiary',
@@ -765,7 +765,7 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
                 {d.delta_quantity > 0 ? '+' : ''}
                 {fmtFixed(d.delta_quantity, 2)} {d.unit ?? ''}
               </td>
-              <td className="py-1 text-right">
+              <td className="text-right">
                 {d.cost_impact != null && currency ? (
                   <MoneyDisplay amount={d.cost_impact} currency={currency} colorize className="text-xs" />
                 ) : (
@@ -797,9 +797,9 @@ function SummaryTab({
   const { summary } = diff;
   const tally = summary.measurements;
   const rows: { key: 'added' | 'removed' | 'modified'; color: string; label: string }[] = [
-    { key: 'added', color: 'text-emerald-500', label: t('takeoff_compare.change_added', { defaultValue: 'Added' }) },
-    { key: 'removed', color: 'text-red-500', label: t('takeoff_compare.change_removed', { defaultValue: 'Removed' }) },
-    { key: 'modified', color: 'text-amber-500', label: t('takeoff_compare.change_modified', { defaultValue: 'Modified' }) },
+    { key: 'added', color: 'text-semantic-success', label: t('takeoff_compare.change_added', { defaultValue: 'Added' }) },
+    { key: 'removed', color: 'text-semantic-error', label: t('takeoff_compare.change_removed', { defaultValue: 'Removed' }) },
+    { key: 'modified', color: 'text-semantic-warning', label: t('takeoff_compare.change_modified', { defaultValue: 'Modified' }) },
   ];
   return (
     <div className="flex flex-col gap-4">
@@ -810,9 +810,9 @@ function SummaryTab({
       {summary.truncated && (
         <div
           data-testid="takeoff-compare-truncated"
-          className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3"
+          className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning/10 p-3"
         >
-          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-500" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
           <p className="text-xs text-content-secondary">
             {t('takeoff_compare.truncated_notice', {
               defaultValue:
@@ -890,7 +890,7 @@ function SummaryTab({
             n: summary.from_measurement_total,
           })}
         </span>
-        <ArrowRight size={13} className="text-content-tertiary" />
+        <ArrowRight size={14} className="text-content-tertiary" />
         <span>
           {t('takeoff_compare.count_to', {
             defaultValue: 'After: {{n}} measurements',
@@ -945,14 +945,14 @@ function MeasurementsTab({
                 {t('takeoff_compare.carried_needs_review', { defaultValue: 'Carried, needs review' })}
               </Badge>
               {r.scale_check === 'changed' && (
-                <span className="text-2xs text-amber-600">
+                <span className="text-2xs text-semantic-warning">
                   {t('takeoff_compare.scale_changed', {
                     defaultValue: 'New sheet has a different scale: value recomputed from the same points',
                   })}
                 </span>
               )}
               {r.scale_check === 'unverified' && (
-                <span className="text-2xs text-amber-600">
+                <span className="text-2xs text-semantic-warning">
                   {t('takeoff_compare.scale_unverified', {
                     defaultValue: 'New sheet is not calibrated: old scale kept',
                   })}

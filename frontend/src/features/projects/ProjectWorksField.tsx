@@ -25,7 +25,7 @@ export function ProjectWorksField({
   const hintId = `${id}-hint`;
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-content-primary">
+      <label htmlFor={id} className="oe-label">
         {t('projects.works.label', { defaultValue: 'Public or private client' })}
       </label>
       <select
@@ -37,7 +37,7 @@ export function ProjectWorksField({
           const next = e.target.value;
           onChange(next === 'public' || next === 'private' ? next : null);
         }}
-        className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent disabled:opacity-60"
+        className="oe-select oe-input-lg"
       >
         <option value="">{t('projects.works.unknown', { defaultValue: 'Not recorded' })}</option>
         <option value="public">{t('projects.works.public', { defaultValue: 'Public buyer (public procurement)' })}</option>

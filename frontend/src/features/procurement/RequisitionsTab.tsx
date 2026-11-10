@@ -78,7 +78,7 @@ import {
 } from './RequisitionOrdering';
 
 const fieldCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 const STATUS_VARIANT: Record<RequisitionStatus, BadgeVariant> = {
   draft: 'neutral',
@@ -318,7 +318,7 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
             />
           </>
         )}
-        <label className="block text-xs font-medium text-content-secondary" htmlFor="convert-vendor">
+        <label className="oe-label" htmlFor="convert-vendor">
           {t('procurement.requisitions.field_vendor', { defaultValue: 'Vendor' })}
         </label>
         <VendorSelect
@@ -328,7 +328,7 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
           disabled={blocked}
           fallbackName={requisitions.find((r) => r.vendor_id === vendorId)?.vendor_name}
         />
-        <label className="block text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('procurement.requisitions.convert_delivery', { defaultValue: 'Delivery date (optional)' })}
           <input
             type="date"
@@ -393,12 +393,12 @@ export function DecisionModal({ mode, busy, onClose, onConfirm }: DecisionModalP
         </>
       }
     >
-      <label className="block text-xs font-medium text-content-secondary">
+      <label className="oe-label">
         {isReject
           ? t('procurement.requisitions.reject_reason', { defaultValue: 'Reason (required)' })
           : t('procurement.requisitions.approve_comment', { defaultValue: 'Comment (optional)' })}
         <textarea
-          className="mt-1 min-h-[4rem] w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+          className="oe-textarea mt-1 min-h-[4rem]"
           value={comment}
           maxLength={2000}
           onChange={(e) => setComment(e.target.value)}
@@ -462,7 +462,7 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RequisitionStatus | '')}
-            className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+            className="oe-select"
           >
             <option value="">{t('procurement.requisitions.filter_all', { defaultValue: 'All' })}</option>
             {REQUISITION_STATUSES.map((s) => (
@@ -516,29 +516,29 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                  <th className="w-8 px-2 py-2" />
-                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_number', { defaultValue: 'Number' })}</th>
-                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_title', { defaultValue: 'Title' })}</th>
-                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_vendor', { defaultValue: 'Vendor' })}</th>
-                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_status', { defaultValue: 'Status' })}</th>
-                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_needed_by', { defaultValue: 'Needed by' })}</th>
-                  <th className="px-4 py-2 text-right font-medium">{t('procurement.requisitions.col_lines', { defaultValue: 'Lines' })}</th>
-                  <th className="px-4 py-2 text-right font-medium">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
-                  <th className="px-4 py-2 text-right font-medium">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
-                  <th className="px-4 py-2 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
+                <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                  <th className="w-8" />
+                  <th>{t('procurement.requisitions.col_number', { defaultValue: 'Number' })}</th>
+                  <th>{t('procurement.requisitions.col_title', { defaultValue: 'Title' })}</th>
+                  <th>{t('procurement.requisitions.col_vendor', { defaultValue: 'Vendor' })}</th>
+                  <th>{t('procurement.requisitions.col_status', { defaultValue: 'Status' })}</th>
+                  <th>{t('procurement.requisitions.col_needed_by', { defaultValue: 'Needed by' })}</th>
+                  <th className="text-right">{t('procurement.requisitions.col_lines', { defaultValue: 'Lines' })}</th>
+                  <th className="text-right">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
+                  <th className="text-right">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
+                  <th className="text-right">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.items.map((r) => (
                   <tr
                     key={r.id}
-                    className="cursor-pointer border-b border-border-light/60 last:border-0 hover:bg-surface-secondary"
+                    className="cursor-pointer last:border-0"
                     onClick={() => setOpenId(r.id)}
                   >
-                    <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
+                    <td onClick={(e) => e.stopPropagation()}>
                       {r.status === 'approved' && r.order_owner !== 'external' && (
                         <input
                           type="checkbox"
@@ -553,14 +553,14 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                         />
                       )}
                     </td>
-                    <td className="px-4 py-2 font-mono text-xs text-content-primary">
+                    <td className="font-mono">
                       <button type="button" className="text-oe-blue hover:underline" onClick={() => setOpenId(r.id)}>
                         {r.req_number ?? r.id.slice(0, 8)}
                       </button>
                     </td>
-                    <td className="px-4 py-2 text-content-primary">{r.title || '-'}</td>
-                    <td className="px-4 py-2 text-content-secondary">{r.vendor_name || '-'}</td>
-                    <td className="px-4 py-2">
+                    <td>{r.title || '-'}</td>
+                    <td className="text-content-secondary">{r.vendor_name || '-'}</td>
+                    <td>
                       <StatusBadge status={r.status} />
                       {r.order_progress === 'partial' && r.status === 'approved' && (
                         <span className="ml-1 inline-block">
@@ -573,17 +573,17 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                         <span className="ml-2 font-mono text-2xs text-content-tertiary">{r.po_number}</span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {r.required_date ? <DateDisplay value={r.required_date} /> : '-'}
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">{r.items.length}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">{r.items.length}</td>
+                    <td className="text-right tabular-nums">
                       <HeaderQuantity req={r} value={r.reconciliation.requested} />
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       <HeaderQuantity req={r} value={r.reconciliation.ordered} />
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       <HeaderQuantity req={r} value={r.reconciliation.received} />
                     </td>
                   </tr>
@@ -888,7 +888,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
       }
     >
       {isLoading || !req ? (
-        <Loader2 size={18} className="animate-spin text-content-tertiary" />
+        <Loader2 size={20} className="animate-spin text-content-tertiary" />
       ) : (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -1021,7 +1021,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 />
               </div>
             </div>
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('procurement.requisitions.field_title', { defaultValue: 'Title' })}
               <input
                 className={`${fieldCls} mt-1`}
@@ -1034,7 +1034,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 }}
               />
             </label>
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('procurement.requisitions.field_needed_by', { defaultValue: 'Needed on site by' })}
               <input
                 type="date"
@@ -1063,10 +1063,10 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 </span>
               )}
             </label>
-            <label className="block text-xs font-medium text-content-secondary sm:col-span-2">
+            <label className="oe-label sm:col-span-2">
               {t('procurement.requisitions.field_notes', { defaultValue: 'Notes' })}
               <textarea
-                className="mt-1 min-h-[3.5rem] w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+                className="oe-textarea mt-1 min-h-[3.5rem]"
                 value={notes}
                 maxLength={5000}
                 disabled={!isDraft}
@@ -1106,30 +1106,30 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
               )}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[56rem] text-sm">
+              <table className="oe-table-compact min-w-[56rem]">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                    {isDraft && <th className="w-8 py-1.5" />}
-                    <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
-                    <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
-                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
+                  <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                    {isDraft && <th className="w-8" />}
+                    <th className="pr-3">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
+                    <th className="pr-3">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
+                    <th className="pr-3 text-right">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
                     <th
-                      className="py-1.5 pr-3 text-right font-medium"
+                      className="pr-3 text-right"
                       title={t('procurement.requisitions.col_unit_cost_hint', {
                         defaultValue: 'Indicative, from the BOQ rates. The price is agreed when the order is placed.',
                       })}
                     >
                       {t('procurement.requisitions.col_unit_cost', { defaultValue: 'Estimated unit cost' })}
                     </th>
-                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
-                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_to_order', { defaultValue: 'Still to order' })}</th>
-                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
-                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_outstanding', { defaultValue: 'Outstanding' })}</th>
-                    <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_sources', { defaultValue: 'From the BOQ' })}</th>
-                    <th className="py-1.5 pr-3 font-medium">
+                    <th className="pr-3 text-right">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
+                    <th className="pr-3 text-right">{t('procurement.requisitions.col_to_order', { defaultValue: 'Still to order' })}</th>
+                    <th className="pr-3 text-right">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
+                    <th className="pr-3 text-right">{t('procurement.requisitions.col_outstanding', { defaultValue: 'Outstanding' })}</th>
+                    <th className="pr-3">{t('procurement.requisitions.col_sources', { defaultValue: 'From the BOQ' })}</th>
+                    <th className="pr-3">
                       {t('procurement.requisitions.col_supply', { defaultValue: 'Supplier and date' })}
                     </th>
-                    {isDraft && <th className="w-8 py-1.5" />}
+                    {isDraft && <th className="w-8" />}
                   </tr>
                 </thead>
                 <tbody>
@@ -1138,9 +1138,9 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                     // edit (merge, removal) has none yet.
                     const stored = !dirty ? storedLines[index] : undefined;
                     return (
-                      <tr key={index} className="border-b border-border-light/60 align-top last:border-0">
+                      <tr key={index} className="align-top last:border-0">
                         {isDraft && (
-                          <td className="py-1.5">
+                          <td>
                             <input
                               type="checkbox"
                               aria-label={t('procurement.requisitions.select_line', { defaultValue: 'Select line' })}
@@ -1151,7 +1151,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                             />
                           </td>
                         )}
-                        <td className="py-1.5 pr-3">
+                        <td className="pr-3">
                           {isDraft ? (
                             <input
                               className={fieldCls}
@@ -1163,8 +1163,8 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                             line.description
                           )}
                         </td>
-                        <td className="py-1.5 pr-3 text-content-secondary">{line.unit || '-'}</td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums">
+                        <td className="pr-3 text-content-secondary">{line.unit || '-'}</td>
+                        <td className="pr-3 text-right tabular-nums">
                           {isDraft ? (
                             <input
                               className={`${fieldCls} w-28 text-right`}
@@ -1176,7 +1176,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                             <QuantityDisplay value={line.quantity_requested} unit={line.unit ?? ''} precision={2} />
                           )}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="pr-3 text-right tabular-nums text-content-secondary">
                           {isPositiveDecimal(line.unit_cost) ? (
                             <>
                               {line.unit_cost} {line.currency_code ?? ''}
@@ -1187,23 +1187,23 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                             </span>
                           )}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? <QuantityDisplay value={stored.quantity_ordered} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? (
                             <QuantityDisplay value={stored.quantity_to_order ?? '0'} unit={stored.unit ?? ''} precision={2} />
                           ) : (
                             '-'
                           )}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? <QuantityDisplay value={stored.quantity_received} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? <QuantityDisplay value={stored.quantity_outstanding} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
-                        <td className="py-1.5 pr-3 text-xs text-content-tertiary">
+                        <td className="pr-3 text-content-tertiary">
                           {line.sources.length === 0
                             ? t('procurement.requisitions.no_sources', { defaultValue: 'Entered by hand' })
                             : t('procurement.requisitions.source_count', {
@@ -1225,7 +1225,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                           ))}
                           {isDraft && line.sources.length > 0 && (
                             <input
-                              className={`${fieldCls} mt-1 text-xs`}
+                              className={`${fieldCls} oe-input-sm mt-1`}
                               value={line.over_allocation_reason ?? ''}
                               maxLength={1000}
                               aria-label={t('procurement.requisitions.over_allocation_reason', {
@@ -1239,7 +1239,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                           )}
                           {stored && <LineOrderFlags line={stored} />}
                         </td>
-                        <td className="py-1.5 pr-3">
+                        <td className="pr-3">
                           <LineSupplyCell
                             projectId={projectId}
                             line={line}
@@ -1250,7 +1250,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                           />
                         </td>
                         {isDraft && (
-                          <td className="py-1.5">
+                          <td>
                             <button
                               type="button"
                               aria-label={t('procurement.requisitions.remove_line', { defaultValue: 'Remove line' })}

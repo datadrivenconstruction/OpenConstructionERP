@@ -184,7 +184,7 @@ export function EInvoiceSettings() {
 
   const renderField = (name: FieldName) => (
     <div key={name}>
-      <label htmlFor={name} className="block text-sm font-medium text-content-primary mb-1.5">
+      <label htmlFor={name} className="oe-label">
         {t(LABEL_KEY[name] ?? `settings.einvoice.field.${name}`)}
       </label>
       <input

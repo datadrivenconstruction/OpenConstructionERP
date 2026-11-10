@@ -117,7 +117,7 @@ export function TaxRateResolverPanel() {
             <select
               value={country}
               onChange={(e) => onCountryChange(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-select"
               aria-label={t('tax_rates.field_country', { defaultValue: 'Country' })}
             >
               <option value="">
@@ -138,7 +138,7 @@ export function TaxRateResolverPanel() {
                 ref={regionRef}
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="rounded border border-border-light bg-surface-primary p-2"
+                className="oe-select"
                 aria-label={t('tax_rates.field_region', { defaultValue: 'Region' })}
               >
                 {/* Never preselected. A picker that defaults to the first
@@ -168,7 +168,7 @@ export function TaxRateResolverPanel() {
               type="date"
               value={onDate}
               onChange={(e) => setOnDate(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-input"
               aria-label={t('tax_rates.field_date', { defaultValue: 'Priced at' })}
             />
             <span className="text-2xs text-content-tertiary">
@@ -321,35 +321,35 @@ function Answered({
         {t('tax_rates.breakdown_title', { defaultValue: 'How this was reached' })}
       </h3>
       <div className="mt-2 overflow-x-auto">
-        <table className="w-full min-w-[32rem] text-left text-xs">
-          <thead className="text-content-tertiary">
+        <table className="oe-table-compact min-w-[32rem] text-left">
+          <thead>
             <tr>
-              <th className="py-1 pr-3 font-medium">
+              <th className="pr-3">
                 {t('tax_rates.col_tax', { defaultValue: 'Tax' })}
               </th>
-              <th className="py-1 pr-3 font-medium">
+              <th className="pr-3">
                 {t('tax_rates.col_rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="py-1 pr-3 font-medium">
+              <th className="pr-3">
                 {t('tax_rates.col_base', { defaultValue: 'Charged on' })}
               </th>
-              <th className="py-1 font-medium">
+              <th>
                 {t('tax_rates.col_effective', { defaultValue: 'Adds to total' })}
               </th>
             </tr>
           </thead>
-          <tbody className="text-content-secondary">
+          <tbody>
             {answer.components.map((c, i) => (
-              <tr key={`${c.tax_code ?? c.tax_name}-${i}`} className="border-t border-border-light">
-                <td className="py-1.5 pr-3">
+              <tr key={`${c.tax_code ?? c.tax_name}-${i}`}>
+                <td className="pr-3">
                   <span className="text-content-primary">{c.tax_name}</span>
                   <span className="block text-2xs text-content-tertiary">
                     {combinationLabel(t, c.combination)}
                   </span>
                 </td>
-                <td className="py-1.5 pr-3 tabular-nums">{c.rate_pct}%</td>
-                <td className="py-1.5 pr-3">{baseLabel(t, c.base)}</td>
-                <td className="py-1.5 tabular-nums">{c.effective_rate_pct}%</td>
+                <td className="pr-3 tabular-nums">{c.rate_pct}%</td>
+                <td className="pr-3">{baseLabel(t, c.base)}</td>
+                <td className="tabular-nums">{c.effective_rate_pct}%</td>
               </tr>
             ))}
           </tbody>
@@ -522,7 +522,7 @@ function Unanswered({
     >
       <div data-testid="tax-rates-answer-slot" className="flex items-start gap-2">
         {icon}
-        <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+        <h3 className="oe-section-title">{title}</h3>
       </div>
       <p className="mt-2 text-sm text-content-secondary">{body}</p>
       <p className="mt-2 text-2xs text-content-tertiary">
@@ -627,7 +627,7 @@ function Refused({ code, jurisdiction }: { code: RefusalCode; jurisdiction: stri
     >
       <div data-testid="tax-rates-answer-slot" className="flex items-start gap-2">
         <AlertTriangle className="h-5 w-5 shrink-0 text-semantic-error" />
-        <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+        <h3 className="oe-section-title">{title}</h3>
       </div>
       <p className="mt-2 text-sm text-content-secondary">{body}</p>
       <p className="mt-2 text-2xs text-content-tertiary">

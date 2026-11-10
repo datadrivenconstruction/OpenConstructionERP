@@ -208,7 +208,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
                     <Button
                       size="sm"
                       variant="secondary"
-                      icon={<Check size={13} />}
+                      icon={<Check size={14} />}
                       onClick={() => setDialog({ kind: 'event', target: { kind: 'record', item, date: d.date } })}
                       data-testid="due-record"
                     >
@@ -250,7 +250,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Pencil size={13} />}
+                        icon={<Pencil size={14} />}
                         aria-label={t('stakeholders.ui.edit', { defaultValue: 'Edit' })}
                         onClick={() => setDialog({ kind: 'item', item })}
                         data-testid="plan-item-edit"
@@ -258,7 +258,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Trash2 size={13} />}
+                        icon={<Trash2 size={14} />}
                         aria-label={t('stakeholders.ui.remove', { defaultValue: 'Remove' })}
                         onClick={() => setDialog({ kind: 'delete-item', item })}
                         data-testid="plan-item-delete"
@@ -308,7 +308,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<Plus size={13} />}
+                icon={<Plus size={14} />}
                 onClick={() => setDialog({ kind: 'event', target: { kind: 'new' } })}
                 data-testid="event-add"
               >
@@ -336,7 +336,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Pencil size={13} />}
+                        icon={<Pencil size={14} />}
                         aria-label={t('stakeholders.ui.edit', { defaultValue: 'Edit' })}
                         onClick={() => setDialog({ kind: 'event', target: { kind: 'edit', event: e } })}
                         data-testid="event-edit"
@@ -344,7 +344,7 @@ export function PlanPanel({ screen, items, due, events, stakeholders, focusItemI
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Trash2 size={13} />}
+                        icon={<Trash2 size={14} />}
                         aria-label={t('stakeholders.ui.remove', { defaultValue: 'Remove' })}
                         onClick={() => setDialog({ kind: 'delete-event', event: e })}
                         data-testid="event-delete"

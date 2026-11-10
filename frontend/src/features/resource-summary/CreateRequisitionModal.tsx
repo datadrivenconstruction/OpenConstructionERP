@@ -21,7 +21,7 @@ import { buildRequisitionLinesFromBuyList, createRequisition } from '@/features/
 import type { MaterialBuyListItem } from './api';
 
 const fieldCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 interface CreateRequisitionModalProps {
   open: boolean;
@@ -93,7 +93,7 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
     >
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('resourceSummary.requisition.field_title', { defaultValue: 'Title' })}
             <input
               className={`${fieldCls} mt-1`}
@@ -102,7 +102,7 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
               onChange={(e) => setTitle(e.target.value)}
             />
           </label>
-          <label className="block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('resourceSummary.requisition.field_needed_by', { defaultValue: 'Needed on site by' })}
             <input type="date" className={`${fieldCls} mt-1`} value={neededBy} onChange={(e) => setNeededBy(e.target.value)} />
           </label>
@@ -142,33 +142,33 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-1.5 pr-3 font-medium">
+              <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                <th className="pr-3">
                   {t('resourceSummary.buyList.col.material', { defaultValue: 'Material' })}
                 </th>
-                <th className="py-1.5 pr-3 font-medium">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
+                <th className="pr-3 text-right">
                   {t('resourceSummary.requisition.col_quantity', { defaultValue: 'Quantity' })}
                 </th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3 text-right">
                   {t('resourceSummary.requisition.col_unit_cost', { defaultValue: 'Estimated unit cost' })}
                 </th>
-                <th className="py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('resourceSummary.requisition.col_sources', { defaultValue: 'BOQ sources' })}
                 </th>
               </tr>
             </thead>
             <tbody>
               {lines.map((line, i) => (
-                <tr key={i} className="border-b border-border-light/60 last:border-0">
-                  <td className="py-1.5 pr-3 text-content-primary">{line.description}</td>
-                  <td className="py-1.5 pr-3 text-content-tertiary">{line.unit || '-'}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums">
+                <tr key={i} className="last:border-0">
+                  <td className="pr-3">{line.description}</td>
+                  <td className="pr-3 text-content-tertiary">{line.unit || '-'}</td>
+                  <td className="pr-3 text-right tabular-nums">
                     <QuantityDisplay value={line.quantity_requested} unit={line.unit ?? ''} precision={2} />
                   </td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                  <td className="pr-3 text-right tabular-nums text-content-secondary">
                     {line.unit_cost ? (
                       `${line.unit_cost} ${line.currency_code ?? ''}`.trim()
                     ) : (
@@ -179,7 +179,7 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
                       </span>
                     )}
                   </td>
-                  <td className="py-1.5 text-right tabular-nums text-content-tertiary">{line.sources.length}</td>
+                  <td className="text-right tabular-nums text-content-tertiary">{line.sources.length}</td>
                 </tr>
               ))}
             </tbody>

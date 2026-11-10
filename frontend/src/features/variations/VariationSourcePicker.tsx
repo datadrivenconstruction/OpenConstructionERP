@@ -45,13 +45,13 @@ import {
 } from './api';
 
 const pickerInputCls =
-  'h-8 w-24 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-24';
 
 const selectCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 
 const kindSelectCls =
-  'h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-sm';
 
 /** One line of an existing bill or schedule, in the one shape the list needs. */
 export interface SourceRow {

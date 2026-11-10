@@ -148,7 +148,7 @@ export function ConflictAcknowledge({ screen, refusal, onAcknowledged }: Conflic
             {t('stakeholders.ui.conflict.reason', { defaultValue: 'Why this is accepted on this project' })}
             <textarea
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               data-testid="conflict-reason"

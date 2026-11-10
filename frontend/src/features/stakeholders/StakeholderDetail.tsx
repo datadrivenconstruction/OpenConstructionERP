@@ -82,7 +82,7 @@ export function StakeholderDetail({ screen, stakeholder, stakeholders, onBack }:
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-content-primary">{stakeholderName(t, stakeholder)}</h2>
+          <h2 className="oe-section-title">{stakeholderName(t, stakeholder)}</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-content-secondary">
             <span>{stakeholder.code}</span>
             <span>{nameOf(labels, fw.stakeholder_categories, stakeholder.category)}</span>
@@ -173,7 +173,7 @@ export function StakeholderDetail({ screen, stakeholder, stakeholders, onBack }:
       )}
 
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('stakeholders.ui.assessment.history', { defaultValue: 'Assessment history' })}
         </h3>
         {assessmentsQ.isLoading ? (

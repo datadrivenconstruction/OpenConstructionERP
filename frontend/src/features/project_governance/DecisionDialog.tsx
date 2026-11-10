@@ -146,7 +146,7 @@ export function DecisionDialog({
     });
 
   const fieldClass =
-    'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+    'oe-input';
 
   return (
     <WideModal
@@ -278,7 +278,7 @@ export function DecisionDialog({
           <textarea
             id="decision-rationale"
             rows={3}
-            className={fieldClass}
+            className="oe-textarea"
             value={draft.rationale}
             onChange={(e) => setDraft((d) => ({ ...d, rationale: e.target.value }))}
             placeholder={t('governance.project.decision.rationale_placeholder', {
@@ -305,8 +305,8 @@ export function DecisionDialog({
 
         {missingDocuments.length > 0 && (
           <div className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="missing-documents">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-              <FileWarning size={15} className="text-[#b45309]" aria-hidden />
+            <h3 className="oe-card-title flex items-center gap-2">
+              <FileWarning size={16} className="text-[#b45309]" aria-hidden />
               {t('governance.project.decision.missing_documents', { defaultValue: 'Required documents not ready' })}
             </h3>
             <p className="mt-1 text-xs text-content-secondary">
@@ -351,7 +351,7 @@ export function DecisionDialog({
         {draft.outcome === 'go_with_conditions' && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('governance.project.decision.conditions', { defaultValue: 'Conditions' })}
               </h3>
               <Button

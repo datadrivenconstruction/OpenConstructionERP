@@ -62,7 +62,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /** Canonical doc-type order — drives the dropdown + table grouping. */
 const DOC_TYPES: HandoverDocType[] = [
@@ -260,7 +260,7 @@ export function HandoverDocumentsSection({
           <FileCheck2 size={12} />
           {t('propdev.handover_package', { defaultValue: 'Closeout package' })}
           {expanded && bundleQ.isLoading ? (
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
           ) : (
             bundle && (
               <span className="text-content-tertiary">
@@ -307,14 +307,14 @@ export function HandoverDocumentsSection({
                   </Badge>
                 ) : ready ? (
                   <Badge variant="success" dot>
-                    <CheckCircle2 size={11} className="mr-1 inline" />
+                    <CheckCircle2 size={12} className="mr-1 inline" />
                     {t('propdev.handover_package.ready', {
                       defaultValue: 'Ready - all required documents delivered',
                     })}
                   </Badge>
                 ) : (
                   <Badge variant="warning" dot>
-                    <AlertTriangle size={11} className="mr-1 inline" />
+                    <AlertTriangle size={12} className="mr-1 inline" />
                     {t('propdev.missing_docs', {
                       defaultValue: '{{count}} required document(s) missing',
                       count: missingCount,
@@ -361,7 +361,7 @@ export function HandoverDocumentsSection({
                           e.target.value as 'all' | 'delivered' | 'pending',
                         )
                       }
-                      className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-select oe-input-sm"
                       aria-label={t('propdev.filter_by_status', {
                         defaultValue: 'Filter by delivery status',
                       })}
@@ -451,7 +451,7 @@ export function HandoverDocumentsSection({
                         <Button
                           size="sm"
                           variant="ghost"
-                          icon={<Pencil size={11} />}
+                          icon={<Pencil size={12} />}
                           onClick={() => openEdit(doc)}
                         >
                           {t('common.edit', { defaultValue: 'Edit' })}
@@ -459,7 +459,7 @@ export function HandoverDocumentsSection({
                         <Button
                           size="sm"
                           variant="ghost"
-                          icon={<Trash2 size={11} />}
+                          icon={<Trash2 size={12} />}
                           onClick={async () => {
                             const ok = await confirm({
                               title: t('propdev.delete_doc_title', {
@@ -546,7 +546,7 @@ export function HandoverDocumentsSection({
                     doc_type: e.target.value as HandoverDocType,
                   })
                 }
-                className={inputCls}
+                className="oe-select"
                 disabled={!!editDoc}
               >
                 {DOC_TYPES.map((dt) => (

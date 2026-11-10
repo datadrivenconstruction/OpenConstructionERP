@@ -831,7 +831,7 @@ function RangeInput({
         value={min === 0 ? '' : min}
         placeholder={String(bounds.min)}
         onChange={(e) => onMinChange(Number(e.target.value) || 0)}
-        className="w-20 rounded border border-divider/60 px-1.5 py-0.5 text-xs"
+        className="oe-input oe-input-sm w-20"
         aria-label={`${label} min`}
       />
       <span className="text-2xs text-content-tertiary">—</span>
@@ -844,7 +844,7 @@ function RangeInput({
         onChange={(e) =>
           onMaxChange(Number(e.target.value) || Number.POSITIVE_INFINITY)
         }
-        className="w-20 rounded border border-divider/60 px-1.5 py-0.5 text-xs"
+        className="oe-input oe-input-sm w-20"
         aria-label={`${label} max`}
       />
     </div>
@@ -1206,13 +1206,13 @@ function HoldModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="hold-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4"
       data-testid="hold-modal"
     >
       <Card className="w-full max-w-md space-y-3 p-4">
         <h2
           id="hold-modal-title"
-          className="text-base font-semibold text-content-primary"
+          className="oe-section-title"
         >
           {t('propdev.inventory_map.hold_modal_title', {
             defaultValue: 'Hold {{count}} plots',
@@ -1236,7 +1236,7 @@ function HoldModal({
             value={reason}
             onChange={(e) => onReasonChange(e.target.value)}
             maxLength={500}
-            className="mt-1 w-full rounded border border-divider/60 px-2 py-1.5 text-sm"
+            className="oe-input mt-1"
             placeholder={t('propdev.inventory_map.hold_reason_placeholder', {
               defaultValue: 'e.g. broker viewing this week',
             })}
@@ -1253,7 +1253,7 @@ function HoldModal({
             type="date"
             value={until}
             onChange={(e) => onUntilChange(e.target.value)}
-            className="mt-1 w-full rounded border border-divider/60 px-2 py-1.5 text-sm"
+            className="oe-input mt-1"
             data-testid="hold-modal-until"
           />
         </label>

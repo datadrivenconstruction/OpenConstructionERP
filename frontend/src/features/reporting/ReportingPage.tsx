@@ -258,7 +258,7 @@ function KPICard({
     <>
       {Icon && (
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${trafficClasses[color]}`}>
-          <Icon size={18} />
+          <Icon size={20} />
         </div>
       )}
       <div className="min-w-0">
@@ -835,7 +835,7 @@ function RequiresProject({
                 const name = projects.find((p) => p.id === id)?.name ?? '';
                 if (id) useProjectContextStore.getState().setActiveProject(id, name);
               }}
-              className="h-9 min-w-[240px] rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary outline-none focus:border-oe-blue focus:ring-1 focus:ring-oe-blue"
+              className="oe-select min-w-[240px]"
             >
               <option value="" disabled>
                 {t('reporting.choose_project', { defaultValue: 'Choose a project…' })}
@@ -984,18 +984,18 @@ function ExecutiveDashboard({
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary text-left text-xs font-medium text-content-secondary">
-                  <th className="px-4 py-3">{t('reporting.col_project', { defaultValue: 'Project' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_status', { defaultValue: 'Status' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_cpi', { defaultValue: 'CPI' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_spi', { defaultValue: 'SPI' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_budget', { defaultValue: 'Budget %' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_schedule', { defaultValue: 'Schedule %' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_risk', { defaultValue: 'Risk Score' })}</th>
-                  <th className="px-4 py-3">{t('reporting.col_open_items', { defaultValue: 'Open Items' })}</th>
-                  <th className="px-4 py-3" aria-hidden="true" />
+                <tr className="bg-surface-secondary text-left text-xs font-medium text-content-secondary">
+                  <th>{t('reporting.col_project', { defaultValue: 'Project' })}</th>
+                  <th>{t('reporting.col_status', { defaultValue: 'Status' })}</th>
+                  <th>{t('reporting.col_cpi', { defaultValue: 'CPI' })}</th>
+                  <th>{t('reporting.col_spi', { defaultValue: 'SPI' })}</th>
+                  <th>{t('reporting.col_budget', { defaultValue: 'Budget %' })}</th>
+                  <th>{t('reporting.col_schedule', { defaultValue: 'Schedule %' })}</th>
+                  <th>{t('reporting.col_risk', { defaultValue: 'Risk Score' })}</th>
+                  <th>{t('reporting.col_open_items', { defaultValue: 'Open Items' })}</th>
+                  <th aria-hidden="true" />
                 </tr>
               </thead>
               <tbody>
@@ -1025,27 +1025,27 @@ function ExecutiveDashboard({
                       })}
                       className="group cursor-pointer border-b border-border-light last:border-0 transition-colors hover:bg-surface-secondary/50 focus-visible:bg-surface-secondary/50 focus-visible:outline-none"
                     >
-                      <td className="px-4 py-3 font-medium text-content-primary group-hover:text-oe-blue-text">{p.name}</td>
-                      <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
-                      <td className="px-4 py-3">
+                      <td className="group-hover:text-oe-blue-text">{p.name}</td>
+                      <td><StatusBadge status={p.status} /></td>
+                      <td>
                         <TrafficDot color={kpiColor(cpiVal, [0.9, 1.0])} label={fmt(kpi?.cpi)} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <TrafficDot color={kpiColor(spiVal, [0.9, 1.0])} label={fmt(kpi?.spi)} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <TrafficDot color={budgetVal !== null ? kpiColor(100 - budgetVal, [5, 20]) : 'gray'} label={fmt(kpi?.budget_consumed_pct, '%')} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <TrafficDot color={kpiColor(schedVal, [50, 80])} label={fmt(kpi?.schedule_progress_pct, '%')} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <TrafficDot color={riskVal !== null ? kpiColor(10 - riskVal, [3, 7]) : 'gray'} label={fmt(kpi?.risk_score_avg)} />
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         {kpi ? openItems : <span className="text-content-tertiary">{EMPTY}</span>}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-right">
                         <ChevronRight
                           size={16}
                           className="text-content-quaternary transition-colors group-hover:text-oe-blue-text"
@@ -1071,7 +1071,7 @@ function PortfolioValueCard({ currencyEntries }: { currencyEntries: [string, num
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${trafficClasses.gray}`}>
-        <BarChart3 size={18} />
+        <BarChart3 size={20} />
       </div>
       <div className="min-w-0">
         <p className="truncate text-xs font-medium text-content-secondary">{label}</p>
@@ -1232,7 +1232,7 @@ function PMDashboard({
       {scheduleStats && (
         <Card>
           <CardContent>
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-3">
               {t('reporting.schedule_summary', { defaultValue: 'Schedule Summary' })}
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
@@ -1250,7 +1250,7 @@ function PMDashboard({
       {rfiStats && (
         <Card>
           <CardContent>
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-3">
               {t('reporting.rfi_summary', { defaultValue: 'RFI Summary' })}
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -1399,13 +1399,13 @@ function EstimatorDashboard({
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary text-left text-xs font-medium text-content-secondary">
-                    <th className="px-4 py-3">{t('reporting.boq_name', { defaultValue: 'BOQ Name' })}</th>
-                    <th className="px-4 py-3">{t('reporting.col_status', { defaultValue: 'Status' })}</th>
-                    <th className="px-4 py-3 text-right">{t('reporting.positions', { defaultValue: 'Positions' })}</th>
-                    <th className="px-4 py-3 text-right">{t('reporting.grand_total', { defaultValue: 'Grand Total' })}</th>
+                  <tr className="bg-surface-secondary text-left text-xs font-medium text-content-secondary">
+                    <th>{t('reporting.boq_name', { defaultValue: 'BOQ Name' })}</th>
+                    <th>{t('reporting.col_status', { defaultValue: 'Status' })}</th>
+                    <th className="text-right">{t('reporting.positions', { defaultValue: 'Positions' })}</th>
+                    <th className="text-right">{t('reporting.grand_total', { defaultValue: 'Grand Total' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1422,10 +1422,10 @@ function EstimatorDashboard({
                       }}
                       className="group cursor-pointer border-b border-border-light last:border-0 transition-colors hover:bg-surface-secondary/50 focus-visible:bg-surface-secondary/50 focus-visible:outline-none"
                     >
-                      <td className="px-4 py-3 font-medium text-content-primary group-hover:text-oe-blue-text">{b.name}</td>
-                      <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
-                      <td className="px-4 py-3 text-right text-content-secondary">{b.position_count ?? 0}</td>
-                      <td className="px-4 py-3 text-right font-medium text-content-primary">
+                      <td className="group-hover:text-oe-blue-text">{b.name}</td>
+                      <td><StatusBadge status={b.status} /></td>
+                      <td className="text-right text-content-secondary">{b.position_count ?? 0}</td>
+                      <td className="text-right">
                         <MoneyDisplay amount={b.grand_total} currency={b.currency} showCode />
                       </td>
                     </tr>
@@ -1509,7 +1509,7 @@ function SiteDashboard({
       {safetyStats ? (
         <Card>
           <CardContent>
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-3">
               {t('reporting.safety_overview', { defaultValue: 'Safety Overview' })}
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -1737,7 +1737,7 @@ function FinanceDashboardView({
       {procurementStats && (
         <Card>
           <CardContent>
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-3">
               {t('reporting.procurement_summary', { defaultValue: 'Procurement Summary' })}
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -2010,7 +2010,7 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
       <Card>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('reporting.templates_title', { defaultValue: 'Report templates' })}
             </h3>
           </div>
@@ -2037,32 +2037,32 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary text-left text-xs font-medium text-content-secondary">
-                    <th className="px-4 py-3">{t('reporting.template_name', { defaultValue: 'Name' })}</th>
-                    <th className="px-4 py-3">{t('reporting.template_type', { defaultValue: 'Type' })}</th>
-                    <th className="px-4 py-3">{t('reporting.template_scope', { defaultValue: 'Scope' })}</th>
-                    <th className="px-4 py-3">{t('reporting.template_schedule', { defaultValue: 'Schedule' })}</th>
-                    <th className="px-4 py-3 text-right">{t('reporting.actions', { defaultValue: 'Actions' })}</th>
+                  <tr className="bg-surface-secondary text-left text-xs font-medium text-content-secondary">
+                    <th>{t('reporting.template_name', { defaultValue: 'Name' })}</th>
+                    <th>{t('reporting.template_type', { defaultValue: 'Type' })}</th>
+                    <th>{t('reporting.template_scope', { defaultValue: 'Scope' })}</th>
+                    <th>{t('reporting.template_schedule', { defaultValue: 'Schedule' })}</th>
+                    <th className="text-right">{t('reporting.actions', { defaultValue: 'Actions' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {templates.map((tpl) => (
-                    <tr key={tpl.id} className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50">
-                      <td className="px-4 py-3 font-medium text-content-primary">{tpl.name}</td>
-                      <td className="px-4 py-3 text-content-secondary">{humanizeReportType(tpl.report_type)}</td>
-                      <td className="px-4 py-3 text-content-secondary">
+                    <tr key={tpl.id} className="last:border-0">
+                      <td>{tpl.name}</td>
+                      <td className="text-content-secondary">{humanizeReportType(tpl.report_type)}</td>
+                      <td className="text-content-secondary">
                         {tpl.is_system
                           ? t('reporting.scope_system', { defaultValue: 'System' })
                           : t('reporting.scope_custom', { defaultValue: 'Custom' })}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         {tpl.is_scheduled && tpl.schedule_cron
                           ? tpl.schedule_cron
                           : t('reporting.schedule_none', { defaultValue: '—' })}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-right">
                         <Button
                           variant="secondary"
                           size="sm"
@@ -2089,7 +2089,7 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
       <Card>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('reporting.generated_reports_title', { defaultValue: 'Generated reports' })}
             </h3>
           </div>
@@ -2115,14 +2115,14 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary text-left text-xs font-medium text-content-secondary">
-                    <th className="px-4 py-3">{t('reporting.report_title', { defaultValue: 'Title' })}</th>
-                    <th className="px-4 py-3">{t('reporting.report_type', { defaultValue: 'Type' })}</th>
-                    <th className="px-4 py-3">{t('reporting.report_format', { defaultValue: 'Format' })}</th>
-                    <th className="px-4 py-3">{t('reporting.report_generated_at', { defaultValue: 'Generated' })}</th>
-                    <th className="px-4 py-3 text-right">{t('reporting.actions', { defaultValue: 'Actions' })}</th>
+                  <tr className="bg-surface-secondary text-left text-xs font-medium text-content-secondary">
+                    <th>{t('reporting.report_title', { defaultValue: 'Title' })}</th>
+                    <th>{t('reporting.report_type', { defaultValue: 'Type' })}</th>
+                    <th>{t('reporting.report_format', { defaultValue: 'Format' })}</th>
+                    <th>{t('reporting.report_generated_at', { defaultValue: 'Generated' })}</th>
+                    <th className="text-right">{t('reporting.actions', { defaultValue: 'Actions' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2130,12 +2130,12 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
                     const generated = r.generated_at || r.created_at;
                     const ts = generated ? new Date(generated).toLocaleString(getIntlLocale()) : '—';
                     return (
-                      <tr key={r.id} className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50">
-                        <td className="px-4 py-3 font-medium text-content-primary">{r.title}</td>
-                        <td className="px-4 py-3 text-content-secondary">{humanizeReportType(r.report_type)}</td>
-                        <td className="px-4 py-3 text-content-secondary uppercase">{r.format}</td>
-                        <td className="px-4 py-3 text-content-secondary">{ts}</td>
-                        <td className="px-4 py-3">
+                      <tr key={r.id} className="last:border-0">
+                        <td>{r.title}</td>
+                        <td className="text-content-secondary">{humanizeReportType(r.report_type)}</td>
+                        <td className="text-content-secondary">{r.format}</td>
+                        <td className="text-content-secondary">{ts}</td>
+                        <td>
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               variant="secondary"
@@ -2291,7 +2291,7 @@ function ReportViewerModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-viewer-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
+      className="fixed inset-0 z-modal flex items-center justify-center p-4 sm:p-8"
     >
       <button
         type="button"
@@ -2305,7 +2305,7 @@ function ReportViewerModal({
           <div className="min-w-0">
             <h2
               id="report-viewer-title"
-              className="truncate text-base font-semibold text-content-primary"
+              className="oe-section-title truncate"
             >
               {report.title}
             </h2>
@@ -2366,7 +2366,7 @@ function ReportViewerModal({
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
         </div>

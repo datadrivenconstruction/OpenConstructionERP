@@ -175,7 +175,7 @@ export function BillPositionPicker({
           // two controls with one name on the form, which is worse for a screen
           // reader than the fallback the placeholder already provides.
           placeholder={label}
-          className="w-full rounded border border-border-light px-2 py-1 text-sm"
+          className="oe-input"
         />
       )}
       <select
@@ -183,7 +183,7 @@ export function BillPositionPicker({
         onChange={(e) => onChange(e.target.value || null)}
         disabled={disabled}
         aria-label={ariaLabel}
-        className="w-full rounded border border-border-light px-2 py-1 text-sm"
+        className="oe-select"
       >
         <option value="">
           {t('procurement.item_position_none', { defaultValue: 'Not linked to the estimate' })}

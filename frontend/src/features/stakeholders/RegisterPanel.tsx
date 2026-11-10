@@ -47,7 +47,7 @@ export function ReadinessStrip({ readiness }: { readiness: Readiness | undefined
       className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3"
       data-testid="readiness-strip"
     >
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h2 className="oe-overline">
         {t('stakeholders.ui.readiness.title', { defaultValue: 'What the next gate checks here' })}
       </h2>
       <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
@@ -58,9 +58,9 @@ export function ReadinessStrip({ readiness }: { readiness: Readiness | undefined
           return (
             <li key={code} data-testid="readiness-check" data-status={check.status} className="flex items-start gap-2 text-sm">
               {met ? (
-                <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />
+                <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />
               ) : (
-                <CircleDashed size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
+                <CircleDashed size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
               )}
               <span className={met ? 'text-content-secondary' : 'text-content-primary'}>
                 {vocab(t, READINESS, code)}
@@ -181,22 +181,22 @@ export function RegisterPanel({ screen, stakeholders, readiness, onOpen, onAdd }
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full min-w-[720px] text-sm" data-testid="register-table">
-            <thead className="bg-surface-secondary text-left text-xs text-content-tertiary">
+          <table className="oe-table min-w-[720px]" data-testid="register-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2 font-medium">{t('stakeholders.ui.register.col_name', { defaultValue: 'Stakeholder' })}</th>
-                <th className="px-3 py-2 font-medium">{t('stakeholders.ui.register.col_class', { defaultValue: 'Classification' })}</th>
-                <th className="px-3 py-2 font-medium">{t('stakeholders.ui.register.col_engagement', { defaultValue: 'Engagement today / needed' })}</th>
-                <th className="px-3 py-2 font-medium">{t('stakeholders.ui.register.col_owner', { defaultValue: 'Relationship kept by' })}</th>
-                <th className="px-3 py-2 text-right font-medium">{t('stakeholders.ui.register.col_commitments', { defaultValue: 'Open commitments' })}</th>
+                <th>{t('stakeholders.ui.register.col_name', { defaultValue: 'Stakeholder' })}</th>
+                <th>{t('stakeholders.ui.register.col_class', { defaultValue: 'Classification' })}</th>
+                <th>{t('stakeholders.ui.register.col_engagement', { defaultValue: 'Engagement today / needed' })}</th>
+                <th>{t('stakeholders.ui.register.col_owner', { defaultValue: 'Relationship kept by' })}</th>
+                <th className="text-right">{t('stakeholders.ui.register.col_commitments', { defaultValue: 'Open commitments' })}</th>
               </tr>
             </thead>
             <tbody>
               {shown.map((s) => {
                 const gap = (s.engagement_gap ?? 0) > 0;
                 return (
-                  <tr key={s.id} className="border-t border-border-light" data-testid="register-row">
-                    <td className="px-3 py-2">
+                  <tr key={s.id} data-testid="register-row">
+                    <td>
                       <button
                         type="button"
                         onClick={() => onOpen(s.id)}
@@ -213,7 +213,7 @@ export function RegisterPanel({ screen, stakeholders, readiness, onOpen, onAdd }
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <span className={s.classification === 'not_assessed' ? 'text-content-tertiary' : 'text-content-primary'}>
                         {classificationName(labels, settings, s)}
                       </span>
@@ -224,7 +224,7 @@ export function RegisterPanel({ screen, stakeholders, readiness, onOpen, onAdd }
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       {s.engagement_current || s.engagement_desired ? (
                         <span className={gap ? 'font-medium text-semantic-warning' : 'text-content-secondary'} data-testid="engagement-cell" data-gap={gap}>
                           {t('stakeholders.ui.register.engagement_pair', {
@@ -241,12 +241,12 @@ export function RegisterPanel({ screen, stakeholders, readiness, onOpen, onAdd }
                         <span className="text-content-tertiary">{t('stakeholders.ui.not_set', { defaultValue: 'Not set' })}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {personName(s.relationship_owner_user_id) ?? (
                         <span className="text-content-tertiary">{t('stakeholders.ui.nobody', { defaultValue: 'Nobody yet' })}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{s.open_commitments}</td>
+                    <td className="text-right tabular-nums text-content-secondary">{s.open_commitments}</td>
                   </tr>
                 );
               })}

@@ -201,7 +201,7 @@ const fieldBase =
   'h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const inputCls = clsx(fieldBase, 'w-full');
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
 function LabeledText({
@@ -353,7 +353,7 @@ function ModalShell({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
       <div
         role="dialog"
         aria-modal="true"
@@ -361,13 +361,13 @@ function ModalShell({
         className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-section-title">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t('temporary_works.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4">{children}</div>
@@ -770,7 +770,7 @@ function ComplianceBanner({ loadStatus }: { loadStatus?: LoadStatus }) {
       <div className="flex items-center gap-3 rounded-xl border border-semantic-success/50 bg-semantic-success-bg/50 p-4">
         <ShieldCheck size={20} className="shrink-0 text-semantic-success" />
         <div>
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('temporary_works.compliant_title', { defaultValue: 'All temporary works compliant' })}
           </h2>
           <p className="text-xs text-content-tertiary">
@@ -787,7 +787,7 @@ function ComplianceBanner({ loadStatus }: { loadStatus?: LoadStatus }) {
     <div className="rounded-xl border-2 border-semantic-error bg-semantic-error-bg/50 p-4">
       <div className="flex items-center gap-2">
         <ShieldAlert size={20} className="shrink-0 text-semantic-error" />
-        <h2 className="text-base font-semibold text-semantic-error">
+        <h2 className="oe-section-title text-semantic-error">
           {t('temporary_works.breach_banner_title', {
             defaultValue: 'Compliance breach: temporary works bearing load with no valid permit to load',
           })}
@@ -903,7 +903,7 @@ function PrereqDot({ ok, label }: { ok: boolean; label: string }) {
         ok ? 'text-semantic-success' : 'text-content-tertiary',
       )}
     >
-      {ok ? <CheckCircle2 size={11} /> : <CircleSlash size={11} />}
+      {ok ? <CheckCircle2 size={12} /> : <CircleSlash size={12} />}
       {label}
     </span>
   );
@@ -1035,9 +1035,9 @@ function ItemRow({
           }
         >
           {clearedLoad ? (
-            <CheckCircle2 size={15} className="text-semantic-success" />
+            <CheckCircle2 size={16} className="text-semantic-success" />
           ) : (
-            <CircleSlash size={15} className={breaching ? 'text-semantic-error' : 'text-content-tertiary'} />
+            <CircleSlash size={16} className={breaching ? 'text-semantic-error' : 'text-content-tertiary'} />
           )}
         </span>
       </div>
@@ -1135,10 +1135,10 @@ function ItemRow({
 
           {/* Item actions */}
           <div className="flex items-center gap-2 pt-1">
-            <Button variant="secondary" size="sm" onClick={() => onEdit(item)} icon={<Pencil size={13} />}>
+            <Button variant="secondary" size="sm" onClick={() => onEdit(item)} icon={<Pencil size={14} />}>
               {t('temporary_works.edit', { defaultValue: 'Edit' })}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(item)} icon={<Trash2 size={13} />}>
+            <Button variant="ghost" size="sm" onClick={() => onDelete(item)} icon={<Trash2 size={14} />}>
               {t('temporary_works.delete', { defaultValue: 'Delete' })}
             </Button>
           </div>

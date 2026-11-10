@@ -135,7 +135,7 @@ export function Snapshot4DView({
     <Card padding="md" className="mt-4">
       <div className="mb-3 flex items-center gap-2">
         <CalendarClock size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule.snapshot.title', { defaultValue: '4D Snapshot' })}
         </h3>
         <span className="text-2xs text-content-tertiary">
@@ -177,7 +177,7 @@ export function Snapshot4DView({
               max={range.max}
               onChange={(e) => setAsOf(clampDateIso(e.target.value, range.min, range.max))}
               aria-label={t('schedule.snapshot.data_date', { defaultValue: 'Data date' })}
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm tabular-nums focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input tabular-nums"
             />
           </div>
           <div className="mt-1 flex justify-between text-2xs text-content-quaternary tabular-nums">
@@ -192,7 +192,7 @@ export function Snapshot4DView({
             className="mb-1 block text-2xs font-semibold uppercase tracking-wide text-content-tertiary"
           >
             <span className="inline-flex items-center gap-1">
-              <Box size={11} />
+              <Box size={12} />
               {t('schedule.snapshot.bim_model', { defaultValue: 'BIM model' })}
             </span>
           </label>
@@ -200,7 +200,7 @@ export function Snapshot4DView({
             id="snapshot-model"
             value={modelId}
             onChange={(e) => setModelId(e.target.value)}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select"
           >
             <option value="">
               {t('schedule.snapshot.all_models', { defaultValue: 'All linked elements' })}
@@ -281,7 +281,7 @@ export function Snapshot4DView({
           <RecoveryCard error={error} onRetry={() => refetch()} />
         ) : total === 0 ? (
           <div className="flex items-start gap-3 rounded-xl border border-border-light bg-surface-secondary/30 p-4">
-            <Info size={15} className="mt-0.5 shrink-0 text-content-tertiary" />
+            <Info size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
             <div>
               <p className="text-sm font-medium text-content-primary">
                 {t('schedule.snapshot.empty_title', { defaultValue: 'No linked elements' })}
@@ -368,7 +368,7 @@ export function Snapshot4DView({
             </ul>
 
             <p className="mt-3 flex items-center gap-1.5 text-2xs text-content-tertiary">
-              <Layers size={11} className="shrink-0" />
+              <Layers size={12} className="shrink-0" />
               {t('schedule.snapshot.footer_hint', {
                 defaultValue:
                   'Status is derived from each linked activity at the data date. Drag the scrubber to replay the build sequence.',

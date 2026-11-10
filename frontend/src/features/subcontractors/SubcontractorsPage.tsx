@@ -143,7 +143,7 @@ const PAYMENT_VARIANT: Record<
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 function toNum(n: number | string | null | undefined): number {
   if (n === null || n === undefined) return 0;
@@ -270,7 +270,7 @@ function HowSubcontractorsWork() {
   return (
     <CollapsibleSection
       storageKey="subcontractors.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('subcontractors.flow_title', {
         defaultValue: 'How the subcontractor register fits together',
       })}
@@ -533,7 +533,7 @@ export function SubcontractorsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[200px]')}
+          className={clsx('oe-select', 'max-w-[200px]')}
           aria-label={t('subcontractors.filter_by_status', {
             defaultValue: 'Filter by prequalification status',
           })}
@@ -623,25 +623,25 @@ function SubcontractorTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_name', { defaultValue: 'Name' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_trades', { defaultValue: 'Trades' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_insurance', { defaultValue: 'Insurance' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_rating', { defaultValue: 'Rating' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('subcontractors.col_country', { defaultValue: 'Country' })}
             </th>
           </tr>
@@ -651,9 +651,9 @@ function SubcontractorTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2">
+              <td>
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="font-medium text-content-primary truncate max-w-[260px]">
                     {r.legal_name}
@@ -673,7 +673,7 @@ function SubcontractorTable({
                   </div>
                 )}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 <div className="flex flex-wrap gap-1">
                   {r.trade_categories.slice(0, 3).map((c) => (
                     <span
@@ -690,18 +690,18 @@ function SubcontractorTable({
                   )}
                 </div>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={PREQUAL_VARIANT[r.prequalification_status]} dot>
                   {r.prequalification_status}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <InsuranceChip expiry={r.insurance_expiry_date} />
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RatingStars score={r.rating_score} />
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">
+              <td className="text-content-secondary">
                 {r.country || '—'}
               </td>
             </tr>
@@ -867,7 +867,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         className="relative h-full w-full max-w-2xl overflow-y-auto bg-surface-elevated shadow-xl"
@@ -1448,7 +1448,7 @@ function LienWaiverRequirementToggle({ agreement }: { agreement: Agreement }) {
   return (
     <div className="mt-3 flex items-center justify-between gap-3 border-t border-border-light pt-3">
       <span className="flex items-center gap-1.5 text-xs text-content-secondary">
-        <FileSignature size={13} className="text-content-tertiary" />
+        <FileSignature size={14} className="text-content-tertiary" />
         {t('subcontractors.require_lien_waiver', {
           defaultValue: 'Require signed lien waiver before payment',
         })}
@@ -1540,7 +1540,7 @@ function PaymentsTab({
         <select
           value={effectiveId}
           onChange={(e) => setAgreementId(e.target.value)}
-          className={inputCls}
+          className="oe-select"
         >
           {agreements.map((a) => (
             <option key={a.id} value={a.id}>
@@ -1622,51 +1622,51 @@ function PaymentList({
   const hakedisAvailable = hakedisProbe.isSuccess;
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-xs">
-        <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+      <table className="oe-table-compact">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('subcontractors.payment_no', { defaultValue: 'App #' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('subcontractors.period', { defaultValue: 'Period' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.gross', { defaultValue: 'Gross' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.net', { defaultValue: 'Net' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('subcontractors.col_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((p) => (
-            <tr key={p.id} className="border-t border-border-light">
-              <td className="px-3 py-2 font-mono">{p.application_number}</td>
-              <td className="px-3 py-2 text-content-secondary">
+            <tr key={p.id}>
+              <td className="font-mono">{p.application_number}</td>
+              <td className="text-content-secondary">
                 {p.period_start || '—'} → {p.period_end || '—'}
               </td>
-              <td className="px-3 py-2 text-right">
+              <td className="text-right">
                 <PayAppAmount
                   claimed={p.gross_amount}
                   approved={p.approved_gross_amount}
                   currency={p.currency}
                 />
               </td>
-              <td className="px-3 py-2 text-right font-medium">
+              <td className="text-right">
                 <PayAppAmount
                   claimed={p.net_amount}
                   approved={p.approved_net_amount}
                   currency={p.currency}
                 />
               </td>
-              <td className="px-3 py-2">
+              <td>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Badge variant={PAYMENT_VARIANT[p.status]} dot>
                     {p.status}
@@ -1676,7 +1676,7 @@ function PaymentList({
                   )}
                 </div>
               </td>
-              <td className="px-3 py-2">
+              <td>
                 <PaymentRowActions
                   payment={p}
                   requiresWaiver={requiresWaiver}
@@ -1728,7 +1728,7 @@ function ComputeRatingButton({ subcontractorId }: { subcontractorId: string }) {
       size="sm"
       loading={mutation.isPending}
       onClick={() => mutation.mutate()}
-      icon={<Star size={13} />}
+      icon={<Star size={14} />}
     >
       {t('subcontractors.compute_rating', {
         defaultValue: 'Recompute this month',
@@ -1811,46 +1811,46 @@ function RatingsTab({
       <RatingSourceLinks subName={subName} />
       <ScorecardTile ratings={data} />
       <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-xs">
-        <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+      <table className="oe-table-compact">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('subcontractors.period', { defaultValue: 'Period' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.quality', { defaultValue: 'Quality' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.hse', { defaultValue: 'HSE' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.schedule', { defaultValue: 'Schedule' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.cost', { defaultValue: 'Cost' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('subcontractors.overall', { defaultValue: 'Overall' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {data.map((r) => (
-            <tr key={r.id} className="border-t border-border-light">
-              <td className="px-3 py-2 font-mono">{r.period}</td>
-              <td className="px-3 py-2 text-right tabular-nums">
+            <tr key={r.id}>
+              <td className="font-mono">{r.period}</td>
+              <td className="text-right tabular-nums">
                 {fmtFixed(toNum(r.quality_score), 0)}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 {fmtFixed(toNum(r.hse_score), 0)}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 {fmtFixed(toNum(r.schedule_score), 0)}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 {fmtFixed(toNum(r.cost_score), 0)}
               </td>
-              <td className="px-3 py-2 text-right font-semibold tabular-nums">
+              <td className="text-right tabular-nums">
                 {fmtFixed(toNum(r.overall_score), 0)}
               </td>
             </tr>
@@ -1904,7 +1904,7 @@ function RetentionTab({
       <select
         value={effectiveId}
         onChange={(e) => setAgreementId(e.target.value)}
-        className={inputCls}
+        className="oe-select"
       >
         {agreements.map((a) => (
           <option key={a.id} value={a.id}>
@@ -1953,42 +1953,42 @@ function RetentionTab({
       )}
       {entries.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+          <table className="oe-table-compact">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.released_at', { defaultValue: 'Released at' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('subcontractors.accrued', { defaultValue: 'Accrued' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('subcontractors.released', { defaultValue: 'Released' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('subcontractors.reason', { defaultValue: 'Reason' })}
                 </th>
               </tr>
             </thead>
             <tbody>
               {entries.map((e) => (
-                <tr key={e.id} className="border-t border-border-light">
-                  <td className="px-3 py-2 text-content-secondary">
+                <tr key={e.id}>
+                  <td className="text-content-secondary">
                     {e.released_at ? <DateDisplay value={e.released_at} /> : '—'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     <MoneyDisplay
                       amount={toNum(e.accrued_amount)}
                       currency={currency}
                     />
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     <MoneyDisplay
                       amount={toNum(e.released_amount)}
                       currency={currency}
                     />
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {e.release_reason || '—'}
                   </td>
                 </tr>
@@ -2222,7 +2222,7 @@ function SubcontractorFormModal({
           <select
             value={form.party_kind}
             onChange={(e) => set('party_kind', e.target.value as SubcontractorFormState['party_kind'])}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">{t('contacts.party_kind_unset', { defaultValue: 'Not stated' })}</option>
             <option value="natural_person">
@@ -2298,7 +2298,7 @@ function SubcontractorFormModal({
             onChange={(e) =>
               set('prequalification_status', e.target.value as PrequalStatus)
             }
-            className={inputCls}
+            className="oe-select"
           >
             {(['pending', 'approved', 'suspended', 'rejected'] as PrequalStatus[]).map(
               (s) => (
@@ -2319,7 +2319,7 @@ function SubcontractorFormModal({
             value={form.notes}
             onChange={(e) => set('notes', e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
       </WideModalSection>

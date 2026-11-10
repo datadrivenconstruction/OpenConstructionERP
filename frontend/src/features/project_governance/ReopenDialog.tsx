@@ -105,7 +105,7 @@ export function ReopenDialog({
           <textarea
             id="reopen-rationale"
             rows={3}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+            className="oe-textarea"
             value={rationale}
             onChange={(e) => setRationale(e.target.value)}
             placeholder={t('governance.project.reopen.rationale_placeholder', {

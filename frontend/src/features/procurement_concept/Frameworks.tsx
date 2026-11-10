@@ -321,22 +321,22 @@ function Ledger({ frameworkId, labels }: { frameworkId: string; labels: LabelCon
           })}
         </p>
       ) : (
-        <table className="mt-2 w-full text-left text-sm">
-          <thead className="text-xs text-content-tertiary">
+        <table className="oe-table-compact mt-2 text-left">
+          <thead>
             <tr>
-              <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.ledger.col_kind', { defaultValue: 'Call-off' })}</th>
-              <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.package.col_state', { defaultValue: 'State' })}</th>
-              <th className="py-1 text-right font-medium">{t('procurement_concept.ui.ledger.col_amount', { defaultValue: 'Amount' })}</th>
+              <th className="pr-3">{t('procurement_concept.ui.ledger.col_kind', { defaultValue: 'Call-off' })}</th>
+              <th className="pr-3">{t('procurement_concept.ui.package.col_state', { defaultValue: 'State' })}</th>
+              <th className="text-right">{t('procurement_concept.ui.ledger.col_amount', { defaultValue: 'Amount' })}</th>
             </tr>
           </thead>
           <tbody>
             {ledger.items.map((e) => (
-              <tr key={`${e.kind}-${e.id}`} className="border-t border-border-light" data-testid="ledger-entry">
-                <td className="py-1 pr-3 text-content-primary">{vocab(labels.t, LEDGER_KIND, e.kind)}</td>
-                <td className="py-1 pr-3 text-content-secondary">
+              <tr key={`${e.kind}-${e.id}`} data-testid="ledger-entry">
+                <td className="pr-3">{vocab(labels.t, LEDGER_KIND, e.kind)}</td>
+                <td className="pr-3 text-content-secondary">
                   {e.kind === 'award_package' ? vocab(labels.t, PACKAGE_STATE, e.state as keyof typeof PACKAGE_STATE) : e.state}
                 </td>
-                <td className="py-1 text-right text-content-primary">
+                <td className="text-right">
                   <Money value={e.amount} currency={e.currency || ledger.currency} />
                 </td>
               </tr>
@@ -455,7 +455,7 @@ function FrameworkDialog({
           )}
         </div>
         <Field label={t('procurement_concept.ui.framework.scope', { defaultValue: 'What it covers' })} htmlFor="fw-scope">
-          <textarea id="fw-scope" rows={2} className={FIELD_CLASS} value={draft.scope} onChange={(e) => set('scope', e.target.value)} />
+          <textarea id="fw-scope" rows={2} className="oe-textarea" value={draft.scope} onChange={(e) => set('scope', e.target.value)} />
         </Field>
         <fieldset data-testid="framework-lot-editor">
           <legend className="mb-1 text-xs font-medium text-content-secondary">
@@ -538,7 +538,7 @@ function FrameworkDialog({
             />
           </Field>
           <Field label={t('procurement_concept.ui.framework.call_off_mode', { defaultValue: 'Call-off' })} htmlFor="fw-mode">
-            <select id="fw-mode" className={FIELD_CLASS} value={draft.call_off_mode} onChange={(e) => set('call_off_mode', e.target.value as CallOffMode)}>
+            <select id="fw-mode" className="oe-select" value={draft.call_off_mode} onChange={(e) => set('call_off_mode', e.target.value as CallOffMode)}>
               {MODES.map((m) => (
                 <option key={m} value={m}>
                   {vocab(labels.t, CALL_OFF_MODE, m)}

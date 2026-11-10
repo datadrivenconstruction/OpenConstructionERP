@@ -51,9 +51,9 @@ interface ScheduleRealtimePanelProps {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 /** Poll the presence roster on this cadence (ms) so "who is here" stays fresh. */
 const PRESENCE_REFETCH_MS = 10_000;
@@ -71,8 +71,8 @@ export function ScheduleRealtimePanel({
     <div className="space-y-4" data-testid="schedule-realtime-panel">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-2">
-        <Radio size={18} className="text-content-secondary" />
-        <h3 className="text-base font-semibold text-content-primary">
+        <Radio size={20} className="text-content-secondary" />
+        <h3 className="oe-card-title">
           {t('schedule.realtime.title', { defaultValue: 'Real-time collaboration' })}
         </h3>
       </div>
@@ -140,7 +140,7 @@ function PresenceRoster({ scheduleId }: { scheduleId: string }) {
           {users.map((u) => (
             <li
               key={u.user_id}
-              className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2"
+              className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2"
             >
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold uppercase text-oe-blue">
                 {initials(u.user_name || u.user_id)}
@@ -398,7 +398,7 @@ function GuardedEdit({
                     value={progress}
                     onChange={(e) => setProgress(e.target.value)}
                     placeholder="0 - 100"
-                    className={inputCls}
+                    className="oe-input"
                   />
                 </>
               ) : (
@@ -432,8 +432,8 @@ function GuardedEdit({
               data-testid="realtime-conflict"
               role="alert"
             >
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-warning" />
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-warning" />
                 <div className="min-w-0 flex-1">
                   <h5 className="text-sm font-semibold text-content-primary">
                     {t('schedule.realtime.conflict_title', {

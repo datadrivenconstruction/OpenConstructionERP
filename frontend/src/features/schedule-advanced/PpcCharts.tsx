@@ -193,7 +193,7 @@ export function PpcPanel({ masterId }: { masterId: string }) {
   return (
     <div className="space-y-4">
       <Card padding="md">
-        <h3 className="mb-3 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-3">
           {t('schedule_advanced.ppc_history_title', { defaultValue: 'Plan reliability' })}
         </h3>
         {q.isLoading ? (

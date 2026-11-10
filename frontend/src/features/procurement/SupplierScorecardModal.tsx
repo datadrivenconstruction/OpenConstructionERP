@@ -224,7 +224,7 @@ export function SupplierScorecardModal({
               if (onTime.kind === 'measured') {
                 return (
                   <KpiTile
-                    icon={<Truck size={18} />}
+                    icon={<Truck size={20} />}
                     label={label}
                     value={formatPct(scorecard.on_time_delivery_pct)}
                     tone={onTime.tone}
@@ -238,7 +238,7 @@ export function SupplierScorecardModal({
               }
               return (
                 <KpiTile
-                  icon={<Truck size={18} />}
+                  icon={<Truck size={20} />}
                   label={label}
                   value={t('procurement.scorecard_on_time_na', {
                     defaultValue: 'Not scheduled',
@@ -261,7 +261,7 @@ export function SupplierScorecardModal({
               );
             })()}
             <KpiTile
-              icon={<TrendingUp size={18} />}
+              icon={<TrendingUp size={20} />}
               label={t('procurement.scorecard_qty_variance', {
                 defaultValue: 'Qty variance',
               })}
@@ -273,7 +273,7 @@ export function SupplierScorecardModal({
               )}
             />
             <KpiTile
-              icon={<AlertTriangle size={18} />}
+              icon={<AlertTriangle size={20} />}
               label={t('procurement.scorecard_rejection', {
                 defaultValue: 'GR rejection',
               })}

@@ -269,7 +269,7 @@ function ResourceGroupCard({ group, currency }: ResourceGroupCardProps) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Icon size={16} className={kindAccentClass(group.kind)} aria-hidden />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t(`resourceSummary.kind.${group.kind}`, { defaultValue: group.label })}
           </h3>
           <span className="text-xs text-content-tertiary">
@@ -289,34 +289,34 @@ function ResourceGroupCard({ group, currency }: ResourceGroupCardProps) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[32rem] text-sm">
+        <table className="oe-table-compact min-w-[32rem]">
           <thead>
-            <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="py-1.5 pr-3 font-medium">{t('resourceSummary.col.resource', { defaultValue: 'Resource' })}</th>
-              <th className="py-1.5 pr-3 font-medium">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
-              <th className="py-1.5 pr-3 text-right font-medium">
+            <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+              <th className="pr-3">{t('resourceSummary.col.resource', { defaultValue: 'Resource' })}</th>
+              <th className="pr-3">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
+              <th className="pr-3 text-right">
                 {t('resourceSummary.col.quantity', { defaultValue: 'Quantity' })}
               </th>
-              <th className="py-1.5 pr-3 text-right font-medium">
+              <th className="pr-3 text-right">
                 {t('resourceSummary.col.cost', { defaultValue: 'Cost' })}
               </th>
-              <th className="py-1.5 text-right font-medium">
+              <th className="text-right">
                 {t('resourceSummary.col.positions', { defaultValue: 'Positions' })}
               </th>
             </tr>
           </thead>
           <tbody>
             {group.lines.map((line, idx) => (
-              <tr key={`${line.name}-${line.unit}-${idx}`} className="border-b border-border-light/60 last:border-0">
-                <td className="py-1.5 pr-3 text-content-primary">{line.name}</td>
-                <td className="py-1.5 pr-3 text-content-tertiary">{line.unit || '-'}</td>
-                <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+              <tr key={`${line.name}-${line.unit}-${idx}`} className="last:border-0">
+                <td className="pr-3">{line.name}</td>
+                <td className="pr-3 text-content-tertiary">{line.unit || '-'}</td>
+                <td className="pr-3 text-right tabular-nums text-content-secondary">
                   <QuantityDisplay value={line.quantity} unit={line.unit} precision={2} />
                 </td>
-                <td className="py-1.5 pr-3 text-right tabular-nums text-content-primary">
+                <td className="pr-3 text-right tabular-nums">
                   <MoneyDisplay amount={line.cost} currency={currency} />
                 </td>
-                <td className="py-1.5 text-right tabular-nums text-content-tertiary">{line.position_count}</td>
+                <td className="text-right tabular-nums text-content-tertiary">{line.position_count}</td>
               </tr>
             ))}
           </tbody>
@@ -395,7 +395,7 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <ShoppingCart size={16} className="text-semantic-success" aria-hidden />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('resourceSummary.buyList.heading', { defaultValue: 'Materials to purchase' })}
             </h3>
             <span className="text-xs text-content-tertiary">
@@ -430,10 +430,10 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[32rem] text-sm">
+          <table className="oe-table-compact min-w-[32rem]">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="w-8 py-1.5 pr-2">
+              <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                <th className="w-8 pr-2">
                   <input
                     type="checkbox"
                     aria-label={t('resourceSummary.buyList.selectAll', { defaultValue: 'Select all materials' })}
@@ -441,31 +441,31 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
                     onChange={(e) => setSelected(e.target.checked ? data.items.map((_, i) => i) : [])}
                   />
                 </th>
-                <th className="py-1.5 pr-3 font-medium">
+                <th className="pr-3">
                   {t('resourceSummary.buyList.col.material', { defaultValue: 'Material' })}
                 </th>
-                <th className="py-1.5 pr-3 font-medium">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
+                <th className="pr-3 text-right">
                   {t('resourceSummary.buyList.col.quantity', { defaultValue: 'Total quantity' })}
                 </th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3 text-right">
                   {t('resourceSummary.buyList.col.covered', { defaultValue: 'On requisitions' })}
                 </th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3 text-right">
                   {t('resourceSummary.buyList.col.remaining', { defaultValue: 'Remaining' })}
                 </th>
-                <th className="py-1.5 pr-3 text-right font-medium">
+                <th className="pr-3 text-right">
                   {t('resourceSummary.buyList.col.cost', { defaultValue: 'Est. cost' })}
                 </th>
-                <th className="py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('resourceSummary.buyList.col.positions', { defaultValue: 'Used in' })}
                 </th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, idx) => (
-                <tr key={`${item.name}-${item.unit}-${idx}`} className="border-b border-border-light/60 last:border-0">
-                  <td className="py-1.5 pr-2">
+                <tr key={`${item.name}-${item.unit}-${idx}`} className="last:border-0">
+                  <td className="pr-2">
                     <input
                       type="checkbox"
                       aria-label={t('resourceSummary.buyList.selectRow', {
@@ -478,12 +478,12 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
                       }
                     />
                   </td>
-                  <td className="py-1.5 pr-3 text-content-primary">{item.name}</td>
-                  <td className="py-1.5 pr-3 text-content-tertiary">{item.unit || '-'}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                  <td className="pr-3">{item.name}</td>
+                  <td className="pr-3 text-content-tertiary">{item.unit || '-'}</td>
+                  <td className="pr-3 text-right tabular-nums text-content-secondary">
                     <QuantityDisplay value={item.quantity} unit={item.unit} precision={2} />
                   </td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                  <td className="pr-3 text-right tabular-nums text-content-secondary">
                     {item.covered_quantity != null ? (
                       <QuantityDisplay value={item.covered_quantity} unit={item.unit} precision={2} />
                     ) : (
@@ -503,10 +503,10 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
                       '-'
                     )}
                   </td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-primary">
+                  <td className="pr-3 text-right tabular-nums">
                     <MoneyDisplay amount={item.cost} currency={currency} />
                   </td>
-                  <td className="py-1.5 text-right tabular-nums text-content-tertiary">{item.position_count}</td>
+                  <td className="text-right tabular-nums text-content-tertiary">{item.position_count}</td>
                 </tr>
               ))}
             </tbody>

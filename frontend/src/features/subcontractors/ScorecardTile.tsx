@@ -84,7 +84,7 @@ function Dial({ label, value, prior, icon: Icon }: DialProps) {
   return (
     <div
       className={clsx(
-        'rounded-lg ring-1 ring-inset p-2.5 bg-surface-primary',
+        'rounded-lg ring-1 ring-inset p-2 bg-surface-primary',
         cls.ring,
       )}
     >
@@ -213,7 +213,7 @@ export function ScorecardTile({ ratings }: ScorecardTileProps) {
       className="space-y-2"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <h3 className="oe-overline">
           {t('subcontractors.scorecard_title', {
             defaultValue: 'Performance - current period',
           })}

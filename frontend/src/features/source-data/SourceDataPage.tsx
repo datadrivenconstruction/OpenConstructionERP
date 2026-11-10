@@ -131,9 +131,9 @@ const CHECKLIST_STATUS_LABELS: Record<ChecklistItemStatus, string> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Document Create/Edit Modal ───────────────────────────────────────── */
 
@@ -281,10 +281,7 @@ function DocumentModal({
             placeholder={t('source_data.name_placeholder', {
               defaultValue: 'e.g. Building permit no. 2026-0417',
             })}
-            className={clsx(
-              inputCls,
-              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!nameError}
           />
         </WideModalField>
 
@@ -293,7 +290,7 @@ function DocumentModal({
             id="sd-type"
             value={form.doc_type}
             onChange={(e) => set('doc_type', e.target.value as SourceDocType)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {DOC_TYPES_LIST.map((tp) => (
               <option key={tp} value={tp}>
@@ -308,7 +305,7 @@ function DocumentModal({
             id="sd-status"
             value={form.status}
             onChange={(e) => set('status', e.target.value as SourceDocManualStatus)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {MANUAL_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -467,7 +464,7 @@ function DocumentRow({
         })}
       >
         <span className="truncate">{item.name}</span>
-        <ExternalLink size={11} className="shrink-0 opacity-60" aria-hidden="true" />
+        <ExternalLink size={12} className="shrink-0 opacity-60" aria-hidden="true" />
         {item.blocks_schedule && (
           <AlertOctagon
             size={12}
@@ -525,7 +522,7 @@ function DocumentRow({
           <Button
             variant="secondary"
             size="sm"
-            icon={<ShieldCheck size={13} />}
+            icon={<ShieldCheck size={14} />}
             disabled={verifying}
             onClick={() => onVerify(item)}
             data-testid={`source-data-verify-${item.id}`}
@@ -536,7 +533,7 @@ function DocumentRow({
         <Button
           variant="ghost"
           size="sm"
-          icon={<Pencil size={13} />}
+          icon={<Pencil size={14} />}
           onClick={() => onEdit(item)}
           aria-label={t('common.edit', { defaultValue: 'Edit' })}
           data-testid={`source-data-edit-${item.id}`}
@@ -545,7 +542,7 @@ function DocumentRow({
           variant="ghost"
           size="sm"
           className="text-semantic-error hover:bg-semantic-error-bg"
-          icon={<Trash2 size={13} />}
+          icon={<Trash2 size={14} />}
           onClick={() => onDelete(item)}
           aria-label={t('common.delete', { defaultValue: 'Delete' })}
           data-testid={`source-data-delete-${item.id}`}
@@ -970,7 +967,7 @@ export function SourceDataPage() {
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <Card padding="sm">
               <div className="flex items-center gap-2">
-                <Clock size={15} className="text-semantic-warning shrink-0" />
+                <Clock size={16} className="text-semantic-warning shrink-0" />
                 <span className="text-sm font-semibold text-content-primary">
                   {t('source_data.expiring_soon_title', { defaultValue: 'Expiring soon' })}
                 </span>
@@ -1013,7 +1010,7 @@ export function SourceDataPage() {
 
             <Card padding="sm">
               <div className="flex items-center gap-2">
-                <AlertOctagon size={15} className="text-semantic-error shrink-0" />
+                <AlertOctagon size={16} className="text-semantic-error shrink-0" />
                 {blocking.length > 0 ? (
                   <Link
                     to="/schedule"
@@ -1021,7 +1018,7 @@ export function SourceDataPage() {
                     title={t('source_data.open_schedule', { defaultValue: 'Open the project schedule' })}
                   >
                     {t('source_data.blocking_title', { defaultValue: 'Blocking the schedule' })}
-                    <ExternalLink size={11} className="shrink-0 opacity-60" aria-hidden="true" />
+                    <ExternalLink size={12} className="shrink-0 opacity-60" aria-hidden="true" />
                   </Link>
                 ) : (
                   <span className="text-sm font-semibold text-content-primary">
@@ -1054,7 +1051,7 @@ export function SourceDataPage() {
 
             <Card padding="sm">
               <div className="flex items-center gap-2">
-                <ListChecks size={15} className="text-oe-blue shrink-0" />
+                <ListChecks size={16} className="text-oe-blue shrink-0" />
                 <span className="text-sm font-semibold text-content-primary">
                   {t('source_data.checklist_title', { defaultValue: 'Checklist completeness' })}
                 </span>
@@ -1096,13 +1093,13 @@ export function SourceDataPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('source_data.search_placeholder', { defaultValue: 'Search documents...' })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input ps-8"
               />
             </div>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as SourceDocType | '')}
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-select"
             >
               <option value="">{t('source_data.filter_all_types', { defaultValue: 'All types' })}</option>
               {(meta?.doc_types ?? DOC_TYPES_LIST.map((c) => ({ code: c, label: DOC_TYPE_LABELS[c] }))).map(
@@ -1116,7 +1113,7 @@ export function SourceDataPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as SourceDocStatus | '')}
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-select"
             >
               <option value="">{t('source_data.filter_all_statuses', { defaultValue: 'All statuses' })}</option>
               {(meta?.statuses ?? Object.entries(STATUS_LABELS).map(([code, label]) => ({ code, label }))).map(
@@ -1209,7 +1206,7 @@ export function SourceDataPage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Plus size={13} />}
+                  icon={<Plus size={14} />}
                   disabled={!newChecklistLabel.trim() || createChecklistMut.isPending}
                   onClick={() => createChecklistMut.mutate(newChecklistLabel.trim())}
                   data-testid="source-data-checklist-add"

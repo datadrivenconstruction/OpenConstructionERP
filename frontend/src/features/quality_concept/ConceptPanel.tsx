@@ -286,7 +286,7 @@ export function ConceptPanel(props: PanelProps) {
             })}
           >
             <select
-              className={inputCls}
+              className="oe-select"
               disabled={!editable || write.pending}
               value={concept.documentation_set_code ?? ''}
               data-testid="documentation-set"
@@ -495,7 +495,7 @@ function ReopenDialog({ projectId, onClose }: PanelProps & { onClose: () => void
       onSubmit={() => write.send(() => reopenConcept(projectId, { rationale: reason.trim() }), onClose)}
     >
       <Field required label={t('qualityConcept.concept.reopen_reason', { defaultValue: 'Reason' })}>
-        <textarea rows={3} className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="reopen-reason" />
+        <textarea rows={3} className="oe-textarea" value={reason} onChange={(e) => setReason(e.target.value)} data-testid="reopen-reason" />
       </Field>
     </FormDialog>
   );

@@ -29,7 +29,7 @@ import type {
 import { refusalText, type TFn } from './labels';
 
 export const FIELD_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-input';
 
 export const PLAN_TONE: Record<PlanStatus, BadgeVariant> = {
   draft: 'neutral',

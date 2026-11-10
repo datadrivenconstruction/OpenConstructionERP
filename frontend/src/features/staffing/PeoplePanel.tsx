@@ -102,42 +102,42 @@ export function PeoplePanel({ projectId, files, candidates, catalogue, labels, o
         </Button>
       </div>
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[680px] text-sm">
+        <table className="oe-table min-w-[680px]">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.fill.person', { defaultValue: 'Person' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.people.roles', { defaultValue: 'Roles' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.period', { defaultValue: 'Period' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.people.clearance', { defaultValue: 'Clearance' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.file.title', { defaultValue: 'Personnel file' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">
+            <tr className="text-left text-xs text-content-tertiary">
+              <th scope="col">{t('staffing.fill.person', { defaultValue: 'Person' })}</th>
+              <th scope="col">{t('staffing.people.roles', { defaultValue: 'Roles' })}</th>
+              <th scope="col">{t('staffing.position.period', { defaultValue: 'Period' })}</th>
+              <th scope="col">{t('staffing.people.clearance', { defaultValue: 'Clearance' })}</th>
+              <th scope="col">{t('staffing.file.title', { defaultValue: 'Personnel file' })}</th>
+              <th scope="col">
                 <span className="sr-only">{t('staffing.actions', { defaultValue: 'Actions' })}</span>
               </th>
             </tr>
           </thead>
           <tbody>
             {files.map((f) => (
-              <tr key={f.id} className="border-b border-border-light last:border-b-0" data-testid="file-row">
-                <td className="px-3 py-2 font-medium text-content-primary">{personLabel(labels.t, f.name)}</td>
-                <td className="px-3 py-2 text-content-secondary">
+              <tr key={f.id} className="last:border-b-0" data-testid="file-row">
+                <td>{personLabel(labels.t, f.name)}</td>
+                <td className="text-content-secondary">
                   {f.roles.length > 0
                     ? fmtList(f.roles.map((r) => catalogueName(labels, catalogue, 'role', r)))
                     : t('staffing.people.no_role', { defaultValue: 'No position yet' })}
                 </td>
-                <td className="px-3 py-2 text-content-secondary">
+                <td className="text-content-secondary">
                   {f.start
                     ? f.end
                       ? t('staffing.period_range', { defaultValue: '{{from}} to {{to}}', from: fmtDate(f.start), to: fmtDate(f.end) })
                       : t('staffing.period_from', { defaultValue: 'From {{from}}', from: fmtDate(f.start) })
                     : t('staffing.not_set', { defaultValue: 'Not set' })}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   {f.status === 'anonymised' ? null : <ClearedBadge cleared={f.cleared_to_work} />}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <ToneBadge tone={FILE_TONE[f.status]}>{vocab(t, FILE_STATUS, f.status)}</ToneBadge>
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {f.can.open.allowed ? (
                     <Button variant="secondary" size="sm" onClick={() => onOpen(f.id)} data-testid="open-file">
                       {t('staffing.people.open', { defaultValue: 'Open file' })}

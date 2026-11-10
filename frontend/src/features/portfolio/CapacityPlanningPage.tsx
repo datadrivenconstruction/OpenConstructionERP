@@ -283,7 +283,7 @@ export function CapacityPlanningPage() {
                             Resources & Crew so a red over-allocated row can be
                             opened where its bookings are managed. */}
                         <div className="flex min-w-0 items-center gap-2 pr-2">
-                          <Icon size={15} className="shrink-0 text-content-tertiary" />
+                          <Icon size={16} className="shrink-0 text-content-tertiary" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <button

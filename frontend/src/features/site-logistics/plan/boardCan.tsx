@@ -48,7 +48,7 @@ export function BoardCanNotice({ projectId }: { projectId: string }) {
       className="flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning/5 p-3 text-sm text-content-primary"
       data-testid="board-can-failed"
     >
-      <AlertTriangle size={15} className="shrink-0 text-semantic-warning" aria-hidden />
+      <AlertTriangle size={16} className="shrink-0 text-semantic-warning" aria-hidden />
       <span className="flex-1">{tx(t, 'board.can_failed')}</span>
       <Button size="sm" variant="secondary" disabled={query.isFetching} onClick={() => void query.refetch()}>
         {tx(t, 'retry')}

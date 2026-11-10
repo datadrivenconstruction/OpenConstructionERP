@@ -169,7 +169,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
           <div>
             <label
               htmlFor="mc-iterations"
-              className="block text-xs font-medium text-content-secondary mb-1.5 uppercase tracking-wide"
+              className="oe-label"
             >
               {t('risk.montecarlo.iterations', { defaultValue: 'Iterations' })}
             </label>
@@ -186,7 +186,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
                   setIterations(Math.max(ITERATIONS_MIN, Math.min(v, ITERATIONS_MAX)));
                 }
               }}
-              className="h-10 w-32 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input oe-input-lg w-32"
             />
             <p className="mt-1 text-2xs text-content-tertiary">
               {t('risk.montecarlo.iterations_hint', {
@@ -198,7 +198,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
           <div>
             <label
               htmlFor="mc-mode"
-              className="block text-xs font-medium text-content-secondary mb-1.5 uppercase tracking-wide"
+              className="oe-label"
             >
               {t('risk.montecarlo.mode', { defaultValue: 'Mode' })}
             </label>
@@ -206,7 +206,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
               id="mc-mode"
               value={mode}
               onChange={(e) => setMode(e.target.value as RiskSimulateMode)}
-              className="h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-select oe-input-lg"
             >
               <option value="both">
                 {t('risk.montecarlo.mode_both', { defaultValue: 'Cost + Schedule' })}
@@ -251,7 +251,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={14} className="text-content-tertiary" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('risk.montecarlo.last_run', {
                 defaultValue: 'Last run - {{risks}} risks, {{iterations}} iterations',
                 risks: result.risk_count,
@@ -325,7 +325,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
       {/* ── Histogram ─────────────────────────────────────────────── */}
       {result && histogramData.length > 0 && (
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-content-primary mb-3">
+          <h3 className="oe-card-title mb-3">
             {t('risk.montecarlo.histogram', {
               defaultValue: 'Contingency distribution',
             })}
@@ -352,7 +352,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
       {/* ── Tornado ───────────────────────────────────────────────── */}
       {result && tornadoData.length > 0 && (
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-content-primary mb-3">
+          <h3 className="oe-card-title mb-3">
             {t('risk.montecarlo.tornado', {
               defaultValue: 'Top contributors (tornado)',
             })}

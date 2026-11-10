@@ -120,7 +120,7 @@ export function PanelHead({
   const { t } = useWords();
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <h3 className="text-base font-semibold text-content-primary">{tx(t, title)}</h3>
+      <h3 className="oe-card-title">{tx(t, title)}</h3>
       <div className="flex flex-wrap items-center gap-2">
         {children}
         {action && onAction && !absent(may) && (

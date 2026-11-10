@@ -325,7 +325,7 @@ export function WebhookLeads() {
             onChange={(e) => setNewSlug(e.target.value)}
           />
           <select
-            className="border rounded-md px-3 py-2 text-sm bg-surface-primary"
+            className="oe-select"
             value={newAuth}
             onChange={(e) =>
               setNewAuth(e.target.value as 'api_key' | 'hmac' | 'jwt')
@@ -464,7 +464,7 @@ export function WebhookLeads() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-3">
               <select
-                className="border rounded-md px-3 py-2 text-sm bg-surface-primary"
+                className="oe-select"
                 value={mapField}
                 onChange={(e) => setMapField(e.target.value)}
               >
@@ -482,7 +482,7 @@ export function WebhookLeads() {
                 onChange={(e) => setMapPath(e.target.value)}
               />
               <select
-                className="border rounded-md px-3 py-2 text-sm bg-surface-primary"
+                className="oe-select"
                 value={mapTransform}
                 onChange={(e) => setMapTransform(e.target.value)}
               >
@@ -569,22 +569,22 @@ export function WebhookLeads() {
               </Button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="text-left text-content-tertiary border-b">
-                    <th className="py-2 pr-3">
+                  <tr className="text-left text-content-tertiary">
+                    <th className="pr-3">
                       {t('webhook_leads.col_time', { defaultValue: 'Time' })}
                     </th>
-                    <th className="py-2 pr-3">
+                    <th className="pr-3">
                       {t('webhook_leads.col_status', {
                         defaultValue: 'Status',
                       })}
                     </th>
-                    <th className="py-2 pr-3">HTTP</th>
-                    <th className="py-2 pr-3">
+                    <th className="pr-3">HTTP</th>
+                    <th className="pr-3">
                       {t('webhook_leads.col_ip', { defaultValue: 'Remote IP' })}
                     </th>
-                    <th className="py-2 pr-3">
+                    <th className="pr-3">
                       {t('webhook_leads.col_detail', {
                         defaultValue: 'Lead / Error',
                       })}
@@ -593,19 +593,19 @@ export function WebhookLeads() {
                 </thead>
                 <tbody>
                   {(logsQ.data ?? []).map((l) => (
-                    <tr key={l.id} className="border-b border-border-light">
-                      <td className="py-2 pr-3 whitespace-nowrap text-content-tertiary">
+                    <tr key={l.id}>
+                      <td className="pr-3 whitespace-nowrap text-content-tertiary">
                         {l.received_at?.slice(0, 19).replace('T', ' ') ??
                           l.created_at.slice(0, 19).replace('T', ' ')}
                       </td>
-                      <td className="py-2 pr-3">
+                      <td className="pr-3">
                         <Badge variant={statusBadge(l.status)}>
                           {l.status}
                         </Badge>
                       </td>
-                      <td className="py-2 pr-3">{l.http_status}</td>
-                      <td className="py-2 pr-3">{l.remote_ip}</td>
-                      <td className="py-2 pr-3 max-w-xs truncate">
+                      <td className="pr-3">{l.http_status}</td>
+                      <td className="pr-3">{l.remote_ip}</td>
+                      <td className="pr-3 max-w-xs truncate">
                         {l.created_lead_id ? (
                           <span className="text-semantic-success">
                             {l.created_lead_id.slice(0, 8)}…
@@ -622,7 +622,7 @@ export function WebhookLeads() {
                     <tr>
                       <td
                         colSpan={5}
-                        className="py-4 text-center text-content-tertiary"
+                        className="text-center text-content-tertiary"
                       >
                         {t('webhook_leads.no_logs', {
                           defaultValue: 'No ingestion attempts yet.',

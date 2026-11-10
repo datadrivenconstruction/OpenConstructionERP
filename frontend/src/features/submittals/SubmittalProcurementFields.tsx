@@ -189,8 +189,8 @@ export function buildProcurementCreate(form: ProcurementFormData): ProcurementPa
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const invalidCls = ' border-semantic-error focus:ring-semantic-error/30';
+  'oe-input oe-input-lg';
+const invalidCls = 'oe-input';
 
 /**
  * The message under a field that cannot be saved as typed.
@@ -278,7 +278,7 @@ export function SubmittalProcurementFields({
                   onChange('discipline', e.target.value);
                 }
               }}
-              className={inputCls + ' appearance-none pr-9'}
+              className="oe-select oe-input-lg"
             >
               <option value="">{t('submittals.discipline_none', { defaultValue: 'No discipline' })}</option>
               {disciplines.map((entry) => (
@@ -346,10 +346,7 @@ export function SubmittalProcurementFields({
           value={form.manufacturer}
           onChange={(e) => onChange('manufacturer', e.target.value)}
           maxLength={255}
-          className={clsx(
-            inputCls,
-            isMaterial && form.manufacturer.trim() === '' && 'border-semantic-warning/60',
-          )}
+          className={inputCls}
         />
       </WideModalField>
 

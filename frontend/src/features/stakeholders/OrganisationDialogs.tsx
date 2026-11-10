@@ -187,7 +187,7 @@ export function RoleHoldersDialog({ screen, role, holders, roster, onClose, onSa
                 <input
                   id={`from-${r.rowId}`}
                   type="date"
-                  className={FIELD_CLASS}
+                  className="oe-input"
                   value={r.valid_from ?? ''}
                   onChange={(e) => patch(r.rowId, { valid_from: e.target.value || null })}
                 />
@@ -196,7 +196,7 @@ export function RoleHoldersDialog({ screen, role, holders, roster, onClose, onSa
                 <input
                   id={`to-${r.rowId}`}
                   type="date"
-                  className={FIELD_CLASS}
+                  className="oe-input"
                   value={r.valid_to ?? ''}
                   min={r.valid_from ?? undefined}
                   onChange={(e) => patch(r.rowId, { valid_to: e.target.value || null })}
@@ -206,7 +206,7 @@ export function RoleHoldersDialog({ screen, role, holders, roster, onClose, onSa
                 <Button
                   size="sm"
                   variant="ghost"
-                  icon={<Trash2 size={13} />}
+                  icon={<Trash2 size={14} />}
                   onClick={() => setRows((all) => all.filter((x) => x.rowId !== r.rowId))}
                   data-testid="role-holder-remove"
                 >
@@ -220,7 +220,7 @@ export function RoleHoldersDialog({ screen, role, holders, roster, onClose, onSa
               >
                 <input
                   id={`conflict-${r.rowId}`}
-                  className={FIELD_CLASS}
+                  className="oe-input"
                   value={r.conflict_rationale}
                   onChange={(e) => patch(r.rowId, { conflict_rationale: e.target.value })}
                 />
@@ -228,7 +228,7 @@ export function RoleHoldersDialog({ screen, role, holders, roster, onClose, onSa
             </WideModalSection>
           </div>
         ))}
-        <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={() => setRows((all) => [...all, blank()])} data-testid="role-holder-add">
+        <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setRows((all) => [...all, blank()])} data-testid="role-holder-add">
           {role.multi || rows.length === 0
             ? t('stakeholders.ui.role.add_holder', { defaultValue: 'Add a holder' })
             : t('stakeholders.ui.role.add_successor', { defaultValue: 'Add a successor for a later period' })}
@@ -342,7 +342,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
         )}
         <WideModalSection columns={3}>
           <WideModalField label={t('stakeholders.ui.body.name', { defaultValue: 'Name' })} required span={2} htmlFor="body-name">
-            <input id="body-name" className={FIELD_CLASS} value={draft.name} maxLength={255} onChange={(e) => set('name', e.target.value)} />
+            <input id="body-name" className="oe-input" value={draft.name} maxLength={255} onChange={(e) => set('name', e.target.value)} />
           </WideModalField>
           <WideModalField
             label={t('stakeholders.ui.body.code', { defaultValue: 'Short code' })}
@@ -355,7 +355,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
           >
             <input
               id="body-code"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.code}
               maxLength={64}
               disabled={!!savedId}
@@ -420,7 +420,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
               type="number"
               min={1}
               max={20}
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.level}
               onChange={(e) => set('level', e.target.value)}
             />
@@ -432,7 +432,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
                 type="number"
                 min={1}
                 max={100}
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={draft.quorum_min}
                 onChange={(e) => set('quorum_min', e.target.value)}
               />
@@ -441,7 +441,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
         </WideModalSection>
 
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-content-primary">{t('stakeholders.ui.body.members', { defaultValue: 'Members' })}</h3>
+          <h3 className="oe-card-title">{t('stakeholders.ui.body.members', { defaultValue: 'Members' })}</h3>
           <p className="text-xs text-content-secondary">
             {t('stakeholders.ui.body.members_hint', {
               defaultValue: 'A member is either a role (whoever holds it sits on the body) or a named person.',
@@ -491,7 +491,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
               <Button
                 size="sm"
                 variant="ghost"
-                icon={<Trash2 size={13} />}
+                icon={<Trash2 size={14} />}
                 aria-label={t('stakeholders.ui.remove', { defaultValue: 'Remove' })}
                 onClick={() => setMembers((all) => all.filter((x) => x.rowId !== m.rowId))}
               />
@@ -500,7 +500,7 @@ export function BodyDialog({ screen, body, roles, onClose, onSaved }: BodyDialog
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={13} />}
+            icon={<Plus size={14} />}
             onClick={() =>
               setMembers((all) => [
                 ...all,

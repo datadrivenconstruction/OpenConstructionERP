@@ -309,9 +309,7 @@ const WARRANTY_VARIANT: Record<WarrantyStatus, 'neutral' | 'blue' | 'success' | 
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const inputErrCls =
-  'h-9 w-full rounded-lg border border-semantic-error bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-semantic-error/30';
+  'oe-input';
 
 const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
 
@@ -715,7 +713,7 @@ export function PropertyDevPage() {
                 >
                   <h3
                     id={`propdev-group-${g.id}`}
-                    className="px-1 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+                    className="oe-overline px-1 pb-1.5"
                   >
                     {g.label}
                   </h3>
@@ -795,7 +793,7 @@ export function PropertyDevPage() {
           <select
             value={selectedDevId}
             onChange={(e) => setSelectedDevId(e.target.value)}
-            className={clsx(inputCls, 'max-w-[320px]')}
+            className={clsx('oe-select', 'max-w-[320px]')}
           >
             {developments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -835,7 +833,7 @@ export function PropertyDevPage() {
               aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
               data-testid="propdev-view-on-map"
             >
-              <Globe2 size={13} />
+              <Globe2 size={14} />
               {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
             </button>
           )}
@@ -851,7 +849,7 @@ export function PropertyDevPage() {
               })}
               data-testid="propdev-inventory-map-link"
             >
-              <LayoutGrid size={13} />
+              <LayoutGrid size={14} />
               {t('propdev.inventory_map.cta', {
                 defaultValue: 'Inventory Map',
               })}
@@ -872,7 +870,7 @@ export function PropertyDevPage() {
               })}
               data-testid="propdev-compliance-link"
             >
-              <ShieldCheck size={13} />
+              <ShieldCheck size={14} />
               {t('propdev.compliance.title', {
                 defaultValue: 'Compliance dashboard',
               })}
@@ -1226,26 +1224,25 @@ function BuyersTab({
 
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide sticky top-0">
+          <table className="oe-table">
+            <thead className="sticky top-0">
               <tr>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.buyer', { defaultValue: 'Buyer' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.email', { defaultValue: 'Email' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.plot', { defaultValue: 'Plot' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.stage', { defaultValue: 'Stage' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">
                   {t('propdev.contract_value', { defaultValue: 'Contract' })}
                 </th>
                 <th
-                  className="px-4 py-2.5 text-left"
                   aria-sort="ascending"
                 >
                   {t('propdev.freeze_deadline', { defaultValue: 'Freeze' })}
@@ -1257,7 +1254,7 @@ function BuyersTab({
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-8 text-center text-sm text-content-tertiary"
+                    className="text-center text-content-tertiary"
                   >
                     {t('propdev.no_buyers_for_stage', {
                       defaultValue: 'No buyers in this stage.',
@@ -1285,7 +1282,7 @@ function BuyersTab({
                       })}
                       className="border-t border-border-light hover:bg-surface-secondary cursor-pointer focus:bg-surface-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
                     >
-                      <td className="px-4 py-2 font-medium">
+                      <td>
                         <span className="inline-flex items-center gap-1.5">
                           {b.full_name || '—'}
                           {b.contact_id && (
@@ -1299,15 +1296,15 @@ function BuyersTab({
                                 defaultValue: 'Linked to Contacts',
                               })}
                             >
-                              <UserCircle2 size={11} aria-hidden="true" />
+                              <UserCircle2 size={12} aria-hidden="true" />
                             </span>
                           )}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-xs text-content-secondary">
+                      <td className="text-content-secondary">
                         {b.email}
                       </td>
-                      <td className="px-4 py-2 text-xs">
+                      <td>
                         {plot ? (
                           <span className="inline-flex items-center gap-1 font-mono text-content-secondary">
                             {plot.plot_number}
@@ -1316,7 +1313,7 @@ function BuyersTab({
                           <span className="text-content-tertiary">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-2">
+                      <td>
                         <Badge variant={BUYER_VARIANT[b.status]} dot>
                           {t(`propdev.stage_${b.status}`, {
                             defaultValue:
@@ -1325,13 +1322,13 @@ function BuyersTab({
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-2 text-right">
+                      <td className="text-right">
                         <MoneyDisplay
                           amount={toNumber(b.contract_value)}
                           currency={b.currency || undefined}
                         />
                       </td>
-                      <td className="px-4 py-2 text-xs">
+                      <td>
                         {b.freeze_deadline ? (
                           <span
                             className={clsx(
@@ -1341,7 +1338,7 @@ function BuyersTab({
                                 : 'text-content-secondary',
                             )}
                           >
-                            <Clock size={11} aria-hidden="true" />
+                            <Clock size={12} aria-hidden="true" />
                             {days != null ? (
                               days > 0 ? (
                                 t('propdev.in_days', {
@@ -1545,7 +1542,7 @@ function LeadsTab({
                 e.target.value ? (e.target.value as LeadSource) : null,
               )
             }
-            className={clsx(inputCls, 'h-7 py-0 text-xs w-auto')}
+            className={clsx('oe-select', 'oe-input-sm w-auto')}
           >
             <option value="">
               {t('propdev.all_sources', { defaultValue: 'All sources' })}
@@ -1563,25 +1560,25 @@ function LeadsTab({
 
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide sticky top-0">
+          <table className="oe-table">
+            <thead className="sticky top-0">
               <tr>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.lead_name', { defaultValue: 'Lead' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.email', { defaultValue: 'Email' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.lead_source', { defaultValue: 'Source' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.lead_score', { defaultValue: 'Score' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">
                   {t('propdev.actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
@@ -1591,7 +1588,7 @@ function LeadsTab({
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-8 text-center text-sm text-content-tertiary"
+                    className="text-center text-content-tertiary"
                   >
                     {t('propdev.no_leads_for_filter', {
                       defaultValue: 'No leads match the current filter.',
@@ -1621,7 +1618,7 @@ function LeadsTab({
                       })}
                       className="border-t border-border-light hover:bg-surface-secondary cursor-pointer focus:bg-surface-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
                     >
-                      <td className="px-4 py-2 font-medium">
+                      <td>
                         <span className="inline-flex items-center gap-1.5">
                           {l.full_name || '—'}
                           {l.contact_id && (
@@ -1635,28 +1632,28 @@ function LeadsTab({
                                 defaultValue: 'Linked to Contacts',
                               })}
                             >
-                              <UserCircle2 size={11} aria-hidden="true" />
+                              <UserCircle2 size={12} aria-hidden="true" />
                             </span>
                           )}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-xs text-content-secondary">
+                      <td className="text-content-secondary">
                         {l.email || '—'}
                       </td>
-                      <td className="px-4 py-2 text-xs text-content-secondary">
+                      <td className="text-content-secondary">
                         {t(`propdev.lead_source_${l.source}`, {
                           defaultValue: LEAD_SOURCE_LABELS[l.source] ?? l.source.replace(/_/g, ' '),
                         })}
                       </td>
-                      <td className="px-4 py-2 text-xs font-mono tabular-nums">
+                      <td className="font-mono tabular-nums">
                         {fmtFixed(toNumber(l.lead_score), 0)}
                       </td>
-                      <td className="px-4 py-2">
+                      <td>
                         <Badge variant={LEAD_VARIANT[l.status]} dot>
                           {leadStatusLabel(l.status, t)}
                         </Badge>
                       </td>
-                      <td className="px-4 py-2 text-right">
+                      <td className="text-right">
                         {convertible && (
                           <button
                             type="button"
@@ -1934,7 +1931,7 @@ function LeadDetailDrawer({
               {t('propdev.lead_source', { defaultValue: 'Source' })}
             </span>
             <select
-              className={inputCls}
+              className="oe-select"
               value={form.source}
               disabled={!canEdit}
               onChange={(e) =>
@@ -1980,7 +1977,7 @@ function LeadDetailDrawer({
               {t('propdev.status', { defaultValue: 'Status' })}
             </span>
             <select
-              className={inputCls}
+              className="oe-select"
               value={form.status}
               disabled={!canEdit}
               onChange={(e) =>
@@ -2004,7 +2001,7 @@ function LeadDetailDrawer({
           </span>
           <textarea
             rows={4}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
             value={form.notes}
             disabled={!canEdit}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -2101,7 +2098,7 @@ function LinkedContactCard({
 
   return (
     <Card padding="sm">
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue shrink-0">
           <UserCircle2 size={16} aria-hidden="true" />
         </div>
@@ -2119,7 +2116,7 @@ function LinkedContactCard({
               {t('propdev.open_in_contacts', {
                 defaultValue: 'Open in Contacts',
               })}
-              <ArrowRight size={11} aria-hidden="true" />
+              <ArrowRight size={12} aria-hidden="true" />
             </Link>
           </div>
           <p className="text-sm font-medium truncate">{displayName}</p>
@@ -2277,7 +2274,7 @@ function ConvertLeadModal({
             span={2}
           >
             <select
-              className={inputCls}
+              className="oe-select"
               value={form.plot_id}
               onChange={(e) => setForm({ ...form, plot_id: e.target.value })}
               data-testid="convert-lead-plot"
@@ -2317,11 +2314,8 @@ function ConvertLeadModal({
             }
           >
             <input
-              className={
-                form.currency && !ISO_CURRENCY_RE.test(form.currency)
-                  ? inputErrCls
-                  : inputCls
-              }
+              className={inputCls}
+ aria-invalid={!!(form.currency && !ISO_CURRENCY_RE.test(form.currency))}
               value={form.currency}
               maxLength={3}
               onChange={(e) =>
@@ -2560,7 +2554,7 @@ function ReservationsTab({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as ReservationStatus | '')}
-          className={clsx(inputCls, 'max-w-[200px]')}
+          className={clsx('oe-select', 'max-w-[200px]')}
         >
           <option value="">{t('propdev.all_statuses', { defaultValue: 'All statuses' })}</option>
           {RESERVATION_STATUS_OPTIONS.map((s) => (
@@ -2601,16 +2595,16 @@ function ReservationsTab({
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-secondary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.reservation_number', { defaultValue: 'No.' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.plot', { defaultValue: 'Plot' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.buyer', { defaultValue: 'Buyer' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('propdev.deposit', { defaultValue: 'Deposit' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.expires_at', { defaultValue: 'Expires' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('common.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('propdev.reservation_number', { defaultValue: 'No.' })}</th>
+                  <th>{t('propdev.plot', { defaultValue: 'Plot' })}</th>
+                  <th>{t('propdev.buyer', { defaultValue: 'Buyer' })}</th>
+                  <th className="text-right">{t('propdev.deposit', { defaultValue: 'Deposit' })}</th>
+                  <th>{t('propdev.expires_at', { defaultValue: 'Expires' })}</th>
+                  <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -2619,18 +2613,18 @@ function ReservationsTab({
                   const buyer = r.buyer_id ? buyers.find((b) => b.id === r.buyer_id) : null;
                   const isActive = r.status === 'active';
                   return (
-                    <tr key={r.id} className="border-t border-border-light">
-                      <td className="px-3 py-2 font-mono text-xs">{r.reservation_number}</td>
-                      <td className="px-3 py-2">{plot?.plot_number ?? '—'}</td>
-                      <td className="px-3 py-2">{buyer?.full_name ?? buyer?.email ?? '—'}</td>
-                      <td className="px-3 py-2 text-right">
+                    <tr key={r.id}>
+                      <td className="font-mono">{r.reservation_number}</td>
+                      <td>{plot?.plot_number ?? '—'}</td>
+                      <td>{buyer?.full_name ?? buyer?.email ?? '—'}</td>
+                      <td className="text-right">
                         <MoneyDisplay amount={toNumber(r.deposit_amount)} currency={r.currency || undefined} />
                       </td>
-                      <td className="px-3 py-2">{r.expires_at ? <DateDisplay value={r.expires_at} /> : '—'}</td>
-                      <td className="px-3 py-2">
+                      <td>{r.expires_at ? <DateDisplay value={r.expires_at} /> : '—'}</td>
+                      <td>
                         <Badge variant={RESERVATION_VARIANT[r.status]} dot>{t(`propdev.reservation.status.${r.status}`, { defaultValue: RESERVATION_STATUS_LABELS[r.status] ?? r.status })}</Badge>
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -2804,7 +2798,7 @@ function CreateReservationModal({
           <select
             value={form.plot_id}
             onChange={(e) => setForm({ ...form, plot_id: e.target.value })}
-            className={inputCls}
+            className="oe-select"
           >
             {availablePlots.length === 0 && (
               <option value="" disabled>
@@ -2822,7 +2816,7 @@ function CreateReservationModal({
           <select
             value={form.buyer_id}
             onChange={(e) => setForm({ ...form, buyer_id: e.target.value })}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">{t('propdev.no_buyer', { defaultValue: 'No buyer yet' })}</option>
             {buyers.map((b) => (
@@ -2973,11 +2967,8 @@ function ConvertReservationModal({
                   .slice(0, 3),
               })
             }
-            className={
-              form.currency && !ISO_CURRENCY_RE.test(form.currency)
-                ? inputErrCls
-                : inputCls
-            }
+            className={inputCls}
+ aria-invalid={!!(form.currency && !ISO_CURRENCY_RE.test(form.currency))}
             maxLength={3}
           />
         </WideModalField>
@@ -3116,7 +3107,7 @@ function SpaTab({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as SpaStatus | '')}
-          className={clsx(inputCls, 'max-w-[220px]')}
+          className={clsx('oe-select', 'max-w-[220px]')}
         >
           <option value="">{t('propdev.all_statuses', { defaultValue: 'All statuses' })}</option>
           {SPA_STATUS_OPTIONS.map((s) => (
@@ -3206,15 +3197,15 @@ function SpaTab({
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-secondary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.contract_number', { defaultValue: 'No.' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.plot', { defaultValue: 'Plot' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.signed', { defaultValue: 'Signed' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('propdev.total_value', { defaultValue: 'Total' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('common.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('propdev.contract_number', { defaultValue: 'No.' })}</th>
+                  <th>{t('propdev.plot', { defaultValue: 'Plot' })}</th>
+                  <th>{t('propdev.signed', { defaultValue: 'Signed' })}</th>
+                  <th className="text-right">{t('propdev.total_value', { defaultValue: 'Total' })}</th>
+                  <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -3226,19 +3217,19 @@ function SpaTab({
                   return (
                     <tr
                       key={s.id}
-                      className="border-t border-border-light cursor-pointer hover:bg-surface-secondary/30"
+                      className="cursor-pointer"
                       onClick={() => setActiveSpaId(s.id)}
                     >
-                      <td className="px-3 py-2 font-mono text-xs">{s.contract_number}</td>
-                      <td className="px-3 py-2">{plot?.plot_number ?? '—'}</td>
-                      <td className="px-3 py-2">{s.signing_date ? <DateDisplay value={s.signing_date} /> : '—'}</td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="font-mono">{s.contract_number}</td>
+                      <td>{plot?.plot_number ?? '—'}</td>
+                      <td>{s.signing_date ? <DateDisplay value={s.signing_date} /> : '—'}</td>
+                      <td className="text-right">
                         <MoneyDisplay amount={toNumber(s.total_value)} currency={s.currency || undefined} />
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <Badge variant={SPA_VARIANT[s.status]} dot>{t(`propdev.spa.status.${s.status}`, { defaultValue: SPA_STATUS_LABELS[s.status] ?? s.status })}</Badge>
                       </td>
-                      <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -3565,36 +3556,36 @@ function InstalmentsTable({
   return (
     <>
       <div className="overflow-x-auto rounded border border-border-light">
-        <table className="w-full text-xs">
-          <thead className="bg-surface-secondary text-content-secondary">
+        <table className="oe-table-compact">
+          <thead>
             <tr>
-              <th className="px-2 py-1.5 text-left font-medium">#</th>
-              <th className="px-2 py-1.5 text-left font-medium">{t('propdev.milestone', { defaultValue: 'Milestone' })}</th>
-              <th className="px-2 py-1.5 text-left font-medium">{t('propdev.due', { defaultValue: 'Due' })}</th>
-              <th className="px-2 py-1.5 text-right font-medium">{t('propdev.amount', { defaultValue: 'Amount' })}</th>
-              <th className="px-2 py-1.5 text-right font-medium">{t('propdev.paid', { defaultValue: 'Paid' })}</th>
-              <th className="px-2 py-1.5 text-left font-medium">{t('common.status', { defaultValue: 'Status' })}</th>
-              <th className="px-2 py-1.5 text-right font-medium">{t('common.actions', { defaultValue: 'Actions' })}</th>
+              <th>#</th>
+              <th>{t('propdev.milestone', { defaultValue: 'Milestone' })}</th>
+              <th>{t('propdev.due', { defaultValue: 'Due' })}</th>
+              <th className="text-right">{t('propdev.amount', { defaultValue: 'Amount' })}</th>
+              <th className="text-right">{t('propdev.paid', { defaultValue: 'Paid' })}</th>
+              <th>{t('common.status', { defaultValue: 'Status' })}</th>
+              <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
             </tr>
           </thead>
           <tbody>
             {instalments.map((ins) => {
               const open = !['paid', 'waived', 'cancelled'].includes(ins.status);
               return (
-                <tr key={ins.id} className="border-t border-border-light">
-                  <td className="px-2 py-1.5 font-mono">{ins.sequence}</td>
-                  <td className="px-2 py-1.5">{ins.milestone_label}</td>
-                  <td className="px-2 py-1.5">{ins.due_date ? <DateDisplay value={ins.due_date} /> : '—'}</td>
-                  <td className="px-2 py-1.5 text-right">
+                <tr key={ins.id}>
+                  <td className="font-mono">{ins.sequence}</td>
+                  <td>{ins.milestone_label}</td>
+                  <td>{ins.due_date ? <DateDisplay value={ins.due_date} /> : '—'}</td>
+                  <td className="text-right">
                     <MoneyDisplay amount={toNumber(ins.amount)} currency={currency || undefined} />
                   </td>
-                  <td className="px-2 py-1.5 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={toNumber(ins.amount_paid)} currency={currency || undefined} />
                   </td>
-                  <td className="px-2 py-1.5">
+                  <td>
                     <Badge variant={INSTALMENT_VARIANT[ins.status]}>{t(`propdev.instalment.status.${ins.status}`, { defaultValue: INSTALMENT_STATUS_LABELS[ins.status] ?? ins.status })}</Badge>
                   </td>
-                  <td className="px-2 py-1.5">
+                  <td>
                     <div className="flex items-center justify-end gap-0.5">
                       <button
                         type="button"
@@ -4018,7 +4009,7 @@ function PaymentScheduleTab({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as PaymentScheduleStatus | '')}
-          className={clsx(inputCls, 'max-w-[200px]')}
+          className={clsx('oe-select', 'max-w-[200px]')}
         >
           <option value="">{t('propdev.all_statuses', { defaultValue: 'All statuses' })}</option>
           {SCHEDULE_STATUS_OPTIONS.map((s) => (
@@ -4084,7 +4075,7 @@ function PaymentScheduleTab({
                   onClick={() => setGenerateForSpa(s)}
                   className="inline-flex items-center gap-1.5 rounded border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
                 >
-                  <Receipt size={11} />
+                  <Receipt size={12} />
                   {s.contract_number}
                   {plot?.plot_number ? ` · ${plot.plot_number}` : ''}
                 </button>
@@ -4147,15 +4138,15 @@ function PaymentScheduleTab({
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-secondary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.contract_number', { defaultValue: 'SPA' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('propdev.plot', { defaultValue: 'Plot' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('propdev.total', { defaultValue: 'Total' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('propdev.late_fee_pct_short', { defaultValue: 'Late %' })}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t('common.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('propdev.contract_number', { defaultValue: 'SPA' })}</th>
+                  <th>{t('propdev.plot', { defaultValue: 'Plot' })}</th>
+                  <th className="text-right">{t('propdev.total', { defaultValue: 'Total' })}</th>
+                  <th className="text-right">{t('propdev.late_fee_pct_short', { defaultValue: 'Late %' })}</th>
+                  <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -4163,17 +4154,17 @@ function PaymentScheduleTab({
                   const spa = spas.find((s) => s.id === sch.sales_contract_id);
                   const plot = spa ? plots.find((p) => p.id === spa.plot_id) : null;
                   return (
-                    <tr key={sch.id} className="border-t border-border-light">
-                      <td className="px-3 py-2 font-mono text-xs">{spa?.contract_number ?? sch.sales_contract_id.slice(0, 8)}</td>
-                      <td className="px-3 py-2">{plot?.plot_number ?? '—'}</td>
-                      <td className="px-3 py-2 text-right">
+                    <tr key={sch.id}>
+                      <td className="font-mono">{spa?.contract_number ?? sch.sales_contract_id.slice(0, 8)}</td>
+                      <td>{plot?.plot_number ?? '—'}</td>
+                      <td className="text-right">
                         <MoneyDisplay amount={toNumber(sch.total_amount)} currency={sch.currency || undefined} />
                       </td>
-                      <td className="px-3 py-2 text-right text-xs">{String(sch.late_fee_pct)}%</td>
-                      <td className="px-3 py-2">
+                      <td className="text-right">{String(sch.late_fee_pct)}%</td>
+                      <td>
                         <Badge variant={SCHEDULE_VARIANT[sch.status]} dot>{t(`propdev.payment_schedule.status.${sch.status}`, { defaultValue: SCHEDULE_STATUS_LABELS[sch.status] ?? sch.status })}</Badge>
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -4557,7 +4548,7 @@ function HandoverPlotRow({ plot, buyer }: { plot: Plot; buyer: Buyer | undefined
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className={inputCls}
+                className="oe-textarea"
                 rows={3}
               />
             </WideModalField>
@@ -4772,7 +4763,7 @@ function CompleteHandoverModal({
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className={inputCls}
+            className="oe-textarea"
             rows={3}
           />
         </WideModalField>
@@ -4916,7 +4907,7 @@ function WarrantyTab({
             <select
               value={filterBuyerId}
               onChange={(e) => setFilterBuyerId(e.target.value)}
-              className={clsx(inputCls, 'max-w-[260px]')}
+              className={clsx('oe-select', 'max-w-[260px]')}
             >
               <option value="">
                 {t('propdev.warranty.filter_all_buyers', {
@@ -4937,7 +4928,7 @@ function WarrantyTab({
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className={clsx(inputCls, 'max-w-[180px]')}
+              className={clsx('oe-select', 'max-w-[180px]')}
             >
               <option value="">{t('propdev.warranty.filter_all', { defaultValue: 'All' })}</option>
               <option value="raised">{t('propdev.warranty.status_raised', { defaultValue: 'Raised' })}</option>
@@ -4957,7 +4948,7 @@ function WarrantyTab({
               <select
                 value={filterSeverity}
                 onChange={(e) => setFilterSeverity(e.target.value)}
-                className={clsx(inputCls, 'max-w-[160px]')}
+                className={clsx('oe-select', 'max-w-[160px]')}
               >
                 <option value="">{t('propdev.warranty.filter_all', { defaultValue: 'All' })}</option>
                 <option value="minor">{t('propdev.warranty.severity_minor', { defaultValue: 'Minor' })}</option>
@@ -4997,17 +4988,17 @@ function WarrantyTab({
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.plot', { defaultValue: 'Plot' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.warranty.buyer', { defaultValue: 'Buyer' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.category', { defaultValue: 'Category' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.warranty.severity', { defaultValue: 'Severity' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.description', { defaultValue: 'Description' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('propdev.warranty.in_warranty', { defaultValue: 'In warranty' })}</th>
-                  <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('propdev.plot', { defaultValue: 'Plot' })}</th>
+                  <th>{t('propdev.warranty.buyer', { defaultValue: 'Buyer' })}</th>
+                  <th>{t('propdev.category', { defaultValue: 'Category' })}</th>
+                  <th>{t('propdev.warranty.severity', { defaultValue: 'Severity' })}</th>
+                  <th>{t('propdev.description', { defaultValue: 'Description' })}</th>
+                  <th>{t('propdev.status', { defaultValue: 'Status' })}</th>
+                  <th>{t('propdev.warranty.in_warranty', { defaultValue: 'In warranty' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -5015,15 +5006,15 @@ function WarrantyTab({
                   const plot = plotMap.get(c.plot_id);
                   const buyer = buyerMap.get(c.buyer_id);
                   return (
-                    <tr key={c.id} className="border-t border-border-light">
-                      <td className="px-4 py-2 text-xs">{plot?.plot_number ?? '—'}</td>
-                      <td className="px-4 py-2 text-xs">{buyer?.full_name ?? '—'}</td>
-                      <td className="px-4 py-2 text-xs">
+                    <tr key={c.id}>
+                      <td>{plot?.plot_number ?? '—'}</td>
+                      <td>{buyer?.full_name ?? '—'}</td>
+                      <td>
                         {t(`propdev.warranty.cat_${c.category}`, {
                           defaultValue: c.category,
                         })}
                       </td>
-                      <td className="px-4 py-2 text-xs">
+                      <td>
                         <Badge
                           variant={
                             c.severity === 'critical'
@@ -5039,17 +5030,17 @@ function WarrantyTab({
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-2 max-w-[320px] truncate" title={c.description}>
+                      <td className="max-w-[320px] truncate" title={c.description}>
                         {c.description}
                       </td>
-                      <td className="px-4 py-2">
+                      <td>
                         <Badge variant={WARRANTY_VARIANT[c.status]} dot>
                           {t(`propdev.warranty.status_${c.status}`, {
                             defaultValue: c.status,
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-2 text-xs">
+                      <td>
                         {c.is_in_warranty ? (
                           <Badge variant="success" dot>
                             {t('propdev.warranty.in_warranty_yes', { defaultValue: 'Yes' })}
@@ -5058,7 +5049,7 @@ function WarrantyTab({
                           <span className="text-content-tertiary">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-right">
+                      <td className="text-right">
                         <div className="inline-flex gap-1 items-center">
                           <Button
                             variant="ghost"
@@ -5195,7 +5186,7 @@ function CreateWarrantyClaimModal({
             onChange={(e) =>
               setForm((f) => ({ ...f, buyer_id: e.target.value, plot_id: '' }))
             }
-            className={clsx(inputCls, 'w-full')}
+            className="oe-select"
           >
             {buyers.map((b) => (
               <option key={b.id} value={b.id}>
@@ -5211,7 +5202,7 @@ function CreateWarrantyClaimModal({
           <select
             value={form.plot_id}
             onChange={(e) => setForm((f) => ({ ...f, plot_id: e.target.value }))}
-            className={clsx(inputCls, 'w-full')}
+            className="oe-select"
           >
             <option value="">
               {t('propdev.warranty.pick_plot', { defaultValue: 'Pick a plot…' })}
@@ -5236,7 +5227,7 @@ function CreateWarrantyClaimModal({
                   category: e.target.value as WarrantyCategory,
                 }))
               }
-              className={clsx(inputCls, 'w-full')}
+              className="oe-select"
             >
               <option value="defect">{t('propdev.warranty.cat_defect', { defaultValue: 'Defect' })}</option>
               <option value="structural">{t('propdev.warranty.cat_structural', { defaultValue: 'Structural' })}</option>
@@ -5257,7 +5248,7 @@ function CreateWarrantyClaimModal({
                   severity: e.target.value as WarrantySeverity,
                 }))
               }
-              className={clsx(inputCls, 'w-full')}
+              className="oe-select"
             >
               <option value="minor">{t('propdev.warranty.severity_minor', { defaultValue: 'Minor' })}</option>
               <option value="major">{t('propdev.warranty.severity_major', { defaultValue: 'Major' })}</option>
@@ -5275,7 +5266,7 @@ function CreateWarrantyClaimModal({
               setForm((f) => ({ ...f, description: e.target.value }))
             }
             rows={4}
-            className={clsx(inputCls, 'w-full')}
+            className="oe-textarea"
             placeholder={t('propdev.warranty.describe', {
               defaultValue: 'Describe the defect, observed symptoms, location…',
             })}
@@ -5291,7 +5282,7 @@ function CreateWarrantyClaimModal({
             onChange={(e) =>
               setForm((f) => ({ ...f, sla_deadline: e.target.value }))
             }
-            className={clsx(inputCls, 'w-full max-w-[220px]')}
+            className={clsx(inputCls, 'max-w-[220px]')}
           />
         </label>
         <div className="flex justify-end gap-2 pt-2">
@@ -5549,7 +5540,7 @@ function PlotDetailDrawer({
                       <Globe2 size={12} className="text-content-tertiary group-hover:text-oe-blue" />
                       <span>{t('propdev.view_plot_on_map', { defaultValue: 'Plot {{n}} on map', n: plot.plot_number })}</span>
                     </span>
-                    <ArrowRight size={11} className="text-content-tertiary group-hover:text-oe-blue" />
+                    <ArrowRight size={12} className="text-content-tertiary group-hover:text-oe-blue" />
                   </Link>
                 </li>
                 <li>
@@ -5561,7 +5552,7 @@ function PlotDetailDrawer({
                       <FileSignature size={12} className="text-content-tertiary group-hover:text-oe-blue" />
                       <span>{t('propdev.view_contracts', { defaultValue: 'Sales contracts' })}</span>
                     </span>
-                    <ArrowRight size={11} className="text-content-tertiary group-hover:text-oe-blue" />
+                    <ArrowRight size={12} className="text-content-tertiary group-hover:text-oe-blue" />
                   </Link>
                 </li>
               </ul>
@@ -5742,7 +5733,7 @@ function EditPlotModal({
           <select
             value={form.house_type_id}
             onChange={(e) => setForm((s) => ({ ...s, house_type_id: e.target.value }))}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {houseTypes.map((h) => (
@@ -5786,13 +5777,13 @@ function EditPlotModal({
           <input type="number" value={form.parking_spaces} onChange={(e) => setForm((s) => ({ ...s, parking_spaces: e.target.value }))} className={inputCls} min={0} max={20} />
         </WideModalField>
         <WideModalField label={t('propdev.plot.orientation', { defaultValue: 'Orientation' })}>
-          <select value={form.orientation} onChange={(e) => setForm((s) => ({ ...s, orientation: e.target.value }))} className={inputCls}>
+          <select value={form.orientation} onChange={(e) => setForm((s) => ({ ...s, orientation: e.target.value }))} className="oe-select">
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {PLOT_ORIENTATIONS.map((o) => (<option key={o} value={o}>{o}</option>))}
           </select>
         </WideModalField>
         <WideModalField label={t('propdev.plot.view_type', { defaultValue: 'View type' })}>
-          <select value={form.view_type} onChange={(e) => setForm((s) => ({ ...s, view_type: e.target.value }))} className={inputCls}>
+          <select value={form.view_type} onChange={(e) => setForm((s) => ({ ...s, view_type: e.target.value }))} className="oe-select">
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {PLOT_VIEW_TYPES.map((v) => (
               <option key={v} value={v}>
@@ -6185,7 +6176,7 @@ export function BuyerDetailDrawer({
                       </span>
                     </span>
                     <ArrowRight
-                      size={11}
+                      size={12}
                       className="text-content-tertiary group-hover:text-oe-blue"
                     />
                   </Link>
@@ -6214,7 +6205,7 @@ export function BuyerDetailDrawer({
                     </span>
                   </span>
                   <ArrowRight
-                    size={11}
+                    size={12}
                     className="text-content-tertiary group-hover:text-oe-blue"
                   />
                 </Link>
@@ -6240,7 +6231,7 @@ export function BuyerDetailDrawer({
                     </span>
                   </span>
                   <ArrowRight
-                    size={11}
+                    size={12}
                     className="text-content-tertiary group-hover:text-oe-blue"
                   />
                 </Link>
@@ -6274,7 +6265,7 @@ export function BuyerDetailDrawer({
                     </span>
                   </span>
                   <ArrowRight
-                    size={11}
+                    size={12}
                     className="text-content-tertiary group-hover:text-oe-blue"
                   />
                 </Link>
@@ -6963,7 +6954,7 @@ function CreateModal({
                   source: e.target.value as LeadSource,
                 })
               }
-              className={inputCls}
+              className="oe-select"
             >
               {LEAD_SOURCES.map((src) => (
                 <option key={src} value={src}>
@@ -7002,7 +6993,7 @@ function CreateModal({
               onChange={(e) =>
                 setLeadForm({ ...leadForm, notes: e.target.value })
               }
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <div className="sm:col-span-2">
@@ -7033,7 +7024,7 @@ function SyncToContactsToggle({
 }) {
   const { t } = useTranslation();
   return (
-    <label className="flex items-start gap-2.5 rounded-md border border-border-light bg-surface-secondary/60 p-2.5 cursor-pointer hover:bg-surface-secondary">
+    <label className="flex items-start gap-2 rounded-md border border-border-light bg-surface-secondary/60 p-3 cursor-pointer hover:bg-surface-secondary">
       <input
         type="checkbox"
         checked={checked}
@@ -7043,7 +7034,7 @@ function SyncToContactsToggle({
       />
       <div className="min-w-0">
         <p className="text-xs font-medium text-content-primary inline-flex items-center gap-1.5">
-          <LinkIcon size={11} aria-hidden="true" />
+          <LinkIcon size={12} aria-hidden="true" />
           {t('propdev.sync_to_contacts', {
             defaultValue: 'Sync to Contacts directory',
           })}
@@ -7202,7 +7193,7 @@ function DevelopmentFormBody({
           <select
             value={devForm.dev_type}
             onChange={(e) => set('dev_type', e.target.value as DevelopmentType)}
-            className={inputCls}
+            className="oe-select"
           >
             {DEV_TYPES.map((dt) => (
               <option key={dt} value={dt}>
@@ -7223,7 +7214,7 @@ function DevelopmentFormBody({
             onChange={(e) =>
               set('sales_phase', e.target.value as Development['sales_phase'])
             }
-            className={inputCls}
+            className="oe-select"
           >
             {DEV_SALES_PHASES.map((p) => (
               <option key={p} value={p}>
@@ -7241,7 +7232,7 @@ function DevelopmentFormBody({
           <textarea
             value={devForm.description}
             onChange={(e) => set('description', e.target.value)}
-            className={`${inputCls} h-20 py-2`}
+            className="oe-textarea h-20"
             rows={3}
           />
         </WideModalField>
@@ -7781,7 +7772,7 @@ function PlotFormBody({
           <select
             value={plotForm.status}
             onChange={(e) => set('status', e.target.value as PlotStatus)}
-            className={inputCls}
+            className="oe-select"
           >
             {PLOT_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -7796,7 +7787,7 @@ function PlotFormBody({
           <select
             value={plotForm.house_type_id}
             onChange={(e) => set('house_type_id', e.target.value)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {houseTypes.map((h) => (
@@ -7821,7 +7812,7 @@ function PlotFormBody({
               <select
                 value={catalogueCountry}
                 onChange={(e) => setCatalogueCountry(e.target.value)}
-                className={clsx(inputCls, 'max-w-[200px]')}
+                className={clsx('oe-select', 'max-w-[200px]')}
                 aria-label={t('property_dev.house_type.country_label', {
                   defaultValue: 'Country',
                 })}
@@ -7835,7 +7826,7 @@ function PlotFormBody({
               <select
                 value={plotForm.house_type_label}
                 onChange={(e) => set('house_type_label', e.target.value)}
-                className={clsx(inputCls, 'min-w-[200px] flex-1')}
+                className={clsx('oe-select', 'min-w-[200px] flex-1')}
               >
                 <option value="">
                   — {t('property_dev.house_type.none', { defaultValue: 'None' })} —
@@ -8095,7 +8086,7 @@ function PlotFormBody({
           <select
             value={plotForm.orientation}
             onChange={(e) => set('orientation', e.target.value)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {PLOT_ORIENTATIONS.map((o) => (
@@ -8111,7 +8102,7 @@ function PlotFormBody({
           <select
             value={plotForm.view_type}
             onChange={(e) => set('view_type', e.target.value)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">— {t('common.none', { defaultValue: 'None' })} —</option>
             {PLOT_VIEW_TYPES.map((v) => (

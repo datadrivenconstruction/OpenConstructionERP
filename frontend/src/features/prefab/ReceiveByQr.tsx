@@ -49,13 +49,13 @@ export function ReceiveByQr({ onReceived }: { onReceived: () => void }) {
       className="flex flex-wrap items-end gap-2 rounded-xl border border-border-light bg-surface-elevated p-3"
       data-testid="prefab-receive-qr"
     >
-      <QrCode size={18} className="mb-2 text-oe-blue" aria-hidden />
+      <QrCode size={20} className="mb-2 text-oe-blue" aria-hidden />
       <label className="flex min-w-[12rem] flex-1 flex-col text-2xs text-content-tertiary">
         {t('prefab.receive_qr_label', { defaultValue: 'Scanned QR code' })}
         <input
           value={token}
           onChange={(e) => setToken(e.target.value)}
-          className="mt-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1 font-mono text-sm text-content-primary"
+          className="oe-input mt-1 font-mono"
         />
       </label>
       <label className="flex min-w-[10rem] flex-col text-2xs text-content-tertiary">
@@ -63,7 +63,7 @@ export function ReceiveByQr({ onReceived }: { onReceived: () => void }) {
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="mt-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+          className="oe-input mt-1"
         />
       </label>
       <button

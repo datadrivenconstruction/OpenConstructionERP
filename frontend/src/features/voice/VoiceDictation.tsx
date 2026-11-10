@@ -186,7 +186,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
     <div className={clsx('relative flex items-center gap-0.5', className)} data-testid="voice-dictation">
       {showStrip && (
         <div
-          className="absolute bottom-full end-0 z-10 mb-2 flex w-[min(26rem,calc(100vw-2rem))] items-start gap-2 rounded-xl border border-border-light bg-surface-elevated p-2.5 text-sm shadow-lg"
+          className="absolute bottom-full end-0 z-10 mb-2 flex w-[min(26rem,calc(100vw-2rem))] items-start gap-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-sm shadow-lg"
           data-testid="voice-dictation-strip"
           data-status={voice.status}
         >
@@ -247,7 +247,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                   className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                   data-testid="voice-dictation-cancel"
                 >
-                  <X size={15} aria-hidden />
+                  <X size={16} aria-hidden />
                 </button>
                 {listening && (
                   <button
@@ -258,7 +258,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                     className="rounded-md bg-oe-blue p-1.5 text-oe-on-accent hover:bg-oe-blue-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                     data-testid="voice-dictation-done"
                   >
-                    <Check size={15} aria-hidden />
+                    <Check size={16} aria-hidden />
                   </button>
                 )}
               </div>
@@ -331,7 +331,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
         className="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
         data-testid="voice-dictation-settings-toggle"
       >
-        <Settings2 size={13} aria-hidden />
+        <Settings2 size={14} aria-hidden />
       </button>
 
       {settingsOpen && (

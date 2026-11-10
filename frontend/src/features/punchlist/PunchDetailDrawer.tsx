@@ -503,7 +503,7 @@ export function PunchDetailDrawer({
                     'text-content-secondary',
                   )}
                 >
-                  <RotateCcw size={13} className="mt-0.5 shrink-0 text-content-tertiary" />
+                  <RotateCcw size={14} className="mt-0.5 shrink-0 text-content-tertiary" />
                   <span className="min-w-0">
                     {t('punch.reopened_from', {
                       defaultValue: 'Reopened from {{status}} on {{date}}',

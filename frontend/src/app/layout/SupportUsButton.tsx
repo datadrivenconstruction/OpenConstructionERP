@@ -316,7 +316,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
 
   const panel = (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6 bg-black/45 backdrop-blur-[3px]"
+      className="fixed inset-0 z-modal flex items-center justify-center p-3 sm:p-6 bg-black/45 backdrop-blur-[3px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="support-us-title"
@@ -344,7 +344,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="absolute top-3 right-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
           <div className="relative px-6 sm:px-8 py-7 text-center">
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg mb-4">
@@ -633,11 +633,11 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             }}
             className="group mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-semantic-warning hover:text-semantic-warning transition-colors"
           >
-            <Users size={13} strokeWidth={2} />
+            <Users size={14} strokeWidth={2} />
             {t('support.see_contributors', {
               defaultValue: 'See who is already building it with us',
             })}
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
       </div>

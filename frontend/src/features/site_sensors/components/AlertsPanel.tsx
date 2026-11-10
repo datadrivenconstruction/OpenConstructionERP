@@ -16,7 +16,7 @@ import { acknowledgeAlert, fetchSensorAlerts, linkAlert, type SensorAlert, type 
 import { unitKeyOf } from '../units';
 import { useSensorUnits } from '../useSensorUnits';
 
-const FIELD = 'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary';
+const FIELD = 'oe-input oe-input-sm';
 
 function AlertRow({ alert, device }: { alert: SensorAlert; device?: SensorDevice }) {
   const { t } = useTranslation();

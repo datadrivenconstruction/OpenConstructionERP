@@ -280,32 +280,32 @@ function SummaryView({ summary }: { summary: ValueSummary }) {
         })}
       >
         <Card className="overflow-hidden p-0">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2">{t('value.col_currency', { defaultValue: 'Currency' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_exposure', { defaultValue: 'Exposure managed' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_chargeable', { defaultValue: 'Chargeable' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_recovered', { defaultValue: 'Recovered' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_rate', { defaultValue: 'Rate' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_days', { defaultValue: 'Schedule (d)' })}</th>
+                <th>{t('value.col_currency', { defaultValue: 'Currency' })}</th>
+                <th className="text-right">{t('value.col_exposure', { defaultValue: 'Exposure managed' })}</th>
+                <th className="text-right">{t('value.col_chargeable', { defaultValue: 'Chargeable' })}</th>
+                <th className="text-right">{t('value.col_recovered', { defaultValue: 'Recovered' })}</th>
+                <th className="text-right">{t('value.col_rate', { defaultValue: 'Rate' })}</th>
+                <th className="text-right">{t('value.col_days', { defaultValue: 'Schedule (d)' })}</th>
               </tr>
             </thead>
             <tbody>
               {summary.by_currency.map((row) => (
-                <tr key={row.currency} className="border-t border-border-light">
-                  <td className="px-3 py-2 font-medium text-content-primary">{row.currency || '-'}</td>
-                  <td className="px-3 py-2 text-right">
+                <tr key={row.currency}>
+                  <td>{row.currency || '-'}</td>
+                  <td className="text-right">
                     <MoneyDisplay amount={row.overrun_exposure_managed} currency={row.currency} showCode />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={row.chargeable_total} currency={row.currency} showCode />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={row.recovered_total} currency={row.currency} showCode />
                   </td>
-                  <td className="px-3 py-2 text-right">{ratePct(row.recovery_rate)}</td>
-                  <td className="px-3 py-2 text-right">{row.schedule_days_managed}</td>
+                  <td className="text-right">{ratePct(row.recovery_rate)}</td>
+                  <td className="text-right">{row.schedule_days_managed}</td>
                 </tr>
               ))}
             </tbody>
@@ -368,14 +368,14 @@ function AdoptionView() {
         })}
       >
         <Card className="overflow-hidden p-0">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2">{t('value.col_metric', { defaultValue: 'Outcome metric' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_adopters', { defaultValue: 'Adopters' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_others', { defaultValue: 'Others' })}</th>
-                <th className="px-3 py-2 text-center">{t('value.col_favours', { defaultValue: 'Favours' })}</th>
-                <th className="px-3 py-2 text-right">{t('value.col_confidence', { defaultValue: 'Confidence' })}</th>
+                <th>{t('value.col_metric', { defaultValue: 'Outcome metric' })}</th>
+                <th className="text-right">{t('value.col_adopters', { defaultValue: 'Adopters' })}</th>
+                <th className="text-right">{t('value.col_others', { defaultValue: 'Others' })}</th>
+                <th className="text-center">{t('value.col_favours', { defaultValue: 'Favours' })}</th>
+                <th className="text-right">{t('value.col_confidence', { defaultValue: 'Confidence' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -384,13 +384,13 @@ function AdoptionView() {
                 const fmt = (v: number | null) =>
                   v == null ? '-' : isRate ? floatPct(v) : `${fmtFixed(v, 1)}d`;
                 return (
-                  <tr key={c.metric} className="border-t border-border-light">
-                    <td className="px-3 py-2 font-medium text-content-primary">
+                  <tr key={c.metric}>
+                    <td>
                       {METRIC_LABEL[c.metric] ?? humanize(c.metric)}
                     </td>
-                    <td className="px-3 py-2 text-right">{fmt(c.high_mean)}</td>
-                    <td className="px-3 py-2 text-right">{fmt(c.low_mean)}</td>
-                    <td className="px-3 py-2 text-center">
+                    <td className="text-right">{fmt(c.high_mean)}</td>
+                    <td className="text-right">{fmt(c.low_mean)}</td>
+                    <td className="text-center">
                       {c.favours_high == null ? (
                         <span className="text-content-tertiary">-</span>
                       ) : c.favours_high ? (
@@ -403,7 +403,7 @@ function AdoptionView() {
                         </Badge>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <ConfidenceTag level={c.confidence} />
                     </td>
                   </tr>
@@ -447,7 +447,7 @@ function RegionalBenchmarksView() {
           <select
             value={metric}
             onChange={(e) => setMetric(e.target.value as (typeof REGIONAL_METRICS)[number])}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+            className="oe-select"
           >
             {REGIONAL_METRICS.map((m) => (
               <option key={m} value={m}>
@@ -464,7 +464,7 @@ function RegionalBenchmarksView() {
             value={region}
             onChange={(e) => setRegion(e.target.value)}
             placeholder={t('value.benchmark_region_all', { defaultValue: 'All regions' })}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+            className="oe-input"
           />
         </label>
       </div>
@@ -573,7 +573,7 @@ function ChecklistView({ projectId }: { projectId: string }) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as (typeof CHECKLIST_ROLES)[number])}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+            className="oe-select"
           >
             {CHECKLIST_ROLES.map((r) => (
               <option key={r} value={r}>

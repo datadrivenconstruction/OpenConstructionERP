@@ -47,7 +47,7 @@ interface Props {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 export function RecurringSchedulesTab({ contracts, projectId }: Props) {
   const { t } = useTranslation();
@@ -161,25 +161,25 @@ export function RecurringSchedulesTab({ contracts, projectId }: Props) {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('service.recurring.col_name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('service.recurring.col_rrule', { defaultValue: 'RRULE' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('service.recurring.col_next', { defaultValue: 'Next run' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('service.recurring.col_last', { defaultValue: 'Last run' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('service.recurring.col_status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-4 py-2.5 text-right">
+                  <th className="text-right">
                     {t('common.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -415,7 +415,7 @@ function CreateRecurringModal({
           <select
             value={contractId}
             onChange={(e) => setContractId(e.target.value)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">—</option>
             {contracts.map((c) => (
@@ -448,7 +448,7 @@ function CreateRecurringModal({
             onChange={(e) =>
               setPriority(e.target.value as 'low' | 'med' | 'high' | 'critical')
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="low">low</option>
             <option value="med">med</option>

@@ -410,7 +410,7 @@ export function ScheduleSpreadsheetImportDialog({
           <div>
             <label
               htmlFor="tabular-import-file"
-              className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-secondary"
+              className="oe-label"
             >
               {t('schedule.tabular_import.file_label', { defaultValue: 'Spreadsheet (.xlsx, .xls or .csv)' })}
             </label>
@@ -425,7 +425,7 @@ export function ScheduleSpreadsheetImportDialog({
             />
             {file && (
               <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-content-secondary">
-                <FileSpreadsheet size={13} className="text-oe-blue" />
+                <FileSpreadsheet size={14} className="text-oe-blue" />
                 {file.name}
               </span>
             )}
@@ -433,7 +433,7 @@ export function ScheduleSpreadsheetImportDialog({
           <div>
             <label
               htmlFor="tabular-template-lang"
-              className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-secondary"
+              className="oe-label"
             >
               {t('schedule.tabular_import.template_label', { defaultValue: 'Start from a template' })}
             </label>

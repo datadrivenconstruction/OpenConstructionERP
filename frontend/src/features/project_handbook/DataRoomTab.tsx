@@ -63,9 +63,9 @@ function FolderRow({ node, depth, open, toggle, tf }: { node: Node; depth: numbe
           <span className="w-3.5" aria-hidden />
         )}
         {expanded || f.documents > 0 ? (
-          <FolderOpen size={15} className="shrink-0 text-oe-blue" aria-hidden />
+          <FolderOpen size={16} className="shrink-0 text-oe-blue" aria-hidden />
         ) : (
-          <Folder size={15} className="shrink-0 text-content-tertiary" aria-hidden />
+          <Folder size={16} className="shrink-0 text-content-tertiary" aria-hidden />
         )}
         <span className={depth === 0 ? 'font-medium text-content-primary' : 'text-content-primary'}>{folderName(tf, f)}</span>
         {f.phase_code ? (

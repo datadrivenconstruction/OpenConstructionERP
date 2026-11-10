@@ -58,9 +58,9 @@ import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 const MANAGER_PLUS = new Set(['admin', 'superuser', 'owner', 'manager']);
 const BULK_MAX_ITEMS = 500;
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const labelCls =
-  'block text-xs font-medium text-content-secondary mb-1';
+  'oe-label';
 
 /* ───────────── Shared types ────────────────────────────────────────── */
 
@@ -329,7 +329,7 @@ function PlotStatusChangeSection() {
           <select
             value={targetStatus}
             onChange={(e) => setTargetStatus(e.target.value as typeof targetStatus)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="planned">planned</option>
             <option value="under_construction">under_construction</option>
@@ -520,7 +520,7 @@ function DocumentsRegenerateSection() {
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value as typeof docType)}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="reservation_receipt">{t('property_dev.bulk.doc_reservation_receipt', { defaultValue: 'Reservation receipt' })}</option>
             <option value="sales_contract">{t('property_dev.bulk.doc_sales_contract', { defaultValue: 'Sales contract (SPA)' })}</option>
@@ -778,7 +778,7 @@ function SectionShell({
         <summary className="cursor-pointer list-none border-b border-border-light bg-surface-secondary px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-oe-blue">{icon}</span>
-            <h2 className="flex-1 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title flex-1">
               {title}
             </h2>
             <span className="text-xs text-content-tertiary group-open:hidden">
@@ -823,7 +823,7 @@ function PlotIdsInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={4}
-        className={`${inputCls} h-auto font-mono text-xs`}
+        className="oe-textarea font-mono"
         placeholder="e.g.&#10;00000000-0000-0000-0000-000000000001&#10;00000000-0000-0000-0000-000000000002"
       />
       {plotIdsCount > BULK_MAX_ITEMS && (

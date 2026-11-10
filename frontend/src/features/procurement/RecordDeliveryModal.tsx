@@ -100,7 +100,7 @@ export function validateDeliveryLine(
 }
 
 const fieldCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 export function RecordDeliveryModal({
   open,
@@ -316,14 +316,14 @@ export function RecordDeliveryModal({
         {/* ── PO + delivery header ─────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-1">
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('procurement.po_number', { defaultValue: 'PO #' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <select
               value={selectedPoId}
               onChange={(e) => setSelectedPoId(e.target.value)}
-              className={fieldCls}
+              className="oe-select oe-input-lg"
               disabled={posLoading}
             >
               <option value="">
@@ -346,7 +346,7 @@ export function RecordDeliveryModal({
             {receivablePage && <TruncationNotice page={receivablePage} className="mt-1" />}
           </div>
           <div className="sm:col-span-1">
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('procurement.receipt_date', { defaultValue: 'Date' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -358,7 +358,7 @@ export function RecordDeliveryModal({
             />
           </div>
           <div className="sm:col-span-1">
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('procurement.delivery_note', {
                 defaultValue: 'Delivery Note #',
               })}
@@ -390,7 +390,7 @@ export function RecordDeliveryModal({
         {/* ── Line items ───────────────────────────────────────────────── */}
         {selectedPoId && (
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+            <h3 className="oe-overline mb-3">
               {t('procurement.gr_quantities_received', {
                 defaultValue: 'Quantities Received',
               })}
@@ -398,7 +398,7 @@ export function RecordDeliveryModal({
 
             {detailLoading && (
               <div className="flex items-center justify-center py-8 text-content-tertiary">
-                <Loader2 size={18} className="animate-spin mr-2" />
+                <Loader2 size={20} className="animate-spin mr-2" />
                 {t('common.loading', { defaultValue: 'Loading...' })}
               </div>
             )}
@@ -443,11 +443,7 @@ export function RecordDeliveryModal({
                         step="any"
                         value={l.receivedQty}
                         onChange={(e) => updateReceived(l.poItemId, e.target.value)}
-                        className={`h-9 w-full rounded-lg border bg-surface-primary px-2.5 text-sm tabular-nums text-right focus:outline-none focus:ring-2 focus:ring-oe-blue/30 ${
-                          lineErrors[l.poItemId]
-                            ? 'border-semantic-error'
-                            : 'border-border focus:border-oe-blue'
-                        }`}
+                        className="oe-input tabular-nums text-right" aria-invalid={!!(lineErrors[l.poItemId])}
                         aria-label={t('procurement.gr_received_for', {
                           defaultValue: 'Received quantity for {{item}}',
                           item: l.description,
@@ -469,7 +465,7 @@ export function RecordDeliveryModal({
         {/* ── Notes ────────────────────────────────────────────────────── */}
         {selectedPoId && lines.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('procurement.notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -477,7 +473,7 @@ export function RecordDeliveryModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               maxLength={5000}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-textarea resize-none"
               placeholder={t('procurement.gr_notes_placeholder', {
                 defaultValue: 'Optional notes about this delivery...',
               })}

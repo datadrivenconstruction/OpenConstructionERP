@@ -259,7 +259,7 @@ export function PaymentApprovalActions({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           maxLength={255}
-          className="h-7 w-40 rounded-md border border-border-light bg-surface-primary px-2 text-xs"
+          className="oe-input oe-input-sm w-40"
           aria-label={t('subcontractors.pay_app_reject_reason', { defaultValue: 'Reason for rejecting' })}
           placeholder={t('subcontractors.pay_app_reject_reason', { defaultValue: 'Reason for rejecting' })}
           disabled={busy}

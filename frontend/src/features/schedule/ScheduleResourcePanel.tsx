@@ -77,9 +77,9 @@ interface ScheduleResourcePanelProps {
 type TabKey = 'histogram' | 'leveling';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 const BUCKETS: HistogramBucket[] = ['week', 'month'];
 const RATE_TYPES: HistogramRateType[] = ['cost', 'billing', 'overtime'];
@@ -126,8 +126,8 @@ export function ScheduleResourcePanel({
     <div className="space-y-4" data-testid="schedule-resource-panel">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-2">
-        <Users size={18} className="text-content-secondary" />
-        <h3 className="text-base font-semibold text-content-primary">
+        <Users size={20} className="text-content-secondary" />
+        <h3 className="oe-card-title">
           {t('schedule.resources.title', { defaultValue: 'Resource depth' })}
         </h3>
       </div>
@@ -153,7 +153,7 @@ export function ScheduleResourcePanel({
                 active ? 'bg-oe-blue text-white' : 'text-content-secondary hover:bg-surface-secondary'
               }`}
             >
-              <Icon size={13} />
+              <Icon size={14} />
               {tb.label}
             </button>
           );
@@ -342,7 +342,7 @@ function HistogramTab({ projectId }: { projectId: string }) {
                 id="res-histo-bucket"
                 value={bucket}
                 onChange={(e) => setBucket(e.target.value as HistogramBucket)}
-                className={inputCls}
+                className="oe-select"
               >
                 {BUCKETS.map((b) => (
                   <option key={b} value={b}>
@@ -359,7 +359,7 @@ function HistogramTab({ projectId }: { projectId: string }) {
                 id="res-histo-rate"
                 value={rateType}
                 onChange={(e) => setRateType(e.target.value as HistogramRateType)}
-                className={inputCls}
+                className="oe-select"
               >
                 {RATE_TYPES.map((r) => (
                   <option key={r} value={r}>
@@ -819,16 +819,16 @@ function PreviewResult({
             </h4>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" data-testid="resource-peak-table">
-              <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table" data-testid="resource-peak-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('schedule.resources.resource', { defaultValue: 'Resource' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.resources.peak_before_col', { defaultValue: 'Before' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.resources.peak_after_col', { defaultValue: 'After' })}
                   </th>
                 </tr>
@@ -838,9 +838,9 @@ function PreviewResult({
                   const before = preview.peak_before[name] ?? 0;
                   const after = preview.peak_after[name] ?? 0;
                   return (
-                    <tr key={name} className="border-t border-border-light">
-                      <td className="px-3 py-2">{name}</td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                    <tr key={name}>
+                      <td>{name}</td>
+                      <td className="text-right font-mono tabular-nums">
                         {formatUnits(before)}
                       </td>
                       <td
@@ -877,34 +877,34 @@ function PreviewResult({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" data-testid="resource-shifts-table">
-              <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table" data-testid="resource-shifts-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('schedule.resources.activity', { defaultValue: 'Activity' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.resources.base_es', { defaultValue: 'Base start' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.resources.new_es', { defaultValue: 'New start' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.resources.delta_col', { defaultValue: 'Delta' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {preview.shifts.map((s) => (
-                  <tr key={s.activity_id} className="border-t border-border-light">
-                    <td className="px-3 py-2">
+                  <tr key={s.activity_id}>
+                    <td>
                       <span className="truncate" title={s.activity_id}>
                         {nameFor(s.activity_id)}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{s.base_es}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{s.new_es}</td>
-                    <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums text-semantic-warning">
+                    <td className="text-right font-mono tabular-nums">{s.base_es}</td>
+                    <td className="text-right font-mono tabular-nums">{s.new_es}</td>
+                    <td className="text-right font-mono tabular-nums text-semantic-warning">
                       {formatDelta(s.delta)}
                     </td>
                   </tr>

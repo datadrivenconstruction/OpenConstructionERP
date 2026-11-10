@@ -303,7 +303,7 @@ export function GenerationPreviewPanel({
             value={depth == null ? '' : String(depth)}
             disabled={depthBusy}
             onChange={(e) => onDepthChange(e.target.value === '' ? null : Number(e.target.value))}
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-select"
           >
             <option value="">{t('schedule.preview_depth_all', { defaultValue: 'Every position' })}</option>
             {Array.from({ length: (preview.max_depth ?? 1) - 1 }, (_, i) => i + 1).map((level) => (

@@ -47,7 +47,7 @@ export function GeneratedReportsHistory({ projectId }: GeneratedReportsHistoryPr
     >
       <div className="mb-3 flex items-center gap-2">
         <Clock size={16} className="text-content-tertiary" aria-hidden="true" />
-        <h2 id="reports-history-heading" className="text-sm font-semibold text-content-primary">
+        <h2 id="reports-history-heading" className="oe-card-title">
           {t('reports.history_title', { defaultValue: 'Recently generated reports' })}
         </h2>
       </div>

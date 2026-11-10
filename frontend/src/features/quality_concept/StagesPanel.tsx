@@ -266,12 +266,12 @@ export function StagesPanel(props: PanelProps) {
           </Hint>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-            <table className="w-full min-w-[640px] text-sm" data-testid="matrix-table">
+            <table className="oe-table-compact min-w-[640px]" data-testid="matrix-table">
               <thead>
                 <tr className="text-left text-xs text-content-tertiary">
-                  <th className="py-1 pr-3 font-medium">{t('qualityConcept.stages.system', { defaultValue: 'System' })}</th>
+                  <th className="pr-3">{t('qualityConcept.stages.system', { defaultValue: 'System' })}</th>
                   {stages.map((s) => (
-                    <th key={s.id} className="px-1 py-1 font-medium">
+                    <th key={s.id}>
                       {stageName(s)}
                     </th>
                   ))}
@@ -279,14 +279,14 @@ export function StagesPanel(props: PanelProps) {
               </thead>
               <tbody>
                 {systems.map((sys) => (
-                  <tr key={sys.id} className="border-t border-border-light">
-                    <th scope="row" className="py-1.5 pr-3 text-left font-medium text-content-primary">
+                  <tr key={sys.id}>
+                    <th scope="row" className="pr-3">
                       {sys.name}
                     </th>
                     {stages.map((s) => {
                       const p = cell(sys.id, s.code);
                       return (
-                        <td key={s.id} className="px-1 py-1.5">
+                        <td key={s.id}>
                           {p ? (
                             <button
                               type="button"
@@ -569,7 +569,7 @@ function ResultDialog({
         </Field>
       )}
       <Field label={t('qualityConcept.common.note', { defaultValue: 'Note' })}>
-        <textarea rows={3} className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} data-testid="stage-result-note" />
+        <textarea rows={3} className="oe-textarea" value={note} onChange={(e) => setNote(e.target.value)} data-testid="stage-result-note" />
       </Field>
     </FormDialog>
   );
@@ -594,7 +594,7 @@ function NotApplicableDialog({ projectId, progress, onClose }: PanelProps & { pr
       onSubmit={() => write.send(() => markStageNotApplicable(projectId, progress.id, reason.trim()), onClose)}
     >
       <Field required label={t('qualityConcept.common.reason', { defaultValue: 'Reason' })}>
-        <textarea rows={3} className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="stage-na-reason" />
+        <textarea rows={3} className="oe-textarea" value={reason} onChange={(e) => setReason(e.target.value)} data-testid="stage-na-reason" />
       </Field>
     </FormDialog>
   );

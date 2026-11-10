@@ -53,7 +53,7 @@ function formatQty(value: number): string {
 }
 
 const INPUT_CLASS =
-  'rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-input';
 
 export function CreateRfiFromMeasurementDialog({
   measurement,
@@ -188,7 +188,7 @@ export function CreateRfiFromMeasurementDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="takeoff-rfi-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -197,7 +197,7 @@ export function CreateRfiFromMeasurementDialog({
       <div className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl">
         <h2
           id="takeoff-rfi-modal-title"
-          className="text-start text-base font-semibold text-content-primary"
+          className="oe-section-title text-start"
         >
           {t('takeoff_crosslink.rfi_dialog_title', {
             defaultValue: 'Create RFI from measurement',
@@ -233,7 +233,7 @@ export function CreateRfiFromMeasurementDialog({
               value={question}
               rows={4}
               onChange={(e) => setQuestion(e.target.value)}
-              className={`${INPUT_CLASS} resize-none`}
+              className="oe-textarea resize-none"
               data-testid="takeoff-rfi-question"
             />
           </label>
@@ -245,7 +245,7 @@ export function CreateRfiFromMeasurementDialog({
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value as RFIPriority)}
-              className={INPUT_CLASS}
+              className="oe-select"
               data-testid="takeoff-rfi-priority"
             >
               {PRIORITIES.map((p) => (

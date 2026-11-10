@@ -134,7 +134,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
 
       <div className="grid gap-2 md:grid-cols-12">
         <select
-          className={`${inputCls} md:col-span-3`}
+          className="oe-select md:col-span-3"
           value={kind}
           aria-label={t('qualityConcept.evidence.kind', { defaultValue: 'Kind of record' })}
           onChange={(e) => {
@@ -157,7 +157,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
           onChange={(e) => setQ(e.target.value)}
         />
         <select
-          className={`${inputCls} md:col-span-4`}
+          className="oe-select md:col-span-4"
           value={linkId}
           aria-label={t('qualityConcept.evidence.record', { defaultValue: 'Record' })}
           onChange={(e) => setLinkId(e.target.value)}
@@ -178,7 +178,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
         </select>
         {all.length > 0 && (
           <select
-            className={`${inputCls} md:col-span-10`}
+            className="oe-select md:col-span-10"
             value={retestOf}
             aria-label={t('qualityConcept.evidence.retest_pick', { defaultValue: 'Repeats an earlier record' })}
             onChange={(e) => setRetestOf(e.target.value)}

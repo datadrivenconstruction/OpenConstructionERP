@@ -235,8 +235,8 @@ function RevisionChain({ submittal }: { submittal: Submittal }) {
         </p>
       )}
       <div className="overflow-x-auto rounded-lg border border-border-light">
-        <table className="w-full min-w-[480px] text-xs">
-          <thead className="bg-surface-secondary/40 text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table-compact min-w-[480px]">
+          <thead>
             <tr>
               <th className={th}>{t('submittals.col_rev', { defaultValue: 'Rev' })}</th>
               <th className={th}>{t('submittals.status_submitted', { defaultValue: 'Submitted' })}</th>
@@ -246,7 +246,7 @@ function RevisionChain({ submittal }: { submittal: Submittal }) {
               <th className={th}>{t('submittals.label_review_notes', { defaultValue: 'Reviewer comments' })}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light text-content-primary">
+          <tbody>
             {history.map((entry, index) => (
               <tr key={`${entry.revision}-${index}`}>
                 <td className={clsx(td, 'font-mono tabular-nums')}>R{entry.revision}</td>
@@ -331,7 +331,7 @@ function Findings({ submittal }: { submittal: Submittal }) {
         {findings.map((finding, index) => (
           <li
             key={`${finding.rule_id}-${index}`}
-            className={clsx('flex items-start gap-2 rounded-lg border p-2.5 text-xs', FINDING_STYLE[finding.severity])}
+            className={clsx('flex items-start gap-2 rounded-lg border p-3 text-xs', FINDING_STYLE[finding.severity])}
           >
             <FindingIcon severity={finding.severity} />
             <div>

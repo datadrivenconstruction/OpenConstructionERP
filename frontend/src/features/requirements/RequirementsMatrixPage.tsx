@@ -1030,10 +1030,10 @@ export function RequirementsMatrixPage() {
               {/* Set management for the active set */}
               {targetSet && (
                 <div className="ml-auto flex items-center gap-1">
-                  <Button variant="ghost" size="sm" icon={<Pencil size={13} />} onClick={() => setSetEditor({ open: true, set: targetSet })}>
+                  <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => setSetEditor({ open: true, set: targetSet })}>
                     {t('requirements.matrix.rename_set', { defaultValue: 'Rename set' })}
                   </Button>
-                  <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => setSetToDelete(targetSet)}>
+                  <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => setSetToDelete(targetSet)}>
                     {t('requirements.matrix.delete_set', { defaultValue: 'Delete set' })}
                   </Button>
                 </div>
@@ -1097,28 +1097,28 @@ export function RequirementsMatrixPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse">
-              <thead className="bg-surface-secondary/60 text-xs uppercase tracking-wider text-content-secondary">
+            <table className="oe-table min-w-full">
+              <thead>
                 <tr>
-                  <th className="sticky left-0 z-10 min-w-[220px] bg-surface-secondary/60 px-3 py-2 text-left font-medium">
+                  <th className="sticky left-0 z-10 min-w-[220px]">
                     {t('requirements.matrix.col_requirement', { defaultValue: 'Requirement' })}
                   </th>
                   {sets.length > 1 && !setFilter && (
-                    <th className="px-3 py-2 text-left font-medium">{t('requirements.matrix.col_set', { defaultValue: 'Set' })}</th>
+                    <th>{t('requirements.matrix.col_set', { defaultValue: 'Set' })}</th>
                   )}
-                  <th className="px-3 py-2 text-left font-medium">{t('requirements.matrix.col_coverage', { defaultValue: 'Coverage' })}</th>
+                  <th>{t('requirements.matrix.col_coverage', { defaultValue: 'Coverage' })}</th>
                   {cols.map((col) => (
-                    <th key={col} className="min-w-[120px] px-3 py-2 text-left font-medium">
+                    <th key={col} className="min-w-[120px]">
                       {TYPE_LABEL[col] ?? col}
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-right font-medium">{t('requirements.matrix.col_actions', { defaultValue: 'Actions' })}</th>
+                  <th className="text-right">{t('requirements.matrix.col_actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {visibleRows.map((row) => (
-                  <tr key={row.requirement_id} className="group/row border-t border-border-light/60 hover:bg-surface-secondary/30">
-                    <td className="sticky left-0 z-10 max-w-[280px] bg-surface-elevated px-3 py-2 align-top group-hover/row:bg-surface-secondary/30">
+                  <tr key={row.requirement_id} className="group/row">
+                    <td className="sticky left-0 z-10 max-w-[280px] align-top group-hover/row:bg-surface-secondary/30">
                       <div className="truncate font-medium text-content-primary" title={`${row.entity}.${row.attribute}`}>
                         {row.entity}
                       </div>
@@ -1141,24 +1141,24 @@ export function RequirementsMatrixPage() {
                           })}
                           className="mt-1 inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue/10 px-2 py-0.5 text-2xs font-medium text-oe-blue transition hover:bg-oe-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                         >
-                          <Link2 size={11} />
+                          <Link2 size={12} />
                           {t('requirements.matrix.linked_boq', { defaultValue: 'BOQ' })}
                         </button>
                       )}
                     </td>
                     {sets.length > 1 && !setFilter && (
-                      <td className="px-3 py-2 align-middle text-xs text-content-secondary">
+                      <td className="text-content-secondary">
                         {setNameById.get(row.requirement_set_id) ?? '—'}
                       </td>
                     )}
-                    <td className="px-3 py-2 align-middle">
+                    <td>
                       <CoverageChip pct={row.coverage_pct} />
                     </td>
                     {cols.map((col) => {
                       const cell = row.cells[col];
                       const status: DeliverableStatus = (cell?.status as DeliverableStatus) ?? 'missing';
                       return (
-                        <td key={col} className="px-2 py-2 align-middle">
+                        <td key={col}>
                           <button
                             type="button"
                             onClick={() => setCellEditor({ open: true, row, deliverableType: col, cell: cell ?? null })}
@@ -1185,7 +1185,7 @@ export function RequirementsMatrixPage() {
                         </td>
                       );
                     })}
-                    <td className="px-3 py-2 align-middle text-right">
+                    <td className="text-right">
                       <div className="inline-flex items-center gap-1 opacity-60 transition group-hover/row:opacity-100">
                         <button
                           type="button"

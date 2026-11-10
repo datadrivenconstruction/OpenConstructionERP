@@ -86,7 +86,7 @@ function Head({ handbook, findings }: { handbook: Handbook; findings: Finding[] 
     <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm px-4 py-3" data-testid="handbook-head">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-content-primary">{handbook.title}</h2>
+          <h2 className="oe-section-title">{handbook.title}</h2>
           {handbook.edition ? <p className="text-sm text-content-secondary">{handbook.edition}</p> : null}
         </div>
         <Button
@@ -150,7 +150,7 @@ function CreateHandbook({ projectId, onDone }: { projectId: string; onDone: () =
           {t('projectHandbook.title_field', { defaultValue: 'Title of the handbook' })}
         </span>
         <input
-          className="w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-input"
           value={title}
           maxLength={255}
           onChange={(e) => setTitle(e.target.value)}

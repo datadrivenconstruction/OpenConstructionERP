@@ -62,7 +62,7 @@ import {
 import { getIntlLocale } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 /* ── Role + module config ───────────────────────────────────────────────
  *
@@ -285,7 +285,7 @@ function InviteModal({
         <div>
           <label
             htmlFor="invite_full_name"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('users.full_name', { defaultValue: 'Full Name' })}
           </label>
@@ -303,7 +303,7 @@ function InviteModal({
         <div>
           <label
             htmlFor="invite_email"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('users.email', { defaultValue: 'Email' })}
           </label>
@@ -321,7 +321,7 @@ function InviteModal({
         <div>
           <label
             htmlFor="invite_password"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('users.password', { defaultValue: 'Password' })}
           </label>
@@ -345,7 +345,7 @@ function InviteModal({
           )}
         </div>
         <div>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('users.role', { defaultValue: 'Role' })}
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -459,7 +459,7 @@ function ModuleAccessPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -470,7 +470,7 @@ function ModuleAccessPanel({
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <Settings2 size={18} className="text-oe-blue" />
+              <Settings2 size={20} className="text-oe-blue" />
               <h3 className="text-base font-semibold">
                 {t('users.module_access', { defaultValue: 'Module Access' })}
               </h3>
@@ -491,11 +491,11 @@ function ModuleAccessPanel({
         {/* Custom role name + presets */}
         <div className="px-5 py-3 border-b border-border flex items-center gap-3 shrink-0">
           <div className="flex-1">
-            <label className="block text-2xs font-medium text-content-tertiary mb-0.5">
+            <label className="oe-label">
               {t('users.custom_role', { defaultValue: 'Custom Role Name' })}
             </label>
             <input
-              className="h-8 w-full max-w-xs rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+              className="oe-input oe-input-sm max-w-xs"
               value={customRoleName}
               onChange={(e) => {
                 setCustomRoleName(e.target.value);
@@ -701,16 +701,16 @@ function RoleDropdown({
             : 'hover:bg-surface-secondary cursor-pointer',
         )}
       >
-        <Icon size={13} className={cfg.color} />
+        <Icon size={14} className={cfg.color} />
         {t(`users.roles.${cfg.labelKey}`)}
         {!disabled && <ChevronDown size={12} className="text-content-quaternary" />}
       </button>
       {open && pos && createPortal(
         <>
-          <div className="fixed inset-0 z-[60]" onClick={() => setOpen(false)} />
+          <div className="fixed inset-0 z-dropdown" onClick={() => setOpen(false)} />
           <div
             role="listbox"
-            className="fixed z-[61] w-36 bg-surface-primary rounded-lg shadow-lg border border-border py-1 animate-fade-in"
+            className="fixed z-dropdown w-36 bg-surface-primary rounded-lg shadow-lg border border-border py-1 animate-fade-in"
             style={{ top: pos.top, left: pos.left }}
           >
             {ROLES.map((r) => {
@@ -730,7 +730,7 @@ function RoleDropdown({
                     r === currentRole && 'bg-surface-secondary font-medium',
                   )}
                 >
-                  <RIcon size={13} className={rc.color} />
+                  <RIcon size={14} className={rc.color} />
                   {t(`users.roles.${rc.labelKey}`)}
                   {r === currentRole && <Check size={12} className="ml-auto text-oe-blue" />}
                 </button>
@@ -1040,25 +1040,25 @@ export function UserManagementPage() {
       {/* Users Table */}
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border bg-surface-secondary/50">
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+              <tr className="bg-surface-secondary/50">
+                <th>
                   {t('users.name', { defaultValue: 'Name' })}
                 </th>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+                <th>
                   {t('users.email', { defaultValue: 'Email' })}
                 </th>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+                <th>
                   {t('users.role', { defaultValue: 'Role' })}
                 </th>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+                <th>
                   {t('users.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+                <th>
                   {t('users.last_login', { defaultValue: 'Last Login' })}
                 </th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-content-secondary uppercase tracking-wider">
+                <th className="text-right">
                   {t('users.actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
@@ -1066,15 +1066,15 @@ export function UserManagementPage() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/50">
-                    <td colSpan={6} className="px-4 py-3">
+                  <tr key={i}>
+                    <td colSpan={6}>
                       <div className="h-4 w-full bg-surface-secondary rounded animate-pulse" />
                     </td>
                   </tr>
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-content-tertiary">
+                  <td colSpan={6} className="text-center text-content-tertiary">
                     <Users size={32} className="mx-auto mb-2 opacity-30" />
                     <p>{t('users.no_users', { defaultValue: 'No users found' })}</p>
                   </td>
@@ -1085,14 +1085,13 @@ export function UserManagementPage() {
                   return (
                   <tr
                     key={user.id}
-                    className="border-b border-border/50 hover:bg-surface-secondary/30 transition-colors"
                   >
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2.5">
+                    <td>
+                      <div className="flex items-center gap-2">
                         <div
                           className={clsx(
                             'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white',
-                            user.is_active ? 'bg-oe-blue' : 'bg-gray-400',
+                            user.is_active ? 'bg-oe-blue' : 'bg-content-quaternary',
                           )}
                         >
                           {user.full_name?.[0]?.toUpperCase() || '?'}
@@ -1100,13 +1099,13 @@ export function UserManagementPage() {
                         <span className="font-medium">{user.full_name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-content-secondary">
+                    <td className="text-content-secondary">
                       <div className="flex items-center gap-1.5">
                         <Mail size={12} className="text-content-quaternary" />
                         {user.email}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td>
                       <RoleDropdown
                         currentRole={user.role}
                         userId={user.id}
@@ -1117,17 +1116,17 @@ export function UserManagementPage() {
                         })}
                       />
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td>
                       <Badge variant={user.is_active ? 'success' : 'neutral'}>
                         {user.is_active
                           ? t('users.active', { defaultValue: 'Active' })
                           : t('users.inactive', { defaultValue: 'Inactive' })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2.5 text-content-tertiary text-xs">
+                    <td className="text-content-tertiary">
                       {user.last_login_at ? (
                         <div className="flex items-center gap-1">
-                          <Clock size={11} />
+                          <Clock size={12} />
                           {new Date(user.last_login_at).toLocaleDateString(getIntlLocale())}
                         </div>
                       ) : (
@@ -1136,14 +1135,14 @@ export function UserManagementPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-right">
+                    <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => setAccessUser(user)}
                           className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
                           title={t('users.module_access', { defaultValue: 'Module Access' })}
                         >
-                          <Settings2 size={13} />
+                          <Settings2 size={14} />
                           {t('users.access', { defaultValue: 'Access' })}
                         </button>
                         <button
@@ -1165,7 +1164,7 @@ export function UserManagementPage() {
                                 : 'text-semantic-success hover:bg-semantic-success-bg',
                           )}
                         >
-                          {user.is_active ? <Lock size={13} /> : <Unlock size={13} />}
+                          {user.is_active ? <Lock size={14} /> : <Unlock size={14} />}
                           {user.is_active
                             ? t('users.deactivate', { defaultValue: 'Deactivate' })
                             : t('users.activate', { defaultValue: 'Activate' })}
@@ -1187,7 +1186,7 @@ export function UserManagementPage() {
                               : 'text-semantic-error hover:bg-semantic-error-bg',
                           )}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                           {t('users.delete', { defaultValue: 'Delete' })}
                         </button>
                       </div>
@@ -1203,13 +1202,13 @@ export function UserManagementPage() {
 
       {/* Role Legend */}
       <div className="mt-4 flex items-center gap-4 text-xs text-content-tertiary">
-        <Shield size={13} />
+        <Shield size={14} />
         {ROLES.map((r) => {
           const cfg = ROLE_CONFIG[r];
           const Icon = cfg.icon;
           return (
             <span key={r} className="flex items-center gap-1">
-              <Icon size={11} className={cfg.color} />
+              <Icon size={12} className={cfg.color} />
               <strong>
                 {t(`users.roles.${cfg.labelKey}`)}
               </strong>

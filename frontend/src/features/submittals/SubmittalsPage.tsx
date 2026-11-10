@@ -169,9 +169,9 @@ const STATUS_LABELS: Record<SubmittalStatus, string> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
@@ -371,11 +371,7 @@ function SubmittalFormModal({
             placeholder={t('submittals.title_placeholder', {
               defaultValue: 'e.g. Structural Steel Shop Drawings - Level 3',
             })}
-            className={clsx(
-              inputCls,
-              titleError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!titleError}
           />
         </WideModalField>
 
@@ -397,11 +393,7 @@ function SubmittalFormModal({
             placeholder={t('submittals.spec_placeholder', {
               defaultValue: 'e.g. 05 12 00',
             })}
-            className={clsx(
-              inputCls,
-              specError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!specError}
           />
         </WideModalField>
 
@@ -414,7 +406,7 @@ function SubmittalFormModal({
               id={`${idPrefix}-type`}
               value={form.type}
               onChange={(e) => set('type', e.target.value as SubmittalType)}
-              className={inputCls + ' appearance-none pr-9'}
+              className="oe-select oe-input-lg"
             >
               {SUBMITTAL_TYPES.map((tp) => (
                 <option key={tp} value={tp}>
@@ -523,10 +515,10 @@ function ApproveModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-modal="true" aria-label={t('submittals.review_title', { defaultValue: 'Review {{number}}', number: submittal.submittal_number })}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('submittals.review_title', {
               defaultValue: 'Review {{number}}',
               number: submittal.submittal_number,
@@ -537,7 +529,7 @@ function ApproveModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4 space-y-4">
@@ -550,7 +542,7 @@ function ApproveModal({
 
           {/* Decision */}
           <div>
-            <label id="submittal-decision-label" className="block text-sm font-medium text-content-secondary mb-2">
+            <label id="submittal-decision-label" className="oe-label">
               {t('submittals.field_decision', { defaultValue: 'Decision' })}
             </label>
             <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="submittal-decision-label">
@@ -589,7 +581,7 @@ function ApproveModal({
           {/* The mark on the stamp, and the corrected copy an approval as noted may still owe. */}
           <div className="flex flex-wrap items-end gap-4">
             <div>
-              <label htmlFor="submittal-review-code" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="submittal-review-code" className="oe-label">
                 {t('submittals.field_review_code', { defaultValue: 'Review code' })}
               </label>
               <input
@@ -598,7 +590,7 @@ function ApproveModal({
                 onChange={(e) => setCode(e.target.value)}
                 maxLength={20}
                 placeholder={defaultCode}
-                className={inputCls + ' w-24'}
+                className={`${inputCls} w-24`}
               />
             </div>
             {decision === 'approved_as_noted' && (
@@ -626,7 +618,7 @@ function ApproveModal({
 
           {/* Comments */}
           <div>
-            <label htmlFor="submittal-review-comments" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="submittal-review-comments" className="oe-label">
               {t('submittals.field_comments', { defaultValue: 'Comments' })}
             </label>
             <textarea
@@ -870,7 +862,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
                   })}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors max-w-[140px]"
                 >
-                  <FileCheck size={11} className="shrink-0" />
+                  <FileCheck size={12} className="shrink-0" />
                   <span className="truncate font-mono">{id.slice(0, 8)}</span>
                 </button>
               ))}
@@ -1029,7 +1021,7 @@ function SubmittalsHowItWorks() {
   return (
     <CollapsibleSection
       storageKey="submittals.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('submittals.flow_title', { defaultValue: 'How submittals work and connect' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1569,7 +1561,7 @@ export function SubmittalsPage() {
               defaultValue: 'Search submittals...',
             })}
             aria-label={t('submittals.search_placeholder', { defaultValue: 'Search submittals...' })}
-            className={inputCls + ' pl-9'}
+            className={`${inputCls} pl-9`}
           />
         </div>
 
@@ -1586,7 +1578,7 @@ export function SubmittalsPage() {
               }))
             }
             aria-label={t('submittals.filter_all', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-48"
+            className="oe-select oe-input-lg sm:w-48"
           >
             <option value="">
               {t('submittals.filter_all', { defaultValue: 'All Statuses' })}

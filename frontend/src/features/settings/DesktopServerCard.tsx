@@ -143,7 +143,7 @@ export function DesktopServerCard() {
           <div className="flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary/30 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-                <Cloud size={18} />
+                <Cloud size={20} />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-content-primary">
@@ -207,7 +207,7 @@ export function DesktopServerCard() {
                   setError(undefined);
                 }}
               />
-              <Laptop size={18} className="mt-0.5 shrink-0 text-content-tertiary" />
+              <Laptop size={20} className="mt-0.5 shrink-0 text-content-tertiary" />
               <span className="min-w-0">
                 <span className="block text-sm font-semibold text-content-primary">
                   {t('settings.desktop_server_mode_local', {
@@ -234,7 +234,7 @@ export function DesktopServerCard() {
                   setError(undefined);
                 }}
               />
-              <Cloud size={18} className="mt-0.5 shrink-0 text-content-tertiary" />
+              <Cloud size={20} className="mt-0.5 shrink-0 text-content-tertiary" />
               <span className="min-w-0">
                 <span className="block text-sm font-semibold text-content-primary">
                   {t('settings.desktop_server_mode_remote', {

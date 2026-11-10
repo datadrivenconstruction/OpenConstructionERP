@@ -37,7 +37,7 @@ export default function CaseVideos({ caseId }: { caseId: string }) {
           <MonitorPlay size={16} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 id={`case-videos-${caseId}`} className="text-sm font-semibold text-content-primary">
+          <h2 id={`case-videos-${caseId}`} className="oe-card-title">
             {t('videos.for_case', { defaultValue: 'Videos for this case' })}
           </h2>
           <p className="text-2xs text-content-tertiary">

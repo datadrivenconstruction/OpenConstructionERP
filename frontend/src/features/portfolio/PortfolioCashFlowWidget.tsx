@@ -52,7 +52,7 @@ export function PortfolioCashFlowWidget() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <TrendingDown size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('portfolio.cf_title', { defaultValue: 'Portfolio cash flow' })}
           </h3>
         </div>

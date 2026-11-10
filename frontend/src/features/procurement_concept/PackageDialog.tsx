@@ -156,7 +156,7 @@ export function PackageDialog({
         <RefusalBox error={save.error} />
 
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('procurement_concept.ui.package.value_title', { defaultValue: '1. What the package is worth' })}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -181,7 +181,7 @@ export function PackageDialog({
             <Field label={t('procurement_concept.ui.package.split_basis', { defaultValue: 'How the work is split' })} htmlFor="pk-split">
               <select
                 id="pk-split"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.split_basis}
                 onChange={(e) => set('split_basis', e.target.value as SplitBasis)}
               >
@@ -215,7 +215,7 @@ export function PackageDialog({
         </section>
 
         <section data-testid="threshold-section">
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('procurement_concept.ui.package.threshold_title', { defaultValue: '2. Which threshold it meets' })}
           </h3>
           {!view.award ? (
@@ -265,19 +265,19 @@ export function PackageDialog({
               )}
               {check.thresholds.length > 0 && (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm" data-testid="threshold-rows">
-                    <thead className="text-xs text-content-tertiary">
+                  <table className="oe-table-compact text-left" data-testid="threshold-rows">
+                    <thead>
                       <tr>
-                        <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.package.th_threshold', { defaultValue: 'Threshold' })}</th>
-                        <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.package.th_compared', { defaultValue: 'Package value compared' })}</th>
-                        <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.package.th_result', { defaultValue: 'Result' })}</th>
-                        <th className="py-1 font-medium">{t('procurement_concept.ui.package.th_source', { defaultValue: 'Source' })}</th>
+                        <th className="pr-3">{t('procurement_concept.ui.package.th_threshold', { defaultValue: 'Threshold' })}</th>
+                        <th className="pr-3">{t('procurement_concept.ui.package.th_compared', { defaultValue: 'Package value compared' })}</th>
+                        <th className="pr-3">{t('procurement_concept.ui.package.th_result', { defaultValue: 'Result' })}</th>
+                        <th>{t('procurement_concept.ui.package.th_source', { defaultValue: 'Source' })}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {check.thresholds.map((row, i) => (
-                        <tr key={`${row.contract_kind}-${row.amount}-${i}`} className="border-t border-border-light">
-                          <td className="py-1.5 pr-3">
+                        <tr key={`${row.contract_kind}-${row.amount}-${i}`}>
+                          <td className="pr-3">
                             <Money value={row.amount} currency={row.currency} />{' '}
                             <span className="text-xs text-content-tertiary">
                               {row.vat_basis === 'net'
@@ -285,15 +285,15 @@ export function PackageDialog({
                                 : t('procurement_concept.ui.package.vat_gross', { defaultValue: 'with VAT' })}
                             </span>
                           </td>
-                          <td className="py-1.5 pr-3">
+                          <td className="pr-3">
                             <Money value={row.compared_value} currency={row.currency} />
                           </td>
-                          <td className="py-1.5 pr-3">
+                          <td className="pr-3">
                             {row.position
                               ? vocab(labels.t, THRESHOLD_STATUS, row.position)
                               : vocab(labels.t, THRESHOLD_STATUS, 'unresolved')}
                           </td>
-                          <td className="py-1.5">
+                          <td>
                             {row.source_url ? (
                               <a href={row.source_url} target="_blank" rel="noreferrer noopener" className="text-oe-blue underline">
                                 {row.review_status === 'verified'
@@ -320,7 +320,7 @@ export function PackageDialog({
         {view.award?.procedure_code && <RuleSnapshotPanel projectId={projectId} packageId={cp.id} />}
 
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('procurement_concept.ui.package.procedure_title', { defaultValue: '3. How it is awarded' })}
           </h3>
           <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={t('procurement_concept.ui.package.procedure', { defaultValue: 'Procedure' })}>
@@ -330,7 +330,7 @@ export function PackageDialog({
                 data-testid="procedure-option"
                 data-allowed={o.allowed ? 'yes' : 'no'}
                 className={clsx(
-                  'flex cursor-pointer items-start gap-2 rounded-lg border p-2.5 text-sm',
+                  'flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-sm',
                   draft.procedure_code === o.code ? 'border-oe-blue bg-oe-blue-subtle' : 'border-border-light',
                   !o.allowed && 'opacity-80',
                 )}
@@ -356,7 +356,7 @@ export function PackageDialog({
             <Field label={t('procurement_concept.ui.package.tender_basis', { defaultValue: 'What bidders price' })} htmlFor="pk-basis">
               <select
                 id="pk-basis"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.tender_basis}
                 onChange={(e) => set('tender_basis', e.target.value as TenderBasis | '')}
               >
@@ -374,7 +374,7 @@ export function PackageDialog({
             >
               <select
                 id="pk-framework"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.framework_agreement_id}
                 onChange={(e) => set('framework_agreement_id', e.target.value)}
               >
@@ -392,7 +392,7 @@ export function PackageDialog({
             >
               <select
                 id="pk-profile"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.prequal_profile_id}
                 onChange={(e) => set('prequal_profile_id', e.target.value)}
               >
@@ -410,7 +410,7 @@ export function PackageDialog({
             >
               <select
                 id="pk-evaluation"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.evaluation_method}
                 onChange={(e) => set('evaluation_method', e.target.value as EvaluationMethod)}
               >
@@ -513,7 +513,7 @@ export function PackageDialog({
                     })
             }
           >
-            <select id="pk-cost-ref" className={FIELD_CLASS} aria-busy={sectionsQ.isLoading} value={draft.cost_ref_id} onChange={(e) => set('cost_ref_id', e.target.value)}>
+            <select id="pk-cost-ref" className="oe-select" aria-busy={sectionsQ.isLoading} value={draft.cost_ref_id} onChange={(e) => set('cost_ref_id', e.target.value)}>
               <option value="">{t('procurement_concept.ui.package.cost_ref_unset', { defaultValue: 'No section' })}</option>
               {draft.cost_ref_id && !sections.some((x) => x.id === draft.cost_ref_id) && (
                 <option value={draft.cost_ref_id}>
@@ -534,7 +534,7 @@ export function PackageDialog({
         </section>
 
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('procurement_concept.ui.package.timing_title', { defaultValue: '4. When the contract is needed' })}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -564,7 +564,7 @@ export function PackageDialog({
               >
                 <select
                   id="pk-need-activity"
-                  className={FIELD_CLASS}
+                  className="oe-select"
                   value={draft.need_activity_id}
                   onChange={(e) => set('need_activity_id', e.target.value)}
                 >
@@ -629,7 +629,7 @@ export function PackageDialog({
               <textarea
                 id="pk-advance-reason"
                 rows={2}
-                className={FIELD_CLASS}
+                className="oe-textarea"
                 value={draft.advance_reason}
                 onChange={(e) => set('advance_reason', e.target.value)}
               />
@@ -652,7 +652,7 @@ export function PackageDialog({
             >
               <select
                 id="pk-advance-release"
-                className={FIELD_CLASS}
+                className="oe-select"
                 value={draft.advance_release}
                 onChange={(e) => set('advance_release', e.target.value)}
               >
@@ -684,7 +684,7 @@ export function PackageDialog({
             </p>
           )}
           <Field className="mt-3" label={t('procurement_concept.ui.package.notes', { defaultValue: 'Notes' })} htmlFor="pk-notes">
-            <textarea id="pk-notes" rows={2} className={FIELD_CLASS} value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
+            <textarea id="pk-notes" rows={2} className="oe-textarea" value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
           </Field>
         </section>
       </div>

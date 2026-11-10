@@ -109,7 +109,7 @@ export default function MenuIconPicker({ route, label, defaultIcon, onClose }: M
   const title = t('settings.menu_icons_pick_title', { defaultValue: 'Icon for {{label}}', label });
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden />
       <div
         ref={dialogRef}
@@ -126,7 +126,7 @@ export default function MenuIconPicker({ route, label, defaultIcon, onClose }: M
             <PreviewIcon size={20} strokeWidth={1.75} />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-sm font-semibold text-content-primary">{title}</h2>
+            <h2 className="oe-card-title truncate">{title}</h2>
             <p className="text-xs text-content-tertiary">
               {t('settings.menu_icons_pick_hint', {
                 defaultValue: 'Shown in the menu, the top bar and the command palette.',
@@ -159,7 +159,7 @@ export default function MenuIconPicker({ route, label, defaultIcon, onClose }: M
               placeholder={t('settings.menu_icons_search_placeholder', {
                 defaultValue: 'Search in English: truck, invoice, safety…',
               })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+              className="oe-input ps-8"
             />
           </label>
         </div>
@@ -197,7 +197,7 @@ export default function MenuIconPicker({ route, label, defaultIcon, onClose }: M
                           : 'border-transparent text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
                       )}
                     >
-                      <Icon size={18} strokeWidth={1.75} aria-hidden />
+                      <Icon size={20} strokeWidth={1.75} aria-hidden />
                     </button>
                   );
                 })}

@@ -215,7 +215,7 @@ function OverrideRow({
   const Default = item.icon;
   return (
     <li className="flex items-center gap-2 rounded-lg border border-border-light px-2.5 py-1.5">
-      <Default size={15} strokeWidth={1.75} aria-hidden className="shrink-0 text-content-quaternary" />
+      <Default size={16} strokeWidth={1.75} aria-hidden className="shrink-0 text-content-quaternary" />
       <span aria-hidden className="text-content-quaternary">
         →
       </span>
@@ -231,7 +231,7 @@ function OverrideRow({
         title={t('settings.menu_icons_reset_one', { defaultValue: 'Reset to default' })}
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
       >
-        <RotateCcw size={13} aria-hidden />
+        <RotateCcw size={14} aria-hidden />
       </button>
     </li>
   );
@@ -413,7 +413,7 @@ export function MenuAppearanceCard() {
             )}
           </div>
           <label className="mt-3 flex flex-wrap items-center gap-2">
-            <Palette size={15} aria-hidden className="text-content-tertiary" />
+            <Palette size={16} aria-hidden className="text-content-tertiary" />
             <span className="text-sm text-content-secondary">
               {t('settings.menu_icons_pick_item', { defaultValue: 'Change the icon of' })}
             </span>
@@ -423,7 +423,7 @@ export function MenuAppearanceCard() {
                 const item = itemByRoute.get(e.target.value);
                 if (item) setPicking(item);
               }}
-              className="h-9 min-w-0 max-w-full flex-1 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/20 sm:max-w-xs"
+              className="oe-select min-w-0 max-w-full flex-1 sm:max-w-xs"
             >
               <option value="">{t('settings.menu_icons_choose_item', { defaultValue: 'Choose a menu item…' })}</option>
               {allItems.map(({ group, items }) => (

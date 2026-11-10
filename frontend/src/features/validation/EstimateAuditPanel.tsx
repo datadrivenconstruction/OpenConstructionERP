@@ -126,7 +126,7 @@ export function EstimateAuditPanel({
               <ClipboardCheck size={20} />
             </span>
             <div>
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('validation.audit_title', { defaultValue: 'One-click estimate audit' })}
               </h3>
               <p className="mt-0.5 text-xs text-content-secondary">
@@ -200,7 +200,7 @@ export function EstimateAuditPanel({
 
             {report.findings.length === 0 ? (
               <div className="flex items-center gap-3 rounded-xl bg-semantic-success-bg px-4 py-3">
-                <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
+                <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
                 <p className="text-sm font-medium text-semantic-success">
                   {t('validation.audit_all_clear', {
                     defaultValue: 'No issues found - this estimate passed every audit check.',
@@ -262,11 +262,11 @@ function AuditFindingRow({
 
   const icon =
     finding.severity === 'error' ? (
-      <XCircle size={15} className="shrink-0 text-semantic-error" />
+      <XCircle size={16} className="shrink-0 text-semantic-error" />
     ) : finding.severity === 'info' ? (
-      <Info size={15} className="shrink-0 text-blue-500" />
+      <Info size={16} className="shrink-0 text-blue-500" />
     ) : (
-      <AlertTriangle size={15} className="shrink-0 text-semantic-warning" />
+      <AlertTriangle size={16} className="shrink-0 text-semantic-warning" />
     );
 
   return (
@@ -288,14 +288,14 @@ function AuditFindingRow({
           className="inline-flex shrink-0 items-center gap-1 text-xs text-oe-blue hover:underline"
         >
           {t('validation.audit_go_to_line', { defaultValue: 'Go to line' })}
-          <ExternalLink size={11} />
+          <ExternalLink size={12} />
         </button>
       )}
       {finding.fix ? (
         <Button
           variant="secondary"
           size="sm"
-          icon={<Wand2 size={13} />}
+          icon={<Wand2 size={14} />}
           loading={applying}
           disabled={busy}
           onClick={() => onApplyFix(finding)}

@@ -29,7 +29,7 @@ export function MenuBottomNav({ onMore }: { onMore: () => void }) {
       <nav
         data-testid="menu-bottom-nav"
         aria-label={t('menu_layout.bottom_nav', { defaultValue: 'Quick navigation' })}
-        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border-light bg-surface-primary pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-header flex border-t border-border-light bg-surface-primary pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         {routes.map((route) => {
           const item = BY_ROUTE[route]!;
@@ -47,7 +47,7 @@ export function MenuBottomNav({ onMore }: { onMore: () => void }) {
                 )
               }
             >
-              <Icon size={18} strokeWidth={1.75} aria-hidden />
+              <Icon size={20} strokeWidth={1.75} aria-hidden />
               <span className="w-full truncate text-center">{label}</span>
             </NavLink>
           );
@@ -57,7 +57,7 @@ export function MenuBottomNav({ onMore }: { onMore: () => void }) {
           onClick={onMore}
           className="flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-2xs text-content-tertiary"
         >
-          <Menu size={18} strokeWidth={1.75} aria-hidden />
+          <Menu size={20} strokeWidth={1.75} aria-hidden />
           <span>{t('menu_layout.more', { defaultValue: 'More' })}</span>
         </button>
       </nav>

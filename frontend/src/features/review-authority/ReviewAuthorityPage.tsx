@@ -181,9 +181,9 @@ const remarkStatusVariant = (s: string): 'blue' | 'warning' | 'success' | 'error
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Create Cycle Modal ────────────────────────────────────────────────── */
 
@@ -281,10 +281,7 @@ function CreateCycleModal({
             placeholder={t('review_authority.authority_name_placeholder', {
               defaultValue: 'e.g. Regional Building Control Office',
             })}
-            className={clsx(
-              inputCls,
-              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!nameError}
           />
         </WideModalField>
 
@@ -296,7 +293,7 @@ function CreateCycleModal({
             id="ra-authority-kind"
             value={form.authority_kind}
             onChange={(e) => set('authority_kind', e.target.value as AuthorityKind)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {AUTHORITY_KINDS.map((k) => (
               <option key={k} value={k}>
@@ -474,10 +471,7 @@ function EditCycleModal({
               set('authority_name', e.target.value);
               setTouched(true);
             }}
-            className={clsx(
-              inputCls,
-              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!nameError}
           />
         </WideModalField>
 
@@ -489,7 +483,7 @@ function EditCycleModal({
             id="ra-edit-authority-kind"
             value={form.authority_kind}
             onChange={(e) => set('authority_kind', e.target.value as AuthorityKind)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {AUTHORITY_KINDS.map((k) => (
               <option key={k} value={k}>
@@ -668,10 +662,7 @@ function AddRemarkModal({
               setTouched(true);
             }}
             rows={3}
-            className={clsx(
-              textareaCls,
-              textError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={textareaCls} aria-invalid={!!textError}
           />
         </WideModalField>
 
@@ -695,7 +686,7 @@ function AddRemarkModal({
             id="ra-remark-severity"
             value={form.severity}
             onChange={(e) => set('severity', e.target.value as RemarkSeverity)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {REMARK_SEVERITIES.map((s) => (
               <option key={s} value={s}>
@@ -769,20 +760,20 @@ function RemarkRow({
               })}
             >
             <Badge variant="warning" size="sm">
-              <Gavel size={11} className="mr-1" />
+              <Gavel size={12} className="mr-1" />
               {t('review_authority.no_norm_ref', { defaultValue: 'No norm cited' })}
             </Badge>
             </span>
           )}
           {remark.is_stale && (
             <Badge variant="error" size="sm">
-              <FileWarning size={11} className="mr-1" />
+              <FileWarning size={12} className="mr-1" />
               {t('review_authority.stale', { defaultValue: 'Stale' })}
             </Badge>
           )}
           {remark.repeat_of_id && (
             <Badge variant="neutral" size="sm">
-              <Radar size={11} className="mr-1" />
+              <Radar size={12} className="mr-1" />
               {t('review_authority.repeat', { defaultValue: 'Repeat' })}
             </Badge>
           )}
@@ -795,13 +786,13 @@ function RemarkRow({
       <p className="text-sm text-content-primary whitespace-pre-wrap">{remark.text}</p>
       {remark.norm_reference && (
         <p className="text-xs text-content-tertiary">
-          <ScrollText size={11} className="inline mr-1 -mt-0.5" />
+          <ScrollText size={12} className="inline mr-1 -mt-0.5" />
           {remark.norm_reference}
         </p>
       )}
 
       {remark.response_text && (
-        <div className="rounded-lg bg-surface-secondary p-2.5 mt-1">
+        <div className="rounded-lg bg-surface-secondary p-2 mt-1">
           <p className="text-2xs uppercase tracking-wide text-content-tertiary mb-1 font-medium">
             {t('review_authority.response', { defaultValue: 'Response' })}
           </p>
@@ -832,7 +823,7 @@ function RemarkRow({
                     setResponseText('');
                     setShowRespond(false);
                   }}
-                  icon={<MessageSquareReply size={13} />}
+                  icon={<MessageSquareReply size={14} />}
                 >
                   {t('review_authority.submit_response', { defaultValue: 'Submit response' })}
                 </Button>
@@ -845,7 +836,7 @@ function RemarkRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<MessageSquareReply size={13} />}
+              icon={<MessageSquareReply size={14} />}
               onClick={() => setShowRespond(true)}
             >
               {t('review_authority.respond', { defaultValue: 'Respond' })}
@@ -865,11 +856,11 @@ function RemarkRow({
               onClick={() => onDecide(remark.id, d)}
               icon={
                 d === 'accepted' ? (
-                  <CheckCircle2 size={13} />
+                  <CheckCircle2 size={14} />
                 ) : d === 'contested' ? (
-                  <Scale size={13} />
+                  <Scale size={14} />
                 ) : (
-                  <Undo2 size={13} />
+                  <Undo2 size={14} />
                 )
               }
             >
@@ -1101,7 +1092,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <Landmark size={16} className="text-oe-blue shrink-0" />
-              <h2 className="text-sm font-semibold text-content-primary truncate">
+              <h2 className="oe-card-title truncate">
                 {cycle.authority_name}
               </h2>
               <Badge variant={cycleStatusVariant(cycle.status)} size="sm">
@@ -1111,7 +1102,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
               </Badge>
               {cycle.overdue && (
                 <Badge variant="error" size="sm">
-                  <AlertTriangle size={11} className="mr-1" />
+                  <AlertTriangle size={12} className="mr-1" />
                   {t('review_authority.overdue', { defaultValue: 'Overdue' })}
                 </Badge>
               )}
@@ -1128,7 +1119,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={13} />}
+              icon={<Download size={14} />}
               disabled={isExportingDossier}
               onClick={handleExportDossier}
             >
@@ -1139,7 +1130,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={() => setShowEdit(true)}
             >
               {t('common.edit', { defaultValue: 'Edit' })}
@@ -1148,7 +1139,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
               variant="secondary"
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={handleDelete}
             >
               {t('common.delete', { defaultValue: 'Delete' })}
@@ -1167,7 +1158,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
           </span>
           {cycle.days_remaining !== null && (
             <span className={cycle.overdue ? 'text-semantic-error font-medium' : ''}>
-              <Clock size={11} className="inline mr-1 -mt-0.5" />
+              <Clock size={12} className="inline mr-1 -mt-0.5" />
               {cycle.days_remaining >= 0
                 ? t('review_authority.days_remaining', {
                     defaultValue: '{{count}} days remaining',
@@ -1203,7 +1194,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
               size="sm"
               disabled={submitMut.isPending}
               onClick={() => submitMut.mutate()}
-              icon={<Send size={13} />}
+              icon={<Send size={14} />}
             >
               {t('review_authority.submit_cycle', { defaultValue: 'Submit' })}
             </Button>
@@ -1219,11 +1210,11 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
                 onClick={() => transitionMut.mutate(s)}
                 icon={
                   s === 'approved' ? (
-                    <CheckCircle2 size={13} />
+                    <CheckCircle2 size={14} />
                   ) : s === 'rejected' ? (
-                    <XCircle size={13} />
+                    <XCircle size={14} />
                   ) : (
-                    <ChevronRight size={13} />
+                    <ChevronRight size={14} />
                   )
                 }
               >
@@ -1247,7 +1238,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
               size="sm"
               disabled={transitionMut.isPending}
               onClick={() => transitionMut.mutate('withdrawn')}
-              icon={<Undo2 size={13} />}
+              icon={<Undo2 size={14} />}
               className="text-content-tertiary"
             >
               {t('review_authority.withdraw_cycle', { defaultValue: 'Withdraw' })}
@@ -1357,14 +1348,14 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
       {/* Remarks */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('review_authority.remarks_title', { defaultValue: 'Remarks' })}{' '}
             <span className="text-content-tertiary font-normal">({remarks.length})</span>
           </h3>
           <Button
             variant="secondary"
             size="sm"
-            icon={<MessageSquarePlus size={13} />}
+            icon={<MessageSquarePlus size={14} />}
             onClick={() => setShowAddRemark(true)}
           >
             {t('review_authority.add_remark', { defaultValue: 'Add Remark' })}
@@ -1634,7 +1625,7 @@ export function ReviewAuthorityPage() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as CycleStatus | '')}
                 aria-label={t('review_authority.filter_all_status', { defaultValue: 'All Statuses' })}
-                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+                className="oe-select oe-input-lg sm:w-44"
               >
                 <option value="">
                   {t('review_authority.filter_all_status', { defaultValue: 'All Statuses' })}
@@ -1655,7 +1646,7 @@ export function ReviewAuthorityPage() {
                 value={authorityFilter}
                 onChange={(e) => setAuthorityFilter(e.target.value as AuthorityKind | '')}
                 aria-label={t('review_authority.filter_all_authority', { defaultValue: 'All Authority Kinds' })}
-                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-52"
+                className="oe-select oe-input-lg sm:w-52"
               >
                 <option value="">
                   {t('review_authority.filter_all_authority', { defaultValue: 'All Authority Kinds' })}

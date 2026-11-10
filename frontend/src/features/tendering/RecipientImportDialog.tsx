@@ -142,28 +142,28 @@ export function RecipientImportDialog({
               })}
             </p>
             <div className="max-h-96 overflow-auto rounded-lg border border-border">
-              <table className="w-full text-sm">
-                <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+              <table className="oe-table">
+                <thead>
                   <tr>
-                    <th className="px-3 py-2">{t('tendering.import_col_row', { defaultValue: 'Row' })}</th>
-                    <th className="px-3 py-2">{t('tendering.company_name', 'Company Name')}</th>
-                    <th className="px-3 py-2">
+                    <th>{t('tendering.import_col_row', { defaultValue: 'Row' })}</th>
+                    <th>{t('tendering.company_name', 'Company Name')}</th>
+                    <th>
                       {t('tendering.import_col_contact', { defaultValue: 'Contact name' })}
                     </th>
-                    <th className="px-3 py-2">{t('tendering.contact_email', 'Contact Email')}</th>
-                    <th className="px-3 py-2">{t('tendering.import_col_trade', { defaultValue: 'Trade' })}</th>
-                    <th className="px-3 py-2">{t('tendering.import_col_status', { defaultValue: 'Status' })}</th>
+                    <th>{t('tendering.contact_email', 'Contact Email')}</th>
+                    <th>{t('tendering.import_col_trade', { defaultValue: 'Trade' })}</th>
+                    <th>{t('tendering.import_col_status', { defaultValue: 'Status' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {preview.rows.map((r) => (
-                    <tr key={r.line} className="border-t border-border" data-testid="recipient-import-row">
-                      <td className="px-3 py-2 text-content-tertiary">{r.line}</td>
-                      <td className="px-3 py-2">{r.company}</td>
-                      <td className="px-3 py-2">{r.contact_name}</td>
-                      <td className="px-3 py-2">{r.email}</td>
-                      <td className="px-3 py-2">{r.trade}</td>
-                      <td className="px-3 py-2">
+                    <tr key={r.line} data-testid="recipient-import-row">
+                      <td className="text-content-tertiary">{r.line}</td>
+                      <td>{r.company}</td>
+                      <td>{r.contact_name}</td>
+                      <td>{r.email}</td>
+                      <td>{r.trade}</td>
+                      <td>
                         {r.valid ? (
                           <Badge variant="success">
                             {t('tendering.import_row_ok', { defaultValue: 'Ready' })}

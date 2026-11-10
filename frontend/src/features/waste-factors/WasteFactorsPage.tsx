@@ -350,7 +350,7 @@ function WasteFactorsContent() {
               rows={5}
               spellCheck={false}
               placeholder={'concrete 12.5\nrebar 340\ntiling 85'}
-              className="rounded-lg border border-border bg-surface-primary px-3 py-2 font-mono text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-textarea font-mono"
             />
           </label>
 
@@ -387,23 +387,23 @@ function ApplyResults({ result }: { result: ApplyResponse }) {
   }
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-            <th className="px-3 py-2 font-medium">{t('waste_factors.col_category', { defaultValue: 'Category' })}</th>
-            <th className="px-3 py-2 text-right font-medium">{t('waste_factors.col_net', { defaultValue: 'Net' })}</th>
-            <th className="px-3 py-2 text-right font-medium">
+          <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+            <th>{t('waste_factors.col_category', { defaultValue: 'Category' })}</th>
+            <th className="text-right">{t('waste_factors.col_net', { defaultValue: 'Net' })}</th>
+            <th className="text-right">
               {t('waste_factors.col_factor', { defaultValue: 'Factor' })}
             </th>
-            <th className="px-3 py-2 text-right font-medium">
+            <th className="text-right">
               {t('waste_factors.col_gross', { defaultValue: 'Gross' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {result.lines.map((r, i) => (
-            <tr key={i} className="border-b border-border-light last:border-0">
-              <td className="px-3 py-2">
+            <tr key={i} className="last:border-0">
+              <td>
                 <span className="font-mono text-content-secondary">{r.category}</span>
                 {!r.matched && (
                   <Badge variant="warning" size="sm" className="ml-2">
@@ -411,14 +411,14 @@ function ApplyResults({ result }: { result: ApplyResponse }) {
                   </Badge>
                 )}
               </td>
-              <td className="px-3 py-2 text-right font-mono text-content-secondary">{trimQty(r.net_qty)}</td>
-              <td className="px-3 py-2 text-right font-mono text-content-tertiary">
+              <td className="text-right font-mono text-content-secondary">{trimQty(r.net_qty)}</td>
+              <td className="text-right font-mono text-content-tertiary">
                 <span className="inline-flex items-center justify-end gap-1">
                   &times;{trimQty(r.factor)}
                   <ArrowRight className="h-3 w-3 text-content-tertiary" aria-hidden />
                 </span>
               </td>
-              <td className="px-3 py-2 text-right font-mono font-semibold text-content-primary">
+              <td className="text-right font-mono">
                 {trimQty(r.gross_qty)}
               </td>
             </tr>

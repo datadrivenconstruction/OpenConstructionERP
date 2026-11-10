@@ -137,9 +137,9 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
                 data-ready={r.ready}
               >
                 {r.ready ? (
-                  <CheckCircle2 size={18} className="text-semantic-success" aria-hidden />
+                  <CheckCircle2 size={20} className="text-semantic-success" aria-hidden />
                 ) : (
-                  <CircleAlert size={18} className="text-semantic-error" aria-hidden />
+                  <CircleAlert size={20} className="text-semantic-error" aria-hidden />
                 )}
                 {noGates
                   ? tx(t, r.ready ? 'readiness.ready_plain' : 'readiness.not_ready_plain')
@@ -149,11 +149,11 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
                 {r.items.map((item) => (
                   <li key={item.code} className="flex items-start gap-2 text-sm" data-testid="plan-ready-item" data-state={item.state}>
                     {item.state === 'met' ? (
-                      <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />
                     ) : item.state === 'unknown' ? (
-                      <CircleAlert size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
+                      <CircleAlert size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
                     ) : (
-                      <XCircle size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
+                      <XCircle size={16} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
                     )}
                     <span className="text-content-primary">
                       {evidence(item.code)}
@@ -211,7 +211,7 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
       <ChecksPanel projectId={projectId} />
 
       <div className="space-y-2">
-        <h3 className="text-base font-semibold text-content-primary">{tx(t, 'readiness.export')}</h3>
+        <h3 className="oe-card-title">{tx(t, 'readiness.export')}</h3>
         <p className="text-sm text-content-secondary">{tx(t, 'readiness.export_lead')}</p>
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {REGISTERS.map((register) => (
@@ -227,7 +227,7 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
                     onClick={() => void download(register, format)}
                     data-testid={`plan-export-${register}-${format}`}
                   >
-                    <Download size={13} className="mr-1" />
+                    <Download size={14} className="mr-1" />
                     {tx(t, `readiness.${format}`)}
                   </Button>
                 ))}
@@ -266,7 +266,7 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
             <p className="mt-1 text-xs text-content-secondary">{tx(t, 'readiness.catalogue_hint')}</p>
             {catalogue.review_status !== 'verified' && (
               <p className="mt-1 flex items-start gap-1.5 text-xs text-semantic-warning" data-testid="plan-catalogue-unconfirmed">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden />
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden />
                 {tx(t, 'readiness.catalogue_unconfirmed')}
               </p>
             )}

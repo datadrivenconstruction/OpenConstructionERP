@@ -46,7 +46,7 @@ export function POSourceRequisitions({ poId }: { poId: string }) {
       className="mt-4 rounded-lg border border-border-light bg-surface-secondary/40 p-3 text-sm"
     >
       <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-        <Link2 size={13} />
+        <Link2 size={14} />
         {t('procurement.trace.po_sources_title', { defaultValue: 'Source requisitions' })}
       </h4>
       <p className="mb-2 text-content-secondary">

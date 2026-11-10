@@ -58,7 +58,7 @@ export interface CreateTaskFromSourceDialogProps {
 }
 
 const INPUT_CLASS =
-  'rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-input';
 
 /** Label shown in the "From" line for each source kind. */
 function sourceKindLabel(
@@ -164,7 +164,7 @@ export function CreateTaskFromSourceDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-task-from-source-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -173,7 +173,7 @@ export function CreateTaskFromSourceDialog({
       <div className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl">
         <h2
           id="create-task-from-source-title"
-          className="text-start text-base font-semibold text-content-primary"
+          className="oe-section-title text-start"
         >
           {t('tasks.from_source_dialog_title', { defaultValue: 'Create task' })}
         </h2>
@@ -207,7 +207,7 @@ export function CreateTaskFromSourceDialog({
               value={description}
               rows={3}
               onChange={(e) => setDescription(e.target.value)}
-              className={`${INPUT_CLASS} resize-none`}
+              className="oe-textarea resize-none"
               data-testid="create-task-from-source-description-input"
             />
           </label>

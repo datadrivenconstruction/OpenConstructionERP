@@ -66,7 +66,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
             <Wallet size={16} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('schedule.evm.title', { defaultValue: 'Earned Value (EVM)' })}
             </h3>
             <p className="mt-1 max-w-xl text-xs text-content-secondary">
@@ -104,7 +104,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
     <Card padding="md" className="mt-4">
       <div className="mb-3 flex items-center gap-2">
         <TrendingUp size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule.evm.title', { defaultValue: 'Earned Value (EVM)' })}
         </h3>
         <span className="text-2xs text-content-tertiary">
@@ -191,7 +191,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
       {/* Forecast block: EAC / ETC / VAC */}
       <div className="mt-3 rounded-xl border border-border-light bg-surface-secondary/40 p-3">
         <div className="mb-2 flex items-center gap-1.5">
-          <Target size={13} className="text-content-secondary" />
+          <Target size={14} className="text-content-secondary" />
           <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
             {t('schedule.evm.forecast', { defaultValue: 'Forecast at completion (CPI method)' })}
           </span>
@@ -221,7 +221,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
             <p className="flex items-center gap-1 text-2xs text-content-tertiary">
               {t('schedule.evm.vac', { defaultValue: 'Variance at Completion (VAC)' })}
               {vac != null && vac < 0 && (
-                <AlertTriangle size={11} className="text-semantic-error" aria-hidden />
+                <AlertTriangle size={12} className="text-semantic-error" aria-hidden />
               )}
             </p>
             <p

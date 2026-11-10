@@ -1038,7 +1038,7 @@ function WidgetSection({
     <section className="mb-5">
       <div className="mb-2 flex items-center gap-2">
         <span className="text-content-tertiary">{icon}</span>
-        <h2 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <h2 className="oe-overline">
           {title}
         </h2>
         <div className="h-px flex-1 bg-border-light" aria-hidden="true" />
@@ -1192,7 +1192,7 @@ function ImportDialog({
   }, [selectedFile, mutation]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
@@ -1205,7 +1205,7 @@ function ImportDialog({
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('import.import_document', { defaultValue: 'Import Document' })}
               </h2>
               <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
@@ -1222,7 +1222,7 @@ function ImportDialog({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -1470,7 +1470,7 @@ class TabErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <AlertTriangle className="text-semantic-warning mb-3" size={32} />
-          <h3 className="text-base font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {this.props.fallbackTitle || i18n.t('common.something_went_wrong', { defaultValue: 'Something went wrong' })}
           </h3>
           <p className="mt-1 text-sm text-content-secondary max-w-md">
@@ -1529,7 +1529,7 @@ function ProjectStatusSelect({
         aria-label={t('projects.status_select_label', {
           defaultValue: 'Change project status',
         })}
-        className="h-7 appearance-none rounded-lg border border-border bg-surface-primary pl-2.5 pr-7 text-xs font-medium text-content-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:opacity-60"
+        className="oe-select oe-input-sm"
       >
         {isCustom && <option value={value}>{statusLabel(value)}</option>}
         {options.map((s) => (
@@ -1539,7 +1539,7 @@ function ProjectStatusSelect({
         ))}
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-content-tertiary">
-        <ChevronDown size={13} />
+        <ChevronDown size={14} />
       </div>
     </div>
   );
@@ -2159,7 +2159,7 @@ export function ProjectDetailPage() {
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full text-sm text-content-secondary bg-surface-secondary rounded-lg p-2 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 resize-none"
+                  className="oe-textarea resize-none"
                   rows={2}
                   placeholder={t('projects.description', 'Description')}
                 />
@@ -2167,13 +2167,13 @@ export function ProjectDetailPage() {
                   <input
                     value={editForm.region}
                     onChange={(e) => setEditForm((f) => ({ ...f, region: e.target.value }))}
-                    className="text-sm bg-surface-secondary rounded-lg px-3 py-1.5 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 w-40"
+                    className="oe-input w-40"
                     placeholder={t('projects.region', 'Region')}
                   />
                   <input
                     value={editForm.currency}
                     onChange={(e) => setEditForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
-                    className="text-sm bg-surface-secondary rounded-lg px-3 py-1.5 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 w-24 uppercase"
+                    className="oe-input w-24 uppercase"
                     placeholder="EUR"
                     maxLength={3}
                   />
@@ -2258,7 +2258,7 @@ export function ProjectDetailPage() {
                     className="flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
                     title={t('project.settings.title', { defaultValue: 'Project Settings' })}
                   >
-                    <ClipboardList size={13} />
+                    <ClipboardList size={14} />
                     {t('project.settings.link', { defaultValue: 'Settings' })}
                   </button>
                 </div>
@@ -2314,7 +2314,7 @@ export function ProjectDetailPage() {
         <details className="group">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary">
             <ChevronDown
-              size={15}
+              size={16}
               className="shrink-0 text-content-tertiary transition-transform group-open:rotate-180"
             />
             {t('projects.status_history.title', { defaultValue: 'Status history' })}
@@ -2538,13 +2538,13 @@ export function ProjectDetailPage() {
       {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1 overflow-x-auto border-b border-border-light">
         {([
-          { key: 'dashboard' as ProjectTab, label: t('projects.dashboard', { defaultValue: 'Dashboard' }), icon: <LayoutDashboard size={15} /> },
-          { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={15} /> },
-          { key: 'schedule' as ProjectTab, label: t('projects.4d_schedule'), icon: <CalendarClock size={15} /> },
-          { key: 'budget' as ProjectTab, label: t('projects.5d_budget'), icon: <Wallet size={15} /> },
-          { key: 'tendering' as ProjectTab, label: t('projects.tendering'), icon: <Gavel size={15} /> },
-          { key: 'photos' as ProjectTab, label: t('projects.photos.tab_label', { defaultValue: 'Photos' }), icon: <ImageIcon size={15} /> },
-          { key: 'compliance' as ProjectTab, label: t('compliance.tab_label', { defaultValue: 'Compliance' }), icon: <ShieldCheck size={15} /> },
+          { key: 'dashboard' as ProjectTab, label: t('projects.dashboard', { defaultValue: 'Dashboard' }), icon: <LayoutDashboard size={16} /> },
+          { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={16} /> },
+          { key: 'schedule' as ProjectTab, label: t('projects.4d_schedule'), icon: <CalendarClock size={16} /> },
+          { key: 'budget' as ProjectTab, label: t('projects.5d_budget'), icon: <Wallet size={16} /> },
+          { key: 'tendering' as ProjectTab, label: t('projects.tendering'), icon: <Gavel size={16} /> },
+          { key: 'photos' as ProjectTab, label: t('projects.photos.tab_label', { defaultValue: 'Photos' }), icon: <ImageIcon size={16} /> },
+          { key: 'compliance' as ProjectTab, label: t('compliance.tab_label', { defaultValue: 'Compliance' }), icon: <ShieldCheck size={16} /> },
         ]).map((tab) => (
           <button
             key={tab.key}
@@ -2748,7 +2748,7 @@ export function ProjectDetailPage() {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <DollarSign size={16} className="text-content-tertiary" />
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <h3 className="oe-card-title">
                     {t('projects.dash_budget_overview', { defaultValue: 'Budget Overview' })}
                   </h3>
                   {dashboardData.budget.warning_level !== 'normal' && (
@@ -2828,7 +2828,7 @@ export function ProjectDetailPage() {
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <CalendarClock size={16} className="text-content-tertiary" />
-                    <h3 className="text-sm font-semibold text-content-primary">
+                    <h3 className="oe-card-title">
                       {t('projects.dash_schedule', { defaultValue: 'Schedule' })}
                     </h3>
                   </div>
@@ -2890,7 +2890,7 @@ export function ProjectDetailPage() {
                 <Card padding="md">
                   <div className="flex items-center gap-2 mb-3">
                     <MessageSquare size={16} className="text-content-tertiary" />
-                    <h3 className="text-sm font-semibold text-content-primary">
+                    <h3 className="oe-card-title">
                       {t('projects.dash_open_items_detail', { defaultValue: 'Open Items' })}
                     </h3>
                   </div>
@@ -2989,7 +2989,7 @@ export function ProjectDetailPage() {
                   <div className="px-5 pt-5 pb-2">
                     <div className="flex items-center gap-2">
                       <Activity size={16} className="text-content-tertiary" />
-                      <h3 className="text-sm font-semibold text-content-primary">
+                      <h3 className="oe-card-title">
                         {t('projects.dash_recent_activity', { defaultValue: 'Recent Activity' })}
                       </h3>
                     </div>
@@ -3061,11 +3061,11 @@ export function ProjectDetailPage() {
                 <Card padding="md" className="h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles size={16} className="text-content-tertiary" />
-                    <h3 className="text-sm font-semibold text-content-primary">
+                    <h3 className="oe-card-title">
                       {t('projects.dash_quick_actions', { defaultValue: 'Quick Actions' })}
                     </h3>
                   </div>
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     <Button
                       variant="secondary"
                       size="md"
@@ -3199,7 +3199,7 @@ export function ProjectDetailPage() {
                         {dashboardData.documents.pending_transmittals > 0 && (
                           <span className="flex flex-col">
                             <strong className="text-lg leading-none text-semantic-warning">{dashboardData.documents.pending_transmittals}</strong>
-                            <span className="mt-0.5 text-2xs text-amber-700/80 uppercase tracking-wide">{t('projects.dash_pending', { defaultValue: 'pending' })}</span>
+                            <span className="mt-0.5 text-2xs text-semantic-warning/80 uppercase tracking-wide">{t('projects.dash_pending', { defaultValue: 'pending' })}</span>
                           </span>
                         )}
                       </div>
@@ -3282,7 +3282,7 @@ export function ProjectDetailPage() {
                         onClick={() => navigate(`/boq/${boq.id}`)}
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-transform group-hover:scale-105"
                       >
-                        <Table2 size={18} strokeWidth={1.75} />
+                        <Table2 size={20} strokeWidth={1.75} />
                       </button>
 
                       {/* Info */}
@@ -3303,7 +3303,7 @@ export function ProjectDetailPage() {
                             <>
                               <span className="text-border">|</span>
                               <span className="flex items-center gap-1">
-                                <Clock size={11} />
+                                <Clock size={12} />
                                 {formatDate(boq.updated_at, i18n.language)}
                               </span>
                             </>
@@ -3404,13 +3404,13 @@ export function ProjectDetailPage() {
                   <SummaryCard
                     label={t('projects.total_budget', { defaultValue: 'Total Budget' })}
                     value={formatCurrency(budgetDashboard.total_budget ?? 0, currency)}
-                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                    icon={<DollarSign size={20} strokeWidth={1.75} />}
                     variant="blue"
                   />
                   <SummaryCard
                     label={t('projects.total_spent', { defaultValue: 'Total Spent' })}
                     value={formatCurrency(budgetDashboard.total_actual ?? budgetDashboard.total_spent ?? 0, currency)}
-                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                    icon={<DollarSign size={20} strokeWidth={1.75} />}
                   />
                   <SummaryCard
                     label={t('projects.remaining', { defaultValue: 'Remaining' })}
@@ -3418,7 +3418,7 @@ export function ProjectDetailPage() {
                       budgetDashboard.remaining ?? (budgetDashboard.total_budget ?? 0) - (budgetDashboard.total_actual ?? 0),
                       currency,
                     )}
-                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                    icon={<DollarSign size={20} strokeWidth={1.75} />}
                     variant={
                       (budgetDashboard.remaining ?? (budgetDashboard.total_budget ?? 0) - (budgetDashboard.total_actual ?? 0)) >= 0
                         ? 'success'
@@ -3428,26 +3428,26 @@ export function ProjectDetailPage() {
                 </div>
                 {(budgetDashboard.items?.length ?? 0) > 0 && (
                   <div className="rounded-lg border border-border-light overflow-hidden">
-                    <table className="w-full text-sm">
+                    <table className="oe-table">
                       <thead>
-                        <tr className="border-b border-border-light bg-surface-tertiary text-left">
-                          <th className="px-4 py-2.5 font-medium text-content-secondary">{t('common.item', { defaultValue: 'Item' })}</th>
-                          <th className="px-4 py-2.5 font-medium text-content-secondary text-right">
+                        <tr className="bg-surface-tertiary text-left">
+                          <th>{t('common.item', { defaultValue: 'Item' })}</th>
+                          <th className="text-right">
                             {t('projects.planned', { defaultValue: 'Planned' })}
                           </th>
-                          <th className="px-4 py-2.5 font-medium text-content-secondary text-right">
+                          <th className="text-right">
                             {t('projects.actual', { defaultValue: 'Actual' })}
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border-light">
+                      <tbody>
                         {budgetDashboard.items!.map((item) => (
-                          <tr key={item.name} className="hover:bg-surface-secondary transition-colors">
-                            <td className="px-4 py-2.5 text-content-primary">{item.name}</td>
-                            <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+                          <tr key={item.name}>
+                            <td>{item.name}</td>
+                            <td className="text-right tabular-nums text-content-secondary">
                               {formatCurrency(item.planned ?? 0, currency)}
                             </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                            <td className="text-right tabular-nums">
                               {formatCurrency(item.actual ?? 0, currency)}
                             </td>
                           </tr>

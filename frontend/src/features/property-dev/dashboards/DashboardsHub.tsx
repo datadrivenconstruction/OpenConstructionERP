@@ -44,7 +44,7 @@ function DashboardTile({ title, icon, to, children }: DashboardTileProps) {
   return (
     <Card className="flex flex-col p-3 min-h-[260px]">
       <header className="mb-2 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title flex items-center gap-2">
           <span className="text-content-tertiary">{icon}</span>
           {title}
         </h3>
@@ -158,7 +158,7 @@ export function DashboardsHub() {
             <select
               value={developmentId}
               onChange={(e) => setDevelopmentId(e.target.value)}
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary"
+              className="oe-select"
             >
               {developments.map((d: Development) => (
                 <option key={d.id} value={d.id}>
@@ -234,7 +234,7 @@ export function DashboardsHub() {
         </Card>
         <Card className="flex min-h-[260px] flex-col p-3 md:col-span-2">
           <header className="mb-2 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title flex items-center gap-2">
               <Sparkles size={14} className="text-content-tertiary" />
               {t('propdev.dashboards.insights.card_title', {
                 defaultValue: 'Sales insights (v3124)',

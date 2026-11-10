@@ -288,7 +288,7 @@ export function SmartViewsPanel({
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-light">
         <div className="flex items-center gap-1.5">
           <Sparkles size={14} className="text-oe-blue" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('smartViews.title', { defaultValue: 'Smart Views' })}
           </h3>
         </div>
@@ -432,11 +432,11 @@ export function SmartViewsPanel({
                     data-testid={`smart-views-folder-toggle-${group.folder}`}
                   >
                     {collapsedFolders.has(group.folder) ? (
-                      <ChevronRight size={13} />
+                      <ChevronRight size={14} />
                     ) : (
-                      <ChevronDown size={13} />
+                      <ChevronDown size={14} />
                     )}
-                    <Folder size={13} className="text-oe-blue/70" />
+                    <Folder size={14} className="text-oe-blue/70" />
                     <span className="truncate">{group.folder}</span>
                     <span className="ms-auto font-normal text-content-tertiary">
                       {group.views.length}

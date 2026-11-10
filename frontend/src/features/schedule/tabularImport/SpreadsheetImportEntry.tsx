@@ -79,7 +79,7 @@ export function SpreadsheetImportEntry({ projectId, schedule, variant }: Spreads
       <Card padding="md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title flex items-center gap-2">
               <FileSpreadsheet size={16} className="text-content-secondary" />
               {t('schedule.tabular_import.card_title', { defaultValue: 'Import from Excel or CSV' })}
             </h3>

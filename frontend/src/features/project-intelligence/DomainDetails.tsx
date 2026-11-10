@@ -110,7 +110,7 @@ export function DomainDetails({
               )}
               style={isActive ? { borderBottomColor: tab.color } : undefined}
             >
-              <Icon size={13} style={isActive ? { color: tab.color } : undefined} />
+              <Icon size={14} style={isActive ? { color: tab.color } : undefined} />
               {tab.label}
               <span className="text-2xs text-content-quaternary">{Math.round(score)}%</span>
             </button>
@@ -348,9 +348,9 @@ function DomainContent({
             <span className="text-2xs text-content-tertiary truncate">{row.label}</span>
             <span className="text-xs font-medium text-content-secondary tabular-nums flex items-center gap-1 shrink-0">
               {String(row.value)}
-              {row.status === 'ok' && <CheckCircle2 size={10} className="text-green-400" />}
-              {row.status === 'warn' && <AlertTriangle size={10} className="text-yellow-400" />}
-              {row.status === 'error' && <XIcon size={10} className="text-red-400" />}
+              {row.status === 'ok' && <CheckCircle2 size={10} className="text-semantic-success" />}
+              {row.status === 'warn' && <AlertTriangle size={10} className="text-semantic-warning" />}
+              {row.status === 'error' && <XIcon size={10} className="text-semantic-error" />}
             </span>
           </div>
         ))}
@@ -365,7 +365,7 @@ function DomainContent({
               onClick={() => onAction(action.id)}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-content-secondary bg-surface-tertiary border border-border-light rounded-md hover:bg-surface-quaternary transition-colors"
             >
-              <Zap size={11} />
+              <Zap size={12} />
               {action.label}
             </button>
           ))}

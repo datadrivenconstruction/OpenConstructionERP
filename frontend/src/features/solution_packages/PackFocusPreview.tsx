@@ -28,8 +28,8 @@ export function PackFocusPreview({
 
   return (
     <section className="rounded-xl border border-border-light bg-surface-elevated p-4 sm:p-5" data-testid="pack-focus-preview">
-      <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-content-primary">
-        <Boxes size={15} aria-hidden className="text-oe-blue" />
+      <h3 className="oe-card-title inline-flex items-center gap-2">
+        <Boxes size={16} aria-hidden className="text-oe-blue" />
         {t('packs.focus_preview_title', { defaultValue: 'Modules this pack turns on: {{n}}', n: data.modules.length })}
       </h3>
       <p className="mb-3 mt-0.5 text-xs text-content-tertiary">
@@ -43,7 +43,7 @@ export function PackFocusPreview({
 
       <div className="mt-4 rounded-lg bg-surface-secondary/60 p-3">
         <p className="inline-flex items-center gap-1.5 text-xs font-medium text-content-secondary">
-          <FolderKanban size={13} aria-hidden />
+          <FolderKanban size={14} aria-hidden />
           {data.demo_template_ids.length
             ? t('packs.focus_demo_n', { defaultValue: 'Demo data: {{n}} filled-in projects, so no screen starts empty', n: data.demo_template_ids.length })
             : t('packs.focus_demo_none', { defaultValue: 'No demo project; start from your own project.' })}
@@ -51,7 +51,7 @@ export function PackFocusPreview({
       </div>
 
       {canChoose && (
-        <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm text-content-primary">
+        <label className="mt-4 flex cursor-pointer items-start gap-2 text-sm text-content-primary">
           <input
             type="checkbox"
             checked={focus}

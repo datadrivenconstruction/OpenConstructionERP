@@ -275,7 +275,7 @@ export function WorkspaceBrandCard() {
                   value={name}
                   maxLength={60}
                   onChange={(e) => setName(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary"
+                  className="oe-input"
                 />
               </label>
               <Button

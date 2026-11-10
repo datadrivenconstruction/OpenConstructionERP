@@ -424,7 +424,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header
       className={clsx(
-        'sticky z-30',
+        'sticky z-header',
         'oe-app-header flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
         'bg-surface-primary/80 backdrop-blur-xl',
       )}
@@ -484,7 +484,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                   no sidebar entry. */}
               {RouteIcon && (
                 <RouteIcon
-                  size={18}
+                  size={20}
                   strokeWidth={1.75}
                   className="shrink-0 text-content-secondary"
                   aria-hidden
@@ -945,7 +945,7 @@ export function BugReportMenu() {
         <div
           role="dialog"
           aria-label={t('bug.menu_heading', { defaultValue: 'Report a bug' })}
-          className="absolute right-0 top-full mt-1.5 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-2 z-40"
+          className="absolute right-0 top-full mt-1.5 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-2 z-dropdown"
         >
           <div className="px-3 pb-2 border-b border-border-light">
             <div className="flex items-center gap-2">
@@ -978,7 +978,7 @@ export function BugReportMenu() {
           <div className="px-3 pt-2.5">
             <label
               htmlFor={descriptionId}
-              className="block text-2xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('bug.description_label', { defaultValue: 'What happened?' })}
               <span className="text-semantic-error ml-0.5" aria-hidden="true">*</span>
@@ -1002,26 +1002,21 @@ export function BugReportMenu() {
               required
               aria-required="true"
               aria-describedby={descriptionHintId}
-              className={clsx(
-                'mt-1.5 w-full rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5',
-                'text-xs text-content-primary placeholder:text-content-quaternary',
-                'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-                'transition-colors resize-none',
-              )}
+              className={clsx('oe-textarea', 'mt-1.5', 'resize-none')}
             />
           </div>
 
           {networkOnly && (
             <div
               role="alert"
-              className="mx-3 my-2 rounded-lg border border-amber-500/30 bg-semantic-warning/10 px-3 py-2"
+              className="mx-3 my-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2"
             >
               <p className="text-2xs font-semibold text-semantic-warning">
                 {t('bug.network_only_title', {
                   defaultValue: 'Looks like a network issue, not a bug',
                 })}
               </p>
-              <p className="mt-1 text-2xs text-amber-700/90 dark:text-amber-300/90 leading-snug">
+              <p className="mt-1 text-2xs text-semantic-warning/90 leading-snug">
                 {t('bug.network_only_desc', {
                   defaultValue:
                     'Recent errors look like the backend was unreachable (offline, restarting, or VPN dropped). Check your connection and reload - if the problem persists, you can still file a report.',
@@ -1160,7 +1155,7 @@ function HelpMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-1.5 w-60 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1 z-40"
+          className="absolute right-0 top-full mt-1.5 w-60 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1 z-dropdown"
         >
           {/* In-app guided explanation of every module - the "How it works"
               hub. Lives first so it is the most discoverable help action. */}
@@ -1171,7 +1166,7 @@ function HelpMenu() {
               setOpen(false);
               navigate('/how-it-works');
             }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <GraduationCap size={14} className="text-oe-blue shrink-0" />
             <span className="flex-1 text-left">{t('howto.menu_item', { defaultValue: 'How it works' })}</span>
@@ -1183,7 +1178,7 @@ function HelpMenu() {
               setOpen(false);
               navigate('/courses');
             }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <GraduationCap size={14} className="text-oe-blue shrink-0" />
             <span className="flex-1 text-left">{t('nav.courses', { defaultValue: 'Courses and guides' })}</span>
@@ -1198,11 +1193,11 @@ function HelpMenu() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <BookOpen size={14} className="text-content-tertiary shrink-0" />
             <span className="flex-1">{t('nav.docs', { defaultValue: 'Documentation' })}</span>
-            <ExternalLink size={11} className="text-content-quaternary shrink-0" />
+            <ExternalLink size={12} className="text-content-quaternary shrink-0" />
           </a>
           <a
             role="menuitem"
@@ -1210,11 +1205,11 @@ function HelpMenu() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <Github size={14} className="text-content-tertiary shrink-0" />
             <span className="flex-1">{t('nav.github', { defaultValue: 'GitHub repository' })}</span>
-            <ExternalLink size={11} className="text-content-quaternary shrink-0" />
+            <ExternalLink size={12} className="text-content-quaternary shrink-0" />
           </a>
 
           {/* Desktop only: open the same app in the user's normal web browser.
@@ -1238,13 +1233,13 @@ function HelpMenu() {
                   }
                 });
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
             >
               <Globe size={14} className="text-content-tertiary shrink-0" />
               <span className="flex-1 text-left">
                 {t('desktop.open_in_browser', { defaultValue: 'Open in your browser' })}
               </span>
-              <ExternalLink size={11} className="text-content-quaternary shrink-0" />
+              <ExternalLink size={12} className="text-content-quaternary shrink-0" />
             </button>
           )}
 
@@ -1255,7 +1250,7 @@ function HelpMenu() {
             type="button"
             role="menuitem"
             onClick={handleFeedback}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <MessageSquarePlus size={14} className="text-content-tertiary shrink-0" />
             <span>{t('feedback.title', { defaultValue: 'Send feedback' })}</span>
@@ -1269,7 +1264,7 @@ function HelpMenu() {
             role="menuitem"
             href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <Mail size={14} className="text-content-tertiary shrink-0" />
             <span>{t('header.email_issues', { defaultValue: 'Email the team' })}</span>
@@ -1331,7 +1326,7 @@ function LanguageSwitcher({
         )}
       >
         <CountryFlag code={currentLang.country} size={16} />
-        <ChevronDown size={11} className={clsx('transition-transform duration-fast', open && 'rotate-180')} aria-hidden="true" />
+        <ChevronDown size={12} className={clsx('transition-transform duration-fast', open && 'rotate-180')} aria-hidden="true" />
       </button>
 
       {open && (
@@ -1342,7 +1337,7 @@ function LanguageSwitcher({
               role="menuitem"
               onClick={() => { onSelect(lang.code); setOpen(false); }}
               className={clsx(
-                'flex w-full items-center gap-2.5 px-3 py-1.5 text-sm transition-colors',
+                'flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors',
                 lang.code === currentLang.code
                   ? 'bg-oe-blue-subtle text-oe-blue-text font-medium'
                   : 'text-content-primary hover:bg-surface-secondary',
@@ -1669,7 +1664,7 @@ function UserMenu() {
           aria-hidden
           className="absolute -bottom-0.5 right-0 flex h-2.5 w-2.5 items-center justify-center overflow-hidden"
         >
-          <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400/70 animate-ping" />
+          <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-semantic-success/70 animate-ping" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-semantic-success ring-2 ring-surface-primary" />
         </span>
       </button>
@@ -1687,7 +1682,7 @@ function UserMenu() {
           <button
             role="menuitem"
             onClick={() => { setOpen(false); navigate('/settings'); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <User size={14} className="text-content-tertiary" />
             {t('auth.profile', 'Profile')}
@@ -1695,7 +1690,7 @@ function UserMenu() {
           <button
             role="menuitem"
             onClick={() => { setOpen(false); navigate('/settings'); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <Settings size={14} className="text-content-tertiary" />
             {t('nav.settings', 'Settings')}
@@ -1704,7 +1699,7 @@ function UserMenu() {
           <button
             role="menuitem"
             onClick={() => { logout(); navigate('/login'); setOpen(false); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
           >
             <LogOut size={14} />
             {t('auth.logout', 'Sign out')}
@@ -1945,7 +1940,7 @@ function ProjectSwitcher() {
               dot in CTA mode so the eye is drawn to "act here". */}
           {activeProjectId ? (
             <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-oe-blue/15 shrink-0">
-              <FolderOpen size={13} strokeWidth={2} />
+              <FolderOpen size={14} strokeWidth={2} />
               <span
                 aria-hidden
                 className="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-surface-elevated"
@@ -1988,7 +1983,7 @@ function ProjectSwitcher() {
           title={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
           aria-label={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
         >
-          <ChevronDown size={13} strokeWidth={2.25} className={clsx(
+          <ChevronDown size={14} strokeWidth={2.25} className={clsx(
             'shrink-0 transition-transform duration-fast',
             open && 'rotate-180',
           )} />
@@ -1996,7 +1991,7 @@ function ProjectSwitcher() {
       </div>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1.5 z-50 w-72 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">
+        <div className="absolute top-full left-0 mt-1.5 z-dropdown w-72 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">
           <div className="px-4 py-2.5 border-b border-border-light bg-surface-secondary/50">
             <p className="text-xs font-semibold text-content-secondary">
               {t('schedule.switch_project', { defaultValue: 'Switch Project' })}
@@ -2011,7 +2006,7 @@ function ProjectSwitcher() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('common.search', { defaultValue: 'Search...' })}
-                className="w-full rounded-lg border border-border-light bg-surface-secondary ps-8 pe-3 py-1.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input ps-8"
               />
             </div>
           </div>
@@ -2052,7 +2047,7 @@ function ProjectSwitcher() {
                   setOpen(false);
                 }}
                 className={clsx(
-                  'flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors',
+                  'flex w-full items-center gap-2 px-4 py-2 text-sm transition-colors',
                   p.id === activeProjectId
                     ? 'bg-oe-blue-subtle text-oe-blue-text font-medium'
                     : 'text-content-primary hover:bg-surface-secondary',
@@ -2172,7 +2167,7 @@ function UploadQueueIndicator() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-xl z-dropdown overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
             <h3 className="text-xs font-semibold text-content-primary">
               {t('queue.title', { defaultValue: 'Processing Queue' })}

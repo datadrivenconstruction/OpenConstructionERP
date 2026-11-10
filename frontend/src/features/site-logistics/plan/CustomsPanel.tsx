@@ -220,7 +220,7 @@ export function CustomsPanel({ projectId, catalogue }: PanelProps) {
       <PanelHead title="tab.customs" action="add_customs" may={resource.mayCreate} onAction={() => resource.open()} />
       {valuesHidden && (
         <p className="flex items-center gap-1.5 text-xs text-content-secondary" data-testid="plan-values-hidden">
-          <EyeOff size={13} aria-hidden />
+          <EyeOff size={14} aria-hidden />
           {tx(t, 'customs.values_hidden')}
         </p>
       )}

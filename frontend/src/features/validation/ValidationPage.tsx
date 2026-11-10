@@ -353,7 +353,7 @@ function SelectDropdown({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-content-primary">{label}</label>
+      <label htmlFor={id} className="oe-label">{label}</label>
       <select
         id={id}
         value={value}

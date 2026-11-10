@@ -127,9 +127,9 @@ const PURPOSE_COLORS: Record<TransmittalPurpose, string> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
@@ -279,11 +279,7 @@ function CreateTransmittalModal({
             placeholder={t('transmittals.subject_placeholder', {
               defaultValue: 'e.g. Structural drawings for approval - Rev C',
             })}
-            className={clsx(
-              inputCls,
-              subjectError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls} aria-invalid={!!subjectError}
           />
         </WideModalField>
 
@@ -299,7 +295,7 @@ function CreateTransmittalModal({
               id="tr-purpose"
               value={form.purpose}
               onChange={(e) => set('purpose', e.target.value as TransmittalPurpose)}
-              className={inputCls + ' appearance-none pr-9'}
+              className="oe-select oe-input-lg"
             >
               {(Object.keys(PURPOSE_LABELS) as TransmittalPurpose[]).map((p) => (
                 <option key={p} value={p}>
@@ -372,7 +368,7 @@ function CreateTransmittalModal({
                 aria-label={t('transmittals.picker_container_label', { defaultValue: 'Container' })}
                 value={pickerContainerId}
                 onChange={(e) => setPickerContainerId(e.target.value)}
-                className={inputCls + ' appearance-none pr-9'}
+                className="oe-select oe-input-lg"
               >
                 <option value="">
                   {t('transmittals.picker_select_container', { defaultValue: 'Select container…' })}
@@ -395,7 +391,7 @@ function CreateTransmittalModal({
                   const rev = revisions.find((r) => r.id === e.target.value);
                   if (rev) addRevision(rev);
                 }}
-                className={inputCls + ' appearance-none pr-9'}
+                className="oe-select oe-input-lg"
                 disabled={!pickerContainerId}
               >
                 <option value="">
@@ -572,7 +568,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
 
         {/* Locked indicator */}
         {transmittal.locked && (
-          <Lock size={13} className="text-content-tertiary shrink-0" />
+          <Lock size={14} className="text-content-tertiary shrink-0" />
         )}
       </div>
 
@@ -678,7 +674,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                 placeholder={t('transmittals.add_recipient_placeholder', {
                   defaultValue: 'Name or email',
                 })}
-                className="flex-1 rounded-lg border border-border bg-surface-primary px-2 py-1 text-sm"
+                className="oe-input flex-1"
               />
               <button
                 type="submit"
@@ -721,7 +717,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                     <span className="text-2xs text-content-quaternary font-mono w-5 text-center shrink-0">
                       {idx + 1}
                     </span>
-                    <FileText size={13} className="text-content-tertiary shrink-0" />
+                    <FileText size={14} className="text-content-tertiary shrink-0" />
                     <span
                       className={clsx(
                         'truncate',
@@ -767,7 +763,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                     onIssue(transmittal.id);
                   }}
                 >
-                  <Send size={13} className="mr-1" />
+                  <Send size={14} className="mr-1" />
                   {t('transmittals.action_issue', { defaultValue: 'Issue Transmittal' })}
                 </Button>
                 <Button
@@ -779,7 +775,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                     onEdit(transmittal);
                   }}
                 >
-                  <Pencil size={13} className="mr-1" />
+                  <Pencil size={14} className="mr-1" />
                   {t('common.edit', { defaultValue: 'Edit' })}
                 </Button>
                 <Button
@@ -792,7 +788,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                     onDelete(transmittal);
                   }}
                 >
-                  <Trash2 size={13} className="mr-1" />
+                  <Trash2 size={14} className="mr-1" />
                   {t('common.delete', { defaultValue: 'Delete' })}
                 </Button>
               </>
@@ -843,7 +839,7 @@ function EditTransmittalModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
       onClick={onClose}
       role="presentation"
     >
@@ -856,7 +852,7 @@ function EditTransmittalModal({
       >
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
-            <h2 id="edit-transmittal-title" className="text-base font-semibold text-content-primary">
+            <h2 id="edit-transmittal-title" className="oe-section-title">
               {t('transmittals.edit_title', {
                 defaultValue: 'Edit {{number}}',
                 number: transmittal.transmittal_number,
@@ -868,13 +864,13 @@ function EditTransmittalModal({
               className="p-1 rounded hover:bg-surface-secondary text-content-tertiary"
               aria-label={t('common.close', { defaultValue: 'Close' })}
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
 
           <div className="px-5 py-4 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-content-secondary mb-1">
+              <label className="oe-label">
                 {t('transmittals.field_subject', { defaultValue: 'Subject' })}
                 <span className="text-semantic-error ml-0.5">*</span>
               </label>
@@ -883,21 +879,21 @@ function EditTransmittalModal({
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 data-testid="edit-transmittal-subject"
-                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input"
                 required aria-required="true"
                 maxLength={500}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-content-secondary mb-1">
+              <label className="oe-label">
                 {t('transmittals.field_purpose', { defaultValue: 'Purpose' })}
               </label>
               <select
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value as TransmittalPurpose)}
                 data-testid="edit-transmittal-purpose"
-                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select"
               >
                 {(Object.keys(PURPOSE_LABELS) as TransmittalPurpose[]).map((k) => (
                   <option key={k} value={k}>
@@ -908,19 +904,19 @@ function EditTransmittalModal({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-content-secondary mb-1">
+              <label className="oe-label">
                 {t('transmittals.field_response_due', { defaultValue: 'Response due' })}
               </label>
               <input
                 type="date"
                 value={responseDue}
                 onChange={(e) => setResponseDue(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-content-secondary mb-1">
+              <label className="oe-label">
                 {t('transmittals.field_cover_note', { defaultValue: 'Cover note' })}
               </label>
               <textarea
@@ -928,7 +924,7 @@ function EditTransmittalModal({
                 onChange={(e) => setCoverNote(e.target.value)}
                 rows={4}
                 maxLength={5000}
-                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue resize-y"
+                className="oe-textarea resize-y"
               />
             </div>
           </div>
@@ -1002,7 +998,7 @@ function TransmittalsHowItWorks() {
   return (
     <CollapsibleSection
       storageKey="transmittals.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('transmittals.flow_title', { defaultValue: 'How transmittals work and connect' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1544,7 +1540,7 @@ export function TransmittalsPage() {
               defaultValue: 'Search transmittals...',
             })}
             aria-label={t('transmittals.search_placeholder', { defaultValue: 'Search transmittals...' })}
-            className={inputCls + ' pl-9'}
+            className={`${inputCls} pl-9`}
           />
         </div>
 
@@ -1554,7 +1550,7 @@ export function TransmittalsPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TransmittalStatus | '')}
             aria-label={t('transmittals.filter_all', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+            className="oe-select oe-input-lg sm:w-44"
           >
             <option value="">
               {t('transmittals.filter_all', { defaultValue: 'All Statuses' })}

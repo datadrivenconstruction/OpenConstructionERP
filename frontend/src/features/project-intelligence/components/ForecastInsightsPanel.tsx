@@ -178,7 +178,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-oe-blue text-white rounded-lg hover:bg-oe-blue-dark transition-colors"
         >
-          <RefreshCw size={13} />
+          <RefreshCw size={14} />
           {t('common.retry', { defaultValue: 'Retry' })}
         </button>
       </div>
@@ -310,8 +310,8 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Schedule slip */}
         <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
-          <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
-            <CalendarClock size={15} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-2 mb-3">
+            <CalendarClock size={16} className="text-oe-blue" />
             {t('project_intelligence.insights.schedule_title', {
               defaultValue: 'Schedule slip projection',
             })}
@@ -391,8 +391,8 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
 
         {/* Risk gauge */}
         <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
-          <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
-            <Gauge size={15} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-2 mb-3">
+            <Gauge size={16} className="text-oe-blue" />
             {t('project_intelligence.insights.risk_title', {
               defaultValue: 'Cost-overrun risk',
             })}
@@ -420,10 +420,10 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
                 <div
                   className={`h-full rounded-full ${
                     risk.band === 'red'
-                      ? 'bg-rose-400'
+                      ? 'bg-semantic-error'
                       : risk.band === 'amber'
-                        ? 'bg-amber-400'
-                        : 'bg-emerald-400'
+                        ? 'bg-semantic-warning'
+                        : 'bg-semantic-success'
                   }`}
                   style={{ width: `${Math.min(100, scorePct)}%` }}
                 />

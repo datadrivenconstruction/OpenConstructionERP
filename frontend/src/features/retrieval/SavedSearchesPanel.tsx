@@ -55,7 +55,7 @@ export function SavedSearches({
   return (
     <Card className="space-y-3 p-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('retrieval.searches_title', { defaultValue: 'Saved and recent searches' })}
         </h2>
         {currentCanSave && (

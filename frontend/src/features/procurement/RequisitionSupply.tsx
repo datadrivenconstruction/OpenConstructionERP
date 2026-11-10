@@ -33,9 +33,9 @@ import {
 } from './requisitionsApi';
 
 const fieldCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 const smallFieldCls =
-  'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-sm';
 
 /** Active vendors of the directory, the only ones a requisition may name. */
 export function useActiveVendors() {
@@ -121,7 +121,7 @@ export function SuggestedSupplierHint({
   if (suggested.length > 1) {
     return (
       <p className="mt-1 flex items-start gap-1 text-xs text-semantic-warning">
-        <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
         {t('procurement.requisitions.suggested_several', {
           defaultValue: 'The lines suggest different suppliers: {{names}}. Choose one, or split the requisition.',
           names: vendorNames(suggested),
@@ -275,7 +275,7 @@ export function LineSupplyCell({ projectId, line, stored, headerDate, editable, 
         <label className="block flex-1 text-content-tertiary">
           {t('procurement.requisitions.line_activity', { defaultValue: 'From schedule activity' })}
           <select
-            className={`${smallFieldCls} mt-0.5`}
+            className="oe-select oe-input-sm mt-0.5"
             value={activityId}
             onChange={(e) =>
               // A new activity proposes a new date: clear the old one and its anchor.

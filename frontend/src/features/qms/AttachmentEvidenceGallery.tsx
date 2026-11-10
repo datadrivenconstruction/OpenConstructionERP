@@ -23,7 +23,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 export function AttachmentEvidenceGallery({
   inspectionId,
@@ -74,11 +74,11 @@ export function AttachmentEvidenceGallery({
     <Card padding="sm">
       <div className="mb-2 flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">
-          <Paperclip size={13} />
+          <Paperclip size={14} />
           {t('qms.evidence', { defaultValue: 'Evidence' })}
         </p>
         {canEdit && !adding && (
-          <Button variant="ghost" size="sm" icon={<Plus size={13} />} onClick={() => setAdding(true)}>
+          <Button variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => setAdding(true)}>
             {t('qms.link_evidence', { defaultValue: 'Link evidence' })}
           </Button>
         )}
@@ -113,7 +113,7 @@ export function AttachmentEvidenceGallery({
               {a.file_hash_sha256 ? (
                 <span title={a.file_hash_sha256}>
                   <Badge variant="success">
-                    <ShieldCheck size={11} className="mr-0.5 inline" />
+                    <ShieldCheck size={12} className="mr-0.5 inline" />
                     {t('qms.hash_verified', { defaultValue: 'Hash verified' })}
                   </Badge>
                 </span>

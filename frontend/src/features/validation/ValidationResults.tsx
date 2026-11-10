@@ -329,14 +329,14 @@ function FindingRow<T extends FindingLike>({
             className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle"
           >
             {t('validation.open_in_boq', { defaultValue: 'Open in BOQ' })}
-            <ExternalLink size={11} />
+            <ExternalLink size={12} />
           </Link>
         )}
         {!finding.passed && finding.severity === 'error' && onRaiseNcr && (
           <Button
             variant="ghost"
             size="sm"
-            icon={<AlertOctagon size={13} />}
+            icon={<AlertOctagon size={14} />}
             onClick={() => onRaiseNcr(finding)}
           >
             {t('validation.raise_ncr', { defaultValue: 'Raise NCR' })}
@@ -506,7 +506,7 @@ export function ValidationResults<T extends FindingLike>({
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-content-primary">{t('validation.results_title', 'Results')}</h2>
+        <h2 className="oe-section-title">{t('validation.results_title', 'Results')}</h2>
         <FilterBar filter={filter} onFilterChange={onFilterChange} counts={counts} />
       </div>
 
@@ -521,7 +521,7 @@ export function ValidationResults<T extends FindingLike>({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('validation.search_placeholder', { defaultValue: 'Search position or text' })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input ps-8"
               />
             </label>
           )}

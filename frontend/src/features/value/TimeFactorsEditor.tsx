@@ -163,7 +163,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
               return (
                 <li
                   key={key}
-                  className="flex flex-wrap items-center gap-2 rounded-md border border-border-light p-2.5"
+                  className="flex flex-wrap items-center gap-2 rounded-md border border-border-light p-2"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -198,9 +198,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
                       aria-invalid={invalid}
                       value={value}
                       onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
-                      className={`w-20 rounded-md border bg-surface-primary px-2 py-1 text-right text-sm text-content-primary ${
-                        invalid ? 'border-semantic-error' : 'border-border-light'
-                      }`}
+                      className="oe-input w-20 text-right" aria-invalid={!!(invalid)}
                     />
                     <span className="text-xs text-content-tertiary">
                       {t('value.factors.min_unit', { defaultValue: 'min' })}

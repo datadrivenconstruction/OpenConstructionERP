@@ -85,7 +85,7 @@ function KeysSection({ associationId, keys }: { associationId: string; keys: App
   const remove = useMutation({ mutationFn: deleteKey, onSuccess: () => qc.invalidateQueries({ queryKey: ['service-charges'] }), onError });
   return (
     <Card padding="sm">
-      <h2 className="mb-2 text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title mb-2">
         {t('service_charges.keys_title', { defaultValue: 'Apportionment keys' })}
       </h2>
       {keys.length === 0 ? (
@@ -124,7 +124,7 @@ function KeysSection({ associationId, keys }: { associationId: string; keys: App
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <select className={inputCls} value={method} onChange={(e) => setMethod(e.target.value as KeyMethod)}>
+        <select className="oe-select" value={method} onChange={(e) => setMethod(e.target.value as KeyMethod)}>
           {(['permille', 'area', 'equal', 'custom'] as KeyMethod[]).map((m) => (
             <option key={m} value={m}>
               {methodLabel(m)}
@@ -141,7 +141,7 @@ function KeysSection({ associationId, keys }: { associationId: string; keys: App
           {t('service_charges.add_key', { defaultValue: 'Add key' })}
         </Button>
         <textarea
-          className={`${inputCls} sm:col-span-3`}
+          className="oe-textarea sm:col-span-3"
           rows={4}
           dir="ltr"
           placeholder={t('service_charges.key_lines_hint', {
@@ -218,7 +218,7 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
   return (
     <Card padding="sm" data-testid={`service-charges-budget-${budget.year}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('service_charges.budget_year', { defaultValue: 'Budget {{year}}', year: budget.year })}
         </h3>
         <div className="flex items-center gap-2">
@@ -226,22 +226,22 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
           <span className="text-sm font-semibold tabular-nums">{fmtCurrency(budget.total, currency)}</span>
         </div>
       </div>
-      <table className="mt-2 w-full text-xs">
-        <thead className="text-content-tertiary">
+      <table className="oe-table-compact mt-2">
+        <thead>
           <tr>
-            <th className="py-1 text-start font-medium">{t('service_charges.col_category', { defaultValue: 'Cost category' })}</th>
-            <th className="py-1 text-start font-medium">{t('service_charges.col_key', { defaultValue: 'Split by' })}</th>
-            <th className="py-1 text-end font-medium">{t('service_charges.col_amount', { defaultValue: 'Amount' })}</th>
+            <th>{t('service_charges.col_category', { defaultValue: 'Cost category' })}</th>
+            <th>{t('service_charges.col_key', { defaultValue: 'Split by' })}</th>
+            <th className="text-end">{t('service_charges.col_amount', { defaultValue: 'Amount' })}</th>
             <th />
           </tr>
         </thead>
         <tbody>
           {budget.lines.map((l) => (
-            <tr key={l.id} className="border-t border-border-light">
-              <td className="py-1">{l.category}</td>
-              <td className="py-1">{keyName(l.key_id)}</td>
-              <td className="py-1 text-end tabular-nums">{fmtCurrency(l.amount, currency)}</td>
-              <td className="py-1 text-end">
+            <tr key={l.id}>
+              <td>{l.category}</td>
+              <td>{keyName(l.key_id)}</td>
+              <td className="text-end tabular-nums">{fmtCurrency(l.amount, currency)}</td>
+              <td className="text-end">
                 {budget.status === 'draft' && (
                   <button
                     type="button"
@@ -249,7 +249,7 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
                     className="text-content-tertiary hover:text-semantic-error"
                     onClick={() => removeLine.mutate(l.id)}
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 )}
               </td>
@@ -273,7 +273,7 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <select className={inputCls} value={keyId} onChange={(e) => setKeyId(e.target.value)}>
+          <select className="oe-select" value={keyId} onChange={(e) => setKeyId(e.target.value)}>
             {keys.map((k) => (
               <option key={k.id} value={k.id}>
                 {k.name}
@@ -305,7 +305,7 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
       {budget.status === 'approved' && (
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-light pt-3 text-xs">
           <span>{t('service_charges.period', { defaultValue: 'Period' })}</span>
-          <select className={`${inputCls} w-24`} value={period} onChange={(e) => setPeriod(Number(e.target.value))}>
+          <select className="oe-select w-24" value={period} onChange={(e) => setPeriod(Number(e.target.value))}>
             {Array.from({ length: PERIODS[budget.demand_frequency as Frequency] }, (_, i) => i + 1).map((p) => (
               <option key={p} value={p}>
                 {p}
@@ -337,22 +337,22 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
               })}
             </span>
           </div>
-          <table className="mt-2 w-full text-xs">
-            <thead className="text-content-tertiary">
+          <table className="oe-table-compact mt-2">
+            <thead>
               <tr>
-                <th className="py-1 text-start font-medium">{t('service_charges.col_unit', { defaultValue: 'Unit' })}</th>
-                <th className="py-1 text-end font-medium">{t('service_charges.col_demanded', { defaultValue: 'Demanded' })}</th>
-                <th className="py-1 text-end font-medium">{t('service_charges.col_actual', { defaultValue: 'Actual share' })}</th>
-                <th className="py-1 text-end font-medium">{t('service_charges.col_balance', { defaultValue: 'Refund (+) / to pay (-)' })}</th>
+                <th>{t('service_charges.col_unit', { defaultValue: 'Unit' })}</th>
+                <th className="text-end">{t('service_charges.col_demanded', { defaultValue: 'Demanded' })}</th>
+                <th className="text-end">{t('service_charges.col_actual', { defaultValue: 'Actual share' })}</th>
+                <th className="text-end">{t('service_charges.col_balance', { defaultValue: 'Refund (+) / to pay (-)' })}</th>
               </tr>
             </thead>
             <tbody>
               {rec.unit_balances.map((u) => (
-                <tr key={u.unit_ref} className="border-t border-border-light">
-                  <td className="py-1" dir="ltr">{u.unit_ref}</td>
-                  <td className="py-1 text-end tabular-nums">{fmtCurrency(u.demanded, currency)}</td>
-                  <td className="py-1 text-end tabular-nums">{fmtCurrency(u.actual_share, currency)}</td>
-                  <td className="py-1 text-end font-medium tabular-nums">{fmtCurrency(u.balance, currency)}</td>
+                <tr key={u.unit_ref}>
+                  <td dir="ltr">{u.unit_ref}</td>
+                  <td className="text-end tabular-nums">{fmtCurrency(u.demanded, currency)}</td>
+                  <td className="text-end tabular-nums">{fmtCurrency(u.actual_share, currency)}</td>
+                  <td className="text-end tabular-nums">{fmtCurrency(u.balance, currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -448,7 +448,7 @@ export function AssociationDetailPage() {
       />
       <KeysSection associationId={assoc.id} keys={keys} />
       <Card padding="sm">
-        <h2 className="mb-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-2">
           {t('service_charges.budgets_title', { defaultValue: 'Budgets' })}
         </h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -458,7 +458,7 @@ export function AssociationDetailPage() {
             value={year}
             onChange={(e) => setYear(Number(e.target.value) || new Date().getFullYear())}
           />
-          <select className={`${inputCls} w-40`} value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
+          <select className="oe-select w-40" value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
             {(['annual', 'semiannual', 'quarterly', 'monthly'] as Frequency[]).map((f) => (
               <option key={f} value={f}>
                 {freqLabel(f)}

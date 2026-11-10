@@ -177,7 +177,7 @@ export function FullViewPage() {
           <select
             value={developmentId}
             onChange={(e) => setDevelopmentId(e.target.value)}
-            className="rounded border border-border-light bg-surface-elevated px-2 py-1"
+            className="oe-select"
           >
             {developments.map((d: Development) => (
               <option key={d.id} value={d.id}>

@@ -106,25 +106,25 @@ export function AwardSchedule({ projectId, concept, schedule, labels, onGoToPack
         </p>
       )}
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-left text-sm" data-testid="schedule-table">
-          <thead className="bg-surface-secondary text-xs text-content-tertiary">
+        <table className="oe-table text-left" data-testid="schedule-table">
+          <thead>
             <tr>
-              <th className="px-3 py-2 font-medium">
+              <th>
                 <span className="sr-only">{t('procurement_concept.ui.schedule.col_pick', { defaultValue: 'Confirm' })}</span>
               </th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_package', { defaultValue: 'Package' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.schedule.col_start', { defaultValue: 'Start procurement' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.package.col_dates', { defaultValue: 'Award due' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.schedule.col_need', { defaultValue: 'Needed on site' })}</th>
-              <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.schedule.col_status', { defaultValue: 'In the project schedule' })}</th>
+              <th>{t('procurement_concept.ui.package.col_package', { defaultValue: 'Package' })}</th>
+              <th>{t('procurement_concept.ui.schedule.col_start', { defaultValue: 'Start procurement' })}</th>
+              <th>{t('procurement_concept.ui.package.col_dates', { defaultValue: 'Award due' })}</th>
+              <th>{t('procurement_concept.ui.schedule.col_need', { defaultValue: 'Needed on site' })}</th>
+              <th>{t('procurement_concept.ui.schedule.col_status', { defaultValue: 'In the project schedule' })}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
               const proposal = hasProposal(r);
               return (
-                <tr key={r.package_id} className="border-t border-border-light align-top" data-testid="schedule-row" data-package={r.code}>
-                  <td className="px-3 py-2.5">
+                <tr key={r.package_id} className="align-top" data-testid="schedule-row" data-package={r.code}>
+                  <td>
                     <input
                       type="checkbox"
                       disabled={!proposal}
@@ -136,7 +136,7 @@ export function AwardSchedule({ projectId, concept, schedule, labels, onGoToPack
                       })}
                     />
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     <div className="font-medium text-content-primary">
                       <span className="font-mono text-xs text-content-tertiary">{r.code}</span> {r.title}
                     </div>
@@ -155,9 +155,9 @@ export function AwardSchedule({ projectId, concept, schedule, labels, onGoToPack
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2.5 text-content-primary">{r.proposed_start_date ? fmtDate(r.proposed_start_date) : '-'}</td>
-                  <td className="px-3 py-2.5 text-content-primary">{r.proposed_award_date ? fmtDate(r.proposed_award_date) : '-'}</td>
-                  <td className="px-3 py-2.5 text-content-primary">
+                  <td>{r.proposed_start_date ? fmtDate(r.proposed_start_date) : '-'}</td>
+                  <td>{r.proposed_award_date ? fmtDate(r.proposed_award_date) : '-'}</td>
+                  <td>
                     {r.need_date ? fmtDate(r.need_date) : '-'}
                     {r.lead_time_days ? (
                       <div className="text-xs text-content-tertiary">
@@ -168,7 +168,7 @@ export function AwardSchedule({ projectId, concept, schedule, labels, onGoToPack
                       </div>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     {isConfirmed(r) ? (
                       <ToneBadge tone="success" testId="schedule-in">
                         {t('procurement_concept.ui.schedule.in_schedule', { defaultValue: 'Milestones set' })}

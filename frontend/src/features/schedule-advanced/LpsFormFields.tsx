@@ -15,8 +15,8 @@ import type { ConstraintLinkedType } from './api';
 import { linkedTypeLabel } from './ConstraintsLog';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input';
+const labelCls = 'oe-label';
 
 export const LINKED_TYPES: ConstraintLinkedType[] = ['rfi', 'submittal', 'purchase_order', 'goods_receipt'];
 
@@ -49,7 +49,7 @@ export function ConstraintLinkFields({
         <select
           value={type}
           onChange={(e) => onType(e.target.value as ConstraintLinkedType | '')}
-          className={inputCls}
+          className="oe-select"
           data-testid="constraint-link-type"
         >
           <option value="">{t('schedule_advanced.link_none', { defaultValue: 'None' })}</option>
@@ -106,7 +106,7 @@ export function CommitmentExtraFields({
         <select
           value={subcontractorId}
           onChange={(e) => onSubcontractor(e.target.value)}
-          className={inputCls}
+          className="oe-select"
           data-testid="commitment-subcontractor"
         >
           <option value="">{t('schedule_advanced.link_none', { defaultValue: 'None' })}</option>

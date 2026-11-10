@@ -234,7 +234,7 @@ export function TaxQuotePanel({
       <header className="flex items-baseline justify-between">
         <h3
           id="taxquote-heading"
-          className="text-sm font-semibold text-content-primary"
+          className="oe-card-title"
         >
           {t('propdev.tax.title', 'Tax / VAT / Stamp-duty breakdown')}
         </h3>
@@ -259,7 +259,7 @@ export function TaxQuotePanel({
               setEmirate('');
               setAbsdProfile('');
             }}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+            className="oe-select"
           >
             <option value="">{t('propdev.tax.auto_detect', 'Auto-detect from contract')}</option>
             {JURISDICTIONS.map((j) => (
@@ -278,7 +278,7 @@ export function TaxQuotePanel({
             <select
               value={regionSubcode}
               onChange={(e) => setRegionSubcode(e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+              className="oe-select"
             >
               <option value="">{t('propdev.tax.select_region', 'Select region')}</option>
               {subcodeOptions.map((r) => (
@@ -297,7 +297,7 @@ export function TaxQuotePanel({
           <select
             value={vatRateClass}
             onChange={(e) => setVatRateClass(e.target.value)}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+            className="oe-select"
           >
             {VAT_RATE_CLASSES.map((c) => (
               <option key={c.code} value={c.code}>
@@ -315,7 +315,7 @@ export function TaxQuotePanel({
             <select
               value={emirate}
               onChange={(e) => setEmirate(e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+              className="oe-select"
             >
               <option value="">{t('propdev.tax.select_emirate', 'Select emirate')}</option>
               {EMIRATES.map((em) => (
@@ -335,7 +335,7 @@ export function TaxQuotePanel({
             <select
               value={absdProfile}
               onChange={(e) => setAbsdProfile(e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+              className="oe-select"
             >
               <option value="">{t('propdev.tax.no_absd', 'No ABSD')}</option>
               {ABSD_PROFILES.map((p) => (
@@ -412,39 +412,39 @@ export function TaxQuotePanel({
           className="rounded-md border border-border-light overflow-hidden"
           data-testid="taxquote-breakdown"
         >
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary/50">
+          <table className="oe-table-compact">
+            <thead>
               <tr>
-                <th className="text-left px-3 py-1.5 font-medium text-content-secondary">
+                <th>
                   {t('propdev.tax.line', 'Line item')}
                 </th>
-                <th className="text-right px-3 py-1.5 font-medium text-content-secondary">
+                <th className="text-right">
                   {t('propdev.tax.amount', 'Amount')}
                 </th>
               </tr>
             </thead>
             <tbody>
               {quote.breakdown.map((row, idx) => (
-                <tr key={idx} className="border-t border-border-light">
-                  <td className="px-3 py-1.5 text-content-primary">{row.line}</td>
-                  <td className="px-3 py-1.5 text-right tabular-nums">
+                <tr key={idx}>
+                  <td>{row.line}</td>
+                  <td className="text-right tabular-nums">
                     {formatMoney(row.amount, displayCurrency)}
                   </td>
                 </tr>
               ))}
-              <tr className="border-t border-border-light bg-surface-secondary/30">
-                <td className="px-3 py-1.5 font-medium text-content-primary">
+              <tr className="bg-surface-secondary/30">
+                <td>
                   {t('propdev.tax.subtotal', 'Subtotal taxes')}
                 </td>
-                <td className="px-3 py-1.5 text-right font-medium tabular-nums">
+                <td className="text-right tabular-nums">
                   {formatMoney(quote.subtotal_taxes, displayCurrency)}
                 </td>
               </tr>
-              <tr className="border-t border-border-light bg-surface-secondary/60">
-                <td className="px-3 py-1.5 font-semibold text-content-primary">
+              <tr className="bg-surface-secondary/60">
+                <td>
                   {t('propdev.tax.grand_total', 'Grand total')}
                 </td>
-                <td className="px-3 py-1.5 text-right font-semibold tabular-nums">
+                <td className="text-right tabular-nums">
                   {formatMoney(quote.grand_total, displayCurrency)}
                 </td>
               </tr>

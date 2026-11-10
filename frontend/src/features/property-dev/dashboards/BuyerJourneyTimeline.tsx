@@ -83,7 +83,7 @@ export function BuyerJourneyTimeline({
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {data.full_name || t('propdev.dashboards.journey.title', {
             defaultValue: 'Buyer journey',
           })}

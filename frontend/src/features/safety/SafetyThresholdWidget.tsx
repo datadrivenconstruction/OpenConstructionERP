@@ -245,8 +245,8 @@ export function SafetyThresholdWidget({ projectId }: SafetyThresholdWidgetProps)
       <div className="p-4">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <HeadlineIcon size={18} className="text-content-secondary" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <HeadlineIcon size={20} className="text-content-secondary" />
+            <h3 className="oe-card-title">
               {t('safety.threshold_title', { defaultValue: 'Safety thresholds' })}
             </h3>
           </div>

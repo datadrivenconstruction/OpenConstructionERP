@@ -318,19 +318,19 @@ export function LevelingMatrix({ packageId, currency }: Props) {
 
           {/* Matrix */}
           <div className="overflow-x-auto relative">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 bg-surface-primary">
-                <tr className="border-b border-border-light">
-                  <th className="whitespace-nowrap px-3 py-2.5 text-left font-semibold text-content-primary sticky left-0 z-20 bg-surface-primary">
+            <table className="oe-table">
+              <thead className="sticky top-0 z-10">
+                <tr>
+                  <th className="sticky left-0 z-20">
                     {t('tendering.leveling.line', 'Line')}
                   </th>
-                  <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary">
+                  <th className="text-right">
                     {t('tendering.leveling.reference', 'Reference')}
                   </th>
                   {matrix.bid_summaries.map((bs) => (
                     <th
                       key={bs.bid_id}
-                      className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
+                      className="text-right"
                     >
                       <span className="flex items-center justify-end gap-1.5">
                         <Building2
@@ -350,9 +350,9 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                   return (
                     <tr
                       key={`${key}-${idx}`}
-                      className="group border-b border-border-light/50 transition-colors hover:bg-surface-secondary/30"
+                      className="group"
                     >
-                      <td className="px-3 py-2.5 sticky left-0 bg-surface-primary group-hover:bg-surface-secondary/30">
+                      <td className="sticky left-0 group-hover:bg-surface-secondary/30">
                         {row.line_code && (
                           <span className="text-xs text-content-tertiary mr-2 tabular-nums">
                             {row.line_code}
@@ -370,7 +370,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                           })()}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary">
+                      <td className="whitespace-nowrap text-right tabular-nums text-content-secondary">
                         {/* Money, so the digit count is the currency's. The
                             footer under this column sums exactly these cells
                             and asks the same code. */}
@@ -382,7 +382,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                       {row.cells.map((cell) => (
                         <td
                           key={`${key}-${cell.bid_id}`}
-                          className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums"
+                          className="whitespace-nowrap text-right tabular-nums"
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span className={cellColorClass(cell.leveled_total, m)}>
@@ -404,11 +404,11 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-border bg-surface-secondary/30">
-                  <td className="px-3 py-3 font-semibold text-content-primary sticky left-0 bg-surface-secondary">
+                <tr className="border-t-2 bg-surface-secondary/30">
+                  <td className="sticky left-0">
                     {t('tendering.leveling.total_leveled', 'TOTAL LEVELED')}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
+                  <td className="whitespace-nowrap text-right tabular-nums">
                     {/* Reference total */}
                     {formatCurrency(
                       matrix.rows.reduce(
@@ -420,7 +420,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                   {matrix.bid_summaries.map((bs) => (
                     <td
                       key={`total-${bs.bid_id}`}
-                      className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary"
+                      className="whitespace-nowrap text-right tabular-nums"
                     >
                       {formatCurrency(
                         Number(bs.leveled_amount),

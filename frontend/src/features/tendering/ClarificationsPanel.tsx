@@ -28,7 +28,7 @@ const STATUS_VARIANT: Record<ClarificationStatus, BadgeVariant> = {
 };
 
 const fieldCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /**
  * One question. The asker is shown to the buyer only while the question is
@@ -114,7 +114,7 @@ export function ClarificationCard({
               {t('tendering.clarification.save_answer', { defaultValue: 'Save answer' })}
             </Button>
             {item.status === 'answered' && (
-              <Button variant="primary" size="sm" icon={<Send size={13} />} disabled={busy} onClick={onPublish}>
+              <Button variant="primary" size="sm" icon={<Send size={14} />} disabled={busy} onClick={onPublish}>
                 {t('tendering.clarification.publish', { defaultValue: 'Publish to all bidders' })}
               </Button>
             )}
@@ -124,7 +124,7 @@ export function ClarificationCard({
 
       {item.status !== 'open' && !item.addendum_id && (
         <div className="mt-2">
-          <Button variant="ghost" size="sm" icon={<Megaphone size={13} />} disabled={busy} onClick={onPromote}>
+          <Button variant="ghost" size="sm" icon={<Megaphone size={14} />} disabled={busy} onClick={onPromote}>
             {t('tendering.clarification.promote', { defaultValue: 'Turn into addendum' })}
           </Button>
         </div>
@@ -227,7 +227,7 @@ export function ClarificationsPanel({ packageId }: { packageId: string }) {
             value={recipientId}
             onChange={(e) => setRecipientId(e.target.value)}
             aria-label={t('tendering.clarification.asked_by_label', { defaultValue: 'Asked by' })}
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary"
+            className="oe-select"
           >
             <option value="">{t('tendering.clarification.any_firm', { defaultValue: 'Any firm' })}</option>
             {(recipients ?? []).map((r) => (

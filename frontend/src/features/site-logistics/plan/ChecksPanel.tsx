@@ -22,7 +22,7 @@ export function ChecksPanel({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-3" data-testid="plan-checks">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-base font-semibold text-content-primary">{tx(t, 'checks.title')}</h3>
+        <h3 className="oe-card-title">{tx(t, 'checks.title')}</h3>
         <Button size="sm" variant="secondary" loading={run.isPending} onClick={() => run.mutate()} data-testid="plan-checks-run">
           <ListChecks size={14} className="mr-1" />
           {tx(t, 'checks.run')}
@@ -54,7 +54,7 @@ export function ChecksPanel({ projectId }: { projectId: string }) {
           </p>
           {open.length === 0 ? (
             <p className="flex items-center gap-2 text-sm text-content-secondary">
-              <CheckCircle2 size={15} className="text-semantic-success" aria-hidden />
+              <CheckCircle2 size={16} className="text-semantic-success" aria-hidden />
               {tx(t, 'checks.all_passed')}
             </p>
           ) : (

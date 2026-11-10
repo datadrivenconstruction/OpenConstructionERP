@@ -34,7 +34,7 @@ export function TaxRatesPage() {
 
       <CollapsibleSection
         storageKey="tax_rates.how"
-        icon={<Percent size={15} className="text-oe-blue" />}
+        icon={<Percent size={16} className="text-oe-blue" />}
         title={t('tax_rates.flow_title', {
           defaultValue: 'How a tax rate is worked out, and when it declines to give one',
         })}

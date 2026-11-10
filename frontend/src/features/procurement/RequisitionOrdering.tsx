@@ -35,9 +35,9 @@ import {
 } from './requisitionsApi';
 
 const fieldCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const smallFieldCls =
-  'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-sm';
 
 type Translate = ReturnType<typeof useTranslation>['t'];
 
@@ -61,7 +61,7 @@ export function OrderOwnerSelect({ id, value, onChange, disabled }: OrderOwnerSe
   return (
     <select
       id={id}
-      className={fieldCls}
+      className="oe-select"
       value={value}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value as OrderOwner)}
@@ -164,7 +164,7 @@ export function ApproverChainEditor({
           <select
             id={`${idPrefix}-add-approver`}
             aria-label={t('procurement.requisitions.approver_add_label', { defaultValue: 'Approver to add' })}
-            className={smallFieldCls}
+            className="oe-select oe-input-sm"
             value={adding}
             disabled={isLoading || choices.length === 0}
             onChange={(e) => setAdding(e.target.value)}
@@ -340,15 +340,15 @@ export function ConvertLinesTable({ requisitions, chosen, onChange }: ConvertLin
   if (!rows.length) return null;
   return (
     <div className="max-h-72 overflow-auto rounded-lg border border-border-light">
-      <table className="w-full text-xs">
+      <table className="oe-table-compact">
         <thead>
-          <tr className="border-b border-border-light text-left uppercase tracking-wide text-content-tertiary">
-            <th className="px-2 py-1.5 font-medium">{t('procurement.requisitions.col_number', { defaultValue: 'Number' })}</th>
-            <th className="px-2 py-1.5 font-medium">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
-            <th className="px-2 py-1.5 text-right font-medium">
+          <tr className="text-left uppercase tracking-wide text-content-tertiary">
+            <th>{t('procurement.requisitions.col_number', { defaultValue: 'Number' })}</th>
+            <th>{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
+            <th className="text-right">
               {t('procurement.requisitions.col_to_order', { defaultValue: 'Still to order' })}
             </th>
-            <th className="px-2 py-1.5 text-right font-medium">
+            <th className="text-right">
               {t('procurement.requisitions.col_order_now', { defaultValue: 'Order now' })}
             </th>
           </tr>
@@ -358,15 +358,15 @@ export function ConvertLinesTable({ requisitions, chosen, onChange }: ConvertLin
             const value = chosen[item.id] ?? item.quantity_to_order ?? '';
             const invalid = value.trim() !== '' && !/^\d+(\.\d+)?$/.test(value.trim());
             return (
-              <tr key={item.id} className="border-b border-border-light/60 last:border-0">
-                <td className="px-2 py-1 font-mono text-content-tertiary">{req.req_number ?? req.id.slice(0, 8)}</td>
-                <td className="px-2 py-1 text-content-primary">{item.description}</td>
-                <td className="px-2 py-1 text-right tabular-nums">
+              <tr key={item.id} className="last:border-0">
+                <td className="font-mono text-content-tertiary">{req.req_number ?? req.id.slice(0, 8)}</td>
+                <td>{item.description}</td>
+                <td className="text-right tabular-nums">
                   <QuantityDisplay value={item.quantity_to_order ?? '0'} unit={item.unit ?? ''} precision={2} />
                 </td>
-                <td className="px-2 py-1 text-right">
+                <td className="text-right">
                   <input
-                    className={`${smallFieldCls} w-28 text-right ${invalid ? 'border-semantic-error' : ''}`}
+                    className={`${smallFieldCls} w-28 text-right`} aria-invalid={!!(invalid)}
                     inputMode="decimal"
                     aria-label={t('procurement.requisitions.order_now_for', {
                       defaultValue: 'Quantity to order now for {{line}}',
@@ -512,11 +512,11 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
           })}
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('procurement.requisitions.external_system', { defaultValue: 'System' })}
             <input className={`${fieldCls} mt-1`} value={system} maxLength={100} onChange={(e) => setSystem(e.target.value)} />
           </label>
-          <label className="block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('procurement.requisitions.external_order_number', { defaultValue: 'Order number' })}
             <input
               className={`${fieldCls} mt-1`}
@@ -527,17 +527,17 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
           </label>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[48rem] text-xs">
+          <table className="oe-table-compact min-w-[48rem]">
             <thead>
-              <tr className="border-b border-border-light text-left uppercase tracking-wide text-content-tertiary">
-                <th className="w-8 py-1.5" />
-                <th className="py-1.5 pr-2 font-medium">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
-                <th className="py-1.5 pr-2 font-medium">{t('procurement.requisitions.external_line', { defaultValue: 'Line' })}</th>
-                <th className="py-1.5 pr-2 font-medium">{t('procurement.requisitions.col_status', { defaultValue: 'Status' })}</th>
-                <th className="py-1.5 pr-2 text-right font-medium">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
-                <th className="py-1.5 pr-2 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
-                <th className="py-1.5 pr-2 font-medium">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
-                <th className="py-1.5 pr-2 font-medium">
+              <tr className="text-left uppercase tracking-wide text-content-tertiary">
+                <th className="w-8" />
+                <th className="pr-2">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
+                <th className="pr-2">{t('procurement.requisitions.external_line', { defaultValue: 'Line' })}</th>
+                <th className="pr-2">{t('procurement.requisitions.col_status', { defaultValue: 'Status' })}</th>
+                <th className="pr-2 text-right">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
+                <th className="pr-2 text-right">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
+                <th className="pr-2">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
+                <th className="pr-2">
                   {t('procurement.requisitions.external_confirmed', { defaultValue: 'Confirmed delivery' })}
                 </th>
               </tr>
@@ -547,8 +547,8 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                 const d = drafts[i.id];
                 if (!d) return null;
                 return (
-                  <tr key={i.id} className="border-b border-border-light/60 last:border-0">
-                    <td className="py-1">
+                  <tr key={i.id} className="last:border-0">
+                    <td>
                       <input
                         type="checkbox"
                         aria-label={t('procurement.requisitions.external_include', {
@@ -559,8 +559,8 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         onChange={(e) => patch(i.id, { include: e.target.checked })}
                       />
                     </td>
-                    <td className="py-1 pr-2 text-content-primary">{i.description}</td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">{i.description}</td>
+                    <td className="pr-2">
                       <input
                         className={`${smallFieldCls} w-16`}
                         aria-label={`${t('procurement.requisitions.external_line', { defaultValue: 'Line' })}: ${i.description}`}
@@ -570,9 +570,9 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         onChange={(e) => patch(i.id, { ref: e.target.value })}
                       />
                     </td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">
                       <select
-                        className={smallFieldCls}
+                        className="oe-select oe-input-sm"
                         aria-label={`${t('procurement.requisitions.col_status', { defaultValue: 'Status' })}: ${i.description}`}
                         value={d.status}
                         disabled={!d.include}
@@ -585,7 +585,7 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         ))}
                       </select>
                     </td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">
                       <input
                         className={`${smallFieldCls} w-24 text-right`}
                         inputMode="decimal"
@@ -595,7 +595,7 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         onChange={(e) => patch(i.id, { ordered: e.target.value })}
                       />
                     </td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">
                       <input
                         className={`${smallFieldCls} w-24 text-right`}
                         inputMode="decimal"
@@ -605,7 +605,7 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         onChange={(e) => patch(i.id, { received: e.target.value })}
                       />
                     </td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">
                       <input
                         className={`${smallFieldCls} w-16`}
                         aria-label={`${t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}: ${i.description}`}
@@ -615,7 +615,7 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
                         onChange={(e) => patch(i.id, { unit: e.target.value })}
                       />
                     </td>
-                    <td className="py-1 pr-2">
+                    <td className="pr-2">
                       <input
                         type="date"
                         className={smallFieldCls}
@@ -698,10 +698,10 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
       }
     >
       {isLoading || !data ? (
-        <Loader2 size={18} className="animate-spin text-content-tertiary" />
+        <Loader2 size={20} className="animate-spin text-content-tertiary" />
       ) : (
         <div className="space-y-4 text-sm">
-          <label className="block text-xs font-medium text-content-secondary" htmlFor="settings-owner">
+          <label className="oe-label" htmlFor="settings-owner">
             {t('procurement.requisitions.field_order_owner', { defaultValue: 'Orders are placed in' })}
           </label>
           <OrderOwnerSelect id="settings-owner" value={owner} onChange={setOwner} />

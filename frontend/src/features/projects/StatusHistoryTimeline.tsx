@@ -72,7 +72,7 @@ export function StatusHistoryTimeline({
       {!hideHeader && (
         <div className="mb-3 flex items-center gap-2">
           <History size={16} className="text-content-tertiary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('projects.status_history.title', { defaultValue: 'Status history' })}
           </h3>
         </div>
@@ -86,7 +86,7 @@ export function StatusHistoryTimeline({
         </div>
       ) : isError ? (
         <div className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2.5">
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
           <p className="text-sm text-content-secondary">
             {t('projects.status_history.error', {
               defaultValue: 'Could not load the status history for this project.',
@@ -100,7 +100,7 @@ export function StatusHistoryTimeline({
           })}
         </p>
       ) : (
-        <ol className="space-y-2.5">
+        <ol className="space-y-2">
           {history.map((entry) => {
             const actor = displayUser(entry.changed_by);
             return (

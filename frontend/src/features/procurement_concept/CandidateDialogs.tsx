@@ -146,7 +146,7 @@ export function CandidateDialog({
             htmlFor="cd-list"
             hint={listVerdict ? errorText(labels.t, listVerdict) : undefined}
           >
-            <select id="cd-list" className={FIELD_CLASS} disabled={!!listVerdict} value={draft.list} onChange={(e) => set('list', e.target.value as CandidateList)}>
+            <select id="cd-list" className="oe-select" disabled={!!listVerdict} value={draft.list} onChange={(e) => set('list', e.target.value as CandidateList)}>
               {LISTS.map((l) => (
                 <option key={l} value={l}>
                   {vocab(labels.t, CANDIDATE_LIST, l)}
@@ -157,7 +157,7 @@ export function CandidateDialog({
           <Field label={t('procurement_concept.ui.candidate.source', { defaultValue: 'Where the company came from' })} htmlFor="cd-source">
             <select
               id="cd-source"
-              className={FIELD_CLASS}
+              className="oe-select"
               value={draft.source}
               onChange={(e) => set('source', e.target.value as CandidateSource)}
             >
@@ -180,7 +180,7 @@ export function CandidateDialog({
           <textarea
             id="cd-rationale"
             rows={2}
-            className={FIELD_CLASS}
+            className="oe-textarea"
             value={draft.decision_rationale}
             onChange={(e) => set('decision_rationale', e.target.value)}
           />
@@ -198,7 +198,7 @@ export function CandidateDialog({
             <textarea
               id="cd-conflict"
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.conflict_note}
               onChange={(e) => set('conflict_note', e.target.value)}
             />
@@ -288,7 +288,7 @@ export function ScoresDialog({
               {r.kind === 'pass_fail' ? (
                 <select
                   id={id}
-                  className={FIELD_CLASS}
+                  className="oe-select"
                   value={r.passed}
                   onChange={(e) => patch(r.criterion_code, { passed: e.target.value as ScoreDraft['passed'] })}
                 >

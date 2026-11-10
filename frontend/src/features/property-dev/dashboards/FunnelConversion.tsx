@@ -104,7 +104,7 @@ export function FunnelConversion({ developmentId }: FunnelConversionProps) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('propdev.dashboards.funnel.title', {
               defaultValue: 'Conversion funnel',
             })}

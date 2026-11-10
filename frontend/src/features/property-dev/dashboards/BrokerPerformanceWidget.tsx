@@ -126,7 +126,7 @@ export function BrokerPerformanceWidget({
       className="space-y-3"
     >
       <header>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('propdev.dashboards.bp.title', {
             defaultValue: 'Broker performance',
           })}
@@ -140,9 +140,9 @@ export function BrokerPerformanceWidget({
       </header>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-xs">
+        <table className="oe-table-compact min-w-full">
           <thead>
-            <tr className="border-b border-divider text-content-tertiary">
+            <tr className="border-divider text-content-tertiary">
               <SortHeader
                 label={t('propdev.dashboards.bp.col_broker', {
                   defaultValue: 'Broker',
@@ -204,26 +204,26 @@ export function BrokerPerformanceWidget({
           </thead>
           <tbody>
             {sortedRows.map((r: BrokerLeaderboardRow) => (
-              <tr key={r.broker_id} className="border-b border-divider/50">
-                <td className="px-2 py-1.5 font-medium text-content-primary">
+              <tr key={r.broker_id} className="border-divider/50">
+                <td>
                   {r.broker_name || '—'}
                 </td>
-                <td className="px-2 py-1.5 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   {r.leads_assigned}
                 </td>
-                <td className="px-2 py-1.5 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   {r.reservations_closed}
                 </td>
-                <td className="px-2 py-1.5 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   {r.sales_closed}
                 </td>
-                <td className="px-2 py-1.5 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   {fmtPercent(num(r.conversion_rate_pct))}
                 </td>
-                <td className="px-2 py-1.5 text-right">
+                <td className="text-right">
                   <CurrencyStack rows={r.gmv} />
                 </td>
-                <td className="px-2 py-1.5 text-right">
+                <td className="text-right">
                   <CurrencyStack rows={r.commission_earned} />
                 </td>
               </tr>

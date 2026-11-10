@@ -431,7 +431,7 @@ function GenerateDialog({
     >
       <Field required label={t('qualityConcept.generate.package', { defaultValue: 'Package' })}>
         <select
-          className={inputCls}
+          className="oe-select"
           value={pkg}
           onChange={(e) => {
             setPkg(e.target.value);
@@ -569,7 +569,7 @@ function ProofDialog({
     >
       <div className="grid gap-3 md:grid-cols-2">
         <Field label={t('qualityConcept.generate.package', { defaultValue: 'Package' })}>
-          <select className={inputCls} value={pkg} disabled={!!proof} onChange={(e) => setPkg(e.target.value)}>
+          <select className="oe-select" value={pkg} disabled={!!proof} onChange={(e) => setPkg(e.target.value)}>
             <option value="">{t('qualityConcept.proofs.no_package', { defaultValue: 'Whole project' })}</option>
             {concept.applicable_packages.map((p) => (
               <option key={p.ref} value={p.ref}>
@@ -579,7 +579,7 @@ function ProofDialog({
           </select>
         </Field>
         <Field required label={t('qualityConcept.proofs.type', { defaultValue: 'Kind of proof' })}>
-          <select className={inputCls} value={type} disabled={!!proof} onChange={(e) => setType(e.target.value)} data-testid="proof-type">
+          <select className="oe-select" value={type} disabled={!!proof} onChange={(e) => setType(e.target.value)} data-testid="proof-type">
             {types.map((e) => (
               <option key={e.code} value={e.code}>
                 {nameIn(labels, types, e.code)}
@@ -609,7 +609,7 @@ function ProofDialog({
         </Field>
         <Field required label={vocab(t as TFn, REQUIRED_BY_KIND, dueKind)}>
           {dueKind === 'stage' ? (
-            <select className={inputCls} value={ref} onChange={(e) => setDueRef(e.target.value)} data-testid="proof-due-ref">
+            <select className="oe-select" value={ref} onChange={(e) => setDueRef(e.target.value)} data-testid="proof-due-ref">
               {stageCodes.map((c) => (
                 <option key={c} value={c}>
                   {nameIn(labels, catalogue?.commissioning_stages, c)}
@@ -617,7 +617,7 @@ function ProofDialog({
               ))}
             </select>
           ) : dueKind === 'acceptance_unit' ? (
-            <select className={inputCls} value={ref} onChange={(e) => setDueRef(e.target.value)} data-testid="proof-due-ref">
+            <select className="oe-select" value={ref} onChange={(e) => setDueRef(e.target.value)} data-testid="proof-due-ref">
               {units.map((u) => (
                 <option key={u.id} value={u.id}>
                   {[u.code, u.title].filter(Boolean).join(' ')}
@@ -685,7 +685,7 @@ function WaiverDialog({ projectId, proof, catalogue, labels, onClose }: PanelPro
         })}
       </Hint>
       <Field required label={t('qualityConcept.common.reason', { defaultValue: 'Reason' })}>
-        <textarea rows={3} className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="waiver-reason" />
+        <textarea rows={3} className="oe-textarea" value={reason} onChange={(e) => setReason(e.target.value)} data-testid="waiver-reason" />
       </Field>
     </FormDialog>
   );

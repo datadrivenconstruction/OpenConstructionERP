@@ -349,10 +349,10 @@ export function SitePlanPanel({ projectId, catalogue, readOnly = false }: PanelP
             <>
               <p className="text-sm text-content-secondary">{tx(t, 'siteplan.lead')}</p>
               <div className="flex flex-wrap items-end gap-3">
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {tx(t, 'siteplan.stage')}
                   <select
-                    className="mt-1 block h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary"
+                    className="oe-select mt-1 block"
                     value={stageId}
                     onChange={(e) => setStagePick(e.target.value)}
                     data-testid="siteplan-stage"
@@ -365,10 +365,10 @@ export function SitePlanPanel({ projectId, catalogue, readOnly = false }: PanelP
                   </select>
                 </label>
                 {!locked && (
-                  <label className="text-xs font-medium text-content-secondary">
+                  <label className="oe-label">
                     {tx(t, 'siteplan.draw')}
                     <select
-                      className="mt-1 block h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary"
+                      className="oe-select mt-1 block"
                       value={targetKey}
                       onChange={(e) => begin(e.target.value)}
                       data-testid="siteplan-target"

@@ -205,23 +205,23 @@ export function ScimPanel() {
                   {t('scim.groups_empty', { defaultValue: 'No groups yet. They appear when the identity provider pushes them.' })}
                 </p>
               ) : (
-                <table className="w-full text-sm" data-testid="scim-groups">
+                <table className="oe-table-compact" data-testid="scim-groups">
                   <thead>
                     <tr className="text-left text-xs text-content-secondary">
-                      <th className="py-1 pr-3 font-medium">{t('scim.col_group', { defaultValue: 'Group' })}</th>
-                      <th className="py-1 pr-3 font-medium">{t('scim.col_members', { defaultValue: 'Members' })}</th>
-                      <th className="py-1 font-medium">{t('scim.col_role', { defaultValue: 'Role' })}</th>
+                      <th className="pr-3">{t('scim.col_group', { defaultValue: 'Group' })}</th>
+                      <th className="pr-3">{t('scim.col_members', { defaultValue: 'Members' })}</th>
+                      <th>{t('scim.col_role', { defaultValue: 'Role' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.groups.map((g) => (
-                      <tr key={g.id} className="border-t border-border-light">
-                        <td className="py-1.5 pr-3">{g.display_name}</td>
-                        <td className="py-1.5 pr-3">{g.member_count}</td>
-                        <td className="py-1.5">
+                      <tr key={g.id}>
+                        <td className="pr-3">{g.display_name}</td>
+                        <td className="pr-3">{g.member_count}</td>
+                        <td>
                           <select
                             aria-label={t('scim.role_for', { defaultValue: 'Role for {{name}}', name: g.display_name })}
-                            className="rounded-lg border border-border bg-surface-primary px-2 py-1 text-sm"
+                            className="oe-select"
                             value={g.role ?? ''}
                             disabled={setRole.isPending}
                             onChange={(e) => setRole.mutate({ id: g.id, role: e.target.value || null })}
@@ -250,23 +250,23 @@ export function ScimPanel() {
           <Card>
             <CardHeader title={t('scim.users_title', { defaultValue: 'People' })} />
             <CardContent>
-              <table className="w-full text-sm" data-testid="scim-users">
+              <table className="oe-table-compact" data-testid="scim-users">
                 <thead>
                   <tr className="text-left text-xs text-content-secondary">
-                    <th className="py-1 pr-3 font-medium">{t('scim.col_user', { defaultValue: 'User' })}</th>
-                    <th className="py-1 pr-3 font-medium">{t('scim.col_source', { defaultValue: 'Source' })}</th>
-                    <th className="py-1 pr-3 font-medium">{t('scim.col_role', { defaultValue: 'Role' })}</th>
-                    <th className="py-1 font-medium">{t('scim.col_last_sync', { defaultValue: 'Last sync' })}</th>
+                    <th className="pr-3">{t('scim.col_user', { defaultValue: 'User' })}</th>
+                    <th className="pr-3">{t('scim.col_source', { defaultValue: 'Source' })}</th>
+                    <th className="pr-3">{t('scim.col_role', { defaultValue: 'Role' })}</th>
+                    <th>{t('scim.col_last_sync', { defaultValue: 'Last sync' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.users.map((u) => (
-                    <tr key={u.id} className="border-t border-border-light">
-                      <td className="py-1.5 pr-3">
+                    <tr key={u.id}>
+                      <td className="pr-3">
                         <div className={u.is_active ? '' : 'text-content-tertiary line-through'}>{u.email}</div>
                         {u.full_name && <div className="text-xs text-content-secondary">{u.full_name}</div>}
                       </td>
-                      <td className="py-1.5 pr-3">
+                      <td className="pr-3">
                         <Badge variant={SOURCE_VARIANT[u.source]} size="sm">
                           {t(`scim.source_${u.source}`, { defaultValue: u.source === 'local' ? 'Local' : u.source.toUpperCase() })}
                         </Badge>
@@ -276,8 +276,8 @@ export function ScimPanel() {
                           </Badge>
                         )}
                       </td>
-                      <td className="py-1.5 pr-3">{roleLabel(u.role)}</td>
-                      <td className="py-1.5 text-xs text-content-secondary">{formatWhen(u.last_sync_at, i18n.language)}</td>
+                      <td className="pr-3">{roleLabel(u.role)}</td>
+                      <td className="text-content-secondary">{formatWhen(u.last_sync_at, i18n.language)}</td>
                     </tr>
                   ))}
                 </tbody>

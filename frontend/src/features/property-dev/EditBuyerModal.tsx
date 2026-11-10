@@ -42,7 +42,7 @@ import {
 import { fmtFixed } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -353,7 +353,7 @@ export function EditBuyerModal({
           label={t('propdev.edit.language', { defaultValue: 'Language' })}
         >
           <select
-            className={inputCls}
+            className="oe-select"
             value={form.language}
             onChange={(e) => setForm({ ...form, language: e.target.value })}
             data-testid="edit-buyer-language"
@@ -379,7 +379,7 @@ export function EditBuyerModal({
           })}
         >
           <select
-            className={inputCls}
+            className="oe-select"
             value={form.plot_id}
             onChange={(e) => setForm({ ...form, plot_id: e.target.value })}
             data-testid="edit-buyer-plot"
@@ -401,7 +401,7 @@ export function EditBuyerModal({
           })}
         >
           <select
-            className={inputCls}
+            className="oe-select"
             value={form.status}
             onChange={(e) =>
               setForm({ ...form, status: e.target.value as BuyerStatus })
@@ -425,7 +425,7 @@ export function EditBuyerModal({
           })}
         >
           <select
-            className={inputCls}
+            className="oe-select"
             value={form.jurisdiction}
             onChange={(e) =>
               setForm({ ...form, jurisdiction: e.target.value.toUpperCase() })

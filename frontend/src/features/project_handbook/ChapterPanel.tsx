@@ -40,7 +40,7 @@ import {
 } from './labels';
 
 const FIELD_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-textarea';
 
 function ActionButton({
   can,
@@ -225,7 +225,7 @@ export function ChapterPanel({
     <div className="space-y-4" data-testid="handbook-chapter">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-content-primary">{chapterTitle(tf, chapter)}</h2>
+          <h2 className="oe-section-title">{chapterTitle(tf, chapter)}</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <Badge variant={CHAPTER_TONE[status]} dot>
               {keyText(tf, CHAPTER_STATUS[status])}
@@ -323,7 +323,7 @@ export function ChapterPanel({
       ) : null}
       {chapter.linked.length > 0 ? (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('projectHandbook.live_records', { defaultValue: 'Live from the project' })}
           </h3>
           <p className="text-xs text-content-secondary">
@@ -338,7 +338,7 @@ export function ChapterPanel({
       ) : null}
 
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('projectHandbook.versions', { defaultValue: 'Approved versions' })}
         </h3>
         {chapter.versions.length === 0 ? (

@@ -69,7 +69,7 @@ function Chip({ route }: { route: string }) {
               : 'border-border-light bg-surface-primary/90 text-content-secondary backdrop-blur hover:border-oe-blue/40 hover:text-oe-blue',
           )}
         >
-          <Icon size={13} aria-hidden />
+          <Icon size={14} aria-hidden />
           {label}
           <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue">{count}</span>
           <ChevronDown size={12} className={clsx('transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden />

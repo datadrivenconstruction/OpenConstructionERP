@@ -106,7 +106,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
           {t('packs.focus_installed', { defaultValue: '{{pack}} is set up', pack: packName })}
         </p>
         <h1 className="sr-only">{t('nav.packs', { defaultValue: 'Packs' })}</h1>
-        <h2 className="mt-2 text-xl font-semibold text-content-primary" data-testid="pack-focus-headline">
+        <h2 className="oe-section-title mt-2" data-testid="pack-focus-headline">
           {t('packs.focus_headline', {
             defaultValue: '{{on}} modules are on for {{pack}}. {{hidden}} others are hidden.',
             on: on.length,
@@ -121,7 +121,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <a href="#more-modules" className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-oe-blue px-3 text-sm font-medium text-content-inverse hover:bg-oe-blue-hover">
-            <Layers3 size={15} aria-hidden />
+            <Layers3 size={16} aria-hidden />
             {t('packs.focus_more', { defaultValue: 'Show more modules' })}
           </a>
           <Button variant="secondary" onClick={() => void showAll()} disabled={resetting} data-testid="pack-focus-show-all">
@@ -133,7 +133,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
 
       {steps.length > 0 && (
         <section className="rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
-          <h2 className="mb-3 inline-flex items-center gap-2 text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title mb-3 inline-flex items-center gap-2">
             <Rocket size={16} aria-hidden className="text-oe-blue" />
             {t('packs.focus_start', { defaultValue: 'Start here' })}
           </h2>
@@ -157,14 +157,14 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
       )}
 
       <section className="rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
-        <h2 className="mb-3 text-base font-semibold text-content-primary">
+        <h2 className="oe-section-title mb-3">
           {t('packs.focus_on_title', { defaultValue: 'On in your menu' })}
         </h2>
         <FocusModuleList modules={on} testId="pack-focus-on" />
       </section>
 
       <section id="more-modules" className="scroll-mt-20 rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
-        <h2 className="mb-1 inline-flex items-center gap-2 text-base font-semibold text-content-primary">
+        <h2 className="oe-section-title mb-1 inline-flex items-center gap-2">
           <EyeOff size={16} aria-hidden className="text-content-tertiary" />
           {t('packs.focus_hidden_title', { defaultValue: 'Hidden modules' })}
         </h2>

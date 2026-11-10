@@ -156,7 +156,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
   };
 
   const inputClass =
-    'h-9 rounded-lg border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
+    'oe-input';
 
   return (
     <WideModal
@@ -225,7 +225,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="flex flex-col gap-1 text-xs text-content-secondary">
               {t('schedule.progress_sheet.filter_wbs', { defaultValue: 'WBS' })}
-              <select className={inputClass} value={wbs} onChange={(e) => setWbs(e.target.value)} data-testid="ps-wbs">
+              <select className="oe-select" value={wbs} onChange={(e) => setWbs(e.target.value)} data-testid="ps-wbs">
                 <option value="">{t('schedule.progress_sheet.filter_all', { defaultValue: 'All' })}</option>
                 {prefixes.map((p) => (
                   <option key={p} value={p}>
@@ -237,7 +237,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
             <label className="flex flex-col gap-1 text-xs text-content-secondary">
               {t('schedule.progress_sheet.filter_responsible', { defaultValue: 'Responsible' })}
               <select
-                className={inputClass}
+                className="oe-select"
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 data-testid="ps-assignee"
@@ -356,18 +356,18 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                 )}
               </div>
               <div className="max-h-[50vh] overflow-auto rounded-lg border border-border-light">
-                <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-surface-secondary text-content-secondary">
+                <table className="oe-table-compact">
+                  <thead className="sticky top-0">
                     <tr>
-                      <th className="w-8 px-2 py-2" />
-                      <th className="px-2 py-2 text-left">{t('schedule.progress_sheet.col_row', { defaultValue: 'Row' })}</th>
-                      <th className="px-2 py-2 text-left">
+                      <th className="w-8" />
+                      <th>{t('schedule.progress_sheet.col_row', { defaultValue: 'Row' })}</th>
+                      <th>
                         {t('schedule.progress_sheet.col_activity', { defaultValue: 'Activity' })}
                       </th>
-                      <th className="px-2 py-2 text-left">
+                      <th>
                         {t('schedule.progress_sheet.col_changes', { defaultValue: 'Changes' })}
                       </th>
-                      <th className="px-2 py-2 text-left">
+                      <th>
                         {t('schedule.progress_sheet.col_checks', { defaultValue: 'Checks' })}
                       </th>
                     </tr>
@@ -376,10 +376,10 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                     {preview.rows.map((row) => (
                       <tr
                         key={row.row_number}
-                        className="border-t border-border-light align-top"
+                        className="align-top"
                         data-testid={`ps-row-${row.row_number}`}
                       >
-                        <td className="px-2 py-2">
+                        <td>
                           <input
                             type="checkbox"
                             aria-label={t('schedule.progress_sheet.select_row', {
@@ -391,8 +391,8 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                             onChange={() => toggle(row)}
                           />
                         </td>
-                        <td className="px-2 py-2 tabular-nums text-content-tertiary">{row.row_number}</td>
-                        <td className="px-2 py-2">
+                        <td className="tabular-nums text-content-tertiary">{row.row_number}</td>
+                        <td>
                           <div className="font-medium text-content-primary">{row.name ?? '-'}</div>
                           <div className="text-content-tertiary">{row.activity_code}</div>
                           {row.stale && (
@@ -401,7 +401,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                             </Badge>
                           )}
                         </td>
-                        <td className="px-2 py-2">
+                        <td>
                           {Object.keys(row.changes).length === 0 ? (
                             <span className="text-content-tertiary">
                               {t('schedule.progress_sheet.no_changes', { defaultValue: 'No changes' })}
@@ -424,7 +424,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                             </ul>
                           )}
                         </td>
-                        <td className="px-2 py-2">
+                        <td>
                           <ul className="space-y-1">
                             {row.issues.map((issue, i) => (
                               <li

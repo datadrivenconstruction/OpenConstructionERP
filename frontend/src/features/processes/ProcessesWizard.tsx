@@ -155,7 +155,7 @@ export function ProcessesWizard() {
     });
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4" data-testid="processes-wizard">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4" data-testid="processes-wizard">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" aria-hidden />
       <div
         ref={ref}
@@ -166,7 +166,7 @@ export function ProcessesWizard() {
       >
         <header className="flex items-start gap-3 border-b border-border-light px-4 py-4 sm:px-6">
           <div className="min-w-0 flex-1">
-            <h2 id="processes-wizard-title" className="text-lg font-semibold text-content-primary">
+            <h2 id="processes-wizard-title" className="oe-section-title">
               {t('processes.wizard.title', { defaultValue: 'What will you use?' })}
             </h2>
             <p className="mt-1 text-sm text-content-secondary">

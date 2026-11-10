@@ -355,7 +355,7 @@ function SoundingDialog({
             <input id="ms-date" type="date" className={FIELD_CLASS} value={draft.held_on} onChange={(e) => set('held_on', e.target.value)} />
           </Field>
           <Field label={t('procurement_concept.ui.sounding.method', { defaultValue: 'How the market was asked' })} htmlFor="ms-method">
-            <select id="ms-method" className={FIELD_CLASS} value={draft.method} onChange={(e) => set('method', e.target.value as SoundingMethod)}>
+            <select id="ms-method" className="oe-select" value={draft.method} onChange={(e) => set('method', e.target.value as SoundingMethod)}>
               {METHODS.map((m) => (
                 <option key={m} value={m}>
                   {vocab(labels.t, METHOD, m)}
@@ -420,7 +420,7 @@ function SoundingDialog({
           <Field label={t('procurement_concept.ui.sounding.capacity', { defaultValue: 'Capacity' })} htmlFor="ms-capacity">
             <select
               id="ms-capacity"
-              className={FIELD_CLASS}
+              className="oe-select"
               value={draft.capacity_signal}
               onChange={(e) => set('capacity_signal', e.target.value as CapacitySignal)}
             >
@@ -432,7 +432,7 @@ function SoundingDialog({
             </select>
           </Field>
           <Field label={t('procurement_concept.ui.sounding.price', { defaultValue: 'Price level' })} htmlFor="ms-price">
-            <select id="ms-price" className={FIELD_CLASS} value={draft.price_signal} onChange={(e) => set('price_signal', e.target.value as PriceSignal)}>
+            <select id="ms-price" className="oe-select" value={draft.price_signal} onChange={(e) => set('price_signal', e.target.value as PriceSignal)}>
               {PRICES.map((p) => (
                 <option key={p} value={p}>
                   {vocab(labels.t, PRICE, p)}
@@ -451,10 +451,10 @@ function SoundingDialog({
           </Field>
         </div>
         <Field label={t('procurement_concept.ui.sounding.findings', { defaultValue: 'What the market said' })} htmlFor="ms-findings">
-          <textarea id="ms-findings" rows={3} className={FIELD_CLASS} value={draft.findings} onChange={(e) => set('findings', e.target.value)} />
+          <textarea id="ms-findings" rows={3} className="oe-textarea" value={draft.findings} onChange={(e) => set('findings', e.target.value)} />
         </Field>
         <Field label={t('procurement_concept.ui.sounding.mitigation', { defaultValue: 'What we do about it' })} htmlFor="ms-mitigation">
-          <textarea id="ms-mitigation" rows={2} className={FIELD_CLASS} value={draft.mitigation} onChange={(e) => set('mitigation', e.target.value)} />
+          <textarea id="ms-mitigation" rows={2} className="oe-textarea" value={draft.mitigation} onChange={(e) => set('mitigation', e.target.value)} />
         </Field>
         <label className="flex items-center gap-2 text-sm text-content-primary">
           <input type="checkbox" checked={draft.resplit} onChange={(e) => set('resplit', e.target.checked)} />

@@ -98,8 +98,8 @@ export function badgeLabel(badge: NavBadgeData, t: TFunction): string {
 
 const TONE_CLASS: Record<NavBadgeTone, string> = {
   neutral: 'bg-surface-secondary text-content-secondary border-border-light',
-  warning: 'bg-semantic-warning/15 text-semantic-warning dark:text-amber-300 border-amber-500/30',
-  danger: 'bg-semantic-error/15 text-semantic-error dark:text-red-300 border-red-500/30',
+  warning: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30',
+  danger: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30',
 };
 
 /** What the Sidebar renders in a row's badge slot. Nothing when the row has no count. */

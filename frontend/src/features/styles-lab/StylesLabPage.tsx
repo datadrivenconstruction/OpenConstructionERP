@@ -128,7 +128,7 @@ function Grid({ children }: { children: ReactNode }) {
 function SectionTitle({ children, sub }: { children: ReactNode; sub?: string }) {
   return (
     <div className="mb-6 flex items-baseline gap-3">
-      <h2 className="text-xl font-semibold text-content-primary">{children}</h2>
+      <h2 className="oe-section-title">{children}</h2>
       {sub && <span className="text-xs text-content-tertiary">{sub}</span>}
     </div>
   );
@@ -180,7 +180,7 @@ function HeadingsSection() {
               <Building2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold tracking-tight text-content-primary leading-tight">Project overview</h3>
+              <h3 className="oe-section-title">Project overview</h3>
               <div className="text-xs text-content-tertiary">12 BOQs · 4 active phases</div>
             </div>
           </div>
@@ -271,7 +271,7 @@ function ButtonsSection() {
         </Specimen>
 
         <Specimen no={5} name="Brutalist Hard Shadow" family="Bold" note="Чёрный border + offset-shadow. Маркетинг, dev-инструменты. r=8px.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold bg-yellow-300 text-black border-2 border-black shadow-[3px_3px_0_0_#000] hover:shadow-[5px_5px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-[1px_1px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-fast">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold bg-semantic-warning text-black border-2 border-black shadow-[3px_3px_0_0_#000] hover:shadow-[5px_5px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-[1px_1px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-fast">
             <ArrowRight className="h-4 w-4" /> Ship it
           </button>
         </Specimen>

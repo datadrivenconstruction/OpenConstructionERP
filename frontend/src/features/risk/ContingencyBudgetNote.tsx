@@ -79,7 +79,7 @@ export function ContingencyBudgetNote({
         </span>
       )}
       <Link to="/risks" className="inline-flex items-center gap-0.5 font-medium text-oe-blue-text hover:underline">
-        <ShieldAlert size={11} />
+        <ShieldAlert size={12} />
         {t('risk.cont_budget_link', { defaultValue: 'Risk register' })}
       </Link>
     </span>

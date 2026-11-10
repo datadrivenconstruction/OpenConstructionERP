@@ -93,7 +93,7 @@ export function FrameworkSettings({ projectId, settings, canPin = true, labels, 
   return (
     <section className="space-y-4 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="framework-settings">
       <div>
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('stakeholders.ui.framework.title', { defaultValue: 'Stakeholder framework' })}
         </h2>
         <p className="text-xs text-content-secondary">
@@ -168,7 +168,7 @@ export function FrameworkSettings({ projectId, settings, canPin = true, labels, 
               type="number"
               min={1}
               max={3650}
-              className={FIELD_CLASS}
+              className="oe-input"
               value={days}
               disabled={!allowed}
               onChange={(e) => setDays(e.target.value)}
@@ -243,7 +243,7 @@ export function ExportBar({ projectId, settings, document }: { projectId: string
             key={format}
             size="sm"
             variant="ghost"
-            icon={<Download size={13} />}
+            icon={<Download size={14} />}
             loading={busy === format}
             onClick={() => download(format)}
             data-testid={`export-${document}-${format}`}
@@ -255,7 +255,7 @@ export function ExportBar({ projectId, settings, document }: { projectId: string
           <Button
             size="sm"
             variant="secondary"
-            icon={<FileCheck2 size={13} />}
+            icon={<FileCheck2 size={14} />}
             loading={file.busy}
             disabled={!filing.allowed || (asksReason && !reason.trim())}
             onClick={() => file.run(undefined)}
@@ -279,11 +279,11 @@ export function ExportBar({ projectId, settings, document }: { projectId: string
           </p>
           <label className="block text-xs text-content-secondary">
             {t('stakeholders.ui.export.change_reason', { defaultValue: 'Why the document changes' })}
-            <textarea rows={2} className={FIELD_CLASS} value={reason} onChange={(e) => setReason(e.target.value)} />
+            <textarea rows={2} className="oe-textarea" value={reason} onChange={(e) => setReason(e.target.value)} />
           </label>
           <label className="block text-xs text-content-secondary">
             {t('stakeholders.ui.export.change_impact', { defaultValue: 'What the change affects (optional)' })}
-            <textarea rows={2} className={FIELD_CLASS} value={impact} onChange={(e) => setImpact(e.target.value)} />
+            <textarea rows={2} className="oe-textarea" value={impact} onChange={(e) => setImpact(e.target.value)} />
           </label>
         </div>
       ) : (

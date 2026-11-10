@@ -113,8 +113,8 @@ export function RoutePin({ projectId, model, kind, onDone }: RoutePinProps) {
 
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid={`route-pin-${kind}`}>
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-        <RouteIcon size={15} className="text-content-tertiary" aria-hidden />
+      <h3 className="oe-card-title flex items-center gap-2">
+        <RouteIcon size={16} className="text-content-tertiary" aria-hidden />
         {title}
       </h3>
       <p className="mt-1 text-xs text-content-secondary">{t(spec.body[0], { defaultValue: spec.body[1] })}</p>
@@ -158,7 +158,7 @@ export function RoutePin({ projectId, model, kind, onDone }: RoutePinProps) {
         <div className="mt-2 flex flex-col items-start gap-1">
           <select
             aria-label={title}
-            className="min-w-[16rem] rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary disabled:opacity-60"
+            className="oe-select min-w-[16rem]"
             value={pinnedMissing ? '' : pinned ?? ''}
             disabled={!!verdict || pin.isPending}
             onChange={(e) => pin.mutate(e.target.value || null)}

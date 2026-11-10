@@ -109,7 +109,7 @@ export function WorkPrefsCard() {
                       })}
                       value={prefs.projectStart[role] ?? 'overview'}
                       onChange={(e) => setProjectStart(role, e.target.value as ProjectStartPage)}
-                      className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                      className="oe-select"
                     >
                       {PROJECT_START_PAGES.map((page) => (
                         <option key={page} value={page}>

@@ -72,7 +72,7 @@ function RoleChip({ role }: { role: UserRole }) {
   return (
     <Badge variant={meta.variant} size="sm">
       <span className="inline-flex items-center gap-1">
-        <Icon size={11} />
+        <Icon size={12} />
         {t(`users.roles.${role}`, { defaultValue: role })}
       </span>
     </Badge>
@@ -266,8 +266,8 @@ export function SettingsTeamPanel() {
           {!canListMembers ? (
             // Honest read-only state: no users.list permission, so we show the
             // caller's own membership only and point to the admin.
-            <div className="flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/30 px-4 py-3">
-              <Info size={15} className="mt-0.5 shrink-0 text-content-tertiary" />
+            <div className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-4 py-3">
+              <Info size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
               <div className="min-w-0 text-sm">
                 <p className="text-content-primary font-medium">
                   {t('settings.members_readonly_title', { defaultValue: 'Member list is admin-only' })}
@@ -334,7 +334,7 @@ export function SettingsTeamPanel() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
-                          <Mail size={11} />
+                          <Mail size={12} />
                           <span className="truncate">{m.email}</span>
                         </div>
                       </div>
@@ -406,7 +406,7 @@ export function SettingsTeamPanel() {
               className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-oe-blue hover:underline"
             >
               {t('settings.license_read_agpl', { defaultValue: 'Read the AGPL-3.0 license' })}
-              <ExternalLink size={11} />
+              <ExternalLink size={12} />
             </a>
           </div>
 
@@ -459,7 +459,7 @@ export function SettingsTeamPanel() {
                   className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-oe-blue/30 bg-surface-elevated px-4 py-2 text-sm font-medium text-oe-blue transition-colors hover:bg-oe-blue/10"
                 >
                   {t('settings.license_request_cta', { defaultValue: 'Request a commercial license' })}
-                  <ExternalLink size={13} />
+                  <ExternalLink size={14} />
                 </a>
               </div>
             </div>

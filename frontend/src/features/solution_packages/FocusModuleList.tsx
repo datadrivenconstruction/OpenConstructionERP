@@ -37,7 +37,7 @@ export function FocusModuleList({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('packs.focus_search', { defaultValue: 'Find a module' })}
           aria-label={t('packs.focus_search', { defaultValue: 'Find a module' })}
-          className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm"
+          className="oe-input"
         />
       )}
       {groups.map((group) => {
@@ -72,7 +72,7 @@ export function FocusModuleList({
                       className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-2.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-60"
                       data-testid={`focus-show-${m.key}`}
                     >
-                      {busy === m.key ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} aria-hidden />}
+                      {busy === m.key ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} aria-hidden />}
                       {t('packs.focus_show', { defaultValue: 'Show' })}
                     </button>
                   )}

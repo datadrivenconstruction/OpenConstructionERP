@@ -151,7 +151,7 @@ export function ConceptDialog({ open, onClose, projectId, concept, catalogues, c
             defaultValue: 'The catalogue brings the procedures, the thresholds with their sources and the usual lead times.',
           })}
         >
-          <select id="pc-catalogue" className={FIELD_CLASS} value={catalogue} onChange={(e) => setPicked(e.target.value)}>
+          <select id="pc-catalogue" className="oe-select" value={catalogue} onChange={(e) => setPicked(e.target.value)}>
             {pinned && concept && !listed && catalogue === pinned && <option value={pinned}>{concept.catalogue_id}</option>}
             {usable.map((c) => (
               <option key={`${c.source}:${c.id}`} value={`${c.source}:${c.id}`}>
@@ -162,7 +162,7 @@ export function ConceptDialog({ open, onClose, projectId, concept, catalogues, c
         </Field>
 
         <Field label={t('procurement_concept.ui.concept.jurisdiction', { defaultValue: 'Procurement law' })} htmlFor="pc-jurisdiction">
-          <select id="pc-jurisdiction" className={FIELD_CLASS} value={law?.code ?? ''} onChange={(e) => setLawPick(e.target.value)}>
+          <select id="pc-jurisdiction" className="oe-select" value={law?.code ?? ''} onChange={(e) => setLawPick(e.target.value)}>
             {laws.map((j) => (
               <option key={j.code} value={j.code}>
                 {catalogueName(labels, 'jurisdiction', j) || vocab(labels.t, JURISDICTION, j.code)}
@@ -197,7 +197,7 @@ export function ConceptDialog({ open, onClose, projectId, concept, catalogues, c
         {isPublic && (
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t('procurement_concept.ui.concept.client_type', { defaultValue: 'Kind of public client' })} htmlFor="pc-client-type">
-              <select id="pc-client-type" className={FIELD_CLASS} value={chosenType} onChange={(e) => setClientType(e.target.value)}>
+              <select id="pc-client-type" className="oe-select" value={chosenType} onChange={(e) => setClientType(e.target.value)}>
                 {publicTypes.map((c) => (
                   <option key={c} value={c}>
                     {vocab(labels.t, CLIENT_TYPE, c)}
@@ -246,7 +246,7 @@ export function ConceptDialog({ open, onClose, projectId, concept, catalogues, c
                     })
             }
           >
-            <select id="pc-gate" className={FIELD_CLASS} disabled={!!gateOff} value={gate} onChange={(e) => setGate(e.target.value)}>
+            <select id="pc-gate" className="oe-select" disabled={!!gateOff} value={gate} onChange={(e) => setGate(e.target.value)}>
               <option value="">
                 {fromStart
                   ? t('procurement_concept.ui.concept.gate_none_from_start', {

@@ -145,7 +145,7 @@ export function DesktopToolbar() {
         aria-label={t('desktop.back', { defaultValue: 'Back' })}
         title={t('desktop.back', { defaultValue: 'Back' })}
       >
-        <ArrowLeft size={15} strokeWidth={1.9} />
+        <ArrowLeft size={16} strokeWidth={1.9} />
       </button>
       <button
         type="button"
@@ -154,7 +154,7 @@ export function DesktopToolbar() {
         aria-label={t('desktop.forward', { defaultValue: 'Forward' })}
         title={t('desktop.forward', { defaultValue: 'Forward' })}
       >
-        <ArrowRight size={15} strokeWidth={1.9} />
+        <ArrowRight size={16} strokeWidth={1.9} />
       </button>
       <button
         type="button"
@@ -221,7 +221,7 @@ export function DesktopToolbar() {
             : t('desktop.add_favorite', { defaultValue: 'Add to favorites' })
         }
       >
-        <Star size={15} strokeWidth={1.9} fill={starred ? 'currentColor' : 'none'} />
+        <Star size={16} strokeWidth={1.9} fill={starred ? 'currentColor' : 'none'} />
       </button>
 
       <div className="relative" ref={favRef}>
@@ -234,13 +234,13 @@ export function DesktopToolbar() {
           aria-label={t('desktop.favorites', { defaultValue: 'Favorites' })}
           title={t('desktop.favorites', { defaultValue: 'Favorites' })}
         >
-          <ChevronDown size={13} strokeWidth={2} />
+          <ChevronDown size={14} strokeWidth={2} />
         </button>
 
         {favOpen && (
           <div
             role="menu"
-            className="absolute right-0 top-full mt-1.5 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1.5 z-50"
+            className="absolute right-0 top-full mt-1.5 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1.5 z-dropdown"
           >
             <div className="flex items-center justify-between px-3 pb-1.5">
               <span className="text-xs font-semibold text-content-primary">
@@ -281,7 +281,7 @@ export function DesktopToolbar() {
                       className="flex min-w-0 flex-1 items-center gap-2 py-2 text-left"
                     >
                       <Star
-                        size={13}
+                        size={14}
                         strokeWidth={1.9}
                         className="shrink-0 text-oe-blue"
                         fill="currentColor"
@@ -304,7 +304,7 @@ export function DesktopToolbar() {
                         defaultValue: 'Remove from favorites',
                       })}
                     >
-                      <Trash2 size={13} strokeWidth={1.9} />
+                      <Trash2 size={14} strokeWidth={1.9} />
                     </button>
                   </div>
                 ))}
@@ -368,11 +368,7 @@ function AddressField({
         onBlur={commit}
         aria-label={t('desktop.address', { defaultValue: 'Page address' })}
         spellCheck={false}
-        className={clsx(
-          'h-7 flex-1 rounded-md border border-border-focus bg-white px-2.5 dark:bg-surface-primary',
-          'text-xs text-content-primary',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus',
-        )}
+        className={clsx('oe-input-sm flex-1', 'oe-input-sm')}
       />
     );
   }

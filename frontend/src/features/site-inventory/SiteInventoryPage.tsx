@@ -72,7 +72,7 @@ import { buildSiteInventoryInsights } from './siteInventoryInsights';
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 type TabId = 'stock' | 'bill' | 'movements' | 'items' | 'locations';
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
@@ -138,7 +138,7 @@ function Modal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-fade-in">
       <div
         className={clsx(
           'w-full bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in max-h-[90vh] overflow-y-auto',
@@ -149,13 +149,13 @@ function Modal({
         aria-label={title}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-section-title">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t('site_inventory.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4 space-y-4">{children}</div>
@@ -180,7 +180,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-content-primary mb-1.5">
+      <label className="oe-label">
         {label}
         {required && <span className="text-semantic-error"> *</span>}
       </label>
@@ -447,12 +447,12 @@ function BoqPositionPickerDialog({
           </p>
         ) : (
           <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <tbody>
                 {positions.map((p) => (
                   <tr
                     key={p.id}
-                    className="cursor-pointer border-b border-border-light last:border-0 hover:bg-surface-secondary/60"
+                    className="cursor-pointer last:border-0"
                     onClick={() =>
                       onPick({
                         id: p.id,
@@ -462,11 +462,11 @@ function BoqPositionPickerDialog({
                       })
                     }
                   >
-                    <td className="px-3 py-2 font-mono text-2xs text-content-tertiary">
+                    <td className="font-mono text-content-tertiary">
                       {p.ordinal || '-'}
                     </td>
-                    <td className="px-3 py-2">{p.description}</td>
-                    <td className="px-3 py-2 text-right text-xs text-content-tertiary">
+                    <td>{p.description}</td>
+                    <td className="text-right text-content-tertiary">
                       {p.unit || '-'}
                     </td>
                   </tr>
@@ -1310,30 +1310,30 @@ export function SiteInventoryPage() {
     {
       id: 'stock' as const,
       label: t('site_inventory.tab_stock', { defaultValue: 'Stock on hand' }),
-      icon: <Boxes size={15} />,
+      icon: <Boxes size={16} />,
     },
     {
       id: 'bill' as const,
       label: t('site_inventory.tab_bill', { defaultValue: 'Against the bill' }),
-      icon: <Receipt size={15} />,
+      icon: <Receipt size={16} />,
       badge: countBadge(coverageQuery.data?.position_count ?? 0),
     },
     {
       id: 'movements' as const,
       label: t('site_inventory.tab_movements', { defaultValue: 'Movements' }),
-      icon: <ArrowLeftRight size={15} />,
+      icon: <ArrowLeftRight size={16} />,
       badge: countBadge(movements.length),
     },
     {
       id: 'items' as const,
       label: t('site_inventory.tab_items', { defaultValue: 'Items' }),
-      icon: <Package size={15} />,
+      icon: <Package size={16} />,
       badge: countBadge(items.length),
     },
     {
       id: 'locations' as const,
       label: t('site_inventory.tab_locations', { defaultValue: 'Locations' }),
-      icon: <Warehouse size={15} />,
+      icon: <Warehouse size={16} />,
       badge: countBadge(locations.length),
     },
   ];
@@ -1624,9 +1624,9 @@ function StockPanel({
         ))}
       </div>
       <Card padding="none" className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
+            <tr className="bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
               <th className={thCls}>{t('site_inventory.col_item', { defaultValue: 'Item' })}</th>
               <th className={thCls}>{t('site_inventory.col_unit', { defaultValue: 'Unit' })}</th>
               <th className={clsx(thCls, 'text-right')}>
@@ -1644,7 +1644,7 @@ function StockPanel({
               return (
                 <tr
                   key={row.item_id}
-                  className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
+                  className="last:border-0"
                 >
                   <td className={clsx(tdCls, 'font-medium')}>{row.name}</td>
                   <td className={clsx(tdCls, 'text-content-tertiary')}>{row.unit || '-'}</td>
@@ -1714,9 +1714,9 @@ function MovementsPanel({
 
   return (
     <Card padding="none" className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
+          <tr className="bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
             <th className={thCls}>{t('site_inventory.col_date', { defaultValue: 'Date' })}</th>
             <th className={thCls}>{t('site_inventory.col_type', { defaultValue: 'Type' })}</th>
             <th className={thCls}>{t('site_inventory.col_item', { defaultValue: 'Item' })}</th>
@@ -1743,7 +1743,7 @@ function MovementsPanel({
             return (
               <tr
                 key={m.id}
-                className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
+                className="last:border-0"
               >
                 <td className={clsx(tdCls, 'whitespace-nowrap text-content-tertiary')}>
                   <DateDisplay value={m.occurred_at} />
@@ -1808,9 +1808,9 @@ function ItemsPanel({
 
   return (
     <Card padding="none" className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
+          <tr className="bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
             <th className={thCls}>{t('site_inventory.col_item', { defaultValue: 'Item' })}</th>
             <th className={thCls}>{t('site_inventory.col_sku', { defaultValue: 'SKU' })}</th>
             <th className={thCls}>{t('site_inventory.col_unit', { defaultValue: 'Unit' })}</th>
@@ -1835,7 +1835,7 @@ function ItemsPanel({
           {items.map((it) => (
             <tr
               key={it.id}
-              className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
+              className="last:border-0"
             >
               <td className={clsx(tdCls, 'font-medium')}>{it.name}</td>
               <td className={clsx(tdCls, 'text-content-tertiary')}>{it.sku || '-'}</td>
@@ -1844,7 +1844,7 @@ function ItemsPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Link2 size={13} />}
+                  icon={<Link2 size={14} />}
                   onClick={() => onLink(it)}
                   className={clsx(!it.boq_position_id && 'text-content-tertiary')}
                 >
@@ -1870,7 +1870,7 @@ function ItemsPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Trash2 size={13} />}
+                  icon={<Trash2 size={14} />}
                   onClick={() => onDelete(it)}
                   aria-label={t('site_inventory.delete_aria', {
                     defaultValue: 'Delete {{name}}',
@@ -2037,9 +2037,9 @@ function BillPanel({
       </div>
 
       <Card padding="none" className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
+            <tr className="bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
               <th className={thCls}>{t('site_inventory.col_position', { defaultValue: 'Position' })}</th>
               <th className={clsx(thCls, 'text-right')}>
                 {t('site_inventory.col_bill_qty', { defaultValue: 'In the bill' })}
@@ -2065,7 +2065,7 @@ function BillPanel({
             {lines.map((line) => (
               <tr
                 key={line.position_id}
-                className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
+                className="last:border-0"
               >
                 <td className={tdCls}>
                   <div className="flex flex-col gap-1">
@@ -2141,9 +2141,9 @@ function LocationsPanel({
 
   return (
     <Card padding="none" className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
+          <tr className="bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
             <th className={thCls}>{t('site_inventory.col_name', { defaultValue: 'Name' })}</th>
             <th className={thCls}>{t('site_inventory.col_code', { defaultValue: 'Code' })}</th>
             <th className={thCls}>{t('site_inventory.col_address', { defaultValue: 'Address' })}</th>
@@ -2159,7 +2159,7 @@ function LocationsPanel({
           {locations.map((loc) => (
             <tr
               key={loc.id}
-              className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
+              className="last:border-0"
             >
               <td className={clsx(tdCls, 'font-medium')}>{loc.name}</td>
               <td className={clsx(tdCls, 'text-content-tertiary')}>{loc.code || '-'}</td>
@@ -2175,7 +2175,7 @@ function LocationsPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Trash2 size={13} />}
+                  icon={<Trash2 size={14} />}
                   onClick={() => onDelete(loc)}
                   aria-label={t('site_inventory.delete_aria', {
                     defaultValue: 'Delete {{name}}',

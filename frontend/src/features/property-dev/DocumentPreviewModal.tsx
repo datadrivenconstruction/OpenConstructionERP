@@ -332,7 +332,7 @@ export function DocumentPreviewModal({
       <div className="space-y-3">
         {/* Locale picker */}
         <div className="flex flex-wrap items-center gap-3">
-          <label htmlFor="propdev-document-locale" className="text-sm font-medium text-content-secondary">
+          <label htmlFor="propdev-document-locale" className="oe-label">
             {t('propdev.documents.locale', { defaultValue: 'Locale' })}
           </label>
           <DocumentLanguageSelect
@@ -381,7 +381,7 @@ export function DocumentPreviewModal({
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
                   placeholder="buyer@example.com"
-                  className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  className="oe-input"
                   disabled={sending}
                   aria-invalid={recipient.length > 0 && !recipientValid}
                 />
@@ -403,7 +403,7 @@ export function DocumentPreviewModal({
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  className="oe-input"
                   disabled={sending}
                 />
               </label>
@@ -418,7 +418,7 @@ export function DocumentPreviewModal({
                 value={emailNote}
                 onChange={(e) => setEmailNote(e.target.value)}
                 rows={2}
-                className="rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-textarea"
                 disabled={sending}
               />
             </label>

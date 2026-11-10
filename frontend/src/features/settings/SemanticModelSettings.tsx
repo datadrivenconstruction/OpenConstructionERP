@@ -65,7 +65,7 @@ export default function SemanticModelSettings() {
             <Sparkles size={20} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('settings.semantic_title', { defaultValue: 'Semantic search' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">

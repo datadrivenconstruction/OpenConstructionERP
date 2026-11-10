@@ -227,7 +227,7 @@ export function CoursesPage() {
   const clearFilters = () =>
     patch({ kind: null, topic: null, track: null, route: null, q: null, access: null, country: null, time: null, sort: null });
   const selectCls =
-    'max-w-full cursor-pointer rounded-lg border bg-surface-primary px-2 py-1 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20';
+    'oe-select oe-input-sm max-w-full cursor-pointer';
 
   return (
     <div className="space-y-5 animate-fade-in" data-testid="courses-page">
@@ -240,7 +240,7 @@ export function CoursesPage() {
         actions={
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-              <Search size={15} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
+              <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" aria-hidden />
               <input
                 type="search"
                 value={filters.query}
@@ -248,7 +248,7 @@ export function CoursesPage() {
                 placeholder={t('common.search', { defaultValue: 'Search' })}
                 aria-label={t('common.search', { defaultValue: 'Search' })}
                 data-testid="courses-search"
-                className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+                className="oe-input ps-9"
               />
             </div>
             <Button
@@ -272,7 +272,7 @@ export function CoursesPage() {
         id="courses-filter-panel"
         data-testid="courses-filter-panel"
         className={clsx(
-          'space-y-2.5 rounded-xl border border-border-light bg-surface-elevated p-3 text-xs md:block',
+          'space-y-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-xs md:block',
           !panelOpen && 'hidden',
         )}
       >
@@ -422,7 +422,7 @@ export function CoursesPage() {
               aria-label={t('learn.filter.remove', { defaultValue: 'Remove filter: {{filter}}', filter: a.text })}
               className="rounded-full p-0.5 hover:bg-oe-blue/15"
             >
-              <X size={11} aria-hidden />
+              <X size={12} aria-hidden />
             </button>
           </span>
         ))}
@@ -437,7 +437,7 @@ export function CoursesPage() {
             value={filters.sort ?? 'recommended'}
             onChange={(e) => patch({ sort: e.target.value === 'recommended' ? null : e.target.value })}
             data-testid="courses-sort"
-            className={clsx(selectCls, 'border-border-light')}
+            className={selectCls}
           >
             {SORTS.map((s) => (
               <option key={s} value={s}>
@@ -464,7 +464,7 @@ export function CoursesPage() {
               aria-label={t('common.clear', { defaultValue: 'Clear' })}
               className="rounded-full p-0.5 hover:bg-oe-blue/15"
             >
-              <X size={11} aria-hidden />
+              <X size={12} aria-hidden />
             </button>
           </span>
         </p>

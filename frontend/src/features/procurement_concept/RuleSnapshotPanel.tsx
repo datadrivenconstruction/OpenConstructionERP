@@ -29,7 +29,7 @@ export function RuleSnapshotPanel({ projectId, packageId }: { projectId: string;
 
   return (
     <section data-testid="rule-snapshot-section">
-      <h3 className="mb-1 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-1">
         {t('procurement_concept.ui.snapshot.title', { defaultValue: 'Rules applied when the procedure was set' })}
       </h3>
       <p className="mb-2 text-xs text-content-tertiary">
@@ -84,25 +84,25 @@ export function RuleSnapshotPanel({ projectId, packageId }: { projectId: string;
                   </li>
                 ))}
               </ul>
-              <table className="mt-2 w-full text-left text-xs" data-testid="rule-snapshot-rules">
+              <table className="oe-table-compact mt-2 text-left" data-testid="rule-snapshot-rules">
                 <thead>
                   <tr className="text-content-tertiary">
-                    <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.snapshot.th_rule', { defaultValue: 'Rule' })}</th>
-                    <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.snapshot.th_figure', { defaultValue: 'Figure' })}</th>
-                    <th className="py-1 pr-3 font-medium">{t('procurement_concept.ui.snapshot.th_valid', { defaultValue: 'In force' })}</th>
-                    <th className="py-1 font-medium">{t('procurement_concept.ui.snapshot.th_source', { defaultValue: 'Source' })}</th>
+                    <th className="pr-3">{t('procurement_concept.ui.snapshot.th_rule', { defaultValue: 'Rule' })}</th>
+                    <th className="pr-3">{t('procurement_concept.ui.snapshot.th_figure', { defaultValue: 'Figure' })}</th>
+                    <th className="pr-3">{t('procurement_concept.ui.snapshot.th_valid', { defaultValue: 'In force' })}</th>
+                    <th>{t('procurement_concept.ui.snapshot.th_source', { defaultValue: 'Source' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {s.rules.map((r) => (
-                    <tr key={r.id} className="border-t border-border-light align-top">
-                      <td className="py-1 pr-3 text-content-secondary">{r.id}</td>
-                      <td className="py-1 pr-3">{r.amount ? `${r.amount} ${r.currency ?? ''}` : ''}</td>
-                      <td className="py-1 pr-3">
+                    <tr key={r.id} className="align-top">
+                      <td className="pr-3 text-content-secondary">{r.id}</td>
+                      <td className="pr-3">{r.amount ? `${r.amount} ${r.currency ?? ''}` : ''}</td>
+                      <td className="pr-3">
                         {r.valid_from ? fmtDate(r.valid_from) : ''}
                         {r.valid_to ? ` - ${fmtDate(r.valid_to)}` : ''}
                       </td>
-                      <td className="py-1">
+                      <td>
                         {r.source_url ? (
                           <a href={r.source_url} target="_blank" rel="noreferrer noopener" className="text-oe-blue underline">
                             {r.review_status === 'verified'

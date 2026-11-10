@@ -81,7 +81,7 @@ export function DeleteAccountDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
 
@@ -104,7 +104,7 @@ export function DeleteAccountDialog({
             <AlertTriangle size={20} />
           </div>
 
-          <h2 className="text-center text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title text-center">
             {t('settings.delete_account_title', { defaultValue: 'Delete your account' })}
           </h2>
 
@@ -124,7 +124,7 @@ export function DeleteAccountDialog({
           >
             <label
               htmlFor="delete-account-confirm"
-              className="mb-1.5 block text-xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('settings.delete_account_field_label', {
                 defaultValue: 'Enter your password to confirm. Single sign-on accounts: type DELETE.',
@@ -138,7 +138,7 @@ export function DeleteAccountDialog({
               onChange={(e) => setValue(e.target.value)}
               autoComplete="off"
               disabled={loading}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-semantic-error/50"
+              className="oe-input"
             />
             {error ? <p className="mt-2 text-xs text-semantic-error">{error}</p> : null}
           </form>

@@ -236,7 +236,7 @@ export function AssessmentDialog({ screen, stakeholder, previous, onClose, onSav
           <textarea
             id="assessment-rationale"
             rows={3}
-            className={FIELD_CLASS}
+            className="oe-textarea"
             value={rationale}
             onChange={(e) => setRationale(e.target.value)}
           />

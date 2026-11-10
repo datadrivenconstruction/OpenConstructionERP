@@ -145,9 +145,9 @@ function daysLabel(t: Translate, days: number | null | undefined): string {
 /* -- Shared styles --------------------------------------------------------- */
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* -- Signal banner --------------------------------------------------------- */
 
@@ -249,7 +249,7 @@ function SignalBanner({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">{copy.title}</h2>
+              <h2 className="oe-section-title">{copy.title}</h2>
               <Badge variant={GATE_BADGE_VARIANT[gateState]} dot>
                 {copy.badge}
               </Badge>
@@ -289,7 +289,7 @@ function SignalBanner({
       {gateState === 'blocked' && blockers.length > 0 && (
         <div className="mt-4 rounded-lg border border-semantic-error/30 bg-surface-elevated/70 p-3">
           <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-semantic-error">
-            <AlertTriangle size={13} />
+            <AlertTriangle size={14} />
             {t('site_prep.blockers_title', { defaultValue: 'Commencement gates still blocking' })}
           </p>
           <ul className="flex flex-col gap-1.5">
@@ -298,7 +298,7 @@ function SignalBanner({
                 key={b.item_id ?? `${b.category}-${i}`}
                 className="flex flex-wrap items-center gap-2 text-sm text-content-primary"
               >
-                <Flag size={13} className="shrink-0 text-semantic-error" />
+                <Flag size={14} className="shrink-0 text-semantic-error" />
                 <span className="min-w-0 truncate">{b.title}</span>
                 <Badge variant="neutral" size="sm">
                   {categoryLabel(t, b.category)}
@@ -393,7 +393,7 @@ function ItemRow({
     <div className="flex flex-wrap items-center gap-3 border-b border-border-light px-4 py-3 last:border-b-0 hover:bg-surface-secondary/40">
       {item.is_gate ? (
         <Flag
-          size={15}
+          size={16}
           className="shrink-0 text-oe-blue"
           aria-label={t('site_prep.gate_flag_title', {
             defaultValue: 'Commencement gate: a hard prerequisite to start on site',
@@ -439,7 +439,7 @@ function ItemRow({
           variant="ghost"
           size="sm"
           onClick={() => onEdit(item)}
-          icon={<Pencil size={13} />}
+          icon={<Pencil size={14} />}
           aria-label={t('site_prep.edit_item', { defaultValue: 'Edit item' })}
           title={t('site_prep.edit_item', { defaultValue: 'Edit item' })}
         />
@@ -447,7 +447,7 @@ function ItemRow({
           variant="ghost"
           size="sm"
           onClick={() => onDelete(item)}
-          icon={<Trash2 size={13} />}
+          icon={<Trash2 size={14} />}
           className="text-semantic-error"
           aria-label={t('site_prep.delete_item', { defaultValue: 'Delete item' })}
           title={t('site_prep.delete_item', { defaultValue: 'Delete item' })}
@@ -541,14 +541,14 @@ function ItemModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
       <div
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
         role="dialog"
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {isEdit
               ? t('site_prep.edit_item_title', { defaultValue: 'Edit readiness item' })
               : t('site_prep.new_item_title', { defaultValue: 'New readiness item' })}
@@ -558,14 +558,14 @@ function ItemModal({
             aria-label={t('site_prep.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="space-y-4 px-6 py-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label className="oe-label">
                 {t('site_prep.field_category', { defaultValue: 'Category' })}
               </label>
               <select
@@ -581,7 +581,7 @@ function ItemModal({
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label className="oe-label">
                 {t('site_prep.field_status', { defaultValue: 'Status' })}
               </label>
               <select
@@ -599,7 +599,7 @@ function ItemModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -613,7 +613,7 @@ function ItemModal({
               placeholder={t('site_prep.title_placeholder', {
                 defaultValue: 'e.g. Site access road and gate installed',
               })}
-              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30')}
+              className="oe-input oe-input-lg" aria-invalid={!!titleError}
             />
             {titleError && (
               <p className="mt-1 text-xs text-semantic-error">
@@ -623,7 +623,7 @@ function ItemModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -639,7 +639,7 @@ function ItemModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label className="oe-label">
                 {t('site_prep.field_responsible', { defaultValue: 'Responsible party' })}
               </label>
               <input
@@ -648,23 +648,23 @@ function ItemModal({
                 placeholder={t('site_prep.responsible_placeholder', {
                   defaultValue: 'e.g. Site manager, groundworks subcontractor',
                 })}
-                className={inputCls}
+                className="oe-input oe-input-lg"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label className="oe-label">
                 {t('site_prep.field_due_date', { defaultValue: 'Due date' })}
               </label>
               <input
                 type="date"
                 value={form.due_date}
                 onChange={(e) => set('due_date', e.target.value)}
-                className={inputCls}
+                className="oe-input oe-input-lg"
               />
             </div>
           </div>
 
-          <label className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2.5">
+          <label className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2.5">
             <input
               type="checkbox"
               checked={form.is_gate}
@@ -679,7 +679,7 @@ function ItemModal({
           </label>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -703,7 +703,7 @@ function ItemModal({
             onClick={handleSubmit}
             loading={isPending}
             disabled={!canSubmit}
-            icon={!isPending ? <Plus size={15} /> : undefined}
+            icon={!isPending ? <Plus size={16} /> : undefined}
           >
             {isEdit
               ? t('site_prep.save', { defaultValue: 'Save' })
@@ -762,14 +762,14 @@ function PlanModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-lg rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
         role="dialog"
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {isEdit
               ? t('site_prep.plan_modal_edit_title', { defaultValue: 'Edit mobilisation plan' })
               : t('site_prep.plan_modal_create_title', { defaultValue: 'Create mobilisation plan' })}
@@ -779,24 +779,24 @@ function PlanModal({
             aria-label={t('site_prep.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="space-y-4 px-6 py-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_target_start', { defaultValue: 'Target start date' })}
             </label>
             <input
               type="date"
               value={form.target_start_date}
               onChange={(e) => setForm((p) => ({ ...p, target_start_date: e.target.value }))}
-              className={inputCls}
+              className="oe-input oe-input-lg"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_plan_status', { defaultValue: 'Plan status' })}
             </label>
             <select
@@ -814,7 +814,7 @@ function PlanModal({
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('site_prep.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -1029,7 +1029,7 @@ export function SitePrepPage() {
       >
         {/* Plan strip */}
         <div className="flex flex-wrap items-center gap-2 text-sm text-content-secondary">
-          <CalendarClock size={15} className="text-content-tertiary" />
+          <CalendarClock size={16} className="text-content-tertiary" />
           {plan ? (
             <>
               <span className="text-content-tertiary">
@@ -1070,8 +1070,8 @@ export function SitePrepPage() {
 
         {/* Category grid */}
         <div>
-          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-            <Gauge size={15} className="text-oe-blue" />
+          <h2 className="oe-card-title mb-3 flex items-center gap-1.5">
+            <Gauge size={16} className="text-oe-blue" />
             {t('site_prep.categories_title', { defaultValue: 'Readiness by category' })}
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -1084,8 +1084,8 @@ export function SitePrepPage() {
         {/* Items */}
         <div>
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-              <ListChecks size={15} className="text-oe-blue" />
+            <h2 className="oe-card-title flex items-center gap-1.5">
+              <ListChecks size={16} className="text-oe-blue" />
               {t('site_prep.items_title', { defaultValue: 'Readiness items' })}
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -1093,7 +1093,7 @@ export function SitePrepPage() {
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value as SitePrepCategory | '')}
                 aria-label={t('site_prep.filter_all_categories', { defaultValue: 'All categories' })}
-                className={inputCls + ' sm:w-52'}
+                className={`${inputCls} sm:w-52`}
               >
                 <option value="">
                   {t('site_prep.filter_all_categories', { defaultValue: 'All categories' })}
@@ -1108,7 +1108,7 @@ export function SitePrepPage() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as SitePrepItemStatus | '')}
                 aria-label={t('site_prep.filter_all_statuses', { defaultValue: 'All statuses' })}
-                className={inputCls + ' sm:w-44'}
+                className={`${inputCls} sm:w-44`}
               >
                 <option value="">
                   {t('site_prep.filter_all_statuses', { defaultValue: 'All statuses' })}

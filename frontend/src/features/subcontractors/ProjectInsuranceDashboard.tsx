@@ -107,7 +107,7 @@ export function ProjectInsuranceDashboard() {
   if (!projectId || !data || !data.counts) return null;
   return (
     <Card padding="md">
-      <h3 className="mb-3 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-3">
         {t('subcontractors.insurance.project_title', { defaultValue: 'Insurance compliance on this project' })}
       </h3>
       <ProjectInsuranceView data={data} />

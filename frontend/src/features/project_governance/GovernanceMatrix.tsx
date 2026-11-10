@@ -102,7 +102,7 @@ export function NextGateBanner({
           blockers > 0 ? 'text-[#b45309]' : 'text-semantic-success',
         )}
       >
-        {blockers > 0 ? <AlertTriangle size={13} aria-hidden /> : <CheckCircle2 size={13} aria-hidden />}
+        {blockers > 0 ? <AlertTriangle size={14} aria-hidden /> : <CheckCircle2 size={14} aria-hidden />}
         {blockers > 0
           ? t('governance.project.matrix.blockers', { defaultValue: '{{count}} blockers', count: blockers })
           : t('governance.project.matrix.no_blockers', { defaultValue: 'No blockers' })}
@@ -187,10 +187,10 @@ export function GovernanceMatrix({
         onOpen={onOpenGate}
       />
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[720px] border-collapse text-left" data-testid="governance-matrix">
+        <table className="oe-table min-w-[720px] text-left" data-testid="governance-matrix">
           <thead>
             <tr className="bg-surface-secondary">
-              <th scope="col" className="sticky left-0 z-10 w-56 bg-surface-secondary px-3 py-2 text-xs font-semibold text-content-secondary">
+              <th scope="col" className="sticky left-0 z-10 w-56">
                 {t('governance.project.matrix.area_column', { defaultValue: 'Management area' })}
               </th>
               {data.columns.map((col) => (
@@ -239,8 +239,8 @@ export function GovernanceMatrix({
                 override: row.area.name_override,
               });
               return (
-                <tr key={row.area.area_id} className="border-t border-border-light align-top" data-testid="matrix-row">
-                  <th scope="row" className="sticky left-0 z-10 bg-surface-primary px-3 py-2 text-left font-normal">
+                <tr key={row.area.area_id} className="align-top" data-testid="matrix-row">
+                  <th scope="row" className="sticky left-0 z-10">
                     <button
                       type="button"
                       onClick={() => onOpenArea(row.area.area_id)}

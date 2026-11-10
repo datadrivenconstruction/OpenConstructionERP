@@ -130,7 +130,7 @@ function MemberListModal({
       aria-label={t('projects.team.modal_members_title', {
         defaultValue: 'Project members',
       })}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
       onClick={onClose}
     >
       <div
@@ -138,7 +138,7 @@ function MemberListModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('projects.team.modal_members_title', {
               defaultValue: 'Project members',
             })}
@@ -148,7 +148,7 @@ function MemberListModal({
             className="text-content-tertiary hover:text-content-primary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <ul className="overflow-y-auto divide-y divide-border-light">
@@ -229,7 +229,7 @@ function AddMemberModal({
       aria-label={t('projects.team.modal_add_title', {
         defaultValue: 'Add member',
       })}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
       onClick={onClose}
       data-testid="team-strip-add-modal"
     >
@@ -239,7 +239,7 @@ function AddMemberModal({
         onSubmit={handleSubmit}
       >
         <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('projects.team.modal_add_title', {
               defaultValue: 'Add member',
             })}
@@ -250,12 +250,12 @@ function AddMemberModal({
             className="text-content-tertiary hover:text-content-primary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-4 py-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label className="oe-label">
               {t('projects.team.user_label', { defaultValue: 'User' })}
             </label>
             <UserSearchInput
@@ -270,7 +270,7 @@ function AddMemberModal({
           <div>
             <label
               htmlFor="team-strip-role-select"
-              className="block text-xs font-medium text-content-secondary mb-1.5"
+              className="oe-label"
             >
               {t('projects.team.role_label', { defaultValue: 'Role' })}
             </label>
@@ -278,7 +278,7 @@ function AddMemberModal({
               id="team-strip-role-select"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-select oe-input-lg"
             >
               {ROLE_CHOICES.map((r) => (
                 <option key={r} value={r}>

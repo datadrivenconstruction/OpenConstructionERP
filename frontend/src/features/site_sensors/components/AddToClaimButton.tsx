@@ -15,7 +15,7 @@ import { fileSensorEvidence } from '../evidenceApi';
 import { shortHash, windowAround, windowIsValid } from '../evidenceData';
 import { isoFromLocal, localDateTimeValue } from '../sensorData';
 
-const FIELD = 'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary';
+const FIELD = 'oe-input oe-input-sm';
 
 export function AddToClaimButton({ alertId, deviceId, raisedAt }: { alertId: string; deviceId: string; raisedAt: string }) {
   const { t } = useTranslation();

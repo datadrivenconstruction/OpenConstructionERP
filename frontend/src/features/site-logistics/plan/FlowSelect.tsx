@@ -25,7 +25,7 @@ export function FlowSelect({
   const label = tx(t, 'delivery.flow');
   return (
     <div data-testid="delivery-flow">
-      <label htmlFor="delivery-flow-code" className="mb-1.5 block text-sm font-medium text-content-primary">
+      <label htmlFor="delivery-flow-code" className="oe-label">
         {label}
       </label>
       <select id="delivery-flow-code" value={value} onChange={(e) => onChange(e.target.value)} className={className}>

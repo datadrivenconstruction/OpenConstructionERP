@@ -146,7 +146,7 @@ function RFQBiddingExplainer() {
   return (
     <CollapsibleSection
       storageKey="rfq_bidding.how"
-      icon={<FileText size={15} className="text-oe-blue" />}
+      icon={<FileText size={16} className="text-oe-blue" />}
       title={t('rfq_bidding.flow_title', { defaultValue: 'How RFQ bidding works' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -619,9 +619,7 @@ function RFQListPanel({
             placeholder={t('rfq_bidding.search', { defaultValue: 'Search RFQs...' })}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full rounded-lg border border-border-light bg-surface-primary py-2 ps-10 pe-4 text-sm
-              text-content-primary placeholder:text-content-tertiary
-              focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input ps-10"
           />
           {search && (
             <button
@@ -636,8 +634,7 @@ function RFQListPanel({
         <select
           value={statusFilter}
           onChange={(e) => onStatusFilterChange(e.target.value as RFQStatus | '')}
-          className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-            text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-select"
         >
           <option value="">{t('rfq_bidding.all_statuses', { defaultValue: 'All statuses' })}</option>
           {ALL_STATUSES.map((s) => (
@@ -803,14 +800,13 @@ function ComparisonPanel({
     <div className="space-y-4">
       {/* RFQ selector */}
       <div className="flex items-center gap-3">
-        <label className="text-sm font-medium text-content-secondary">
+        <label className="oe-label">
           {t('rfq_bidding.select_rfq', { defaultValue: 'Select RFQ' })}:
         </label>
         <select
           value={selectedRfqId ?? ''}
           onChange={(e) => onSelectRfq(e.target.value || null)}
-          className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-            text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-select"
         >
           <option value="">{t('rfq_bidding.choose_rfq', { defaultValue: 'Choose an RFQ...' })}</option>
           {comparableRfqs.map((r) => (
@@ -895,27 +891,27 @@ function ComparisonTable({
     <div className="space-y-4">
       {comparison.ranked.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-border-light">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
               <tr className="bg-surface-secondary text-content-secondary">
-                <th className="px-4 py-3 text-left font-medium">
+                <th>
                   {t('rfq_bidding.col_rank', { defaultValue: 'Rank' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium">
+                <th>
                   {t('rfq_bidding.col_bidder', { defaultValue: 'Bidder' })}
                 </th>
-                <th className="px-4 py-3 text-right font-medium">
+                <th className="text-right">
                   {t('rfq_bidding.col_coverage', { defaultValue: 'Scope covered' })}
                 </th>
                 {showScore && (
-                  <th className="px-4 py-3 text-right font-medium">
+                  <th className="text-right">
                     {t('rfq_bidding.col_score', { defaultValue: 'Score' })}
                   </th>
                 )}
-                <th className="px-4 py-3 text-right font-medium">
+                <th className="text-right">
                   {t('rfq_bidding.total', { defaultValue: 'Total' })} ({comparison.basis_currency})
                 </th>
-                <th className="px-4 py-3" />
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -1415,7 +1411,7 @@ function CreateRFQDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
       onClick={handleBackdropClick}
     >
       <div
@@ -1426,7 +1422,7 @@ function CreateRFQDialog({
         aria-label={t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
           </h2>
           <button
@@ -1440,7 +1436,7 @@ function CreateRFQDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-content-secondary">
+            <label className="oe-label">
               {t('rfq_bidding.field_title', { defaultValue: 'Title' })}
               <span className="text-semantic-error"> *</span>
             </label>
@@ -1451,14 +1447,12 @@ function CreateRFQDialog({
               placeholder={t('rfq_bidding.field_title_placeholder', { defaultValue: 'e.g. Concrete supply for Block A' })}
               required
               autoFocus
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary placeholder:text-content-tertiary
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-content-secondary">
+            <label className="oe-label">
               {t('rfq_bidding.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -1468,23 +1462,19 @@ function CreateRFQDialog({
               placeholder={t('rfq_bidding.field_description_placeholder', {
                 defaultValue: 'Describe the scope and requirements...',
               })}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary placeholder:text-content-tertiary resize-none
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-textarea resize-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-content-secondary">
+            <label className="oe-label">
               {t('rfq_bidding.field_due_date', { defaultValue: 'Due Date' })}
             </label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input"
             />
           </div>
 

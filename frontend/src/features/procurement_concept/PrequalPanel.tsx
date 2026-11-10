@@ -154,10 +154,10 @@ export function PrequalPanel({
     <div className="space-y-4" data-testid="prequal-panel">
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[16rem]">
-          <label htmlFor="pq-package" className="mb-1 block text-xs font-medium text-content-secondary">
+          <label htmlFor="pq-package" className="oe-label">
             {t('procurement_concept.ui.prequal.package', { defaultValue: 'Package' })}
           </label>
-          <select id="pq-package" className={FIELD_CLASS} value={currentId} onChange={(e) => onSelectPackage(e.target.value)}>
+          <select id="pq-package" className="oe-select" value={currentId} onChange={(e) => onSelectPackage(e.target.value)}>
             {planned.map((p) => (
               <option key={p.contract_package.id} value={p.contract_package.id}>
                 {`${p.contract_package.code} ${p.contract_package.title}`}
@@ -203,7 +203,7 @@ export function PrequalPanel({
           <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="profile-summary">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {profileRow?.name || t('procurement_concept.ui.prequal.profile', { defaultValue: 'Prequalification profile' })}
                 </h3>
                 {matrix.profile ? (
@@ -299,26 +299,26 @@ export function PrequalPanel({
             />
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-              <table className="w-full text-left text-sm" data-testid="candidate-matrix">
-                <thead className="bg-surface-secondary text-xs text-content-tertiary">
+              <table className="oe-table text-left" data-testid="candidate-matrix">
+                <thead>
                   <tr>
-                    <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.prequal.col_company', { defaultValue: 'Company' })}</th>
-                    <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.candidate.list', { defaultValue: 'List' })}</th>
+                    <th>{t('procurement_concept.ui.prequal.col_company', { defaultValue: 'Company' })}</th>
+                    <th>{t('procurement_concept.ui.candidate.list', { defaultValue: 'List' })}</th>
                     {criteria.map((c) => (
-                      <th key={c.code} className="px-3 py-2 font-medium">
+                      <th key={c.code}>
                         {catalogueName(labels, 'criterion', c.code)}
                       </th>
                     ))}
-                    <th className="px-3 py-2 font-medium">{t('procurement_concept.ui.prequal.col_total', { defaultValue: 'Total' })}</th>
-                    <th className="px-3 py-2 font-medium">
+                    <th>{t('procurement_concept.ui.prequal.col_total', { defaultValue: 'Total' })}</th>
+                    <th>
                       <span className="sr-only">{t('procurement_concept.ui.actions', { defaultValue: 'Actions' })}</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {matrix.items.map((c) => (
-                    <tr key={c.id} className="border-t border-border-light align-top" data-testid="candidate-row">
-                      <td className="px-3 py-2.5">
+                    <tr key={c.id} className="align-top" data-testid="candidate-row">
+                      <td>
                         <div className="font-medium text-content-primary">{c.name}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary">
                           <span>{vocab(labels.t, CANDIDATE_SOURCE, c.source)}</span>
@@ -382,7 +382,7 @@ export function PrequalPanel({
                         )}
                         {c.decision_rationale && <p className="mt-1 text-xs text-content-secondary">{c.decision_rationale}</p>}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         <ToneBadge tone={LIST_TONE[c.list]} testId="candidate-list">
                           {vocab(labels.t, CANDIDATE_LIST, c.list)}
                         </ToneBadge>
@@ -390,7 +390,7 @@ export function PrequalPanel({
                       {criteria.map((cr) => {
                         const s = c.scores.find((x) => x.criterion_code === cr.code);
                         return (
-                          <td key={cr.code} className="px-3 py-2.5 tabular-nums text-content-primary">
+                          <td key={cr.code} className="tabular-nums">
                             {s?.passed === true
                               ? t('procurement_concept.ui.scores.pass', { defaultValue: 'Pass' })
                               : s?.passed === false
@@ -401,7 +401,7 @@ export function PrequalPanel({
                           </td>
                         );
                       })}
-                      <td className="px-3 py-2.5 font-medium tabular-nums text-content-primary" data-testid="candidate-total">
+                      <td className="tabular-nums" data-testid="candidate-total">
                         {c.total_score}
                         {c.missing_criteria.length > 0 && (
                           <div className="text-2xs font-normal text-content-tertiary">
@@ -412,7 +412,7 @@ export function PrequalPanel({
                           </div>
                         )}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         {removing === c.id ? (
                           <div className="space-y-1.5">
                             <p className="text-xs text-content-primary">
@@ -473,7 +473,7 @@ export function PrequalPanel({
 
           {matrix.items.length > 0 && (
             <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="shortlist-check">
-              <h3 className="mb-1 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-1">
                 {t('procurement_concept.ui.prequal.check_title', { defaultValue: 'Is the short list ready?' })}
               </h3>
               <p className="mb-2 text-xs text-content-secondary">

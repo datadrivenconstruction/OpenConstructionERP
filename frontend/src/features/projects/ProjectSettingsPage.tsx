@@ -162,14 +162,14 @@ function FxRateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onCancel}
       />
       <div className="relative w-full max-w-md mx-4 rounded-xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in">
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {isEdit
               ? t('project.settings.fx.edit_title', { defaultValue: 'Edit currency' })
               : t('project.settings.fx.add_title', { defaultValue: 'Add currency' })}
@@ -179,21 +179,21 @@ function FxRateModal({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 pt-2 space-y-4">
           {/* Currency picker */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('project.settings.fx.currency', { defaultValue: 'Currency' })}
             </label>
             <select
               value={code}
               onChange={(e) => setCode(e.target.value)}
               disabled={isEdit}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+              className="oe-select oe-input-lg"
             >
               <option value="" disabled>
                 {t('project.settings.fx.select_currency', {
@@ -227,7 +227,7 @@ function FxRateModal({
                   defaultValue: 'e.g. XAF',
                 })}
                 maxLength={10}
-                className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary uppercase focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-input oe-input-lg uppercase"
               />
             )}
             {isSameAsBase && (
@@ -949,7 +949,7 @@ export function ProjectSettingsPage() {
         <div className="mt-4 rounded-lg border border-border-light bg-surface-secondary/20 px-4 py-3">
           <label
             htmlFor="base-currency-select"
-            className="block text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('project.settings.base_currency.field', { defaultValue: 'Base currency' })}
           </label>
@@ -958,7 +958,7 @@ export function ProjectSettingsPage() {
               id="base-currency-select"
               value={baseCurrencyDraft}
               onChange={(e) => setBaseCurrencyDraft(e.target.value)}
-              className="h-9 min-w-[16rem] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              className="oe-select min-w-[16rem]"
             >
               <option value="" disabled>
                 {t('project.settings.fx.select_currency', {
@@ -1028,28 +1028,28 @@ export function ProjectSettingsPage() {
         </div>
 
         <div className="mt-4 overflow-hidden rounded-lg border border-border-light">
-          <table className="min-w-full text-sm">
-            <thead className="bg-surface-secondary/40">
+          <table className="oe-table min-w-full">
+            <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
-                <th className="px-4 py-2 font-medium">
+                <th>
                   {t('project.settings.fx.col_code', { defaultValue: 'Code' })}
                 </th>
-                <th className="px-4 py-2 font-medium">
+                <th>
                   {t('project.settings.fx.col_label', { defaultValue: 'Label' })}
                 </th>
-                <th className="px-4 py-2 font-medium text-right">
+                <th className="text-right">
                   {t('project.settings.fx.col_rate', {
                     defaultValue: 'Rate to {{base}}',
                     base: baseCurrency || '-',
                   })}
                 </th>
-                <th className="px-4 py-2 w-24" />
+                <th className="w-24" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {/* Base currency row — locked, displayed first, shows rate 1.0000 */}
               <tr className="bg-surface-secondary/30">
-                <td className="px-4 py-2.5 font-medium text-content-primary tabular-nums">
+                <td className="tabular-nums">
                   <span className="inline-flex items-center gap-2">
                     <Coins size={14} className="text-oe-blue" />
                     {baseCurrency || (
@@ -1059,19 +1059,19 @@ export function ProjectSettingsPage() {
                     )}
                   </span>
                 </td>
-                <td className="px-4 py-2.5 text-content-secondary">
+                <td className="text-content-secondary">
                   <Badge variant="blue" size="sm">
                     {t('project.settings.base_currency.label', { defaultValue: 'Base' })}
                   </Badge>
                 </td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-content-tertiary">
+                <td className="text-right tabular-nums text-content-tertiary">
                   1.0000
                 </td>
-                <td className="px-4 py-2.5" />
+                <td />
               </tr>
               {fxRates.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-4 text-center text-sm text-content-tertiary">
+                  <td colSpan={4} className="text-center text-content-tertiary">
                     {t('project.settings.fx.empty', {
                       defaultValue: 'No additional currencies. Click "Add currency" to set one up.',
                     })}
@@ -1079,21 +1079,21 @@ export function ProjectSettingsPage() {
                 </tr>
               ) : (
                 fxRates.map((row) => (
-                  <tr key={row.code} className="hover:bg-surface-secondary/40">
-                    <td className="px-4 py-2.5 font-medium text-content-primary tabular-nums">
+                  <tr key={row.code}>
+                    <td className="tabular-nums">
                       {row.code}
                     </td>
-                    <td className="px-4 py-2.5 text-content-secondary">
+                    <td className="text-content-secondary">
                       {row.label || (
                         <span className="text-content-tertiary italic">
                           {t('project.settings.fx.no_label', { defaultValue: '-' })}
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                    <td className="text-right tabular-nums">
                       {row.rate}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td>
                       <div className="flex justify-end gap-1">
                         <button
                           type="button"
@@ -1101,7 +1101,7 @@ export function ProjectSettingsPage() {
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
                           aria-label={t('common.edit', { defaultValue: 'Edit' })}
                         >
-                          <Pencil size={13} />
+                          <Pencil size={14} />
                         </button>
                         <button
                           type="button"
@@ -1109,7 +1109,7 @@ export function ProjectSettingsPage() {
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/10 transition-colors"
                           aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -1139,7 +1139,7 @@ export function ProjectSettingsPage() {
         />
         <form onSubmit={handleVatSave} className="mt-4 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('project.settings.vat.input_label', { defaultValue: 'VAT %' })}
             </label>
             <div className="relative">
@@ -1149,10 +1149,10 @@ export function ProjectSettingsPage() {
                 value={vatInput}
                 onChange={(e) => setVatInput(e.target.value)}
                 placeholder={String(regionalVatPct)}
-                className="h-9 w-32 rounded-lg border border-border bg-surface-primary px-3 pr-7 text-sm text-content-primary tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input w-32 pr-7 tabular-nums"
               />
               <Percent
-                size={13}
+                size={14}
                 className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
               />
             </div>
@@ -1235,7 +1235,7 @@ export function ProjectSettingsPage() {
                     className="inline-flex h-5 w-5 items-center justify-center rounded-full text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/10 transition-colors"
                     aria-label={t('common.remove', { defaultValue: 'Remove' })}
                   >
-                    <X size={11} />
+                    <X size={12} />
                   </button>
                 </span>
               ))}

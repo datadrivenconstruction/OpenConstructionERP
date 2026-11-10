@@ -211,7 +211,7 @@ function SectionCard({
   const isReasoning = section.source === 'reasoning';
   const isProcedureType = section.key === 'procedure_type';
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-select oe-input-lg';
 
   return (
     <Card>
@@ -350,7 +350,7 @@ function SectionCard({
                   defaultValue:
                     'Write the reasoning as it stands today. Recording a newer statement keeps the earlier ones rather than replacing them.',
                 })}
-                className="w-full resize-none rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-textarea resize-none"
               />
               <div className="flex items-center gap-2">
                 <Button

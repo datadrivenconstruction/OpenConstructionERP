@@ -102,7 +102,7 @@ export function OverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card padding="md" className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('propdev.recent_activity', {
                 defaultValue: 'Recent activity',
               })}
@@ -115,7 +115,7 @@ export function OverviewTab({
         </Card>
 
         <Card padding="md">
-          <h3 className="mb-3 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-3">
             {t('propdev.quick_links', { defaultValue: 'Quick links' })}
           </h3>
           <ul className="space-y-2">
@@ -137,7 +137,7 @@ export function OverviewTab({
                   </span>
                 </span>
                 <ArrowRight
-                  size={13}
+                  size={14}
                   className="text-content-tertiary group-hover:text-oe-blue"
                 />
               </button>
@@ -160,7 +160,7 @@ export function OverviewTab({
                   </span>
                 </span>
                 <ArrowRight
-                  size={13}
+                  size={14}
                   className="text-content-tertiary group-hover:text-oe-blue"
                 />
               </button>
@@ -183,7 +183,7 @@ export function OverviewTab({
                   </span>
                 </span>
                 <ArrowRight
-                  size={13}
+                  size={14}
                   className="text-content-tertiary group-hover:text-oe-blue"
                 />
               </button>
@@ -206,7 +206,7 @@ export function OverviewTab({
                   </span>
                 </span>
                 <ArrowRight
-                  size={13}
+                  size={14}
                   className="text-content-tertiary group-hover:text-oe-blue"
                 />
               </button>
@@ -217,7 +217,7 @@ export function OverviewTab({
 
       <Card padding="none">
         <div className="px-4 py-3 border-b border-border-light flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('propdev.developments_snapshot', {
               defaultValue: 'Developments snapshot',
             })}
@@ -231,22 +231,22 @@ export function OverviewTab({
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.development', { defaultValue: 'Development' })}
                 </th>
-                <th className="px-4 py-2.5 text-left">
+                <th>
                   {t('propdev.phase', { defaultValue: 'Phase' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">
                   {t('propdev.sold_pct', { defaultValue: 'Sold %' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">
                   {t('propdev.contracted', { defaultValue: 'Contracted' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">
                   {t('propdev.open_snags', { defaultValue: 'Open snags' })}
                 </th>
               </tr>
@@ -568,7 +568,7 @@ function KpiTile({
         </span>
         {error && (
           <AlertOctagon
-            size={11}
+            size={12}
             className="text-semantic-error shrink-0"
             aria-label="error"
           />
