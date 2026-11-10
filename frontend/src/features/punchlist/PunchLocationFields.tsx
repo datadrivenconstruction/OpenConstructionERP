@@ -7,7 +7,7 @@ import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useToastStore } from '@/stores/useToastStore';
 import { updatePunchItem, type PunchAssetKind, type PunchItem } from './api';
 
-const inputCls = 'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm';
+const inputCls = 'oe-input';
 const TAG = 'tag';
 
 export interface PunchAssetLink {
@@ -24,7 +24,7 @@ export function PunchAreaField({ value, onChange, suggestions = [], disabled = f
   const id = useId();
   const listId = `${id}-areas`;
   return <div className="space-y-1.5">
-    <label htmlFor={id} className="text-sm font-medium text-content-secondary">{label}</label>
+    <label htmlFor={id} className="oe-label">{label}</label>
     <input id={id} list={listId} value={value} disabled={disabled} placeholder={placeholder} className={inputCls}
       maxLength={255} onChange={event => onChange(event.target.value)} />
     <datalist id={listId}>{suggestions.map(area => <option key={area} value={area} />)}</datalist>
@@ -56,10 +56,10 @@ export function PunchAssetField({ projectId, value, onChange, disabled = false }
   }
 
   return <div className="space-y-1.5">
-    <label htmlFor={id} className="text-sm font-medium text-content-secondary">
+    <label htmlFor={id} className="oe-label">
       {t('punch.field_asset', { defaultValue: 'Asset' })}
     </label>
-    <select id={id} value={selectValue ?? ''} disabled={disabled || isLoading} className={inputCls}
+    <select id={id} value={selectValue ?? ''} disabled={disabled || isLoading} className="oe-select"
       onChange={event => pick(event.target.value)}>
       <option value="">{t('common.not_set')}</option>
       {value?.asset_kind === 'bim_element' && !inRegister && !isLoading

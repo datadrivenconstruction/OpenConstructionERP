@@ -50,7 +50,7 @@ const THRESHOLD_KEY = 'oce.postcalc.qc.threshold';
 const CURRENT = '__current__';
 
 const selectCls =
-  'h-9 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-select oe-input-sm';
 
 function qty(value: string | null): string {
   const parsed = num(value);
@@ -138,26 +138,26 @@ export function QuantityCheckTable({
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1080px] text-xs" data-testid="qc-table">
+        <table className="oe-table-compact min-w-[1080px]" data-testid="qc-table">
           <thead>
-            <tr className="border-b border-border-light text-2xs text-content-tertiary">
-              <th className="px-3 py-2 text-left">{t('postcalc.qc.col_ref', { defaultValue: 'Item' })}</th>
-              <th className="px-3 py-2 text-left">{t('postcalc.qc.col_description', { defaultValue: 'Description' })}</th>
-              <th className="px-3 py-2 text-left">{t('postcalc.qc.col_unit', { defaultValue: 'Unit' })}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+            <tr className="text-2xs text-content-tertiary">
+              <th>{t('postcalc.qc.col_ref', { defaultValue: 'Item' })}</th>
+              <th>{t('postcalc.qc.col_description', { defaultValue: 'Description' })}</th>
+              <th>{t('postcalc.qc.col_unit', { defaultValue: 'Unit' })}</th>
+              <th className="border-l text-right">
                 {t('postcalc.qc.col_contract_qty', { defaultValue: 'Contract qty' })}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.qc.col_measured_qty', { defaultValue: 'Measured qty' })}</th>
-              <th className="px-3 py-2 text-left">{t('postcalc.qc.col_source', { defaultValue: 'Source' })}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+              <th className="text-right">{t('postcalc.qc.col_measured_qty', { defaultValue: 'Measured qty' })}</th>
+              <th>{t('postcalc.qc.col_source', { defaultValue: 'Source' })}</th>
+              <th className="border-l text-right">
                 {t('postcalc.qc.col_difference', { defaultValue: 'Difference' })}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.qc.col_difference_pct', { defaultValue: 'Diff. %' })}</th>
-              <th className="border-l border-border-light px-3 py-2 text-right">
+              <th className="text-right">{t('postcalc.qc.col_difference_pct', { defaultValue: 'Diff. %' })}</th>
+              <th className="border-l text-right">
                 {t('postcalc.qc.col_rate', { defaultValue: 'Contract rate' })}
               </th>
-              <th className="px-3 py-2 text-right">{t('postcalc.qc.col_cost_effect', { defaultValue: 'Cost effect' })}</th>
-              <th className="border-l border-border-light px-3 py-2 text-left">
+              <th className="text-right">{t('postcalc.qc.col_cost_effect', { defaultValue: 'Cost effect' })}</th>
+              <th className="border-l">
                 {t('postcalc.qc.col_status', { defaultValue: 'Status' })}
               </th>
             </tr>
@@ -178,8 +178,8 @@ export function QuantityCheckTable({
                     beyond && 'bg-semantic-warning-bg',
                   )}
                 >
-                  <td className="px-3 py-2 font-mono text-2xs text-content-secondary">{line.ordinal || '-'}</td>
-                  <td className="max-w-[260px] truncate px-3 py-2 text-content-primary" title={line.description}>
+                  <td className="font-mono text-content-secondary">{line.ordinal || '-'}</td>
+                  <td className="max-w-[260px] truncate" title={line.description}>
                     {line.description || '-'}
                     {!line.in_baseline && (
                       <span className="ml-1.5 text-2xs text-semantic-warning">
@@ -192,8 +192,8 @@ export function QuantityCheckTable({
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-content-tertiary">{line.unit ? localizedUnitCode(line.unit, i18n.language) : '-'}</td>
-                  <td className="border-l border-border-light px-3 py-2 text-right tabular-nums">
+                  <td className="text-content-tertiary">{line.unit ? localizedUnitCode(line.unit, i18n.language) : '-'}</td>
+                  <td className="border-l text-right tabular-nums">
                     {line.contract_quantity === null ? (
                       <span className="text-content-tertiary">-</span>
                     ) : (
@@ -210,14 +210,14 @@ export function QuantityCheckTable({
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {line.measured_quantity === null ? (
                       <span className="text-content-tertiary">-</span>
                     ) : (
                       qty(line.measured_quantity)
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <SourceBadge line={line} />
                   </td>
                   <td
@@ -240,7 +240,7 @@ export function QuantityCheckTable({
                           value: signedNumber(pct, 1),
                         })}
                   </td>
-                  <td className="whitespace-nowrap border-l border-border-light px-3 py-2 text-right tabular-nums text-content-secondary">
+                  <td className="whitespace-nowrap border-l text-right tabular-nums text-content-secondary">
                     {line.contract_unit_rate === null ? '-' : formatCurrency(line.contract_unit_rate, currency)}
                   </td>
                   <td
@@ -252,7 +252,7 @@ export function QuantityCheckTable({
                   >
                     {Number.isNaN(cost) ? '' : signedMoney(cost, currency)}
                   </td>
-                  <td className="border-l border-border-light px-3 py-2">
+                  <td className="border-l">
                     <StatusCell line={line} />
                   </td>
                 </tr>
@@ -260,14 +260,14 @@ export function QuantityCheckTable({
             })}
           </tbody>
           <tfoot>
-            <tr className="border-t border-border bg-surface-secondary/50 text-xs font-medium" data-testid="qc-footer">
-              <td className="px-3 py-2" colSpan={6}>
+            <tr className="bg-surface-secondary/50 text-xs font-medium" data-testid="qc-footer">
+              <td colSpan={6}>
                 {t('postcalc.qc.footer_rows', {
                   count: shown.count,
                   defaultValue: 'Total of the {{count}} rows shown',
                 })}
               </td>
-              <td className="border-l border-border-light px-3 py-2 text-right" colSpan={3}>
+              <td className="border-l text-right" colSpan={3}>
                 <span className="whitespace-nowrap text-semantic-error" data-testid="qc-footer-over">
                   {signedMoney(shown.over, currency)}
                 </span>
@@ -276,10 +276,10 @@ export function QuantityCheckTable({
                   {signedMoney(shown.under, currency)}
                 </span>
               </td>
-              <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums" data-testid="qc-footer-net">
+              <td className="whitespace-nowrap text-right tabular-nums" data-testid="qc-footer-net">
                 {signedMoney(shown.net, currency)}
               </td>
-              <td className="border-l border-border-light px-3 py-2" />
+              <td className="border-l" />
             </tr>
           </tfoot>
         </table>
@@ -464,7 +464,7 @@ export function QuantityCheckPanel({ projectId }: { projectId: string }) {
                 type="number"
                 min={0}
                 step={1}
-                className={clsx(selectCls, 'w-24 text-right')}
+                className={clsx('oe-input oe-input-sm', 'w-24 text-right')}
                 value={threshold}
                 onChange={(e) => onThreshold(e.target.value)}
               />

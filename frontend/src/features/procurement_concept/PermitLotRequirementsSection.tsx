@@ -19,7 +19,7 @@ export function PermitLotRequirementsSection({ projectId }: { projectId: string 
 
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="permit-lot-requirements">
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('procurement_concept.ui.permit_conditions.title', { defaultValue: 'Permit conditions for every lot' })}
       </h3>
       <p className="mt-1 text-xs text-content-secondary">

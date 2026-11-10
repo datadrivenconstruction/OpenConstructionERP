@@ -375,13 +375,13 @@ export function SmartViewRuleEditor({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="smart-view-default-action"
-              className="text-sm font-medium text-content-primary"
+              className="oe-label"
             >
               {t('smartViews.default_action', { defaultValue: 'Default action' })}
             </label>
             <select
               id="smart-view-default-action"
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm"
+              className="oe-select"
               value={defaultAction}
               onChange={(e) =>
                 setDefaultAction(e.target.value as SmartViewDefaultAction)
@@ -401,13 +401,13 @@ export function SmartViewRuleEditor({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="smart-view-description"
-            className="text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('smartViews.description', { defaultValue: 'Description' })}
           </label>
           <textarea
             id="smart-view-description"
-            className="min-h-[64px] w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+            className="oe-textarea min-h-[64px]"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             data-testid="smart-view-description-input"
@@ -418,14 +418,14 @@ export function SmartViewRuleEditor({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="smart-view-folder"
-            className="text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('smartViews.folder', { defaultValue: 'Folder (optional)' })}
           </label>
           <input
             id="smart-view-folder"
             list="smart-view-folder-options"
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm"
+            className="oe-input"
             value={folder}
             onChange={(e) => setFolder(e.target.value)}
             placeholder={t('smartViews.folder_placeholder', {
@@ -578,7 +578,7 @@ function RuleRow({
           </label>
           <input
             list={`ifc-classes-${index}`}
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+            className="oe-input"
             value={rule.selector.ifc_class ?? ''}
             onChange={(e) =>
               onPatchSelector({ ifc_class: e.target.value || null })
@@ -598,7 +598,7 @@ function RuleRow({
             {t('smartViews.rule_selector_property', { defaultValue: 'Property' })}
           </label>
           <input
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+            className="oe-input"
             value={rule.selector.property ?? ''}
             onChange={(e) =>
               onPatchSelector({ property: e.target.value || null })
@@ -613,7 +613,7 @@ function RuleRow({
             {t('smartViews.rule_selector_operator', { defaultValue: 'Operator' })}
           </label>
           <select
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+            className="oe-select"
             value={op ?? ''}
             onChange={(e) => {
               const next = e.target.value === '' ? null : (e.target.value as SmartViewOperator);
@@ -649,7 +649,7 @@ function RuleRow({
           ) : valueInputType === 'number' ? (
             <input
               type="number"
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-input"
               value={valueAsString}
               onChange={(e) =>
                 onPatchSelector({
@@ -668,7 +668,7 @@ function RuleRow({
                     })
                   : ''
               }
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-input"
               value={valueAsString}
               onChange={(e) =>
                 onPatchSelector({
@@ -687,7 +687,7 @@ function RuleRow({
           {t('smartViews.rule_action', { defaultValue: 'Action' })}
         </label>
         <select
-          className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+          className="oe-select"
           value={action}
           onChange={(e) =>
             onPatchRule({ action: e.target.value as SmartViewAction })
@@ -718,7 +718,7 @@ function RuleRow({
             />
             <input
               type="text"
-              className="h-9 w-24 rounded-lg border border-border bg-surface-primary px-2 text-sm font-mono"
+              className="oe-input w-24 font-mono"
               value={rule.action_args.color ?? ''}
               onChange={(e) =>
                 onPatchActionArgs({ color: e.target.value })
@@ -771,7 +771,7 @@ function RuleRow({
           rule.action_args.color_by_property !== undefined && (
             <input
               type="text"
-              className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-input"
               value={rule.action_args.color_by_property}
               onChange={(e) =>
                 onPatchActionArgs({ color_by_property: e.target.value })

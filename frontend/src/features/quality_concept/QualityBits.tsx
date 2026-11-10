@@ -18,7 +18,7 @@ import type { Finding } from './api';
 import { REVIEW_STATUS, findingText, vocab, type KeyMap, type TFn } from './labels';
 
 export const inputCls =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  'oe-input';
 
 export const CONCEPT_TONE: Record<string, BadgeVariant> = {
   draft: 'neutral',
@@ -148,7 +148,7 @@ export function Section({
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid={testId}>
       <div className="mb-3 flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-card-title">{title}</h2>
           {description && <p className="mt-0.5 text-xs text-content-secondary">{description}</p>}
         </div>
         {action}

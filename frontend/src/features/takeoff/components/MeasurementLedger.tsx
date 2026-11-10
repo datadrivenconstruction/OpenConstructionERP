@@ -344,11 +344,11 @@ export function MeasurementLedger({
       ) : (
         <div ref={scrollContainerRef} className="max-h-[500px] overflow-auto">
           <table
-            className="w-full text-2xs tabular-nums"
+            className="oe-table-compact text-2xs tabular-nums"
             data-testid="ledger-table"
           >
-            <thead className="sticky top-0 bg-surface-primary/95 backdrop-blur-sm z-10">
-              <tr className="border-b border-border">
+            <thead className="sticky top-0 backdrop-blur-sm z-10">
+              <tr>
                 {COLUMNS.map((col) => {
                   const isActive = sortCol === col.key;
                   const Arrow =
@@ -403,7 +403,7 @@ export function MeasurementLedger({
                 {hasActionColumn && (
                   <th
                     scope="col"
-                    className="px-1.5 py-1 font-semibold text-content-secondary text-right"
+                    className="text-right"
                     aria-label={t('takeoff_viewer.col_actions', {
                       defaultValue: 'Actions',
                     })}
@@ -417,7 +417,7 @@ export function MeasurementLedger({
                 <tr>
                   <td
                     colSpan={columnCount}
-                    className="text-center text-content-tertiary py-4"
+                    className="text-center text-content-tertiary"
                     data-testid="ledger-no-matches"
                   >
                     {t('takeoff_viewer.ledger_no_matches', {
@@ -455,28 +455,28 @@ export function MeasurementLedger({
                     data-testid="ledger-grand-total"
                     data-type={gt.type}
                   >
-                    <td className="px-1.5 py-1 text-right text-content-tertiary" />
-                    <td className="px-1.5 py-1 font-semibold text-content-primary capitalize">
+                    <td className="text-right text-content-tertiary" />
+                    <td className="capitalize">
                       {t('takeoff_viewer.total_of_type', {
                         defaultValue: 'Total {{type}}',
                         type: gt.type,
                       })}
                     </td>
-                    <td className="px-1.5 py-1 text-content-tertiary">
+                    <td className="text-content-tertiary">
                       {gt.count} {t('takeoff_viewer.items', { defaultValue: 'items' })}
                     </td>
-                    <td className="px-1.5 py-1" />
-                    <td className="px-1.5 py-1 text-right font-semibold text-content-primary">
+                    <td />
+                    <td className="text-right">
                       {/* Count totals are whole pieces (K-14). */}
                       {gt.type === 'count'
                         ? formatCountQuantity(disp.value)
                         : formatQuantity(disp.value)}
                     </td>
-                    <td className="px-1.5 py-1 text-content-secondary">
+                    <td className="text-content-secondary">
                       {localizedUnitCode(disp.unit, i18n.language)}
                     </td>
-                    <td className="px-1.5 py-1" />
-                    {hasActionColumn && <td className="px-1.5 py-1" />}
+                    <td />
+                    {hasActionColumn && <td />}
                   </tr>
                   );
                 })}
@@ -637,7 +637,7 @@ function GroupRows({
                         className={clsx(
                           'p-0.5 rounded transition-colors',
                           measurement.linkedPositionId
-                            ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+                            ? 'text-semantic-success hover:bg-semantic-success-bg'
                             : 'text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10',
                         )}
                         aria-label={t('takeoff_viewer.ledger_add_to_boq', {
@@ -659,7 +659,7 @@ function GroupRows({
                         }
                         data-testid="ledger-add-to-boq"
                       >
-                        <Link2 size={11} />
+                        <Link2 size={12} />
                       </button>
                     )}
                     {onCreateRfi && (
@@ -678,7 +678,7 @@ function GroupRows({
                         })}
                         data-testid="ledger-create-rfi"
                       >
-                        <HelpCircle size={11} />
+                        <HelpCircle size={12} />
                       </button>
                     )}
                   </span>

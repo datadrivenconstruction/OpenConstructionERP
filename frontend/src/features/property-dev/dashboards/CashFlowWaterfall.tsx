@@ -122,7 +122,7 @@ export function CashFlowWaterfall({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('propdev.dashboards.cashflow.title', {
             defaultValue: 'Cash-flow waterfall',
           })}

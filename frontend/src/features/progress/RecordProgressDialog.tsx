@@ -201,7 +201,7 @@ export function RecordProgressDialog({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="progress-position-search"
-              className="text-xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('progress.record_position', { defaultValue: 'Position' })}
             </label>
@@ -262,7 +262,7 @@ export function RecordProgressDialog({
         {/* Period + percent */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="progress-period" className="text-xs font-medium text-content-secondary">
+            <label htmlFor="progress-period" className="oe-label">
               {t('progress.record_period', { defaultValue: 'Period' })}
             </label>
             <Input
@@ -280,7 +280,7 @@ export function RecordProgressDialog({
             </p>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="progress-percent" className="text-xs font-medium text-content-secondary">
+            <label htmlFor="progress-percent" className="oe-label">
               {t('progress.record_percent', { defaultValue: 'Percent complete' })}
             </label>
             <Input
@@ -305,7 +305,7 @@ export function RecordProgressDialog({
 
         {/* Notes */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="progress-notes" className="text-xs font-medium text-content-secondary">
+          <label htmlFor="progress-notes" className="oe-label">
             {t('progress.record_notes', { defaultValue: 'Notes (optional)' })}
           </label>
           <textarea
@@ -314,7 +314,7 @@ export function RecordProgressDialog({
             maxLength={2000}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+            className="oe-textarea"
             placeholder={t('progress.record_notes_ph', {
               defaultValue: 'What was observed, and by whom',
             })}

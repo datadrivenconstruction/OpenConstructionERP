@@ -29,8 +29,8 @@ import {
 import { parseReadingsCsv, validReadings, type CsvRowError } from '../readingsCsv';
 import { isoFromLocal, localDateTimeValue, outsideLimits } from '../sensorData';
 
-const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
-const LABEL = 'text-xs text-content-secondary';
+const FIELD = 'oe-input';
+const LABEL = 'oe-label';
 const W = 560;
 const H = 160;
 const WINDOW_DAYS = 14;
@@ -217,7 +217,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
             setLimitEdit(null);
           }}
           aria-label={t('site_sensors.forms.device', { defaultValue: 'Device' })}
-          className={`${FIELD} w-full`}
+          className="oe-select"
         >
           <option value="">{t('site_sensors.forms.pick_device', { defaultValue: 'Choose a device' })}</option>
           {devices.map((d) => (
@@ -282,7 +282,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    icon={<Pencil size={13} />}
+                    icon={<Pencil size={14} />}
                     onClick={() =>
                       setLimitEdit({ upper: device.limit_value ?? '', lower: device.lower_limit ?? '', reason: device.limit_note })
                     }
@@ -295,15 +295,15 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <label className={LABEL}>
                     {t('site_sensors.custom.upper', { defaultValue: 'Upper limit' })}
-                    <input type="number" step="any" value={limitEdit.upper} onChange={(e) => setLimitEdit({ ...limitEdit, upper: e.target.value })} className={`${FIELD} mt-1 w-full`} />
+                    <input type="number" step="any" value={limitEdit.upper} onChange={(e) => setLimitEdit({ ...limitEdit, upper: e.target.value })} className={`${FIELD} mt-1`} />
                   </label>
                   <label className={LABEL}>
                     {t('site_sensors.custom.lower', { defaultValue: 'Lower limit' })}
-                    <input type="number" step="any" value={limitEdit.lower} onChange={(e) => setLimitEdit({ ...limitEdit, lower: e.target.value })} className={`${FIELD} mt-1 w-full`} />
+                    <input type="number" step="any" value={limitEdit.lower} onChange={(e) => setLimitEdit({ ...limitEdit, lower: e.target.value })} className={`${FIELD} mt-1`} />
                   </label>
                   <label className={`${LABEL} col-span-2`}>
                     {t('site_sensors.limits.reason', { defaultValue: 'Reason or source of the limit' })}
-                    <input type="text" maxLength={300} value={limitEdit.reason} onChange={(e) => setLimitEdit({ ...limitEdit, reason: e.target.value })} className={`${FIELD} mt-1 w-full`} />
+                    <input type="text" maxLength={300} value={limitEdit.reason} onChange={(e) => setLimitEdit({ ...limitEdit, reason: e.target.value })} className={`${FIELD} mt-1`} />
                     <span className="mt-1 block text-2xs text-content-tertiary">
                       {t('site_sensors.limits.reason_hint', {
                         defaultValue: 'Blank upper limit uses the country default. A limit that replaces it needs a reason.',
@@ -328,15 +328,15 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                 <div className="mt-2 grid grid-cols-2 gap-3">
                   <label className={LABEL}>
                     {t('site_sensors.forms.recorded_at', { defaultValue: 'Recorded at' })}
-                    <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                    <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} className={`${FIELD} mt-1`} />
                   </label>
                   <label className={LABEL}>
                     {t('site_sensors.forms.value', { defaultValue: 'Value' })} {device.unit ? `(${device.unit})` : ''}
-                    <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                    <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={`${FIELD} mt-1`} />
                   </label>
                   <label className={`${LABEL} col-span-2`}>
                     {t('site_sensors.readings.note', { defaultValue: 'Note' })}
-                    <input type="text" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                    <input type="text" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} className={`${FIELD} mt-1`} />
                   </label>
                 </div>
                 <Button
@@ -359,7 +359,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                   rows={4}
                   placeholder={t('site_sensors.import.placeholder', { defaultValue: 'time,value,note per line, e.g. 2026-11-02 08:00,42.5,meter check' })}
                   aria-label={t('site_sensors.import.title', { defaultValue: 'Paste or import CSV' })}
-                  className="mt-2 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 font-mono text-xs text-content-primary"
+                  className="oe-textarea mt-2 font-mono"
                 />
                 <input
                   ref={fileRef}
@@ -373,7 +373,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                   }}
                 />
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Button variant="secondary" size="sm" icon={<Upload size={13} />} onClick={() => fileRef.current?.click()}>
+                  <Button variant="secondary" size="sm" icon={<Upload size={14} />} onClick={() => fileRef.current?.click()}>
                     {t('site_sensors.import.choose_file', { defaultValue: 'Choose file' })}
                   </Button>
                   <Button variant="primary" size="sm" disabled={good.length === 0} loading={importMut.isPending} onClick={() => importMut.mutate()}>
@@ -390,7 +390,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                   )}
                 </div>
                 {preview.length > 0 && (
-                  <table className="mt-2 w-full text-xs">
+                  <table className="oe-table-compact mt-2">
                     <tbody>
                       {preview.slice(0, 50).map((r) => (
                         <tr key={r.line} className={r.error ? 'text-semantic-error' : 'text-content-secondary'}>
@@ -445,8 +445,8 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                             {r.note && <span className="text-xs italic text-content-tertiary">{r.note}</span>}
                             {mayChange(r) && (
                               <span className="ml-auto flex gap-1">
-                                <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={13} />} onClick={() => setEditing({ t: r.t, value: String(r.v), note: r.note })} />
-                                <Button variant="ghost" size="sm" aria-label={t('common.delete', { defaultValue: 'Delete' })} icon={<Trash2 size={13} />} loading={delMut.isPending && delMut.variables === r.t} onClick={() => delMut.mutate(r.t)} />
+                                <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setEditing({ t: r.t, value: String(r.v), note: r.note })} />
+                                <Button variant="ghost" size="sm" aria-label={t('common.delete', { defaultValue: 'Delete' })} icon={<Trash2 size={14} />} loading={delMut.isPending && delMut.variables === r.t} onClick={() => delMut.mutate(r.t)} />
                               </span>
                             )}
                           </>

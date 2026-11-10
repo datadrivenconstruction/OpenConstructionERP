@@ -362,7 +362,7 @@ export function DocumentTemplatesSettingsPage() {
             value={activeDevId ?? ''}
             onChange={(e) => setActiveDevId(e.target.value || null)}
             disabled={developmentsQ.isLoading}
-            className="h-7 w-72 max-w-full rounded border border-border bg-surface-primary px-2 text-xs disabled:opacity-60"
+            className="oe-select oe-input-sm w-72 max-w-full"
             data-testid="active-dev-input"
           >
             <option value="">
@@ -417,7 +417,7 @@ export function DocumentTemplatesSettingsPage() {
             <Edit3 size={16} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('property_dev.doc_templates.editor_cta_title', {
                 defaultValue: 'Create or edit templates in your browser',
               })}
@@ -787,7 +787,7 @@ function UploadCustomTemplateForm({
 
   return (
     <Card className="p-4">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title flex items-center gap-2">
         <UploadIcon size={14} className="text-oe-blue" />
         {t('property_dev.doc_templates.upload_title', {
           defaultValue: 'Upload custom template',
@@ -802,7 +802,7 @@ function UploadCustomTemplateForm({
       </p>
       <form className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12" onSubmit={submit}>
         <div className="md:col-span-4">
-          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="oe-label">
             {t('property_dev.doc_templates.upload_field_file', {
               defaultValue: 'File',
             })}
@@ -816,7 +816,7 @@ function UploadCustomTemplateForm({
           />
         </div>
         <div className="md:col-span-4">
-          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="oe-label">
             {t('property_dev.doc_templates.upload_field_name', {
               defaultValue: 'Display name',
             })}
@@ -828,14 +828,14 @@ function UploadCustomTemplateForm({
             placeholder={t('property_dev.doc_templates.upload_field_name_ph', {
               defaultValue: 'e.g. KYC checklist (UAE 2026)',
             })}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input"
             data-testid="custom-upload-name"
           />
         </div>
         <div className="md:col-span-2">
           <label
             htmlFor="custom-upload-doctype"
-            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="oe-label"
           >
             {t('property_dev.doc_templates.upload_field_doctype', {
               defaultValue: 'Doc type',
@@ -858,7 +858,7 @@ function UploadCustomTemplateForm({
         <div className="md:col-span-2">
           <label
             htmlFor="custom-upload-entity"
-            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="oe-label"
           >
             {t('property_dev.doc_templates.upload_field_entity', {
               defaultValue: 'Entity',
@@ -879,7 +879,7 @@ function UploadCustomTemplateForm({
           />
         </div>
         <div className="md:col-span-8">
-          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="oe-label">
             {t('property_dev.doc_templates.upload_field_desc', {
               defaultValue: 'Description (optional)',
             })}
@@ -891,12 +891,12 @@ function UploadCustomTemplateForm({
             placeholder={t('property_dev.doc_templates.upload_field_desc_ph', {
               defaultValue: 'Short note for your team',
             })}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input"
             data-testid="custom-upload-desc"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="oe-label">
             {t('property_dev.doc_templates.upload_field_trigger', {
               defaultValue: 'Trigger',
             })}
@@ -906,7 +906,7 @@ function UploadCustomTemplateForm({
             value={trigger}
             onChange={(e) => setTrigger(e.target.value)}
             placeholder="manual"
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input"
             data-testid="custom-upload-trigger"
           />
         </div>
@@ -1164,7 +1164,7 @@ function TemplateCard({
         {canPreview && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
             <div>
-              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="oe-label">
                 <Globe2 size={10} className="mr-1 inline" />
                 {t('property_dev.doc_templates.locale', {
                   defaultValue: 'Locale',
@@ -1173,7 +1173,7 @@ function TemplateCard({
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-select"
               >
                 {locales.map((l) => (
                   <option key={l} value={l}>
@@ -1185,7 +1185,7 @@ function TemplateCard({
             <div>
               <label
                 htmlFor={`tpl-regulator-${docTypeKey}`}
-                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="oe-label"
               >
                 <ShieldAlert size={10} className="mr-1 inline" />
                 {t('property_dev.doc_templates.regulator', {
@@ -1241,7 +1241,7 @@ function TemplateCard({
               }`}
               data-testid={`toggle-default-${template.id}`}
             >
-              {isDefault ? <CheckCircle2 size={11} /> : null}
+              {isDefault ? <CheckCircle2 size={12} /> : null}
               {isDefault
                 ? t('common.yes', { defaultValue: 'Default' })
                 : t('property_dev.doc_templates.set_default', {
@@ -1677,7 +1677,7 @@ function TemplateEditorModal({
           {/* Metadata row */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
             <div className="md:col-span-4">
-              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="oe-label">
                 {t('property_dev.doc_templates.upload_field_name', {
                   defaultValue: 'Display name',
                 })}
@@ -1686,14 +1686,14 @@ function TemplateEditorModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input"
                 data-testid="editor-name"
               />
             </div>
             <div className="md:col-span-3">
               <label
                 htmlFor="editor-doctype"
-                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="oe-label"
               >
                 {t('property_dev.doc_templates.upload_field_doctype', {
                   defaultValue: 'Doc type',
@@ -1716,7 +1716,7 @@ function TemplateEditorModal({
             <div className="md:col-span-2">
               <label
                 htmlFor="editor-entity"
-                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="oe-label"
               >
                 {t('property_dev.doc_templates.upload_field_entity', {
                   defaultValue: 'Entity',
@@ -1737,7 +1737,7 @@ function TemplateEditorModal({
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="oe-label">
                 {t('property_dev.doc_templates.editor_content_type', {
                   defaultValue: 'Source format',
                 })}
@@ -1747,7 +1747,7 @@ function TemplateEditorModal({
                 onChange={(e) =>
                   setContentType(e.target.value as CustomTemplateTextContentType)
                 }
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-select"
                 data-testid="editor-content-type"
               >
                 {ALLOWED_CONTENT_TYPES.map((opt) => (
@@ -1758,7 +1758,7 @@ function TemplateEditorModal({
               </select>
             </div>
             <div className="md:col-span-12">
-              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="oe-label">
                 {t('property_dev.doc_templates.upload_field_desc', {
                   defaultValue: 'Description (optional)',
                 })}
@@ -1767,7 +1767,7 @@ function TemplateEditorModal({
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input"
                 data-testid="editor-description"
               />
             </div>
@@ -1833,7 +1833,7 @@ function TemplateEditorModal({
                 value={contentText}
                 onChange={(e) => setContentText(e.target.value)}
                 spellCheck={false}
-                className="flex-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2 font-mono text-xs leading-5 text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+                className="oe-textarea flex-1 font-mono resize-none"
                 data-testid="editor-source"
               />
             </div>
@@ -2168,7 +2168,7 @@ function LocaleEditorModal({
           <div className="flex-1 min-w-[240px]">
             <label
               htmlFor="locale-editor-code"
-              className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+              className="oe-label"
             >
               {t('property_dev.doc_templates.locale_code_label', {
                 defaultValue: 'Locale code (e.g. de, ja, pt-BR)',
@@ -2181,7 +2181,7 @@ function LocaleEditorModal({
               onChange={(e) => setCode(e.target.value)}
               placeholder="de"
               autoFocus={!initialCode}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input"
             />
           </div>
           <Button
@@ -2239,7 +2239,7 @@ function LocaleEditorModal({
         <div>
           <label
             htmlFor="locale-editor-json"
-            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="oe-label"
           >
             {t('property_dev.doc_templates.locale_json_label', {
               defaultValue: 'Translation JSON',
@@ -2252,7 +2252,7 @@ function LocaleEditorModal({
             disabled={loading || busy}
             rows={20}
             spellCheck={false}
-            className="w-full rounded-lg border border-border bg-surface-primary p-3 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-textarea font-mono"
             placeholder={
               loading
                 ? t('common.loading', { defaultValue: 'Loading…' })

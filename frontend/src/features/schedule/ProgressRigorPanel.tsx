@@ -103,7 +103,7 @@ function EvmWarnings({ warnings }: { warnings: EvmWarningKey[] }) {
           key={w}
           className="flex items-start gap-2 rounded-md bg-semantic-warning-bg px-2.5 py-1.5 text-xs text-semantic-warning ring-1 ring-semantic-warning/30"
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>{warningText(w, t)}</span>
         </div>
       ))}
@@ -172,7 +172,7 @@ export function ProgressRigorPanel({ scheduleId, activities, currency, dataDate 
         <div className="flex flex-wrap items-end justify-between gap-3 p-4">
           <div>
             <div className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-              <CalendarClock size={15} /> {t('schedule.live_pv', { defaultValue: 'Live planned value' })}
+              <CalendarClock size={16} /> {t('schedule.live_pv', { defaultValue: 'Live planned value' })}
             </div>
             <p className="mt-0.5 text-xs text-content-secondary">
               {t('schedule.live_pv_hint', {
@@ -192,7 +192,7 @@ export function ProgressRigorPanel({ scheduleId, activities, currency, dataDate 
             </label>
             <Button
               variant="primary"
-              icon={<CalendarClock size={15} />}
+              icon={<CalendarClock size={16} />}
               loading={advance.isPending}
               onClick={() => advance.mutate()}
             >
@@ -222,13 +222,13 @@ export function ProgressRigorPanel({ scheduleId, activities, currency, dataDate 
       {/* ── Activity picker ─────────────────────────────────────────────── */}
       <Card>
         <div className="flex flex-wrap items-center gap-2 p-3">
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('schedule.activity', { defaultValue: 'Activity' })}
           </label>
           <select
             value={selected?.id ?? ''}
             onChange={(e) => setSelectedId(e.target.value)}
-            className="min-w-[16rem] flex-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm"
+            className="oe-select min-w-[16rem] flex-1"
           >
             {activities.map((a) => (
               <option key={a.id} value={a.id}>
@@ -248,7 +248,7 @@ function PvStat({ label, value, loading }: { label: string; value: string; loadi
     <div className="bg-surface-primary px-4 py-3">
       <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
       <div className="mt-0.5 text-base font-semibold text-content-primary">
-        {loading ? <Loader2 size={15} className="animate-spin" /> : value}
+        {loading ? <Loader2 size={16} className="animate-spin" /> : value}
       </div>
     </div>
   );
@@ -353,7 +353,7 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
   if (seed.isLoading || !view) {
     return (
       <div className="flex items-center gap-2 p-6 text-sm text-content-secondary">
-        <Loader2 size={15} className="animate-spin" /> {t('common.loading', { defaultValue: 'Loading…' })}
+        <Loader2 size={16} className="animate-spin" /> {t('common.loading', { defaultValue: 'Loading…' })}
       </div>
     );
   }
@@ -381,11 +381,11 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
           )}
         </div>
         {suspended ? (
-          <Button variant="secondary" icon={<PlayCircle size={15} />} onClick={() => suspendResume.mutate('resume')} loading={suspendResume.isPending}>
+          <Button variant="secondary" icon={<PlayCircle size={16} />} onClick={() => suspendResume.mutate('resume')} loading={suspendResume.isPending}>
             {t('schedule.resume', { defaultValue: 'Resume' })}
           </Button>
         ) : (
-          <Button variant="ghost" icon={<PauseCircle size={15} />} onClick={() => suspendResume.mutate('suspend')} loading={suspendResume.isPending}>
+          <Button variant="ghost" icon={<PauseCircle size={16} />} onClick={() => suspendResume.mutate('suspend')} loading={suspendResume.isPending}>
             {t('schedule.suspend', { defaultValue: 'Suspend' })}
           </Button>
         )}
@@ -610,7 +610,7 @@ function StepChecklist({
       </div>
       {loading ? (
         <div className="flex items-center gap-2 p-3 text-xs text-content-secondary">
-          <Loader2 size={13} className="animate-spin" /> {t('common.loading', { defaultValue: 'Loading…' })}
+          <Loader2 size={14} className="animate-spin" /> {t('common.loading', { defaultValue: 'Loading…' })}
         </div>
       ) : (
         <ul className="divide-y divide-border-light">

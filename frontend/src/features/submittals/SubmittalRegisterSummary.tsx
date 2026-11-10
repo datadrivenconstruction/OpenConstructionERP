@@ -223,7 +223,7 @@ export function SubmittalRegisterSummary({
           onClick={() => setLegendOpen((open) => !open)}
           className="inline-flex items-center gap-1 text-xs font-medium text-oe-blue-text hover:underline"
         >
-          <CircleHelp size={13} aria-hidden />
+          <CircleHelp size={14} aria-hidden />
           {t('submittals.outcome_legend_toggle', { defaultValue: 'What the codes mean' })}
         </button>
       </div>

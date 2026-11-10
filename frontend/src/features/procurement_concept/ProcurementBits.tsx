@@ -28,7 +28,7 @@ import type { Verdict } from './rules';
 import { getErrorMessage } from '@/shared/lib/api';
 
 export const FIELD_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-input';
 
 /**
  * A button that, when it may not be pressed, stays visible and says why.
@@ -68,7 +68,7 @@ export function ReasonedButton({
           data-reason={verdict ?? undefined}
           className={quiet ? 'sr-only' : 'inline-flex max-w-xs items-start gap-1 text-2xs text-content-tertiary'}
         >
-          <Info size={11} className="mt-px shrink-0" aria-hidden />
+          <Info size={12} className="mt-px shrink-0" aria-hidden />
           {reason}
         </span>
       )}
@@ -207,7 +207,7 @@ export function Field({
 }) {
   return (
     <div className={className}>
-      <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium text-content-secondary">
+      <label htmlFor={htmlFor} className="oe-label">
         {label}
       </label>
       {children}

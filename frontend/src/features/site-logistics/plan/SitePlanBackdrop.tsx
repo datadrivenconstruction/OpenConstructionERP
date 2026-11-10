@@ -41,7 +41,7 @@ export function provisionalCalibration(image: PlanImage): Calibration {
   return { metresPerPixel: 0.1, origin: [0, image.height] };
 }
 
-const selectCls = 'mt-1 block h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary';
+const selectCls = 'oe-input mt-1 block';
 
 export function PlanImageBar({
   projectId,
@@ -97,10 +97,10 @@ export function PlanImageBar({
   return (
     <div className="space-y-2" data-testid="siteplan-image-bar">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {tx(t, 'siteplan.image')}
           <select
-            className={selectCls}
+            className="oe-select"
             value={stage.plan_document_id ?? ''}
             disabled={readOnly || busy || images.isLoading}
             aria-busy={images.isLoading}
@@ -168,7 +168,7 @@ export function PlanImageBar({
       {scaling && image && (
         <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="siteplan-scale-form">
           <p className="basis-full text-sm text-content-secondary">{tx(t, 'siteplan.scale_hint')}</p>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {tx(t, 'siteplan.scale_distance')}
             <input
               className={selectCls}

@@ -30,7 +30,7 @@ export function MenuModeBar({
         value={mode}
         onChange={(e) => onMode(e.target.value as MenuModeId)}
         title={t('menu_layout.mode_hint', { defaultValue: 'Show only the screens for your job' })}
-        className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-secondary/60 px-2 py-1 text-xs text-content-secondary"
+        className="oe-select oe-input-sm min-w-0 flex-1"
       >
         {MENU_MODE_IDS.map((m) => (
           <option key={m} value={m}>
@@ -46,7 +46,7 @@ export function MenuModeBar({
         title={t('menu_layout.title', { defaultValue: 'Arrange menu' })}
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border-light text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
       >
-        <SlidersHorizontal size={13} />
+        <SlidersHorizontal size={14} />
       </button>
     </div>
   );
@@ -72,7 +72,7 @@ export function MenuSuggestionCard({
       className="mx-3 mb-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 p-2 text-xs"
     >
       <div className="flex items-start gap-1.5">
-        <Lightbulb size={13} className="mt-0.5 shrink-0 text-oe-blue" aria-hidden />
+        <Lightbulb size={14} className="mt-0.5 shrink-0 text-oe-blue" aria-hidden />
         <div className="min-w-0 flex-1">
           <div className="font-medium text-content-primary">
             {hide
@@ -144,7 +144,7 @@ export function RailFlyoutGroup({
         {icon}
       </button>
       {open && (
-        <div className="absolute start-full top-0 z-50 ms-1 w-56 rounded-lg border border-border-light bg-surface-primary p-1.5 shadow-lg">
+        <div className="absolute start-full top-0 z-dropdown ms-1 w-56 rounded-lg border border-border-light bg-surface-primary p-1.5 shadow-lg">
           <div className="px-2 pb-1 text-2xs font-medium text-content-tertiary">{label}</div>
           {children}
         </div>

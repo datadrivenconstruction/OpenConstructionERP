@@ -88,7 +88,7 @@ export function PositionSuggestedSupplier({ positionId }: { positionId: string }
         </p>
       ) : data ? (
         <div className="mt-2 space-y-2">
-          <label className="block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('procurement.suggested.position_default', { defaultValue: 'For all materials of this position' })}
             <div className="mt-1">
               <VendorSelect

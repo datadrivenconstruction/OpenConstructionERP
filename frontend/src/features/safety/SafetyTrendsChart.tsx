@@ -102,7 +102,7 @@ function TrendDirectionChip({
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${c.cls}`}
       data-testid="safety-trend-direction"
     >
-      <Icon size={13} />
+      <Icon size={14} />
       {c.label}
     </span>
   );

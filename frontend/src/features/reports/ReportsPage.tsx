@@ -948,7 +948,7 @@ async function downloadProgressReport(
     const risks = (await apiGet<Page<{ code: string; title: string; risk_score: number; impact_severity: string }>>(`/v1/risk/?project_id=${projectId}&limit=5`)).items;
     if (risks.length > 0) {
       htmlParts.push(`<h2>${esc(t('reports.html_top_risks', { defaultValue: 'Top Risks' }))}</h2>`);
-      htmlParts.push(`<table><thead><tr><th>${esc(t('reports.html_col_code', { defaultValue: 'Code' }))}</th><th>${esc(t('reports.html_col_risk', { defaultValue: 'Risk' }))}</th><th>${esc(t('reports.html_col_severity', { defaultValue: 'Severity' }))}</th><th>${esc(t('reports.html_col_score', { defaultValue: 'Score' }))}</th></tr></thead><tbody>`);
+      htmlParts.push(`<table className="oe-table"><thead><tr><th>${esc(t('reports.html_col_code', { defaultValue: 'Code' }))}</th><th>${esc(t('reports.html_col_risk', { defaultValue: 'Risk' }))}</th><th>${esc(t('reports.html_col_severity', { defaultValue: 'Severity' }))}</th><th>${esc(t('reports.html_col_score', { defaultValue: 'Score' }))}</th></tr></thead><tbody>`);
       const sorted = [...risks].sort((a, b) => b.risk_score - a.risk_score);
       for (const r of sorted) {
         htmlParts.push(`<tr><td>${esc(r.code)}</td><td>${esc(r.title)}</td><td>${esc(r.impact_severity)}</td><td>${fmtFixed(r.risk_score, 1)}</td></tr>`);
@@ -1233,7 +1233,7 @@ export function ReportsPage() {
         <div className="flex flex-col gap-1">
           <label
             htmlFor="report-boq"
-            className="text-xs font-medium text-content-secondary"
+            className="oe-label"
           >
             {t('boq.title', { defaultValue: 'BOQ' })}
           </label>
@@ -1242,7 +1242,7 @@ export function ReportsPage() {
             value={selectedBoqId}
             onChange={(e) => setSelectedBoqId(e.target.value)}
             disabled={loadingBoqs || boqs.length === 0}
-            className="h-9 min-w-[220px] rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary outline-none transition-colors focus:border-oe-blue focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+            className="oe-select min-w-[220px]"
           >
             {loadingBoqs && (
               <option value="">
@@ -1281,7 +1281,7 @@ export function ReportsPage() {
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10">
               <Settings2 size={20} className="text-oe-blue" strokeWidth={1.75} />
             </div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('reports.custom_report', { defaultValue: 'Custom Report' })}
             </h3>
             <p className="mt-1 text-sm leading-relaxed text-content-secondary">
@@ -1399,7 +1399,7 @@ export function ReportsPage() {
                 htmlParts.push(`<h2>${esc(t('reports.section_budget', { defaultValue: 'Budget vs Actual' }))}</h2>`);
                 try {
                   const dashboard = await getDashboard();
-                  htmlParts.push(`<table><thead><tr><th>${esc(t('reports.html_col_metric', { defaultValue: 'Metric' }))}</th><th style="text-align:right">${esc(t('reports.html_col_value', { defaultValue: 'Value' }))}</th></tr></thead><tbody>`);
+                  htmlParts.push(`<table className="oe-table"><thead><tr><th>${esc(t('reports.html_col_metric', { defaultValue: 'Metric' }))}</th><th style="text-align:right">${esc(t('reports.html_col_value', { defaultValue: 'Value' }))}</th></tr></thead><tbody>`);
                   htmlParts.push(`<tr><td>${esc(t('reports.html_total_budget_planned', { defaultValue: 'Total Budget (Planned)' }))}</td><td style="text-align:right">${Number(dashboard.total_budget || 0).toLocaleString(lang)}</td></tr>`);
                   htmlParts.push(`<tr><td>${esc(t('reports.html_total_committed', { defaultValue: 'Total Committed' }))}</td><td style="text-align:right">${Number(dashboard.total_committed || 0).toLocaleString(lang)}</td></tr>`);
                   htmlParts.push(`<tr><td>${esc(t('reports.html_total_actual', { defaultValue: 'Total Actual' }))}</td><td style="text-align:right">${Number(dashboard.total_actual || 0).toLocaleString(lang)}</td></tr>`);
@@ -1420,7 +1420,7 @@ export function ReportsPage() {
                   const dashboard = await getDashboard();
                   const categories = (dashboard as unknown as Record<string, unknown>).categories as Array<Record<string, unknown>> | undefined;
                   if (categories && categories.length > 0) {
-                    htmlParts.push(`<table><thead><tr><th>${esc(t('reports.html_col_category', { defaultValue: 'Category' }))}</th><th style="text-align:right">${esc(t('reports.html_col_planned', { defaultValue: 'Planned' }))}</th><th style="text-align:right">${esc(t('reports.html_col_actual', { defaultValue: 'Actual' }))}</th><th style="text-align:right">${esc(t('reports.html_variance', { defaultValue: 'Variance' }))}</th></tr></thead><tbody>`);
+                    htmlParts.push(`<table className="oe-table"><thead><tr><th>${esc(t('reports.html_col_category', { defaultValue: 'Category' }))}</th><th style="text-align:right">${esc(t('reports.html_col_planned', { defaultValue: 'Planned' }))}</th><th style="text-align:right">${esc(t('reports.html_col_actual', { defaultValue: 'Actual' }))}</th><th style="text-align:right">${esc(t('reports.html_variance', { defaultValue: 'Variance' }))}</th></tr></thead><tbody>`);
                     const unknownLabel = t('reports.csv_unknown', { defaultValue: 'Unknown' });
                     for (const cat of categories) {
                       const v = Number(cat.planned || 0) - Number(cat.actual || 0);
@@ -1527,7 +1527,7 @@ export function ReportsPage() {
                     htmlParts.push(`<div class="metric"><div class="metric-label">${esc(t('reports.html_high_critical', { defaultValue: 'High/Critical' }))}</div><div class="metric-value">${highCritical}</div></div>`);
                     htmlParts.push(`<div class="metric"><div class="metric-label">${esc(t('reports.html_total_exposure', { defaultValue: 'Total Exposure' }))}</div><div class="metric-value">${totalExposure.toLocaleString(lang, { maximumFractionDigits: 0 })}</div></div>`);
                     htmlParts.push(`<h3>${esc(t('reports.html_top5_risks', { defaultValue: 'Top 5 Risks' }))}</h3>`);
-                    htmlParts.push(`<table><thead><tr><th>${esc(t('reports.html_col_code', { defaultValue: 'Code' }))}</th><th>${esc(t('reports.html_col_title', { defaultValue: 'Title' }))}</th><th>${esc(t('reports.html_col_probability', { defaultValue: 'Probability' }))}</th><th>${esc(t('reports.html_col_severity', { defaultValue: 'Severity' }))}</th><th style="text-align:right">${esc(t('reports.html_col_score', { defaultValue: 'Score' }))}</th></tr></thead><tbody>`);
+                    htmlParts.push(`<table className="oe-table"><thead><tr><th>${esc(t('reports.html_col_code', { defaultValue: 'Code' }))}</th><th>${esc(t('reports.html_col_title', { defaultValue: 'Title' }))}</th><th>${esc(t('reports.html_col_probability', { defaultValue: 'Probability' }))}</th><th>${esc(t('reports.html_col_severity', { defaultValue: 'Severity' }))}</th><th style="text-align:right">${esc(t('reports.html_col_score', { defaultValue: 'Score' }))}</th></tr></thead><tbody>`);
                     const top5 = [...risks].sort((a, b) => b.risk_score - a.risk_score).slice(0, 5);
                     for (const r of top5) {
                       const cls = r.impact_severity === 'critical' ? 'error' : r.impact_severity === 'high' ? 'warning' : 'neutral';
@@ -1571,7 +1571,7 @@ export function ReportsPage() {
                   if (truncated) {
                     htmlParts.push(`<p style="color:#92400e;font-size:13px">${esc(t('reports.html_boq_truncated', { defaultValue: '(Showing first {{limit}} positions; full BOQ available in BOQ export)', limit: BOQ_DETAIL_POSITION_LIMIT }))}</p>`);
                   }
-                  htmlParts.push(`<table><thead><tr><th>#</th><th>${esc(t('reports.html_col_description', { defaultValue: 'Description' }))}</th><th>${esc(t('reports.html_col_unit', { defaultValue: 'Unit' }))}</th><th style="text-align:right">${esc(t('reports.html_col_qty', { defaultValue: 'Qty' }))}</th><th style="text-align:right">${esc(t('reports.html_col_rate', { defaultValue: 'Rate' }))}</th><th style="text-align:right">${esc(t('reports.html_col_total', { defaultValue: 'Total' }))}</th></tr></thead><tbody>`);
+                  htmlParts.push(`<table className="oe-table"><thead><tr><th>#</th><th>${esc(t('reports.html_col_description', { defaultValue: 'Description' }))}</th><th>${esc(t('reports.html_col_unit', { defaultValue: 'Unit' }))}</th><th style="text-align:right">${esc(t('reports.html_col_qty', { defaultValue: 'Qty' }))}</th><th style="text-align:right">${esc(t('reports.html_col_rate', { defaultValue: 'Rate' }))}</th><th style="text-align:right">${esc(t('reports.html_col_total', { defaultValue: 'Total' }))}</th></tr></thead><tbody>`);
                   for (const pos of rows) {
                     // Quantity is absolute (scaled); unit_rate is a per-unit
                     // price (reciprocal - divide by the unit scale so rate x qty
@@ -1652,7 +1652,7 @@ function ReportCardComponent({
         <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue-subtle">
           <Icon size={20} className="text-oe-blue" strokeWidth={1.75} />
         </div>
-        <h3 className="text-base font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t(card.titleKey, { defaultValue: card.id })}
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-content-secondary">
@@ -1768,7 +1768,7 @@ function CustomReportBuilder({
     <div className="rounded-xl border border-border bg-surface-primary p-5 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('reports.select_sections', { defaultValue: 'Select report sections' })}
           </h3>
           <p className="text-xs text-content-tertiary mt-0.5">
@@ -1849,7 +1849,7 @@ function CustomReportBuilder({
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <Icon size={13} className={isActive ? 'text-oe-blue' : 'text-content-tertiary'} />
+                  <Icon size={14} className={isActive ? 'text-oe-blue' : 'text-content-tertiary'} />
                   <span className={`text-xs font-medium ${isActive ? 'text-content-primary' : 'text-content-secondary'}`}>
                     {t(sec.labelKey, { defaultValue: sec.labelDefault })}
                   </span>

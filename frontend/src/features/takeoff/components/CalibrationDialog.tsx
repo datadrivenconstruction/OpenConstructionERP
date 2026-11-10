@@ -142,7 +142,7 @@ export function CalibrationDialog({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && isValid) handleConfirm();
             }}
-            className="rounded border border-border bg-surface-secondary px-2 py-1.5 text-sm text-content-primary"
+            className="oe-input"
             min={0}
             step={0.01}
             aria-label={t('takeoff_viewer.calibrate_length', {
@@ -153,7 +153,7 @@ export function CalibrationDialog({
           <select
             value={unit}
             onChange={(e) => setUnit(e.target.value as CalibrationUnit)}
-            className="rounded border border-border bg-surface-secondary px-2 py-1.5 text-sm text-content-primary"
+            className="oe-select"
             aria-label={t('takeoff_viewer.calibrate_unit', { defaultValue: 'Unit' })}
             data-testid="calibration-unit-select"
           >

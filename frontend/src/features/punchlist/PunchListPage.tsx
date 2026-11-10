@@ -218,9 +218,9 @@ const STATUS_TRANSITION: Record<PunchStatus, { next: PunchStatus; labelKey: stri
 /* ── Styling helpers ──────────────────────────────────────────────────── */
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 type ViewMode = 'list' | 'kanban' | 'pins' | 'map';
 
@@ -512,10 +512,10 @@ function punchDrawingLink(item: {
 }
 
 const PRIORITY_RADIO_COLORS: Record<PunchPriority, string> = {
-  low: 'bg-surface-secondary text-content-secondary border-border peer-checked:bg-gray-200 peer-checked:border-gray-500',
+  low: 'bg-surface-secondary text-content-secondary border-border peer-checked:bg-surface-tertiary peer-checked:border-border',
   medium: 'bg-blue-50 text-blue-700 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-500 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-  high: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30 peer-checked:bg-amber-100 peer-checked:border-amber-500',
-  critical: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30 peer-checked:bg-red-100 peer-checked:border-red-500',
+  high: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30 peer-checked:bg-semantic-warning-bg peer-checked:border-semantic-warning',
+  critical: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30 peer-checked:bg-semantic-error-bg peer-checked:border-semantic-error',
 };
 
 function AddPunchModal({
@@ -623,7 +623,7 @@ function AddPunchModal({
             placeholder={t('punch.title_placeholder', {
               defaultValue: 'e.g. Missing fire seal on Level 3 penetration',
             })}
-            className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+            className="oe-input oe-input-lg" aria-invalid={!!titleError}
             autoFocus
           />
         </WideModalField>
@@ -748,7 +748,7 @@ function AddPunchModal({
             type="date"
             value={form.due_date}
             onChange={(e) => set('due_date', e.target.value)}
-            className={inputCls}
+            className="oe-input oe-input-lg"
           />
         </WideModalField>
 
@@ -797,7 +797,7 @@ function AddPunchModal({
             onChange={(e) => set('rework_cost', e.target.value)}
             disabled={!currency}
             placeholder="0.00"
-            className={clsx(inputCls, 'tabular-nums disabled:opacity-60')}
+            className={clsx('oe-input oe-input-lg', 'tabular-nums')}
           />
         </WideModalField>
 
@@ -841,7 +841,7 @@ function AddPunchModal({
                 value={form.page}
                 onChange={(e) => set('page', e.target.value)}
                 placeholder="1"
-                className={inputCls}
+                className="oe-input oe-input-lg"
               />
             </WideModalField>
             <WideModalField
@@ -864,7 +864,7 @@ function AddPunchModal({
                   onChange={(e) => set('location_x', e.target.value)}
                   placeholder="0.50"
                   aria-label={t('punch.field_pin_x', { defaultValue: 'Pin X (0-1)' })}
-                  className={clsx(inputCls, xError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                  className="oe-input oe-input-lg" aria-invalid={!!xError}
                 />
                 <input
                   type="number"
@@ -875,7 +875,7 @@ function AddPunchModal({
                   onChange={(e) => set('location_y', e.target.value)}
                   placeholder="0.50"
                   aria-label={t('punch.field_pin_y', { defaultValue: 'Pin Y (0-1)' })}
-                  className={clsx(inputCls, yError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                  className="oe-input oe-input-lg" aria-invalid={!!yError}
                 />
               </div>
             </WideModalField>
@@ -961,7 +961,7 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
         <div className="flex items-center gap-2">
           {(item.photos || []).length > 0 && (
             <div className="flex items-center gap-0.5">
-              <Camera size={11} />
+              <Camera size={12} />
               <span>{(item.photos || []).length}</span>
             </div>
           )}
@@ -972,7 +972,7 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
                 isOverdue && 'text-semantic-error font-medium',
               )}
             >
-              {isOverdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
+              {isOverdue ? <AlertTriangle size={12} /> : <Calendar size={12} />}
               <span>
                 {fmtDate(item.due_date, { month: 'short', day: 'numeric' })}
               </span>
@@ -1724,7 +1724,7 @@ export function PunchListPage() {
               defaultValue: 'Search title, description, location...',
             })}
             aria-label={t('punch.search', { defaultValue: 'Search title, description, location...' })}
-            className={inputCls + ' pl-9'}
+            className="oe-input oe-input-lg pl-9"
           />
         </div>
 
@@ -1817,7 +1817,7 @@ export function PunchListPage() {
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as PunchPriority | '')}
             aria-label={t('punch.all_priorities', { defaultValue: 'All Priorities' })}
-            className={inputCls + ' max-w-[160px]'}
+            className={`${inputCls} max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_priorities', { defaultValue: 'All Priorities' })}
@@ -1835,7 +1835,7 @@ export function PunchListPage() {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as PunchStatus | '')}
             aria-label={t('punch.all_statuses', { defaultValue: 'All Statuses' })}
-            className={inputCls + ' max-w-[160px]'}
+            className={`${inputCls} max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_statuses', { defaultValue: 'All Statuses' })}
@@ -1856,7 +1856,7 @@ export function PunchListPage() {
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as PunchCategory | '')}
             aria-label={t('punch.all_categories', { defaultValue: 'All Categories' })}
-            className={inputCls + ' max-w-[160px]'}
+            className={`${inputCls} max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_categories', { defaultValue: 'All Categories' })}
@@ -1877,7 +1877,7 @@ export function PunchListPage() {
             value={filterArea}
             onChange={(e) => setFilterArea(e.target.value)}
             aria-label={t('punch.all_areas', { defaultValue: 'All Areas' })}
-            className={inputCls + ' max-w-[180px]'}
+            className={`${inputCls} max-w-[180px]`}
           >
             <option value="">{t('punch.all_areas', { defaultValue: 'All Areas' })}</option>
             {filterOptions.areas.map((area) => (
@@ -1889,7 +1889,7 @@ export function PunchListPage() {
             value={filterAsset}
             onChange={(e) => setFilterAsset(e.target.value)}
             aria-label={t('punch.all_assets', { defaultValue: 'All Assets' })}
-            className={inputCls + ' max-w-[180px]'}
+            className={`${inputCls} max-w-[180px]`}
           >
             <option value="">{t('punch.all_assets', { defaultValue: 'All Assets' })}</option>
             {filterOptions.assets.map((asset) => (
@@ -1901,7 +1901,7 @@ export function PunchListPage() {
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
             aria-label={t('punch.all_assignees', { defaultValue: 'All Assignees' })}
-            className={inputCls + ' max-w-[180px]'}
+            className={`${inputCls} max-w-[180px]`}
           >
             <option value="">
               {t('punch.all_assignees', { defaultValue: 'All Assignees' })}
@@ -2043,10 +2043,10 @@ export function PunchListPage() {
               </div>
             )}
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/50">
-                    <th className="px-3 py-3 text-left w-8">
+                  <tr className="bg-surface-secondary/50">
+                    <th className="w-8">
                       <input
                         type="checkbox"
                         aria-label={t('punch.select_all', { defaultValue: 'Select all' })}
@@ -2064,36 +2064,36 @@ export function PunchListPage() {
                         className="h-4 w-4 rounded border-border accent-oe-blue cursor-pointer"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_title', { defaultValue: 'Title' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_priority', { defaultValue: 'Priority' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_category', { defaultValue: 'Category' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_assigned_to', { defaultValue: 'Assigned To' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_due_date', { defaultValue: 'Due Date' })}
                     </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th>
                       {t('punch.col_photos', { defaultValue: 'Photos' })}
                     </th>
-                    <th className="px-4 py-3 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th className="text-right">
                       {t('punch.col_rework_cost', { defaultValue: 'Rework cost' })}
                     </th>
-                    <th className="px-4 py-3 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <th className="text-right">
                       {t('common.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {filteredItems.map((item) => (
                     <PunchTableRow
                       key={item.id}
@@ -2245,7 +2245,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
         </div>
         {(item.area || item.asset_label) && (
           <div className="mt-0.5 flex max-w-[250px] items-center gap-1 truncate text-xs text-content-tertiary">
-            <MapPin size={11} className="shrink-0" />
+            <MapPin size={12} className="shrink-0" />
             <span className="truncate">{[item.area, item.asset_label].filter(Boolean).join(' · ')}</span>
           </div>
         )}
@@ -2266,7 +2266,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
               defaultValue: 'Open the drawing this item is pinned to',
             })}
           >
-            <MapPin size={11} className="shrink-0" />
+            <MapPin size={12} className="shrink-0" />
             {t('punch.open_drawing', { defaultValue: 'Open drawing' })}
           </button>
         )}
@@ -2358,7 +2358,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
             aria-label={t('common.delete', { defaultValue: 'Delete' })}
             title={t('common.delete', { defaultValue: 'Delete' })}
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </button>
         </div>
       </td>

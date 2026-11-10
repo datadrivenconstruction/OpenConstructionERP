@@ -29,24 +29,24 @@ export function ColumnMappingTable({ columns, chosen, onChoose, sample = [], dis
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-left text-xs">
-        <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-secondary">
+      <table className="oe-table-compact text-left">
+        <thead>
           <tr>
-            <th className="px-3 py-2 font-medium">
+            <th>
               {t('schedule.tabular_import.col_header', { defaultValue: 'Column in the file' })}
             </th>
-            <th className="px-3 py-2 font-medium">
+            <th>
               {t('schedule.tabular_import.col_sample', { defaultValue: 'First value' })}
             </th>
-            <th className="px-3 py-2 font-medium">
+            <th>
               {t('schedule.tabular_import.col_field', { defaultValue: 'Import as' })}
             </th>
-            <th className="px-3 py-2 font-medium">
+            <th>
               {t('schedule.tabular_import.col_confidence', { defaultValue: 'Match' })}
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {columns.map((column) => {
             const key = String(column.index);
             const value = chosen[key] ?? column.field ?? '';
@@ -58,11 +58,11 @@ export function ColumnMappingTable({ columns, chosen, onChoose, sample = [], dis
               });
             return (
               <tr key={key} data-column={column.index}>
-                <td className="px-3 py-2 font-medium text-content-primary">{header}</td>
-                <td className="max-w-[12rem] truncate px-3 py-2 text-content-secondary" title={sample[column.index] ?? ''}>
+                <td>{header}</td>
+                <td className="max-w-[12rem] truncate text-content-secondary" title={sample[column.index] ?? ''}>
                   {sample[column.index] ?? ''}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <select
                     value={value}
                     disabled={disabled}
@@ -71,7 +71,7 @@ export function ColumnMappingTable({ columns, chosen, onChoose, sample = [], dis
                       defaultValue: 'Import column "{{column}}" as',
                       column: header,
                     })}
-                    className="w-full rounded-md border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    className="oe-select oe-input-sm"
                   >
                     <option value="">
                       {t('schedule.tabular_import.field_none', { defaultValue: 'Do not import' })}
@@ -83,7 +83,7 @@ export function ColumnMappingTable({ columns, chosen, onChoose, sample = [], dis
                     ))}
                   </select>
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   {column.tier === 'override' ? (
                     <Badge size="sm" variant="blue">
                       {t('schedule.tabular_import.match_override', { defaultValue: 'Chosen by you' })}

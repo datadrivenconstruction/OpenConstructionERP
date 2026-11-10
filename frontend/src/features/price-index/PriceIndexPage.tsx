@@ -567,7 +567,7 @@ function PriceIndexContent() {
               <select
                 value={effectiveAdjustSeries}
                 onChange={(e) => setAdjustSeriesId(e.target.value)}
-                className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select"
               >
                 {seriesList.length === 0 && (
                   <option value="">{t('price_index.no_series_option', { defaultValue: 'No series available' })}</option>
@@ -688,7 +688,7 @@ function RegionSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+        className="oe-select"
       >
         <option value="">{baselineLabel}</option>
         {options.map((code) => (
@@ -705,24 +705,24 @@ function AdjustResults({ result }: { result: AdjustResponse }) {
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-            <th className="px-3 py-2 font-medium">{t('price_index.col_amount', { defaultValue: 'Base amount' })}</th>
-            <th className="px-3 py-2 font-medium">{t('price_index.col_move', { defaultValue: 'From / to' })}</th>
-            <th className="px-3 py-2 text-right font-medium">
+          <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+            <th>{t('price_index.col_amount', { defaultValue: 'Base amount' })}</th>
+            <th>{t('price_index.col_move', { defaultValue: 'From / to' })}</th>
+            <th className="text-right">
               {t('price_index.col_factor', { defaultValue: 'Applied factor' })}
             </th>
-            <th className="px-3 py-2 text-right font-medium">
+            <th className="text-right">
               {t('price_index.col_adjusted', { defaultValue: 'Adjusted amount' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {result.results.map((r, i) => (
-            <tr key={i} className="border-b border-border-light last:border-0">
-              <td className="px-3 py-2 font-mono text-content-secondary">{r.amount}</td>
-              <td className="px-3 py-2 text-content-secondary">
+            <tr key={i} className="last:border-0">
+              <td className="font-mono text-content-secondary">{r.amount}</td>
+              <td className="text-content-secondary">
                 <span className="inline-flex flex-wrap items-center gap-1">
                   <span className="font-mono">{r.base_period}</span>
                   {r.base_region && <span className="text-content-tertiary">/{r.base_region}</span>}
@@ -733,7 +733,7 @@ function AdjustResults({ result }: { result: AdjustResponse }) {
                 {r.note && <div className="text-xs text-semantic-warning">{r.note}</div>}
                 {r.error && <div className="text-xs text-semantic-error">{r.error}</div>}
               </td>
-              <td className="px-3 py-2 text-right">
+              <td className="text-right">
                 {r.applied_factor ? (
                   <span className="inline-flex items-center justify-end gap-1 font-medium">
                     <FactorArrow direction={factorDirection(r.applied_factor)} />
@@ -743,7 +743,7 @@ function AdjustResults({ result }: { result: AdjustResponse }) {
                   <span className="text-content-tertiary">&mdash;</span>
                 )}
               </td>
-              <td className="px-3 py-2 text-right font-semibold text-content-primary">
+              <td className="text-right">
                 {r.adjusted_amount ?? (
                   <Badge variant="error" size="sm">
                     {t('price_index.not_adjusted', { defaultValue: 'not adjusted' })}
@@ -851,8 +851,7 @@ function EscalatePanel({ seriesList }: { seriesList: CostIndexSeries[] }) {
   const canPreview = !noSeries && dateValid && selectorReady && seriesReady && !previewMut.isPending;
 
   const selectClass =
-    'h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary ' +
-    'focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+    'oe-select';
 
   return (
     <Card>
@@ -1154,21 +1153,21 @@ function EscalateResults({ result }: { result: EscalatePreviewResponse }) {
       )}
 
       <div className="overflow-x-auto rounded-lg border border-border-light">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-              <th className="px-3 py-2 font-medium">{t('price_index.escalate_col_code', { defaultValue: 'Code' })}</th>
-              <th className="px-3 py-2 font-medium">{t('price_index.escalate_col_unit', { defaultValue: 'Unit' })}</th>
-              <th className="px-3 py-2 text-right font-medium">
+            <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+              <th>{t('price_index.escalate_col_code', { defaultValue: 'Code' })}</th>
+              <th>{t('price_index.escalate_col_unit', { defaultValue: 'Unit' })}</th>
+              <th className="text-right">
                 {t('price_index.escalate_col_base', { defaultValue: 'Base rate' })}
               </th>
-              <th className="px-3 py-2 font-medium">
+              <th>
                 {t('price_index.escalate_col_base_date', { defaultValue: 'Base date' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('price_index.escalate_col_factor', { defaultValue: 'Factor' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('price_index.escalate_col_escalated', { defaultValue: 'Escalated rate' })}
               </th>
             </tr>
@@ -1182,26 +1181,26 @@ function EscalateResults({ result }: { result: EscalatePreviewResponse }) {
                   (r.escalatable ? '' : 'bg-surface-secondary/40 text-content-tertiary')
                 }
               >
-                <td className="px-3 py-2 font-mono text-content-secondary">{r.code}</td>
-                <td className="px-3 py-2 text-content-secondary">{r.unit || '-'}</td>
-                <td className="px-3 py-2 text-right font-mono text-content-secondary">
+                <td className="font-mono text-content-secondary">{r.code}</td>
+                <td className="text-content-secondary">{r.unit || '-'}</td>
+                <td className="text-right font-mono text-content-secondary">
                   {r.base_rate != null ? withCurrency(r.base_rate, r.currency) : '-'}
                 </td>
-                <td className="px-3 py-2 font-mono text-content-secondary">{r.base_date ?? '-'}</td>
+                <td className="font-mono text-content-secondary">{r.base_date ?? '-'}</td>
                 {r.escalatable ? (
                   <>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <span className="inline-flex items-center justify-end gap-1 font-medium text-content-primary">
                         <FactorArrow direction={factorDirection(r.factor)} />
                         {formatFactor(r.factor)}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-right font-mono font-semibold text-content-primary">
+                    <td className="text-right font-mono">
                       {r.escalated_rate != null ? withCurrency(r.escalated_rate, r.currency) : '-'}
                     </td>
                   </>
                 ) : (
-                  <td className="px-3 py-2 text-xs text-semantic-warning" colSpan={2}>
+                  <td className="text-semantic-warning" colSpan={2}>
                     {r.note ?? t('price_index.escalate_skipped', { defaultValue: 'cannot escalate' })}
                   </td>
                 )}

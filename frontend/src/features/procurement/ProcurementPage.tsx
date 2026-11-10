@@ -375,7 +375,7 @@ export function parseIncomingBuyList(raw: unknown): POLineItemForm[] {
 /* ── Constants ────────────────────────────────────────────────────────── */
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 /** Common currency shortlist - NOT a default. The PO's actual currency is
  *  inherited from the project (task #217); the project's resolved currency
@@ -516,27 +516,27 @@ export function ProcurementPage() {
     {
       key: 'requisitions',
       label: t('procurement.requisitions.tab', { defaultValue: 'Requisitions' }),
-      icon: <FileText size={15} />,
+      icon: <FileText size={16} />,
     },
     {
       key: 'purchase-orders',
       label: t('procurement.purchase_orders', { defaultValue: 'Purchase Orders' }),
-      icon: <Package size={15} />,
+      icon: <Package size={16} />,
     },
     {
       key: 'goods-receipts',
       label: t('procurement.goods_receipts', { defaultValue: 'Goods Receipts' }),
-      icon: <ClipboardCheck size={15} />,
+      icon: <ClipboardCheck size={16} />,
     },
     {
       key: 'vendors',
       label: t('supplier_catalogs.tab_vendors', { defaultValue: 'Vendors' }),
-      icon: <Truck size={15} />,
+      icon: <Truck size={16} />,
     },
     {
       key: 'catalog',
       label: t('supplier_catalogs.tab_catalog', { defaultValue: 'Catalog' }),
-      icon: <Boxes size={15} />,
+      icon: <Boxes size={16} />,
     },
   ];
 
@@ -652,7 +652,7 @@ export function ProcurementPage() {
       {/* Tab Content. Vendors and the catalog belong to the company, not a
           project, so they open without one. */}
       {activeTab === 'vendors' || activeTab === 'catalog' ? (
-        <Suspense fallback={<Loader2 size={18} className="animate-spin text-content-tertiary" />}>
+        <Suspense fallback={<Loader2 size={20} className="animate-spin text-content-tertiary" />}>
           <SupplierCatalogsPage embeddedTab={activeTab} />
         </Suspense>
       ) : !projectId ? (
@@ -1289,10 +1289,10 @@ function PurchaseOrdersTab({
       ? t('procurement.edit_po', { defaultValue: 'Edit purchase order' })
       : t('procurement.new_po', { defaultValue: 'New Purchase Order' });
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
         <div className="w-full max-w-5xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[88vh] flex flex-col" role="dialog" aria-modal="true" aria-label={modalTitle}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {modalTitle}
             </h2>
             <button
@@ -1300,7 +1300,7 @@ function PurchaseOrdersTab({
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
           <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
@@ -1333,13 +1333,13 @@ function PurchaseOrdersTab({
                 phones. The previous single-column stack made the form
                 feel "narrow" even on a 27" monitor. */}
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+              <h3 className="oe-overline mb-3">
                 {t('procurement.section_order_details', { defaultValue: 'Order Details' })}
               </h3>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Vendor - takes 2 columns on lg to keep the search input usable */}
                 <div ref={firstFieldRef} className="lg:col-span-2">
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                  <label className="oe-label">
                     {t('procurement.vendor', { defaultValue: 'Vendor' })}
                   </label>
                   {figuresLocked ? (
@@ -1349,7 +1349,7 @@ function PurchaseOrdersTab({
                       disabled
                       value={poForm.vendor_display || '-'}
                       aria-label={t('procurement.vendor', { defaultValue: 'Vendor' })}
-                      className={clsx(inputCls, 'bg-surface-secondary/50 cursor-not-allowed')}
+                      className={clsx(inputCls, 'cursor-not-allowed')}
                     />
                   ) : (
                     <ContactSearchInput
@@ -1364,7 +1364,7 @@ function PurchaseOrdersTab({
                 </div>
                 {/* Delivery date */}
                 <div>
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                  <label className="oe-label">
                     {t('procurement.delivery_date', { defaultValue: 'Delivery Date' })}
                   </label>
                   <input
@@ -1376,7 +1376,7 @@ function PurchaseOrdersTab({
                 </div>
                 {/* PO Type - visual toggle, full-row */}
                 <div className="lg:col-span-3">
-                  <label className="block text-sm font-medium text-content-primary mb-2">
+                  <label className="oe-label">
                     {t('procurement.po_type', { defaultValue: 'PO Type' })}
                   </label>
                   <div className="flex flex-wrap items-center gap-2">
@@ -1402,7 +1402,7 @@ function PurchaseOrdersTab({
 
             {/* ── Section: Items ── */}
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+              <h3 className="oe-overline mb-3">
                 {t('procurement.section_items', { defaultValue: 'Items' })} <span className="text-semantic-error">*</span>
               </h3>
               <div className="space-y-2">
@@ -1439,7 +1439,7 @@ function PurchaseOrdersTab({
                           defaultValue: 'Description for line {{line}}',
                           line: idx + 1,
                         })}
-                        className={clsx(inputCls, 'h-9 text-xs')}
+                        className={clsx('oe-input', 'oe-input-sm')}
                       />
                       <BillPositionPicker
                         projectId={projectId}
@@ -1467,7 +1467,7 @@ function PurchaseOrdersTab({
                         defaultValue: 'Quantity for line {{line}}',
                         line: idx + 1,
                       })}
-                      className={clsx(inputCls, 'h-9 text-xs')}
+                      className={clsx('oe-input', 'oe-input-sm')}
                     />
                     <input
                       value={li.unit}
@@ -1478,7 +1478,7 @@ function PurchaseOrdersTab({
                         defaultValue: 'Unit for line {{line}}',
                         line: idx + 1,
                       })}
-                      className={clsx(inputCls, 'h-9 text-xs')}
+                      className={clsx('oe-input', 'oe-input-sm')}
                     />
                     <input
                       type="number"
@@ -1491,7 +1491,7 @@ function PurchaseOrdersTab({
                         defaultValue: 'Unit rate for line {{line}}',
                         line: idx + 1,
                       })}
-                      className={clsx(inputCls, 'h-9 text-xs')}
+                      className={clsx('oe-input', 'oe-input-sm')}
                     />
                     <input
                       type="text"
@@ -1502,7 +1502,7 @@ function PurchaseOrdersTab({
                         defaultValue: 'Amount for line {{line}}',
                         line: idx + 1,
                       })}
-                      className={clsx(inputCls, 'h-9 text-xs bg-surface-secondary/50 cursor-default')}
+                      className={clsx('oe-input', 'oe-input-sm cursor-default')}
                       tabIndex={-1}
                     />
                     <button
@@ -1558,7 +1558,7 @@ function PurchaseOrdersTab({
                         setPoTaxRateTouched(true);
                         setPoTaxRateInput(e.target.value);
                       }}
-                      className={clsx(inputCls, 'h-8 text-xs pr-7 text-right', poRateInvalid && 'border-semantic-error')}
+                      className={clsx('oe-input', 'oe-input-sm pr-7 text-right')} aria-invalid={!!poRateInvalid}
                       placeholder={t('procurement.vat_rate_none', { defaultValue: 'none' })}
                     />
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-2xs text-content-tertiary font-medium">
@@ -1580,7 +1580,7 @@ function PurchaseOrdersTab({
                       disabled={figuresLocked || poRateApplies}
                       aria-label={t('procurement.tax', { defaultValue: 'Tax' })}
                       onChange={(e) => setPoTaxInput(e.target.value)}
-                      className={clsx(inputCls, 'h-8 text-xs pl-10 text-right')}
+                      className={clsx('oe-input', 'oe-input-sm pl-10 text-right')}
                       placeholder="0.00"
                     />
                   </div>
@@ -1594,14 +1594,14 @@ function PurchaseOrdersTab({
 
             {/* ── Section: Terms ── */}
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+              <h3 className="oe-overline mb-3">
                 {t('procurement.section_terms', { defaultValue: 'Terms' })}
               </h3>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   {/* Currency */}
                   <div>
-                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    <label className="oe-label">
                       {t('procurement.currency', { defaultValue: 'Currency' })}
                     </label>
                     <select
@@ -1609,7 +1609,7 @@ function PurchaseOrdersTab({
                       disabled={figuresLocked}
                       aria-label={t('procurement.currency', { defaultValue: 'Currency' })}
                       onChange={(e) => setPoForm((f) => ({ ...f, currency: e.target.value }))}
-                      className={inputCls}
+                      className="oe-select oe-input-lg"
                     >
                       {!poForm.currency && (
                         <option value="">
@@ -1627,13 +1627,13 @@ function PurchaseOrdersTab({
                   </div>
                   {/* Payment terms */}
                   <div>
-                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    <label className="oe-label">
                       {t('procurement.payment_terms', { defaultValue: 'Payment Terms' })}
                     </label>
                     <select
                       value={poForm.payment_terms}
                       onChange={(e) => setPoForm((f) => ({ ...f, payment_terms: e.target.value }))}
-                      className={inputCls}
+                      className="oe-select oe-input-lg"
                     >
                       <option value="30">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 30 })}</option>
                       <option value="45">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 45 })}</option>
@@ -1644,7 +1644,7 @@ function PurchaseOrdersTab({
                   {/* Invoice allowance: how far a supplier invoice may run past
                       this order before the invoice match warns. */}
                   <div>
-                    <label htmlFor="po-tolerance-pct" className="block text-sm font-medium text-content-primary mb-1.5">
+                    <label htmlFor="po-tolerance-pct" className="oe-label">
                       {t('procurement.invoice_tolerance_pct', { defaultValue: 'Invoice allowance, %' })}
                     </label>
                     <input
@@ -1657,7 +1657,7 @@ function PurchaseOrdersTab({
                     />
                   </div>
                   <div>
-                    <label htmlFor="po-tolerance-abs" className="block text-sm font-medium text-content-primary mb-1.5">
+                    <label htmlFor="po-tolerance-abs" className="oe-label">
                       {t('procurement.invoice_tolerance_abs', {
                         defaultValue: 'Invoice allowance, {{currency}}',
                         currency: poForm.currency || '',
@@ -1679,14 +1679,14 @@ function PurchaseOrdersTab({
                 </div>
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                  <label className="oe-label">
                     {t('procurement.notes', { defaultValue: 'Notes' })}
                   </label>
                   <textarea
                     value={poForm.notes}
                     onChange={(e) => setPoForm((f) => ({ ...f, notes: e.target.value }))}
                     rows={2}
-                    className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
+                    className={clsx('oe-textarea', 'resize-none')}
                     placeholder={t('procurement.notes_placeholder', { defaultValue: 'Optional notes or special instructions...' })}
                   />
                 </div>
@@ -1747,7 +1747,7 @@ function PurchaseOrdersTab({
             aria-label={t('procurement.search_po', {
               defaultValue: 'Search by PO # or vendor...',
             })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input oe-input-lg ps-10"
           />
         </div>
         <div className="shrink-0">
@@ -1807,28 +1807,28 @@ function PurchaseOrdersTab({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+            <tr className="bg-surface-secondary/50">
+              <th>
                 {t('procurement.po_number', { defaultValue: 'PO #' })}
               </th>
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+              <th>
                 {t('procurement.vendor', { defaultValue: 'Vendor' })}
               </th>
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+              <th>
                 {t('procurement.issue_date', { defaultValue: 'Date' })}
               </th>
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+              <th>
                 {t('procurement.delivery_date', { defaultValue: 'Delivery' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('procurement.amount', { defaultValue: 'Amount' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('common.actions', { defaultValue: 'Actions' })}
               </th>
             </tr>
@@ -1836,7 +1836,7 @@ function PurchaseOrdersTab({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={7} className="text-center text-content-tertiary">
                   {t('procurement.no_po_match', { defaultValue: 'No matching purchase orders' })}
                 </td>
               </tr>
@@ -1856,7 +1856,7 @@ function PurchaseOrdersTab({
                 onMouseEnter={() => setMatchActive((m) => ({ ...m, [po.id]: true }))}
                 onFocus={() => setMatchActive((m) => ({ ...m, [po.id]: true }))}
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="font-mono">
                   {po.po_number}
                   {/* The RFQ whose award drafted this order, so the reviewer
                       can check the draft against the quote it came from. */}
@@ -1877,7 +1877,7 @@ function PurchaseOrdersTab({
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <div className="flex flex-wrap items-center gap-1.5">
                     {po.vendor_contact_id ? (
                       <button
@@ -1904,10 +1904,10 @@ function PurchaseOrdersTab({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <DateDisplay value={po.issue_date} />
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <div className="flex flex-col items-start gap-1">
                     <DateDisplay value={po.delivery_date} />
                     <DeliveryCountdownBadge
@@ -1916,7 +1916,7 @@ function PurchaseOrdersTab({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   {/* Money bug fix: feed MoneyDisplay the REAL wire fields
                       `amount_total` (Decimal string) + `currency_code`. The
                       old `po.total_amount`/`po.currency` did not exist on the
@@ -1933,7 +1933,7 @@ function PurchaseOrdersTab({
                     />
                   )}
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <div className="flex flex-col items-center gap-1">
                     <div className="flex items-center justify-center gap-1.5">
                       <Badge
@@ -1958,7 +1958,7 @@ function PurchaseOrdersTab({
                     <RetainageBadge percent={po.retention_percent} />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <div className="flex items-center justify-end gap-1 flex-wrap">
                     {/* The printed order, for every reader of the register; the
                         workflow actions beside it stay manager-only. */}
@@ -2350,7 +2350,7 @@ function GoodsReceiptsTab({
             aria-label={t('procurement.search_gr', {
               defaultValue: 'Search by GR reference or PO #...',
             })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input oe-input-lg ps-10"
           />
         </div>
         {canReceive && (
@@ -2369,25 +2369,25 @@ function GoodsReceiptsTab({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+            <tr className="bg-surface-secondary/50">
+              <th>
                 {t('procurement.gr_ref', { defaultValue: 'GR Reference' })}
               </th>
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+              <th>
                 {t('procurement.po_ref', { defaultValue: 'PO Reference' })}
               </th>
-              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
+              <th>
                 {t('procurement.receipt_date', { defaultValue: 'Date' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('procurement.quantities', { defaultValue: 'Qty (Recv / Ord)' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('common.actions', { defaultValue: 'Actions' })}
               </th>
             </tr>
@@ -2395,16 +2395,15 @@ function GoodsReceiptsTab({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={6} className="text-center text-content-tertiary">
                   {t('procurement.no_gr_match', { defaultValue: 'No matching goods receipts' })}
                 </td>
               </tr>
             ) : filtered.map((gr) => (
               <tr
                 key={gr.id}
-                className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="font-mono">
                   {gr.gr_reference || (
                     <span className="text-content-tertiary">-</span>
                   )}
@@ -2414,13 +2413,13 @@ function GoodsReceiptsTab({
                     </Badge>
                   )}
                 </td>
-                <td className="px-4 py-3 font-mono text-xs text-content-secondary">
+                <td className="font-mono text-content-secondary">
                   {gr.po_number}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <DateDisplay value={gr.receipt_date} />
                 </td>
-                <td className="px-4 py-3 text-center tabular-nums">
+                <td className="text-center tabular-nums">
                   <span
                     className={
                       isGoodsReceiptFullyReceived(gr.received_qty, gr.ordered_qty)
@@ -2433,7 +2432,7 @@ function GoodsReceiptsTab({
                   <span className="text-content-tertiary mx-1">/</span>
                   <span className="text-content-secondary">{gr.ordered_qty ?? '0'}</span>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={GR_STATUS_COLORS[gr.status] ?? 'neutral'}
                     size="sm"
@@ -2443,7 +2442,7 @@ function GoodsReceiptsTab({
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <RecordPdfButton
                       download={(locale) =>

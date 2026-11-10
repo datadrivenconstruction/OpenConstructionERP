@@ -371,7 +371,7 @@ export function PlanPanel({
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="mr-auto text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title mr-auto">
             {t('staffing.position.heading', { defaultValue: 'Positions' })}
           </h2>
           <Button
@@ -417,18 +417,18 @@ export function PlanPanel({
         ) : (
           groups.map((group) => (
             <div key={group.phase} className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm" data-testid={`phase-${group.phase}`}>
-              <table className="w-full min-w-[760px] text-sm">
+              <table className="oe-table min-w-[760px]">
                 <caption className="border-b border-border-light bg-surface-secondary px-3 py-2 text-left text-sm font-medium text-content-primary">
                   {vocab(t, PHASE, group.phase)}
                 </caption>
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.role', { defaultValue: 'Role' })}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.fte', { defaultValue: 'FTE' })}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.period', { defaultValue: 'Period' })}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.status', { defaultValue: 'Status' })}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.people', { defaultValue: 'People' })}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">
+                  <tr className="text-left text-xs text-content-tertiary">
+                    <th scope="col">{t('staffing.position.role', { defaultValue: 'Role' })}</th>
+                    <th scope="col">{t('staffing.position.fte', { defaultValue: 'FTE' })}</th>
+                    <th scope="col">{t('staffing.position.period', { defaultValue: 'Period' })}</th>
+                    <th scope="col">{t('staffing.position.status', { defaultValue: 'Status' })}</th>
+                    <th scope="col">{t('staffing.position.people', { defaultValue: 'People' })}</th>
+                    <th scope="col">
                       <span className="sr-only">{t('staffing.actions', { defaultValue: 'Actions' })}</span>
                     </th>
                   </tr>
@@ -438,13 +438,13 @@ export function PlanPanel({
                     const moves = allowedStatusMoves(p);
                     const owner = personName(p.owner_user_id);
                     return (
-                      <tr key={p.id} className="border-b border-border-light align-top last:border-b-0" data-testid="position-row">
-                        <td className="px-3 py-2">
+                      <tr key={p.id} className="align-top last:border-b-0" data-testid="position-row">
+                        <td>
                           <div className="flex items-center gap-1.5 font-medium text-content-primary">
                             {positionName(labels, catalogue, p)}
                             {p.key_role && (
                               <span title={t('staffing.position.key_role', { defaultValue: 'Key role' })} data-testid="key-role">
-                                <KeyRound size={13} className="text-oe-blue-text" aria-label={t('staffing.position.key_role', { defaultValue: 'Key role' })} />
+                                <KeyRound size={14} className="text-oe-blue-text" aria-label={t('staffing.position.key_role', { defaultValue: 'Key role' })} />
                               </span>
                             )}
                           </div>
@@ -457,7 +457,7 @@ export function PlanPanel({
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-2 tabular-nums text-content-primary">
+                        <td className="tabular-nums">
                           {p.headcount > 1
                             ? t('staffing.position.fte_times', { defaultValue: '{{fte}} FTE x {{n}}', fte: fte(p.fte), n: p.headcount })
                             : fte(p.fte)}
@@ -465,7 +465,7 @@ export function PlanPanel({
                             {t('staffing.position.covered', { defaultValue: 'Covered {{fte}}', fte: fte(p.covered_fte) })}
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-content-secondary">
+                        <td className="text-content-secondary">
                           {p.entry_date ? fmtDate(p.entry_date) : t('staffing.not_set', { defaultValue: 'Not set' })}
                           {p.exit_date && (
                             <>
@@ -474,13 +474,13 @@ export function PlanPanel({
                             </>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           <ToneBadge tone={POSITION_TONE[p.status]} testId="position-status">
                             {vocab(t, POSITION_STATUS, p.status)}
                           </ToneBadge>
                           {moves.length > 0 && (
                             <select
-                              className={`${FIELD_CLASS} mt-1 !w-auto !py-0.5 text-xs`}
+                              className="oe-select oe-input-sm mt-1 w-auto"
                               aria-label={t('staffing.position.change_status', { defaultValue: 'Change status' })}
                               value=""
                               onChange={(e) => {
@@ -496,7 +496,7 @@ export function PlanPanel({
                             </select>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           {p.fills.length === 0 ? (
                             <span className="text-content-tertiary" data-testid="position-vacant">
                               {t('staffing.vacant', { defaultValue: 'Vacant' })}
@@ -566,7 +566,7 @@ export function PlanPanel({
                             </ul>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           <div className="flex flex-wrap items-center justify-end gap-1">
                             {p.resource_request_id && (
                               <span className="text-xs text-content-tertiary" data-testid="resource-requested">
@@ -631,7 +631,7 @@ export function PlanPanel({
       {positions.length > 0 && (
         <section className="space-y-3" data-testid="handovers">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="mr-auto text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title mr-auto">
               {t('staffing.handover.heading', { defaultValue: 'Handovers' })}
             </h2>
             <Button variant="secondary" size="sm" disabled={locked} title={lockedReason} onClick={() => setDialog({ kind: 'handover', handover: null })} data-testid="add-handover">

@@ -164,20 +164,20 @@ export function X84ImportDialog({
             )}
             {flagged.length > 0 && (
               <div className="max-h-72 overflow-auto rounded-lg border border-border">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+                <table className="oe-table">
+                  <thead>
                     <tr>
-                      <th className="px-3 py-2">{t('tendering.x84_col_ordinal', { defaultValue: 'Position' })}</th>
-                      <th className="px-3 py-2">{t('tendering.x84_col_text', { defaultValue: 'Text' })}</th>
-                      <th className="px-3 py-2">{t('tendering.import_col_status', { defaultValue: 'Status' })}</th>
+                      <th>{t('tendering.x84_col_ordinal', { defaultValue: 'Position' })}</th>
+                      <th>{t('tendering.x84_col_text', { defaultValue: 'Text' })}</th>
+                      <th>{t('tendering.import_col_status', { defaultValue: 'Status' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {flagged.map((l, i) => (
-                      <tr key={`${l.ordinal}-${i}`} className="border-t border-border" data-testid="x84-import-row">
-                        <td className="px-3 py-2 font-mono text-xs">{l.ordinal}</td>
-                        <td className="px-3 py-2">{l.description}</td>
-                        <td className="px-3 py-2">
+                      <tr key={`${l.ordinal}-${i}`} data-testid="x84-import-row">
+                        <td className="font-mono">{l.ordinal}</td>
+                        <td>{l.description}</td>
+                        <td>
                           <div className="flex flex-wrap gap-1">
                             {l.issues.map((code) => (
                               <Badge key={code} variant={code === 'unpriced' ? 'warning' : 'error'}>

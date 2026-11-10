@@ -106,9 +106,9 @@ const INDEX_COLOR: Record<'green' | 'amber' | 'red', string> = {
   red: 'text-semantic-error',
 };
 const INDEX_BAR: Record<'green' | 'amber' | 'red', string> = {
-  green: 'bg-emerald-400',
-  amber: 'bg-amber-400',
-  red: 'bg-rose-400',
+  green: 'bg-semantic-success',
+  amber: 'bg-semantic-warning',
+  red: 'bg-semantic-error',
 };
 
 function num(value: string | number | null | undefined): number {
@@ -249,7 +249,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
           }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-oe-blue text-white rounded-lg hover:bg-oe-blue-dark transition-colors"
         >
-          <RefreshCw size={13} />
+          <RefreshCw size={14} />
           {t('common.retry', { defaultValue: 'Retry' })}
         </button>
       </div>
@@ -396,8 +396,8 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
 
       {/* Forecast-to-Completion card */}
       <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
-        <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
-          <Target size={15} className="text-oe-blue" />
+        <h3 className="oe-card-title flex items-center gap-2 mb-3">
+          <Target size={16} className="text-oe-blue" />
           {t('project_intelligence.forecast.ftc_title', {
             defaultValue: 'Forecast to Completion',
           })}
@@ -439,7 +439,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
             </div>
             <div className="h-3 rounded-full bg-surface-tertiary overflow-hidden">
               <div
-                className={`h-full rounded-full ${overBudget ? 'bg-rose-400' : 'bg-emerald-400'}`}
+                className={`h-full rounded-full ${overBudget ? 'bg-semantic-error' : 'bg-semantic-success'}`}
                 style={{ width: `${eacPct}%` }}
                 data-testid="forecast-eac-bar"
               />
@@ -471,8 +471,8 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
 
       {/* Active Alerts table */}
       <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
-        <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
-          <AlertTriangle size={15} className={alerts.length ? 'text-rose-400' : 'text-content-quaternary'} />
+        <h3 className="oe-card-title flex items-center gap-2 mb-3">
+          <AlertTriangle size={16} className={alerts.length ? 'text-semantic-error' : 'text-content-quaternary'} />
           {t('project_intelligence.forecast.active_alerts', {
             defaultValue: 'Active Forecast Alerts',
           })}
@@ -481,7 +481,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
 
         {alerts.length === 0 ? (
           <div className="py-6 text-center">
-            <CheckCircle2 size={24} className="mx-auto text-emerald-400 mb-2" />
+            <CheckCircle2 size={24} className="mx-auto text-semantic-success mb-2" />
             <p className="text-sm font-medium text-content-primary">
               {t('project_intelligence.forecast.no_alerts_title', {
                 defaultValue: 'No active alerts',
@@ -496,22 +496,22 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="oe-table-compact">
               <thead>
-                <tr className="text-content-tertiary text-left border-b border-border-light">
-                  <th className="py-2 pr-3 font-medium">
+                <tr className="text-content-tertiary text-left">
+                  <th className="pr-3">
                     {t('project_intelligence.forecast.col_severity', { defaultValue: 'Severity' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th className="pr-3">
                     {t('project_intelligence.forecast.col_reason', { defaultValue: 'Reason' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium text-right">
+                  <th className="pr-3 text-right">
                     {t('project_intelligence.forecast.col_eac', { defaultValue: 'EAC' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th className="pr-3">
                     {t('project_intelligence.forecast.col_when', { defaultValue: 'Triggered' })}
                   </th>
-                  <th className="py-2 font-medium text-right">
+                  <th className="text-right">
                     {t('project_intelligence.forecast.col_actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -523,10 +523,10 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                   return (
                     <tr
                       key={a.forecast_id}
-                      className="border-b border-border-light/60 last:border-0"
+                      className="last:border-0"
                       data-testid="forecast-alert-row"
                     >
-                      <td className="py-2.5 pr-3">
+                      <td className="pr-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium ${sev.chip}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
                           {t(`project_intelligence.forecast.sev_${a.severity}`, {
@@ -535,24 +535,24 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                         </span>
                         {isSnoozed && (
                           <span className="ml-1 inline-flex items-center gap-1 text-2xs text-content-quaternary">
-                            <BellOff size={11} />
+                            <BellOff size={12} />
                             {t('project_intelligence.forecast.snoozed', { defaultValue: 'Snoozed' })}
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 pr-3 text-content-secondary">
+                      <td className="pr-3 text-content-secondary">
                         {a.summary ||
                           t('project_intelligence.forecast.generic_reason', {
                             defaultValue: 'Forecast breached a configured threshold',
                           })}
                       </td>
-                      <td className="py-2.5 pr-3 text-right">
+                      <td className="pr-3 text-right">
                         <MoneyDisplay amount={num(a.eac)} currency={currency} className="tabular-nums" />
                       </td>
-                      <td className="py-2.5 pr-3 text-content-tertiary whitespace-nowrap">
+                      <td className="pr-3 text-content-tertiary whitespace-nowrap">
                         {a.triggered_at ? new Date(a.triggered_at).toLocaleDateString(getIntlLocale()) : '—'}
                       </td>
-                      <td className="py-2.5 text-right whitespace-nowrap">
+                      <td className="text-right whitespace-nowrap">
                         <div className="inline-flex items-center gap-1.5">
                           <button
                             onClick={() => handleAcknowledge(a.forecast_id)}

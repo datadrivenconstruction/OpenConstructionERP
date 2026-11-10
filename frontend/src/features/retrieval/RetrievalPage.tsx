@@ -446,7 +446,7 @@ export function RetrievalPage() {
                 if (e.key === 'Enter') runSearch();
               }}
               placeholder={t('retrieval.text_ph', { defaultValue: 'Search the project record...' })}
-              className="w-full rounded-md border border-border-light bg-surface-primary ps-8 pe-2 py-2 text-sm text-content-primary"
+              className="oe-input ps-8"
             />
           </div>
           <button
@@ -474,7 +474,7 @@ export function RetrievalPage() {
                   if (e.key === 'Enter') runSearch();
                 }}
                 placeholder={t('retrieval.party_ph', { defaultValue: 'e.g. contractor-a' })}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+                className="oe-input"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm text-content-secondary">
@@ -482,7 +482,7 @@ export function RetrievalPage() {
               <select
                 value={recordType}
                 onChange={(e) => setRecordType(e.target.value)}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+                className="oe-select"
               >
                 <option value="">{t('retrieval.type_any', { defaultValue: 'Any type' })}</option>
                 <option value="document">
@@ -505,7 +505,7 @@ export function RetrievalPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') runSearch();
                 }}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+                className="oe-input"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm text-content-secondary">
@@ -517,7 +517,7 @@ export function RetrievalPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') runSearch();
                 }}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+                className="oe-input"
               />
             </label>
           </div>
@@ -582,7 +582,7 @@ export function RetrievalPage() {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortMode)}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+                className="oe-select oe-input-sm"
               >
                 <option value="relevance">
                   {t('retrieval.sort_relevance', { defaultValue: 'Relevance' })}

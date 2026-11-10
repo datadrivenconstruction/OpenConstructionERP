@@ -499,9 +499,9 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
               className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-medium text-oe-blue border border-oe-blue/30 rounded-md hover:bg-oe-blue/5 transition-colors disabled:opacity-50"
             >
               {setBaselineM.isPending ? (
-                <Loader2 size={11} className="animate-spin" />
+                <Loader2 size={12} className="animate-spin" />
               ) : (
-                <Flag size={11} />
+                <Flag size={12} />
               )}
               {t('project_intelligence.analytics.set_baseline', {
                 defaultValue: 'Set baseline',

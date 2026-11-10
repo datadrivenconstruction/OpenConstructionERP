@@ -209,7 +209,7 @@ const STATUS_HEADER_CLS: Record<TaskStatus, string> = {
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Add Task Modal ────────────────────────────────────────────────────── */
 
@@ -313,12 +313,12 @@ function AddTaskModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('tasks.new_task', { defaultValue: 'New Task' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('tasks.new_task', { defaultValue: 'New Task' })}
             </h2>
             {projectName && (
@@ -335,7 +335,7 @@ function AddTaskModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -343,7 +343,7 @@ function AddTaskModal({
         <div className="px-6 py-4 space-y-5">
           {/* ── Type selector with icons ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('tasks.field_type', { defaultValue: 'Type' })}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -362,7 +362,7 @@ function AddTaskModal({
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
-                    <TypeIcon size={18} />
+                    <TypeIcon size={20} />
                     <span className="text-2xs font-medium leading-tight">
                       {t(`tasks.type_${tt}`, {
                         defaultValue: tt.charAt(0).toUpperCase() + tt.slice(1),
@@ -386,7 +386,7 @@ function AddTaskModal({
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
-                    <ListTodo size={18} />
+                    <ListTodo size={20} />
                     <span className="text-2xs font-medium leading-tight">
                       {cat.label}
                     </span>
@@ -407,7 +407,7 @@ function AddTaskModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('tasks.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -417,11 +417,7 @@ function AddTaskModal({
               placeholder={t('tasks.title_placeholder', {
                 defaultValue: 'e.g. Review structural drawings for Level 5',
               })}
-              className={clsx(
-                'h-12 w-full rounded-lg border border-border bg-surface-primary px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-                errors.title &&
-                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              className={clsx('oe-input', 'h-12')} aria-invalid={!!(errors.title)}
               autoFocus
             />
             {errors.title && (
@@ -433,7 +429,7 @@ function AddTaskModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('tasks.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -449,7 +445,7 @@ function AddTaskModal({
 
           {/* ── Priority (visual badges) ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('tasks.field_priority', { defaultValue: 'Priority' })}
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -493,7 +489,7 @@ function AddTaskModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('tasks.field_assignee', { defaultValue: 'Assignee' })}
               </label>
               <AssigneePicker
@@ -514,7 +510,7 @@ function AddTaskModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('tasks.field_due_date', { defaultValue: 'Due Date' })}
               </label>
               <input
@@ -608,7 +604,7 @@ const TaskCard = React.memo(function TaskCard({
               'flex items-center justify-center w-5 h-5 rounded shrink-0 mt-px',
               getTypeColor(task.task_type, customCategories),
             )}>
-              <TypeIcon size={11} />
+              <TypeIcon size={12} />
             </div>
           );
         })()}
@@ -751,7 +747,7 @@ const TaskCard = React.memo(function TaskCard({
                 onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={t('tasks.change_status', { defaultValue: 'Change status' })}
-                className="text-2xs py-0 px-0.5 rounded border border-border-light bg-surface-secondary text-content-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue h-4"
+                className="oe-select oe-input-sm h-4"
               >
                 {STATUS_OPTIONS_FOR(task.status).map((s) => (
                   <option key={s} value={s}>
@@ -1579,7 +1575,7 @@ export function TasksPage() {
           cross-project and doesn't require a selected project. */}
       {!projectId && !myTasksOnly && (
         <div className="flex items-center gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
-          <AlertTriangle size={18} className="text-semantic-warning shrink-0" />
+          <AlertTriangle size={20} className="text-semantic-warning shrink-0" />
           <div>
             <p className="text-sm font-medium text-semantic-warning">{t('requiresProject.title')}</p>
             <p className="text-xs text-semantic-warning">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
@@ -1816,7 +1812,7 @@ export function TasksPage() {
               const isBuiltin = BUILTIN_STATUSES.includes(status as TaskStatus);
               const customStatus = customStatuses.find((s) => s.name === status);
               const headerCls = STATUS_HEADER_CLS[status as TaskStatus]
-                ?? (customStatus ? CUSTOM_CATEGORY_COLORS[customStatus.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? 'bg-gray-100 text-gray-700' : 'bg-surface-secondary text-content-secondary');
+                ?? (customStatus ? CUSTOM_CATEGORY_COLORS[customStatus.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? 'bg-surface-secondary text-content-primary' : 'bg-surface-secondary text-content-secondary');
               const displayLabel = isBuiltin
                 ? t(`tasks.status_${status}`, { defaultValue: status.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') })
                 : customStatus?.label ?? status;
@@ -1943,7 +1939,7 @@ export function TasksPage() {
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAddStatus(); if (e.key === 'Escape') setShowAddStatus(false); }}
                     placeholder={t('tasks.new_column_name', { defaultValue: 'Column name...' })}
                     aria-label={t('tasks.new_column_name', { defaultValue: 'Column name...' })}
-                    className="w-full text-xs px-2.5 py-1.5 rounded-md border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-input oe-input-sm"
                     autoFocus
                   />
                   <div className="flex gap-1">
@@ -2013,10 +2009,10 @@ export function TasksPage() {
 
       {/* Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
           <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('tasks.import_tasks', { defaultValue: 'Import Tasks' })}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('tasks.import_tasks', { defaultValue: 'Import Tasks' })}
               </h2>
               <button
@@ -2024,7 +2020,7 @@ export function TasksPage() {
                 aria-label={t('common.close', { defaultValue: 'Close' })}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4">

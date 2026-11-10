@@ -175,7 +175,7 @@ export function SmartViewShareModal({
           <div className="flex flex-col gap-3">
             <label
               htmlFor="smart-view-share-url"
-              className="text-xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('smartViews.share_url_label', {
                 defaultValue: 'Shareable URL',
@@ -187,7 +187,7 @@ export function SmartViewShareModal({
                 type="text"
                 readOnly
                 value={url}
-                className="flex-1 h-9 rounded-lg border border-border bg-surface-secondary px-3 font-mono text-xs text-content-primary"
+                className="oe-input oe-input-sm flex-1 font-mono"
                 onFocus={(e) => e.currentTarget.select()}
                 data-testid="smart-view-share-url"
               />

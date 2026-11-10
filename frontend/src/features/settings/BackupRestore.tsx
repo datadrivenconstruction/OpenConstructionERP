@@ -350,8 +350,8 @@ export function BackupRestore() {
         <CardContent>
           {/* Honest scope note: the backup currently carries the core estimation
               graph, not yet the field/site modules. Full coverage is on the way. */}
-          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-oe-blue/20 bg-oe-blue-subtle/40 px-3.5 py-2.5">
-            <Info size={15} className="mt-0.5 shrink-0 text-oe-blue" />
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-oe-blue/20 bg-oe-blue-subtle/40 px-3.5 py-2.5">
+            <Info size={16} className="mt-0.5 shrink-0 text-oe-blue" />
             <p className="text-xs text-content-secondary leading-relaxed">
               {t('backup.scope_note', {
                 defaultValue:
@@ -471,7 +471,7 @@ export function BackupRestore() {
                     <div className="mt-3 space-y-3">
                       {/* File info */}
                       <div className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5">
-                        <FileArchive size={18} className="shrink-0 text-oe-blue" />
+                        <FileArchive size={20} className="shrink-0 text-oe-blue" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-content-primary truncate">
                             {selectedFile.name}
@@ -533,7 +533,7 @@ export function BackupRestore() {
                                   className="flex items-start gap-2 text-xs text-content-secondary"
                                 >
                                   <AlertTriangle
-                                    size={13}
+                                    size={14}
                                     className="shrink-0 mt-0.5 text-semantic-warning"
                                   />
                                   <span>{w}</span>
@@ -549,7 +549,7 @@ export function BackupRestore() {
                           {!validation.format_version.startsWith(`${SUPPORTED_FORMAT_MAJOR}.`) && (
                             <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2.5">
                               <div className="flex items-start gap-2 text-xs text-semantic-error">
-                                <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                                 <span>
                                   {t('backup.incompatible', {
                                     defaultValue:
@@ -565,7 +565,7 @@ export function BackupRestore() {
                             <div className="space-y-3">
                               {/* Mode selector */}
                               <div>
-                                <label className="text-xs font-medium text-content-secondary block mb-2">
+                                <label className="oe-label">
                                   {t('backup.restore_mode', {
                                     defaultValue: 'Restore mode',
                                   })}

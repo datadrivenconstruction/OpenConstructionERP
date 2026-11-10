@@ -24,8 +24,8 @@ import {
 import { calibrationWarnings, parseCalibrationRows, type CalibrationRow } from '../calibration';
 import { useSensorUnits } from '../useSensorUnits';
 
-const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
-const LABEL = 'text-xs text-content-secondary';
+const FIELD = 'oe-input';
+const LABEL = 'oe-label';
 
 export function MixForms({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
@@ -117,11 +117,11 @@ export function MixForms({ projectId }: { projectId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <label className={LABEL}>
               {t('site_sensors.forms.code', { defaultValue: 'Code' })}
-              <input type="text" value={code} maxLength={50} onChange={(e) => setCode(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="text" value={code} maxLength={50} onChange={(e) => setCode(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             <label className={LABEL}>
               {t('site_sensors.mixes.method', { defaultValue: 'Maturity method' })}
-              <select value={method} onChange={(e) => setMethod(e.target.value as MaturityMethod)} className={`${FIELD} mt-1 w-full`}>
+              <select value={method} onChange={(e) => setMethod(e.target.value as MaturityMethod)} className="oe-select mt-1">
                 <option value="nurse_saul">{t('site_sensors.mixes.nurse_saul', { defaultValue: 'Nurse-Saul (temperature-time factor)' })}</option>
                 <option value="equivalent_age">{t('site_sensors.mixes.equivalent_age', { defaultValue: 'Equivalent age (Arrhenius)' })}</option>
               </select>
@@ -129,7 +129,7 @@ export function MixForms({ projectId }: { projectId: string }) {
             {method === 'nurse_saul' ? (
               <label className={`${LABEL} col-span-2`}>
                 {t('site_sensors.mixes.datum', { defaultValue: 'Datum temperature ({{unit}})', unit: u.label('degC') })}
-                <input type="number" step="0.5" value={datum} onChange={(e) => setDatum(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                <input type="number" step="0.5" value={datum} onChange={(e) => setDatum(e.target.value)} className={`${FIELD} mt-1`} />
                 <span className="mt-1 block text-2xs text-content-tertiary">
                   {t('site_sensors.mixes.datum_hint', {
                     defaultValue: '0 °C per ASTM C1074 by default; use your lab value when the mix was calibrated with another.',
@@ -139,7 +139,7 @@ export function MixForms({ projectId }: { projectId: string }) {
             ) : (
               <label className={`${LABEL} col-span-2`}>
                 {t('site_sensors.mixes.activation_energy', { defaultValue: 'Activation energy (kJ/mol)' })}
-                <input type="number" step="1" min="1" value={ea} onChange={(e) => setEa(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+                <input type="number" step="1" min="1" value={ea} onChange={(e) => setEa(e.target.value)} className={`${FIELD} mt-1`} />
                 <span className="mt-1 block text-2xs text-content-tertiary">
                   {t('site_sensors.mixes.activation_hint', {
                     defaultValue: '40 kJ/mol at a 20 °C reference by default; use your lab value.',
@@ -149,15 +149,15 @@ export function MixForms({ projectId }: { projectId: string }) {
             )}
             <label className={LABEL}>
               {t('site_sensors.mixes.curve_a', { defaultValue: 'Curve a (MPa)' })}
-              <input type="number" step="any" value={a} onChange={(e) => setA(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="number" step="any" value={a} onChange={(e) => setA(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             <label className={LABEL}>
               {t('site_sensors.mixes.curve_b', { defaultValue: 'Curve b (MPa per decade)' })}
-              <input type="number" step="any" min="0" value={b} onChange={(e) => setB(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="number" step="any" min="0" value={b} onChange={(e) => setB(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
             <label className={`${LABEL} col-span-2`}>
               {t('site_sensors.mixes.strip_strength', { defaultValue: 'Strike strength (MPa)' })}
-              <input type="number" step="0.5" min="0" value={strip} onChange={(e) => setStrip(e.target.value)} className={`${FIELD} mt-1 w-full`} />
+              <input type="number" step="0.5" min="0" value={strip} onChange={(e) => setStrip(e.target.value)} className={`${FIELD} mt-1`} />
             </label>
           </div>
           <Button
@@ -192,7 +192,7 @@ export function MixForms({ projectId }: { projectId: string }) {
                 value={mixId}
                 onChange={(e) => setMixId(e.target.value)}
                 aria-label={t('site_sensors.forms.mix', { defaultValue: 'Concrete mix' })}
-                className={`${FIELD} w-full`}
+                className="oe-select"
               >
                 <option value="">{t('site_sensors.calibration.pick_mix', { defaultValue: 'Choose a mix' })}</option>
                 {mixes.map((m) => (
@@ -232,18 +232,18 @@ export function MixForms({ projectId }: { projectId: string }) {
                       defaultValue: 'Enter your own strength-maturity points by hand, then save: the curve is fitted to them.',
                     })}
                   </p>
-                  <table className="w-full text-sm">
+                  <table className="oe-table-compact">
                     <thead>
                       <tr className="text-left text-xs text-content-tertiary">
-                        <th className="font-medium">{indexLabel}</th>
-                        <th className="font-medium">{t('site_sensors.calibration.strength', { defaultValue: 'Strength (MPa)' })}</th>
+                        <th>{indexLabel}</th>
+                        <th>{t('site_sensors.calibration.strength', { defaultValue: 'Strength (MPa)' })}</th>
                         <th />
                       </tr>
                     </thead>
                     <tbody>
                       {rows.map((r, i) => (
                         <tr key={i}>
-                          <td className="pr-2 py-1">
+                          <td className="pr-2">
                             <input
                               type="number"
                               step="any"
@@ -251,10 +251,10 @@ export function MixForms({ projectId }: { projectId: string }) {
                               value={r.index}
                               aria-label={indexLabel}
                               onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, index: e.target.value } : x)))}
-                              className={`${FIELD} w-full`}
+                              className={`${FIELD}`}
                             />
                           </td>
-                          <td className="pr-2 py-1">
+                          <td className="pr-2">
                             <input
                               type="number"
                               step="any"
@@ -262,7 +262,7 @@ export function MixForms({ projectId }: { projectId: string }) {
                               value={r.mpa}
                               aria-label={t('site_sensors.calibration.strength', { defaultValue: 'Strength (MPa)' })}
                               onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, mpa: e.target.value } : x)))}
-                              className={`${FIELD} w-full`}
+                              className={`${FIELD}`}
                             />
                           </td>
                           <td className="w-8">
@@ -270,7 +270,7 @@ export function MixForms({ projectId }: { projectId: string }) {
                               variant="ghost"
                               size="sm"
                               aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                              icon={<Trash2 size={13} />}
+                              icon={<Trash2 size={14} />}
                               onClick={() => setRows(rows.filter((_, j) => j !== i))}
                             />
                           </td>
@@ -279,7 +279,7 @@ export function MixForms({ projectId }: { projectId: string }) {
                     </tbody>
                   </table>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={() => setRows([...rows, { index: '', mpa: '' }])}>
+                    <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setRows([...rows, { index: '', mpa: '' }])}>
                       {t('site_sensors.calibration.add_point', { defaultValue: 'Add cube' })}
                     </Button>
                     <Button variant="primary" size="sm" loading={saveMut.isPending} onClick={() => saveMut.mutate()}>

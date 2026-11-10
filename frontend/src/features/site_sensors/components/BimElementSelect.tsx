@@ -7,8 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchBIMElements, fetchBIMModels } from '@/features/bim/api';
 import { filterElements } from '../evidenceData';
 
-const FIELD = 'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
-const LABEL = 'text-xs text-content-secondary';
+const FIELD = 'oe-select';
+const LABEL = 'oe-label';
 
 export interface BimLink {
   modelId: string;
@@ -47,7 +47,7 @@ export function BimElementSelect({
         <select
           value={value.modelId}
           onChange={(e) => onChange({ modelId: e.target.value, elementId: '' })}
-          className={`${FIELD} mt-1 w-full`}
+          className={`${FIELD} mt-1`}
         >
           <option value="">{t('site_sensors.bim.none', { defaultValue: 'Not linked' })}</option>
           {models.map((m) => (
@@ -66,12 +66,12 @@ export function BimElementSelect({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('site_sensors.bim.search', { defaultValue: 'Search elements' })}
             aria-label={t('site_sensors.bim.search', { defaultValue: 'Search elements' })}
-            className={`${FIELD} mt-1 w-full`}
+            className="oe-input mt-1"
           />
           <select
             value={value.elementId}
             onChange={(e) => onChange({ modelId: value.modelId, elementId: e.target.value })}
-            className={`${FIELD} mt-1 w-full`}
+            className={`${FIELD} mt-1`}
           >
             <option value="">{t('site_sensors.bim.none', { defaultValue: 'Not linked' })}</option>
             {items.map((el) => (

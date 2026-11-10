@@ -41,7 +41,7 @@ const SEVERITY_CONFIG: Record<
   { color: string; bg: string; border: string; icon: typeof AlertOctagon; label: string }
 > = {
   blocker: {
-    color: 'text-red-400',
+    color: 'text-semantic-error',
     bg: 'bg-semantic-error/10',
     border: 'border-l-red-500',
     icon: AlertOctagon,
@@ -55,15 +55,15 @@ const SEVERITY_CONFIG: Record<
     label: 'CRITICAL',
   },
   warning: {
-    color: 'text-yellow-400',
+    color: 'text-semantic-warning',
     bg: 'bg-semantic-warning/10',
     border: 'border-l-yellow-500',
     icon: AlertCircle,
     label: 'WARNING',
   },
   suggestion: {
-    color: 'text-gray-400',
-    bg: 'bg-gray-500/10',
+    color: 'text-content-tertiary',
+    bg: 'bg-content-tertiary',
     border: 'border-l-gray-500',
     icon: Info,
     label: 'SUGGESTION',

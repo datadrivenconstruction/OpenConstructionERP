@@ -326,35 +326,34 @@ const DictionariesTable = memo(function DictionariesTable({
       </h4>
       <div className="mt-3 overflow-hidden rounded-lg border border-border-light">
         <table
-          className="min-w-full text-sm"
+          className="oe-table min-w-full"
           data-testid="translation-dict-table"
         >
-          <thead className="bg-surface-secondary/40">
+          <thead>
             <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
-              <th className="px-4 py-2 font-medium">
+              <th>
                 {t('translation.dict.col_kind', { defaultValue: 'Source' })}
               </th>
-              <th className="px-4 py-2 font-medium">
+              <th>
                 {t('translation.dict.col_pair', { defaultValue: 'Pair' })}
               </th>
-              <th className="px-4 py-2 font-medium text-right">
+              <th className="text-right">
                 {t('translation.dict.col_size', { defaultValue: 'Size' })}
               </th>
-              <th className="px-4 py-2 font-medium text-right">
+              <th className="text-right">
                 {t('translation.dict.col_modified', {
                   defaultValue: 'Modified',
                 })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {entries.map(({ kind, entry }) => (
               <tr
                 key={`${kind}-${entry.pair}`}
-                className="hover:bg-surface-secondary/40"
                 data-testid={`translation-dict-row-${kind}-${entry.pair}`}
               >
-                <td className="px-4 py-2.5">
+                <td>
                   <Badge
                     variant={kind === 'muse' ? 'blue' : 'success'}
                     size="sm"
@@ -362,13 +361,13 @@ const DictionariesTable = memo(function DictionariesTable({
                     {kind.toUpperCase()}
                   </Badge>
                 </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-content-primary">
+                <td className="font-mono">
                   {entry.pair}
                 </td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatBytes(entry.size_bytes)}
                 </td>
-                <td className="px-4 py-2.5 text-right text-content-tertiary">
+                <td className="text-right text-content-tertiary">
                   {formatRelative(entry.modified_at, t)}
                 </td>
               </tr>
@@ -486,7 +485,7 @@ function MuseDownloadForm({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="muse-pair"
-            className="text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('translation.muse.pair_label', { defaultValue: 'Pair' })}
           </label>
@@ -494,7 +493,7 @@ function MuseDownloadForm({
             id="muse-pair"
             value={presetValue}
             onChange={(e) => setPresetValue(e.target.value)}
-            className="h-10 min-w-[14rem] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-select oe-input-lg min-w-[14rem]"
             data-testid="translation-muse-preset"
           >
             {PRESET_MUSE_PAIRS.map((p) => (
@@ -696,7 +695,7 @@ function IateDownloadForm({
         data-testid="translation-iate-local-form"
       >
         <h5 className="text-sm font-medium text-content-primary flex items-center gap-2">
-          <FileText size={13} className="text-content-tertiary" aria-hidden />
+          <FileText size={14} className="text-content-tertiary" aria-hidden />
           {t('translation.iate.local_title', {
             defaultValue: 'Process a local TBX file (recommended)',
           })}
@@ -736,7 +735,7 @@ function IateDownloadForm({
         data-testid="translation-iate-url-form"
       >
         <h5 className="text-sm font-medium text-content-primary flex items-center gap-2">
-          <Globe size={13} className="text-content-tertiary" aria-hidden />
+          <Globe size={14} className="text-content-tertiary" aria-hidden />
           {t('translation.iate.url_title', {
             defaultValue: 'Trigger download from a mirror URL',
           })}

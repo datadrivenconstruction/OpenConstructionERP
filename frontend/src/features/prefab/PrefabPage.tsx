@@ -85,7 +85,7 @@ interface StageMeta {
 const STAGE_META: Record<PrefabStage, StageMeta> = {
   design: {
     label: 'Design',
-    dot: 'bg-slate-400',
+    dot: 'bg-content-quaternary',
     badge: 'bg-surface-secondary text-content-secondary',
     column: 'border-border',
   },
@@ -97,7 +97,7 @@ const STAGE_META: Record<PrefabStage, StageMeta> = {
   },
   in_production: {
     label: 'In production',
-    dot: 'bg-amber-400',
+    dot: 'bg-semantic-warning',
     badge: 'bg-semantic-warning-bg text-semantic-warning',
     column: 'border-semantic-warning/30',
   },
@@ -129,7 +129,7 @@ const STAGE_META: Record<PrefabStage, StageMeta> = {
 
 const DEFAULT_STAGE_META: StageMeta = {
   label: 'Unknown',
-  dot: 'bg-gray-400',
+  dot: 'bg-content-quaternary',
   badge: 'bg-surface-secondary text-content-secondary',
   column: 'border-border',
 };
@@ -149,7 +149,7 @@ function stageMeta(stage: string): StageMeta {
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 /* ── Install-date risk helpers ─────────────────────────────────────────── */
 
@@ -329,14 +329,14 @@ function CreateUnitModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
         role="dialog"
         aria-label={t('prefab.new_unit', { defaultValue: 'New Unit' })}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('prefab.new_unit', { defaultValue: 'New Unit' })}
           </h2>
           <button
@@ -344,14 +344,14 @@ function CreateUnitModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('prefab.field_ref', { defaultValue: 'Unit reference' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -362,10 +362,7 @@ function CreateUnitModal({
                   setTouched(true);
                 }}
                 placeholder={t('prefab.ref_placeholder', { defaultValue: 'e.g. POD-L03-14' })}
-                className={clsx(
-                  inputCls,
-                  refError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-                )}
+                className={inputCls} aria-invalid={!!refError}
                 autoFocus
               />
               {refError && (
@@ -375,13 +372,13 @@ function CreateUnitModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('prefab.field_type', { defaultValue: 'Unit type' })}
               </label>
               <select
                 value={form.unit_type}
                 onChange={(e) => set('unit_type', e.target.value as PrefabUnitType)}
-                className={inputCls + ' appearance-none'}
+                className="oe-select oe-input-lg"
               >
                 {UNIT_TYPES.map((ty) => (
                   <option key={ty} value={ty}>
@@ -394,7 +391,7 @@ function CreateUnitModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('prefab.field_target_install', { defaultValue: 'Target install date' })}
               </label>
               <input
@@ -405,7 +402,7 @@ function CreateUnitModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('prefab.field_drawing_ref', { defaultValue: 'Drawing reference' })}
               </label>
               <input
@@ -418,14 +415,14 @@ function CreateUnitModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('prefab.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
               value={form.notes}
               onChange={(e) => set('notes', e.target.value)}
               rows={2}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              className="oe-textarea resize-none"
               placeholder={t('prefab.notes_placeholder', {
                 defaultValue: 'Optional notes for this unit...',
               })}
@@ -504,13 +501,13 @@ const UnitCard = React.memo(function UnitCard({
               dueSoon && 'font-medium text-semantic-warning',
             )}
           >
-            {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
+            {overdue ? <AlertTriangle size={12} /> : <Calendar size={12} />}
             <DateDisplay value={unit.target_install_date} />
           </span>
         )}
         {unit.drawing_ref && (
           <span className="inline-flex items-center gap-1 truncate">
-            <FileText size={11} />
+            <FileText size={12} />
             {unit.drawing_ref}
           </span>
         )}
@@ -519,7 +516,7 @@ const UnitCard = React.memo(function UnitCard({
         <div className="mt-2">
           {overdue ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-error">
-              <AlertTriangle size={11} className="shrink-0" />
+              <AlertTriangle size={12} className="shrink-0" />
               {days != null
                 ? t('prefab.overdue_by_days', {
                     defaultValue: 'Overdue by {{count}}d',
@@ -529,7 +526,7 @@ const UnitCard = React.memo(function UnitCard({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-md bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
-              <Clock size={11} className="shrink-0" />
+              <Clock size={12} className="shrink-0" />
               {days === 0
                 ? t('prefab.due_today', { defaultValue: 'Due today' })
                 : t('prefab.due_in_days', {
@@ -542,10 +539,10 @@ const UnitCard = React.memo(function UnitCard({
       )}
       {unit.cost_basis != null && (
         <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success">
-          <Coins size={11} className="shrink-0" />
+          <Coins size={12} className="shrink-0" />
           <span className="tabular-nums">{unit.cost_basis}</span>
           {unit.earned_value != null && (
-            <span className="text-emerald-600/70 dark:text-emerald-400/70">
+            <span className="text-semantic-success/70 ">
               {t('prefab.earned_short', { defaultValue: 'earned {{value}}', value: unit.earned_value })}
             </span>
           )}
@@ -659,7 +656,7 @@ function LinkCostSection({
               disabled={isLinking}
               className="inline-flex items-center gap-1 text-2xs font-medium text-semantic-error hover:underline disabled:opacity-50"
             >
-              <Unlink size={11} className="shrink-0" />
+              <Unlink size={12} className="shrink-0" />
               {t('prefab.unlink', { defaultValue: 'Unlink' })}
             </button>
           </div>
@@ -711,7 +708,7 @@ function LinkCostSection({
                   setBoqId(e.target.value);
                   setPositionId('');
                 }}
-                className={inputCls + ' h-9 appearance-none text-xs'}
+                className="oe-select oe-input-sm"
               >
                 <option value="">{t('prefab.pick_boq', { defaultValue: 'Select a BOQ...' })}</option>
                 {boqs.map((b) => (
@@ -725,7 +722,7 @@ function LinkCostSection({
                   value={positionId}
                   onChange={(e) => setPositionId(e.target.value)}
                   disabled={positionsLoading}
-                  className={inputCls + ' h-9 appearance-none text-xs'}
+                  className="oe-select oe-input-sm"
                 >
                   <option value="">
                     {positionsLoading
@@ -744,7 +741,7 @@ function LinkCostSection({
             <select
               value={assemblyId}
               onChange={(e) => setAssemblyId(e.target.value)}
-              className={inputCls + ' h-9 appearance-none text-xs'}
+              className="oe-select oe-input-sm"
             >
               <option value="">
                 {t('prefab.pick_assembly', { defaultValue: 'Select an assembly...' })}
@@ -764,7 +761,7 @@ function LinkCostSection({
               </Button>
             )}
             <Button variant="primary" size="sm" onClick={applyLink} disabled={!canLink || isLinking}>
-              <Link2 size={13} className="mr-1 shrink-0" />
+              <Link2 size={14} className="mr-1 shrink-0" />
               {t('prefab.link_action', { defaultValue: 'Link' })}
             </Button>
           </div>
@@ -772,7 +769,7 @@ function LinkCostSection({
       ) : (
         !isLinked && (
           <Button variant="secondary" size="sm" onClick={() => setEditing(true)} className="w-full">
-            <Link2 size={13} className="mr-1.5 shrink-0" />
+            <Link2 size={14} className="mr-1.5 shrink-0" />
             {t('prefab.link_to_cost', { defaultValue: 'Link to BOQ / assembly' })}
           </Button>
         )
@@ -824,7 +821,7 @@ function UnitDetailDrawer({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end bg-black/50 animate-fade-in" onClick={onClose}>
       <div
         className="h-full w-full max-w-md bg-surface-primary shadow-2xl border-l border-border flex flex-col animate-slide-in-right"
         onClick={(e) => e.stopPropagation()}
@@ -852,7 +849,7 @@ function UnitDetailDrawer({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="p-1 rounded hover:bg-surface-secondary shrink-0"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -910,7 +907,7 @@ function UnitDetailDrawer({
           {/* QA gate hint */}
           {hasPassedQa ? (
             <div className="flex items-start gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success-bg px-3 py-2 text-xs text-semantic-success">
-              <ShieldCheck size={15} className="mt-0.5 shrink-0" />
+              <ShieldCheck size={16} className="mt-0.5 shrink-0" />
               <span>
                 {t('prefab.qa_passed_hint', {
                   defaultValue: 'QA passed. This unit is cleared for dispatch, delivery and install.',
@@ -919,7 +916,7 @@ function UnitDetailDrawer({
             </div>
           ) : (
             <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
-              <ShieldCheck size={15} className="mt-0.5 shrink-0" />
+              <ShieldCheck size={16} className="mt-0.5 shrink-0" />
               <span>
                 {t('prefab.qa_pending_hint', {
                   defaultValue:
@@ -948,7 +945,7 @@ function UnitDetailDrawer({
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none mb-2"
+                  className="oe-textarea resize-none mb-2"
                   placeholder={t('prefab.advance_note_placeholder', {
                     defaultValue: 'Optional note for the audit trail...',
                   })}
@@ -1013,7 +1010,7 @@ function UnitDetailDrawer({
                           {t(`prefab.stage_${ev.stage}`, { defaultValue: evMeta.label })}
                         </Badge>
                         <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
-                          <Clock size={11} />
+                          <Clock size={12} />
                           <DateDisplay value={ev.at} format="datetime" />
                         </span>
                       </div>
@@ -1486,7 +1483,7 @@ export function PrefabPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('prefab.search_placeholder', { defaultValue: 'Search units...' })}
-            className={inputCls + ' pl-9'}
+            className={`${inputCls} pl-9`}
           />
         </div>
       )}

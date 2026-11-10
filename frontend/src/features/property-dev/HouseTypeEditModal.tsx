@@ -47,14 +47,9 @@ import {
 import type { ProjectStub } from './HouseTypeSettingsPage';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm ' +
-  'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const inputErrCls =
-  'h-9 w-full rounded-lg border border-semantic-error bg-surface-primary px-3 text-sm ' +
-  'focus:outline-none focus:ring-2 focus:ring-semantic-error/30';
+  'oe-input';
 const textAreaCls =
-  'min-h-[72px] w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm ' +
-  'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-textarea';
 
 const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
 const COMMON_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'PLN', 'RUB', 'TRY', 'JPY', 'CNY', 'AED'];
@@ -371,7 +366,7 @@ export function HouseTypeEditModal({
                   value={form.project_id}
                   onChange={(e) => set('project_id', e.target.value)}
                   onBlur={() => markTouched('project_id')}
-                  className={projectErr ? inputErrCls : inputCls}
+                  className={inputCls} aria-invalid={!!projectErr}
                   disabled={projects.length === 0}
                 >
                   <option value="">
@@ -404,7 +399,7 @@ export function HouseTypeEditModal({
                 maxLength={32}
                 disabled={isEdit /* code is immutable once shipped */}
                 placeholder="TYPE-A"
-                className={codeErr ? inputErrCls : inputCls}
+                className={inputCls} aria-invalid={!!codeErr}
               />
             </WideModalField>
             <WideModalField
@@ -419,7 +414,7 @@ export function HouseTypeEditModal({
                 onBlur={() => markTouched('name')}
                 maxLength={120}
                 placeholder="2-bed coastal townhouse"
-                className={nameErr ? inputErrCls : inputCls}
+                className={inputCls} aria-invalid={!!nameErr}
               />
             </WideModalField>
             <WideModalField
@@ -564,7 +559,7 @@ export function HouseTypeEditModal({
               <select
                 value={form.energy_class}
                 onChange={(e) => set('energy_class', e.target.value)}
-                className={inputCls}
+                className="oe-select"
               >
                 <option value="">—</option>
                 {ENERGY_CLASSES.map((cls) => (
@@ -635,7 +630,7 @@ export function HouseTypeEditModal({
                 list="house-type-currency-list"
                 maxLength={3}
                 placeholder="EUR"
-                className={currencyErr ? inputErrCls : inputCls}
+                className={inputCls} aria-invalid={!!currencyErr}
               />
               <datalist id="house-type-currency-list">
                 {COMMON_CURRENCIES.map((c) => (
@@ -659,7 +654,7 @@ export function HouseTypeEditModal({
               <select
                 value={form.construction_type}
                 onChange={(e) => set('construction_type', e.target.value)}
-                className={inputCls}
+                className="oe-select"
               >
                 <option value="">—</option>
                 {CONSTRUCTION_TYPES.map((ct) => (
@@ -677,7 +672,7 @@ export function HouseTypeEditModal({
               <select
                 value={form.sales_channel}
                 onChange={(e) => set('sales_channel', e.target.value)}
-                className={inputCls}
+                className="oe-select"
               >
                 <option value="">—</option>
                 {SALES_CHANNELS.map((ch) => (

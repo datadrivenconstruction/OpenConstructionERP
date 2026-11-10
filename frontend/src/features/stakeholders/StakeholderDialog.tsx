@@ -136,7 +136,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
           >
             <input
               id="stakeholder-name"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.display_name}
               maxLength={255}
               disabled={masked}
@@ -231,7 +231,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
               <input
                 type="number"
                 min={0}
-                className={`${FIELD_CLASS} w-24`}
+                className="oe-input w-24"
                 value={draft.group_size}
                 onChange={(e) => set('group_size', e.target.value)}
               />
@@ -266,7 +266,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
             >
               <input
                 id="stakeholder-address"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={place.address}
                 maxLength={255}
                 onChange={(e) => setPlace((p) => ({ ...p, address: e.target.value }))}
@@ -279,7 +279,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
             >
               <input
                 id="stakeholder-parcel"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={place.parcel_ref}
                 maxLength={255}
                 onChange={(e) => setPlace((p) => ({ ...p, parcel_ref: e.target.value }))}
@@ -298,7 +298,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
               <input
                 id="stakeholder-lat"
                 inputMode="decimal"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={place.lat}
                 onChange={(e) => setPlace((p) => ({ ...p, lat: e.target.value }))}
               />
@@ -316,7 +316,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
               <input
                 id="stakeholder-lon"
                 inputMode="decimal"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={place.lon}
                 onChange={(e) => setPlace((p) => ({ ...p, lon: e.target.value }))}
               />
@@ -328,7 +328,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
           <WideModalField label={t('stakeholders.ui.stakeholder.interests', { defaultValue: 'What they care about' })}>
             <textarea
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.interests}
               onChange={(e) => set('interests', e.target.value)}
             />
@@ -338,7 +338,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
           >
             <textarea
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.expectations}
               onChange={(e) => set('expectations', e.target.value)}
             />
@@ -346,7 +346,7 @@ export function StakeholderDialog({ screen, stakeholder, stakeholders, onClose, 
           <WideModalField label={t('stakeholders.ui.stakeholder.concerns', { defaultValue: 'What worries them' })}>
             <textarea
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.concerns}
               onChange={(e) => set('concerns', e.target.value)}
             />

@@ -238,7 +238,7 @@ export function LineOfBalanceView({ lob }: Props) {
             </div>
             {hover.has_rhythm_break && (
               <div className="mt-1 inline-flex items-center gap-1 text-semantic-warning">
-                <AlertTriangle size={11} />
+                <AlertTriangle size={12} />
                 {t('takt.rhythmBreak', { defaultValue: 'Takt rhythm break' })}
               </div>
             )}

@@ -101,7 +101,7 @@ export function OrganisationPanel({ screen, onOpenSettings }: OrganisationPanelP
       capability="organisation"
       variant="secondary"
       size="sm"
-      icon={<Plus size={13} />}
+      icon={<Plus size={14} />}
       onClick={() => setDialog({ kind: 'body', body: null })}
       data-testid="body-add"
     >
@@ -174,7 +174,7 @@ export function OrganisationPanel({ screen, onOpenSettings }: OrganisationPanelP
                     <Button
                       size="sm"
                       variant="ghost"
-                      icon={<UserCog size={13} />}
+                      icon={<UserCog size={14} />}
                       onClick={() => setDialog({ kind: 'role', role })}
                       data-testid="role-set"
                     >
@@ -222,7 +222,7 @@ export function OrganisationPanel({ screen, onOpenSettings }: OrganisationPanelP
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Pencil size={13} />}
+                        icon={<Pencil size={14} />}
                         aria-label={t('stakeholders.ui.edit', { defaultValue: 'Edit' })}
                         onClick={() => setDialog({ kind: 'body', body: b })}
                         data-testid="body-edit"
@@ -230,7 +230,7 @@ export function OrganisationPanel({ screen, onOpenSettings }: OrganisationPanelP
                       <Button
                         size="sm"
                         variant="ghost"
-                        icon={<Trash2 size={13} />}
+                        icon={<Trash2 size={14} />}
                         aria-label={t('stakeholders.ui.remove', { defaultValue: 'Remove' })}
                         onClick={() => setDialog({ kind: 'delete-body', body: b })}
                         data-testid="body-delete"

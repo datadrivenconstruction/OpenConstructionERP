@@ -121,7 +121,7 @@ function HeaderFields({
         <input id="file-employer" className={FIELD_CLASS} value={employer} onChange={(e) => setEmployer(e.target.value)} />
       </WideModalField>
       <WideModalField label={t('staffing.file.employment_basis', { defaultValue: 'Employment basis' })} htmlFor="file-basis">
-        <select id="file-basis" className={FIELD_CLASS} value={basis} onChange={(e) => setBasis(e.target.value as EmploymentBasis)}>
+        <select id="file-basis" className="oe-select" value={basis} onChange={(e) => setBasis(e.target.value as EmploymentBasis)}>
           {BASES.map((b) => (
             <option key={b} value={b}>
               {vocab(t, EMPLOYMENT_BASIS, b)}
@@ -134,7 +134,7 @@ function HeaderFields({
         hint={t('staffing.file.lawful_basis_hint', { defaultValue: 'Why the project may keep this personal data.' })}
         htmlFor="file-lawful"
       >
-        <select id="file-lawful" className={FIELD_CLASS} value={lawful} onChange={(e) => setLawful(e.target.value as LawfulBasis)}>
+        <select id="file-lawful" className="oe-select" value={lawful} onChange={(e) => setLawful(e.target.value as LawfulBasis)}>
           {LAWFUL.map((b) => (
             <option key={b} value={b}>
               {vocab(t, LAWFUL_BASIS, b)}
@@ -230,7 +230,7 @@ export function CreateFileDialog({ open, projectId, labels, candidates, onClose,
         <WideModalField label={t('staffing.fill.person', { defaultValue: 'Person' })} required span={2} htmlFor="file-person">
           <select
             id="file-person"
-            className={FIELD_CLASS}
+            className="oe-select"
             value={member}
             onChange={(e) => {
               setMember(e.target.value);
@@ -463,7 +463,7 @@ export function DocumentDialog({
           >
             <select
               id="document-fit"
-              className={FIELD_CLASS}
+              className="oe-select"
               value={fit}
               onChange={(e) => setFit(e.target.value as FitForRole | '')}
               data-testid="document-fit"
@@ -568,7 +568,7 @@ export function TravelDialog({
     >
       <WideModalSection columns={2}>
         <WideModalField label={t('staffing.travel.kind_label', { defaultValue: 'Kind of trip' })} span={2} htmlFor="travel-kind">
-          <select id="travel-kind" className={FIELD_CLASS} value={kind} onChange={(e) => setKind(e.target.value as TravelKind)}>
+          <select id="travel-kind" className="oe-select" value={kind} onChange={(e) => setKind(e.target.value as TravelKind)}>
             {TRAVEL_KINDS.map((k) => (
               <option key={k} value={k}>
                 {vocab(t, TRAVEL_KIND, k)}
@@ -595,7 +595,7 @@ export function TravelDialog({
               aria-label={t('staffing.travel.currency', { defaultValue: 'Currency' })}
               placeholder={t('staffing.travel.currency', { defaultValue: 'Currency' })}
               maxLength={3}
-              className={`${FIELD_CLASS} !w-24 uppercase`}
+              className={`${FIELD_CLASS} w-24 uppercase`}
               value={cur}
               onChange={(e) => setCur(e.target.value)}
               data-testid="travel-currency"
@@ -691,7 +691,7 @@ export function LeaveDialog({
     >
       <WideModalSection columns={2}>
         <WideModalField label={t('staffing.leave.type', { defaultValue: 'Type' })} span={2} htmlFor="leave-type">
-          <select id="leave-type" className={FIELD_CLASS} value={type} onChange={(e) => setType(e.target.value)}>
+          <select id="leave-type" className="oe-select" value={type} onChange={(e) => setType(e.target.value)}>
             {types.map((lt) => (
               <option key={lt.code} value={lt.code}>
                 {catalogueName(labels, catalogue, 'leave_type', lt.code)}

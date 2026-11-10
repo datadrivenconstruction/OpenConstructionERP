@@ -35,7 +35,7 @@ import {
 import { gateErrorMessage } from './complianceReasons';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /**
  * Select the whole value when a number field takes focus, so what is typed
@@ -234,7 +234,7 @@ export function AgreementFormModal({
           <select
             value={projectId}
             onChange={(e) => set('project_id', e.target.value)}
-            className={inputCls}
+            className="oe-select"
             data-testid="agreement-project"
           >
             {projects.map((p) => (
@@ -252,7 +252,7 @@ export function AgreementFormModal({
           <select
             value={form.contract_id}
             onChange={(e) => linkContract(e.target.value)}
-            className={inputCls}
+            className="oe-select"
             data-testid="agreement-contract"
           >
             <option value="">{t('subcontractors.agreement_contract_none')}</option>
@@ -362,7 +362,7 @@ export function SignAgreementButton({ agreement }: { agreement: Agreement }) {
       variant="secondary"
       onClick={() => mutation.mutate()}
       loading={mutation.isPending}
-      icon={<FileSignature size={13} />}
+      icon={<FileSignature size={14} />}
       title={t('subcontractors.sign_agreement_hint')}
     >
       {t('subcontractors.sign_agreement')}

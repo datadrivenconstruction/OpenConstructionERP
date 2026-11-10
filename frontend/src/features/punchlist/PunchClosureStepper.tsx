@@ -179,7 +179,7 @@ export function PunchClosureStepper({
             placeholder={t('punch.transition_note_placeholder', {
               defaultValue: 'Optional note added to the next status change (e.g. what was fixed, or why it is being reopened)',
             })}
-            className="w-full resize-none rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-textarea resize-none"
           />
         ) : (
           <button
@@ -187,7 +187,7 @@ export function PunchClosureStepper({
             onClick={() => setShowNote(true)}
             className="inline-flex items-center gap-1.5 rounded-md text-xs text-content-tertiary hover:text-content-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           >
-            <StickyNote size={13} />
+            <StickyNote size={14} />
             {t('punch.add_transition_note', { defaultValue: 'Add a note (optional)' })}
           </button>
         )}

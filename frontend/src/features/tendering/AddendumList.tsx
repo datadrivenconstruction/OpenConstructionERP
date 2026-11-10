@@ -89,7 +89,7 @@ const emptyBoqRow = (): BoqDraftRow => ({
 });
 
 const miniCls =
-  'h-8 w-full min-w-0 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 disabled:opacity-40';
+  'oe-input oe-input-sm min-w-0';
 
 function patchRow<T>(set: (fn: (rows: T[]) => T[]) => void, index: number, patch: Partial<T>) {
   set((rows) => rows.map((r, i) => (i === index ? { ...r, ...patch } : r)));
@@ -150,15 +150,15 @@ export function AddendumChanges({ addendum }: { addendum: Addendum }) {
               </Badge>
             )}
           </div>
-          <table className="w-full text-xs" data-testid="addendum-boq-diff">
+          <table className="oe-table-compact" data-testid="addendum-boq-diff">
             <tbody>
               {boq.map((c, i) => (
-                <tr key={`${c.ordinal}-${i}`} data-op={c.op} className="border-t border-border-light">
+                <tr key={`${c.ordinal}-${i}`} data-op={c.op}>
                   <td className={`py-1 pr-2 font-medium ${OP_TONE[c.op]}`}>{opLabel[c.op]}</td>
-                  <td className="py-1 pr-2 tabular-nums text-content-secondary">{c.ordinal}</td>
-                  <td className="py-1 pr-2 text-content-primary">{c.description}</td>
-                  <td className="py-1 pr-2 text-content-tertiary">{c.unit}</td>
-                  <td className="py-1 text-right tabular-nums text-content-primary">
+                  <td className="pr-2 tabular-nums text-content-secondary">{c.ordinal}</td>
+                  <td className="pr-2">{c.description}</td>
+                  <td className="pr-2 text-content-tertiary">{c.unit}</td>
+                  <td className="text-right tabular-nums">
                     {qty(c.quantity_before)} {'->'} {qty(c.quantity_after)}
                   </td>
                 </tr>
@@ -171,7 +171,7 @@ export function AddendumChanges({ addendum }: { addendum: Addendum }) {
         <ul className="space-y-0.5 text-xs" data-testid="addendum-documents">
           {docs.map((d, i) => (
             <li key={`${d.drawing_number ?? ''}-${i}`} className="flex flex-wrap items-center gap-2 text-content-secondary">
-              <FileText size={11} />
+              <FileText size={12} />
               {d.drawing_number && <span className="tabular-nums">{d.drawing_number}</span>}
               <span className="text-content-primary">{d.title}</span>
               {d.revision && <span>{d.revision}</span>}
@@ -243,7 +243,7 @@ function CreateAddendumDialog({
   });
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input oe-input-lg';
 
   return (
     <WideModal
@@ -293,7 +293,7 @@ function CreateAddendumDialog({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={6}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea resize-none"
             placeholder={t('tendering.addendum.body_placeholder', {
               defaultValue:
                 'Detailed explanation of the clarification, change, or addition...',
@@ -318,7 +318,7 @@ function CreateAddendumDialog({
                 <select
                   value={row.op}
                   onChange={(e) => patchRow(setBoqRows, i, { op: e.target.value as BoqChangeOp })}
-                  className={miniCls}
+                  className="oe-select oe-input-sm"
                   aria-label={t('tendering.addendum.op', { defaultValue: 'Change type' })}
                 >
                   <option value="add">{t('tendering.addendum.op_add', { defaultValue: 'Add' })}</option>
@@ -377,7 +377,7 @@ function CreateAddendumDialog({
             <Button
               variant="ghost"
               size="sm"
-              icon={<Plus size={13} />}
+              icon={<Plus size={14} />}
               onClick={() => setBoqRows((rows) => [...rows, emptyBoqRow()])}
             >
               {t('tendering.addendum.add_boq_row', { defaultValue: 'Add position change' })}
@@ -422,7 +422,7 @@ function CreateAddendumDialog({
             <Button
               variant="ghost"
               size="sm"
-              icon={<Plus size={13} />}
+              icon={<Plus size={14} />}
               onClick={() => setDocRows((rows) => [...rows, { drawing_number: '', title: '', revision: '' }])}
             >
               {t('tendering.addendum.add_document', { defaultValue: 'Add document' })}
@@ -471,17 +471,17 @@ export function AddendaValidationPanel({ packageId }: { packageId: string }) {
   return (
     <Card padding="none" className="px-4 py-3" data-testid="addenda-validation">
       <h5 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <ShieldCheck size={13} />
+        <ShieldCheck size={14} />
         {t('tendering.addendum.validation', { defaultValue: 'Addenda checks' })}
       </h5>
       <ul className="space-y-1.5">
         {sorted.map((r, i) => (
           <li key={`${r.rule_id}-${r.element_ref ?? i}`} className="flex items-start gap-2 text-xs" data-passed={r.passed ? 'true' : 'false'}>
             {r.passed ? (
-              <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-semantic-success" />
+              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-semantic-success" />
             ) : (
               <AlertTriangle
-                size={13}
+                size={14}
                 className={`mt-0.5 shrink-0 ${r.severity === 'warning' ? 'text-semantic-warning' : 'text-semantic-error'}`}
               />
             )}
@@ -560,7 +560,7 @@ function AddendumRow({
           <div className="mt-2 flex items-center flex-wrap gap-3 text-xs text-content-tertiary">
             {isPublished ? (
               <span className="inline-flex items-center gap-1">
-                <Clock size={11} />
+                <Clock size={12} />
                 {t('tendering.addendum.published_at', {
                   defaultValue: 'Published {{when}}',
                   when: formatDate(addendum.published_at),
@@ -568,12 +568,12 @@ function AddendumRow({
               </span>
             ) : (
               <span className="inline-flex items-center gap-1">
-                <Clock size={11} />
+                <Clock size={12} />
                 {formatDate(addendum.created_at)}
               </span>
             )}
             <span className="inline-flex items-center gap-1">
-              <CheckCircle2 size={11} />
+              <CheckCircle2 size={12} />
               {t('tendering.addendum.acks', {
                 defaultValue: '{{n}} acknowledgement(s)',
                 n: ackCount,
@@ -611,7 +611,7 @@ function AddendumRow({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Check size={13} />}
+                  icon={<Check size={14} />}
                   onClick={() => setPicking(true)}
                 >
                   {t('tendering.addendum.acknowledge', {
@@ -656,7 +656,7 @@ function AddendumRow({
           <Button
             variant="primary"
             size="sm"
-            icon={<Send size={13} />}
+            icon={<Send size={14} />}
             loading={publishing}
             onClick={onPublish}
           >

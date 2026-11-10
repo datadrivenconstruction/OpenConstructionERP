@@ -107,14 +107,14 @@ function FlowStrip() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="inline-flex items-center gap-1.5">
-        {node(<Ruler size={13} className="text-blue-500" />, t('quantities.flow_takeoff', { defaultValue: 'Takeoff' }))}
-        {node(<Box size={13} className="text-semantic-success" />, t('quantities.flow_cad', { defaultValue: 'CAD / BIM' }))}
-        {node(<Sparkles size={13} className="text-violet-500" />, t('quantities.flow_ai', { defaultValue: 'AI' }))}
+        {node(<Ruler size={14} className="text-blue-500" />, t('quantities.flow_takeoff', { defaultValue: 'Takeoff' }))}
+        {node(<Box size={14} className="text-semantic-success" />, t('quantities.flow_cad', { defaultValue: 'CAD / BIM' }))}
+        {node(<Sparkles size={14} className="text-violet-500" />, t('quantities.flow_ai', { defaultValue: 'AI' }))}
       </span>
       <ArrowRight size={14} className="text-content-quaternary" />
-      {node(<Layers3 size={13} className="text-oe-blue" />, t('quantities.flow_measured', { defaultValue: 'Measured quantities' }))}
+      {node(<Layers3 size={14} className="text-oe-blue" />, t('quantities.flow_measured', { defaultValue: 'Measured quantities' }))}
       <ArrowRight size={14} className="text-content-quaternary" />
-      {node(<Table2 size={13} className="text-content-tertiary" />, t('quantities.flow_boq', { defaultValue: 'BOQ / estimate' }))}
+      {node(<Table2 size={14} className="text-content-tertiary" />, t('quantities.flow_boq', { defaultValue: 'BOQ / estimate' }))}
     </div>
   );
 }
@@ -138,7 +138,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+        className="oe-select oe-input-sm"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -377,7 +377,7 @@ export function QuantitySummaryPanel({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('quantities.summary_title', { defaultValue: 'Measured quantities' })}
               </h2>
               <InfoHint
@@ -543,7 +543,7 @@ export function QuantitySummaryPanel({
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <span className="inline-flex items-center gap-1 text-2xs uppercase tracking-wide text-content-quaternary">
-                <Filter size={11} />
+                <Filter size={12} />
                 {t('quantities.filters', { defaultValue: 'Filters' })}
               </span>
               <FilterSelect
@@ -582,7 +582,7 @@ export function QuantitySummaryPanel({
                   onClick={resetFilters}
                   className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-2xs font-medium text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
                 >
-                  <RotateCcw size={11} />
+                  <RotateCcw size={12} />
                   {t('quantities.reset_filters', { defaultValue: 'Reset' })}
                 </button>
               )}
@@ -618,19 +618,19 @@ export function QuantitySummaryPanel({
             </div>
           ) : (
             <div className="mt-5 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table-compact">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th className="pb-2 pr-4 font-medium">
+                  <tr className="text-left text-xs text-content-tertiary">
+                    <th className="pb-2 pr-4">
                       {t('quantities.col_unit', { defaultValue: 'Unit' })}
                     </th>
-                    <th className="pb-2 pr-4 font-medium text-right">
+                    <th className="pb-2 pr-4 text-right">
                       {t('quantities.col_measurements', { defaultValue: 'Measurements' })}
                     </th>
-                    <th className="pb-2 pr-4 font-medium text-right">
+                    <th className="pb-2 pr-4 text-right">
                       {t('quantities.col_total', { defaultValue: 'Total quantity' })}
                     </th>
-                    <th className="pb-2 font-medium">
+                    <th className="pb-2">
                       {t('quantities.col_sources', { defaultValue: 'Sources' })}
                     </th>
                   </tr>
@@ -645,7 +645,7 @@ export function QuantitySummaryPanel({
                   grouped.map((section) => (
                     <tbody key={section.group}>
                       <tr className="bg-surface-secondary/40">
-                        <td colSpan={4} className="px-1 py-1.5">
+                        <td colSpan={4}>
                           <span className="text-xs font-semibold text-content-secondary">
                             {groupLabelFor(section.group)}
                           </span>

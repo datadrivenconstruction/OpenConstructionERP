@@ -81,7 +81,7 @@ export function PunchDescriptionSection({ item, onSaved }: { item: PunchItem; on
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             rows={5}
-            className="w-full rounded-lg border border-border bg-surface-primary p-2 text-sm text-content-primary"
+            className="oe-textarea"
             aria-label={t('punch.field_description', { defaultValue: 'Description' })}
           />
           <div className="flex gap-2">

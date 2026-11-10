@@ -283,7 +283,7 @@ export function ResourceLevelingPage() {
       {/* What window the numbers describe. Sits directly under the header so it
           is read before the grid, and moves when the bucket toggle moves. */}
       <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
-        <CalendarDays size={13} className="shrink-0" />
+        <CalendarDays size={14} className="shrink-0" />
         <span>{windowLabel}</span>
       </div>
 
@@ -353,14 +353,14 @@ export function ResourceLevelingPage() {
       {data && !isLoading && resources.length > 0 && data.overloaded_resources === 0 && (
         <div className="flex items-start gap-3 rounded-xl border border-semantic-success/30 bg-semantic-success/10 p-4">
           <CheckCircle2
-            size={18}
+            size={20}
             className="mt-0.5 shrink-0 text-semantic-success"
           />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-semantic-success">
+            <h2 className="oe-card-title text-semantic-success">
               {t('leveling.all_clear_title', { defaultValue: 'Nothing is over capacity' })}
             </h2>
-            <p className="mt-1 text-xs text-emerald-900/80 dark:text-emerald-200/80">
+            <p className="mt-1 text-xs text-semantic-success/80 ">
               {data.capacity_unknown_resources > 0
                 ? t('leveling.all_clear_desc_unknown', {
                     defaultValue:
@@ -461,7 +461,7 @@ export function ResourceLevelingPage() {
                             defaultValue: 'View bookings and leveling suggestions',
                           })}
                         >
-                          <Icon size={15} className="shrink-0 text-content-tertiary" />
+                          <Icon size={16} className="shrink-0 text-content-tertiary" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <span className="truncate text-sm font-medium text-content-primary">
@@ -600,7 +600,7 @@ export function ResourceLevelingPage() {
             {/* Capacity-unknown notice */}
             {drawer.row.capacity_unknown && (
               <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-xs text-semantic-warning">
-                <HelpCircle size={15} className="mt-0.5 shrink-0" />
+                <HelpCircle size={16} className="mt-0.5 shrink-0" />
                 <span>
                   {t('leveling.unknown_notice', {
                     defaultValue:
@@ -612,7 +612,7 @@ export function ResourceLevelingPage() {
 
             {/* Suggestions */}
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-2">
                 {t('leveling.suggestions_heading', { defaultValue: 'Leveling suggestions' })}
               </h3>
               {drawer.row.suggestions.length === 0 ? (
@@ -656,7 +656,7 @@ export function ResourceLevelingPage() {
 
             {/* Per-bucket booking breakdown */}
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-2">
                 {t('leveling.bookings_heading', { defaultValue: 'Bookings by period' })}
               </h3>
               <ul className="space-y-2">
@@ -748,7 +748,7 @@ function BookingRow({
           className="group inline-flex min-w-0 items-center gap-1 truncate text-left text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
         >
           <span className="truncate">{booking.project_name}</span>
-          <ArrowUpRight size={11} className="shrink-0 opacity-60 group-hover:opacity-100" />
+          <ArrowUpRight size={12} className="shrink-0 opacity-60 group-hover:opacity-100" />
         </button>
       ) : (
         <span className="truncate">{booking.project_name}</span>
@@ -877,7 +877,7 @@ function SuggestionItem({
             className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
             title={t('leveling.view_in_schedule', { defaultValue: 'View in 4D Schedule' })}
           >
-            <ExternalLink size={11} />
+            <ExternalLink size={12} />
             {t('leveling.view_in_schedule', { defaultValue: 'View in 4D Schedule' })}
           </button>
         )}

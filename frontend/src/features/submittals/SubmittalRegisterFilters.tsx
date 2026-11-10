@@ -76,7 +76,7 @@ export function SubmittalTypeTabs({
 }
 
 const selectCls =
-  'h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue';
+  'oe-select oe-input-lg';
 
 function FilterSelect({
   label,

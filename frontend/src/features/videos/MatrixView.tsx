@@ -103,7 +103,7 @@ export function MatrixView({ videos, rows, onRowsChange, labels, onPick }: Matri
         ))}
       </div>
       <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <table className="w-full min-w-[40rem] border-separate border-spacing-1 text-xs">
+        <table className="oe-table-compact min-w-[40rem] border-separate border-spacing-1">
           <caption className="sr-only">
             {t('videos.matrix_note', {
               defaultValue: 'How many videos cover each role or country at each project stage. Choose a cell to list them.',
@@ -113,7 +113,7 @@ export function MatrixView({ videos, rows, onRowsChange, labels, onPick }: Matri
             <tr>
               <th scope="col" className="w-40" />
               {STAGE_META.map((s) => (
-                <th key={s.id} scope="col" className="px-1 pb-1 text-center text-2xs font-medium text-content-tertiary">
+                <th key={s.id} scope="col" className="pb-1 text-center">
                   <span className="block tabular-nums text-content-quaternary">{s.num}</span>
                   {labels.stageShort(s.id)}
                 </th>
@@ -123,7 +123,7 @@ export function MatrixView({ videos, rows, onRowsChange, labels, onPick }: Matri
           <tbody>
             {rowIds.map((row) => (
               <tr key={row}>
-                <th scope="row" className="max-w-[10rem] truncate pr-2 text-left text-xs font-medium text-content-secondary">
+                <th scope="row" className="max-w-[10rem] truncate pr-2">
                   {rowLabel(row)}
                 </th>
                 {STAGE_META.map((s) => {
@@ -135,7 +135,7 @@ export function MatrixView({ videos, rows, onRowsChange, labels, onPick }: Matri
                     n,
                   });
                   return (
-                    <td key={s.id} className="p-0">
+                    <td key={s.id}>
                       <button
                         type="button"
                         disabled={n === 0}

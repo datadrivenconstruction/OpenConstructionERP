@@ -150,7 +150,7 @@ export const STATUS_CONFIG: Record<
  *   critical → red
  */
 export const PRIORITY_DOT: Record<RFIPriority, string> = {
-  low: 'bg-gray-400',
+  low: 'bg-content-quaternary',
   normal: 'bg-blue-500',
   high: 'bg-semantic-warning',
   critical: 'bg-semantic-error',
@@ -272,9 +272,9 @@ export function daysOverdue(responseDueDate: string | null): number | null {
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -530,7 +530,7 @@ function DocumentPickerModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -541,7 +541,7 @@ function DocumentPickerModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('rfi.attach_drawings', { defaultValue: 'Attach drawings' })}
           </h3>
           <button
@@ -963,7 +963,7 @@ export function CreateRFIModal({
                       return next;
                     });
                   }}
-                  className={clsx(inputCls, 'pr-9 appearance-none')}
+                  className="oe-select oe-input-lg"
                 >
                   {typeOptions.map((rt) => (
                     <option key={rt.code} value={rt.code}>
@@ -993,11 +993,7 @@ export function CreateRFIModal({
             placeholder={t('rfi.subject_placeholder', {
               defaultValue: 'e.g. Clarification on foundation depth at Grid Line A-3',
             })}
-            className={clsx(
-              'h-12 w-full rounded-lg border border-border bg-surface-primary px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-              errors.subject &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={clsx('oe-input', 'h-12')} aria-invalid={!!(errors.subject)}
           />
         </WideModalField>
 
@@ -1013,11 +1009,7 @@ export function CreateRFIModal({
             value={form.question}
             onChange={(e) => set('question', e.target.value)}
             rows={5}
-            className={clsx(
-              textareaCls,
-              errors.question &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={textareaCls} aria-invalid={!!(errors.question)}
             placeholder={t('rfi.question_placeholder', {
               defaultValue: 'Describe the information you need...',
             })}
@@ -1070,7 +1062,7 @@ export function CreateRFIModal({
               id="rfi-discipline"
               value={form.discipline}
               onChange={(e) => set('discipline', e.target.value)}
-              className={clsx(inputCls, 'pr-9 appearance-none')}
+              className="oe-select oe-input-lg"
             >
               <option value="">
                 {t('rfi.discipline_none', { defaultValue: 'No discipline' })}
@@ -1317,7 +1309,7 @@ export function CreateRFIModal({
                     key={id}
                     className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 text-oe-blue px-2.5 py-1 text-xs font-medium"
                   >
-                    <FileText size={11} />
+                    <FileText size={12} />
                     <span className="max-w-[180px] truncate" title={label}>
                       {label}
                     </span>
@@ -1329,7 +1321,7 @@ export function CreateRFIModal({
                       })}
                       className="ml-0.5 rounded-full hover:bg-oe-blue/20 p-0.5"
                     >
-                      <X size={11} />
+                      <X size={12} />
                     </button>
                   </span>
                 );
@@ -1444,10 +1436,10 @@ function RespondModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-modal="true" aria-label={t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}
           </h2>
           <button
@@ -1455,7 +1447,7 @@ function RespondModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4 space-y-3">
@@ -1464,7 +1456,7 @@ function RespondModal({
             <p className="text-sm text-content-primary">{rfi.question}</p>
           </div>
           <div>
-            <label htmlFor="rfi-response" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="rfi-response" className="oe-label">
               {t('rfi.field_response', { defaultValue: 'Response' })}
             </label>
             <textarea
@@ -1692,12 +1684,12 @@ const RFIRow = React.memo(function RFIRow({
         <div className="flex items-center gap-1.5 w-14 shrink-0 justify-end">
           {rfi.cost_impact && (
             <span title={t('rfi.cost_impact', { defaultValue: 'Cost Impact' })}>
-              <DollarSign size={13} className="text-semantic-warning" />
+              <DollarSign size={14} className="text-semantic-warning" />
             </span>
           )}
           {rfi.schedule_impact && (
             <span title={t('rfi.schedule_impact', { defaultValue: 'Schedule Impact' })}>
-              <Clock size={13} className="text-orange-500" />
+              <Clock size={14} className="text-orange-500" />
             </span>
           )}
         </div>
@@ -1738,7 +1730,7 @@ const RFIRow = React.memo(function RFIRow({
               UUIDs the operator cannot act on. */}
           {rfi.linked_drawing_ids && rfi.linked_drawing_ids.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <FileText size={13} className="text-content-tertiary" />
+              <FileText size={14} className="text-content-tertiary" />
               <span className="text-xs text-content-secondary">
                 {t('rfi.attached_documents', { defaultValue: 'Attached documents' })}
               </span>
@@ -1897,7 +1889,7 @@ function RFIHowItWorks() {
   return (
     <CollapsibleSection
       storageKey="rfi.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('rfi.flow_title', { defaultValue: 'How RFIs work and connect' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -2634,7 +2626,7 @@ export function RFIPage() {
               defaultValue: 'Search RFIs...',
             })}
             aria-label={t('rfi.search_placeholder', { defaultValue: 'Search RFIs...' })}
-            className={inputCls + ' pl-9'}
+            className={`${inputCls} pl-9`}
           />
         </div>
 
@@ -2646,7 +2638,7 @@ export function RFIPage() {
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label={t('rfi.filter_type_all', { defaultValue: 'All types' })}
               data-testid="rfi-type-filter"
-              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-48"
+              className="oe-select oe-input-lg sm:w-48"
             >
               <option value="">{t('rfi.filter_type_all', { defaultValue: 'All types' })}</option>
               {requestTypes.map((rt) => (
@@ -2667,7 +2659,7 @@ export function RFIPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RFIStatus | '')}
             aria-label={t('rfi.filter_all', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg sm:w-40"
           >
             <option value="">
               {t('rfi.filter_all', { defaultValue: 'All Statuses' })}
@@ -2691,7 +2683,7 @@ export function RFIPage() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as RFIPriority | '')}
             aria-label={t('rfi.filter_priority', { defaultValue: 'All priorities' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg sm:w-40"
           >
             <option value="">
               {t('rfi.filter_priority', { defaultValue: 'All priorities' })}
@@ -2717,7 +2709,7 @@ export function RFIPage() {
             aria-label={t('rfi.filter_discipline', {
               defaultValue: 'All disciplines',
             })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg sm:w-40"
           >
             <option value="">
               {t('rfi.filter_discipline', { defaultValue: 'All disciplines' })}

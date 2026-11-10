@@ -25,7 +25,7 @@ import {
 } from './bbsApi';
 
 const inputCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input';
 
 export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
@@ -110,7 +110,7 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
           <label className="flex flex-col gap-1 text-xs text-content-secondary">
             <span>{t('rebar_schedule.bbs_standard', { defaultValue: 'Standard' })}</span>
             <select
-              className={inputCls}
+              className="oe-select"
               value={f.standard}
               onChange={(e) => setF({ ...f, standard: e.target.value as ShapeStandard, shape_code: '', dims: {} })}
             >
@@ -120,7 +120,7 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
           </label>
           <label className="flex flex-col gap-1 text-xs text-content-secondary">
             <span>{t('rebar_schedule.bbs_shape', { defaultValue: 'Shape code' })}</span>
-            <select className={inputCls} dir="ltr" value={f.shape_code} onChange={(e) => setF({ ...f, shape_code: e.target.value, dims: {} })}>
+            <select className="oe-select" dir="ltr" value={f.shape_code} onChange={(e) => setF({ ...f, shape_code: e.target.value, dims: {} })}>
               <option value="" />
               {codes.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -131,7 +131,7 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
           </label>
           <label className="flex flex-col gap-1 text-xs text-content-secondary">
             <span>{t('rebar_schedule.bbs_diameter', { defaultValue: 'Dia (mm)' })}</span>
-            <select className={inputCls} dir="ltr" value={f.diameter_mm} onChange={(e) => setF({ ...f, diameter_mm: Number(e.target.value) })}>
+            <select className="oe-select" dir="ltr" value={f.diameter_mm} onChange={(e) => setF({ ...f, diameter_mm: Number(e.target.value) })}>
               {BBS_DIAMETERS.map((d) => (
                 <option key={d} value={d}>
                   {d}
@@ -177,7 +177,7 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
 
       {failed.length > 0 && (
         <Card padding="sm" data-testid="bbs-findings">
-          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2 flex items-center gap-1.5">
             <AlertTriangle size={14} className="text-semantic-warning" />
             {t('rebar_schedule.bbs_findings', { defaultValue: 'Findings' })}
           </h3>
@@ -213,32 +213,32 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
           </div>
           <Card padding="none">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light text-2xs uppercase text-content-tertiary">
-                    <th className="px-3 py-2 text-start">{t('rebar_schedule.bbs_member', { defaultValue: 'Member' })}</th>
-                    <th className="px-3 py-2 text-start">{t('rebar_schedule.bbs_bar_mark', { defaultValue: 'Bar mark' })}</th>
-                    <th className="px-3 py-2 text-start">{t('rebar_schedule.bbs_shape', { defaultValue: 'Shape code' })}</th>
-                    <th className="px-3 py-2 text-end">{t('rebar_schedule.bbs_diameter', { defaultValue: 'Dia (mm)' })}</th>
-                    <th className="px-3 py-2 text-end">{t('rebar_schedule.bbs_count', { defaultValue: 'Bars' })}</th>
-                    <th className="px-3 py-2 text-end">{t('rebar_schedule.bbs_cut_length', { defaultValue: 'Cut length (mm)' })}</th>
-                    <th className="px-3 py-2 text-end">{t('rebar_schedule.bbs_total_length', { defaultValue: 'Total length (m)' })}</th>
-                    <th className="px-3 py-2 text-end">{t('rebar_schedule.bbs_weight', { defaultValue: 'Weight (kg)' })}</th>
-                    <th className="px-3 py-2" />
+                  <tr className="text-2xs uppercase text-content-tertiary">
+                    <th>{t('rebar_schedule.bbs_member', { defaultValue: 'Member' })}</th>
+                    <th>{t('rebar_schedule.bbs_bar_mark', { defaultValue: 'Bar mark' })}</th>
+                    <th>{t('rebar_schedule.bbs_shape', { defaultValue: 'Shape code' })}</th>
+                    <th className="text-end">{t('rebar_schedule.bbs_diameter', { defaultValue: 'Dia (mm)' })}</th>
+                    <th className="text-end">{t('rebar_schedule.bbs_count', { defaultValue: 'Bars' })}</th>
+                    <th className="text-end">{t('rebar_schedule.bbs_cut_length', { defaultValue: 'Cut length (mm)' })}</th>
+                    <th className="text-end">{t('rebar_schedule.bbs_total_length', { defaultValue: 'Total length (m)' })}</th>
+                    <th className="text-end">{t('rebar_schedule.bbs_weight', { defaultValue: 'Weight (kg)' })}</th>
+                    <th />
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((b) => (
-                    <tr key={b.id} className="border-b border-border-light">
-                      <td className="px-3 py-2">{b.member}</td>
-                      <td className="px-3 py-2" dir="ltr">{b.bar_mark}</td>
-                      <td className="px-3 py-2" dir="ltr">{b.shape_code}</td>
-                      <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{b.diameter_mm}</td>
-                      <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{b.members_count * b.bars_per_member}</td>
-                      <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{b.cut_length_mm}</td>
-                      <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{b.total_length_m}</td>
-                      <td className="px-3 py-2 text-end font-medium tabular-nums" dir="ltr">{b.weight_kg}</td>
-                      <td className="px-3 py-2 text-end">
+                    <tr key={b.id}>
+                      <td>{b.member}</td>
+                      <td dir="ltr">{b.bar_mark}</td>
+                      <td dir="ltr">{b.shape_code}</td>
+                      <td className="text-end tabular-nums" dir="ltr">{b.diameter_mm}</td>
+                      <td className="text-end tabular-nums" dir="ltr">{b.members_count * b.bars_per_member}</td>
+                      <td className="text-end tabular-nums" dir="ltr">{b.cut_length_mm}</td>
+                      <td className="text-end tabular-nums" dir="ltr">{b.total_length_m}</td>
+                      <td className="text-end tabular-nums" dir="ltr">{b.weight_kg}</td>
+                      <td className="text-end">
                         <button
                           type="button"
                           className="p-1.5 text-content-tertiary hover:text-semantic-error"
@@ -255,22 +255,22 @@ export function BarBendingSchedulePanel({ projectId }: { projectId: string }) {
             </div>
           </Card>
           <Card padding="sm">
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-2">
               {t('rebar_schedule.bbs_totals', { defaultValue: 'Totals by diameter' })}
             </h3>
-            <table className="w-full text-sm">
+            <table className="oe-table-compact">
               <tbody>
                 {(bbsQ.data?.totals_by_diameter ?? []).map((d) => (
-                  <tr key={d.diameter_mm} className="border-b border-border-light">
-                    <td className="py-1 tabular-nums" dir="ltr">{'Ø'}{d.diameter_mm}</td>
-                    <td className="py-1 text-end tabular-nums" dir="ltr">{d.bar_count}</td>
-                    <td className="py-1 text-end tabular-nums" dir="ltr">{d.total_length_m} m</td>
-                    <td className="py-1 text-end tabular-nums" dir="ltr">{d.weight_kg} kg</td>
+                  <tr key={d.diameter_mm}>
+                    <td className="tabular-nums" dir="ltr">{'Ø'}{d.diameter_mm}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{d.bar_count}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{d.total_length_m} m</td>
+                    <td className="text-end tabular-nums" dir="ltr">{d.weight_kg} kg</td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
-                  <td className="py-1" colSpan={3}>{t('rebar_schedule.bbs_total_weight', { defaultValue: 'Total weight' })}</td>
-                  <td className="py-1 text-end tabular-nums" dir="ltr">{bbsQ.data?.total_weight_kg} kg</td>
+                  <td colSpan={3}>{t('rebar_schedule.bbs_total_weight', { defaultValue: 'Total weight' })}</td>
+                  <td className="text-end tabular-nums" dir="ltr">{bbsQ.data?.total_weight_kg} kg</td>
                 </tr>
               </tbody>
             </table>

@@ -56,7 +56,7 @@ import { apiGet } from '@/shared/lib/api';
 import { fmtList } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 
 type TFn = (k: string, opts?: Record<string, unknown>) => string;
 
@@ -208,7 +208,7 @@ export function ItemDocumentsModal({
               </button>
               <span className="flex items-center gap-2 shrink-0">
                 <Badge variant="neutral">{kindLabel(a.kind)}</Badge>
-                <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => remove.mutate(a)}>
+                <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => remove.mutate(a)}>
                   {t('supplier_catalogs.unlink', { defaultValue: 'Unlink' })}
                 </Button>
               </span>
@@ -373,7 +373,7 @@ export function PriceListsPanel({ vendors }: { vendors: Vendor[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('supplier_catalogs.pl_search', { defaultValue: 'SKU, name, vendor SKU, MPN' })}
-              className={clsx(inputCls, 'pl-8')}
+              className={clsx('oe-input', 'pl-8')}
             />
           </div>
           {entriesQ.isError ? (
@@ -386,28 +386,28 @@ export function PriceListsPanel({ vendors }: { vendors: Vendor[] }) {
             <SkeletonTable rows={6} columns={7} />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+              <table className="oe-table">
+                <thead>
                   <tr>
-                    <th className="px-3 py-2 text-left">{t('supplier_catalogs.sku', { defaultValue: 'SKU' })}</th>
-                    <th className="px-3 py-2 text-left">{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
-                    <th className="px-3 py-2 text-left">{t('supplier_catalogs.vendor_sku', { defaultValue: 'Vendor SKU' })}</th>
-                    <th className="px-3 py-2 text-right">{t('supplier_catalogs.list_price', { defaultValue: 'List price' })}</th>
-                    <th className="px-3 py-2 text-left">{t('supplier_catalogs.discount', { defaultValue: 'Discount' })}</th>
-                    <th className="px-3 py-2 text-right">{t('supplier_catalogs.net_price', { defaultValue: 'Net price' })}</th>
-                    <th className="px-3 py-2 text-left">{t('supplier_catalogs.links', { defaultValue: 'Links' })}</th>
+                    <th>{t('supplier_catalogs.sku', { defaultValue: 'SKU' })}</th>
+                    <th>{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
+                    <th>{t('supplier_catalogs.vendor_sku', { defaultValue: 'Vendor SKU' })}</th>
+                    <th className="text-right">{t('supplier_catalogs.list_price', { defaultValue: 'List price' })}</th>
+                    <th>{t('supplier_catalogs.discount', { defaultValue: 'Discount' })}</th>
+                    <th className="text-right">{t('supplier_catalogs.net_price', { defaultValue: 'Net price' })}</th>
+                    <th>{t('supplier_catalogs.links', { defaultValue: 'Links' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(entriesQ.data?.items ?? []).map((r) => (
-                    <tr key={r.entry_id} className="border-t border-border-light hover:bg-surface-secondary">
-                      <td className="px-3 py-2 font-mono text-xs text-content-secondary">{r.sku}</td>
-                      <td className="px-3 py-2 text-content-primary truncate max-w-[280px]">{r.name}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-content-secondary">{r.vendor_sku || '—'}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                    <tr key={r.entry_id}>
+                      <td className="font-mono text-content-secondary">{r.sku}</td>
+                      <td className="truncate max-w-[280px]">{r.name}</td>
+                      <td className="font-mono text-content-secondary">{r.vendor_sku || '—'}</td>
+                      <td className="text-right tabular-nums text-content-secondary">
                         <MoneyDisplay amount={String(r.gross_price)} currency={pl?.currency ?? 'EUR'} />
                       </td>
-                      <td className="px-3 py-2 text-xs">
+                      <td>
                         {r.discount_source === 'none' ? (
                           <span className="text-content-tertiary">—</span>
                         ) : (
@@ -417,11 +417,11 @@ export function PriceListsPanel({ vendors }: { vendors: Vendor[] }) {
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums font-semibold text-content-primary">
+                      <td className="text-right tabular-nums">
                         <MoneyDisplay amount={String(r.net_price)} currency={pl?.currency ?? 'EUR'} />
                         <span className="ml-1 text-xs font-normal text-content-tertiary">/ {r.unit_of_measure}</span>
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <ItemLinks
                           productUrl={r.product_url}
                           attachmentCount={r.attachment_count}
@@ -702,7 +702,7 @@ function ImportPriceListModal({
                       const next = { ...mapping, [f]: e.target.value || undefined };
                       setMapping(next);
                     }}
-                    className={clsx(inputCls, f === 'unit_price' && !mapping[f] && 'border-semantic-error')}
+                    className={inputCls} aria-invalid={!!(f === 'unit_price' && !mapping[f])}
                   >
                     <option value="">—</option>
                     {preview.headers.filter(Boolean).map((h) => (
@@ -743,45 +743,45 @@ function ImportPriceListModal({
           <WideModalSection columns={3}>
             {!target && (
               <WideModalField label={t('supplier_catalogs.import_name', { defaultValue: 'Price list name' })}>
-                <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+                <input value={name} onChange={(e) => setName(e.target.value)} className="oe-input" />
               </WideModalField>
             )}
             <WideModalField label={t('supplier_catalogs.f_valid_from', { defaultValue: 'Valid from' })}>
-              <input type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} className={inputCls} />
+              <input type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} className="oe-input" />
             </WideModalField>
             <WideModalField label={t('supplier_catalogs.f_valid_to', { defaultValue: 'Valid to' })}>
-              <input type="date" value={validTo} onChange={(e) => setValidTo(e.target.value)} className={inputCls} />
+              <input type="date" value={validTo} onChange={(e) => setValidTo(e.target.value)} className="oe-input" />
             </WideModalField>
           </WideModalSection>
 
           <div className="overflow-x-auto max-h-[360px]">
-            <table className="w-full text-xs">
-              <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide sticky top-0">
+            <table className="oe-table-compact">
+              <thead className="sticky top-0">
                 <tr>
-                  <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.row', { defaultValue: 'Row' })}</th>
-                  <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.result', { defaultValue: 'Result' })}</th>
-                  <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.vendor_sku', { defaultValue: 'Vendor SKU' })}</th>
-                  <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.item', { defaultValue: 'Item' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('supplier_catalogs.old_price', { defaultValue: 'Old price' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('supplier_catalogs.new_price', { defaultValue: 'New price' })}</th>
+                  <th>{t('supplier_catalogs.row', { defaultValue: 'Row' })}</th>
+                  <th>{t('supplier_catalogs.result', { defaultValue: 'Result' })}</th>
+                  <th>{t('supplier_catalogs.vendor_sku', { defaultValue: 'Vendor SKU' })}</th>
+                  <th>{t('supplier_catalogs.item', { defaultValue: 'Item' })}</th>
+                  <th className="text-right">{t('supplier_catalogs.old_price', { defaultValue: 'Old price' })}</th>
+                  <th className="text-right">{t('supplier_catalogs.new_price', { defaultValue: 'New price' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {preview.rows.map((r) => (
-                  <tr key={r.row} className="border-t border-border-light">
-                    <td className="px-2 py-1 tabular-nums text-content-tertiary">{r.row}</td>
-                    <td className="px-2 py-1">
+                  <tr key={r.row}>
+                    <td className="tabular-nums text-content-tertiary">{r.row}</td>
+                    <td>
                       {actionBadge(t, r.action)}
                       {r.errors.length > 0 && (
                         <span className="ml-1 text-semantic-error">{fmtList(r.errors.map((e) => rowError(t, e)))}</span>
                       )}
                     </td>
-                    <td className="px-2 py-1 font-mono">{r.vendor_sku || '—'}</td>
-                    <td className="px-2 py-1 truncate max-w-[240px]">
+                    <td className="font-mono">{r.vendor_sku || '—'}</td>
+                    <td className="truncate max-w-[240px]">
                       {r.sku ? `${r.sku} · ${r.item_name ?? ''}` : '—'}
                     </td>
-                    <td className="px-2 py-1 text-right tabular-nums">{r.old_price != null ? String(r.old_price) : '—'}</td>
-                    <td className="px-2 py-1 text-right tabular-nums font-semibold">
+                    <td className="text-right tabular-nums">{r.old_price != null ? String(r.old_price) : '—'}</td>
+                    <td className="text-right tabular-nums">
                       {r.new_price != null ? String(r.new_price) : '—'}
                     </td>
                   </tr>
@@ -912,22 +912,22 @@ function DiscountsModal({
           {t('supplier_catalogs.no_discounts', { defaultValue: 'No discounts agreed yet: list price = net price.' })}
         </p>
       ) : (
-        <table className="w-full text-sm mb-4">
-          <thead className="text-content-tertiary text-xs uppercase tracking-wide">
+        <table className="oe-table-compact mb-4">
+          <thead>
             <tr>
-              <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
-              <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.applies_to', { defaultValue: 'Applies to' })}</th>
-              <th className="px-2 py-1.5 text-right">{t('supplier_catalogs.discount', { defaultValue: 'Discount' })}</th>
-              <th className="px-2 py-1.5 text-left">{t('supplier_catalogs.valid', { defaultValue: 'Valid' })}</th>
+              <th>{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
+              <th>{t('supplier_catalogs.applies_to', { defaultValue: 'Applies to' })}</th>
+              <th className="text-right">{t('supplier_catalogs.discount', { defaultValue: 'Discount' })}</th>
+              <th>{t('supplier_catalogs.valid', { defaultValue: 'Valid' })}</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {(q.data ?? []).map((a) => (
-              <tr key={a.id} className="border-t border-border-light">
-                <td className="px-2 py-1.5">{a.name}</td>
-                <td className="px-2 py-1.5 text-xs text-content-secondary">{scopeText(a)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">
+              <tr key={a.id}>
+                <td>{a.name}</td>
+                <td className="text-content-secondary">{scopeText(a)}</td>
+                <td className="text-right tabular-nums">
                   {a.fixed_net_price != null ? (
                     <span>
                       {t('supplier_catalogs.fixed_net_short', { defaultValue: 'Net' })}{' '}
@@ -937,11 +937,11 @@ function DiscountsModal({
                     `-${pct(a.discount_pct)}`
                   )}
                 </td>
-                <td className="px-2 py-1.5 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {a.valid_from || '…'} – {a.valid_to || '…'}
                 </td>
-                <td className="px-2 py-1.5 text-right">
-                  <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => remove.mutate(a)}>
+                <td className="text-right">
+                  <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => remove.mutate(a)}>
                     {t('common.delete', { defaultValue: 'Delete' })}
                   </Button>
                 </td>
@@ -958,7 +958,7 @@ function DiscountsModal({
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder={t('supplier_catalogs.discount_name_ph', { defaultValue: 'e.g. Framework agreement 2026' })}
-            className={inputCls}
+            className="oe-input"
           />
         </WideModalField>
         <WideModalField label={t('supplier_catalogs.applies_to', { defaultValue: 'Applies to' })}>
@@ -1011,7 +1011,7 @@ function DiscountsModal({
               value={itemSearch}
               onChange={(e) => setItemSearch(e.target.value)}
               placeholder={t('supplier_catalogs.item_search_ph', { defaultValue: 'Type SKU or name' })}
-              className={inputCls}
+              className="oe-input"
             />
             <select value={itemId} onChange={(e) => setItemId(e.target.value)} className={clsx(inputCls, 'mt-1')}>
               <option value="">{t('supplier_catalogs.choose', { defaultValue: 'Choose…' })}</option>
@@ -1044,7 +1044,7 @@ function DiscountsModal({
             inputMode="decimal"
             value={form.value}
             onChange={(e) => setForm({ ...form, value: e.target.value })}
-            className={clsx(inputCls, pctInvalid && 'border-semantic-error')}
+            className="oe-input" aria-invalid={!!pctInvalid}
           />
         </WideModalField>
         <WideModalField label={t('supplier_catalogs.f_valid_from', { defaultValue: 'Valid from' })}>
@@ -1052,7 +1052,7 @@ function DiscountsModal({
             type="date"
             value={form.valid_from}
             onChange={(e) => setForm({ ...form, valid_from: e.target.value })}
-            className={inputCls}
+            className="oe-input"
           />
         </WideModalField>
         <WideModalField label={t('supplier_catalogs.f_valid_to', { defaultValue: 'Valid to' })}>
@@ -1060,7 +1060,7 @@ function DiscountsModal({
             type="date"
             value={form.valid_to}
             onChange={(e) => setForm({ ...form, valid_to: e.target.value })}
-            className={inputCls}
+            className="oe-input"
           />
         </WideModalField>
       </WideModalSection>

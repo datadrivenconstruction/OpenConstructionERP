@@ -104,7 +104,7 @@ export function CohortRetentionWidget({
       className="space-y-3"
     >
       <header>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('propdev.dashboards.cohort.title', {
             defaultValue: 'Cohort retention',
           })}
@@ -118,15 +118,15 @@ export function CohortRetentionWidget({
       </header>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-xs">
+        <table className="oe-table-compact min-w-full">
           <thead>
-            <tr className="border-b border-divider text-content-tertiary">
-              <th className="px-2 py-1.5 text-left font-medium">
+            <tr className="border-divider text-content-tertiary">
+              <th>
                 {t('propdev.dashboards.cohort.col_cohort', {
                   defaultValue: 'Cohort',
                 })}
               </th>
-              <th className="px-2 py-1.5 text-right font-medium">
+              <th className="text-right">
                 {t('propdev.dashboards.cohort.col_total', {
                   defaultValue: 'Total',
                 })}
@@ -134,7 +134,7 @@ export function CohortRetentionWidget({
               {OFFSETS.map((o) => (
                 <th
                   key={o.key}
-                  className="px-2 py-1.5 text-right font-medium"
+                  className="text-right"
                 >
                   {o.label}
                 </th>
@@ -143,11 +143,11 @@ export function CohortRetentionWidget({
           </thead>
           <tbody>
             {data.cohorts.map((c) => (
-              <tr key={c.cohort_month} className="border-b border-divider/50">
-                <td className="px-2 py-1.5 font-medium text-content-primary">
+              <tr key={c.cohort_month} className="border-divider/50">
+                <td>
                   {c.cohort_month}
                 </td>
-                <td className="px-2 py-1.5 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   {c.total}
                 </td>
                 {OFFSETS.map((o) => {
@@ -155,7 +155,7 @@ export function CohortRetentionWidget({
                   return (
                     <td
                       key={o.key}
-                      className="px-2 py-1.5 text-right"
+                      className="text-right"
                       aria-label={t(
                         'propdev.dashboards.cohort.cell_label',
                         {

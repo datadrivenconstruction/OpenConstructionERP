@@ -72,9 +72,9 @@ function formatMoney(value: number, currency: string): string {
 }
 
 const LEVEL_STYLE: Record<VarianceLevel, { ring: string; text: string; dot: string }> = {
-  green: { ring: 'ring-emerald-400/40', text: 'text-semantic-success', dot: 'bg-semantic-success' },
-  amber: { ring: 'ring-amber-400/40', text: 'text-semantic-warning', dot: 'bg-semantic-warning' },
-  red: { ring: 'ring-rose-400/40', text: 'text-semantic-error', dot: 'bg-semantic-error' },
+  green: { ring: 'ring-semantic-success/40', text: 'text-semantic-success', dot: 'bg-semantic-success' },
+  amber: { ring: 'ring-semantic-warning/40', text: 'text-semantic-warning', dot: 'bg-semantic-warning' },
+  red: { ring: 'ring-semantic-error/40', text: 'text-semantic-error', dot: 'bg-semantic-error' },
 };
 
 export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {

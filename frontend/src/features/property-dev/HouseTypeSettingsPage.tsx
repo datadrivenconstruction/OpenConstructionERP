@@ -42,8 +42,8 @@ import { HouseTypeEditModal } from './HouseTypeEditModal';
 import { fmtFixed } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-select';
+const labelCls = 'oe-label';
 
 export interface ProjectStub {
   id: string;
@@ -259,27 +259,27 @@ export function HouseTypeSettingsPage() {
           {customs.length > 0 && (
             <Card className="overflow-hidden">
               <header className="border-b border-border-light bg-surface-secondary px-4 py-2">
-                <h2 className="text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title">
                   {t('property_dev.house_type.custom_section', {
                     defaultValue: 'Your custom entries',
                   })}
                 </h2>
               </header>
-              <table className="w-full text-sm">
-                <thead className="bg-surface-secondary text-xs uppercase text-content-tertiary">
+              <table className="oe-table">
+                <thead>
                   <tr>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('property_dev.house_type.code_label', { defaultValue: 'Code' })}
                     </th>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('property_dev.house_type.name_label', { defaultValue: 'Name' })}
                     </th>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('property_dev.house_type.country_label', {
                         defaultValue: 'Country',
                       })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('common.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -288,16 +288,15 @@ export function HouseTypeSettingsPage() {
                   {customs.map((entry) => (
                     <tr
                       key={entry.id}
-                      className="border-t border-border-light"
                     >
-                      <td className="px-3 py-2 font-mono text-xs text-content-secondary">
+                      <td className="font-mono text-content-secondary">
                         {entry.code}
                       </td>
-                      <td className="px-3 py-2 text-content-primary">{entry.name}</td>
-                      <td className="px-3 py-2">
+                      <td>{entry.name}</td>
+                      <td>
                         <CountryCell entry={entry} />
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="text-right">
                         <div className="inline-flex gap-1">
                           <Button
                             size="sm"
@@ -328,27 +327,27 @@ export function HouseTypeSettingsPage() {
           )}
           <Card className="overflow-hidden">
             <header className="border-b border-border-light bg-surface-secondary px-4 py-2">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('property_dev.house_type.preset_section', {
                   defaultValue: 'Shipped presets (read-only)',
                 })}
               </h2>
             </header>
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-xs uppercase text-content-tertiary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.house_type.code_label', { defaultValue: 'Code' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.house_type.name_label', { defaultValue: 'Name' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.house_type.country_label', {
                       defaultValue: 'Country',
                     })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('property_dev.house_type.area_typical_col', {
                       defaultValue: 'Typical {{unit}}',
                       unit: dq.unitFor('m²'),
@@ -358,15 +357,15 @@ export function HouseTypeSettingsPage() {
               </thead>
               <tbody>
                 {presets.map((entry) => (
-                  <tr key={entry.id} className="border-t border-border-light">
-                    <td className="px-3 py-2 font-mono text-xs text-content-secondary">
+                  <tr key={entry.id}>
+                    <td className="font-mono text-content-secondary">
                       {entry.code}
                     </td>
-                    <td className="px-3 py-2 text-content-primary">{entry.name}</td>
-                    <td className="px-3 py-2">
+                    <td>{entry.name}</td>
+                    <td>
                       <CountryCell entry={entry} variant="neutral" />
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {entry.area_typical_m2 == null
                         ? '—'
                         : dq.system === 'imperial' &&

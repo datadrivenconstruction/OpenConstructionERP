@@ -142,7 +142,7 @@ export function NoProjectState() {
             up and towards the start edge, where the switcher sits as the first
             item of the header's workspace zone, and mirrors under rtl with the
             rotation rather than a second icon. */}
-        <div className="mb-3 ms-2 hidden items-center gap-2.5 sm:flex">
+        <div className="mb-3 ms-2 hidden items-center gap-2 sm:flex">
           {/* The bounce and the tilt live on different elements on purpose.
               `animate-bounce` animates `transform`, so its keyframes replace a
               `-rotate-45` set on the same node and the arrow ends up pointing
@@ -165,7 +165,7 @@ export function NoProjectState() {
             </div>
 
             <div className="min-w-0 text-center sm:text-start">
-              <h2 className="text-xl font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('retrieval.no_project_title', { defaultValue: 'No project selected' })}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-content-secondary">

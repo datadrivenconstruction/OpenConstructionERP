@@ -78,7 +78,7 @@ export function InventoryAgeing({ developmentId }: InventoryAgeingProps) {
     <div className="space-y-4">
       <div className="flex items-end justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('propdev.dashboards.ageing.title', {
               defaultValue: 'Inventory ageing',
             })}

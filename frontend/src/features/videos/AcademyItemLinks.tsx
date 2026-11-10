@@ -54,7 +54,7 @@ function PaidHint({ id, lesson, dismissed }: { id: string; lesson: boolean; dism
       role="tooltip"
       id={id}
       className={clsx(
-        'pointer-events-none absolute bottom-full start-1/2 z-50 mb-1.5 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap',
+        'pointer-events-none absolute bottom-full start-1/2 z-dropdown mb-1.5 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap',
         'rounded-md bg-slate-900 px-2 py-1 text-2xs font-medium text-white shadow-lg opacity-0 transition-opacity duration-150',
         'group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 motion-reduce:transition-none',
         dismissed && '!opacity-0',
@@ -98,7 +98,7 @@ export function AcademyItemRow({ item }: { item: AcademyItem }) {
       data-access={item.access}
       {...(paid ? hint.handlers : {})}
       className={clsx(
-        'group relative flex w-full items-center gap-2.5 px-3 py-2 text-start hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none',
+        'group relative flex w-full items-center gap-2 px-3 py-2 text-start hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none',
         paid && 'border-s-2 border-oe-purple/60',
       )}
     >
@@ -114,7 +114,7 @@ export function AcademyItemRow({ item }: { item: AcademyItem }) {
           {[meta.kindLabel, meta.duration, meta.otherLanguage].filter(Boolean).join(' · ')}
         </span>
       </span>
-      <ExternalLink size={11} className="shrink-0 text-content-quaternary rtl:-scale-x-100" aria-hidden />
+      <ExternalLink size={12} className="shrink-0 text-content-quaternary rtl:-scale-x-100" aria-hidden />
       <span className="sr-only">{meta.newTab}</span>
       {paid && <PaidHint id={hint.id} lesson={item.kind === 'lesson'} dismissed={hint.dismissed} />}
     </a>
@@ -223,7 +223,7 @@ export function AcademyItemCard({
           </span>
           <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-oe-blue">
             {t('learn.opens_academy', { defaultValue: 'Opens on Academy' })}
-            <ExternalLink size={11} className="rtl:-scale-x-100" aria-hidden />
+            <ExternalLink size={12} className="rtl:-scale-x-100" aria-hidden />
             <span className="sr-only">{meta.newTab}</span>
           </span>
         </>,

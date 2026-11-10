@@ -244,7 +244,7 @@ export function PhotosTab({ projectId }: PhotosTabProps): React.ReactElement {
             placeholder={t('projects.photos.search_placeholder', {
               defaultValue: 'Search filename…',
             })}
-            className="w-full h-9 ps-8 pe-3 text-sm rounded-lg bg-surface-secondary/60 border border-border-light text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input ps-8"
             data-testid="photos-tab-search"
             aria-label={t('projects.photos.search_aria', {
               defaultValue: 'Search photos by filename',
@@ -254,7 +254,7 @@ export function PhotosTab({ projectId }: PhotosTabProps): React.ReactElement {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
-          className="h-9 px-3 text-sm rounded-lg bg-surface-secondary/60 border border-border-light text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+          className="oe-select"
           data-testid="photos-tab-sort"
           aria-label={t('projects.photos.sort_aria', { defaultValue: 'Sort photos' })}
         >
@@ -371,7 +371,7 @@ export function PhotosTab({ projectId }: PhotosTabProps): React.ReactElement {
             defaultValue: 'Photo viewer',
           })}
           data-testid="photos-tab-lightbox"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/85 backdrop-blur-sm"
           onClick={closeLightbox}
         >
           {/* Close */}

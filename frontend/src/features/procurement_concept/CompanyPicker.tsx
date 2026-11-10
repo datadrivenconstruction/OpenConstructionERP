@@ -154,7 +154,7 @@ export function CompanyPicker({
           data-testid="company-filter"
         />
       )}
-      <select id={id} className={FIELD_CLASS} value={value} aria-busy={loading} onChange={(e) => onChange(e.target.value)} data-testid="company-picker">
+      <select id={id} className="oe-select" value={value} aria-busy={loading} onChange={(e) => onChange(e.target.value)} data-testid="company-picker">
         <option value="">{t('procurement_concept.ui.candidate.not_registered', { defaultValue: 'Not registered yet' })}</option>
         {value && !known && (
           <option value={value}>{keptName || t('procurement_concept.ui.candidate.company_kept', { defaultValue: 'The company linked before' })}</option>

@@ -69,9 +69,9 @@ import {
 } from './portfolioCpmApi';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 const NODE_TYPES: PortfolioNodeType[] = ['portfolio', 'programme', 'subprogramme'];
 const DEP_TYPES: DepType[] = ['FS', 'SS', 'FF', 'SF'];
@@ -144,7 +144,7 @@ function HowPortfolioWorks() {
     <CollapsibleSection
       storageKey="portfolio.how"
       className="mt-4"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('portfolio.flow_title', { defaultValue: 'How the portfolio fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -350,7 +350,7 @@ function TreePanel({
     <Card padding="md" data-testid="portfolio-tree-panel">
       <div className="mb-3 flex items-center gap-2">
         <FolderTree size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('portfolio.tree_title', { defaultValue: 'Portfolio tree' })}
         </h3>
       </div>
@@ -440,7 +440,7 @@ function TreePanel({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t('portfolio.node_name_ph', { defaultValue: 'e.g. North Region Programme' })}
-            className={inputCls}
+            className="oe-input"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -532,14 +532,14 @@ function AttachProjectRow({
         onChange={(e) => setProjectId(e.target.value)}
         placeholder={t('portfolio.project_id_ph', { defaultValue: 'Project id to file here' })}
         aria-label={t('portfolio.project_id', { defaultValue: 'Project id' })}
-        className={`${inputCls} h-8 flex-1`}
+        className="oe-input flex-1"
       />
       <Button
         variant="ghost"
         size="sm"
         onClick={() => attachMut.mutate()}
         disabled={attachMut.isPending || projectId.trim().length === 0}
-        icon={attachMut.isPending ? <Loader2 size={13} className="animate-spin" /> : <FolderPlus size={13} />}
+        icon={attachMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <FolderPlus size={14} />}
       >
         {t('portfolio.file_project', { defaultValue: 'File' })}
       </Button>
@@ -598,7 +598,7 @@ function CpmPanel({ selectedNodeId, flat }: { selectedNodeId: string; flat: Flat
       <Card padding="md">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <GitBranch size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('portfolio.cpm_title', { defaultValue: 'Portfolio critical path' })}
           </h3>
           {selectedNode ? (
@@ -685,42 +685,42 @@ function CpmActivityTable({ rows }: { rows: PortfolioCpmActivity[] }) {
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm" data-testid="portfolio-cp-table">
-        <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+      <table className="oe-table" data-testid="portfolio-cp-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('portfolio.col_schedule', { defaultValue: 'Schedule' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('portfolio.col_activity', { defaultValue: 'Activity' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('portfolio.col_es', { defaultValue: 'ES' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('portfolio.col_ef', { defaultValue: 'EF' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('portfolio.col_float', { defaultValue: 'Float' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={`${r.schedule_id}:${r.activity_id}`} className="border-t border-border-light">
-              <td className="px-3 py-2">
+            <tr key={`${r.schedule_id}:${r.activity_id}`}>
+              <td>
                 <span className="text-xs text-content-primary" title={r.schedule_id}>
                   {r.schedule_name || shortId(r.schedule_id)}
                 </span>
               </td>
-              <td className="px-3 py-2">
+              <td>
                 <span className="text-xs text-content-primary" title={r.activity_id}>
                   {r.activity_name || shortId(r.activity_id)}
                 </span>
               </td>
-              <td className="px-3 py-2 text-right font-mono tabular-nums">{r.es}</td>
-              <td className="px-3 py-2 text-right font-mono tabular-nums">{r.ef}</td>
-              <td className="px-3 py-2 text-right font-mono tabular-nums">{r.total_float}</td>
+              <td className="text-right font-mono tabular-nums">{r.es}</td>
+              <td className="text-right font-mono tabular-nums">{r.ef}</td>
+              <td className="text-right font-mono tabular-nums">{r.total_float}</td>
             </tr>
           ))}
         </tbody>
@@ -755,7 +755,7 @@ function CrossLinksPanel({
     <Card padding="md" data-testid="portfolio-crosslinks-panel">
       <div className="mb-1 flex flex-wrap items-center gap-2">
         <Link2 size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('portfolio.crosslinks_title', { defaultValue: 'Cross-project links' })}
         </h3>
       </div>
@@ -873,32 +873,32 @@ function CrossLinkList({ scheduleId, onError }: { scheduleId: string; onError: (
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light">
-      <table className="w-full text-sm" data-testid="portfolio-crosslinks-table">
-        <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+      <table className="oe-table" data-testid="portfolio-crosslinks-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('portfolio.xl_predecessor', { defaultValue: 'Predecessor' })}
             </th>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('portfolio.xl_successor', { defaultValue: 'Successor' })}
             </th>
-            <th className="px-3 py-2 text-center">
+            <th className="text-center">
               {t('portfolio.xl_type', { defaultValue: 'Type' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('portfolio.xl_lag', { defaultValue: 'Lag (d)' })}
             </th>
             {/* Named for assistive tech and hidden visually: a column of controls
                 still needs a heading, and a single space is not one. */}
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               <span className="sr-only">{t('portfolio.col_actions', { defaultValue: 'Actions' })}</span>
             </th>
           </tr>
         </thead>
         <tbody>
           {links.map((l) => (
-            <tr key={l.id} className="border-t border-border-light">
-              <td className="px-3 py-2">
+            <tr key={l.id}>
+              <td>
                 <LinkEndpoint
                   scheduleName={l.predecessor_schedule_name}
                   activityName={l.predecessor_activity_name}
@@ -906,7 +906,7 @@ function CrossLinkList({ scheduleId, onError }: { scheduleId: string; onError: (
                   activityId={l.predecessor_activity_id}
                 />
               </td>
-              <td className="px-3 py-2">
+              <td>
                 <LinkEndpoint
                   scheduleName={l.successor_schedule_name}
                   activityName={l.successor_activity_name}
@@ -914,13 +914,13 @@ function CrossLinkList({ scheduleId, onError }: { scheduleId: string; onError: (
                   activityId={l.successor_activity_id}
                 />
               </td>
-              <td className="px-3 py-2 text-center">
+              <td className="text-center">
                 <Badge variant="neutral" size="sm">
                   {l.dep_type}
                 </Badge>
               </td>
-              <td className="px-3 py-2 text-right font-mono tabular-nums">{l.lag_days}</td>
-              <td className="px-3 py-2 text-right">
+              <td className="text-right font-mono tabular-nums">{l.lag_days}</td>
+              <td className="text-right">
                 <button
                   type="button"
                   onClick={() => onDelete(l.id)}
@@ -1052,7 +1052,7 @@ function CrossLinkCreateForm({
             step={1}
             value={lagDays}
             onChange={(e) => setLagDays(e.target.value)}
-            className={inputCls}
+            className="oe-input"
           />
         </div>
         <Button

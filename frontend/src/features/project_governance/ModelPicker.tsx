@@ -179,7 +179,7 @@ export function ModelPicker({ projectId, model, canSet = null, gates, labels, on
       )}
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {model
             ? t('governance.project.model.change_title', { defaultValue: 'Change the phase model' })
             : t('governance.project.model.choose_title', { defaultValue: 'Choose a phase model' })}
@@ -270,7 +270,7 @@ export function ModelPicker({ projectId, model, canSet = null, gates, labels, on
                 <ArrowRight size={14} aria-hidden className="shrink-0 text-content-tertiary" />
                 {choice.phases && choice.phases.length > 0 ? (
                   <select
-                    className="flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                    className="oe-select flex-1"
                     value={mapping[p.code] ?? ''}
                     onChange={(e) => setMapping((m) => ({ ...m, [p.code]: e.target.value }))}
                   >
@@ -285,7 +285,7 @@ export function ModelPicker({ projectId, model, canSet = null, gates, labels, on
                   </select>
                 ) : (
                   <input
-                    className="flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                    className="oe-input flex-1"
                     placeholder={t('governance.project.model.mapping_code', { defaultValue: 'Phase code in the new model' })}
                     value={mapping[p.code] ?? ''}
                     onChange={(e) => setMapping((m) => ({ ...m, [p.code]: e.target.value.trim() }))}

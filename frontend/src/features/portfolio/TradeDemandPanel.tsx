@@ -228,7 +228,7 @@ export function TradeDemandPanel() {
           <CardContent>
             <div className="mb-2 flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {tradeLabel(selRow)} · {data.weeks[selCell.week_index]?.label}
                 </h3>
                 <div className="text-xs text-content-tertiary">

@@ -248,37 +248,37 @@ export function CPMView({ scheduleId }: CPMViewProps) {
       {/* ── Activity table ────────────────────────────────────────────── */}
       <Card>
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+          <table className="oe-table min-w-full">
+            <thead className="text-content-secondary">
               <tr>
-                <th className="px-3 py-2">{t('schedule.cpm.col_wbs')}</th>
-                <th className="px-3 py-2">{t('schedule.cpm.col_name')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_dur')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_es')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_ef')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_ls')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_lf')}</th>
-                <th className="px-3 py-2 text-right">{t('schedule.cpm.col_float')}</th>
-                <th className="px-3 py-2">{t('schedule.cpm.col_critical')}</th>
+                <th>{t('schedule.cpm.col_wbs')}</th>
+                <th>{t('schedule.cpm.col_name')}</th>
+                <th className="text-right">{t('schedule.cpm.col_dur')}</th>
+                <th className="text-right">{t('schedule.cpm.col_es')}</th>
+                <th className="text-right">{t('schedule.cpm.col_ef')}</th>
+                <th className="text-right">{t('schedule.cpm.col_ls')}</th>
+                <th className="text-right">{t('schedule.cpm.col_lf')}</th>
+                <th className="text-right">{t('schedule.cpm.col_float')}</th>
+                <th>{t('schedule.cpm.col_critical')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {activities.map((a) => (
                 <tr
                   key={a.id}
-                  className={a.is_critical ? 'bg-semantic-error-bg' : 'hover:bg-gray-50'}
+                  className={a.is_critical ? 'bg-semantic-error-bg' : 'hover:bg-surface-secondary'}
                 >
-                  <td className="px-3 py-2 font-mono text-xs">{a.wbs_code}</td>
-                  <td className="px-3 py-2">{a.name}</td>
-                  <td className="px-3 py-2 text-right">{a.duration_days}</td>
-                  <td className="px-3 py-2 text-right">{a.early_start ?? '-'}</td>
-                  <td className="px-3 py-2 text-right">{a.early_finish ?? '-'}</td>
-                  <td className="px-3 py-2 text-right">{a.late_start ?? '-'}</td>
-                  <td className="px-3 py-2 text-right">{a.late_finish ?? '-'}</td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="font-mono">{a.wbs_code}</td>
+                  <td>{a.name}</td>
+                  <td className="text-right">{a.duration_days}</td>
+                  <td className="text-right">{a.early_start ?? '-'}</td>
+                  <td className="text-right">{a.early_finish ?? '-'}</td>
+                  <td className="text-right">{a.late_start ?? '-'}</td>
+                  <td className="text-right">{a.late_finish ?? '-'}</td>
+                  <td className="text-right">
                     {a.total_float ?? '-'}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {a.is_critical ? (
                       <Badge variant="error">
                         <AlertTriangle className="mr-1 h-3 w-3" />
@@ -300,7 +300,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               ))}
               {activities.length === 0 && !activitiesQuery.isLoading && (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="text-center text-content-secondary">
                     {t('schedule.cpm.empty')}
                   </td>
                 </tr>
@@ -313,7 +313,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
       {/* ── Level-resources modal ─────────────────────────────────────── */}
       {levelOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/30"
           onClick={closeLevelModal}
         >
           <div
@@ -330,7 +330,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               <button
                 type="button"
                 onClick={closeLevelModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-content-tertiary hover:text-content-secondary"
                 aria-label={t('common.close', { defaultValue: 'Close' })}
               >
                 <X className="h-5 w-5" />
@@ -339,11 +339,11 @@ export function CPMView({ scheduleId }: CPMViewProps) {
 
             {!levelResult ? (
               <>
-                <p className="mb-3 text-sm text-gray-600">
+                <p className="mb-3 text-sm text-content-secondary">
                   {t('schedule.cpm.level_modal_hint')}
                 </p>
                 {distinctResources.length === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-content-secondary">
                     {t('schedule.cpm.level_modal_no_resources')}
                   </p>
                 ) : (
@@ -352,7 +352,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                       <div key={code} className="flex items-center justify-between gap-2">
                         <label
                           htmlFor={`limit-${code}`}
-                          className="text-sm font-medium text-gray-700"
+                          className="text-sm font-medium text-content-primary"
                         >
                           {code}
                         </label>
@@ -368,7 +368,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                               [code]: e.target.value,
                             }))
                           }
-                          className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
+                          className="oe-input w-24"
                           placeholder="∞"
                         />
                       </div>
@@ -424,15 +424,15 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                     </ul>
                   </div>
                 )}
-                <div className="max-h-60 overflow-y-auto rounded border border-gray-200">
-                  <table className="min-w-full text-xs">
-                    <thead className="bg-gray-50 text-left">
+                <div className="max-h-60 overflow-y-auto rounded border border-border">
+                  <table className="oe-table-compact min-w-full">
+                    <thead>
                       <tr>
-                        <th className="px-2 py-1">{t('schedule.cpm.col_activity')}</th>
-                        <th className="px-2 py-1 text-right">{t('schedule.cpm.col_es_old')}</th>
-                        <th className="px-2 py-1 text-right">{t('schedule.cpm.col_es_new')}</th>
+                        <th>{t('schedule.cpm.col_activity')}</th>
+                        <th className="text-right">{t('schedule.cpm.col_es_old')}</th>
+                        <th className="text-right">{t('schedule.cpm.col_es_new')}</th>
                         <th
-                          className="px-2 py-1 text-right"
+                          className="text-right"
                           title={t('schedule.cpm.col_es_delta', { defaultValue: 'Shift in days' })}
                         >
                           {t('schedule.cpm.col_es_delta_short', { defaultValue: 'Δ days' })}
@@ -442,17 +442,17 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                     <tbody>
                       {levelResult.shifts.map((s) => (
                         <tr key={s.activity_id}>
-                          <td className="px-2 py-1 font-mono">
+                          <td className="font-mono">
                             {s.activity_id.slice(0, 8)}
                           </td>
-                          <td className="px-2 py-1 text-right">{s.original_es}</td>
-                          <td className="px-2 py-1 text-right">{s.shifted_es}</td>
-                          <td className="px-2 py-1 text-right">+{s.delta_days}</td>
+                          <td className="text-right">{s.original_es}</td>
+                          <td className="text-right">{s.shifted_es}</td>
+                          <td className="text-right">+{s.delta_days}</td>
                         </tr>
                       ))}
                       {levelResult.shifts.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="px-2 py-4 text-center text-gray-500">
+                          <td colSpan={4} className="text-center text-content-secondary">
                             {t('schedule.cpm.level_no_change')}
                           </td>
                         </tr>

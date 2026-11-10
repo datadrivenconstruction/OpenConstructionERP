@@ -92,7 +92,7 @@ export function WorkPackageSovPicker({ agreement, workPackage }: WorkPackageSovP
       value={current}
       onChange={(e) => mutation.mutate(e.target.value || null)}
       disabled={mutation.isPending || linesQ.isLoading || contractsQ.isLoading}
-      className="h-7 max-w-[220px] truncate rounded-md border border-border-light bg-surface-primary px-1.5 text-xs"
+      className="oe-select oe-input-sm max-w-[220px] truncate"
       aria-label={t('subcontractors.sov_link_label', {
         name: workPackage.name,
         defaultValue: 'Schedule-of-values line for {{name}}',

@@ -92,19 +92,19 @@ export function ProfileValuesPanel({ jurisdiction }: { jurisdiction: string }) {
         {t('procurement_concept.ui.profile.chain', { defaultValue: 'Applies in order: {{chain}}', chain: data.chain.join(' > ') })}
       </p>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
             <tr className="text-left text-xs text-content-tertiary">
-              <th className="py-1 pr-3">{t('procurement_concept.ui.profile.col_value', { defaultValue: 'Value' })}</th>
-              <th className="py-1 pr-3">{t('procurement_concept.ui.profile.col_valid', { defaultValue: 'Valid' })}</th>
-              <th className="py-1 pr-3">{t('procurement_concept.ui.profile.col_status', { defaultValue: 'Status' })}</th>
-              <th className="py-1" />
+              <th className="pr-3">{t('procurement_concept.ui.profile.col_value', { defaultValue: 'Value' })}</th>
+              <th className="pr-3">{t('procurement_concept.ui.profile.col_valid', { defaultValue: 'Valid' })}</th>
+              <th className="pr-3">{t('procurement_concept.ui.profile.col_status', { defaultValue: 'Status' })}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {data.values.map((row) => (
-              <tr key={row.path} className="border-t border-border-light align-top" data-testid="profile-value-row">
-                <td className="py-2 pr-3">
+              <tr key={row.path} className="align-top" data-testid="profile-value-row">
+                <td className="pr-3">
                   <div className="font-mono text-xs text-content-tertiary">
                     {row.origin} {row.path}
                   </div>
@@ -118,14 +118,14 @@ export function ProfileValuesPanel({ jurisdiction }: { jurisdiction: string }) {
                     </a>
                   )}
                 </td>
-                <td className="py-2 pr-3 whitespace-nowrap">
+                <td className="pr-3 whitespace-nowrap">
                   {row.effective_from ? fmtDate(row.effective_from) : ''}
                   {row.effective_to ? ` .. ${fmtDate(row.effective_to)}` : ''}
                 </td>
-                <td className="py-2 pr-3">
+                <td className="pr-3">
                   <ToneBadge tone={STATUS_TONE[row.status]}>{statusLabel[row.status]}</ToneBadge>
                 </td>
-                <td className="py-2">
+                <td>
                   {row.confirmation ? (
                     <ReasonedButton quiet size="sm" variant="ghost" verdict={verdict} onClick={() => revoke.mutate(row.confirmation!.id)}>
                       {t('procurement_concept.ui.profile.revoke', { defaultValue: 'Revoke' })}

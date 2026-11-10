@@ -127,7 +127,7 @@ export function PaymentInsuranceGate({ paymentId }: { paymentId: string }) {
           </>
         }
       >
-        <label className="block text-xs font-medium text-content-secondary mb-1" htmlFor={`ins-reason-${paymentId}`}>
+        <label className="oe-label" htmlFor={`ins-reason-${paymentId}`}>
           {t('subcontractors.insurance.override_reason', { defaultValue: 'Reason (at least 10 characters)' })}
         </label>
         <textarea
@@ -136,7 +136,7 @@ export function PaymentInsuranceGate({ paymentId }: { paymentId: string }) {
           onChange={(e) => setReason(e.target.value)}
           rows={4}
           maxLength={2000}
-          className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+          className="oe-textarea"
           data-testid="insurance-override-reason"
         />
       </WideModal>

@@ -63,9 +63,9 @@ interface ScheduleCodesPanelProps {
 type TabKey = 'dictionaries' | 'udfs' | 'grouped';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 const UDF_VALUE_TYPES: UdfValueType[] = ['text', 'number', 'date', 'bool', 'enum'];
 const SHARE_SCOPES: LayoutShareScope[] = ['private', 'project', 'workspace'];
@@ -113,8 +113,8 @@ export function ScheduleCodesPanel({ scheduleId, projectId }: ScheduleCodesPanel
     <div className="space-y-4" data-testid="schedule-codes-panel">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
-        <Tags size={18} className="text-content-secondary" />
-        <h3 className="text-base font-semibold text-content-primary">
+        <Tags size={20} className="text-content-secondary" />
+        <h3 className="oe-card-title">
           {t('schedule.codes.title', { defaultValue: 'Activity codes, fields & layouts' })}
         </h3>
       </div>
@@ -140,7 +140,7 @@ export function ScheduleCodesPanel({ scheduleId, projectId }: ScheduleCodesPanel
                 active ? 'bg-oe-blue text-white' : 'text-content-secondary hover:bg-surface-secondary'
               }`}
             >
-              <Icon size={13} />
+              <Icon size={14} />
               {tb.label}
             </button>
           );
@@ -489,9 +489,9 @@ function LibraryImporter({
                 disabled={importMut.isPending}
                 icon={
                   importMut.isPending ? (
-                    <Loader2 size={13} className="animate-spin" />
+                    <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Plus size={13} />
+                    <Plus size={14} />
                   )
                 }
               >
@@ -690,7 +690,7 @@ function DictionaryValues({
               id="codes-val-parent"
               value={parentId}
               onChange={(e) => setParentId(e.target.value)}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">
                 {t('schedule.codes.no_parent', { defaultValue: 'No parent (top level)' })}
@@ -960,7 +960,7 @@ function UdfsTab({ projectId, onError }: { projectId: string; onError: (e: unkno
               id="codes-udf-type"
               value={valueType}
               onChange={(e) => setValueType(e.target.value as UdfValueType)}
-              className={inputCls}
+              className="oe-select"
             >
               {UDF_VALUE_TYPES.map((vt) => (
                 <option key={vt} value={vt}>
@@ -982,7 +982,7 @@ function UdfsTab({ projectId, onError }: { projectId: string; onError: (e: unkno
                 placeholder={t('schedule.codes.enum_values_ph', {
                   defaultValue: 'Low\nMedium\nHigh',
                 })}
-                className={`${inputCls} h-auto py-2`}
+                className="oe-textarea"
               />
             </div>
           )}
@@ -1238,7 +1238,7 @@ function GroupedTab({
                     value={lvl.dictionaryId}
                     onChange={(e) => setLevelDict(idx, e.target.value)}
                     aria-label={t('schedule.codes.level_n', { defaultValue: 'Level {{n}}', n: idx + 1 })}
-                    className={inputCls}
+                    className="oe-select"
                   >
                     <option value="">
                       {t('schedule.codes.pick_dict', { defaultValue: 'Select a dictionary...' })}
@@ -1291,7 +1291,7 @@ function GroupedTab({
                   onChange={(e) =>
                     setTimescale(e.target.value as 'day' | 'week' | 'month' | 'quarter' | 'year')
                   }
-                  className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+                  className="oe-select"
                 >
                   {(['day', 'week', 'month', 'quarter', 'year'] as const).map((ts) => (
                     <option key={ts} value={ts}>
@@ -1355,7 +1355,7 @@ function GroupedTab({
               id="codes-layout-scope"
               value={shareScope}
               onChange={(e) => setShareScope(e.target.value as LayoutShareScope)}
-              className={inputCls}
+              className="oe-select"
             >
               {SHARE_SCOPES.map((s) => (
                 <option key={s} value={s}>
@@ -1415,7 +1415,7 @@ function GroupedTab({
                     variant="ghost"
                     size="sm"
                     onClick={() => applyLayout(layout.spec)}
-                    icon={<Play size={13} />}
+                    icon={<Play size={14} />}
                   >
                     {t('schedule.codes.apply', { defaultValue: 'Apply' })}
                   </Button>
@@ -1544,31 +1544,31 @@ function GroupedGrid({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('schedule.codes.col_activity', { defaultValue: 'Activity' })}
               </th>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('schedule.codes.col_start', { defaultValue: 'Start' })}
               </th>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('schedule.codes.col_end', { defaultValue: 'Finish' })}
               </th>
-              <th className="px-3 py-2 text-right">
+              <th className="text-right">
                 {t('schedule.codes.col_duration', { defaultValue: 'Dur (d)' })}
               </th>
-              <th className="px-3 py-2 text-right">
+              <th className="text-right">
                 {t('schedule.codes.col_progress', { defaultValue: 'Progress' })}
               </th>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('schedule.codes.col_status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-3 py-2 text-right">
+              <th className="text-right">
                 {t('schedule.codes.col_float', { defaultValue: 'Float' })}
               </th>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('schedule.codes.col_codes', { defaultValue: 'Codes' })}
               </th>
             </tr>
@@ -1580,8 +1580,8 @@ function GroupedGrid({
               const isOpen = expanded.has(id);
               const isNoneBand = band.key === GROUP_NONE_KEY;
               return (
-                <tr key={`band-${id}`} className="border-t border-border-light bg-surface-secondary/40">
-                  <td colSpan={8} className="px-3 py-2">
+                <tr key={`band-${id}`} className="bg-surface-secondary/40">
+                  <td colSpan={8}>
                     <button
                       type="button"
                       onClick={() => onToggle(id)}
@@ -1619,7 +1619,7 @@ function GroupedGrid({
             {/* Leaf activity rows */}
             {visibleRows.length === 0 && visibleBands.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-sm text-content-tertiary">
+                <td colSpan={8} className="text-center text-content-tertiary">
                   {t('schedule.codes.no_rows', {
                     defaultValue: 'No activities match this grouping on this page.',
                   })}
@@ -1627,8 +1627,8 @@ function GroupedGrid({
               </tr>
             ) : (
               visibleRows.map((r) => (
-                <tr key={`row-${r.id}`} className="border-t border-border-light hover:bg-surface-secondary/30">
-                  <td className="px-3 py-2">
+                <tr key={`row-${r.id}`}>
+                  <td>
                     <span
                       className="block min-w-0 truncate text-content-primary"
                       style={{ paddingLeft: `${(r.group_path.length + 1) * 18}px` }}
@@ -1641,21 +1641,21 @@ function GroupedGrid({
                       )}
                     </span>
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-content-secondary">
+                  <td className="tabular-nums text-content-secondary">
                     {r.start_date ?? '-'}
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-content-secondary">
+                  <td className="tabular-nums text-content-secondary">
                     {r.end_date ?? '-'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">{r.duration_days}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{Math.round(r.progress_pct)}%</td>
-                  <td className="px-3 py-2">
+                  <td className="text-right tabular-nums">{r.duration_days}</td>
+                  <td className="text-right tabular-nums">{Math.round(r.progress_pct)}%</td>
+                  <td>
                     <span className="text-xs text-content-secondary">{r.status}</span>
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {r.total_float ?? '-'}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex flex-wrap gap-1">
                       {r.codes.map((c) => (
                         <span
@@ -1693,7 +1693,7 @@ function GroupedGrid({
             id="codes-page-size"
             value={pageSize}
             onChange={(e) => onPageSize(Number(e.target.value))}
-            className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs"
+            className="oe-select oe-input-sm"
           >
             {[50, 100, 200, 500].map((n) => (
               <option key={n} value={n}>

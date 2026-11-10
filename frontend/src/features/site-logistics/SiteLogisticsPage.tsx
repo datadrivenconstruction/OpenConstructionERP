@@ -371,7 +371,7 @@ function BillPositionPicker({
   const rows = data?.rows ?? [];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-3xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col"
         role="dialog"
@@ -379,7 +379,7 @@ function BillPositionPicker({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('siteLogistics.pick_from_bill', { defaultValue: 'Pick from the bill' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -394,7 +394,7 @@ function BillPositionPicker({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -590,20 +590,20 @@ function BookDeliveryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
         role="dialog"
         aria-label={title}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-section-title">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -619,7 +619,7 @@ function BookDeliveryModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_supplier', { defaultValue: 'Supplier' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -647,7 +647,7 @@ function BookDeliveryModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_gate', { defaultValue: 'Gate' })}
               </label>
               <select
@@ -670,7 +670,7 @@ function BookDeliveryModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_window_start', { defaultValue: 'Window start' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -685,7 +685,7 @@ function BookDeliveryModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_window_end', { defaultValue: 'Window end' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -710,7 +710,7 @@ function BookDeliveryModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_vehicle', { defaultValue: 'Vehicle type' })}
               </label>
               <input
@@ -723,7 +723,7 @@ function BookDeliveryModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_po', { defaultValue: 'PO reference' })}
               </label>
               <input
@@ -746,7 +746,7 @@ function BookDeliveryModal({
               estimate line prices - a skip, a welfare unit, a tool delivery. */}
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-2">
-              <label className="block text-sm font-medium text-content-primary">
+              <label className="oe-label">
                 {t('siteLogistics.field_bill_lines', { defaultValue: 'Bill positions delivered' })}
               </label>
               <Button
@@ -755,7 +755,7 @@ function BookDeliveryModal({
                 onClick={() => setPicking(true)}
                 disabled={!projectId}
               >
-                <Table2 size={13} className="mr-1 shrink-0" />
+                <Table2 size={14} className="mr-1 shrink-0" />
                 {t('siteLogistics.add_from_bill', { defaultValue: 'Add from bill' })}
               </Button>
             </div>
@@ -800,11 +800,7 @@ function BookDeliveryModal({
                       aria-label={t('siteLogistics.line_quantity', {
                         defaultValue: 'Quantity delivered',
                       })}
-                      className={`h-8 w-24 shrink-0 rounded-lg border bg-surface-primary px-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30 ${
-                        touched && !(Number(line.quantity) > 0)
-                          ? 'border-semantic-error'
-                          : 'border-border'
-                      }`}
+                      className="oe-input w-24 shrink-0 tabular-nums" aria-invalid={!!(touched && !(Number(line.quantity) > 0))}
                     />
                     <span className="w-12 shrink-0 text-2xs text-content-tertiary">
                       {line.unit}
@@ -815,7 +811,7 @@ function BookDeliveryModal({
                       aria-label={t('siteLogistics.remove_line', { defaultValue: 'Remove line' })}
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors"
                     >
-                      <X size={13} />
+                      <X size={14} />
                     </button>
                   </li>
                 ))}
@@ -832,7 +828,7 @@ function BookDeliveryModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('siteLogistics.field_materials', { defaultValue: 'Materials' })}
             </label>
             <input
@@ -853,7 +849,7 @@ function BookDeliveryModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_contact_name', { defaultValue: 'Contact name' })}
               </label>
               <input
@@ -863,7 +859,7 @@ function BookDeliveryModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('siteLogistics.field_contact_phone', { defaultValue: 'Contact phone' })}
               </label>
               <input
@@ -875,14 +871,14 @@ function BookDeliveryModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('siteLogistics.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
               value={form.notes}
               onChange={(e) => set('notes', e.target.value)}
               rows={2}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              className="oe-textarea resize-none"
               placeholder={t('siteLogistics.notes_placeholder', {
                 defaultValue: 'Access, offloading, escort...',
               })}
@@ -957,7 +953,7 @@ export function DeliveryRow({
     <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-border-light last:border-b-0 hover:bg-surface-secondary/40 transition-colors">
       {/* Time window */}
       <div className="flex items-center gap-1.5 w-32 shrink-0 font-mono text-sm text-content-secondary tabular-nums">
-        <Clock size={13} className="text-content-tertiary shrink-0" />
+        <Clock size={14} className="text-content-tertiary shrink-0" />
         {fmtTime(delivery.window_start)}-{fmtTime(delivery.window_end)}
       </div>
 
@@ -1019,7 +1015,7 @@ export function DeliveryRow({
             className="mt-0.5 flex items-center gap-1 text-2xs text-semantic-warning"
             data-testid="delivery-warning"
           >
-            <AlertTriangle size={11} className="shrink-0" aria-hidden />
+            <AlertTriangle size={12} className="shrink-0" aria-hidden />
             {served(t as TFn, `site_logistics.errors.${w.code}`, humanise(w.code))}
           </p>
         ))}
@@ -1057,7 +1053,7 @@ export function DeliveryRow({
             title={reasonText(t as TFn, can.approve)}
             onClick={() => onApprove(delivery)}
           >
-            <Check size={13} className="mr-1" />
+            <Check size={14} className="mr-1" />
             {t('siteLogistics.action_approve', { defaultValue: 'Approve' })}
           </Button>
         )}
@@ -1069,7 +1065,7 @@ export function DeliveryRow({
             title={reasonText(t as TFn, can.reject)}
             onClick={() => onReject(delivery)}
           >
-            <Ban size={13} className="mr-1" />
+            <Ban size={14} className="mr-1" />
             {t('siteLogistics.action_reject', { defaultValue: 'Reject' })}
           </Button>
         )}
@@ -1081,7 +1077,7 @@ export function DeliveryRow({
             onClick={() => onAdvance(delivery, 'arrived')}
             title={t('siteLogistics.action_mark_arrived', { defaultValue: 'Mark arrived' })}
           >
-            <LogIn size={13} className="mr-1" />
+            <LogIn size={14} className="mr-1" />
             {t('siteLogistics.action_mark_arrived', { defaultValue: 'Mark arrived' })}
           </Button>
         )}
@@ -1093,7 +1089,7 @@ export function DeliveryRow({
             onClick={() => onAdvance(delivery, 'completed')}
             title={t('siteLogistics.action_mark_completed', { defaultValue: 'Mark completed' })}
           >
-            <CheckCircle2 size={13} className="mr-1" />
+            <CheckCircle2 size={14} className="mr-1" />
             {t('siteLogistics.action_mark_completed', { defaultValue: 'Mark completed' })}
           </Button>
         )}
@@ -1346,7 +1342,7 @@ function DeliveryBoard({
             <div key={key}>
               <div className="flex items-center gap-2 mb-2">
                 <Calendar size={14} className="text-content-tertiary" />
-                <h3 className="text-sm font-semibold text-content-secondary">
+                <h3 className="oe-card-title text-content-secondary">
                   {fmtDateHeader(items[0]!.window_start)}
                 </h3>
                 <span className="text-2xs text-content-tertiary tabular-nums">
@@ -1598,7 +1594,7 @@ function GateCard({
               title={t('siteLogistics.edit_gate', { defaultValue: 'Edit gate' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40"
             >
-              <Pencil size={13} />
+              <Pencil size={14} />
             </button>
           )}
           {canDelete && (
@@ -1608,7 +1604,7 @@ function GateCard({
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40"
             >
-              <Trash2 size={13} />
+              <Trash2 size={14} />
             </button>
           )}
         </div>
@@ -1729,7 +1725,7 @@ function GateEditForm({
           {t('common.cancel', { defaultValue: 'Cancel' })}
         </Button>
         <Button variant="primary" size="sm" onClick={submit} disabled={!canSave}>
-          <Check size={13} className="mr-1" />
+          <Check size={14} className="mr-1" />
           {t('common.save', { defaultValue: 'Save' })}
         </Button>
       </div>
@@ -1939,7 +1935,7 @@ function LaydownCard({
               title={t('siteLogistics.edit_zone', { defaultValue: 'Edit zone' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40"
             >
-              <Pencil size={13} />
+              <Pencil size={14} />
             </button>
           )}
           {canDelete && (
@@ -1949,7 +1945,7 @@ function LaydownCard({
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40"
             >
-              <Trash2 size={13} />
+              <Trash2 size={14} />
             </button>
           )}
         </div>
@@ -2032,7 +2028,7 @@ function LaydownEditForm({
           {t('common.cancel', { defaultValue: 'Cancel' })}
         </Button>
         <Button variant="primary" size="sm" onClick={submit} disabled={!canSave}>
-          <Check size={13} className="mr-1" />
+          <Check size={14} className="mr-1" />
           {t('common.save', { defaultValue: 'Save' })}
         </Button>
       </div>
@@ -2280,7 +2276,7 @@ function GateTimeline({
       `${title} ${day}`,
     )}</title><style>body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;margin:24px;color:#111}h1{font-size:18px;margin:0 0 4px}p{margin:0 0 16px;color:#555;font-size:13px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f3f4f6}@media print{@page{margin:14mm}}</style></head><body><h1>${escHtml(
       title,
-    )}</h1><p>${escHtml(day)}</p><table><thead><tr>${headHtml}</tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+    )}</h1><p>${escHtml(day)}</p><table className="oe-table"><thead><tr>${headHtml}</tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
     const w = window.open('', '_blank', 'width=1024,height=720');
     if (!w) {
       addToast({
@@ -2506,7 +2502,7 @@ function GateTimeline({
           {/* Legend + empty-day hint */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-2xs text-content-tertiary">
             <span className="inline-flex items-center gap-1">
-              <AlertTriangle size={11} className="text-semantic-warning" />
+              <AlertTriangle size={12} className="text-semantic-warning" />
               {t('siteLogistics.timeline_legend_over', {
                 defaultValue: 'Amber occupancy means the gate is over capacity at some point',
               })}
@@ -2644,28 +2640,28 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
-                  <th className="px-4 py-2 text-left font-medium">
+                <tr className="text-2xs uppercase tracking-wide text-content-tertiary">
+                  <th>
                     {t('siteLogistics.col_item', { defaultValue: 'Item' })}
                   </th>
-                  <th className="px-4 py-2 text-left font-medium">
+                  <th>
                     {t('siteLogistics.col_description', { defaultValue: 'Description' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('siteLogistics.col_bill_quantity', { defaultValue: 'In the bill' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('siteLogistics.col_booked', { defaultValue: 'Booked in' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('siteLogistics.col_delivered', { defaultValue: 'On site' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('siteLogistics.col_outstanding', { defaultValue: 'Outstanding' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('siteLogistics.col_value_on_site', { defaultValue: 'Value on site' })}
                   </th>
                 </tr>
@@ -2679,7 +2675,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
                       row.over_delivered && 'bg-semantic-warning/5',
                     )}
                   >
-                    <td className="px-4 py-2 align-top">
+                    <td className="align-top">
                       <button
                         type="button"
                         onClick={() =>
@@ -2694,7 +2690,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
                         {row.ordinal || '-'}
                       </button>
                     </td>
-                    <td className="px-4 py-2 align-top text-content-primary">
+                    <td className="align-top">
                       <span className="line-clamp-2">{row.description}</span>
                       {row.over_delivered && (
                         <span className="mt-0.5 flex items-center gap-1 text-2xs text-semantic-warning">
@@ -2705,13 +2701,13 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-right align-top tabular-nums text-content-secondary">
+                    <td className="text-right align-top tabular-nums text-content-secondary">
                       <QuantityDisplay value={row.bill_quantity} unit={row.unit} />
                     </td>
-                    <td className="px-4 py-2 text-right align-top tabular-nums text-content-secondary">
+                    <td className="text-right align-top tabular-nums text-content-secondary">
                       <QuantityDisplay value={row.booked_quantity} unit={row.unit} />
                     </td>
-                    <td className="px-4 py-2 text-right align-top tabular-nums font-medium text-content-primary">
+                    <td className="text-right align-top tabular-nums">
                       <QuantityDisplay value={row.delivered_quantity} unit={row.unit} />
                     </td>
                     <td
@@ -2724,7 +2720,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
                     >
                       <QuantityDisplay value={row.outstanding_quantity} unit={row.unit} />
                     </td>
-                    <td className="px-4 py-2 text-right align-top tabular-nums text-content-primary">
+                    <td className="text-right align-top tabular-nums">
                       <MoneyDisplay amount={row.delivered_value} currency={currency} />
                     </td>
                   </tr>

@@ -190,7 +190,7 @@ export function DataFeedsSettings() {
                 {t('bi_feed.project_label', { defaultValue: 'Project' })}
               </span>
               <select
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
+                className="oe-select"
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
                 data-testid="bi-feed-project"
@@ -209,7 +209,7 @@ export function DataFeedsSettings() {
               </span>
               <span className="flex gap-2">
                 <select
-                  className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
+                  className="oe-select min-w-0 flex-1"
                   value={selectedKey?.id ?? ''}
                   onChange={(e) => setKeyId(e.target.value)}
                   data-testid="bi-feed-key"
@@ -261,13 +261,13 @@ export function DataFeedsSettings() {
           )}
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm" data-testid="bi-feed-table">
+            <table className="oe-table text-left" data-testid="bi-feed-table">
               <thead>
-                <tr className="border-b border-border-light text-xs uppercase text-content-tertiary">
-                  <th className="py-2 pr-4">{t('bi_feed.col_feed', { defaultValue: 'Feed' })}</th>
-                  <th className="py-2 pr-4 text-right">{t('bi_feed.col_columns', { defaultValue: 'Columns' })}</th>
-                  <th className="py-2 pr-4 text-right">{t('bi_feed.col_rows', { defaultValue: 'Rows' })}</th>
-                  <th className="py-2" />
+                <tr className="text-xs uppercase text-content-tertiary">
+                  <th className="pr-4">{t('bi_feed.col_feed', { defaultValue: 'Feed' })}</th>
+                  <th className="pr-4 text-right">{t('bi_feed.col_columns', { defaultValue: 'Columns' })}</th>
+                  <th className="pr-4 text-right">{t('bi_feed.col_rows', { defaultValue: 'Rows' })}</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -276,7 +276,7 @@ export function DataFeedsSettings() {
                     key={f.id}
                     className={`border-b border-border-light/60 ${f.id === activeFeed ? 'bg-oe-blue/[0.04]' : ''}`}
                   >
-                    <td className="py-2 pr-4">
+                    <td className="pr-4">
                       <button
                         type="button"
                         className="font-medium text-content-primary hover:underline"
@@ -286,9 +286,9 @@ export function DataFeedsSettings() {
                         {t(f.title_key, { defaultValue: f.id })}
                       </button>
                     </td>
-                    <td className="py-2 pr-4 text-right tabular-nums">{f.columns.length}</td>
-                    <td className="py-2 pr-4 text-right tabular-nums">{f.row_count}</td>
-                    <td className="py-2">
+                    <td className="pr-4 text-right tabular-nums">{f.columns.length}</td>
+                    <td className="pr-4 text-right tabular-nums">{f.row_count}</td>
+                    <td>
                       <span className="flex justify-end gap-2">
                         <Button
                           size="sm"
@@ -339,11 +339,11 @@ export function DataFeedsSettings() {
           )}
           {previewQuery.isSuccess && previewQuery.data.rows.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs" data-testid="bi-feed-preview">
+              <table className="oe-table-compact text-left" data-testid="bi-feed-preview">
                 <thead>
-                  <tr className="border-b border-border-light text-content-tertiary">
+                  <tr className="text-content-tertiary">
                     {previewColumns.map((c) => (
-                      <th key={c.name} className="whitespace-nowrap py-1 pr-3">
+                      <th key={c.name} className="pr-3">
                         {c.name}
                       </th>
                     ))}
@@ -351,7 +351,7 @@ export function DataFeedsSettings() {
                 </thead>
                 <tbody>
                   {previewQuery.data.rows.map((row, i) => (
-                    <tr key={i} className="border-b border-border-light/60">
+                    <tr key={i}>
                       {previewColumns.map((c) => (
                         <td
                           key={c.name}

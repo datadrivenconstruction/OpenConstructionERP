@@ -100,7 +100,7 @@ export function ScopedMandates({ labels, rows, decisionTypes, columns, columnNam
           <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs text-content-secondary">
             {t('stakeholders.ui.scoped.scope', { defaultValue: 'Part of the project' })}
             <input
-              className={FIELD_CLASS}
+              className="oe-input"
               value={r.scope}
               maxLength={128}
               onChange={(e) => patch(i, { scope: e.target.value })}
@@ -142,12 +142,12 @@ export function ScopedMandates({ labels, rows, decisionTypes, columns, columnNam
           </label>
           <label className="flex min-w-[10rem] flex-[2] flex-col gap-1 text-xs text-content-secondary">
             {t('stakeholders.ui.scoped.note', { defaultValue: 'Note (optional)' })}
-            <input className={FIELD_CLASS} value={r.scope_note} onChange={(e) => patch(i, { scope_note: e.target.value })} />
+            <input className="oe-input" value={r.scope_note} onChange={(e) => patch(i, { scope_note: e.target.value })} />
           </label>
           <Button
             size="sm"
             variant="ghost"
-            icon={<Trash2 size={13} />}
+            icon={<Trash2 size={14} />}
             aria-label={t('stakeholders.ui.remove', { defaultValue: 'Remove' })}
             onClick={() => onChange(rows.filter((_, x) => x !== i))}
             data-testid="scoped-remove"
@@ -157,7 +157,7 @@ export function ScopedMandates({ labels, rows, decisionTypes, columns, columnNam
       <Button
         variant="secondary"
         size="sm"
-        icon={<Plus size={13} />}
+        icon={<Plus size={14} />}
         disabled={!first || decisionTypes.length === 0}
         onClick={() =>
           first &&

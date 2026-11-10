@@ -87,7 +87,7 @@ export function TimeToCloseWidget({ since, until }: TimeToCloseWidgetProps) {
     >
       <header className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('propdev.dashboards.ttc.title', {
               defaultValue: 'Time to close',
             })}
@@ -107,7 +107,7 @@ export function TimeToCloseWidget({ since, until }: TimeToCloseWidgetProps) {
         </span>
       </header>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {data.stages.map((s) => (
           <StageBar key={s.stage} stage={s} max={maxP90} />
         ))}

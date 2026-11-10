@@ -97,7 +97,7 @@ export function LookaheadBoard({ lookAheadId }: { lookAheadId: string }) {
   const q = useLookAheadBoard(lookAheadId);
   return (
     <Card padding="md">
-      <h3 className="mb-3 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-3">
         {t('schedule_advanced.board_title', { defaultValue: 'Look-ahead board' })}
       </h3>
       {q.isLoading ? (

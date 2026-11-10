@@ -300,7 +300,7 @@ export function ProjectIntelligencePage() {
         <div className="w-14 h-14 rounded-2xl bg-oe-blue/10 flex items-center justify-center">
           <BrainCircuit size={28} className="text-oe-blue" />
         </div>
-        <h2 className="text-lg font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {t('project_intelligence.page_title_v191', {
             defaultValue: 'Estimation Dashboard',
           })}
@@ -358,7 +358,7 @@ export function ProjectIntelligencePage() {
             <PowerOff size={26} className="text-semantic-warning" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('project_intelligence.module_disabled_title', {
                 defaultValue: 'Project Intelligence is turned off',
               })}
@@ -431,7 +431,7 @@ export function ProjectIntelligencePage() {
           <div className="w-14 h-14 rounded-2xl bg-semantic-warning-bg flex items-center justify-center mx-auto">
             <AlertTriangle size={28} className="text-semantic-warning" />
           </div>
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {isAuth
               ? t('project_intelligence.auth_error', {
                   defaultValue: 'Session expired',
@@ -542,7 +542,7 @@ export function ProjectIntelligencePage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="h-9 text-xs bg-surface-secondary border border-border-light rounded-md px-2 text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-select oe-input-sm"
               aria-label={t('project_intelligence.role', {
                 defaultValue: 'View as role',
               })}
@@ -640,7 +640,7 @@ export function ProjectIntelligencePage() {
             onClick={scrollToForecasts}
             className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-semantic-error text-white rounded-lg hover:bg-semantic-error transition-colors"
           >
-            <TrendingUp size={13} />
+            <TrendingUp size={14} />
             {t('project_intelligence.forecast.banner_cta', {
               defaultValue: 'View forecast',
             })}
@@ -681,8 +681,8 @@ export function ProjectIntelligencePage() {
         <div className="lg:col-span-9 bg-surface-primary rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
           {score.critical_gaps.length > 0 ? (
             <>
-              <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-2">
-                <AlertTriangle size={15} className="text-red-400" />
+              <h3 className="oe-card-title flex items-center gap-2 mb-2">
+                <AlertTriangle size={16} className="text-semantic-error" />
                 {t('project_intelligence.critical_gaps', {
                   defaultValue: 'Critical Gaps',
                 })}
@@ -729,7 +729,7 @@ export function ProjectIntelligencePage() {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <CheckCircle2 size={28} className="text-green-400 mb-2" />
+              <CheckCircle2 size={28} className="text-semantic-success mb-2" />
               <p className="text-sm font-medium text-content-primary">
                 {t('project_intelligence.no_gaps_title', {
                   defaultValue: 'No critical gaps',
@@ -754,7 +754,7 @@ export function ProjectIntelligencePage() {
         <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('project_intelligence.forecast.section_title', {
                 defaultValue: 'Predictive Forecast',
               })}
@@ -782,7 +782,7 @@ export function ProjectIntelligencePage() {
         <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('project_intelligence.insights.section_title', {
                 defaultValue: 'Predictive Risk Analytics',
               })}

@@ -27,7 +27,7 @@ export function HseModeSelect({ projectId }: { projectId: string }) {
         disabled={save.isPending}
         onChange={(e) => save.mutate(e.target.value as HseExceedanceMode)}
         title={t('site_sensors.hse_mode.hint', { defaultValue: 'What a limit exceedance records in the HSE register' })}
-        className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-sm text-content-primary"
+        className="oe-select"
       >
         {HSE_EXCEEDANCE_MODES.map((m) => (
           <option key={m} value={m}>

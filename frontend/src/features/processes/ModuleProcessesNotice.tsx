@@ -68,8 +68,8 @@ export function ModuleProcessesNotice({
       data-state={starting ? 'preparing' : 'off'}
       className={
         (starting
-          ? 'flex items-center gap-2 rounded-xl border border-sky-500/25 bg-semantic-info/5 px-3 py-2 text-xs '
-          : 'flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-semantic-warning/10 p-3 text-sm sm:flex-row sm:items-center ') +
+          ? 'flex items-center gap-2 rounded-xl border border-semantic-info/25 bg-semantic-info/5 px-3 py-2 text-xs '
+          : 'flex flex-col gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-sm sm:flex-row sm:items-center ') +
         (className ?? '')
       }
     >

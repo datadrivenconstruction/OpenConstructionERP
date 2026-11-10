@@ -9,7 +9,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { scheduleApi, type Activity, type BoqPositionLite } from './api';
 
 const SELECT_CLS =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  'oe-select';
 
 /** Enough rows to find a position by eye; the search narrows the rest. */
 const MAX_OPTIONS = 200;
@@ -69,7 +69,7 @@ function LinkedPositionRow({
         onClick={onRemove}
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-50"
       >
-        <Trash2 size={15} />
+        <Trash2 size={16} />
       </button>
     </li>
   );
@@ -173,7 +173,7 @@ export function BoqLinkEditor({
   return (
     <div data-testid="boq-link-editor" className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-        <Link2 size={15} className="text-oe-blue" />
+        <Link2 size={16} className="text-oe-blue" />
         {t('schedule.boq_links_title', { defaultValue: 'BOQ positions' })}
       </div>
 
@@ -233,7 +233,7 @@ export function BoqLinkEditor({
             <input
               type="search"
               data-testid="boq-link-search"
-              className={SELECT_CLS}
+              className="oe-input"
               value={search}
               disabled={busy}
               onChange={(e) => {
@@ -266,7 +266,7 @@ export function BoqLinkEditor({
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={15} />}
+            icon={<Plus size={16} />}
             data-testid="boq-link-submit"
             disabled={busy || !newPositionId}
             loading={linkMutation.isPending}

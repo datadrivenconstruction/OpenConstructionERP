@@ -75,7 +75,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
         />
         {soon ? (
           <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/65 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-amber-200 backdrop-blur-sm">
-            <Hourglass size={11} strokeWidth={2.2} aria-hidden />
+            <Hourglass size={12} strokeWidth={2.2} aria-hidden />
             {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
           </span>
         ) : (
@@ -83,12 +83,12 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
             aria-hidden="true"
             className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 opacity-0 shadow-lg transition-all group-hover:opacity-100 group-focus-within:opacity-100"
           >
-            <Play size={18} strokeWidth={2.4} className="translate-x-px" fill="currentColor" />
+            <Play size={20} strokeWidth={2.4} className="translate-x-px" fill="currentColor" />
           </span>
         )}
         {watched && (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-semantic-success/90 px-2 py-0.5 text-2xs font-semibold text-white">
-            <CheckCircle2 size={11} strokeWidth={2.4} aria-hidden />
+            <CheckCircle2 size={12} strokeWidth={2.4} aria-hidden />
             {t('videos.watched', { defaultValue: 'Watched' })}
           </span>
         )}
@@ -108,7 +108,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
         <p className="truncate text-2xs font-medium uppercase tracking-wide text-content-tertiary">
           {labels.series(video.series)}
         </p>
-        <h3 lang={video.language} className="line-clamp-2 text-sm font-semibold leading-snug text-content-primary">
+        <h3 lang={video.language} className="oe-card-title line-clamp-2">
           <button type="button" onClick={() => onOpen(video)} className="text-left hover:text-oe-blue focus:outline-none focus-visible:underline">
             {video.title}
           </button>
@@ -151,7 +151,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
             onClick={() => onOpen(video, jumpTo.t)}
             className="inline-flex max-w-full items-center gap-1 self-start rounded-md border border-oe-blue/30 bg-oe-blue/[0.06] px-1.5 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
           >
-            <CornerDownRight size={11} className="shrink-0" aria-hidden />
+            <CornerDownRight size={12} className="shrink-0" aria-hidden />
             <span className="truncate">
               {t('videos.jump_to', {
                 defaultValue: 'From {{time}}: {{chapter}}',
@@ -164,7 +164,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
         {cases.length > 0 && (
           <div data-testid="video-card-cases" className="flex min-w-0 flex-wrap items-center gap-1 text-2xs">
             <span className="inline-flex items-center gap-1 text-content-tertiary">
-              <Route size={11} className="text-oe-blue" aria-hidden />
+              <Route size={12} className="text-oe-blue" aria-hidden />
               {t('videos.used_in_cases', { defaultValue: 'Used in these cases' })}
             </span>
             <ul className="contents">
@@ -200,7 +200,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
               className="ml-auto inline-flex items-center gap-1 tabular-nums"
               title={t('videos.chapters', { defaultValue: 'Chapters' })}
             >
-              <ListOrdered size={11} strokeWidth={2.2} aria-hidden />
+              <ListOrdered size={12} strokeWidth={2.2} aria-hidden />
               <span className="sr-only">{t('videos.chapters', { defaultValue: 'Chapters' })}:</span>
               {video.chapters.length}
             </span>

@@ -132,7 +132,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
           <WideModalField label={t('stakeholders.ui.plan.title', { defaultValue: 'Title' })} required span={2} htmlFor="event-title">
             <input
               id="event-title"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.title}
               maxLength={255}
               onChange={(e) => set('title', e.target.value)}
@@ -146,7 +146,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
             <input
               id="event-held"
               type="date"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.held_on}
               onChange={(e) => set('held_on', e.target.value)}
             />
@@ -154,7 +154,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
           <WideModalField label={t('stakeholders.ui.event.location', { defaultValue: 'Place' })} htmlFor="event-location">
             <input
               id="event-location"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.location}
               maxLength={255}
               onChange={(e) => set('location', e.target.value)}
@@ -179,7 +179,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
               id="event-attendance"
               type="number"
               min={0}
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.attendance}
               onChange={(e) => set('attendance', e.target.value)}
             />
@@ -227,7 +227,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
             <textarea
               id="event-outcome"
               rows={3}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.outcome}
               onChange={(e) => set('outcome', e.target.value)}
             />
@@ -242,7 +242,7 @@ export function EventDialog({ screen, target, stakeholders, onClose, onSaved }: 
             <textarea
               id="event-feedback"
               rows={3}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.feedback}
               onChange={(e) => set('feedback', e.target.value)}
             />

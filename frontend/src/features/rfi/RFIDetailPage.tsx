@@ -205,7 +205,7 @@ function InlineRespondForm({
           defaultValue: 'Enter your response...',
         })}
         aria-label={t('rfi.field_response', { defaultValue: 'Response' })}
-        className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+        className="oe-textarea resize-none"
         autoFocus
       />
       <div className="flex items-center gap-2 justify-end">
@@ -913,7 +913,7 @@ export function RFIDetailPage() {
                 })}
               </p>
             ) : (
-              <ol className="space-y-2.5">
+              <ol className="space-y-2">
                 {activityEntries.map((entry) => {
                   const actor = displayUser(entry.actor_id);
                   return (
@@ -924,7 +924,7 @@ export function RFIDetailPage() {
                       <div className="flex items-center gap-1.5">
                         <ActivityStatusToken status={entry.from_status} />
                         <ArrowRight
-                          size={13}
+                          size={14}
                           className="shrink-0 text-content-tertiary"
                           aria-label={t('rfi.history_changed_to', {
                             defaultValue: 'changed to',

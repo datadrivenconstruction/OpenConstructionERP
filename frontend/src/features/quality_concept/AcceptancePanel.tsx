@@ -481,7 +481,7 @@ function UnitDialog({
             defaultValue: 'The contract rules the acceptance follows. They decide the deadlines and the effects.',
           })}
         >
-          <select className={inputCls} value={regime} onChange={(e) => setRegime(e.target.value)} data-testid="unit-regime-select">
+          <select className="oe-select" value={regime} onChange={(e) => setRegime(e.target.value)} data-testid="unit-regime-select">
             <option value="">{t('qualityConcept.common.choose', { defaultValue: 'Choose' })}</option>
             {regimes.map((r) => (
               <option key={r.code} value={r.code}>
@@ -613,13 +613,13 @@ function RefuseDialog({ projectId, unit, onClose }: PanelProps & { unit: Accepta
       onSubmit={() => write.send(() => refuseUnit(projectId, unit.id, { rationale: reason.trim(), defects: lines(defects) }), onClose)}
     >
       <Field required label={t('qualityConcept.common.reason', { defaultValue: 'Reason' })}>
-        <textarea rows={2} className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="refuse-reason" />
+        <textarea rows={2} className="oe-textarea" value={reason} onChange={(e) => setReason(e.target.value)} data-testid="refuse-reason" />
       </Field>
       <Field
         required={needsDefect}
         label={t('qualityConcept.acceptance.defects', { defaultValue: 'Defects, one per line' })}
       >
-        <textarea rows={3} className={inputCls} value={defects} onChange={(e) => setDefects(e.target.value)} data-testid="refuse-defects" />
+        <textarea rows={3} className="oe-textarea" value={defects} onChange={(e) => setDefects(e.target.value)} data-testid="refuse-defects" />
       </Field>
     </FormDialog>
   );

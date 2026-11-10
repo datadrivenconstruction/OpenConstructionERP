@@ -213,7 +213,7 @@ function StandardDialog({
       </Field>
       <div className="grid gap-3 md:grid-cols-2">
         <Field label={t('qualityConcept.standards.family', { defaultValue: 'Subject area' })}>
-          <select className={inputCls} value={family} onChange={(e) => setFamily(e.target.value)}>
+          <select className="oe-select" value={family} onChange={(e) => setFamily(e.target.value)}>
             <option value="">{t('qualityConcept.common.none', { defaultValue: 'None' })}</option>
             {(catalogue?.standard_families ?? []).map((f) => (
               <option key={f.code} value={f.code}>
@@ -227,7 +227,7 @@ function StandardDialog({
         </Field>
       </div>
       <Field label={t('qualityConcept.common.note', { defaultValue: 'Note' })}>
-        <textarea rows={2} className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} />
+        <textarea rows={2} className="oe-textarea" value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
     </FormDialog>
   );
@@ -278,7 +278,7 @@ function RequirementDialog({ projectId, catalogue, labels, onClose }: PanelProps
       }
     >
       <Field required label={t('qualityConcept.requirements.category', { defaultValue: 'Category' })}>
-        <select className={inputCls} value={category} onChange={(e) => setCategory(e.target.value)} data-testid="requirement-category">
+        <select className="oe-select" value={category} onChange={(e) => setCategory(e.target.value)} data-testid="requirement-category">
           {categories.map((c) => (
             <option key={c.code} value={c.code}>
               {catalogueName(labels, c)}

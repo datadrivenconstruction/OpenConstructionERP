@@ -255,7 +255,7 @@ function PreviewSection({
             <select
               value={regimeId}
               onChange={(e) => onRegimeChange(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-select"
               required
             >
               <option value="">{t('tax_withholding.field_scheme_pick', { defaultValue: 'Pick a scheme' })}</option>
@@ -274,7 +274,7 @@ function PreviewSection({
                 inputMode="decimal"
                 value={grossAmount}
                 onChange={(e) => setGrossAmount(e.target.value)}
-                className="rounded border border-border-light bg-surface-primary p-2"
+                className="oe-input"
                 required
               />
             </label>
@@ -284,7 +284,7 @@ function PreviewSection({
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
                 maxLength={3}
-                className="rounded border border-border-light bg-surface-primary p-2 uppercase"
+                className="oe-input uppercase"
                 required
               />
             </label>
@@ -296,7 +296,7 @@ function PreviewSection({
               inputMode="decimal"
               value={materials}
               onChange={(e) => setMaterials(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-input"
             />
           </label>
 
@@ -306,7 +306,7 @@ function PreviewSection({
               inputMode="decimal"
               value={vat}
               onChange={(e) => setVat(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-input"
             />
           </label>
 
@@ -333,7 +333,7 @@ function PreviewSection({
             <select
               value={bandCode}
               onChange={(e) => setBandCode(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-select"
               disabled={!regime}
             >
               <option value="">
@@ -367,7 +367,7 @@ function PreviewSection({
             <select
               value={partyStatusId}
               onChange={(e) => setPartyStatusId(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-select"
               disabled={!regime}
             >
               <option value="">
@@ -387,7 +387,7 @@ function PreviewSection({
               type="date"
               value={asOf}
               onChange={(e) => setAsOf(e.target.value)}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-input"
             />
             <span className="text-xs text-content-tertiary">
               {t('tax_withholding.field_as_of_note', {
@@ -787,12 +787,12 @@ function SchemeCard({ regime }: { regime: Regime }) {
         </p>
       )}
 
-      <table className="mt-2 w-full text-sm">
+      <table className="oe-table-compact mt-2">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
-            <th className="font-normal">{t('tax_withholding.band_col', { defaultValue: 'Band' })}</th>
-            <th className="font-normal">{t('tax_withholding.rate_col', { defaultValue: 'Rate' })}</th>
-            <th className="font-normal">
+            <th>{t('tax_withholding.band_col', { defaultValue: 'Band' })}</th>
+            <th>{t('tax_withholding.rate_col', { defaultValue: 'Rate' })}</th>
+            <th>
               {t('tax_withholding.verification_col', { defaultValue: 'Needs verification' })}
             </th>
           </tr>
@@ -800,7 +800,7 @@ function SchemeCard({ regime }: { regime: Regime }) {
         <tbody>
           {regime.bands.map((band) => (
             <tr key={band.code}>
-              <td className="py-0.5">
+              <td>
                 {band.label || band.code}
                 {band.code === regime.default_band_code && (
                   <span className="ml-2 text-xs text-content-tertiary">
@@ -811,8 +811,8 @@ function SchemeCard({ regime }: { regime: Regime }) {
               {/* The rate is the string the server sent. Parsing it to render it
                   would be this screen taking responsibility for a figure filed
                   with a tax authority. */}
-              <td className="py-0.5">{band.rate_pct}%</td>
-              <td className="py-0.5 text-content-secondary">
+              <td>{band.rate_pct}%</td>
+              <td className="text-content-secondary">
                 {band.requires_verification
                   ? t('common.yes', { defaultValue: 'Yes' })
                   : t('common.no', { defaultValue: 'No' })}

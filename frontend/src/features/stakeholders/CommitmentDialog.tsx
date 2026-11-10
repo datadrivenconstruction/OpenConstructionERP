@@ -166,7 +166,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
           <textarea
             id="commitment-text"
             rows={3}
-            className={FIELD_CLASS}
+            className="oe-textarea"
             value={draft.text}
             disabled={frozen}
             onChange={(e) => set('text', e.target.value)}
@@ -218,7 +218,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
             <input
               id="commitment-due"
               type="date"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.due_date}
               onChange={(e) => set('due_date', e.target.value)}
             />
@@ -231,7 +231,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
             <input
               id="commitment-cost"
               inputMode="decimal"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.cost}
               disabled={frozen}
               onChange={(e) => set('cost', e.target.value)}
@@ -244,7 +244,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
           >
             <input
               id="commitment-currency"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.currency}
               maxLength={3}
               disabled={frozen}
@@ -279,7 +279,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
             >
               <input
                 id="commitment-source-ref"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={draft.sourceRef}
                 maxLength={255}
                 onChange={(e) => set('sourceRef', e.target.value)}
@@ -321,7 +321,7 @@ export function CommitmentDialog({ screen, commitment, stakeholders, events, onC
           <textarea
             id="commitment-verification"
             rows={2}
-            className={FIELD_CLASS}
+            className="oe-textarea"
             value={draft.verification}
             onChange={(e) => set('verification', e.target.value)}
           />
@@ -488,7 +488,7 @@ export function TransitionDialog({ screen, commitment, target, onClose, onDone }
               <input
                 id="transition-told"
                 type="date"
-                className={FIELD_CLASS}
+                className="oe-input"
                 value={draft.toldOn}
                 onChange={(e) => setDraft((d) => ({ ...d, toldOn: e.target.value }))}
               />
@@ -500,7 +500,7 @@ export function TransitionDialog({ screen, commitment, target, onClose, onDone }
               <textarea
                 id="transition-loop"
                 rows={2}
-                className={FIELD_CLASS}
+                className="oe-textarea"
                 value={draft.loopNotRequired}
                 onChange={(e) => setDraft((d) => ({ ...d, loopNotRequired: e.target.value }))}
               />
@@ -517,7 +517,7 @@ export function TransitionDialog({ screen, commitment, target, onClose, onDone }
             <textarea
               id="transition-rationale"
               rows={3}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.rationale}
               onChange={(e) => setDraft((d) => ({ ...d, rationale: e.target.value }))}
             />

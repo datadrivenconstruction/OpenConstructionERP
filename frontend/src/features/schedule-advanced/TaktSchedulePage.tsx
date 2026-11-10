@@ -65,8 +65,8 @@ import {
 } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input';
+const labelCls = 'oe-label';
 
 type LobView = 'lob' | 'crew';
 
@@ -281,7 +281,7 @@ export function TaktSchedulePage() {
                   setMasterId(e.target.value);
                   setTaktId('');
                 }}
-                className={clsx(inputCls, 'min-w-[14rem]')}
+                className={clsx('oe-select', 'min-w-[14rem]')}
               >
                 {(masterQ.data ?? []).map((m: MasterSchedule) => (
                   <option key={m.id} value={m.id}>
@@ -297,7 +297,7 @@ export function TaktSchedulePage() {
               <select
                 value={taktId}
                 onChange={(e) => setTaktId(e.target.value)}
-                className={clsx(inputCls, 'min-w-[14rem]')}
+                className={clsx('oe-select', 'min-w-[14rem]')}
                 disabled={(taktQ.data ?? []).length === 0}
               >
                 {(taktQ.data ?? []).length === 0 ? (
@@ -499,7 +499,7 @@ export function TaktSchedulePage() {
                           )}
                         >
                           <div className="flex items-center gap-1 font-medium">
-                            <AlertTriangle size={11} />
+                            <AlertTriangle size={12} />
                             {v.activity_name} · {v.location_name}
                           </div>
                           <p className="mt-0.5 opacity-90">{v.message}</p>
@@ -707,41 +707,41 @@ function ActivitiesCard({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">#</th>
-                <th className="px-4 py-2.5 text-left">{t('takt.activity', { defaultValue: 'Activity' })}</th>
-                <th className="px-4 py-2.5 text-right">
+                <th>#</th>
+                <th>{t('takt.activity', { defaultValue: 'Activity' })}</th>
+                <th className="text-right">
                   {t('takt.planned', { defaultValue: 'Planned (d)' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">{t('takt.crew', { defaultValue: 'Crew' })}</th>
-                <th className="px-4 py-2.5 text-right">
+                <th className="text-right">{t('takt.crew', { defaultValue: 'Crew' })}</th>
+                <th className="text-right">
                   {t('takt.actualCycleDays', { defaultValue: 'Actual (d)' })}
                 </th>
-                <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
             <tbody>
               {activities.map((a) => (
-                <tr key={a.id} className="border-t border-border-light">
-                  <td className="px-4 py-2 text-content-tertiary tabular-nums">{a.sequence_order}</td>
-                  <td className="px-4 py-2 font-medium">
+                <tr key={a.id}>
+                  <td className="text-content-tertiary tabular-nums">{a.sequence_order}</td>
+                  <td>
                     {a.name}
                     {a.activity_code && (
                       <span className="ml-2 text-2xs text-content-tertiary">{a.activity_code}</span>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-right tabular-nums">{a.planned_cycle_duration_days}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">{a.crew_size}</td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right tabular-nums">{a.planned_cycle_duration_days}</td>
+                  <td className="text-right tabular-nums">{a.crew_size}</td>
+                  <td className="text-right">
                     <input
                       type="number"
                       min={0}
                       step="0.5"
                       defaultValue={a.actual_cycle_duration_days ?? ''}
                       placeholder="—"
-                      className="h-7 w-20 rounded border border-border bg-surface-primary px-2 text-right text-xs tabular-nums"
+                      className="oe-input oe-input-sm w-20 text-right tabular-nums"
                       onBlur={(e) => {
                         const raw = e.target.value.trim();
                         const value = raw === '' ? null : Number(raw);
@@ -753,7 +753,7 @@ function ActivitiesCard({
                       aria-label={t('takt.actualCycleDays', { defaultValue: 'Actual (d)' })}
                     />
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -894,7 +894,7 @@ function CreateTaktModal({
             {t('takt.locations_one_per_line', { defaultValue: 'Locations (one per line, top to bottom)' })}
           </label>
           <textarea
-            className={clsx(inputCls, 'h-32 py-2 resize-y')}
+            className={clsx('oe-textarea', 'h-32 resize-y')}
             value={locationsText}
             onChange={(e) => setLocationsText(e.target.value)}
           />
@@ -990,7 +990,7 @@ function ImportActivitiesModal({
           })}
         </p>
         <textarea
-          className={clsx(inputCls, 'h-40 py-2 font-mono text-xs resize-y')}
+          className={clsx('oe-textarea', 'h-40 font-mono resize-y')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           autoFocus

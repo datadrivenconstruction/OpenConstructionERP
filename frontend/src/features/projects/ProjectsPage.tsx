@@ -865,7 +865,7 @@ export function ProjectsPage() {
                   defaultValue: 'Search projects...',
                 })}
                 aria-label={t('projects.search_placeholder', { defaultValue: 'Search projects...' })}
-                className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-input oe-input-lg ps-10"
               />
             </div>
 
@@ -881,7 +881,7 @@ export function ProjectsPage() {
                 aria-label={t('a11y.projects.status_filter', {
                   defaultValue: 'Filter projects by status',
                 })}
-                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+                className="oe-select oe-input-lg sm:w-36"
               >
                 {availableStatuses.map((s) => (
                   <option key={s} value={s}>
@@ -908,7 +908,7 @@ export function ProjectsPage() {
                 aria-label={t('a11y.projects.region_filter', {
                   defaultValue: 'Filter projects by region',
                 })}
-                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+                className="oe-select oe-input-lg sm:w-40"
               >
                 {availableRegions.map((r) => (
                   <option key={r} value={r}>
@@ -1398,7 +1398,7 @@ export function ProjectCard({
               })}
               data-testid="project-card-view-on-map"
             >
-              <Globe2 size={11} strokeWidth={2.25} />
+              <Globe2 size={12} strokeWidth={2.25} />
               {t('projects.card.view_on_map', { defaultValue: 'On map' })}
             </Link>
           )}
@@ -1507,7 +1507,7 @@ export function ProjectCard({
         {confirmDelete &&
           createPortal(
             <div
-              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+              className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div
@@ -1517,7 +1517,7 @@ export function ProjectCard({
               >
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg">
-                    <Trash2 size={18} className="text-semantic-error" />
+                    <Trash2 size={20} className="text-semantic-error" />
                   </div>
                   <p className="text-base font-semibold text-content-primary">
                     {t('projects.purge_title', { defaultValue: 'Delete this project permanently?' })}
@@ -1540,7 +1540,7 @@ export function ProjectCard({
                   value={typedName}
                   onChange={(e) => setTypedName(e.target.value)}
                   autoFocus
-                  className="mb-4 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+                  className="oe-input mb-4"
                 />
                 <div className="flex items-center justify-end gap-2">
                   <Button
@@ -1568,7 +1568,7 @@ export function ProjectCard({
             document.body,
           )}
 
-        <h3 className="mt-4 flex items-center gap-2 text-base font-semibold tracking-tight text-content-primary">
+        <h3 className="oe-card-title mt-4 flex items-center gap-2">
           <ProjectColorDot color={projectColor(project)} />
           <span className="truncate">{project.name}</span>
         </h3>
@@ -1600,22 +1600,22 @@ export function ProjectCard({
         )}
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
-            <Building2 size={11} strokeWidth={2.25} />
+            <Building2 size={12} strokeWidth={2.25} />
             {standardLabels[project.classification_standard] ?? project.classification_standard}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
-            <CurrencyIcon size={11} strokeWidth={2.25} />
+            <CurrencyIcon size={12} strokeWidth={2.25} />
             {project.currency}
           </span>
           {project.region && (
             <span className="inline-flex items-center gap-1 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
-              <Globe2 size={11} strokeWidth={2.25} />
+              <Globe2 size={12} strokeWidth={2.25} />
               {project.region}
             </span>
           )}
           {project.address?.city && (
             <span className="inline-flex items-center gap-1 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
-              <MapPin size={11} strokeWidth={2.25} />
+              <MapPin size={12} strokeWidth={2.25} />
               {project.address.city}
             </span>
           )}
@@ -1637,7 +1637,7 @@ export function ProjectCard({
               })}
               data-testid="project-card-view-on-map-inline"
             >
-              <Globe2 size={11} strokeWidth={2.25} />
+              <Globe2 size={12} strokeWidth={2.25} />
               {t('projects.card.view_on_map', { defaultValue: 'On map' })}
             </Link>
           )}

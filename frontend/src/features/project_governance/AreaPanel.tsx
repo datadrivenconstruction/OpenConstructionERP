@@ -227,7 +227,7 @@ function DocumentRow({
           <ReasonedButton
             size="sm"
             variant={doc.container_id ? 'ghost' : 'primary'}
-            icon={<Paperclip size={13} />}
+            icon={<Paperclip size={14} />}
             verdict={documentVerdict(doc, 'attach')}
             onClick={() => setAttachOpen(true)}
             data-testid="document-attach-open"
@@ -282,7 +282,7 @@ function DocumentRow({
         <div className="mt-2 space-y-2 rounded-md bg-surface-secondary p-2">
           <textarea
             rows={2}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+            className="oe-textarea"
             aria-label={t('governance.project.area.cr_reason', { defaultValue: 'Reason for the change (required)' })}
             placeholder={t('governance.project.area.cr_reason', { defaultValue: 'Reason for the change (required)' })}
             value={reason}
@@ -290,7 +290,7 @@ function DocumentRow({
           />
           <textarea
             rows={2}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+            className="oe-textarea"
             aria-label={t('governance.project.area.cr_impact', { defaultValue: 'Impact on cost, time or scope' })}
             placeholder={t('governance.project.area.cr_impact', { defaultValue: 'Impact on cost, time or scope' })}
             value={impact}
@@ -374,7 +374,7 @@ function AddDocument({
       <div className="flex flex-wrap items-start gap-2">
         <select
           aria-label={t('governance.project.area.document_type', { defaultValue: 'Document type' })}
-          className="min-w-[14rem] rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary"
+          className="oe-select min-w-[14rem]"
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
         >
@@ -388,7 +388,7 @@ function AddDocument({
         <ReasonedButton
           size="sm"
           variant="secondary"
-          icon={<FilePlus2 size={13} />}
+          icon={<FilePlus2 size={14} />}
           verdict={canAddDocument(area)}
           disabled={!docType}
           loading={add.isPending}
@@ -458,7 +458,7 @@ export function AreaPanel({
         <Button size="sm" variant="ghost" icon={<ArrowLeft size={14} />} onClick={onBack}>
           {t('governance.project.back_to_matrix', { defaultValue: 'Back to matrix' })}
         </Button>
-        <h2 className="text-lg font-semibold text-content-primary">{name}</h2>
+        <h2 className="oe-section-title">{name}</h2>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2">
@@ -537,7 +537,7 @@ export function AreaPanel({
         </label>
         <textarea
           rows={2}
-          className="mt-2 w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+          className="oe-textarea mt-2"
           aria-label={t('governance.project.area.na_rationale', {
             defaultValue: 'Why the area does not apply (required to switch it off)',
           })}
@@ -552,7 +552,7 @@ export function AreaPanel({
       </section>
 
       <section>
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {t('governance.project.area.documents_title', { defaultValue: 'Frame documents' })}
         </h3>
         {documentsLoading ? (

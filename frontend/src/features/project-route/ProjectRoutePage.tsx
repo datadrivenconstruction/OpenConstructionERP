@@ -93,7 +93,7 @@ function confidencePct(confidence: number): number {
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg';
 
 /* ── Classifier form (create / edit assessment) ───────────────────────── */
 
@@ -341,7 +341,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
           className="shrink-0"
         >
           {item.status === 'confirmed' ? (
-            <CheckCircle2 size={11} className="mr-1" />
+            <CheckCircle2 size={12} className="mr-1" />
           ) : null}
           {item.status === 'confirmed'
             ? t('project_route.status_confirmed', { defaultValue: 'Confirmed' })
@@ -393,7 +393,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
               <Button
                 variant="primary"
                 size="sm"
-                icon={<ShieldCheck size={13} />}
+                icon={<ShieldCheck size={14} />}
                 disabled={confirmPending}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -406,7 +406,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
@@ -418,7 +418,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
               variant="secondary"
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);
@@ -661,8 +661,8 @@ export function ProjectRoutePage() {
       {/* Reference vocabularies from the backend */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Card padding="md">
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary mb-2">
-            <ListChecks size={15} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-1.5 mb-2">
+            <ListChecks size={16} className="text-oe-blue" />
             {t('project_route.work_types_title', { defaultValue: 'Work types' })}
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -680,8 +680,8 @@ export function ProjectRoutePage() {
           </div>
         </Card>
         <Card padding="md">
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary mb-2">
-            <Route size={15} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-1.5 mb-2">
+            <Route size={16} className="text-oe-blue" />
             {t('project_route.route_options_title', { defaultValue: 'Route options' })}
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -707,7 +707,7 @@ export function ProjectRoutePage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'confirmed' | '')}
             aria-label={t('project_route.filter_all_status', { defaultValue: 'All Statuses' })}
-            className="h-10 rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+            className="oe-select oe-input-lg sm:w-44"
           >
             <option value="">{t('project_route.filter_all_status', { defaultValue: 'All Statuses' })}</option>
             <option value="draft">{t('project_route.status_draft', { defaultValue: 'Draft' })}</option>

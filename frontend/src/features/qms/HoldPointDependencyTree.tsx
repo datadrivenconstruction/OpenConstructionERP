@@ -98,7 +98,7 @@ export function HoldPointDependencyTree({
               </div>
             )}
             <div className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
-              <Icon size={15} className="mt-0.5 shrink-0 text-content-secondary" />
+              <Icon size={16} className="mt-0.5 shrink-0 text-content-secondary" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm font-medium text-content-primary">

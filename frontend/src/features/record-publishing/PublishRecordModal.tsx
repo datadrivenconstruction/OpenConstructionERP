@@ -60,7 +60,7 @@ const ROLE_OPTIONS: { value: string; labelKey: string; fallback: string }[] = [
 ];
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -205,7 +205,7 @@ export function PublishRecordModal({
       >
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-semantic-success/30 bg-semantic-success-bg/30 px-4 py-3">
-            <CheckCircle2 size={18} className="text-semantic-success" />
+            <CheckCircle2 size={20} className="text-semantic-success" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{result.subject}</p>
               <p className="text-xs text-content-tertiary">
@@ -224,7 +224,7 @@ export function PublishRecordModal({
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-content-secondary">
+            <h3 className="oe-card-title mb-2 text-content-secondary">
               {t('record_publishing.recipients_heading', {
                 defaultValue: 'Recipients',
               })}
@@ -296,14 +296,14 @@ export function PublishRecordModal({
       <div className="space-y-5">
         {lists.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-3 py-2.5">
-            <ListChecks size={15} className="text-content-tertiary" />
+            <ListChecks size={16} className="text-content-tertiary" />
             <span className="text-sm text-content-secondary">
               {t('record_publishing.add_from_list', {
                 defaultValue: 'Add a saved distribution list',
               })}
             </span>
             <select
-              className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select"
               value=""
               onChange={(e) => {
                 if (e.target.value) addListMembers(e.target.value);
@@ -327,7 +327,7 @@ export function PublishRecordModal({
 
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-content-secondary">
+            <h3 className="oe-card-title text-content-secondary">
               {t('record_publishing.recipients_heading', {
                 defaultValue: 'Recipients',
               })}
@@ -381,7 +381,7 @@ export function PublishRecordModal({
                 <select
                   value={row.role}
                   onChange={(e) => patchRow(idx, { role: e.target.value })}
-                  className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-select"
                   aria-label={t('record_publishing.role_label', {
                     defaultValue: 'Recipient role',
                   })}
@@ -401,7 +401,7 @@ export function PublishRecordModal({
                   })}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-content-tertiary"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}
@@ -411,7 +411,7 @@ export function PublishRecordModal({
         <div>
           <label
             htmlFor="record-publish-notes"
-            className="mb-1.5 block text-xs font-medium text-content-primary"
+            className="oe-label"
           >
             {t('record_publishing.notes_label', {
               defaultValue: 'Cover note (optional)',
@@ -425,7 +425,7 @@ export function PublishRecordModal({
             placeholder={t('record_publishing.notes_placeholder', {
               defaultValue: 'A short line that appears on the transmittal cover sheet.',
             })}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-textarea"
           />
         </div>
       </div>

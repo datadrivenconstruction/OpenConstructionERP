@@ -36,15 +36,15 @@ export function ConstraintsLogTable({ rows, today }: { rows: LpsConstraintRow[];
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">{t('common.description', { defaultValue: 'Description' })}</th>
-            <th className="px-3 py-2 text-left">{t('schedule_advanced.type', { defaultValue: 'Type' })}</th>
-            <th className="px-3 py-2 text-left">{t('schedule_advanced.log_owner', { defaultValue: 'Owner' })}</th>
-            <th className="px-3 py-2 text-left">{t('schedule_advanced.log_due', { defaultValue: 'Due date' })}</th>
-            <th className="px-3 py-2 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-            <th className="px-3 py-2 text-left">{t('schedule_advanced.log_linked', { defaultValue: 'Linked record' })}</th>
+            <th>{t('common.description', { defaultValue: 'Description' })}</th>
+            <th>{t('schedule_advanced.type', { defaultValue: 'Type' })}</th>
+            <th>{t('schedule_advanced.log_owner', { defaultValue: 'Owner' })}</th>
+            <th>{t('schedule_advanced.log_due', { defaultValue: 'Due date' })}</th>
+            <th>{t('common.status', { defaultValue: 'Status' })}</th>
+            <th>{t('schedule_advanced.log_linked', { defaultValue: 'Linked record' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -57,15 +57,15 @@ export function ConstraintsLogTable({ rows, today }: { rows: LpsConstraintRow[];
                 data-overdue={overdue ? 'true' : 'false'}
                 className={clsx('border-t border-border-light', overdue && 'bg-semantic-error-bg/40')}
               >
-                <td className="px-3 py-2">
+                <td>
                   <p className="text-content-primary">{r.description || '-'}</p>
                   {r.task_name && <p className="text-2xs text-content-tertiary">{r.task_name}</p>}
                 </td>
-                <td className="px-3 py-2 text-xs">{constraintTypeLabel(t, r.constraint_type)}</td>
-                <td className="px-3 py-2 text-xs text-content-secondary">
+                <td>{constraintTypeLabel(t, r.constraint_type)}</td>
+                <td className="text-content-secondary">
                   {r.owner_user_id ? r.owner_user_id.slice(0, 8) : '-'}
                 </td>
-                <td className="px-3 py-2 text-xs">
+                <td>
                   {r.target_clear_date ? <DateDisplay value={r.target_clear_date} /> : '-'}
                   {overdue && (
                     <Badge variant="error" size="sm" className="ml-1">
@@ -73,12 +73,12 @@ export function ConstraintsLogTable({ rows, today }: { rows: LpsConstraintRow[];
                     </Badge>
                   )}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <Badge variant={r.status === 'cleared' ? 'success' : 'warning'} dot>
                     {constraintStatusLabel(t, r.status)}
                   </Badge>
                 </td>
-                <td className="px-3 py-2 text-xs">
+                <td>
                   {r.linked_type ? (
                     <span>
                       {linkedTypeLabel(t, r.linked_type)}
@@ -104,7 +104,7 @@ export function ConstraintsLog({ masterId }: { masterId: string }) {
   const today = new Date().toISOString().slice(0, 10);
   return (
     <Card padding="none">
-      <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title px-4 pt-4 pb-2">
         {t('schedule_advanced.log_title', { defaultValue: 'Constraints log' })}
       </h3>
       {q.isLoading ? (

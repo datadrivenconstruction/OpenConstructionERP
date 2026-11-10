@@ -207,17 +207,17 @@ function ShapesTable({ shapes }: { shapes: Omit<RebarShape, 'id'>[] }) {
   });
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light text-left text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            <th className="px-3 py-2">{t('rebar_schedule.bar_mark', { defaultValue: 'Bar Mark' })}</th>
-            <th className="px-3 py-2">{t('rebar_schedule.shape_code', { defaultValue: 'Shape' })}</th>
-            <th className="px-3 py-2">{t('rebar_schedule.drawing', { defaultValue: 'Drawing' })}</th>
-            <th className="px-3 py-2">{t('rebar_schedule.steel_grade', { defaultValue: 'Grade' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.diameter', { defaultValue: 'Dia (mm)' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.length', { defaultValue: 'Length (mm)' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.quantity', { defaultValue: 'Qty' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.weight_col', { defaultValue: 'Weight (kg)' })}</th>
+          <tr className="text-left text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <th>{t('rebar_schedule.bar_mark', { defaultValue: 'Bar Mark' })}</th>
+            <th>{t('rebar_schedule.shape_code', { defaultValue: 'Shape' })}</th>
+            <th>{t('rebar_schedule.drawing', { defaultValue: 'Drawing' })}</th>
+            <th>{t('rebar_schedule.steel_grade', { defaultValue: 'Grade' })}</th>
+            <th className="text-right">{t('rebar_schedule.diameter', { defaultValue: 'Dia (mm)' })}</th>
+            <th className="text-right">{t('rebar_schedule.length', { defaultValue: 'Length (mm)' })}</th>
+            <th className="text-right">{t('rebar_schedule.quantity', { defaultValue: 'Qty' })}</th>
+            <th className="text-right">{t('rebar_schedule.weight_col', { defaultValue: 'Weight (kg)' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -229,7 +229,7 @@ function ShapesTable({ shapes }: { shapes: Omit<RebarShape, 'id'>[] }) {
                 s.checksum_ok ? 'hover:bg-surface-secondary/50' : 'bg-semantic-error-bg/60'
               }`}
             >
-              <td className="px-3 py-2 font-medium text-content-primary">
+              <td>
                 <span className="inline-flex items-center gap-1">
                   {!s.checksum_ok && (
                     <span role="img" aria-label={badChecksum} title={badChecksum}>
@@ -239,13 +239,13 @@ function ShapesTable({ shapes }: { shapes: Omit<RebarShape, 'id'>[] }) {
                   {s.position ?? '-'}
                 </span>
               </td>
-              <td className="px-3 py-2 text-content-secondary">{s.super_group}</td>
-              <td className="px-3 py-2 text-content-secondary">{s.drawing_ref ?? '-'}</td>
-              <td className="px-3 py-2 text-content-secondary">{s.steel_grade ?? '-'}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtMm(s.diameter_mm)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtMm(s.length_mm)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{s.quantity ?? '-'}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtOptional(s.weight_kg, 1)}</td>
+              <td className="text-content-secondary">{s.super_group}</td>
+              <td className="text-content-secondary">{s.drawing_ref ?? '-'}</td>
+              <td className="text-content-secondary">{s.steel_grade ?? '-'}</td>
+              <td className="text-right tabular-nums">{fmtMm(s.diameter_mm)}</td>
+              <td className="text-right tabular-nums">{fmtMm(s.length_mm)}</td>
+              <td className="text-right tabular-nums">{s.quantity ?? '-'}</td>
+              <td className="text-right tabular-nums">{fmtOptional(s.weight_kg, 1)}</td>
             </tr>
           ))}
         </tbody>
@@ -261,31 +261,31 @@ function CuttingTable({ cutting }: { cutting: RebarCuttingEntry[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <thead>
-          <tr className="border-b border-border-light text-left text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            <th className="px-3 py-2">{t('rebar_schedule.diameter', { defaultValue: 'Dia (mm)' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.bar_count', { defaultValue: 'Bars' })}</th>
-            <th className="px-3 py-2 text-right">{t('rebar_schedule.total_weight', { defaultValue: 'Weight (kg)' })}</th>
+          <tr className="text-left text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <th>{t('rebar_schedule.diameter', { defaultValue: 'Dia (mm)' })}</th>
+            <th className="text-right">{t('rebar_schedule.bar_count', { defaultValue: 'Bars' })}</th>
+            <th className="text-right">{t('rebar_schedule.total_weight', { defaultValue: 'Weight (kg)' })}</th>
           </tr>
         </thead>
         <tbody>
           {cutting.map((c, i) => (
             <tr
               key={c.diameter_mm ?? `none-${i}`}
-              className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50 transition-colors"
+              className="last:border-0"
             >
-              <td className="px-3 py-2 font-medium text-content-primary">{fmtMm(c.diameter_mm)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{c.bars}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtFixed(c.weight_kg, 1)}</td>
+              <td>{fmtMm(c.diameter_mm)}</td>
+              <td className="text-right tabular-nums">{c.bars}</td>
+              <td className="text-right tabular-nums">{fmtFixed(c.weight_kg, 1)}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border font-semibold text-content-primary">
-            <td className="px-3 py-2">{t('rebar_schedule.total', { defaultValue: 'Total' })}</td>
-            <td className="px-3 py-2 text-right tabular-nums">{totalBars}</td>
-            <td className="px-3 py-2 text-right tabular-nums">{fmtFixed(totalWeight, 1)}</td>
+          <tr className="border-t-2 font-semibold text-content-primary">
+            <td>{t('rebar_schedule.total', { defaultValue: 'Total' })}</td>
+            <td className="text-right tabular-nums">{totalBars}</td>
+            <td className="text-right tabular-nums">{fmtFixed(totalWeight, 1)}</td>
           </tr>
         </tfoot>
       </table>
@@ -338,7 +338,7 @@ function RebarScheduleExplainer() {
   return (
     <CollapsibleSection
       storageKey="rebar_schedule.how"
-      icon={<Ruler size={15} className="text-oe-blue" />}
+      icon={<Ruler size={16} className="text-oe-blue" />}
       title={t('rebar_schedule.flow_title', { defaultValue: 'How rebar schedules work' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -732,7 +732,7 @@ export function RebarSchedulePage() {
 
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs">
           <div className="border-b border-border-light px-4 py-3">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('rebar_schedule.shapes', { defaultValue: 'Shapes' })}
             </h2>
           </div>
@@ -854,7 +854,7 @@ export function RebarSchedulePage() {
         {!detailLoading && shapes.length > 0 && (
           <div className="rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs">
             <div className="border-b border-border-light px-4 py-3">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('rebar_schedule.shapes', { defaultValue: 'Shapes' })}
                 <span className="ml-2 text-xs font-normal text-content-tertiary">
                   ({shapesPage?.total ?? shapes.length})
@@ -877,7 +877,7 @@ export function RebarSchedulePage() {
         {!detailLoading && cutting.length > 0 && (
           <div className="rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs">
             <div className="border-b border-border-light px-4 py-3">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('rebar_schedule.cutting_list', { defaultValue: 'Cutting List' })}
               </h2>
             </div>
@@ -981,7 +981,7 @@ export function RebarSchedulePage() {
         >
           <div className="flex flex-col gap-5 md:flex-row md:items-start">
             <div className="min-w-0 flex-1 space-y-2">
-              <h2 id="rebar-import-title" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+              <h2 id="rebar-import-title" className="oe-card-title flex items-center gap-2">
                 <FileUp className="h-4 w-4 text-oe-blue" aria-hidden />
                 {t('rebar_schedule.import_panel_title', { defaultValue: 'Import a bar bending schedule' })}
               </h2>

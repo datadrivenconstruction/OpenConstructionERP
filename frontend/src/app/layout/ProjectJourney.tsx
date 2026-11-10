@@ -219,7 +219,7 @@ function ProjectJourneyPanel({
   // a high z-index. A body-level portal escapes all of them, so the map always
   // paints on top of everything.
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-3 sm:p-6">
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
@@ -235,10 +235,10 @@ function ProjectJourneyPanel({
         <div className="z-10 flex shrink-0 items-start justify-between gap-3 rounded-t-2xl border-b border-border-light bg-surface-elevated px-5 py-4">
           <div className="flex items-start gap-3 min-w-0">
             <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-              <RouteIcon size={18} strokeWidth={1.75} />
+              <RouteIcon size={20} strokeWidth={1.75} />
             </span>
             <div className="min-w-0">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('journey.title', { defaultValue: 'Your project journey' })}
               </h2>
               <p className="mt-0.5 text-xs leading-relaxed text-content-secondary">
@@ -252,7 +252,7 @@ function ProjectJourneyPanel({
           <div className="flex shrink-0 items-center gap-2">
             {currentPhase && (
               <span className="hidden items-center gap-1.5 rounded-full bg-oe-blue/10 px-2.5 py-1 text-2xs font-medium text-oe-blue sm:inline-flex">
-                <MapPin size={11} aria-hidden />
+                <MapPin size={12} aria-hidden />
                 {t('journey.you_are_here_named', {
                   defaultValue: 'You are here: {{phase}}',
                   phase: t(currentPhase.nameKey, { defaultValue: currentPhase.name }),
@@ -275,7 +275,7 @@ function ProjectJourneyPanel({
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -327,7 +327,7 @@ function ProjectJourneyPanel({
                           )}
                         />
                         <div className="relative z-10 flex flex-1 flex-col">
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2">
                             <span
                               className={clsx(
                                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
@@ -398,9 +398,9 @@ function ProjectJourneyPanel({
           >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-semantic-warning/15 text-semantic-warning">
-                <Sparkles size={15} strokeWidth={1.75} />
+                <Sparkles size={16} strokeWidth={1.75} />
               </span>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              <h3 className="oe-overline">
                 {t('journey.always_on.title', { defaultValue: 'Always on' })}
               </h3>
               <span className="text-2xs text-content-tertiary">
@@ -457,7 +457,7 @@ function ModuleChip({
     >
       <span className="truncate">{t(module.labelKey, { defaultValue: module.label })}</span>
       <ArrowRight
-        size={11}
+        size={12}
         className="shrink-0 opacity-0 transition-opacity group-hover:opacity-60"
         aria-hidden
       />
@@ -673,7 +673,7 @@ function CasesPill({
             : 'border-oe-blue/25 bg-oe-blue/5 hover:border-oe-blue/50 hover:bg-oe-blue/10',
         )}
       >
-        <GraduationCap size={11} strokeWidth={2} aria-hidden />
+        <GraduationCap size={12} strokeWidth={2} aria-hidden />
         {count}
         <ChevronDown
           size={10}
@@ -759,7 +759,7 @@ function CasesPill({
                           {t(pb.titleKey, { defaultValue: pb.titleDefault })}
                         </span>
                         <ArrowRight
-                          size={11}
+                          size={12}
                           aria-hidden
                           className="shrink-0 text-oe-blue opacity-0 transition-opacity group-hover:opacity-70 group-focus:opacity-100"
                         />

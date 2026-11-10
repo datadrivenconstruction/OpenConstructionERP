@@ -245,13 +245,13 @@ function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-lg" aria-hidden="true" onClick={onClose} />
       {/* A dialog taller than the window scrolls inside itself, so the actions
           at its foot stay reachable; the action row of a long dialog is sticky. */}
       <div role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title" className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-fade-in">
         <div className="flex shrink-0 items-center justify-between px-6 pb-5 pt-6">
-          <h2 id="schedule-modal-title" className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 id="schedule-modal-title" className="oe-section-title">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t('common.close', 'Close')}
@@ -727,7 +727,7 @@ function GanttChart({
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-tertiary">
             <BarChart3 size={28} strokeWidth={1.5} />
           </div>
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('schedule.gantt_empty_title', { defaultValue: 'Gantt chart is empty' })}
           </h3>
           <p className="mt-1.5 max-w-md text-sm text-content-secondary">
@@ -1082,7 +1082,7 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
     <Card padding="md" className="mt-4">
       <div className="mb-3 flex items-center gap-2">
         <ShieldAlert size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule.risk_analysis', 'Risk Analysis (PERT)')}
         </h3>
         <Badge variant="neutral" size="sm">
@@ -1120,7 +1120,7 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
           onClick={() => navigate('/risks')}
           className="inline-flex items-center gap-1 rounded-full border border-border-light px-2.5 py-0.5 text-2xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue"
         >
-          <ShieldAlert size={11} />
+          <ShieldAlert size={12} />
           {t('schedule.open_risk_register', { defaultValue: 'Log in Risk Register' })}
         </button>
         <button
@@ -1128,7 +1128,7 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
           onClick={() => navigate('/5d')}
           className="inline-flex items-center gap-1 rounded-full border border-border-light px-2.5 py-0.5 text-2xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue"
         >
-          <TrendingUp size={11} />
+          <TrendingUp size={12} />
           {t('schedule.open_5d_contingency', { defaultValue: 'Cost contingency in 5D' })}
         </button>
       </div>
@@ -2293,7 +2293,7 @@ export function ScheduleDetail({
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20">
                   <CalendarDays size={32} className="text-oe-blue" />
                 </div>
-                <h3 className="text-lg font-semibold text-content-primary">
+                <h3 className="oe-section-title">
                   {t('schedule.detail_empty_title', { defaultValue: 'Build your project timeline' })}
                 </h3>
                 <p className="mt-1.5 max-w-md text-sm text-content-secondary">
@@ -2397,11 +2397,11 @@ export function ScheduleDetail({
             if (summaries.length === 0) return null;
             return (
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-content-primary">
+                <label className="oe-label">
                   {t('schedule.parent_section', { defaultValue: 'Parent section' })}
                 </label>
                 <select
-                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  className="oe-select"
                   value={activityForm.parent_id ?? ''}
                   onChange={(e) => chooseParentSection(e.target.value || undefined)}
                 >
@@ -2448,7 +2448,7 @@ export function ScheduleDetail({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-content-primary">
+            <label className="oe-label">
               {t('schedule.activity_type', 'Type')}
             </label>
             <div className="flex gap-2">
@@ -2551,14 +2551,14 @@ export function ScheduleDetail({
 
           {/* Start date picker */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('schedule.project_start_date', 'Project Start Date')}
             </label>
             <input
               type="date"
               value={generateStartDate}
               onChange={(e) => setGenerateStartDate(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input oe-input-lg"
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {t('schedule.start_date_hint', 'All activities will be scheduled relative to this date.')}
@@ -2567,7 +2567,7 @@ export function ScheduleDetail({
 
           {/* End date: the generated plan is fitted between the two dates. */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('schedule.project_end_date', { defaultValue: 'Project End Date' })}
             </label>
             <input
@@ -2576,7 +2576,7 @@ export function ScheduleDetail({
               value={generateEndDate}
               min={generateStartDate || undefined}
               onChange={(e) => setGenerateEndDate(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input oe-input-lg"
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {!generateEndDate
@@ -2594,7 +2594,7 @@ export function ScheduleDetail({
           <div>
             <label
               htmlFor="generate-workers"
-              className="block text-sm font-medium text-content-primary mb-1.5"
+              className="oe-label"
             >
               {t('schedule.generate_workers_label', { defaultValue: 'Workers per position' })}
             </label>
@@ -2610,7 +2610,7 @@ export function ScheduleDetail({
               placeholder={t('schedule.generate_workers_auto', { defaultValue: 'Auto' })}
               onChange={(e) => setGenerateWorkers(e.target.value)}
               aria-invalid={generateWorkersInvalid || undefined}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input oe-input-lg"
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {generateWorkersInvalid
@@ -2996,7 +2996,7 @@ export function ProjectSchedules({
           <Button
             variant="secondary"
             size="lg"
-            icon={<FileSpreadsheet size={18} />}
+            icon={<FileSpreadsheet size={20} />}
             onClick={() => setShowSpreadsheetImport(true)}
             disabled={!canCreateSchedule}
             title={createHint}
@@ -3006,7 +3006,7 @@ export function ProjectSchedules({
           <Button
             variant="primary"
             size="lg"
-            icon={<Plus size={18} />}
+            icon={<Plus size={20} />}
             onClick={() => setShowCreate(true)}
             disabled={!canCreateSchedule}
             title={createHint}
@@ -3020,7 +3020,7 @@ export function ProjectSchedules({
         {t('schedule.archive_filter')}
         <select aria-label={t('schedule.archive_filter')} value={archiveState}
           onChange={(event) => { setArchiveState(event.target.value as typeof archiveState); setScheduleOffset(0); }}
-          className="rounded-md border border-border bg-surface-primary px-3 py-2 text-content-primary">
+          className="oe-select">
           <option value="current">{t('schedule.archive_filter_current')}</option>
           <option value="archived">{t('schedule.status_archived')}</option>
           <option value="all">{t('common.all')}</option>
@@ -3047,7 +3047,7 @@ export function ProjectSchedules({
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
               <CalendarDays size={32} className="text-oe-blue" />
             </div>
-            <h2 className="text-xl font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('schedule.empty_hero_title', { defaultValue: '4D Schedule with Gantt Chart' })}
             </h2>
             <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
@@ -3063,7 +3063,7 @@ export function ProjectSchedules({
               <div className="mx-auto w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center mb-3">
                 <FileBarChart size={20} className="text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
+              <h3 className="oe-card-title mb-1">
                 {t('schedule.feature_boq_title', { defaultValue: 'Auto-generate from BOQ' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -3076,7 +3076,7 @@ export function ProjectSchedules({
               <div className="mx-auto w-10 h-10 rounded-lg bg-semantic-success-bg flex items-center justify-center mb-3">
                 <GitBranch size={20} className="text-semantic-success" />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
+              <h3 className="oe-card-title mb-1">
                 {t('schedule.feature_deps_title', { defaultValue: 'Dependencies & Links' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -3089,7 +3089,7 @@ export function ProjectSchedules({
               <div className="mx-auto w-10 h-10 rounded-lg bg-semantic-error-bg flex items-center justify-center mb-3">
                 <Zap size={20} className="text-semantic-error" />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
+              <h3 className="oe-card-title mb-1">
                 {t('schedule.feature_cpm_title', { defaultValue: 'CPM Critical Path' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -3102,7 +3102,7 @@ export function ProjectSchedules({
               <div className="mx-auto w-10 h-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center mb-3">
                 <ShieldAlert size={20} className="text-violet-600 dark:text-violet-400" />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
+              <h3 className="oe-card-title mb-1">
                 {t('schedule.feature_risk_title', { defaultValue: 'Monte Carlo Risk' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -3118,7 +3118,7 @@ export function ProjectSchedules({
             <Button
               variant="secondary"
               size="lg"
-              icon={<FileSpreadsheet size={18} />}
+              icon={<FileSpreadsheet size={20} />}
               onClick={() => setShowSpreadsheetImport(true)}
               disabled={!canCreateSchedule}
               title={createHint}
@@ -3128,7 +3128,7 @@ export function ProjectSchedules({
             <Button
               variant="primary"
               size="lg"
-              icon={<Plus size={18} />}
+              icon={<Plus size={20} />}
               onClick={() => setShowCreate(true)}
               disabled={!canCreateSchedule}
               title={createHint}
@@ -3149,10 +3149,10 @@ export function ProjectSchedules({
             >
               <div className="flex items-center gap-3 px-5 py-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
-                  <CalendarDays size={18} strokeWidth={1.75} />
+                  <CalendarDays size={20} strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold text-content-primary truncate">
+                  <h2 className="oe-card-title truncate">
                     {schedule.name}
                   </h2>
                   <p className="mt-0.5 text-xs text-content-secondary truncate">
@@ -3389,7 +3389,7 @@ function HowScheduleWorks() {
   return (
     <CollapsibleSection
       storageKey="schedule.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('schedule.flow_title', { defaultValue: 'How the 4D Schedule fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -3577,7 +3577,7 @@ export function SchedulePage() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
               <Calendar size={32} className="text-oe-blue" />
             </div>
-            <h2 className="text-xl font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('schedule.no_projects_title', { defaultValue: 'No projects yet' })}
             </h2>
             <p className="text-sm text-content-secondary mt-2 max-w-md mx-auto">
@@ -3636,7 +3636,7 @@ export function SchedulePage() {
                   {project.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold text-content-primary truncate">
+                  <h2 className="oe-card-title truncate">
                     {project.name}
                   </h2>
                   {project.description && (

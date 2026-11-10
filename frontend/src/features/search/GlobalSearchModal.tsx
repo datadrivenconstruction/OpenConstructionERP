@@ -62,7 +62,7 @@ const FACET_COLOR: Record<string, string> = {
   oe_submittals_submittals: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   oe_correspondence_correspondence: 'bg-teal-50 text-teal-700 border-teal-200',
   oe_validation: 'bg-orange-50 text-orange-700 border-orange-200',
-  oe_chat: 'bg-slate-50 text-slate-700 border-slate-200',
+  oe_chat: 'bg-surface-secondary text-content-primary border-border',
 };
 
 /* ── Saved searches (localStorage) ─────────────────────────────────────── */
@@ -209,7 +209,7 @@ export default function GlobalSearchModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-black/70 backdrop-blur-lg pt-[8vh] px-3 sm:px-4 pb-4"
+      className="fixed inset-0 z-modal flex items-start justify-center bg-black/70 backdrop-blur-lg pt-[8vh] px-3 sm:px-4 pb-4"
       onClick={closeModal}
     >
       {/* A modal dialog, and marked as one: the AI dock (and any other
@@ -235,7 +235,7 @@ export default function GlobalSearchModal() {
               defaultValue:
                 'Search anything - BOQ positions, drawings, tasks, risks, BIM elements…',
             })}
-            className="flex-1 bg-transparent outline-none text-sm placeholder:text-content-quaternary"
+            className="oe-input flex-1 bg-transparent"
           />
           {searchQuery.isFetching && (
             <Loader2 size={14} className="text-content-tertiary animate-spin" />
@@ -265,7 +265,7 @@ export default function GlobalSearchModal() {
             stays pinned on the right, separated by a border. */}
         <div className="flex items-stretch gap-2 ps-4 pe-3 py-2 border-b border-border-light shrink-0">
           <Filter
-            size={11}
+            size={12}
             className="text-content-tertiary shrink-0 self-center"
           />
           <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto scrollbar-none py-0.5">
@@ -354,7 +354,7 @@ export default function GlobalSearchModal() {
 
           {debouncedQuery.length < 2 && (
             <div className="flex flex-col items-center justify-center py-16 text-content-tertiary">
-              <Sparkles size={28} className="text-amber-400 mb-2" />
+              <Sparkles size={28} className="text-semantic-warning mb-2" />
               <div className="text-xs">
                 {t('global_search.hint', {
                   defaultValue:
@@ -443,7 +443,7 @@ export default function GlobalSearchModal() {
                             </div>
                             {navigable && (
                               <ArrowUpRight
-                                size={13}
+                                size={14}
                                 className="text-content-quaternary group-hover:text-oe-blue shrink-0 mt-0.5"
                               />
                             )}

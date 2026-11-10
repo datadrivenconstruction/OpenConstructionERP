@@ -108,7 +108,7 @@ export function ConversionFunnelWidget({
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('propdev.dashboards.cf.title', {
               defaultValue: 'Conversion funnel',
             })}

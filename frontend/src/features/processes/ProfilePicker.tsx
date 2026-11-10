@@ -103,7 +103,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
       className="mt-3"
       data-testid="processes-profiles"
     >
-      <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h3 className="oe-overline">
         {t('processes.profile_title', { defaultValue: 'Choose a profile' })}
       </h3>
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -118,7 +118,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
               data-testid={`processes-profile-${preset}`}
               data-active={isActive ? 'true' : 'false'}
               className={clsx(
-                'flex min-w-0 flex-col rounded-xl border p-2.5 text-xs',
+                'flex min-w-0 flex-col rounded-xl border p-2 text-xs',
                 isActive ? 'border-oe-blue bg-oe-blue/5' : 'border-border-light bg-surface-elevated',
               )}
             >

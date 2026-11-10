@@ -77,7 +77,7 @@ export function MenuOrganizer({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -175,7 +175,7 @@ export function MenuOrganizer({
                   onChange={(e) => setNewGroup(e.target.value)}
                   placeholder={t('menu_layout.new_group_placeholder', { defaultValue: 'New group, e.g. My day' })}
                   aria-label={t('menu_layout.new_group', { defaultValue: 'New group' })}
-                  className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+                  className="oe-input min-w-0 flex-1"
                 />
                 <button type="submit" className="flex items-center gap-1 rounded-md bg-oe-blue px-3 py-1.5 text-white">
                   <Plus size={14} />
@@ -196,7 +196,7 @@ export function MenuOrganizer({
                       defaultValue={g.label}
                       aria-label={t('menu_layout.group_name', { defaultValue: 'Group name' })}
                       onBlur={(e) => dispatch({ type: 'renameUserGroup', id: g.id, label: e.target.value })}
-                      className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 font-medium"
+                      className="oe-input min-w-0 flex-1"
                     />
                     <button
                       type="button"
@@ -229,7 +229,7 @@ export function MenuOrganizer({
                     value=""
                     aria-label={t('menu_layout.add_row', { defaultValue: 'Add a screen' })}
                     onChange={(e) => e.target.value && dispatch({ type: 'toggleUserGroupItem', id: g.id, route: e.target.value })}
-                    className="mt-2 w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+                    className="oe-select mt-2"
                   >
                     <option value="">{t('menu_layout.add_row', { defaultValue: 'Add a screen' })}</option>
                     {allItems
@@ -292,7 +292,7 @@ export function MenuOrganizer({
                   value=""
                   aria-label={t('menu_layout.add_row', { defaultValue: 'Add a screen' })}
                   onChange={(e) => e.target.value && dispatch({ type: 'toggleModeItem', mode: editMode, route: e.target.value })}
-                  className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1.5"
+                  className="oe-select min-w-0 flex-1"
                 >
                   <option value="">{t('menu_layout.add_row', { defaultValue: 'Add a screen' })}</option>
                   {allItems

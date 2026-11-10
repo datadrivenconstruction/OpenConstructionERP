@@ -664,12 +664,9 @@ export function AIConfigurationCard() {
 
   // Shared utility-class strings for the endpoint field, hoisted so the markup
   // below stays readable. Values are the exact class lists Tailwind emits.
-  const baseUrlLabelClass = 'text-sm font-medium text-content-primary block mb-1.5';
+  const baseUrlLabelClass = 'oe-label';
   const baseUrlInputClass =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 font-mono text-sm ' +
-    'text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 ' +
-    'focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-normal ease-oe ' +
-    'hover:border-content-tertiary';
+    'oe-input oe-input-lg font-mono';
   const baseUrlHintClass = 'mt-1.5 text-xs text-content-tertiary';
 
   return (
@@ -691,7 +688,7 @@ export function AIConfigurationCard() {
         <div className="space-y-6">
           {/* Provider selection */}
           <div>
-            <label className="text-sm font-medium text-content-primary block mb-1">
+            <label className="oe-label">
               {t('settings.ai_provider', { defaultValue: 'AI Provider' })}
             </label>
             <p className="text-xs text-content-tertiary mb-3">
@@ -763,7 +760,7 @@ export function AIConfigurationCard() {
           {!isKeyless && (
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label htmlFor="ai-api-key" className="text-sm font-medium text-content-primary">
+              <label htmlFor="ai-api-key" className="oe-label">
                 {keyIsOptional
                   ? t('settings.ai_key_optional_label', { defaultValue: 'API key (optional)' })
                   : t('settings.ai_api_key', { defaultValue: 'API Key' })}
@@ -776,7 +773,7 @@ export function AIConfigurationCard() {
                 className="flex items-center gap-1 text-xs text-oe-blue hover:underline"
               >
                 {t('settings.ai_get_key', { defaultValue: 'Get an API key' })}
-                <ExternalLink size={11} />
+                <ExternalLink size={12} />
               </a>
               )}
             </div>
@@ -795,7 +792,7 @@ export function AIConfigurationCard() {
                         defaultValue: `Paste your ${AI_PROVIDERS.find((p) => p.id === selectedProvider)?.keyPrefix || ''}... key here`,
                       })
                 }
-                className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 pr-20 font-mono text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue focus:shadow-[0_0_0_4px_rgba(0,113,227,0.08)] transition-all duration-normal ease-oe hover:border-content-tertiary"
+                className="oe-input oe-input-lg pr-20 font-mono"
               />
               <button
                 type="button"
@@ -871,7 +868,7 @@ export function AIConfigurationCard() {
                   setToolModeInput(event.currentTarget.value as ToolCallingMode | '');
                   setToolModeTouched(true);
                 }}
-                className={baseUrlInputClass}
+                className="oe-select oe-input-lg"
               >
                 <option value="">
                   {t('settings.ai_tool_calling_default', {
@@ -941,7 +938,7 @@ export function AIConfigurationCard() {
           <div>
             <label
               htmlFor="ai-model-name"
-              className="text-sm font-medium text-content-primary block mb-1.5"
+              className="oe-label"
             >
               {t('settings.ai_model_name', { defaultValue: 'Model name' })}
             </label>
@@ -965,7 +962,7 @@ export function AIConfigurationCard() {
               }
               spellCheck={false}
               autoComplete="off"
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 font-mono text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-normal ease-oe hover:border-content-tertiary"
+              className="oe-input oe-input-lg font-mono"
             />
             <p className="mt-1.5 text-xs text-content-tertiary">
               {t('settings.ai_model_hint', {
@@ -1060,7 +1057,7 @@ function ThemeScheduleSetting() {
       <select
         value={schedule[key]}
         onChange={(e) => setSchedule({ ...schedule, [key]: Number(e.target.value) })}
-        className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm text-content-primary"
+        className="oe-select"
       >
         {HOURS.map((h) => (
           <option key={h} value={h}>
@@ -1130,7 +1127,7 @@ function InterfaceModeCard() {
         </div>
         <Link
           to="/modules"
-          className="mt-4 flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+          className="mt-4 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
         >
           <Package size={16} className="shrink-0 text-oe-blue" />
           <div className="min-w-0">
@@ -1145,7 +1142,7 @@ function InterfaceModeCard() {
         </Link>
         <Link
           to="/governance"
-          className="mt-2 flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+          className="mt-2 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
         >
           <Scale size={16} className="shrink-0 text-oe-blue" />
           <div className="min-w-0">
@@ -1193,7 +1190,7 @@ function AppearanceCard() {
                     : 'border-2 border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
                 }`}
               >
-                <Icon size={18} strokeWidth={1.75} className="shrink-0" />
+                <Icon size={20} strokeWidth={1.75} className="shrink-0" />
                 <span className="truncate text-sm font-medium">
                   {t(option.labelKey, { defaultValue: option.defaultLabel })}
                 </span>
@@ -1248,7 +1245,7 @@ function ProfileCard({ profile, loading, editing, setEditing, formName, setFormN
                     <input
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
-                      className="text-base font-semibold text-content-primary bg-surface-secondary rounded-lg px-3 py-1.5 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 max-w-xs"
+                      className="oe-input max-w-xs"
                       placeholder={t('settings.full_name', { defaultValue: 'Full name' })}
                       autoFocus
                       onKeyDown={(e) => {
@@ -1846,7 +1843,7 @@ export function SettingsPage() {
               className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue transition-colors"
             >
               {t('settings.about_link', { defaultValue: 'About OpenConstructionERP' })}
-              <ChevronRight size={11} />
+              <ChevronRight size={12} />
             </Link>
           </div>
         </aside>
@@ -1864,7 +1861,7 @@ export function SettingsPage() {
               <ActiveIcon size={20} strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t(activeTabDef.labelKey, { defaultValue: activeTabDef.defaultLabel })}
               </h2>
               <p className="text-sm text-content-secondary mt-0.5">
@@ -1948,27 +1945,27 @@ export function SettingsPage() {
                       }}
                     >
                       <div>
-                        <label htmlFor="pw-current" className="block text-sm font-medium text-content-primary mb-1">
+                        <label htmlFor="pw-current" className="oe-label">
                           {t('settings.current_password', { defaultValue: 'Current password' })}
                         </label>
                         <input
                           id="pw-current"
                           type="password"
                           autoComplete="current-password"
-                          className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors"
+                          className="oe-input"
                           value={pwForm.current}
                           onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
                         />
                       </div>
                       <div>
-                        <label htmlFor="pw-new" className="block text-sm font-medium text-content-primary mb-1">
+                        <label htmlFor="pw-new" className="oe-label">
                           {t('settings.new_password', { defaultValue: 'New password' })}
                         </label>
                         <input
                           id="pw-new"
                           type="password"
                           autoComplete="new-password"
-                          className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors"
+                          className="oe-input"
                           placeholder={t('settings.password_min_hint', { defaultValue: 'Minimum 8 characters' })}
                           value={pwForm.new_}
                           onChange={(e) => setPwForm((f) => ({ ...f, new_: e.target.value }))}
@@ -1978,14 +1975,14 @@ export function SettingsPage() {
                         </p>
                       </div>
                       <div>
-                        <label htmlFor="pw-confirm" className="block text-sm font-medium text-content-primary mb-1">
+                        <label htmlFor="pw-confirm" className="oe-label">
                           {t('settings.confirm_new_password', { defaultValue: 'Confirm new password' })}
                         </label>
                         <input
                           id="pw-confirm"
                           type="password"
                           autoComplete="new-password"
-                          className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors"
+                          className="oe-input"
                           value={pwForm.confirm}
                           onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))}
                         />
@@ -2283,7 +2280,7 @@ export function SettingsPage() {
                 <CardContent className="space-y-3">
                   <Link
                     to="/governance?tab=permissions"
-                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                    className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
                   >
                     <ShieldCheck size={16} className="shrink-0 text-oe-blue" />
                     <div className="min-w-0">
@@ -2298,7 +2295,7 @@ export function SettingsPage() {
                   </Link>
                   <Link
                     to="/governance?tab=approvals"
-                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                    className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
                   >
                     <Scale size={16} className="shrink-0 text-oe-blue" />
                     <div className="min-w-0">
@@ -2313,7 +2310,7 @@ export function SettingsPage() {
                   </Link>
                   <Link
                     to="/governance?tab=validation"
-                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                    className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
                   >
                     <ShieldAlert size={16} className="shrink-0 text-oe-blue" />
                     <div className="min-w-0">
@@ -2374,7 +2371,7 @@ export function SettingsPage() {
                   <ul className="divide-y divide-border-light rounded-xl border border-border-light bg-surface-secondary/30">
                     <li className="flex flex-col sm:flex-row sm:items-center gap-3 p-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-                        <Package size={18} />
+                        <Package size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-content-primary">
@@ -2392,7 +2389,7 @@ export function SettingsPage() {
                     </li>
                     <li className="flex flex-col sm:flex-row sm:items-center gap-3 p-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-                        <Wrench size={18} />
+                        <Wrench size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-content-primary">
@@ -2607,7 +2604,7 @@ function ConverterStatusPanel() {
                       : t('settings.converter_status_current', { defaultValue: 'Up to date' });
                 const statusClass =
                   status === 'missing'
-                    ? 'bg-surface-secondary text-content-secondary ring-1 ring-slate-300/60 dark:ring-slate-700'
+                    ? 'bg-surface-secondary text-content-secondary ring-1 ring-border'
                     : status === 'outdated'
                       ? 'bg-semantic-warning-bg text-semantic-warning ring-1 ring-semantic-warning/30'
                       : 'bg-semantic-success-bg text-semantic-success ring-1 ring-semantic-success/30';
@@ -2631,7 +2628,7 @@ function ConverterStatusPanel() {
                         <span
                           className={['inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium', statusClass].join(' ')}
                         >
-                          <StatusIcon size={11} />
+                          <StatusIcon size={12} />
                           {statusLabel}
                         </span>
                       </div>
@@ -2664,7 +2661,7 @@ function ConverterStatusPanel() {
                           rel="noreferrer noopener"
                           className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
                         >
-                          <ExternalLink size={11} />
+                          <ExternalLink size={12} />
                           {t('settings.converter_view_source', { defaultValue: 'GitHub' })}
                         </a>
                       )}
@@ -2681,7 +2678,7 @@ function ConverterStatusPanel() {
                               : 'border border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
                           ].join(' ')}
                         >
-                          <Package size={11} />
+                          <Package size={12} />
                           {status === 'missing'
                             ? t('settings.converter_install', { defaultValue: 'Download' })
                             : status === 'outdated'

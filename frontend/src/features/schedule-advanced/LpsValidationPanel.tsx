@@ -13,7 +13,7 @@ export function LpsValidationPanel({ masterId }: { masterId: string }) {
   return (
     <Card padding="md">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule_advanced.lps_validation_title', { defaultValue: 'Last Planner checks' })}
         </h3>
         <Badge variant={q.data.errors > 0 ? 'error' : 'success'} size="sm">

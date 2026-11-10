@@ -256,7 +256,7 @@ export function ConceptPanel({ projectId, catalogue }: PanelProps) {
                 className="flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning/5 p-3 text-sm text-content-primary"
                 data-testid="plan-timezone-missing"
               >
-                <AlertTriangle size={15} className="shrink-0 text-semantic-warning" aria-hidden />
+                <AlertTriangle size={16} className="shrink-0 text-semantic-warning" aria-hidden />
                 <span className="flex-1">{tx(t, 'concept.timezone_missing')}</span>
                 <Button size="sm" variant="secondary" disabled={denied(c.can?.edit)} onClick={() => setEditing(true)}>
                   {tx(t, 'concept.set_timezone')}

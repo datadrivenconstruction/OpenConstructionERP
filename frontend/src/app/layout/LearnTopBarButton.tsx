@@ -33,7 +33,7 @@ export function LearnTopBarButton() {
       }}
       aria-label={label}
       title={hint}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue ring-1 ring-inset ring-oe-blue/20 transition-colors hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:bg-oe-blue/20 dark:text-sky-300"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue-text ring-1 ring-inset ring-oe-blue/20 transition-colors hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:bg-oe-blue/20"
     >
       <GraduationCap size={16} strokeWidth={2} aria-hidden />
     </button>

@@ -202,7 +202,7 @@ function SelectDropdown({
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={selectId}
-        className="text-sm font-medium text-content-primary"
+        className="oe-label"
       >
         {label}
       </label>
@@ -446,7 +446,7 @@ function DocumentCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-content-primary truncate">
+            <h3 className="oe-card-title truncate">
               {doc.filename}
             </h3>
             {hasError && (
@@ -537,7 +537,7 @@ function DocumentCard({
           Suppressed once an analysis already exists. */}
       {!aiConnected && !doc.analysis && !hasError && (
         <p className="mt-2.5 flex flex-wrap items-center gap-1 text-xs text-content-tertiary">
-          <BrainCircuit size={13} className="shrink-0 text-oe-blue" />
+          <BrainCircuit size={14} className="shrink-0 text-oe-blue" />
           {t('takeoff.ai_not_connected_hint', {
             defaultValue: 'Analyze with AI needs an AI provider connected.',
           })}
@@ -640,9 +640,9 @@ function DocumentCard({
                   </Button>
                 </div>
                 {!boqSelected && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 px-3 py-2">
-                    <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                    <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                  <div className="flex items-center gap-2 rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 px-3 py-2">
+                    <AlertTriangle size={14} className="text-semantic-warning shrink-0" />
+                    <span className="text-xs text-semantic-warning font-medium">
                       {t('takeoff.select_boq_warning', 'Select a project & BOQ above to add items')}
                     </span>
                   </div>
@@ -659,17 +659,17 @@ function DocumentCard({
                     href="/bim"
                     className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-text hover:border-oe-blue/30"
                   >
-                    <Box size={13} />
+                    <Box size={14} />
                     {t('takeoff.open_in_bim', 'Open in BIM Viewer')}
-                    <ArrowRight size={11} className="text-content-quaternary" />
+                    <ArrowRight size={12} className="text-content-quaternary" />
                   </a>
                   <a
                     href="/boq"
                     className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-text hover:border-oe-blue/30"
                   >
-                    <Link2 size={13} />
+                    <Link2 size={14} />
                     {t('takeoff.link_to_boq', 'Link to BOQ')}
-                    <ArrowRight size={11} className="text-content-quaternary" />
+                    <ArrowRight size={12} className="text-content-quaternary" />
                   </a>
                 </div>
               </div>
@@ -756,7 +756,7 @@ function QuickMeasurementForm({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor={unitSelectId}
-            className="text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('takeoff.unit', 'Unit')}
           </label>
@@ -766,13 +766,7 @@ function QuickMeasurementForm({
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
             disabled={disabled}
-            className={clsx(
-              'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm',
-              'transition-all duration-normal ease-oe text-content-primary',
-              'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-              'hover:border-content-tertiary',
-              disabled && 'opacity-40 cursor-not-allowed',
-            )}
+            className={clsx('oe-select', disabled && 'opacity-40 cursor-not-allowed')}
           >
             {UNIT_OPTIONS.map((u) => (
               <option key={u} value={u}>
@@ -911,7 +905,7 @@ function TakeoffDocFilmstrip({
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as FilmstripSort)}
                 aria-label={t('takeoff.sort_by', { defaultValue: 'Sort by' })}
-                className="h-6 rounded border border-border-light bg-surface-primary px-1 text-2xs text-content-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                className="oe-select oe-input-sm"
                 data-testid="takeoff-filmstrip-sort"
               >
                 <option value="recent">
@@ -1034,7 +1028,7 @@ function TakeoffDocFilmstrip({
                         : t('takeoff.pin', { defaultValue: 'Pin to top' })
                     }
                   >
-                    {isPinned ? <PinOff size={11} /> : <Pin size={11} />}
+                    {isPinned ? <PinOff size={12} /> : <Pin size={12} />}
                   </span>
                   <span
                     role="button"
@@ -1053,7 +1047,7 @@ function TakeoffDocFilmstrip({
                     title={t('common.delete', 'Delete')}
                     aria-label={t('common.delete', 'Delete')}
                   >
-                    <X size={11} />
+                    <X size={12} />
                   </span>
                 </button>
               );
@@ -1073,7 +1067,7 @@ function TakeoffDocFilmstrip({
             title={t('takeoff.upload_pdf', 'Upload PDF')}
           >
             <Plus
-              size={18}
+              size={20}
               className="text-content-quaternary group-hover:text-oe-blue transition-colors"
             />
           </button>
@@ -1118,7 +1112,7 @@ function AiTakeoffNotice({ connected }: { connected: boolean }) {
       className={clsx(
         'mb-6 rounded-xl border px-5 py-4',
         connected
-          ? 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-900/50 dark:bg-emerald-900/15'
+          ? 'border-semantic-success/30 bg-semantic-success-bg'
           : 'border-oe-blue/25 bg-oe-blue-subtle/50',
       )}
     >
@@ -1127,14 +1121,14 @@ function AiTakeoffNotice({ connected }: { connected: boolean }) {
           className={clsx(
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
             connected
-              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+              ? 'bg-semantic-success-bg text-semantic-success'
               : 'bg-oe-blue/10 text-oe-blue',
           )}
         >
-          {connected ? <CheckCircle2 size={18} /> : <BrainCircuit size={18} />}
+          {connected ? <CheckCircle2 size={20} /> : <BrainCircuit size={20} />}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {connected
               ? t('takeoff.ai_setup.ready_title', { defaultValue: 'AI provider connected' })
               : t('takeoff.ai_setup.title', { defaultValue: 'Connect an AI provider to use AI takeoff' })}
@@ -1159,7 +1153,7 @@ function AiTakeoffNotice({ connected }: { connected: boolean }) {
                   className={clsx(
                     'mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-2xs font-semibold',
                     connected
-                      ? 'bg-emerald-200/70 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200'
+                      ? 'bg-semantic-success-bg text-semantic-success'
                       : 'bg-oe-blue/15 text-oe-blue',
                   )}
                 >
@@ -1177,7 +1171,7 @@ function AiTakeoffNotice({ connected }: { connected: boolean }) {
               className="mt-3.5 inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3.5 py-2 text-xs font-semibold text-content-inverse transition-colors hover:bg-oe-blue/90"
             >
               {t('takeoff.ai_setup.connect_cta', { defaultValue: 'Connect an AI provider' })}
-              <ArrowRight size={13} />
+              <ArrowRight size={14} />
             </Link>
           )}
         </div>
@@ -2095,7 +2089,7 @@ export function TakeoffPage() {
           never interferes with foreground controls. */}
       <svg
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 w-full h-full text-slate-500 dark:text-slate-300"
+        className="pointer-events-none fixed inset-0 -z-10 w-full h-full text-content-secondary"
         preserveAspectRatio="xMidYMid slice"
         viewBox="0 0 1600 1000"
       >
@@ -2234,7 +2228,7 @@ export function TakeoffPage() {
               : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/60',
           )}
         >
-          <Ruler size={15} strokeWidth={2.1} aria-hidden />
+          <Ruler size={16} strokeWidth={2.1} aria-hidden />
           {t('takeoff.tab_measurements', 'Measurements')}
         </button>
         <button
@@ -2258,7 +2252,7 @@ export function TakeoffPage() {
               : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/60',
           )}
         >
-          <Sparkles size={15} strokeWidth={2.1} aria-hidden />
+          <Sparkles size={16} strokeWidth={2.1} aria-hidden />
           {t('takeoff.tab_documents', 'Documents & AI')}
           {documents.length > 0 && (
             <Badge variant={activeTab === 'documents' ? 'blue' : 'neutral'} size="sm">
@@ -2282,7 +2276,7 @@ export function TakeoffPage() {
             : 'cursor-not-allowed text-content-quaternary',
         )}
       >
-        <GitCompare size={15} strokeWidth={2.1} aria-hidden />
+        <GitCompare size={16} strokeWidth={2.1} aria-hidden />
         <span className="hidden sm:inline">
           {t('takeoff_compare.compare_short', { defaultValue: 'Compare' })}
         </span>
@@ -2313,7 +2307,7 @@ export function TakeoffPage() {
               { num: '4', label: t('takeoff.step_add', 'Add to BOQ'), icon: Plus, done: !!addToBOQSuccess },
             ].map((step) => (
               <div key={step.num} className={clsx(
-                'flex items-center gap-2.5 rounded-xl px-4 py-2.5 border transition-colors',
+                'flex items-center gap-2 rounded-xl px-4 py-2.5 border transition-colors',
                 step.done
                   ? 'border-semantic-success/30 bg-semantic-success-bg/50 text-semantic-success'
                   : 'border-border-light bg-surface-secondary/30 text-content-tertiary',
@@ -2373,7 +2367,7 @@ export function TakeoffPage() {
           {/* Success toast */}
           {addToBOQSuccess && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-3 animate-fade-in">
-              <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
+              <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
               <p className="text-sm font-medium text-semantic-success">{addToBOQSuccess}</p>
             </div>
           )}
@@ -2381,7 +2375,7 @@ export function TakeoffPage() {
           {/* Upload error toast */}
           {uploadErrorToast && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-error-bg px-5 py-3 animate-fade-in">
-              <AlertTriangle size={18} className="shrink-0 text-semantic-error" />
+              <AlertTriangle size={20} className="shrink-0 text-semantic-error" />
               <p className="text-sm font-medium text-semantic-error flex-1">{uploadErrorToast}</p>
               <button aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
                 onClick={() => setUploadErrorToast(null)}
@@ -2429,7 +2423,7 @@ export function TakeoffPage() {
               survive page reload. */}
           {filmstripDocuments.length > 0 && (
             <div className="mb-8">
-              <h2 className="mb-4 text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title mb-4">
                 {t('takeoff.uploaded_documents', 'Uploaded Documents')}
               </h2>
               <div className="space-y-4">
@@ -2459,7 +2453,7 @@ export function TakeoffPage() {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle">
                 <FileSearch size={24} strokeWidth={1.5} className="text-oe-blue" />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
+              <h3 className="oe-card-title mb-1">
                 {t('takeoff.no_documents', 'No documents uploaded')}
               </h3>
               <p className="text-xs text-content-tertiary max-w-md mx-auto">
@@ -2471,11 +2465,11 @@ export function TakeoffPage() {
           {/* Quick Measurements */}
           <Card className="mt-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
-                <Ruler size={14} className="text-amber-600" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-semantic-warning/10">
+                <Ruler size={14} className="text-semantic-warning" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title">
                   {t('takeoff.quick_measurements', 'Quick Measurements')}
                 </h2>
                 <p className="text-2xs text-content-tertiary">
@@ -2511,13 +2505,13 @@ export function TakeoffPage() {
           <div className="flex flex-1 min-h-0 flex-col overflow-y-auto overflow-x-hidden">
             {deepLinkNotFound && !viewerDoc ? (
               <div
-                className="mx-auto my-8 max-w-md rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/20 px-6 py-8 text-center"
+                className="mx-auto my-8 max-w-md rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-6 py-8 text-center"
                 data-testid="takeoff-deeplink-not-found"
               >
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                  <AlertTriangle size={24} className="text-amber-600" strokeWidth={1.5} />
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-semantic-warning-bg ">
+                  <AlertTriangle size={24} className="text-semantic-warning" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-sm font-semibold text-content-primary mb-1">
+                <h3 className="oe-card-title mb-1">
                   {t('takeoff.deeplink_not_found_title', { defaultValue: 'Document not found' })}
                 </h3>
                 <p className="text-xs text-content-tertiary mb-4">

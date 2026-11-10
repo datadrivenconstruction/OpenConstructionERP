@@ -159,7 +159,7 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
           value={shownUrl}
           onFocus={(e) => e.currentTarget.select()}
           aria-label={t('tendering.bid_link.manual_copy', { defaultValue: 'Bidder link, copy it by hand' })}
-          className="w-64 rounded border border-border-light bg-surface-secondary px-2 py-1 text-2xs text-content-secondary"
+          className="oe-input oe-input-sm w-64"
         />
       )}
       <ConfirmDialog {...confirmProps} />

@@ -139,7 +139,7 @@ export function PlanSetup({ projectId, labels, onDone }: { projectId: string; la
         >
           <select
             id="staffing-catalogue"
-            className={FIELD_CLASS}
+            className="oe-select"
             value={choice}
             onChange={(e) => setChoice(e.target.value)}
             data-testid="plan-catalogue"
@@ -359,7 +359,7 @@ export function ChangeCatalogueDialog({
           <WideModalField label={t('staffing.plan.new_catalogue', { defaultValue: 'New catalogue' })} htmlFor="staffing-new-catalogue">
             <select
               id="staffing-new-catalogue"
-              className={FIELD_CLASS}
+              className="oe-select"
               value={choice}
               onChange={(e) => {
                 setChoice(e.target.value);
@@ -410,7 +410,7 @@ export function ChangeCatalogueDialog({
                             </label>
                             <select
                               id={`map-${code}`}
-                              className={FIELD_CLASS}
+                              className="oe-select"
                               value={mapping[code] ?? ''}
                               onChange={(e) =>
                                 setMapping((m) => {

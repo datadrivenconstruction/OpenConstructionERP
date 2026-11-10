@@ -111,7 +111,7 @@ export function VideoPlayerDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-modal flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -130,7 +130,7 @@ export function VideoPlayerDialog({
               {labels.series(video.series)}
               {index >= 0 && list.length > 1 ? ` · ${index + 1}/${list.length}` : ''}
             </p>
-            <h2 id={titleId} lang={video.language} className="text-base font-semibold leading-snug text-content-primary">
+            <h2 id={titleId} lang={video.language} className="oe-section-title">
               {video.title}
             </h2>
           </div>
@@ -140,7 +140,7 @@ export function VideoPlayerDialog({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="shrink-0 rounded-lg p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -228,7 +228,7 @@ export function VideoPlayerDialog({
                       : 'border-border-light text-content-secondary hover:border-emerald-500/40 hover:text-semantic-success dark:hover:text-emerald-300',
                   )}
                 >
-                  {watched ? <CheckCircle2 size={13} aria-hidden /> : <Circle size={13} aria-hidden />}
+                  {watched ? <CheckCircle2 size={14} aria-hidden /> : <Circle size={14} aria-hidden />}
                   {t('videos.watched', { defaultValue: 'Watched' })}
                 </button>
                 <span className="ml-auto flex flex-wrap items-center gap-1 text-2xs text-content-tertiary">
@@ -279,7 +279,7 @@ export function VideoPlayerDialog({
               {cases.length > 0 && (
                 <section aria-labelledby={`${titleId}-cases`} className="rounded-xl border border-border-light bg-surface-secondary/40 p-3">
                   <h3 id={`${titleId}-cases`} className="flex items-center gap-1.5 text-xs font-semibold text-content-primary">
-                    <Route size={13} className="text-oe-blue" aria-hidden />
+                    <Route size={14} className="text-oe-blue" aria-hidden />
                     {t('videos.used_in_cases', { defaultValue: 'Used in these cases' })}
                   </h3>
                   <p className="mt-0.5 text-2xs text-content-tertiary">

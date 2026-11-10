@@ -112,7 +112,7 @@ import type {
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 function toNumber(v: number | string | null | undefined): number {
   if (v == null) return 0;
@@ -295,28 +295,28 @@ export function PhasesTab({
     <>
       <Card padding="md">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs text-content-tertiary border-b border-border-light">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.sequence', { defaultValue: '#' })}
                 </th>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.code', { defaultValue: 'Code' })}
                 </th>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.name', { defaultValue: 'Name' })}
                 </th>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.planned', { defaultValue: 'Planned' })}
                 </th>
-                <th className="text-left py-2 pr-3">
+                <th className="pr-3">
                   {t('propdev.phase.blocks', { defaultValue: 'Blocks' })}
                 </th>
-                <th className="text-right py-2 pr-2">
+                <th className="text-right pr-2">
                   {t('common.actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
@@ -325,21 +325,20 @@ export function PhasesTab({
               {phases.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-border-light/60 hover:bg-surface-secondary/50"
                 >
-                  <td className="py-2 pr-3 text-content-tertiary">
+                  <td className="pr-3 text-content-tertiary">
                     {p.sequence}
                   </td>
-                  <td className="py-2 pr-3 font-mono text-xs">{p.code}</td>
-                  <td className="py-2 pr-3">{p.name || '—'}</td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3 font-mono">{p.code}</td>
+                  <td className="pr-3">{p.name || '—'}</td>
+                  <td className="pr-3">
                     <Badge variant={PHASE_STATUS_VARIANT[p.status]} dot>
                       {t(`propdev.phase.status.${p.status}`, {
                         defaultValue: p.status.replace('_', ' '),
                       })}
                     </Badge>
                   </td>
-                  <td className="py-2 pr-3 text-xs">
+                  <td className="pr-3">
                     {p.planned_start ? (
                       <DateDisplay value={p.planned_start} />
                     ) : (
@@ -352,7 +351,7 @@ export function PhasesTab({
                       </>
                     )}
                   </td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     <button
                       type="button"
                       onClick={onJumpToBlocks}
@@ -362,7 +361,7 @@ export function PhasesTab({
                       {blockCounts[p.id] ?? 0}
                     </button>
                   </td>
-                  <td className="py-2 pr-2 text-right">
+                  <td className="pr-2 text-right">
                     <div className="inline-flex gap-1">
                       <Button
                         size="sm"
@@ -603,7 +602,7 @@ function PhaseFormModal({
             onChange={(e) =>
               setForm({ ...form, status: e.target.value as PhaseStatus })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="planned">
               {t('propdev.phase.status.planned', { defaultValue: 'Planned' })}
@@ -751,7 +750,7 @@ export function BlocksTab({
         <select
           value={phaseId}
           onChange={(e) => setPhaseId(e.target.value)}
-          className={clsx(inputCls, 'max-w-[280px]')}
+          className={clsx('oe-select', 'max-w-[280px]')}
         >
           {phases.map((p) => (
             <option key={p.id} value={p.id}>
@@ -785,30 +784,30 @@ export function BlocksTab({
       ) : (
         <Card padding="md">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-content-tertiary border-b border-border-light">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.code', { defaultValue: 'Code' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.layout', { defaultValue: 'Layout' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.orientation', {
                       defaultValue: 'Orient.',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.block.plots', { defaultValue: 'Plots' })}
                   </th>
-                  <th className="text-right py-2 pr-2">
+                  <th className="text-right pr-2">
                     {t('common.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -817,22 +816,21 @@ export function BlocksTab({
                 {blocks.map((b) => (
                   <tr
                     key={b.id}
-                    className="border-b border-border-light/60 hover:bg-surface-secondary/50"
                   >
-                    <td className="py-2 pr-3 font-mono text-xs">{b.code}</td>
-                    <td className="py-2 pr-3">{b.name || '—'}</td>
-                    <td className="py-2 pr-3 text-xs text-content-secondary">
+                    <td className="pr-3 font-mono">{b.code}</td>
+                    <td className="pr-3">{b.name || '—'}</td>
+                    <td className="pr-3 text-content-secondary">
                       {b.levels_count}L × {b.units_per_level}u
                     </td>
-                    <td className="py-2 pr-3 text-xs">{b.orientation || '—'}</td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">{b.orientation || '—'}</td>
+                    <td className="pr-3">
                       <Badge variant={BLOCK_STATUS_VARIANT[b.status]} dot>
                         {t(`propdev.block.status.${b.status}`, {
                           defaultValue: b.status.replace('_', ' '),
                         })}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">
                       <button
                         type="button"
                         onClick={onJumpToPlots}
@@ -842,7 +840,7 @@ export function BlocksTab({
                         {(plotsByBlock[b.id] ?? []).length}
                       </button>
                     </td>
-                    <td className="py-2 pr-2 text-right">
+                    <td className="pr-2 text-right">
                       <div className="inline-flex gap-1">
                         <Button
                           size="sm"
@@ -1117,7 +1115,7 @@ function BlockFormModal({
           <select
             value={form.orientation ?? ''}
             onChange={(e) => setForm({ ...form, orientation: e.target.value })}
-            className={inputCls}
+            className="oe-select"
           >
             <option value="">
               {t('common.none', { defaultValue: '- none -' })}
@@ -1140,7 +1138,7 @@ function BlockFormModal({
             onChange={(e) =>
               setForm({ ...form, status: e.target.value as BlockStatus })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="planned">
               {t('propdev.block.status.planned', { defaultValue: 'Planned' })}
@@ -1417,40 +1415,40 @@ export function BrokersTab() {
       ) : (
         <Card padding="md">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-content-tertiary border-b border-border-light">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.license', {
                       defaultValue: 'Licence #',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.licence', { defaultValue: 'Licence' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.jurisdiction', {
                       defaultValue: 'Region',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.email', { defaultValue: 'Email' })}
                   </th>
-                  <th className="text-right py-2 pr-3">
+                  <th className="text-right pr-3">
                     {t('propdev.broker.commission', {
                       defaultValue: 'Commission %',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.kyc', { defaultValue: 'KYC' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.broker.active', { defaultValue: 'Active' })}
                   </th>
-                  <th className="text-right py-2 pr-2">
+                  <th className="text-right pr-2">
                     {t('common.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -1459,27 +1457,26 @@ export function BrokersTab() {
                 {brokers.map((b) => (
                   <tr
                     key={b.id}
-                    className="border-b border-border-light/60 hover:bg-surface-secondary/50"
                   >
-                    <td className="py-2 pr-3 font-medium">{b.name}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">
+                    <td className="pr-3">{b.name}</td>
+                    <td className="pr-3 font-mono">
                       {b.license_number}
                     </td>
-                    <td className="py-2 pr-3 text-xs">
+                    <td className="pr-3">
                       <BrokerLicenceCell
                         licences={licencesByBroker.get(b.id) ?? []}
                       />
                     </td>
-                    <td className="py-2 pr-3 text-xs">
+                    <td className="pr-3">
                       {b.jurisdiction || '—'}
                     </td>
-                    <td className="py-2 pr-3 text-xs">
+                    <td className="pr-3">
                       {b.contact_email || '—'}
                     </td>
-                    <td className="py-2 pr-3 text-right tabular-nums">
+                    <td className="pr-3 text-right tabular-nums">
                       {fmtPercent(toNumber(b.default_commission_pct), 2)}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">
                       <Badge
                         variant={
                           b.kyc_status === 'verified'
@@ -1494,7 +1491,7 @@ export function BrokersTab() {
                         {b.kyc_status}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">
                       <button
                         type="button"
                         onClick={() =>
@@ -1507,7 +1504,7 @@ export function BrokersTab() {
                           'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
                           b.active
                             ? 'bg-semantic-success-bg text-semantic-success'
-                            : 'bg-slate-200 text-slate-700',
+                            : 'bg-surface-tertiary text-content-primary',
                         )}
                         title={t('propdev.broker.toggle_active', {
                           defaultValue: 'Toggle active',
@@ -1518,7 +1515,7 @@ export function BrokersTab() {
                           : t('common.no', { defaultValue: 'No' })}
                       </button>
                     </td>
-                    <td className="py-2 pr-2 text-right">
+                    <td className="pr-2 text-right">
                       <div className="inline-flex gap-1">
                         {b.kyc_status !== 'verified' && (
                           <Button
@@ -2164,34 +2161,34 @@ export function PriceMatrixTab({
       ) : (
         <Card padding="md">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-content-tertiary border-b border-border-light">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.matrix.name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="text-right py-2 pr-3">
+                  <th className="text-right pr-3">
                     {t('propdev.matrix.base_price', {
                       defaultValue: 'Base €/m²',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.matrix.currency', {
                       defaultValue: 'Currency',
                     })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.matrix.effective', {
                       defaultValue: 'Effective',
                     })}
                   </th>
-                  <th className="text-right py-2 pr-3">
+                  <th className="text-right pr-3">
                     {t('propdev.matrix.rules', { defaultValue: 'Rules' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.matrix.status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="text-right py-2 pr-2">
+                  <th className="text-right pr-2">
                     {t('common.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -2200,14 +2197,13 @@ export function PriceMatrixTab({
                 {matrices.map((m) => (
                   <tr
                     key={m.id}
-                    className="border-b border-border-light/60 hover:bg-surface-secondary/50"
                   >
-                    <td className="py-2 pr-3 font-medium">{m.name}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">
+                    <td className="pr-3">{m.name}</td>
+                    <td className="pr-3 text-right tabular-nums">
                       {fmtFixed(toNumber(m.base_price_per_m2), 2)}
                     </td>
-                    <td className="py-2 pr-3 text-xs">{m.currency}</td>
-                    <td className="py-2 pr-3 text-xs">
+                    <td className="pr-3">{m.currency}</td>
+                    <td className="pr-3">
                       <DateDisplay value={m.effective_from} />
                       {m.effective_to && (
                         <>
@@ -2216,10 +2212,10 @@ export function PriceMatrixTab({
                         </>
                       )}
                     </td>
-                    <td className="py-2 pr-3 text-right tabular-nums">
+                    <td className="pr-3 text-right tabular-nums">
                       {m.rules.length}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">
                       <Badge
                         variant={PRICE_MATRIX_STATUS_VARIANT[m.status]}
                         dot
@@ -2227,7 +2223,7 @@ export function PriceMatrixTab({
                         {m.status}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-2 text-right">
+                    <td className="pr-2 text-right">
                       <div className="inline-flex gap-1 flex-wrap justify-end">
                         <Button
                           size="sm"
@@ -2597,7 +2593,7 @@ function PriceMatrixFormModal({
                 status: e.target.value as PriceMatrixStatus,
               })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="draft">draft</option>
             <option value="active">active</option>
@@ -2635,7 +2631,7 @@ function PriceMatrixFormModal({
                     factor_type: e.target.value as PriceMatrixRule['factor_type'],
                   })
                 }
-                className={clsx(inputCls, 'col-span-3 h-8 text-xs')}
+                className={clsx('oe-select', 'oe-input-sm col-span-3')}
               >
                 <option value="floor">floor</option>
                 <option value="view">view</option>
@@ -2655,10 +2651,7 @@ function PriceMatrixFormModal({
                     // ignore - partial JSON while typing
                   }
                 }}
-                className={clsx(
-                  inputCls,
-                  'col-span-6 h-8 text-xs font-mono',
-                )}
+                className={clsx('oe-input', 'oe-input-sm col-span-6 font-mono')}
                 placeholder='{"floor_min":1,"floor_max":10}'
               />
               <input
@@ -2669,10 +2662,7 @@ function PriceMatrixFormModal({
                 onChange={(e) =>
                   updateRule(i, { multiplier: e.target.value })
                 }
-                className={clsx(
-                  inputCls,
-                  'col-span-2 h-8 text-xs tabular-nums',
-                )}
+                className={clsx('oe-input', 'oe-input-sm col-span-2 tabular-nums')}
               />
               <button
                 type="button"
@@ -2740,7 +2730,7 @@ function PriceMatrixPreviewModal({
           <select
             value={plotId}
             onChange={(e) => setPlotId(e.target.value)}
-            className={inputCls}
+            className="oe-select"
           >
             {plots.length === 0 && <option value="">- no plots -</option>}
             {plots.map((p) => {
@@ -3240,7 +3230,7 @@ function EscrowAccountFormModal({
                 regulator_ref: e.target.value as RegulatorRef,
               })
             }
-            className={inputCls}
+            className="oe-select"
             disabled={editing}
           >
             <option value="rera_dubai">RERA Dubai</option>
@@ -3438,36 +3428,36 @@ function EscrowTransactionsDrawer({
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-content-tertiary border-b border-border-light">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.escrow.tx_date', { defaultValue: 'Date' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.escrow.tx_dir', { defaultValue: 'Dir' })}
                   </th>
-                  <th className="text-right py-2 pr-3">
+                  <th className="text-right pr-3">
                     {t('propdev.escrow.tx_amount', { defaultValue: 'Amount' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.escrow.tx_source', { defaultValue: 'Source' })}
                   </th>
-                  <th className="text-left py-2 pr-3">
+                  <th className="pr-3">
                     {t('propdev.escrow.tx_state', {
                       defaultValue: 'Reconciled',
                     })}
                   </th>
-                  <th className="text-right py-2 pr-2"></th>
+                  <th className="text-right pr-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {txs.map((tx) => (
-                  <tr key={tx.id} className="border-b border-border-light/60">
-                    <td className="py-2 pr-3 text-xs">
+                  <tr key={tx.id}>
+                    <td className="pr-3">
                       <DateDisplay value={tx.transaction_date} />
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="pr-3">
                       <Badge
                         variant={
                           tx.direction === 'credit' ? 'success' : 'warning'
@@ -3477,11 +3467,11 @@ function EscrowTransactionsDrawer({
                         {tx.direction}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3 text-right tabular-nums">
+                    <td className="pr-3 text-right tabular-nums">
                       {fmtFixed(toNumber(tx.amount), 2)} {tx.currency}
                     </td>
-                    <td className="py-2 pr-3 text-xs">{tx.source_type}</td>
-                    <td className="py-2 pr-3 text-xs">
+                    <td className="pr-3">{tx.source_type}</td>
+                    <td className="pr-3">
                       <Badge
                         variant={
                           tx.reconciliation_state === 'matched'
@@ -3495,7 +3485,7 @@ function EscrowTransactionsDrawer({
                         {tx.reconciliation_state}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-2 text-right">
+                    <td className="pr-2 text-right">
                       {tx.reconciliation_state === 'unreconciled' && (
                         <Button
                           size="sm"
@@ -3639,7 +3629,7 @@ function EscrowTransactionFormModal({
                 direction: e.target.value as EscrowDirection,
               })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="credit">
               {t('propdev.escrow.dir.credit', {
@@ -3664,7 +3654,7 @@ function EscrowTransactionFormModal({
                 source_type: e.target.value as EscrowSourceType,
               })
             }
-            className={inputCls}
+            className="oe-select"
           >
             <option value="instalment">instalment</option>
             <option value="refund">refund</option>

@@ -65,7 +65,7 @@ export function SealedStateBadge({ state }: { state: SealedState }) {
         : t('tendering.sealed.badge_sealed', { defaultValue: 'Sealed' });
   return (
     <Badge variant={STATE_VARIANT[state]} size="sm" data-testid="sealed-state-badge">
-      {state === 'opened' ? <LockOpen size={11} className="mr-1 inline" /> : <Lock size={11} className="mr-1 inline" />}
+      {state === 'opened' ? <LockOpen size={12} className="mr-1 inline" /> : <Lock size={12} className="mr-1 inline" />}
       {label}
     </Badge>
   );
@@ -132,7 +132,7 @@ export function SealedBidMark() {
   const { t } = useTranslation();
   return (
     <span className="inline-flex items-center gap-1 text-sm font-medium text-content-secondary" data-testid="sealed-bid-mark">
-      <Lock size={13} aria-hidden />
+      <Lock size={14} aria-hidden />
       {t('tendering.sealed.sealed_label', { defaultValue: 'Sealed' })}
     </span>
   );
@@ -166,7 +166,7 @@ export function BidIntegrityButton({ bidId }: { bidId: string }) {
           role="status"
           data-testid="bid-integrity-result"
         >
-          {result.intact ? <ShieldCheck size={13} aria-hidden /> : <ShieldAlert size={13} aria-hidden />}
+          {result.intact ? <ShieldCheck size={14} aria-hidden /> : <ShieldAlert size={14} aria-hidden />}
           {result.intact
             ? t('tendering.sealed.integrity_intact', { defaultValue: 'Unchanged since receipt' })
             : t('tendering.sealed.integrity_changed', { defaultValue: 'Changed after receipt' })}
@@ -294,7 +294,7 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <h4 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-            <Lock size={15} className="text-oe-blue" aria-hidden />
+            <Lock size={16} className="text-oe-blue" aria-hidden />
             {t('tendering.sealed.mode_title', { defaultValue: 'Submission mode' })}
           </h4>
           {isSealed && <SealedStateBadge state={state} />}
@@ -343,7 +343,7 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
                 value={deadline}
                 disabled={decided || saveMutation.isPending}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                className="oe-input"
                 data-testid="sealed-deadline-input"
               />
               <span className="mt-1 block">
@@ -408,20 +408,20 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
               </p>
             ) : status ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table-compact">
                   <thead>
                     <tr className="text-left text-xs text-content-tertiary">
-                      <th className="py-1 pr-3 font-medium">{t('tendering.sealed.col_company', { defaultValue: 'Company' })}</th>
-                      <th className="py-1 pr-3 font-medium">{t('tendering.sealed.col_received', { defaultValue: 'Received' })}</th>
-                      <th className="py-1 font-medium">{t('tendering.sealed.col_hash', { defaultValue: 'SHA-256' })}</th>
+                      <th className="pr-3">{t('tendering.sealed.col_company', { defaultValue: 'Company' })}</th>
+                      <th className="pr-3">{t('tendering.sealed.col_received', { defaultValue: 'Received' })}</th>
+                      <th>{t('tendering.sealed.col_hash', { defaultValue: 'SHA-256' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {status.submissions.map((s) => (
-                      <tr key={s.bid_id} className="border-t border-border-light">
-                        <td className="py-1.5 pr-3 text-content-primary">{s.company_name}</td>
-                        <td className="py-1.5 pr-3 text-content-secondary">{localDateTime(s.received_at)}</td>
-                        <td className="py-1.5">
+                      <tr key={s.bid_id}>
+                        <td className="pr-3">{s.company_name}</td>
+                        <td className="pr-3 text-content-secondary">{localDateTime(s.received_at)}</td>
+                        <td>
                           <HashCell hash={s.sha256} />
                         </td>
                       </tr>
@@ -435,9 +435,9 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
       </div>
 
       {showOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-md space-y-3 rounded-xl bg-surface-primary p-5 shadow-xl" data-testid="sealed-open-dialog">
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('tendering.sealed.open_title', { defaultValue: 'Open sealed bids' })}
             </h3>
             <p className="text-sm text-content-secondary">

@@ -148,7 +148,7 @@ export function PlanItemDialog({ screen, item, stakeholders, onClose, onSaved }:
           <WideModalField label={t('stakeholders.ui.plan.title', { defaultValue: 'Title' })} required span={2} htmlFor="plan-title">
             <input
               id="plan-title"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.title}
               maxLength={255}
               onChange={(e) => set('title', e.target.value)}
@@ -158,7 +158,7 @@ export function PlanItemDialog({ screen, item, stakeholders, onClose, onSaved }:
             <textarea
               id="plan-purpose"
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.purpose}
               onChange={(e) => set('purpose', e.target.value)}
             />
@@ -167,7 +167,7 @@ export function PlanItemDialog({ screen, item, stakeholders, onClose, onSaved }:
             <textarea
               id="plan-message"
               rows={2}
-              className={FIELD_CLASS}
+              className="oe-textarea"
               value={draft.key_message}
               onChange={(e) => set('key_message', e.target.value)}
             />
@@ -330,7 +330,7 @@ export function PlanItemDialog({ screen, item, stakeholders, onClose, onSaved }:
             <input
               id="plan-starts"
               type="date"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.starts_on}
               onChange={(e) => set('starts_on', e.target.value)}
             />
@@ -340,7 +340,7 @@ export function PlanItemDialog({ screen, item, stakeholders, onClose, onSaved }:
             <input
               id="plan-ends"
               type="date"
-              className={FIELD_CLASS}
+              className="oe-input"
               value={draft.ends_on}
               min={draft.starts_on || undefined}
               onChange={(e) => set('ends_on', e.target.value)}

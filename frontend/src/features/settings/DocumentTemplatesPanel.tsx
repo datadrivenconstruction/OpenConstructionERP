@@ -61,7 +61,7 @@ import {
 } from './documentTemplates';
 
 const SELECT_CLS =
-  'h-8 w-full rounded border border-border bg-surface-primary px-2 text-xs disabled:opacity-60';
+  'oe-select oe-input-sm';
 
 export function DocumentTemplatesPanel() {
   const { t } = useTranslation();
@@ -124,7 +124,7 @@ export function DocumentTemplatesPanel() {
           <FileStack size={16} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('settings.document_templates.title', { defaultValue: 'Per-document look' })}
           </h2>
           <p className="mt-0.5 max-w-3xl text-xs text-content-secondary">

@@ -136,7 +136,7 @@ function ModuleToggle({
       className={clsx(
         'relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
-        enabled ? 'bg-oe-blue' : 'bg-gray-300 dark:bg-gray-600',
+        enabled ? 'bg-oe-blue' : 'bg-border',
         disabled || busy ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
       )}
     >
@@ -146,7 +146,7 @@ function ModuleToggle({
           enabled ? 'translate-x-5' : 'translate-x-0',
         )}
       >
-        {busy && <Loader2 size={11} className="animate-spin text-oe-blue" aria-hidden />}
+        {busy && <Loader2 size={12} className="animate-spin text-oe-blue" aria-hidden />}
       </span>
     </button>
   );
@@ -537,7 +537,7 @@ export function ModulesSettings() {
         <CardHeader
           title={
             <span className="flex items-center gap-2">
-              <Package size={18} className="shrink-0 text-oe-blue" aria-hidden />
+              <Package size={20} className="shrink-0 text-oe-blue" aria-hidden />
               {t('settings.modules_optional_title', { defaultValue: 'Installed modules' })}
             </span>
           }
@@ -562,7 +562,7 @@ export function ModulesSettings() {
             </p>
             <div className="relative sm:w-64">
               <Search
-                size={15}
+                size={16}
                 className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary"
                 aria-hidden
               />
@@ -572,7 +572,7 @@ export function ModulesSettings() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('settings.modules_search', { defaultValue: 'Search modules' })}
                 aria-label={t('settings.modules_search', { defaultValue: 'Search modules' })}
-                className="w-full rounded-lg border border-border-light bg-surface-primary py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+                className="oe-input ps-9"
               />
             </div>
           </div>
@@ -593,7 +593,7 @@ export function ModulesSettings() {
 
           {!isAdmin && (
             <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2.5">
-              <Info size={15} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden />
+              <Info size={16} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden />
               <p className="text-xs text-content-secondary">
                 {t('settings.modules_admin_only_hint', {
                   defaultValue:
@@ -635,9 +635,9 @@ export function ModulesSettings() {
                   >
                     <span className="flex items-center gap-2">
                       {isCollapsed ? (
-                        <ChevronRight size={15} className="text-content-tertiary" aria-hidden />
+                        <ChevronRight size={16} className="text-content-tertiary" aria-hidden />
                       ) : (
-                        <ChevronDown size={15} className="text-content-tertiary" aria-hidden />
+                        <ChevronDown size={16} className="text-content-tertiary" aria-hidden />
                       )}
                       <span className="text-sm font-semibold text-content-primary">
                         {t(group.key, { defaultValue: CATEGORY_DEFAULTS[group.key] ?? '' })}
@@ -665,7 +665,7 @@ export function ModulesSettings() {
         <CardHeader
           title={
             <span className="flex items-center gap-2">
-              <Lock size={18} className="shrink-0 text-content-tertiary" aria-hidden />
+              <Lock size={20} className="shrink-0 text-content-tertiary" aria-hidden />
               {t('settings.modules_core_title', { defaultValue: 'Always-on modules' })}
             </span>
           }
@@ -681,7 +681,7 @@ export function ModulesSettings() {
             aria-expanded={showCore}
             className="flex items-center gap-2 text-sm font-medium text-oe-blue hover:underline"
           >
-            {showCore ? <ChevronDown size={15} aria-hidden /> : <ChevronRight size={15} aria-hidden />}
+            {showCore ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
             {showCore
               ? t('settings.modules_core_hide', { defaultValue: 'Hide always-on modules' })
               : t('settings.modules_core_show', {
@@ -724,7 +724,7 @@ export function ModulesSettings() {
               variant="secondary"
               size="sm"
               onClick={() => navigate('/modules')}
-              icon={<ArrowUpRight size={15} />}
+              icon={<ArrowUpRight size={16} />}
               iconPosition="right"
             >
               {t('settings.modules_open_registry', { defaultValue: 'Open registry' })}

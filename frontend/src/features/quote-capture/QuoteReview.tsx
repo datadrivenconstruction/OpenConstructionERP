@@ -86,17 +86,17 @@ export function QuoteReview({ quote }: { quote: Quote }) {
       <div className="flex flex-col gap-4">
         <section className="rounded border p-3">
           <h3 className="mb-2 text-sm font-semibold">{t('quote_capture.header', 'Quote header')}</h3>
-          <table className="w-full text-sm">
+          <table className="oe-table-compact">
             <tbody>
               {HEADER_KEYS.map((key) => {
                 const f = quote.header[key];
                 return (
-                  <tr key={key} className="border-t first:border-t-0">
-                    <td className="py-1 pr-2 text-content-secondary">{t(`quote_capture.field_${key}`, key)}</td>
-                    <td className="py-1">
+                  <tr key={key} className="first:border-t-0">
+                    <td className="pr-2 text-content-secondary">{t(`quote_capture.field_${key}`, key)}</td>
+                    <td>
                       <input
                         aria-label={t(`quote_capture.field_${key}`, key)}
-                        className="w-full rounded border px-2 py-0.5"
+                        className="oe-input"
                         defaultValue={f?.value ?? ''}
                         disabled={locked}
                         onFocus={() => setAnchor(f?.anchor ?? null)}
@@ -106,7 +106,7 @@ export function QuoteReview({ quote }: { quote: Quote }) {
                         }}
                       />
                     </td>
-                    <td className="py-1 pl-2 text-right">{f ? <ConfidenceChip value={f.confidence} /> : null}</td>
+                    <td className="pl-2 text-right">{f ? <ConfidenceChip value={f.confidence} /> : null}</td>
                   </tr>
                 );
               })}
@@ -154,10 +154,10 @@ export function QuoteReview({ quote }: { quote: Quote }) {
         <section className="rounded border p-3">
           <h3 className="mb-2 text-sm font-semibold">{t('quote_capture.lines', 'Line items')}</h3>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
-              <thead className="text-left text-xs text-content-secondary">
+            <table className="oe-table min-w-[720px]">
+              <thead>
                 <tr>
-                  <th className="py-1">{t('quote_capture.col_description', 'Description')}</th>
+                  <th>{t('quote_capture.col_description', 'Description')}</th>
                   <th>{t('quote_capture.col_qty', 'Qty')}</th>
                   <th>{t('quote_capture.col_unit', 'Unit')}</th>
                   <th>{t('quote_capture.col_rate', 'Rate')}</th>
@@ -183,12 +183,12 @@ export function QuoteReview({ quote }: { quote: Quote }) {
                       className={`border-t align-top ${low ? 'bg-semantic-error-bg' : ''}`}
                       onClick={() => setAnchor(line.anchor)}
                     >
-                      <td className="py-1 pr-2" dir="auto">{line.description}</td>
+                      <td className="pr-2" dir="auto">{line.description}</td>
                       {(['quantity', 'unit', 'unit_rate', 'total'] as const).map((key) => (
                         <td key={key} className="pr-1">
                           <input
                             aria-label={`${line.id}-${key}`}
-                            className="w-20 rounded border px-1 py-0.5 text-right"
+                            className="oe-input w-20 text-right"
                             defaultValue={key === 'unit' ? line.unit : formatDecimal(line[key], key === 'quantity' ? 0 : 2)}
                             disabled={locked}
                             onBlur={(e) =>
@@ -203,7 +203,7 @@ export function QuoteReview({ quote }: { quote: Quote }) {
                       <td className="min-w-[180px]">
                         <select
                           aria-label={`${line.id}-match`}
-                          className="w-full rounded border px-1 py-0.5 text-xs"
+                          className="oe-select oe-input-sm"
                           disabled={locked}
                           value={m?.position_id ?? ''}
                           onChange={(e) =>

@@ -66,7 +66,7 @@ export function OrgChartView({ projectId, catalogue, labels, chart }: ViewBase &
       </div>
       {chart.phases.map((phase) => (
         <section key={phase.phase} className="space-y-2" data-testid={`org-phase-${phase.phase}`}>
-          <h2 className="text-base font-semibold text-content-primary">{vocab(t, PHASE, phase.phase)}</h2>
+          <h2 className="oe-section-title">{vocab(t, PHASE, phase.phase)}</h2>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {phase.organisations.map((org) => (
               <div key={org.organisation} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="org-box">
@@ -145,7 +145,7 @@ export function ComplianceView({
       </div>
       {compliance.summary.length > 0 && (
         <section className="space-y-2" data-testid="compliance-summary">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('staffing.compliance.summary_title', { defaultValue: 'People whose file you cannot open, by document' })}
           </h2>
           <p className="text-xs text-content-tertiary">
@@ -155,15 +155,15 @@ export function ComplianceView({
             })}
           </p>
           <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-            <table className="w-full min-w-[560px] text-sm">
+            <table className="oe-table min-w-[560px]">
               <thead>
-                <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                  <th scope="col" className="px-3 py-2 font-medium">{t('staffing.document.kind', { defaultValue: 'Document' })}</th>
-                  <th scope="col" className="px-3 py-2 text-right font-medium">
+                <tr className="text-left text-xs text-content-tertiary">
+                  <th scope="col">{t('staffing.document.kind', { defaultValue: 'Document' })}</th>
+                  <th scope="col" className="text-right">
                     {t('staffing.compliance.summary_people', { defaultValue: 'People' })}
                   </th>
                   {SUMMARY_STATES.map((state) => (
-                    <th key={state} scope="col" className="px-3 py-2 text-right font-medium">
+                    <th key={state} scope="col" className="text-right">
                       {vocab(t, CELL_STATE, state)}
                     </th>
                   ))}
@@ -171,21 +171,21 @@ export function ComplianceView({
               </thead>
               <tbody>
                 {compliance.summary.map((line) => (
-                  <tr key={line.document_kind} className="border-b border-border-light last:border-b-0" data-testid="compliance-summary-row">
-                    <th scope="row" className="px-3 py-2 text-left font-medium text-content-primary">
+                  <tr key={line.document_kind} className="last:border-b-0" data-testid="compliance-summary-row">
+                    <th scope="row">
                       {catalogueName(labels, catalogue, 'document_kind', line.document_kind)}
                     </th>
-                    <td className="px-3 py-2 text-right tabular-nums" data-testid="compliance-summary-people">
+                    <td className="text-right tabular-nums" data-testid="compliance-summary-people">
                       {fmtNumber(line.required, 0)}
                     </td>
                     {line.uniform ? (
                       // Everybody held back stands the same: a split would say how each of them stands.
-                      <td colSpan={SUMMARY_STATES.length} className="px-3 py-2 text-xs text-content-tertiary" data-testid="compliance-summary-uniform">
+                      <td colSpan={SUMMARY_STATES.length} className="text-content-tertiary" data-testid="compliance-summary-uniform">
                         {t('staffing.compliance.summary_uniform', { defaultValue: 'Not split by state: all of them stand the same.' })}
                       </td>
                     ) : (
                       SUMMARY_STATES.map((state) => (
-                        <td key={state} className="px-3 py-2 text-right tabular-nums" data-state={state}>
+                        <td key={state} className="text-right tabular-nums" data-state={state}>
                           {fmtNumber(line[state] ?? 0, 0)}
                         </td>
                       ))
@@ -198,15 +198,15 @@ export function ComplianceView({
         </section>
       )}
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-              <th scope="col" className="sticky left-0 bg-surface-primary px-3 py-2 font-medium">
+            <tr className="text-left text-xs text-content-tertiary">
+              <th scope="col" className="sticky left-0">
                 {t('staffing.fill.person', { defaultValue: 'Person' })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.people.clearance', { defaultValue: 'Clearance' })}</th>
+              <th scope="col">{t('staffing.people.clearance', { defaultValue: 'Clearance' })}</th>
               {compliance.document_kinds.map((k) => (
-                <th key={k} scope="col" className="min-w-[7rem] px-3 py-2 font-medium">
+                <th key={k} scope="col" className="min-w-[7rem]">
                   {catalogueName(labels, catalogue, 'document_kind', k)}
                 </th>
               ))}
@@ -214,8 +214,8 @@ export function ComplianceView({
           </thead>
           <tbody>
             {compliance.items.map((row) => (
-              <tr key={row.roster_member_id} className="border-b border-border-light last:border-b-0" data-testid="compliance-row">
-                <th scope="row" className="sticky left-0 bg-surface-primary px-3 py-2 text-left font-medium text-content-primary">
+              <tr key={row.roster_member_id} className="last:border-b-0" data-testid="compliance-row">
+                <th scope="row" className="sticky left-0">
                   {row.file_id ? (
                     <button type="button" className="text-left hover:underline" onClick={() => onOpenFile(row.file_id as string)}>
                       {personLabel(labels.t, row.name)}
@@ -227,19 +227,19 @@ export function ComplianceView({
                     {fmtList(row.roles.map((r) => catalogueName(labels, catalogue, 'role', r)))}
                   </div>
                 </th>
-                <td className="px-3 py-2">
+                <td>
                   <ClearedBadge cleared={row.cleared_to_work} />
                 </td>
                 {!row.can.see_documents.allowed && compliance.document_kinds.length > 0 && (
-                  <td colSpan={compliance.document_kinds.length} className="px-3 py-2 text-xs text-content-tertiary" data-testid="compliance-hidden">
+                  <td colSpan={compliance.document_kinds.length} className="text-content-tertiary" data-testid="compliance-hidden">
                     {whyNot(labels.t, row.can.see_documents)}
                   </td>
                 )}
                 {row.can.see_documents.allowed && compliance.document_kinds.map((k) => {
                   const cell = row.cells[k];
-                  if (!cell) return <td key={k} className="px-3 py-2" />;
+                  if (!cell) return <td key={k} />;
                   return (
-                    <td key={k} className="px-3 py-2" data-testid="compliance-cell" data-state={cell.state}>
+                    <td key={k} data-testid="compliance-cell" data-state={cell.state}>
                       <span className={clsx(cell.state === 'not_required' && 'opacity-60')}>
                         <ToneBadge tone={CELL_TONE[cell.state]}>
                           {cell.state === 'expiring' && typeof cell.days === 'number'
@@ -269,7 +269,7 @@ export function ComplianceView({
 function UpcomingBlock({ title, empty, children, count, testId }: { title: string; empty: string; children: ReactNode; count: number; testId: string }) {
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid={testId}>
-      <h2 className="mb-2 text-sm font-semibold text-content-primary">{title}</h2>
+      <h2 className="oe-card-title mb-2">{title}</h2>
       {count === 0 ? <p className="text-sm text-content-tertiary">{empty}</p> : <ul className="space-y-1.5">{children}</ul>}
     </section>
   );
@@ -399,20 +399,20 @@ export function PlannedVsActualView({
         })}
       </p>
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="oe-table min-w-[640px]">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-              <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.role', { defaultValue: 'Role' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('staffing.pva.working_days', { defaultValue: 'Working days' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('staffing.pva.planned_days', { defaultValue: 'Planned FTE days' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('staffing.pva.actual_days', { defaultValue: 'Booked days' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('staffing.pva.variance', { defaultValue: 'Variance' })}</th>
+            <tr className="text-left text-xs text-content-tertiary">
+              <th scope="col">{t('staffing.position.role', { defaultValue: 'Role' })}</th>
+              <th scope="col" className="text-right">{t('staffing.pva.working_days', { defaultValue: 'Working days' })}</th>
+              <th scope="col" className="text-right">{t('staffing.pva.planned_days', { defaultValue: 'Planned FTE days' })}</th>
+              <th scope="col" className="text-right">{t('staffing.pva.actual_days', { defaultValue: 'Booked days' })}</th>
+              <th scope="col" className="text-right">{t('staffing.pva.variance', { defaultValue: 'Variance' })}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.position_id} className="border-b border-border-light last:border-b-0" data-testid="pva-row">
-                <td className="px-3 py-2 text-content-primary">
+              <tr key={r.position_id} className="last:border-b-0" data-testid="pva-row">
+                <td>
                   {nameOf(r)}
                   {r.linked_resources === 0 && (
                     <div className="text-xs text-content-tertiary" data-testid="pva-unlinked">
@@ -420,10 +420,10 @@ export function PlannedVsActualView({
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums" data-testid="pva-working-days">{fmtNumber(r.working_days, 0)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{days(r.planned_fte_days)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{r.linked_resources === 0 ? '' : days(r.actual_fte_days)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{r.linked_resources === 0 ? '' : days(r.variance_fte_days)}</td>
+                <td className="text-right tabular-nums" data-testid="pva-working-days">{fmtNumber(r.working_days, 0)}</td>
+                <td className="text-right tabular-nums">{days(r.planned_fte_days)}</td>
+                <td className="text-right tabular-nums">{r.linked_resources === 0 ? '' : days(r.actual_fte_days)}</td>
+                <td className="text-right tabular-nums">{r.linked_resources === 0 ? '' : days(r.variance_fte_days)}</td>
               </tr>
             ))}
           </tbody>

@@ -79,7 +79,7 @@ export function ProjectSubdivisionCard({ project }: { project: Project }) {
             {t('project.settings.location.country', { defaultValue: 'Country' })}
           </span>
           <span className="inline-flex h-9 items-center gap-1.5 text-sm text-content-secondary">
-            <MapPin size={13} className="text-content-tertiary" />
+            <MapPin size={14} className="text-content-tertiary" />
             {country ||
               t('project.settings.location.country_none', {
                 defaultValue: 'Not set, taken from the site address',
@@ -87,7 +87,7 @@ export function ProjectSubdivisionCard({ project }: { project: Project }) {
           </span>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="project-subdivision" className="text-sm font-medium text-content-primary">
+          <label htmlFor="project-subdivision" className="oe-label">
             {t('project.settings.location.subdivision', { defaultValue: 'State / province' })}
           </label>
           <input
@@ -99,7 +99,7 @@ export function ProjectSubdivisionCard({ project }: { project: Project }) {
             maxLength={6}
             autoComplete="off"
             aria-invalid={invalid || undefined}
-            className="h-9 w-32 rounded-lg border border-border bg-surface-primary px-3 text-sm uppercase text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input w-32 uppercase"
           />
         </div>
         <Button

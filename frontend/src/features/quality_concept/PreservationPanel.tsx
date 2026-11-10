@@ -420,7 +420,7 @@ function SurveyDialog({
     >
       <div className="grid gap-3 md:grid-cols-3">
         <Field required label={t('qualityConcept.preservation.subject', { defaultValue: 'What is surveyed' })}>
-          <select className={inputCls} value={subject} disabled={!!survey} onChange={(e) => setSubject(e.target.value)} data-testid="survey-subject">
+          <select className="oe-select" value={subject} disabled={!!survey} onChange={(e) => setSubject(e.target.value)} data-testid="survey-subject">
             {subjects.map((s) => (
               <option key={s.code} value={s.code}>
                 {nameIn(labels, subjects, s.code)}
@@ -534,7 +534,7 @@ function SurveyActionDialog({
             : t('qualityConcept.common.note', { defaultValue: 'Note' })
         }
       >
-        <textarea rows={2} className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} data-testid="survey-action-note" />
+        <textarea rows={2} className="oe-textarea" value={note} onChange={(e) => setNote(e.target.value)} data-testid="survey-action-note" />
       </Field>
     </FormDialog>
   );
@@ -568,7 +568,7 @@ function PairDialog({ projectId, survey, all, onClose }: PanelProps & { survey: 
       onSubmit={() => write.send(() => pairSurvey(projectId, survey.id, beforeId), onClose)}
     >
       <Field label={t('qualityConcept.preservation.before_survey', { defaultValue: 'Before survey' })}>
-        <select className={inputCls} value={beforeId} onChange={(e) => setPicked(e.target.value)}>
+        <select className="oe-select" value={beforeId} onChange={(e) => setPicked(e.target.value)}>
           {befores.map((b) => (
             <option key={b.id} value={b.id}>
               {b.survey_date ? fmtDate(b.survey_date) : b.planned_date ? fmtDate(b.planned_date) : b.subject_ref}
@@ -622,7 +622,7 @@ function ReportDialog({ projectId, report, onClose }: PanelProps & { report: Exp
       </Field>
       <div className="grid gap-3 md:grid-cols-3">
         <Field label={t('qualityConcept.expert.trigger', { defaultValue: 'What sets it off' })}>
-          <select className={inputCls} value={trigger} onChange={(e) => setTrigger(e.target.value)} data-testid="report-trigger">
+          <select className="oe-select" value={trigger} onChange={(e) => setTrigger(e.target.value)} data-testid="report-trigger">
             <option value="">{t('qualityConcept.common.none', { defaultValue: 'None' })}</option>
             {/* A value an older record holds as free text stays selectable until it is replaced. */}
             {trigger && !EXPERT_TRIGGER[trigger] && <option value={trigger}>{trigger}</option>}
@@ -634,7 +634,7 @@ function ReportDialog({ projectId, report, onClose }: PanelProps & { report: Exp
           </select>
         </Field>
         <Field label={t('qualityConcept.expert.frequency', { defaultValue: 'How often' })}>
-          <select className={inputCls} value={frequency} onChange={(e) => setFrequency(e.target.value)} data-testid="report-frequency">
+          <select className="oe-select" value={frequency} onChange={(e) => setFrequency(e.target.value)} data-testid="report-frequency">
             <option value="">{t('qualityConcept.common.none', { defaultValue: 'None' })}</option>
             {/* A value an older record holds as free text stays selectable until it is replaced. */}
             {frequency && !EXPERT_FREQUENCY[frequency] && <option value={frequency}>{frequency}</option>}

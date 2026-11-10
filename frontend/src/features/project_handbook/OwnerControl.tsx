@@ -81,7 +81,7 @@ export function OwnerControl({
       {editing ? (
         <div className="flex flex-wrap items-center gap-2">
           <select
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+            className="oe-select"
             aria-label={t('projectHandbook.owner', { defaultValue: 'Owner' })}
             value={choice}
             disabled={members.isLoading}

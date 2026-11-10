@@ -346,7 +346,7 @@ export function ScheduleInterchangePanel({
       <Card padding="md">
         <div className="mb-1 flex items-center gap-2">
           <Download size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.interchange.export_title', { defaultValue: 'Export schedule' })}
           </h3>
         </div>
@@ -423,7 +423,7 @@ export function ScheduleInterchangePanel({
       <Card padding="md">
         <div className="mb-1 flex flex-wrap items-center gap-2">
           <Stethoscope size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.interchange.health_title', { defaultValue: 'Schedule health check' })}
           </h3>
           <Badge variant="neutral">
@@ -473,7 +473,7 @@ export function ScheduleInterchangePanel({
       <Card padding="md">
         <div className="mb-1 flex items-center gap-2">
           <Upload size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.interchange.import_title', { defaultValue: 'Import schedule' })}
           </h3>
         </div>
@@ -487,7 +487,7 @@ export function ScheduleInterchangePanel({
         <div className="space-y-3">
           {/* File picker */}
           <div>
-            <label htmlFor="interchange-file" className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-secondary">
+            <label htmlFor="interchange-file" className="oe-label">
               {t('schedule.interchange.file_label', { defaultValue: 'Interchange document (.json)' })}
             </label>
             <input
@@ -500,7 +500,7 @@ export function ScheduleInterchangePanel({
             />
             {importFileName && (
               <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-content-secondary">
-                <FileJson size={13} className="text-oe-blue" />
+                <FileJson size={14} className="text-oe-blue" />
                 {importFileName}
               </span>
             )}
@@ -591,7 +591,7 @@ export function ScheduleInterchangePanel({
       <Card padding="md">
         <div className="mb-1 flex items-center gap-2">
           <FileCode2 size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.interchange.vendor_import_title', {
               defaultValue: 'Import a Microsoft Project XML or XER file',
             })}
@@ -608,7 +608,7 @@ export function ScheduleInterchangePanel({
           <div>
             <label
               htmlFor="vendor-file"
-              className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-secondary"
+              className="oe-label"
             >
               {t('schedule.interchange.vendor_file_label', {
                 defaultValue: 'Project file (.xml or .xer)',
@@ -628,7 +628,7 @@ export function ScheduleInterchangePanel({
             />
             {vendorFile && (
               <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-content-secondary">
-                <FileCode2 size={13} className="text-oe-blue" />
+                <FileCode2 size={14} className="text-oe-blue" />
                 {vendorFile.name}
               </span>
             )}

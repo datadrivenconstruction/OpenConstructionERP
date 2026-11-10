@@ -349,7 +349,7 @@ export function CompanyDocumentsSettings() {
           className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-4 py-3 text-sm text-content-secondary"
           data-testid="company-read-only"
         >
-          <Lock size={15} className="mt-0.5 shrink-0" />
+          <Lock size={16} className="mt-0.5 shrink-0" />
           <span>
             {t('settings.company.read_only', {
               defaultValue:
@@ -471,7 +471,7 @@ export function CompanyDocumentsSettings() {
                 <div className="sm:col-span-2 flex flex-col gap-1.5">
                   <label
                     htmlFor="company-address"
-                    className="text-sm font-medium text-content-primary"
+                    className="oe-label"
                   >
                     {t('settings.company.address', { defaultValue: 'Address' })}
                   </label>
@@ -492,7 +492,7 @@ export function CompanyDocumentsSettings() {
                     placeholder={t('settings.company.address_placeholder', {
                       defaultValue: '12 Harbour Road\nSpringfield 12345\nUnited States',
                     })}
-                    className="w-full resize-none rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary hover:border-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    className="oe-textarea resize-none"
                     aria-describedby="company-address-hint"
                   />
                   {maxAddressLines !== null && (
@@ -649,7 +649,7 @@ function SectionHeader({
         {icon}
       </div>
       <div className="min-w-0">
-        <h2 className="text-sm font-semibold text-content-primary">{title}</h2>
+        <h2 className="oe-card-title">{title}</h2>
         <p className="mt-0.5 max-w-3xl text-xs text-content-secondary">{subtitle}</p>
       </div>
     </div>

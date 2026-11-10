@@ -137,7 +137,7 @@ export function DrillDrawer({
             return (
               <div
                 key={(fields['id'] as string) ?? idx}
-                className="rounded-md border border-border-light bg-surface-secondary p-2.5"
+                className="rounded-md border border-border-light bg-surface-secondary p-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-sm font-medium text-content-primary">

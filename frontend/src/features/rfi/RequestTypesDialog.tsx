@@ -37,7 +37,7 @@ import {
 import { fmtList } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 /** The form label each required field already has in the request form. */
 const REQUIRED_FIELD_LABEL_KEYS: Record<RequiredField, [string, string]> = {
@@ -289,24 +289,24 @@ export function RequestTypesDialog({
       {/* ── Catalogue ── */}
       <WideModalSection title={t('rfi.types.section_catalogue', { defaultValue: 'Types in this project' })}>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" data-testid="rfi-type-catalogue">
+          <table className="oe-table" data-testid="rfi-type-catalogue">
             <thead>
               <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-2 pe-3 font-medium">{t('rfi.types.col_type', { defaultValue: 'Type' })}</th>
-                <th className="py-2 pe-3 font-medium">{t('rfi.types.col_numbering', { defaultValue: 'Numbering' })}</th>
-                <th className="py-2 pe-3 font-medium">
+                <th>{t('rfi.types.col_type', { defaultValue: 'Type' })}</th>
+                <th>{t('rfi.types.col_numbering', { defaultValue: 'Numbering' })}</th>
+                <th>
                   {t('rfi.types.col_sla', { defaultValue: 'Response (business days)' })}
                 </th>
-                <th className="py-2 pe-3 font-medium">
+                <th>
                   {t('rfi.types.col_required', { defaultValue: 'Required before issue' })}
                 </th>
-                <th className="py-2 pe-3 font-medium">
+                <th>
                   {t('rfi.types.col_route', { defaultValue: 'Default approval route' })}
                 </th>
-                <th className="py-2 pe-3 font-medium text-end">
+                <th className="text-end">
                   {t('rfi.types.col_requests', { defaultValue: 'Requests' })}
                 </th>
-                <th className="py-2 font-medium" />
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -315,7 +315,7 @@ export function RequestTypesDialog({
                   key={type.code}
                   className={clsx('border-t border-border-light align-top', !type.is_active && 'opacity-60')}
                 >
-                  <td className="py-2 pe-3">
+                  <td>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs font-semibold text-content-secondary">{type.code}</span>
                       <span className="text-content-primary">{requestTypeName(type, language)}</span>
@@ -338,14 +338,14 @@ export function RequestTypesDialog({
                       </p>
                     )}
                   </td>
-                  <td className="py-2 pe-3 font-mono text-xs">{sampleNumber(type)}</td>
-                  <td className="py-2 pe-3 tabular-nums">{type.response_days}</td>
-                  <td className="py-2 pe-3 text-xs text-content-secondary">
+                  <td className="font-mono">{sampleNumber(type)}</td>
+                  <td className="tabular-nums">{type.response_days}</td>
+                  <td className="text-content-secondary">
                     {type.required_fields.length > 0
                       ? fmtList(type.required_fields.map(fieldLabel))
                       : t('rfi.types.none_required', { defaultValue: 'Nothing extra' })}
                   </td>
-                  <td className="py-2 pe-3">
+                  <td>
                     {type.id && canManage ? (
                       <select
                         value={type.default_route_id ?? ''}
@@ -353,7 +353,7 @@ export function RequestTypesDialog({
                         onChange={(e) =>
                           updateMut.mutate({ id: type.id!, data: { default_route_id: e.target.value || null } })
                         }
-                        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs"
+                        className="oe-select oe-input-sm"
                       >
                         <option value="">{t('rfi.types.no_route', { defaultValue: 'No default route' })}</option>
                         {routes.map((r) => (
@@ -369,8 +369,8 @@ export function RequestTypesDialog({
                       </span>
                     )}
                   </td>
-                  <td className="py-2 pe-3 text-end tabular-nums">{type.request_count}</td>
-                  <td className="py-2">
+                  <td className="text-end tabular-nums">{type.request_count}</td>
+                  <td>
                     {type.id && canManage && (
                       <div className="flex items-center justify-end gap-1">
                         <Button
@@ -482,7 +482,7 @@ export function RequestTypesDialog({
               id="rfi-type-route"
               value={form.routeId}
               onChange={(e) => setForm((f) => ({ ...f, routeId: e.target.value }))}
-              className={inputCls}
+              className="oe-select oe-input-lg"
             >
               <option value="">{t('rfi.types.no_route', { defaultValue: 'No default route' })}</option>
               {routes.map((r) => (

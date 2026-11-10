@@ -59,7 +59,7 @@ const toInput = (e: BidOutcome): BidOutcomeInput => ({
 });
 
 const inputCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary';
+  'oe-input';
 
 export function WinLossPage() {
   const { t } = useTranslation();
@@ -160,7 +160,7 @@ export function WinLossPage() {
             {t('winloss.currency', { defaultValue: 'Currency' })}
           </span>
           <select
-            className={`${inputCls} w-28`}
+            className="oe-select w-28"
             value={s.currency}
             onChange={(e) => setCurrency(e.target.value)}
           >
@@ -219,7 +219,7 @@ export function WinLossPage() {
             {field(
               t('winloss.f_outcome', { defaultValue: 'Outcome' }),
               <select
-                className={inputCls}
+                className="oe-select"
                 value={form.outcome}
                 onChange={(e) => set('outcome', e.target.value as BidOutcomeStatus)}
               >
@@ -294,7 +294,7 @@ export function WinLossPage() {
               field(
                 t('winloss.f_reason', { defaultValue: 'Main reason' }),
                 <select
-                  className={inputCls}
+                  className="oe-select"
                   value={form.lost_reason ?? ''}
                   onChange={(e) => set('lost_reason', (e.target.value || null) as LostReason | null)}
                 >
@@ -333,7 +333,7 @@ export function WinLossPage() {
       {s && s.submitted > 0 && (
         <section className="rounded-xl border border-border bg-surface-primary p-4">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('winloss.hit_rate_by', { defaultValue: 'Hit rate by' })}
             </h2>
             {(['by_client', 'by_trade', 'by_size'] as GroupBy[]).map((g) => (
@@ -354,10 +354,10 @@ export function WinLossPage() {
               </button>
             ))}
           </div>
-          <table className="w-full text-sm" data-testid="winloss-groups">
+          <table className="oe-table" data-testid="winloss-groups">
             <thead>
               <tr className="text-left text-xs text-content-secondary">
-                <th className="py-1">{t('winloss.group', { defaultValue: 'Group' })}</th>
+                <th>{t('winloss.group', { defaultValue: 'Group' })}</th>
                 <th>{t('winloss.submitted', { defaultValue: 'Submitted' })}</th>
                 <th>{t('winloss.won', { defaultValue: 'Won' })}</th>
                 <th>{t('winloss.lost', { defaultValue: 'Lost' })}</th>
@@ -367,8 +367,8 @@ export function WinLossPage() {
             </thead>
             <tbody>
               {s[groupBy].map((g: GroupStat) => (
-                <tr key={g.key} className="border-t border-border">
-                  <td className="py-1.5">{groupLabel(g.key)}</td>
+                <tr key={g.key}>
+                  <td>{groupLabel(g.key)}</td>
                   <td>{g.submitted}</td>
                   <td>{g.won}</td>
                   <td>{g.lost}</td>
@@ -397,10 +397,10 @@ export function WinLossPage() {
 
       {entries.data && entries.data.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-border bg-surface-primary">
-          <table className="w-full text-sm" data-testid="winloss-entries">
+          <table className="oe-table" data-testid="winloss-entries">
             <thead>
               <tr className="text-left text-xs text-content-secondary">
-                <th className="px-3 py-2">{t('winloss.f_title', { defaultValue: 'Bid' })}</th>
+                <th>{t('winloss.f_title', { defaultValue: 'Bid' })}</th>
                 <th>{t('winloss.f_client', { defaultValue: 'Client' })}</th>
                 <th>{t('winloss.f_outcome', { defaultValue: 'Outcome' })}</th>
                 <th className="text-right">{t('winloss.f_our_price', { defaultValue: 'Our price' })}</th>
@@ -413,8 +413,8 @@ export function WinLossPage() {
             </thead>
             <tbody>
               {entries.data.map((e) => (
-                <tr key={e.id} className="border-t border-border">
-                  <td className="px-3 py-1.5">
+                <tr key={e.id}>
+                  <td>
                     <button
                       type="button"
                       className="text-left font-medium text-oe-blue-text hover:underline"
@@ -437,7 +437,7 @@ export function WinLossPage() {
                         ? `-${money(e.gap_to_winner, e.currency)}`
                         : ''}
                   </td>
-                  <td className="px-2 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}

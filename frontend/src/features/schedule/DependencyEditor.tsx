@@ -16,7 +16,7 @@ import {
 const REL_TYPES: RelationshipType[] = ['FS', 'SS', 'FF', 'SF'];
 
 const SELECT_CLS =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  'oe-select';
 
 /**
  * Predecessor editor for a single activity.
@@ -140,7 +140,7 @@ export function DependencyEditor({
   return (
     <div data-testid="dependency-editor" className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-        <GitBranch size={15} className="text-oe-blue" />
+        <GitBranch size={16} className="text-oe-blue" />
         {t('schedule.predecessors', { defaultValue: 'Predecessors' })}
       </div>
 
@@ -202,7 +202,7 @@ export function DependencyEditor({
                     defaultValue: 'Lag (days)',
                   })}
                   data-testid={`dep-lag-${r.id}`}
-                  className={`w-20 ${SELECT_CLS}`}
+                  className="w-20 oe-input"
                   defaultValue={r.lag_days}
                   disabled={busy}
                   onBlur={(e) => {
@@ -220,7 +220,7 @@ export function DependencyEditor({
                 onClick={() => deleteMutation.mutate(r.id)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-50"
               >
-                <Trash2 size={15} />
+                <Trash2 size={16} />
               </button>
             </li>
           ))}
@@ -281,7 +281,7 @@ export function DependencyEditor({
               defaultValue: 'New dependency lag in days',
             })}
             data-testid="dep-add-lag"
-            className={`w-20 ${SELECT_CLS}`}
+            className="w-20 oe-input"
             value={newLag}
             disabled={busy}
             onChange={(e) => setNewLag(e.target.value)}
@@ -290,7 +290,7 @@ export function DependencyEditor({
         <Button
           variant="secondary"
           size="sm"
-          icon={<Plus size={15} />}
+          icon={<Plus size={16} />}
           data-testid="dep-add-submit"
           disabled={busy || !newPredId}
           loading={addMutation.isPending}

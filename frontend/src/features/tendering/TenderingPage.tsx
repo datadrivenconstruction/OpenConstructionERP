@@ -634,7 +634,7 @@ function CreatePackageDialog({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea resize-none"
             placeholder={t('tendering.description_placeholder', 'Brief description of the package scope...')}
           />
         </WideModalField>
@@ -775,7 +775,7 @@ function AddBidDialog({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea resize-none"
             placeholder={t('tendering.notes_placeholder', 'Optional notes...')}
           />
         </WideModalField>
@@ -825,10 +825,10 @@ function PackageCard({
     >
       <div className="flex items-center gap-3 px-5 py-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
-          <Package size={18} />
+          <Package size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary truncate">
+          <h3 className="oe-card-title truncate">
             {pkg.name}
           </h3>
           <div className="mt-0.5 flex items-center gap-3 text-xs text-content-secondary">
@@ -961,7 +961,7 @@ export function BidComparisonTable({
             value={varianceThreshold}
             onChange={(e) => setVarianceThreshold(Number(e.target.value))}
             disabled={!hideLowVariance}
-            className="h-7 rounded border border-border bg-surface-primary px-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 disabled:cursor-not-allowed"
+            className="oe-select oe-input-sm"
           >
             <option value={5}>5%</option>
             <option value={10}>10%</option>
@@ -977,20 +977,20 @@ export function BidComparisonTable({
         )}
       </div>
       <div className="overflow-x-auto relative">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-surface-primary">
-            <tr className="border-b border-border-light">
+        <table className="oe-table">
+          <thead className="sticky top-0 z-10">
+            <tr>
               <th
                 className={`whitespace-nowrap px-3 py-2.5 text-left font-semibold text-content-primary ${stickyColClass} z-20`}
               >
                 {t('tendering.position', 'Position')}
               </th>
-              <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary">
+              <th className="text-right">
                 {t('tendering.budget', 'Budget')}
               </th>
               {showCarbon && (
                 <th
-                  className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
+                  className="text-right"
                   title={t('tendering.compare.carbonHint', {
                     defaultValue: 'Embodied carbon A1-A3 of the budget quantity, from the carbon factor of the BOQ position',
                   })}
@@ -1001,7 +1001,7 @@ export function BidComparisonTable({
               {comparison.bid_totals.map((bt) => (
                 <th
                   key={bt.bid_id}
-                  className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
+                  className="text-right"
                 >
                   <span className="flex items-center justify-end gap-1.5">
                     <Building2 size={12} className="text-content-tertiary" />
@@ -1015,7 +1015,7 @@ export function BidComparisonTable({
             {visibleRows.map((row, idx) => (
               <tr
                 key={`${row.description}-${row.unit}-${idx}`}
-                className="group border-b border-border-light/50 transition-colors hover:bg-surface-secondary/30"
+                className="group"
               >
                 <td className={`px-3 py-2.5 ${stickyColClass} z-20 group-hover:bg-surface-secondary/30`}>
                   <span className="text-content-primary">{row.description || '-'}</span>
@@ -1023,11 +1023,11 @@ export function BidComparisonTable({
                     {localizedUnitCode(row.unit, i18n.language)}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary">
+                <td className="whitespace-nowrap text-right tabular-nums text-content-secondary">
                   {formatNumber(row.budget_rate)}
                 </td>
                 {showCarbon && (
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary" data-testid="bid-carbon-cell">
+                  <td className="whitespace-nowrap text-right tabular-nums text-content-secondary" data-testid="bid-carbon-cell">
                     {(() => {
                       const kg = carbonByRef.get(row.position_id ?? `row-${idx}`);
                       return kg == null ? '-' : kgToTonnes(kg, getNumberLocale());
@@ -1089,24 +1089,24 @@ export function BidComparisonTable({
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t-2 border-border bg-surface-secondary/30">
+            <tr className="border-t-2 bg-surface-secondary/30">
               <td
                 className={`px-3 py-3 font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
               >
                 {t('tendering.total', 'TOTAL')}
               </td>
-              <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
+              <td className="whitespace-nowrap text-right tabular-nums">
                 {formatCurrency(comparison.budget_total, currency)}
               </td>
               {showCarbon && (
-                <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
+                <td className="whitespace-nowrap text-right tabular-nums">
                   {carbon ? kgToTonnes(carbon.total_kg, getNumberLocale()) : '-'}
                 </td>
               )}
               {comparison.bid_totals.map((bt) => (
                 <td
                   key={`total-${bt.bid_id}`}
-                  className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
+                  className="whitespace-nowrap text-right tabular-nums"
                 >
                   <span className="font-semibold text-content-primary">
                     {formatCurrency(bt.total, bt.currency)}
@@ -1370,7 +1370,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
                       if (ok) removeMutation.mutate(r.id);
                     }}
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
@@ -1389,7 +1389,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+                className="oe-textarea resize-none"
                 placeholder={t('tendering.cover_message_placeholder', {
                   defaultValue: 'Add a short note to include in the invitation email…',
                 })}
@@ -1425,18 +1425,18 @@ function DistributionPanel({ packageId }: { packageId: string }) {
           <div className="mt-4 rounded-lg border border-border-light bg-surface-secondary/40 p-3 text-xs text-content-secondary">
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1 text-semantic-success">
-                <CheckCircle2 size={13} /> {lastResult.sent_count}{' '}
+                <CheckCircle2 size={14} /> {lastResult.sent_count}{' '}
                 {t('tendering.recipient_sent', { defaultValue: 'Sent' })}
               </span>
               {lastResult.failed_count > 0 && (
                 <span className="inline-flex items-center gap-1 text-semantic-error">
-                  <XCircle size={13} /> {lastResult.failed_count}{' '}
+                  <XCircle size={14} /> {lastResult.failed_count}{' '}
                   {t('tendering.recipient_failed', { defaultValue: 'Failed' })}
                 </span>
               )}
               {lastResult.skipped_count > 0 && (
                 <span className="inline-flex items-center gap-1">
-                  <Minus size={13} /> {lastResult.skipped_count}{' '}
+                  <Minus size={14} /> {lastResult.skipped_count}{' '}
                   {t('tendering.recipient_skipped', { defaultValue: 'Skipped' })}
                 </span>
               )}
@@ -1845,7 +1845,7 @@ function PackageDetail({
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-content-primary">{pkg.name}</h3>
+            <h3 className="oe-section-title">{pkg.name}</h3>
             {pkg.description && (
               <p className="mt-0.5 text-sm text-content-secondary">{pkg.description}</p>
             )}
@@ -2507,7 +2507,7 @@ function HowTenderingWorks() {
   return (
     <CollapsibleSection
       storageKey="tendering.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('tendering.how_title', { defaultValue: 'How tendering fits together' })}
       subtitle={t('tendering.how_subtitle', {
         defaultValue: 'From a priced BOQ to an awarded contract, in five steps',
@@ -2801,7 +2801,7 @@ export function TenderingPage() {
       {/* Packages list */}
       {packages && packages.length > 0 && (
         <div data-guide="tendering-packages">
-          <h2 className="mb-3 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title mb-3">
             {t('tendering.packages', 'Packages')}
           </h2>
           <div className="space-y-2">

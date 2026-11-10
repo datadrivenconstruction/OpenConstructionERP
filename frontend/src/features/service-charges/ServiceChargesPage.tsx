@@ -18,7 +18,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { createAssociation, fetchAssociations, type AssociationCreate } from './api';
 
 export const inputCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input';
 
 function HowItWorks() {
   const { t } = useTranslation();
@@ -55,7 +55,7 @@ function HowItWorks() {
   return (
     <CollapsibleSection
       storageKey="service_charges.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('service_charges.flow_title', { defaultValue: 'How service charges work' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -232,7 +232,7 @@ export function ServiceChargesPage() {
                       className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-secondary/50"
                     >
                       <span className="flex items-center gap-2 text-sm font-medium text-content-primary">
-                        <Building size={15} className="text-oe-blue" />
+                        <Building size={16} className="text-oe-blue" />
                         {a.name}
                       </span>
                       <span className="flex items-center gap-3 text-xs text-content-tertiary">

@@ -243,7 +243,7 @@ const EOT_VARIANT: Record<EotStatus, 'neutral' | 'blue' | 'success' | 'warning' 
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 interface ProjectStub {
   id: string;
@@ -312,7 +312,7 @@ function RowActions({
         }
         className="!p-1 text-content-quaternary hover:text-oe-blue h-auto"
       >
-        <Pencil size={13} />
+        <Pencil size={14} />
       </Button>
       <Button
         variant="ghost"
@@ -321,7 +321,7 @@ function RowActions({
         title={t('common.delete', { defaultValue: 'Delete' })}
         className="!p-1 text-content-quaternary hover:text-semantic-error h-auto"
       >
-        <Trash2 size={13} />
+        <Trash2 size={14} />
       </Button>
     </div>
   );
@@ -394,7 +394,7 @@ function HowVariationsWork() {
   return (
     <CollapsibleSection
       storageKey="variations.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('variations.flow_title', { defaultValue: 'How variations work, and what they connect to' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -917,7 +917,7 @@ export function VariationsPage() {
         (dashboardQ.data.agreed_vo_cost_total != null ||
           dashboardQ.data.pending_vr_cost_total != null) && (
           <Card className="p-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-3">
+            <h3 className="oe-overline mb-3">
               {t('variations.contract_value_card_title', {
                 defaultValue: 'Contract value impact',
               })}
@@ -1051,7 +1051,7 @@ export function VariationsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[220px]')}
+          className={clsx('oe-select', 'max-w-[220px]')}
         >
           <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
           {statusOptions[tab].map((s) => (
@@ -1244,23 +1244,23 @@ function NoticeTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('variations.code', { defaultValue: 'Code' })}</th>
-            <th className="px-4 py-2.5 text-left">
+            <th>{t('variations.code', { defaultValue: 'Code' })}</th>
+            <th>
               {t('variations.title_col', { defaultValue: 'Title' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.recipient', { defaultValue: 'Recipient' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.target_response', { defaultValue: 'Response by' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1270,22 +1270,22 @@ function NoticeTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.code}</td>
-              <td className="px-4 py-2 font-medium truncate max-w-[420px]">{r.title || '—'}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">
+              <td className="font-mono text-content-secondary">{r.code}</td>
+              <td className="truncate max-w-[420px]">{r.title || '—'}</td>
+              <td className="text-content-secondary">
                 {r.recipient_name || r.recipient_type}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.target_response_date ? <DateDisplay value={r.target_response_date} /> : '—'}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={NOTICE_VARIANT[r.status]} dot>
                   {statusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RowActions
                   onEdit={() => onEdit(r)}
                   onDelete={() => onDelete(r.id)}
@@ -1356,26 +1356,26 @@ function RequestTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('variations.code', { defaultValue: 'Code' })}</th>
-            <th className="px-4 py-2.5 text-left">
+            <th>{t('variations.code', { defaultValue: 'Code' })}</th>
+            <th>
               {t('variations.title_col', { defaultValue: 'Title' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.classification', { defaultValue: 'Type' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.cost_impact', { defaultValue: 'Cost' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.days', { defaultValue: 'Days' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1385,24 +1385,24 @@ function RequestTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.code}</td>
-              <td className="px-4 py-2 font-medium truncate max-w-[360px]">{r.title || '—'}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{classLabel(r.classification, t)}</td>
-              <td className="px-4 py-2 text-right tabular-nums">
+              <td className="font-mono text-content-secondary">{r.code}</td>
+              <td className="truncate max-w-[360px]">{r.title || '—'}</td>
+              <td className="text-content-secondary">{classLabel(r.classification, t)}</td>
+              <td className="text-right tabular-nums">
                 <MoneyDisplay
                   amount={Number(r.estimated_cost_impact) || 0}
                   currency={r.currency || currency}
                 />
               </td>
-              <td className="px-4 py-2 text-right tabular-nums">{r.estimated_schedule_days}</td>
-              <td className="px-4 py-2">
+              <td className="text-right tabular-nums">{r.estimated_schedule_days}</td>
+              <td>
                 <Badge variant={VR_VARIANT[r.status]} dot>
                   {statusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RowActions
                   onEdit={() => onEdit(r)}
                   onDelete={() => onDelete(r.id)}
@@ -1473,26 +1473,26 @@ function OrderTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('variations.code', { defaultValue: 'Code' })}</th>
-            <th className="px-4 py-2.5 text-left">
+            <th>{t('variations.code', { defaultValue: 'Code' })}</th>
+            <th>
               {t('variations.title_col', { defaultValue: 'Title' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.cost_impact', { defaultValue: 'Cost' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.days', { defaultValue: 'Days' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.agreed_at', { defaultValue: 'Agreed' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1502,26 +1502,26 @@ function OrderTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.code}</td>
-              <td className="px-4 py-2 font-medium truncate max-w-[360px]">{r.title || '—'}</td>
-              <td className="px-4 py-2 text-right tabular-nums">
+              <td className="font-mono text-content-secondary">{r.code}</td>
+              <td className="truncate max-w-[360px]">{r.title || '—'}</td>
+              <td className="text-right tabular-nums">
                 <MoneyDisplay
                   amount={Number(r.final_cost_impact) || 0}
                   currency={r.currency || currency}
                 />
               </td>
-              <td className="px-4 py-2 text-right tabular-nums">{r.final_schedule_days}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-right tabular-nums">{r.final_schedule_days}</td>
+              <td className="text-content-secondary">
                 {r.agreed_at ? <DateDisplay value={r.agreed_at} /> : '—'}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={VO_VARIANT[r.status]} dot>
                   {statusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RowActions
                   editBlocked={isEditBlocked('orders', r.status)}
                   editBlockedReason={t('variations.order_edit_blocked', {
@@ -1597,25 +1597,25 @@ function DayworkTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.sheet_no', { defaultValue: 'Sheet #' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.work_date', { defaultValue: 'Date' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.description', { defaultValue: 'Description' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.total', { defaultValue: 'Total' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1625,27 +1625,27 @@ function DayworkTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+              <td className="font-mono text-content-secondary">
                 {r.sheet_number}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.work_date ? <DateDisplay value={r.work_date} /> : '—'}
               </td>
-              <td className="px-4 py-2 truncate max-w-[360px]">{r.description || '—'}</td>
-              <td className="px-4 py-2 text-right tabular-nums">
+              <td className="truncate max-w-[360px]">{r.description || '—'}</td>
+              <td className="text-right tabular-nums">
                 <MoneyDisplay
                   amount={Number(r.total_amount) || 0}
                   currency={r.currency || currency}
                 />
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={DAYWORK_VARIANT[r.status]} dot>
                   {statusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RowActions
                   onEdit={() => onEdit(r)}
                   onDelete={() => onDelete(r.id)}
@@ -1714,28 +1714,28 @@ function EoTTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.description', { defaultValue: 'Description' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.cause', { defaultValue: 'Cause' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.requested_days', { defaultValue: 'Requested' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('variations.granted_days', { defaultValue: 'Granted' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.critical_path', { defaultValue: 'CP' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('variations.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1745,27 +1745,27 @@ function EoTTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 truncate max-w-[360px]">{r.description || '—'}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{r.root_cause_category}</td>
-              <td className="px-4 py-2 text-right tabular-nums">{r.requested_days}</td>
-              <td className="px-4 py-2 text-right tabular-nums">
+              <td className="truncate max-w-[360px]">{r.description || '—'}</td>
+              <td className="text-content-secondary">{r.root_cause_category}</td>
+              <td className="text-right tabular-nums">{r.requested_days}</td>
+              <td className="text-right tabular-nums">
                 {r.granted_days ?? '—'}
               </td>
-              <td className="px-4 py-2 text-xs">
+              <td>
                 {r.critical_path_impact ? (
                   <Badge variant="warning">CP</Badge>
                 ) : (
                   <span className="text-content-tertiary">—</span>
                 )}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={EOT_VARIANT[r.status]} dot>
                   {statusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <RowActions
                   onEdit={() => onEdit(r)}
                   onDelete={() => onDelete(r.id)}
@@ -2078,7 +2078,7 @@ function PricedScope({
 
           {boq.is_mixed_currency && (
             <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               {t('variations.boq_mixed_currency', {
                 defaultValue:
                   'This bill blends currencies, so its total is not a figure to settle on yet.',
@@ -2100,7 +2100,7 @@ function PricedScope({
               key={`${check.rule_id}:${index}`}
               className="flex items-start gap-1.5 text-xs text-content-secondary"
             >
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               {check.message}
             </p>
           ))}
@@ -2360,12 +2360,12 @@ export function ApprovalDecisionPanel({
                 placeholder={t('variations.agreed_variance_note_placeholder', {
                   defaultValue: 'Why the agreed amount differs from what was submitted…',
                 })}
-                className={clsx(inputCls, 'mt-0.5 h-auto py-2')}
+                className={clsx('oe-textarea', 'mt-0.5')}
               />
             </div>
             {blockReason && (
               <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 {blockReason === 'amount_missing'
                   ? t('variations.agreed_amount_required', {
                       defaultValue:
@@ -2387,7 +2387,7 @@ export function ApprovalDecisionPanel({
           placeholder={t('variations.decision_notes_placeholder', {
             defaultValue: 'Decision notes…',
           })}
-          className={clsx(inputCls, 'h-auto py-2')}
+          className="oe-textarea"
         />
         <div className="flex gap-2">
           <Button
@@ -2491,7 +2491,7 @@ export function PromoteToOrderCard({
             id={`affected-contract-${request.id}`}
             value={contractId}
             onChange={(e) => onContractIdChange(e.target.value)}
-            className={clsx(inputCls, 'mt-0.5')}
+            className={clsx('oe-select', 'mt-0.5')}
           >
             <option value="">
               {t('variations.affected_contract_none', {
@@ -2782,7 +2782,7 @@ export function DetailDrawer({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -2911,7 +2911,7 @@ export function DetailDrawer({
                         placeholder={t('variations.response_placeholder', {
                           defaultValue: 'Response summary…',
                         })}
-                        className={clsx(inputCls, 'h-auto py-2')}
+                        className="oe-textarea"
                       />
                       <Button
                         variant="primary"
@@ -3237,7 +3237,7 @@ export function DetailDrawer({
                         placeholder={t('variations.void_reason_placeholder', {
                           defaultValue: 'Why is this variation order being voided?',
                         })}
-                        className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+                        className="oe-textarea resize-none"
                       />
                     </WideModalField>
                   </WideModal>
@@ -3384,7 +3384,7 @@ export function DetailDrawer({
                           placeholder={t('variations.decision_notes_placeholder', {
                             defaultValue: 'Decision notes…',
                           })}
-                          className={clsx(inputCls, 'h-auto py-2')}
+                          className="oe-textarea"
                         />
                       </div>
                       <div className="flex gap-2">
@@ -3817,7 +3817,7 @@ function CreateModal({
               value={noticeForm.description}
               onChange={(e) => setNoticeForm({ ...noticeForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <WideModalField
@@ -3831,7 +3831,7 @@ function CreateModal({
                   recipient_type: e.target.value as Notice['recipient_type'],
                 })
               }
-              className={inputCls}
+              className="oe-select"
             >
               {(['owner', 'contractor', 'architect', 'engineer', 'consultant'] as const).map(
                 (rt) => (
@@ -3893,7 +3893,7 @@ function CreateModal({
                 value={vrForm.description}
                 onChange={(e) => setVrForm({ ...vrForm, description: e.target.value })}
                 rows={3}
-                className={clsx(inputCls, 'h-auto py-2')}
+                className="oe-textarea"
               />
             </WideModalField>
             {!isEdit && (
@@ -3908,7 +3908,7 @@ function CreateModal({
                   onChange={(e) =>
                     setVrForm({ ...vrForm, notice_id: e.target.value })
                   }
-                  className={inputCls}
+                  className="oe-select"
                 >
                   <option value="">—</option>
                   {notices.map((n) => (
@@ -3928,7 +3928,7 @@ function CreateModal({
                     classification: e.target.value as VariationRequest['classification'],
                   })
                 }
-                className={inputCls}
+                className="oe-select"
               >
                 {(
                   [
@@ -3952,7 +3952,7 @@ function CreateModal({
                 onChange={(e) =>
                   setVrForm({ ...vrForm, urgency: e.target.value as VariationRequest['urgency'] })
                 }
-                className={inputCls}
+                className="oe-select"
               >
                 {(['low', 'med', 'high'] as const).map((u) => (
                   <option key={u} value={u}>
@@ -4029,7 +4029,7 @@ function CreateModal({
                       variation_request_id: e.target.value,
                     })
                   }
-                  className={inputCls}
+                  className="oe-select"
                 >
                   <option value="">—</option>
                   {requests.map((r) => (
@@ -4107,7 +4107,7 @@ function CreateModal({
               value={dwForm.description}
               onChange={(e) => setDwForm({ ...dwForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
         </WideModalSection>
@@ -4123,7 +4123,7 @@ function CreateModal({
               value={eotForm.description}
               onChange={(e) => setEotForm({ ...eotForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <WideModalField label={t('variations.cause')}>
@@ -4136,7 +4136,7 @@ function CreateModal({
                     .value as ExtensionOfTimeClaim['root_cause_category'],
                 })
               }
-              className={inputCls}
+              className="oe-select"
             >
               {(['employer_caused', 'neutral', 'contractor_caused', 'concurrent'] as const).map(
                 (c) => (

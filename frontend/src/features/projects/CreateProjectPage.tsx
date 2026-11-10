@@ -1165,7 +1165,7 @@ export function CreateProjectModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-modal flex items-center justify-center"
       onKeyDown={onKeyDownModal}
     >
       <div
@@ -1188,7 +1188,7 @@ export function CreateProjectModal({
               <FolderPlus size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 id="cpw-title" className="text-lg font-semibold text-content-primary">
+              <h2 id="cpw-title" className="oe-section-title">
                 {isEdit
                   ? t('project_wizard.edit_setup_title', {
                       defaultValue: 'Edit project setup',
@@ -1216,7 +1216,7 @@ export function CreateProjectModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -1252,14 +1252,14 @@ export function CreateProjectModal({
                         aria-label={STEP_TITLES[s - 1]}
                         className={dotCls + ' cursor-pointer hover:opacity-90'}
                       >
-                        {s < step ? <Check size={13} /> : s}
+                        {s < step ? <Check size={14} /> : s}
                       </button>
                     ) : (
                       <div
                         className={dotCls}
                         aria-current={s === step ? 'step' : undefined}
                       >
-                        {s < step ? <Check size={13} /> : s}
+                        {s < step ? <Check size={14} /> : s}
                       </div>
                     )}
                     <span
@@ -1305,7 +1305,7 @@ export function CreateProjectModal({
               <button
                 type="button"
                 onClick={() => { setMode('classic'); setStep(1); }}
-                className="group w-full text-left rounded-xl border border-border-light hover:border-oe-blue hover:bg-oe-blue/5 transition-all p-4 flex items-start gap-3.5"
+                className="group w-full text-left rounded-xl border border-border-light hover:border-oe-blue hover:bg-oe-blue/5 transition-all p-4 flex items-start gap-3"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
                   <Zap size={20} />
@@ -1326,7 +1326,7 @@ export function CreateProjectModal({
               <button
                 type="button"
                 onClick={() => { setMode('wizard'); setStep(1); setMaxStep(1); }}
-                className="group w-full text-left rounded-xl border border-border-light hover:border-oe-blue hover:bg-oe-blue/5 transition-all p-4 flex items-start gap-3.5"
+                className="group w-full text-left rounded-xl border border-border-light hover:border-oe-blue hover:bg-oe-blue/5 transition-all p-4 flex items-start gap-3"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary">
                   <Wand2 size={20} />
@@ -1366,7 +1366,7 @@ export function CreateProjectModal({
                 <div>
                   <label
                     htmlFor="qc-name"
-                    className="text-sm font-medium text-content-primary block mb-1.5"
+                    className="oe-label"
                   >
                     {t('projects.project_name')}
                     <span aria-hidden className="ml-0.5 text-semantic-error">*</span>
@@ -1432,9 +1432,9 @@ export function CreateProjectModal({
                 >
                 {/* Description & notes */}
                 <div className="rounded-xl border border-border-light bg-surface-primary/40 p-4 space-y-3">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                      <FileText size={15} />
+                      <FileText size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
@@ -1451,15 +1451,15 @@ export function CreateProjectModal({
                     onChange={(e) => set('description', e.target.value)}
                     placeholder={t('projects.description_placeholder', { defaultValue: 'Project description, scope, notes...' })}
                     rows={2}
-                    className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
+                    className="oe-textarea resize-none"
                   />
                 </div>
 
                 {/* Classification & localization */}
                 <div className="rounded-xl border border-border-light bg-surface-primary/40 p-4 space-y-3">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                      <Globe size={15} />
+                      <Globe size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
@@ -1566,7 +1566,7 @@ export function CreateProjectModal({
                     aria-controls="qc-optional-more"
                     className="group flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-oe-blue/40 bg-oe-blue/5 px-4 py-3 text-sm font-medium text-oe-blue transition-colors hover:bg-oe-blue/10"
                   >
-                    <Plus size={15} />
+                    <Plus size={16} />
                     {t('projects.create.show_more', { defaultValue: 'Show all options' })}
                     <ChevronDown size={14} className="transition-transform group-hover:translate-y-0.5" />
                   </button>
@@ -1579,9 +1579,9 @@ export function CreateProjectModal({
                 >
                 {/* Identification */}
                 <div className="rounded-xl border border-border-light bg-surface-primary/40 p-4 space-y-3">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                      <Hash size={15} />
+                      <Hash size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
@@ -1606,7 +1606,7 @@ export function CreateProjectModal({
                       onChange={(e) => setProjectCode(e.target.value)}
                       maxLength={50}
                       placeholder={t('projects.project_code_placeholder', { defaultValue: 'Auto-generated if left blank' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg"
                     />
                   </div>
                   <div>
@@ -1622,7 +1622,7 @@ export function CreateProjectModal({
                       onChange={(e) => setProjectType(e.target.value)}
                       maxLength={50}
                       placeholder={t('projects.project_type_placeholder', { defaultValue: 'e.g. Residential, Infrastructure' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg"
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -1638,7 +1638,7 @@ export function CreateProjectModal({
                       onChange={(e) => setClientName(e.target.value)}
                       maxLength={36}
                       placeholder={t('projects.client_owner_placeholder', { defaultValue: 'Client or owner name' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg"
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -1649,9 +1649,9 @@ export function CreateProjectModal({
 
                 {/* Site address */}
                 <div className="rounded-xl border border-border-light bg-surface-primary/40 p-4 space-y-3">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                      <MapPin size={15} />
+                      <MapPin size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
@@ -1672,10 +1672,10 @@ export function CreateProjectModal({
                     ariaLabel={t('projects.address_search', { defaultValue: 'Search address' })}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input type="text" value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} aria-label={t('projects.address_street', { defaultValue: 'Street & number' })} placeholder={t('projects.address_street', { defaultValue: 'Street & number' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                    <input type="text" value={addressCity} onChange={(e) => setAddressCity(e.target.value)} aria-label={t('projects.address_city', { defaultValue: 'City' })} placeholder={t('projects.address_city', { defaultValue: 'City' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                    <input type="text" value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} aria-label={t('projects.address_country', { defaultValue: 'Country' })} placeholder={t('projects.address_country', { defaultValue: 'Country' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                    <input type="text" value={addressPostal} onChange={(e) => setAddressPostal(e.target.value)} aria-label={t('projects.address_postal', { defaultValue: 'Postal code' })} placeholder={t('projects.address_postal', { defaultValue: 'Postal code' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
+                    <input type="text" value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} aria-label={t('projects.address_street', { defaultValue: 'Street & number' })} placeholder={t('projects.address_street', { defaultValue: 'Street & number' })} className="oe-input oe-input-lg" />
+                    <input type="text" value={addressCity} onChange={(e) => setAddressCity(e.target.value)} aria-label={t('projects.address_city', { defaultValue: 'City' })} placeholder={t('projects.address_city', { defaultValue: 'City' })} className="oe-input oe-input-lg" />
+                    <input type="text" value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} aria-label={t('projects.address_country', { defaultValue: 'Country' })} placeholder={t('projects.address_country', { defaultValue: 'Country' })} className="oe-input oe-input-lg" />
+                    <input type="text" value={addressPostal} onChange={(e) => setAddressPostal(e.target.value)} aria-label={t('projects.address_postal', { defaultValue: 'Postal code' })} placeholder={t('projects.address_postal', { defaultValue: 'Postal code' })} className="oe-input oe-input-lg" />
                   </div>
                   <div className="flex items-center gap-4 pt-1 border-t border-border-light/60 mt-1">
                     <span className="text-xs text-content-tertiary">
@@ -1683,12 +1683,12 @@ export function CreateProjectModal({
                     </span>
                     <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
                       <input type="checkbox" checked={mapEnabled} onChange={toggleMap} className="h-3.5 w-3.5 rounded border-border accent-oe-blue" />
-                      <MapIcon size={11} className="text-oe-blue" />
+                      <MapIcon size={12} className="text-oe-blue" />
                       {t('widget_settings.map', { defaultValue: 'Map' })}
                     </label>
                     <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
                       <input type="checkbox" checked={weatherEnabled} onChange={toggleWeather} className="h-3.5 w-3.5 rounded border-border accent-oe-blue" />
-                      <CloudSun size={11} className="text-oe-blue" />
+                      <CloudSun size={12} className="text-oe-blue" />
                       {t('widget_settings.weather', { defaultValue: 'Weather' })}
                     </label>
                   </div>
@@ -1696,9 +1696,9 @@ export function CreateProjectModal({
 
                 {/* Schedule & budget */}
                 <div className="rounded-xl border border-border-light bg-surface-primary/40 p-4 space-y-3">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                      <CalendarDays size={15} />
+                      <CalendarDays size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
@@ -1721,7 +1721,7 @@ export function CreateProjectModal({
                       type="date"
                       value={plannedStart}
                       onChange={(e) => setPlannedStart(e.target.value)}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg"
                     />
                   </div>
                   <div>
@@ -1736,7 +1736,7 @@ export function CreateProjectModal({
                       value={plannedEnd}
                       onChange={(e) => setPlannedEnd(e.target.value)}
                       min={plannedStart || undefined}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg"
                     />
                   </div>
                   <div>
@@ -1753,7 +1753,7 @@ export function CreateProjectModal({
                       onChange={(e) => setBudgetEstimate(e.target.value)}
                       maxLength={50}
                       placeholder={t('projects.budget_estimate_placeholder', { defaultValue: 'e.g. 1500000' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg tabular-nums"
                     />
                   </div>
                   <div>
@@ -1770,7 +1770,7 @@ export function CreateProjectModal({
                       onChange={(e) => setContractValue(e.target.value)}
                       maxLength={50}
                       placeholder={t('projects.contract_value_placeholder', { defaultValue: 'e.g. 1800000' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      className="oe-input oe-input-lg tabular-nums"
                     />
                   </div>
                 </div>
@@ -1792,7 +1792,7 @@ export function CreateProjectModal({
                     onChange={(e) => setRegionalFactorStr(e.target.value)}
                     onBlur={() => setRegionalFactorStr(clampFactor(regionalFactorStr).toFixed(2))}
                     placeholder="1.00"
-                    className="h-10 w-full max-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                    className="oe-input oe-input-lg max-w-[200px] tabular-nums"
                   />
                   <p className="mt-1 text-xs text-content-tertiary">
                     {t('projects.regional_factor_hint', { defaultValue: 'Multiply all rates by this factor (e.g. 1.12 = +12% over base).' })}
@@ -1853,7 +1853,7 @@ export function CreateProjectModal({
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-content-primary block mb-1.5">
+                <label className="oe-label">
                   {t('projects.description', { defaultValue: 'Description' })}
                 </label>
                 <textarea
@@ -1861,7 +1861,7 @@ export function CreateProjectModal({
                   onChange={(e) => set('description', e.target.value)}
                   placeholder={t('projects.description_placeholder', { defaultValue: 'Project description, scope, notes...' })}
                   rows={3}
-                  className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
+                  className="oe-textarea resize-none"
                 />
               </div>
             </div>
@@ -1942,7 +1942,7 @@ export function CreateProjectModal({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('projects.regional_factor', { defaultValue: 'Regional Factor' })}
                 </label>
                 <input
@@ -1957,7 +1957,7 @@ export function CreateProjectModal({
                     setRegionalFactorStr(clampFactor(regionalFactorStr).toFixed(2))
                   }
                   placeholder="1.00"
-                  className="h-10 w-full max-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                  className="oe-input oe-input-lg max-w-[200px] tabular-nums"
                 />
                 <p className="mt-1 text-xs text-content-tertiary">
                   {t('projects.regional_factor_hint', { defaultValue: 'Multiply all rates by this factor (e.g. 1.12 = +12% over base).' })}
@@ -1971,7 +1971,7 @@ export function CreateProjectModal({
             <div className="space-y-3">
               <InfoHint text={t('project_wizard.type_hint', { defaultValue: 'Pick the closest match. This pre-selects the modules and route for your project - nothing is locked, you can refine on the next step.' })} />
               {presetsLoading && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
@@ -1986,14 +1986,14 @@ export function CreateProjectModal({
               )}
               {presetsError && !presetsLoading && (
                 <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs">
-                  <AlertTriangle size={15} className="text-semantic-warning shrink-0 mt-0.5" />
+                  <AlertTriangle size={16} className="text-semantic-warning shrink-0 mt-0.5" />
                   <span className="text-semantic-warning">
                     {t('project_wizard.presets_error', { defaultValue: 'Couldn’t load project types. You can still continue with the default and refine modules later in Project Settings.' })}
                   </span>
                 </div>
               )}
               <div
-                className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 ${
+                className={`grid grid-cols-1 sm:grid-cols-2 gap-2 ${
                   presetsLoading || presetsError ? 'hidden' : ''
                 }`}
               >
@@ -2014,7 +2014,7 @@ export function CreateProjectModal({
                         <span className="text-sm font-semibold text-content-primary">
                           {t(p.label_key, { defaultValue: p.label_en })}
                         </span>
-                        {selected && <Check size={15} className="text-oe-blue shrink-0" />}
+                        {selected && <Check size={16} className="text-oe-blue shrink-0" />}
                       </div>
                       <p className="text-xs text-content-tertiary mt-1 leading-snug">
                         {t(`project_wizard.preset_blurb.${p.id}`, {
@@ -2022,7 +2022,7 @@ export function CreateProjectModal({
                         })}
                       </p>
                       <p className="text-2xs text-content-quaternary mt-1.5 flex items-center gap-1">
-                        <Layers size={11} />
+                        <Layers size={12} />
                         {t('project_wizard.module_count', {
                           defaultValue: '{{n}} modules',
                           n: p.module_count,
@@ -2089,7 +2089,7 @@ export function CreateProjectModal({
                   ))}
                 </div>
               </div>
-              <label className="flex items-start gap-2.5 rounded-xl border border-border-light bg-surface-secondary/30 p-3 cursor-pointer">
+              <label className="flex items-start gap-2 rounded-xl border border-border-light bg-surface-secondary/30 p-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={focusMode}
@@ -2130,10 +2130,10 @@ export function CreateProjectModal({
                   ariaLabel={t('projects.address_search', { defaultValue: 'Search address' })}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="text" value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} placeholder={t('projects.address_street', { defaultValue: 'Street & number' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                  <input type="text" value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder={t('projects.address_city', { defaultValue: 'City' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                  <input type="text" value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} placeholder={t('projects.address_country', { defaultValue: 'Country' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
-                  <input type="text" value={addressPostal} onChange={(e) => setAddressPostal(e.target.value)} placeholder={t('projects.address_postal', { defaultValue: 'Postal code' })} className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent" />
+                  <input type="text" value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} placeholder={t('projects.address_street', { defaultValue: 'Street & number' })} className="oe-input oe-input-lg" />
+                  <input type="text" value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder={t('projects.address_city', { defaultValue: 'City' })} className="oe-input oe-input-lg" />
+                  <input type="text" value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} placeholder={t('projects.address_country', { defaultValue: 'Country' })} className="oe-input oe-input-lg" />
+                  <input type="text" value={addressPostal} onChange={(e) => setAddressPostal(e.target.value)} placeholder={t('projects.address_postal', { defaultValue: 'Postal code' })} className="oe-input oe-input-lg" />
                 </div>
                 <div className="flex items-center gap-4 pt-1 border-t border-border-light/60 mt-2">
                   <span className="text-xs text-content-tertiary">
@@ -2141,12 +2141,12 @@ export function CreateProjectModal({
                   </span>
                   <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
                     <input type="checkbox" checked={mapEnabled} onChange={toggleMap} className="h-3.5 w-3.5 rounded border-border accent-oe-blue" />
-                    <MapIcon size={11} className="text-oe-blue" />
+                    <MapIcon size={12} className="text-oe-blue" />
                     {t('widget_settings.map', { defaultValue: 'Map' })}
                   </label>
                   <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
                     <input type="checkbox" checked={weatherEnabled} onChange={toggleWeather} className="h-3.5 w-3.5 rounded border-border accent-oe-blue" />
-                    <CloudSun size={11} className="text-oe-blue" />
+                    <CloudSun size={12} className="text-oe-blue" />
                     {t('widget_settings.weather', { defaultValue: 'Weather' })}
                   </label>
                 </div>
@@ -2253,13 +2253,13 @@ export function CreateProjectModal({
               ? t('common.cancel')
               : (step === 1 && isEdit)
                 ? t('common.cancel')
-                : <span className="flex items-center gap-1"><ChevronLeft size={15} />{t('common.back', { defaultValue: 'Back' })}</span>}
+                : <span className="flex items-center gap-1"><ChevronLeft size={16} />{t('common.back', { defaultValue: 'Back' })}</span>}
           </Button>
           {mode === 'choose' ? null : mode === 'classic' || isLast ? (
             <div className="flex items-center gap-3 min-w-0">
               {!canSubmit && submitBlockReason && (
                 <span className="hidden sm:flex items-center gap-1 text-xs text-semantic-warning min-w-0">
-                  <AlertTriangle size={13} className="shrink-0" />
+                  <AlertTriangle size={14} className="shrink-0" />
                   <span className="truncate">{submitBlockReason}</span>
                 </span>
               )}
@@ -2300,7 +2300,7 @@ export function CreateProjectModal({
             >
               <span className="flex items-center gap-1">
                 {t('common.next', { defaultValue: 'Next' })}
-                <ChevronRight size={15} />
+                <ChevronRight size={16} />
               </span>
             </Button>
           )}
@@ -2318,7 +2318,7 @@ export function CreateProjectModal({
               className="mx-6 max-w-sm rounded-xl border border-border-light bg-surface-elevated p-5 shadow-xl text-center"
             >
               <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-semantic-warning-bg">
-                <AlertTriangle size={18} className="text-semantic-warning" />
+                <AlertTriangle size={20} className="text-semantic-warning" />
               </div>
               <p
                 id="cpw-discard-title"
@@ -2448,7 +2448,7 @@ function OptionalLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="text-sm font-medium text-content-primary block mb-1.5"
+      className="oe-label"
     >
       {text}
       <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
@@ -2504,7 +2504,7 @@ function GroupedSelectField({
   const { t, i18n } = useTranslation();
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-content-primary">
+      <label className="oe-label">
         {label}
         {optional && (
           <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
@@ -2515,7 +2515,7 @@ function GroupedSelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary cursor-pointer appearance-none"
+        className="oe-select oe-input-lg cursor-pointer"
       >
         {placeholder && (
           <option value="" disabled>
@@ -2550,7 +2550,7 @@ function SelectField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-content-primary">
+      <label className="oe-label">
         {label}
         {optional && (
           <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
@@ -2561,7 +2561,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary cursor-pointer appearance-none"
+        className="oe-select oe-input-lg cursor-pointer"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

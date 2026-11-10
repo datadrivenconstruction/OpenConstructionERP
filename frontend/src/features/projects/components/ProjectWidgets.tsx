@@ -186,7 +186,7 @@ function WidgetShell({
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <span className="mt-0.5 shrink-0 text-content-tertiary">{icon}</span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-content-primary truncate">
+            <h3 className="oe-card-title truncate">
               {title}
             </h3>
             {subtitle && (

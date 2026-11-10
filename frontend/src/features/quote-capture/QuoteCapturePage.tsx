@@ -77,7 +77,7 @@ export function QuoteCapturePage() {
         <label className="flex flex-col text-xs text-content-secondary">
           {t('quote_capture.package', 'Tender package')}
           <select
-            className="rounded border px-2 py-1 text-sm text-content-primary"
+            className="oe-select"
             value={packageId}
             onChange={(e) => {
               setPackageId(e.target.value);
@@ -122,7 +122,7 @@ export function QuoteCapturePage() {
       <details className="rounded border p-2 text-sm">
         <summary className="cursor-pointer">{t('quote_capture.paste', 'Paste a quote from an email')}</summary>
         <textarea
-          className="mt-2 h-32 w-full rounded border p-2 font-mono text-xs"
+          className="oe-textarea mt-2 h-32 font-mono"
           dir="auto"
           value={pasted}
           onChange={(e) => setPasted(e.target.value)}

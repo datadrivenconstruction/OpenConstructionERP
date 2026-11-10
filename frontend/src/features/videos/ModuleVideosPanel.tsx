@@ -159,7 +159,7 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
                     setPlaying({ video, start: 0 });
                     onClose();
                   }}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-start hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-start hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
                 >
                   <span className="relative block h-[54px] w-24 shrink-0 overflow-hidden rounded-md bg-slate-900">
                     <VideoCover src={video.cover} width={96} height={54} className="h-full w-full object-cover" />
@@ -223,11 +223,11 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
             )}
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-2xs text-content-tertiary">
               <button type="button" onClick={hideHere} className="inline-flex items-center gap-1 hover:text-content-primary">
-                <EyeOff size={11} aria-hidden />
+                <EyeOff size={12} aria-hidden />
                 {t('videos.hide_here', { defaultValue: 'Hide on this screen' })}
               </button>
               <button type="button" onClick={hideEverywhere} className="inline-flex items-center gap-1 hover:text-content-primary">
-                <EyeOff size={11} aria-hidden />
+                <EyeOff size={12} aria-hidden />
                 {t('videos.hide_everywhere', { defaultValue: 'Hide on every screen' })}
               </button>
             </div>

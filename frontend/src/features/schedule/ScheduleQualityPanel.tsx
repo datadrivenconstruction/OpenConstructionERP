@@ -131,7 +131,7 @@ export function ScheduleQualityPanel({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <ShieldCheck size={16} className="text-content-secondary" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('schedule.quality.title', { defaultValue: 'Schedule quality' })}
             </h3>
           </div>
@@ -173,7 +173,7 @@ export function ScheduleQualityPanel({
       <Card padding="md">
         <div className="mb-3 flex items-center gap-2">
           <Route size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.quality.longest_path', { defaultValue: 'Longest Path' })}
           </h3>
           <Badge variant="blue">
@@ -214,7 +214,7 @@ export function ScheduleQualityPanel({
       <Card padding="none">
         <div className="flex items-center gap-2 border-b border-border-light px-4 py-3">
           <Route size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.quality.float_paths', { defaultValue: 'Float paths' })}
           </h3>
           <span className="text-xs text-content-tertiary">
@@ -231,19 +231,19 @@ export function ScheduleQualityPanel({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2 text-left">{t('schedule.quality.path', { defaultValue: 'Path' })}</th>
-                  <th className="px-4 py-2 text-left">{t('schedule.quality.activities_col', { defaultValue: 'Activities' })}</th>
-                  <th className="px-4 py-2 text-right">{t('schedule.quality.length', { defaultValue: 'Length (d)' })}</th>
-                  <th className="px-4 py-2 text-right">{t('schedule.quality.relative_float', { defaultValue: 'Relative float (d)' })}</th>
+                  <th>{t('schedule.quality.path', { defaultValue: 'Path' })}</th>
+                  <th>{t('schedule.quality.activities_col', { defaultValue: 'Activities' })}</th>
+                  <th className="text-right">{t('schedule.quality.length', { defaultValue: 'Length (d)' })}</th>
+                  <th className="text-right">{t('schedule.quality.relative_float', { defaultValue: 'Relative float (d)' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.float_paths.map((p) => (
-                  <tr key={p.index} className="border-t border-border-light align-top">
-                    <td className="px-4 py-2">
+                  <tr key={p.index} className="align-top">
+                    <td>
                       <span className="flex items-center gap-2">
                         <span className="font-mono tabular-nums text-content-secondary">
                           {p.index + 1}
@@ -255,7 +255,7 @@ export function ScheduleQualityPanel({
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <span className="flex flex-wrap gap-1">
                         {p.activity_ids.map((id, i) => (
                           <span
@@ -268,8 +268,8 @@ export function ScheduleQualityPanel({
                         ))}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-right font-mono tabular-nums">{p.length_days}</td>
-                    <td className="px-4 py-2 text-right font-mono tabular-nums">{p.relative_float}</td>
+                    <td className="text-right font-mono tabular-nums">{p.length_days}</td>
+                    <td className="text-right font-mono tabular-nums">{p.relative_float}</td>
                   </tr>
                 ))}
               </tbody>
@@ -282,7 +282,7 @@ export function ScheduleQualityPanel({
       <Card padding="none">
         <div className="flex flex-wrap items-center gap-2 border-b border-border-light px-4 py-3">
           <ListChecks size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.quality.qa_log', { defaultValue: 'Scheduling QA log' })}
           </h3>
           <div className="ml-auto flex items-center gap-2 text-2xs">
@@ -323,7 +323,7 @@ export function ScheduleQualityPanel({
       {data.explanations.length > 0 && (
         <Card padding="none">
           <div className="border-b border-border-light px-4 py-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('schedule.quality.explanations', {
                 defaultValue: 'Activity explanations',
               })}
@@ -394,7 +394,7 @@ function QARow({
         : 'text-content-tertiary';
   return (
     <li className="flex items-start gap-3 px-4 py-2.5">
-      <Icon size={15} className={'mt-0.5 shrink-0 ' + iconCls} />
+      <Icon size={16} className={'mt-0.5 shrink-0 ' + iconCls} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={SEVERITY_BADGE[tone]}>{finding.code}</Badge>

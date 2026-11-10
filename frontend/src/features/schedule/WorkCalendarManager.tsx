@@ -99,7 +99,7 @@ export function WorkCalendarManager({ projectId }: { projectId: string }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-              <CalendarDays size={15} className="text-oe-blue" />
+              <CalendarDays size={16} className="text-oe-blue" />
               {t('schedule.calendar.title', { defaultValue: 'Work calendars' })}
             </div>
             <p className="mt-0.5 max-w-xl text-xs text-content-tertiary">
@@ -130,7 +130,7 @@ export function WorkCalendarManager({ projectId }: { projectId: string }) {
             />
             <Button
               variant="primary"
-              icon={<Plus size={15} />}
+              icon={<Plus size={16} />}
               data-testid="calendar-add"
               disabled={!newName.trim()}
               loading={createMutation.isPending}
@@ -145,7 +145,7 @@ export function WorkCalendarManager({ projectId }: { projectId: string }) {
       {/* Calendar list */}
       {isLoading ? (
         <div className="flex items-center gap-2 p-4 text-sm text-content-secondary">
-          <Loader2 size={15} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" />
           {t('common.loading', { defaultValue: 'Loading...' })}
         </div>
       ) : calendars.length === 0 ? (
@@ -272,7 +272,7 @@ function CalendarCard({
               : 'text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue'
           }`}
         >
-          <Star size={15} fill={calendar.is_default ? 'currentColor' : 'none'} />
+          <Star size={16} fill={calendar.is_default ? 'currentColor' : 'none'} />
         </button>
         {confirmingDelete ? (
           <span className="flex items-center gap-1">
@@ -303,7 +303,7 @@ function CalendarCard({
             onClick={() => setConfirmingDelete(true)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-50"
           >
-            <Trash2 size={15} />
+            <Trash2 size={16} />
           </button>
         )}
       </div>
@@ -372,7 +372,7 @@ function CalendarCard({
       {/* Holidays */}
       <div>
         <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-content-secondary">
-          <CalendarOff size={13} />
+          <CalendarOff size={14} />
           {t('schedule.calendar.holidays', { defaultValue: 'Holidays' })}
         </div>
         {holidays.length === 0 ? (
@@ -397,7 +397,7 @@ function CalendarCard({
                   onClick={() => removeHoliday(h)}
                   className="flex h-4 w-4 items-center justify-center rounded-full text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-50"
                 >
-                  <X size={11} />
+                  <X size={12} />
                 </button>
               </li>
             ))}

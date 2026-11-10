@@ -332,8 +332,8 @@ function SeverityDots({ level, max = 5 }: { level: number; max?: number }) {
                 : level >= 3
                   ? 'bg-orange-400'
                   : level >= 2
-                    ? 'bg-yellow-400'
-                    : 'bg-green-400'
+                    ? 'bg-semantic-warning'
+                    : 'bg-semantic-success'
               : 'bg-surface-tertiary'
           }`}
         />
@@ -509,7 +509,7 @@ function QualityDashboardSummary({
                       'Some incidents have unreadable dates - "days without incident" cannot be confirmed.',
                   })}
                 >
-                  <AlertTriangle size={11} />
+                  <AlertTriangle size={12} />
                   {t('safety.data_unreliable', { defaultValue: 'Check date integrity' })}
                 </div>
               )}
@@ -567,9 +567,9 @@ function QualityDashboardSummary({
 /* ── Main Page ────────────────────────────────────────────────────────── */
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── How it works + connects ─────────────────────────────────────────── */
 
@@ -627,7 +627,7 @@ function HowSafetyWork() {
   return (
     <CollapsibleSection
       storageKey="safety.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('safety.flow_title', { defaultValue: 'How Safety fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -784,17 +784,17 @@ export function SafetyPage() {
     {
       key: 'incidents',
       label: t('safety.incidents', { defaultValue: 'Incidents' }),
-      icon: <ShieldAlert size={15} />,
+      icon: <ShieldAlert size={16} />,
     },
     {
       key: 'observations',
       label: t('safety.observations', { defaultValue: 'Observations' }),
-      icon: <Eye size={15} />,
+      icon: <Eye size={16} />,
     },
     {
       key: 'trends',
       label: t('safety.trends', { defaultValue: 'Trends' }),
-      icon: <LineChart size={15} />,
+      icon: <LineChart size={16} />,
     },
   ];
 
@@ -1169,7 +1169,7 @@ function IncidentsTab({
               defaultValue: 'Search incidents...',
             })}
             aria-label={t('safety.search_incidents', { defaultValue: 'Search incidents...' })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input oe-input-lg ps-10"
           />
         </div>
         <Button
@@ -1199,31 +1199,31 @@ function IncidentsTab({
 
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+            <tr className="bg-surface-secondary/50">
+              <th>
                 {t('safety.incident_number', { defaultValue: 'Incident #' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('safety.date', { defaultValue: 'Date' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.type', { defaultValue: 'Type' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.severity', { defaultValue: 'Severity' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('safety.treatment', { defaultValue: 'Treatment' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.days_lost', { defaultValue: 'Days Lost' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('common.actions', { defaultValue: 'Actions' })}
               </th>
             </tr>
@@ -1231,7 +1231,7 @@ function IncidentsTab({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={8} className="text-center text-content-tertiary">
                   {t('safety.no_incidents_match', { defaultValue: 'No matching incidents' })}
                 </td>
               </tr>
@@ -1244,13 +1244,13 @@ function IncidentsTab({
                   flashId === inc.id && 'bg-oe-blue/10 ring-2 ring-inset ring-oe-blue/40',
                 )}
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="font-mono">
                   {inc.incident_number}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <DateDisplay value={inc.date} />
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={INCIDENT_TYPE_COLORS[inc.type] ?? 'neutral'}
                     size="sm"
@@ -1260,7 +1260,7 @@ function IncidentsTab({
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={INCIDENT_SEVERITY_COLORS[inc.severity] ?? 'neutral'}
                     size="sm"
@@ -1270,10 +1270,10 @@ function IncidentsTab({
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-content-secondary text-xs">
+                <td className="text-content-secondary">
                   {inc.treatment || '\u2014'}
                 </td>
-                <td className="px-4 py-3 text-center tabular-nums">
+                <td className="text-center tabular-nums">
                   {inc.days_lost > 0 ? (
                     <span className="font-medium text-semantic-error">
                       {inc.days_lost}
@@ -1282,7 +1282,7 @@ function IncidentsTab({
                     <span className="text-content-tertiary">0</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={INCIDENT_STATUS_COLORS[inc.status] ?? 'neutral'}
                     size="sm"
@@ -1292,7 +1292,7 @@ function IncidentsTab({
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
+                <td className="text-right whitespace-nowrap">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1379,10 +1379,10 @@ function IncidentsTab({
 
     {/* New Incident Modal */}
     {showCreate && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
         <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('safety.new_incident', { defaultValue: 'New Incident' })}
             </h2>
             <button
@@ -1390,13 +1390,13 @@ function IncidentsTab({
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
           <div className="px-6 py-4 space-y-5">
             {/* ── Incident Type Cards ── */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
+              <label className="oe-label">
                 {t('safety.type', { defaultValue: 'Incident Type' })}
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -1416,7 +1416,7 @@ function IncidentsTab({
                           : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                       )}
                     >
-                      <TypeIcon size={18} />
+                      <TypeIcon size={20} />
                       <span className="text-2xs font-medium leading-tight">
                         {t(`safety.type_${tp}`, {
                           defaultValue: SAFETY_TYPE_LABELS[tp] ?? tp.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -1444,7 +1444,7 @@ function IncidentsTab({
 
             {/* Date */}
             <div>
-              <label htmlFor="incident-date" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-date" className="oe-label">
                 {t('safety.date', { defaultValue: 'Date' })} <span className="text-semantic-error">*</span>
               </label>
               <input
@@ -1456,14 +1456,14 @@ function IncidentsTab({
                   setIncidentForm((f) => ({ ...f, incident_date: e.target.value }));
                   if (incidentErrors.incident_date) setIncidentErrors((prev) => { const next = { ...prev }; delete next.incident_date; return next; });
                 }}
-                className={clsx(inputCls, incidentErrors.incident_date && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                className={inputCls} aria-invalid={!!(incidentErrors.incident_date)}
               />
               {incidentErrors.incident_date && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.incident_date}</p>}
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="incident-description" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-description" className="oe-label">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
@@ -1474,7 +1474,7 @@ function IncidentsTab({
                   if (incidentErrors.description) setIncidentErrors((prev) => { const next = { ...prev }; delete next.description; return next; });
                 }}
                 rows={3}
-                className={clsx(textareaCls, incidentErrors.description && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                className={textareaCls} aria-invalid={!!(incidentErrors.description)}
                 placeholder={t('safety.incident_desc_placeholder', { defaultValue: 'Describe what happened...' })}
               />
               {incidentErrors.description && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.description}</p>}
@@ -1482,7 +1482,7 @@ function IncidentsTab({
 
             {/* Location */}
             <div>
-              <label htmlFor="incident-location" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-location" className="oe-label">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -1505,7 +1505,7 @@ function IncidentsTab({
 
             {/* Treatment Type - Visual Toggle */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
+              <label className="oe-label">
                 {t('safety.treatment', { defaultValue: 'Treatment Type' })}
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -1525,7 +1525,7 @@ function IncidentsTab({
                               ? 'text-orange-600 bg-orange-50 border-orange-200 ring-2 ring-orange-300 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800'
                               : opt.value === 'first_aid'
                                 ? 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30 ring-2 ring-semantic-warning/30'
-                                : 'text-content-secondary bg-surface-secondary border-border-light ring-2 ring-gray-300'
+                                : 'text-content-secondary bg-surface-secondary border-border-light ring-2 ring-border'
                           : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                       )}
                     >
@@ -1541,7 +1541,7 @@ function IncidentsTab({
             {/* Days Lost - only show if treatment is Medical or Hospital */}
             {(incidentForm.treatment_type === 'medical' || incidentForm.treatment_type === 'hospital') && (
               <div className="animate-fade-in">
-                <label htmlFor="incident-days-lost" className="block text-sm font-medium text-content-primary mb-1.5">
+                <label htmlFor="incident-days-lost" className="oe-label">
                   {t('safety.days_lost', { defaultValue: 'Days Lost' })}
                 </label>
                 <input
@@ -1551,7 +1551,7 @@ function IncidentsTab({
                   max={DAYS_LOST_MAX}
                   value={incidentForm.days_lost || ''}
                   onChange={(e) => setIncidentForm((f) => ({ ...f, days_lost: clampDaysLost(e.target.value) }))}
-                  className={inputCls + ' max-w-[120px]'}
+                  className={`${inputCls} max-w-[120px]`}
                   placeholder="0"
                 />
                 <p className="mt-1 text-xs text-content-quaternary">
@@ -1732,7 +1732,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               defaultValue: 'Search observations...',
             })}
             aria-label={t('safety.search_observations', { defaultValue: 'Search observations...' })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input oe-input-lg ps-10"
           />
         </div>
         <Button
@@ -1762,25 +1762,25 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+            <tr className="bg-surface-secondary/50">
+              <th>
                 {t('safety.observation_number', { defaultValue: 'Observation #' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('safety.date', { defaultValue: 'Date' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.type', { defaultValue: 'Type' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.severity', { defaultValue: 'Severity' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('safety.risk_score', { defaultValue: 'Risk Score' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
             </tr>
@@ -1788,16 +1788,15 @@ function ObservationsTab({ projectId }: { projectId: string }) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={6} className="text-center text-content-tertiary">
                   {t('safety.no_observations_match', { defaultValue: 'No matching observations' })}
                 </td>
               </tr>
             ) : filtered.map((obs) => (
               <Fragment key={obs.id}>
               <tr
-                className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="font-mono">
                   {obs.observation_number}
                   <button
                     type="button"
@@ -1808,10 +1807,10 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                     {t('photoArchive.strip.title')}
                   </button>
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <DateDisplay value={obs.date} />
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={OBS_TYPE_COLORS[obs.type] ?? 'neutral'}
                     size="sm"
@@ -1821,12 +1820,12 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-3">
+                <td>
                   <div className="flex justify-center">
                     <SeverityDots level={obs.severity} />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${riskScoreColor(obs.risk_score)}`}
                   >
@@ -1836,7 +1835,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                     </span>
                   </span>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   <Badge
                     variant={OBS_STATUS_COLORS[obs.status] ?? 'neutral'}
                     size="sm"
@@ -1856,8 +1855,8 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 </td>
               </tr>
               {photosFor === obs.id && (
-                <tr className="border-b border-border-light">
-                  <td colSpan={6} className="px-4 py-3">
+                <tr>
+                  <td colSpan={6}>
                     <PhotoStrip projectId={projectId} kind="safety_obs" targetId={obs.id} />
                   </td>
                 </tr>
@@ -1922,10 +1921,10 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
     {/* New Observation Modal */}
     {showCreate && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
         <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('safety.new_observation', { defaultValue: 'New Observation' })}
             </h2>
             <button
@@ -1933,13 +1932,13 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
           <div className="px-6 py-4 space-y-5">
             {/* ── Observation Type Cards ── */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
+              <label className="oe-label">
                 {t('safety.type', { defaultValue: 'Observation Type' })}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1959,7 +1958,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                           : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                       )}
                     >
-                      <TypeIcon size={18} />
+                      <TypeIcon size={20} />
                       <span className="text-2xs font-medium leading-tight">
                         {t(`safety.obs_type_${tp}`, {
                           defaultValue: tp.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -1978,7 +1977,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* Description */}
             <div>
-              <label htmlFor="obs-description" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="obs-description" className="oe-label">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
@@ -1989,7 +1988,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                   if (obsErrors.description) setObsErrors((prev) => { const next = { ...prev }; delete next.description; return next; });
                 }}
                 rows={3}
-                className={clsx(textareaCls, obsErrors.description && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                className={textareaCls} aria-invalid={!!(obsErrors.description)}
                 placeholder={t('safety.obs_desc_placeholder', { defaultValue: 'Describe the observation...' })}
               />
               {obsErrors.description && <p className="mt-1 text-xs text-semantic-error">{obsErrors.description}</p>}
@@ -1997,7 +1996,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* Location */}
             <div>
-              <label htmlFor="obs-location" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="obs-location" className="oe-label">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -2011,7 +2010,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* ── Severity Visual 1-5 Scale ── */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
+              <label className="oe-label">
                 {t('safety.severity', { defaultValue: 'Severity' })}
               </label>
               <div className="flex items-center gap-2">
@@ -2033,8 +2032,8 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                               : obsForm.severity >= 3
                                 ? 'bg-orange-400'
                                 : obsForm.severity >= 2
-                                  ? 'bg-yellow-400'
-                                  : 'bg-green-400'
+                                  ? 'bg-semantic-warning'
+                                  : 'bg-semantic-success'
                             : 'bg-surface-tertiary',
                         )}
                       />
@@ -2049,7 +2048,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* ── Likelihood Visual 1-5 Scale ── */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
+              <label className="oe-label">
                 {t('safety.likelihood', { defaultValue: 'Likelihood' })}
               </label>
               <div className="flex items-center gap-2">
@@ -2071,8 +2070,8 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                               : obsForm.likelihood >= 3
                                 ? 'bg-orange-400'
                                 : obsForm.likelihood >= 2
-                                  ? 'bg-yellow-400'
-                                  : 'bg-green-400'
+                                  ? 'bg-semantic-warning'
+                                  : 'bg-semantic-success'
                             : 'bg-surface-tertiary',
                         )}
                       />

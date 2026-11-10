@@ -164,7 +164,7 @@ const AUDIT_STATUS_VARIANT: Record<string, 'neutral' | 'blue' | 'success' | 'war
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /* ── How it works + module connections ─────────────────────────────────── */
 
@@ -226,7 +226,7 @@ function HowQmsWork() {
   return (
     <CollapsibleSection
       storageKey="qms.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('qms.how_title', { defaultValue: 'How the quality chain fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -594,7 +594,7 @@ export function QMSPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[180px]')}
+          className={clsx('oe-select', 'max-w-[180px]')}
         >
           <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
           {statusOptionsFor(tab).map((s) => (
@@ -607,7 +607,7 @@ export function QMSPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as PunchCategory | '')}
-            className={clsx(inputCls, 'max-w-[180px]')}
+            className={clsx('oe-select', 'max-w-[180px]')}
           >
             <option value="">{t('qms.all_categories', { defaultValue: 'All categories' })}</option>
             {(['architectural', 'mechanical', 'electrical', 'finishes', 'structure'] as PunchCategory[]).map((c) => (
@@ -930,15 +930,15 @@ function ITPTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('qms.name', { defaultValue: 'Name' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.work_type', { defaultValue: 'Work type' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.wbs', { defaultValue: 'WBS' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.version', { defaultValue: 'Ver' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
+            <th>{t('qms.name', { defaultValue: 'Name' })}</th>
+            <th>{t('qms.work_type', { defaultValue: 'Work type' })}</th>
+            <th>{t('qms.wbs', { defaultValue: 'WBS' })}</th>
+            <th>{t('qms.version', { defaultValue: 'Ver' })}</th>
+            <th>{t('qms.status', { defaultValue: 'Status' })}</th>
+            <th className="text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -946,18 +946,18 @@ function ITPTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-medium text-content-primary">{r.name}</td>
-              <td className="px-4 py-2 text-content-secondary">{r.work_type}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.wbs_ref || '—'}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs tabular-nums">v{r.version}</td>
-              <td className="px-4 py-2">
+              <td>{r.name}</td>
+              <td className="text-content-secondary">{r.work_type}</td>
+              <td className="text-content-secondary">{r.wbs_ref || '—'}</td>
+              <td className="text-content-secondary tabular-nums">v{r.version}</td>
+              <td>
                 <Badge variant={ITP_STATUS_VARIANT[r.status] || 'neutral'} dot>
                   {statusLabel(t, r.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 {r.status === 'draft' && (
                   <Button
                     variant="ghost"
@@ -1028,14 +1028,14 @@ function InspectionTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('qms.location', { defaultValue: 'Location' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.scheduled_at', { defaultValue: 'Scheduled' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.performed_at', { defaultValue: 'Performed' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.notes', { defaultValue: 'Notes' })}</th>
+            <th>{t('qms.location', { defaultValue: 'Location' })}</th>
+            <th>{t('qms.scheduled_at', { defaultValue: 'Scheduled' })}</th>
+            <th>{t('qms.performed_at', { defaultValue: 'Performed' })}</th>
+            <th>{t('qms.status', { defaultValue: 'Status' })}</th>
+            <th>{t('qms.notes', { defaultValue: 'Notes' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -1043,21 +1043,21 @@ function InspectionTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-medium text-content-primary">{r.location_ref || '—'}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td>{r.location_ref || '—'}</td>
+              <td className="text-content-secondary">
                 {r.scheduled_at ? <DateDisplay value={r.scheduled_at} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.performed_at ? <DateDisplay value={r.performed_at} /> : '—'}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={INSPECTION_VARIANT[r.status] || 'neutral'} dot>
                   {statusLabel(t, r.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs truncate max-w-[320px]">{r.notes || '—'}</td>
+              <td className="text-content-secondary truncate max-w-[320px]">{r.notes || '—'}</td>
             </tr>
           ))}
         </tbody>
@@ -1114,14 +1114,14 @@ function NCRTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('qms.title_col', { defaultValue: 'Title' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.severity', { defaultValue: 'Severity' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.raised_at', { defaultValue: 'Raised' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('qms.cost_impact', { defaultValue: 'Cost impact' })}</th>
+            <th>{t('qms.title_col', { defaultValue: 'Title' })}</th>
+            <th>{t('qms.severity', { defaultValue: 'Severity' })}</th>
+            <th>{t('qms.status', { defaultValue: 'Status' })}</th>
+            <th>{t('qms.raised_at', { defaultValue: 'Raised' })}</th>
+            <th className="text-right">{t('qms.cost_impact', { defaultValue: 'Cost impact' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -1129,21 +1129,21 @@ function NCRTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[360px]">{r.title}</td>
-              <td className="px-4 py-2">
+              <td className="truncate max-w-[360px]">{r.title}</td>
+              <td>
                 <Badge variant={SEVERITY_VARIANT[r.severity]}>{severityLabel(t, r.severity)}</Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={NCR_STATUS_VARIANT[r.status] || 'neutral'} dot>
                   {statusLabel(t, r.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.raised_at ? <DateDisplay value={r.raised_at} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 {r.cost_impact_amount != null ? (
                   <MoneyDisplay
                     amount={Number(r.cost_impact_amount)}
@@ -1217,34 +1217,34 @@ function PunchTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('qms.title_col', { defaultValue: 'Title' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.category', { defaultValue: 'Category' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.severity', { defaultValue: 'Severity' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.due_date', { defaultValue: 'Due' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
+            <th>{t('qms.title_col', { defaultValue: 'Title' })}</th>
+            <th>{t('qms.category', { defaultValue: 'Category' })}</th>
+            <th>{t('qms.severity', { defaultValue: 'Severity' })}</th>
+            <th>{t('qms.status', { defaultValue: 'Status' })}</th>
+            <th>{t('qms.due_date', { defaultValue: 'Due' })}</th>
+            <th className="text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[320px]">{r.title}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{r.category ? categoryLabel(t, r.category) : '—'}</td>
-              <td className="px-4 py-2">
+            <tr key={r.id}>
+              <td className="truncate max-w-[320px]">{r.title}</td>
+              <td className="text-content-secondary">{r.category ? categoryLabel(t, r.category) : '—'}</td>
+              <td>
                 <Badge variant={SEVERITY_VARIANT[r.severity]}>{severityLabel(t, r.severity)}</Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={PUNCH_STATUS_VARIANT[r.status] || 'neutral'} dot>
                   {statusLabel(t, r.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.due_date ? <DateDisplay value={r.due_date} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 {r.status !== 'closed' && r.status !== 'rejected' && (
                   <Button
                     variant="ghost"
@@ -1320,34 +1320,34 @@ function AuditTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('qms.audit_type', { defaultValue: 'Type' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.standard', { defaultValue: 'Standard' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.planned_date', { defaultValue: 'Planned' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('qms.rating', { defaultValue: 'Rating' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
+            <th>{t('qms.audit_type', { defaultValue: 'Type' })}</th>
+            <th>{t('qms.standard', { defaultValue: 'Standard' })}</th>
+            <th>{t('qms.planned_date', { defaultValue: 'Planned' })}</th>
+            <th>{t('qms.status', { defaultValue: 'Status' })}</th>
+            <th>{t('qms.rating', { defaultValue: 'Rating' })}</th>
+            <th className="text-right">{t('qms.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-              <td className="px-4 py-2 font-medium text-content-primary">{auditTypeLabel(t, r.audit_type)}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.standard_ref || '—'}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+            <tr key={r.id}>
+              <td>{auditTypeLabel(t, r.audit_type)}</td>
+              <td className="text-content-secondary">{r.standard_ref || '—'}</td>
+              <td className="text-content-secondary">
                 {r.planned_date ? <DateDisplay value={r.planned_date} /> : '—'}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={AUDIT_STATUS_VARIANT[r.status] || 'neutral'} dot>
                   {statusLabel(t, r.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs tabular-nums">
+              <td className="tabular-nums">
                 {r.overall_rating != null ? `${r.overall_rating} / 5` : '—'}
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 {r.status === 'in_progress' && (
                   <Button
                     variant="ghost"
@@ -1472,7 +1472,7 @@ function NCRDrawer({
   const canEscalate = ncr.status !== 'closed' && ncr.status !== 'cancelled';
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1586,7 +1586,7 @@ function NCRDrawer({
                   onChange={(e) => setActionDesc(e.target.value)}
                   placeholder={t('qms.action_desc', { defaultValue: 'Action description' })}
                   rows={2}
-                  className={clsx(inputCls, 'h-auto py-2')}
+                  className="oe-textarea"
                 />
                 <input
                   value={responsible}
@@ -1618,7 +1618,7 @@ function NCRDrawer({
                 <select
                   value={variationId}
                   onChange={(e) => setVariationId(e.target.value)}
-                  className={inputCls}
+                  className="oe-select"
                 >
                   <option value="">
                     {t('qms.select_variation', { defaultValue: 'Select a variation order…' })}
@@ -1732,7 +1732,7 @@ function ITPPlanDrawer({
   const items = itemsQ.data?.items ?? [];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1757,7 +1757,7 @@ function ITPPlanDrawer({
         <div className="space-y-4 p-5">
           <div className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary px-3 py-2">
             <span className="flex items-center gap-1.5 text-xs text-content-secondary">
-              <FileCheck size={13} />
+              <FileCheck size={14} />
               {t('qms.compliance_dossier', {
                 defaultValue: 'Audit-ready quality dossier',
               })}
@@ -1776,7 +1776,7 @@ function ITPPlanDrawer({
           </div>
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">
-              <Lock size={13} />
+              <Lock size={14} />
               {t('qms.hold_point_sequencing', { defaultValue: 'Hold point sequencing' })}
             </p>
             {itemsQ.isLoading ? (
@@ -1871,7 +1871,7 @@ function SpecLinkEditor({
   const candidates = items.filter((i) => i.id !== item.id);
 
   return (
-    <div className="mt-1.5 space-y-2 rounded-md border border-border-light bg-surface-primary p-2.5">
+    <div className="mt-1.5 space-y-2 rounded-md border border-border-light bg-surface-primary p-3">
       <input
         value={csi}
         onChange={(e) => setCsi(e.target.value)}
@@ -1896,7 +1896,7 @@ function SpecLinkEditor({
       <select
         value={predecessor}
         onChange={(e) => setPredecessor(e.target.value)}
-        className={inputCls}
+        className="oe-select"
         aria-label={t('qms.predecessor', { defaultValue: 'Predecessor hold point' })}
       >
         <option value="">
@@ -2013,7 +2013,7 @@ function InspectionDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -2062,11 +2062,11 @@ function InspectionDrawer({
               )}
             >
               {holdQ.data.released ? (
-                <Unlock size={15} className="mt-0.5 shrink-0" />
+                <Unlock size={16} className="mt-0.5 shrink-0" />
               ) : holdQ.data.blocked ? (
-                <ShieldAlert size={15} className="mt-0.5 shrink-0" />
+                <ShieldAlert size={16} className="mt-0.5 shrink-0" />
               ) : (
-                <Lock size={15} className="mt-0.5 shrink-0" />
+                <Lock size={16} className="mt-0.5 shrink-0" />
               )}
               <div>
                 <p className="font-medium">
@@ -2089,7 +2089,7 @@ function InspectionDrawer({
             <Card padding="sm" className="border-semantic-error/30 bg-semantic-error/5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-start gap-2">
-                  <AlertOctagon size={15} className="mt-0.5 shrink-0 text-semantic-error" />
+                  <AlertOctagon size={16} className="mt-0.5 shrink-0 text-semantic-error" />
                   <p className="text-xs text-content-secondary">
                     {t('qms.inspection_failed_ncr_hint', {
                       defaultValue:
@@ -2153,13 +2153,13 @@ function InspectionDrawer({
             )}
             {isOpenStatus && (
               <div className="space-y-2 border-t border-border-light pt-2">
-                <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <label className="oe-label">
                   {t('qms.sign_as_role', { defaultValue: 'Sign as role' })}
                 </label>
                 <select
                   value={signRole}
                   onChange={(e) => setSignRole(e.target.value as InspectionSignature['signer_role'])}
-                  className={inputCls}
+                  className="oe-select"
                   aria-label={t('qms.sign_as_role', { defaultValue: 'Sign as role' })}
                 >
                   {SIGNER_ROLES.map((r) => (
@@ -2222,7 +2222,7 @@ function InspectionDrawer({
           {holdQ.data?.is_hold_point && insp.status === 'passed' && !holdQ.data.released && (
             <Card padding="sm">
               <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">
-                <Unlock size={13} />
+                <Unlock size={14} />
                 {t('qms.release_hold_point', { defaultValue: 'Release hold point' })}
               </p>
               <p className="mb-2 text-2xs text-content-tertiary">
@@ -2238,7 +2238,7 @@ function InspectionDrawer({
                   defaultValue: 'Justification (required)',
                 })}
                 rows={2}
-                className={clsx(inputCls, 'h-auto py-2')}
+                className="oe-textarea"
                 aria-label={t('qms.release_justification', { defaultValue: 'Justification (required)' })}
               />
               <Button
@@ -2264,7 +2264,7 @@ function InspectionDrawer({
                 <select
                   value={result}
                   onChange={(e) => setResult(e.target.value as 'passed' | 'failed' | 'conditional')}
-                  className={inputCls}
+                  className="oe-select"
                 >
                   <option value="passed">{t('qms.result_passed', { defaultValue: 'Passed' })}</option>
                   <option value="failed">{t('qms.result_failed', { defaultValue: 'Failed' })}</option>
@@ -2275,7 +2275,7 @@ function InspectionDrawer({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={t('qms.notes_placeholder', { defaultValue: 'Notes (optional)' })}
                   rows={2}
-                  className={clsx(inputCls, 'h-auto py-2')}
+                  className="oe-textarea"
                 />
                 {!signaturesSatisfied && (
                   <p className="text-2xs text-semantic-warning">
@@ -2492,7 +2492,7 @@ function CreateModal({
                 // submit an item id from a different plan.
                 setInspForm({ ...inspForm, itp_item_id: '' });
               }}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">—</option>
               {itpPlans.map((p) => (
@@ -2508,7 +2508,7 @@ function CreateModal({
             <select
               value={inspForm.itp_item_id}
               onChange={(e) => setInspForm({ ...inspForm, itp_item_id: e.target.value })}
-              className={inputCls}
+              className="oe-select"
               disabled={!selectedPlanId || itpItemsQ.isLoading}
             >
               <option value="">
@@ -2548,7 +2548,7 @@ function CreateModal({
               value={inspForm.notes}
               onChange={(e) => setInspForm({ ...inspForm, notes: e.target.value })}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
         </WideModalSection>
@@ -2564,14 +2564,14 @@ function CreateModal({
               value={ncrForm.description}
               onChange={(e) => setNcrForm({ ...ncrForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <WideModalField label={t('qms.severity', { defaultValue: 'Severity' })}>
             <select
               value={ncrForm.severity}
               onChange={(e) => setNcrForm({ ...ncrForm, severity: e.target.value as NCRSeverity })}
-              className={inputCls}
+              className="oe-select"
             >
               {(['minor', 'major', 'critical'] as NCRSeverity[]).map((s) => (
                 <option key={s} value={s}>
@@ -2584,7 +2584,7 @@ function CreateModal({
             <select
               value={ncrForm.linked_inspection_id}
               onChange={(e) => setNcrForm({ ...ncrForm, linked_inspection_id: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">—</option>
               {inspections.map((i) => (
@@ -2627,7 +2627,7 @@ function CreateModal({
               value={punchForm.description}
               onChange={(e) => setPunchForm({ ...punchForm, description: e.target.value })}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <WideModalField label={t('qms.room', { defaultValue: 'Room / area' })}>
@@ -2643,7 +2643,7 @@ function CreateModal({
               onChange={(e) =>
                 setPunchForm({ ...punchForm, category: e.target.value as PunchCategory | '' })
               }
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">—</option>
               {(['architectural', 'mechanical', 'electrical', 'finishes', 'structure'] as PunchCategory[]).map((c) => (
@@ -2657,7 +2657,7 @@ function CreateModal({
             <select
               value={punchForm.severity}
               onChange={(e) => setPunchForm({ ...punchForm, severity: e.target.value as NCRSeverity })}
-              className={inputCls}
+              className="oe-select"
             >
               {(['minor', 'major', 'critical'] as NCRSeverity[]).map((s) => (
                 <option key={s} value={s}>
@@ -2685,7 +2685,7 @@ function CreateModal({
               onChange={(e) =>
                 setAuditForm({ ...auditForm, audit_type: e.target.value as 'internal' | 'external' | 'supplier' })
               }
-              className={inputCls}
+              className="oe-select"
             >
               <option value="internal">{auditTypeLabel(t, 'internal')}</option>
               <option value="external">{auditTypeLabel(t, 'external')}</option>
@@ -2712,7 +2712,7 @@ function CreateModal({
               value={auditForm.audit_scope}
               onChange={(e) => setAuditForm({ ...auditForm, audit_scope: e.target.value })}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
         </WideModalSection>

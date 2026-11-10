@@ -17,7 +17,7 @@ import { apiPost, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
 const fieldCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 export interface ConfirmablePO {
   id: string;
@@ -98,7 +98,7 @@ export function SupplierConfirmationModal({ po, projectId, onClose }: SupplierCo
     >
       <div className="space-y-4">
         <div>
-          <label htmlFor="po-supplier-reference" className="mb-1 block text-xs font-medium text-content-secondary">
+          <label htmlFor="po-supplier-reference" className="oe-label">
             {t('procurement.supplier_reference', { defaultValue: 'Supplier order reference' })}
           </label>
           <input
@@ -110,7 +110,7 @@ export function SupplierConfirmationModal({ po, projectId, onClose }: SupplierCo
           />
         </div>
         <div>
-          <label htmlFor="po-confirmed-date" className="mb-1 block text-xs font-medium text-content-secondary">
+          <label htmlFor="po-confirmed-date" className="oe-label">
             {t('procurement.supplier_confirmed_delivery_date', { defaultValue: 'Confirmed delivery date' })}
           </label>
           <input

@@ -91,7 +91,7 @@ const VENDOR_VARIANT: Record<VendorStatus, 'neutral' | 'blue' | 'success' | 'war
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /* ── How it works + module connections ─────────────────────────────────── */
 
@@ -146,7 +146,7 @@ function HowSupplierCatalogsWork() {
   return (
     <CollapsibleSection
       storageKey="supplier_catalogs.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('supplier_catalogs.flow_title', {
         defaultValue: 'How the supplier library fits together',
       })}
@@ -480,7 +480,7 @@ export function SupplierCatalogsPage({ embeddedTab }: SupplierCatalogsPageProps 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={clsx(inputCls, 'max-w-[180px]')}
+            className={clsx('oe-select', 'max-w-[180px]')}
           >
             <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
             {(['active', 'suspended', 'blacklisted', 'pending'] as VendorStatus[]).map((s) => (
@@ -494,7 +494,7 @@ export function SupplierCatalogsPage({ embeddedTab }: SupplierCatalogsPageProps 
           <select
             value={effectiveWarehouseId}
             onChange={(e) => setSelectedWarehouseId(e.target.value)}
-            className={clsx(inputCls, 'max-w-[280px]')}
+            className={clsx('oe-select', 'max-w-[280px]')}
           >
             {warehousesArr.map((w) => (
               <option key={w.id} value={w.id}>
@@ -757,31 +757,31 @@ function VendorTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.code', { defaultValue: 'Code' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.country', { defaultValue: 'Country' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.rating', { defaultValue: 'Rating' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.payment_terms', { defaultValue: 'Terms' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.actions', { defaultValue: 'Actions' })}</th>
+            <th>{t('supplier_catalogs.code', { defaultValue: 'Code' })}</th>
+            <th>{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
+            <th>{t('supplier_catalogs.country', { defaultValue: 'Country' })}</th>
+            <th>{t('supplier_catalogs.rating', { defaultValue: 'Rating' })}</th>
+            <th>{t('supplier_catalogs.payment_terms', { defaultValue: 'Terms' })}</th>
+            <th>{t('supplier_catalogs.status', { defaultValue: 'Status' })}</th>
+            <th className="text-right">{t('supplier_catalogs.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.code}</td>
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[320px]">{r.name}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.country_code || '—'}</td>
-              <td className="px-4 py-2">
+            <tr key={r.id}>
+              <td className="font-mono text-content-secondary">{r.code}</td>
+              <td className="truncate max-w-[320px]">{r.name}</td>
+              <td className="text-content-secondary">{r.country_code || '—'}</td>
+              <td>
                 <StarRating rating={r.rating} />
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs tabular-nums">
+              <td className="text-content-secondary tabular-nums">
                 {r.payment_terms_days}d · {r.currency}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={VENDOR_VARIANT[r.status] || 'neutral'} dot>
                   {r.status}
                 </Badge>
@@ -792,19 +792,19 @@ function VendorTable({
                   button. Reactivation is deliberately absent - the service has
                   the operation but no route exposes it, so there is nothing to
                   call yet. */}
-              <td className="px-4 py-2">
+              <td>
                 <div className="flex items-center justify-end gap-1 whitespace-nowrap">
-                  <Button variant="ghost" size="sm" icon={<Pencil size={13} />} onClick={() => onEdit(r)}>
+                  <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => onEdit(r)}>
                     {t('common.edit', { defaultValue: 'Edit' })}
                   </Button>
-                  <Button variant="ghost" size="sm" icon={<Star size={13} />} onClick={() => onRate(r)}>
+                  <Button variant="ghost" size="sm" icon={<Star size={14} />} onClick={() => onRate(r)}>
                     {t('supplier_catalogs.rate', { defaultValue: 'Rate' })}
                   </Button>
                   {r.status === 'active' && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      icon={<PauseCircle size={13} />}
+                      icon={<PauseCircle size={14} />}
                       onClick={() => onStatus(r, 'suspend')}
                     >
                       {t('supplier_catalogs.suspend', { defaultValue: 'Suspend' })}
@@ -814,13 +814,13 @@ function VendorTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      icon={<Ban size={13} />}
+                      icon={<Ban size={14} />}
                       onClick={() => onStatus(r, 'blacklist')}
                     >
                       {t('supplier_catalogs.blacklist', { defaultValue: 'Blacklist' })}
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => onDelete(r)}>
+                  <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => onDelete(r)}>
                     {t('common.delete', { defaultValue: 'Delete' })}
                   </Button>
                 </div>
@@ -862,26 +862,26 @@ function CatalogTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.sku', { defaultValue: 'SKU' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.uom', { defaultValue: 'UoM' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.manufacturer', { defaultValue: 'Manufacturer' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.reorder', { defaultValue: 'Reorder' })}</th>
-            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.links', { defaultValue: 'Links' })}</th>
-            <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.actions', { defaultValue: 'Actions' })}</th>
+            <th>{t('supplier_catalogs.sku', { defaultValue: 'SKU' })}</th>
+            <th>{t('supplier_catalogs.name', { defaultValue: 'Name' })}</th>
+            <th>{t('supplier_catalogs.uom', { defaultValue: 'UoM' })}</th>
+            <th>{t('supplier_catalogs.manufacturer', { defaultValue: 'Manufacturer' })}</th>
+            <th className="text-right">{t('supplier_catalogs.reorder', { defaultValue: 'Reorder' })}</th>
+            <th>{t('supplier_catalogs.links', { defaultValue: 'Links' })}</th>
+            <th className="text-right">{t('supplier_catalogs.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.sku}</td>
+            <tr key={r.id}>
+              <td className="font-mono text-content-secondary">{r.sku}</td>
               {/* The inactive marker is the visible half of the Active box in
                   the edit modal. Without it the flag would be a setting the
                   user can change and never see again. */}
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[320px]">
+              <td className="truncate max-w-[320px]">
                 <span className="inline-flex items-center gap-2">
                   {r.name}
                   {r.active === false && (
@@ -891,25 +891,25 @@ function CatalogTable({
                   )}
                 </span>
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.unit_of_measure}</td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.manufacturer || '—'}</td>
-              <td className="px-4 py-2 text-right text-xs tabular-nums">{String(r.reorder_point)}</td>
-              <td className="px-4 py-2">
+              <td className="text-content-secondary">{r.unit_of_measure}</td>
+              <td className="text-content-secondary">{r.manufacturer || '—'}</td>
+              <td className="text-right tabular-nums">{String(r.reorder_point)}</td>
+              <td>
                 <ItemLinks
                   productUrl={r.product_url}
                   attachmentCount={r.attachment_count}
                   onOpenDocuments={() => setDocsItem(r)}
                 />
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 <div className="flex items-center justify-end gap-1 whitespace-nowrap">
                   <Button variant="ghost" size="sm" onClick={() => onSelectPrice(r)}>
                     {t('supplier_catalogs.compare_prices', { defaultValue: 'Compare prices' })}
                   </Button>
-                  <Button variant="ghost" size="sm" icon={<Pencil size={13} />} onClick={() => onEdit(r)}>
+                  <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => onEdit(r)}>
                     {t('common.edit', { defaultValue: 'Edit' })}
                   </Button>
-                  <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => onDelete(r)}>
+                  <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => onDelete(r)}>
                     {t('common.delete', { defaultValue: 'Delete' })}
                   </Button>
                 </div>
@@ -976,7 +976,7 @@ function ProcurementHandoffPanel() {
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-secondary text-content-tertiary">
           <ShoppingCart size={22} />
         </div>
-        <h3 className="text-base font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('supplier_catalogs.procurement_handoff_title', {
             defaultValue: 'Live purchasing lives in Procurement',
           })}
@@ -1077,10 +1077,10 @@ function WarehousePanel({
             to a table row. */}
         {selected && (
           <div className="ml-auto flex items-center gap-1 whitespace-nowrap">
-            <Button variant="ghost" size="sm" icon={<Pencil size={13} />} onClick={() => onEdit(selected)}>
+            <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => onEdit(selected)}>
               {t('common.edit', { defaultValue: 'Edit' })}
             </Button>
-            <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={() => onDelete(selected)}>
+            <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => onDelete(selected)}>
               {t('common.delete', { defaultValue: 'Delete' })}
             </Button>
           </div>
@@ -1092,23 +1092,23 @@ function WarehousePanel({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.item', { defaultValue: 'Item' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.batch', { defaultValue: 'Batch' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.on_hand', { defaultValue: 'On hand' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.reserved', { defaultValue: 'Reserved' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.unit_cost_avg', { defaultValue: 'Avg cost' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.last_moved', { defaultValue: 'Last moved' })}</th>
+                <th>{t('supplier_catalogs.item', { defaultValue: 'Item' })}</th>
+                <th>{t('supplier_catalogs.batch', { defaultValue: 'Batch' })}</th>
+                <th className="text-right">{t('supplier_catalogs.on_hand', { defaultValue: 'On hand' })}</th>
+                <th className="text-right">{t('supplier_catalogs.reserved', { defaultValue: 'Reserved' })}</th>
+                <th className="text-right">{t('supplier_catalogs.unit_cost_avg', { defaultValue: 'Avg cost' })}</th>
+                <th>{t('supplier_catalogs.last_moved', { defaultValue: 'Last moved' })}</th>
               </tr>
             </thead>
             <tbody>
               {balances.map((b) => {
                 const item = itemLookup.get(b.catalog_item_id);
                 return (
-                <tr key={b.id} className="border-t border-border-light hover:bg-surface-secondary">
-                  <td className="px-4 py-2 max-w-[320px]">
+                <tr key={b.id}>
+                  <td className="max-w-[320px]">
                     {item ? (
                       <div className="min-w-0">
                         <p className="font-medium text-content-primary truncate">{item.name}</p>
@@ -1120,15 +1120,15 @@ function WarehousePanel({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-content-secondary text-xs">{b.batch_lot || '—'}</td>
-                  <td className="px-4 py-2 text-right text-xs tabular-nums">{String(b.quantity_on_hand)}</td>
-                  <td className="px-4 py-2 text-right text-xs tabular-nums">{String(b.quantity_reserved)}</td>
+                  <td className="text-content-secondary">{b.batch_lot || '—'}</td>
+                  <td className="text-right tabular-nums">{String(b.quantity_on_hand)}</td>
+                  <td className="text-right tabular-nums">{String(b.quantity_reserved)}</td>
                   {/* The average is money and carries its own ISO currency,
                       which is not the currency the operator picked in
                       settings. When the backend has no single-currency
                       average we say so rather than rendering a number under
                       a label that would be wrong either way. */}
-                  <td className="px-4 py-2 text-right text-xs tabular-nums">
+                  <td className="text-right tabular-nums">
                     {b.unit_cost_avg !== null && b.currency ? (
                       <MoneyDisplay amount={Number(b.unit_cost_avg)} currency={b.currency} />
                     ) : (
@@ -1139,7 +1139,7 @@ function WarehousePanel({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {b.last_movement_at ? <DateDisplay value={b.last_movement_at} /> : '—'}
                   </td>
                 </tr>
@@ -1554,7 +1554,7 @@ function CreateModal({
               value={itemForm.description}
               onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
           <WideModalField
@@ -1600,7 +1600,7 @@ function CreateModal({
               value={warehouseForm.address}
               onChange={(e) => setWarehouseForm({ ...warehouseForm, address: e.target.value })}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
         </WideModalSection>
@@ -1743,7 +1743,7 @@ function EditVendorModal({ vendor, onClose }: { vendor: Vendor; onClose: () => v
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
       </WideModalSection>
@@ -1884,7 +1884,7 @@ function EditItemModal({ item, onClose }: { item: CatalogItem; onClose: () => vo
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
         <WideModalField
@@ -1981,7 +1981,7 @@ function EditWarehouseModal({
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
       </WideModalSection>
@@ -2085,7 +2085,7 @@ function VendorStatusModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className="oe-textarea"
             />
           </WideModalField>
         </WideModalSection>
@@ -2145,7 +2145,7 @@ function VendorRatingModal({ vendor, onClose }: { vendor: Vendor; onClose: () =>
             <select
               value={String(rating)}
               onChange={(e) => setRating(Number(e.target.value))}
-              className={clsx(inputCls, 'max-w-[120px]')}
+              className={clsx('oe-select', 'max-w-[120px]')}
               aria-label={t('supplier_catalogs.rating', { defaultValue: 'Rating' })}
             >
               {[1, 2, 3, 4, 5].map((n) => (
@@ -2162,7 +2162,7 @@ function VendorRatingModal({ vendor, onClose }: { vendor: Vendor; onClose: () =>
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
           />
         </WideModalField>
       </WideModalSection>

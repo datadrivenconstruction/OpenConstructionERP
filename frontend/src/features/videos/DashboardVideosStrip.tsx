@@ -69,7 +69,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
     <section data-testid="dashboard-videos" aria-labelledby="dashboard-videos-title" className="mt-3 border-t border-border-light pt-3">
       <div className="mb-1.5 flex items-center gap-2">
         <span id="dashboard-videos-title" className="flex items-center gap-1 text-2xs font-medium text-content-tertiary">
-          <MonitorPlay size={11} aria-hidden="true" />
+          <MonitorPlay size={12} aria-hidden="true" />
           {t('nav.videos', { defaultValue: 'Video guides' })}
         </span>
         <ContentLanguageNote tags={tags} className="ms-auto" testId="dashboard-videos-lang-note" />
@@ -91,7 +91,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                   aria-hidden="true"
                   className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-md transition-colors group-hover:bg-white motion-reduce:transition-none"
                 >
-                  <Play size={15} className="ms-0.5" fill="currentColor" />
+                  <Play size={16} className="ms-0.5" fill="currentColor" />
                 </span>
                 <span className="absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-white">
                   <MonitorPlay size={10} aria-hidden="true" />
@@ -111,7 +111,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                     data-testid="dashboard-video-duration"
                     className="absolute bottom-1.5 end-1.5 inline-flex items-center gap-1 rounded-md bg-black/80 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-white"
                   >
-                    <Clock size={11} aria-hidden="true" />
+                    <Clock size={12} aria-hidden="true" />
                     {formatClock(video.duration)}
                   </span>
                 ) : null}
@@ -130,7 +130,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
             className="group flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-oe-blue/40 bg-oe-blue/[0.05] px-2 py-3 text-center transition-colors hover:border-oe-blue/60 hover:bg-oe-blue/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue ring-1 ring-inset ring-oe-blue/20">
-              <ArrowRight size={18} strokeWidth={2} className="rtl:rotate-180" aria-hidden="true" />
+              <ArrowRight size={20} strokeWidth={2} className="rtl:rotate-180" aria-hidden="true" />
             </span>
             <span className="text-xs font-semibold leading-snug text-oe-blue-text">
               {t('videos.library_title', { defaultValue: 'All videos' })}

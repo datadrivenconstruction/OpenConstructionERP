@@ -24,7 +24,7 @@ import {
 import { struckBelowTarget } from '../sensorData';
 import { useSensorUnits } from '../useSensorUnits';
 
-const FIELD = 'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary';
+const FIELD = 'oe-input oe-input-sm';
 
 function StrikeDialog({
   strip,
@@ -41,7 +41,7 @@ function StrikeDialog({
   const u = useSensorUnits(strip.project_id);
   const [reason, setReason] = useState('');
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
       <div
         role="dialog"
         aria-modal="true"
@@ -49,7 +49,7 @@ function StrikeDialog({
         className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="strike-dialog-title" className="flex items-center gap-2 text-base font-semibold text-content-primary">
+        <h2 id="strike-dialog-title" className="oe-section-title flex items-center gap-2">
           <AlertTriangle size={16} className="text-semantic-warning" />
           {t('site_sensors.strips.below_title', { defaultValue: 'Strike below target strength?' })}
         </h2>
@@ -69,7 +69,7 @@ function StrikeDialog({
             rows={3}
             autoFocus
             onChange={(e) => setReason(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+            className="oe-textarea mt-1"
           />
         </label>
         <div className="mt-4 flex justify-end gap-2">
@@ -150,7 +150,7 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
               value={deviceId}
               onChange={(e) => setDeviceId(e.target.value)}
               aria-label={t('site_sensors.strips.sensor', { defaultValue: 'Concrete sensor' })}
-              className={`${FIELD} min-w-[160px]`}
+              className="oe-select oe-input-sm min-w-[160px]"
             >
               <option value="">{t('site_sensors.strips.pick_sensor', { defaultValue: 'Choose a sensor' })}</option>
               {concrete.map((d) => (
@@ -220,7 +220,7 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                       )}
                       {low && (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-semantic-error">
-                          <AlertTriangle size={13} />
+                          <AlertTriangle size={14} />
                           {t('site_sensors.strips.below_target', { defaultValue: 'Struck below target strength' })}
                         </span>
                       )}
@@ -231,10 +231,10 @@ export function StripsPanel({ projectId, devices }: { projectId: string; devices
                       )}
                       <span className="ml-auto flex items-center gap-2 text-xs text-content-tertiary">
                         <DateDisplay value={s.struck_at} format="datetime" />
-                        <Button variant="ghost" size="sm" icon={<Download size={13} />} onClick={() => download(s, 'csv')}>
+                        <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => download(s, 'csv')}>
                           {t('site_sensors.strips.record_csv', { defaultValue: 'CSV' })}
                         </Button>
-                        <Button variant="ghost" size="sm" icon={<Download size={13} />} onClick={() => download(s, 'pdf')}>
+                        <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => download(s, 'pdf')}>
                           {t('site_sensors.strips.record_pdf', { defaultValue: 'PDF' })}
                         </Button>
                       </span>

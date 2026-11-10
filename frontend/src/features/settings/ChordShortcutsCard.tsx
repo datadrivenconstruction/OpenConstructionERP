@@ -78,7 +78,7 @@ export function ChordShortcutsCard() {
                       onChange={(e) => onType(chord, e.target.value)}
                       onFocus={(e) => e.currentTarget.select()}
                       aria-label={t('settings.chords_key_for', { defaultValue: 'Key after G for {{page}}', page: text })}
-                      className="h-8 w-10 rounded-lg border border-border bg-surface-primary text-center text-sm uppercase text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                      className="oe-input w-10 text-center uppercase"
                     />
                     <button
                       type="button"
@@ -91,7 +91,7 @@ export function ChordShortcutsCard() {
                       title={t('settings.chords_reset_one', { defaultValue: 'Reset {{page}} to {{key}}', page: text, key: chord.key.toUpperCase() })}
                       className="flex h-7 w-7 items-center justify-center rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
                     >
-                      <RotateCcw size={13} />
+                      <RotateCcw size={14} />
                     </button>
                   </span>
                 </div>

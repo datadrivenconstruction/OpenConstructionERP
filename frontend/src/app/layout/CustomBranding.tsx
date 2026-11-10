@@ -252,7 +252,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
             defaultValue: 'Add your logo or company name',
           })}
         >
-          <Pencil size={13} strokeWidth={2.25} />
+          <Pencil size={14} strokeWidth={2.25} />
         </button>
         )}
       </div>
@@ -405,7 +405,7 @@ function BrandingEditor({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="branding-editor-heading"
@@ -417,7 +417,7 @@ function BrandingEditor({
         <header className="flex items-center justify-between px-5 py-4 border-b border-border-light">
           <h2
             id="branding-editor-heading"
-            className="text-base font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {t('branding.title', { defaultValue: 'Customise branding' })}
           </h2>
@@ -547,7 +547,7 @@ function BrandingEditor({
             >
               <label
                 htmlFor="branding-company-name"
-                className="block text-xs font-medium text-content-secondary mb-1.5"
+                className="oe-label"
               >
                 {t('branding.name_label', {
                   defaultValue: 'Display name shown in the sidebar',
@@ -568,7 +568,7 @@ function BrandingEditor({
                     defaultValue: 'Acme Construction GmbH',
                   })}
                   maxLength={MAX_NAME_LEN}
-                  className="w-full ps-9 pe-3 py-2 rounded-lg bg-surface-secondary border border-border-light focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20 focus:outline-none text-sm text-content-primary placeholder:text-content-tertiary"
+                  className="oe-input ps-9"
                 />
               </div>
               <p className="text-2xs text-content-tertiary mt-1.5">
@@ -595,7 +595,7 @@ function BrandingEditor({
               className="mt-4 inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
               data-testid="branding-documents-link"
             >
-              <FileText size={13} />
+              <FileText size={14} />
               {t('branding.documents_link', {
                 defaultValue: 'Logo and company details for documents',
               })}
@@ -611,7 +611,7 @@ function BrandingEditor({
               onClick={onReset}
               className="inline-flex items-center gap-1.5 text-xs text-content-tertiary hover:text-error-content transition-colors"
             >
-              <Trash2 size={13} />
+              <Trash2 size={14} />
               {t('branding.reset_action', {
                 defaultValue: 'Restore default branding',
               })}

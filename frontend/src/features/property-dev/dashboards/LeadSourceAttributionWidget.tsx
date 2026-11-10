@@ -105,7 +105,7 @@ export function LeadSourceAttributionWidget({
       className="space-y-3"
     >
       <header>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('propdev.dashboards.lsa.title', {
             defaultValue: 'Lead source attribution',
           })}
@@ -146,35 +146,35 @@ export function LeadSourceAttributionWidget({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse text-xs">
+          <table className="oe-table-compact min-w-full">
             <thead>
-              <tr className="border-b border-divider text-content-tertiary">
-                <th className="px-2 py-1.5 text-left font-medium">
+              <tr className="border-divider text-content-tertiary">
+                <th>
                   {t('propdev.dashboards.lsa.col_source', {
                     defaultValue: 'Source',
                   })}
                 </th>
-                <th className="px-2 py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('propdev.dashboards.lsa.col_leads', {
                     defaultValue: 'Leads',
                   })}
                 </th>
-                <th className="px-2 py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('propdev.dashboards.lsa.col_conv_res', {
                     defaultValue: '→ Res %',
                   })}
                 </th>
-                <th className="px-2 py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('propdev.dashboards.lsa.col_conv_sale', {
                     defaultValue: '→ Sale %',
                   })}
                 </th>
-                <th className="px-2 py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('propdev.dashboards.lsa.col_revenue', {
                     defaultValue: 'Revenue',
                   })}
                 </th>
-                <th className="px-2 py-1.5 text-right font-medium">
+                <th className="text-right">
                   {t('propdev.dashboards.lsa.col_cpa', {
                     defaultValue: 'CPA',
                   })}
@@ -185,22 +185,22 @@ export function LeadSourceAttributionWidget({
               {data.rows.map((r: LeadSourceRow, i: number) => (
                 <tr
                   key={r.source}
-                  className="border-b border-divider/50"
+                  className="border-divider/50"
                 >
-                  <td className="px-2 py-1.5 font-medium text-content-primary">
+                  <td>
                     <span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: SOURCE_PALETTE[i % SOURCE_PALETTE.length] }} aria-hidden="true" />
                     {SOURCE_LABEL[r.source] ?? r.source}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-content-secondary">
+                  <td className="text-right text-content-secondary">
                     {r.leads}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-content-secondary">
+                  <td className="text-right text-content-secondary">
                     {fmtPercent(num(r.conversion_to_reservation_pct))}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-content-secondary">
+                  <td className="text-right text-content-secondary">
                     {fmtPercent(num(r.conversion_to_sale_pct))}
                   </td>
-                  <td className="px-2 py-1.5 text-right">
+                  <td className="text-right">
                     {r.revenue.length === 0 ? (
                       <span className="text-content-tertiary">—</span>
                     ) : (
@@ -217,7 +217,7 @@ export function LeadSourceAttributionWidget({
                       </div>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-content-secondary">
+                  <td className="text-right text-content-secondary">
                     {r.cpa == null ? (
                       <span className="text-content-tertiary">—</span>
                     ) : (

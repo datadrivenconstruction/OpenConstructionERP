@@ -23,7 +23,7 @@ import type { ConfirmedVoiceDraft, VoiceTargetType } from './types';
 // A speech-to-text provider takes these directly, so no local transcode is needed.
 const ACCEPT = 'audio/*,video/*,.mp3,.m4a,.wav,.webm,.mp4,.mpeg,.mpga';
 const INPUT_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-textarea';
 const LABEL_CLASS = 'flex flex-col gap-1 text-sm text-content-secondary';
 
 const CONFIRM_DEFAULT: Record<VoiceTargetType, string> = {
@@ -132,7 +132,7 @@ export function VoiceEntry({
           <select
             value={value}
             onChange={(e) => capture.setField(field.name, e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             {field.choices.map((choice) => (
               <option key={choice} value={choice}>
@@ -165,7 +165,7 @@ export function VoiceEntry({
           type={field.kind === 'date' ? 'date' : 'text'}
           value={value}
           onChange={(e) => capture.setField(field.name, e.target.value)}
-          className={INPUT_CLASS}
+          className="oe-input"
         />
       </label>
     );
@@ -177,7 +177,7 @@ export function VoiceEntry({
       return (
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <span className="relative flex h-16 w-16 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400/40" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-semantic-error/40" />
             <span className="relative inline-flex h-16 w-16 items-center justify-center rounded-full bg-semantic-error text-white">
               <Mic className="h-7 w-7" />
             </span>

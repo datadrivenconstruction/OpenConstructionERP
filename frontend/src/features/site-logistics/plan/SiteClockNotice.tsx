@@ -23,7 +23,7 @@ export function SiteClockNotice({ projectId, onOpen }: { projectId: string; onOp
       className="flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning/5 p-3 text-sm text-content-primary"
       data-testid="site-clock-notice"
     >
-      <AlertTriangle size={15} className="shrink-0 text-semantic-warning" aria-hidden />
+      <AlertTriangle size={16} className="shrink-0 text-semantic-warning" aria-hidden />
       <span className="flex-1">{tx(t, 'concept.timezone_missing')}</span>
       <Button size="sm" variant="secondary" onClick={onOpen}>
         {tx(t, 'concept.set_timezone')}

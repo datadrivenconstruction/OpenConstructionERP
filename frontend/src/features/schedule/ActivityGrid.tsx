@@ -448,7 +448,7 @@ export function ActivityGrid({
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={15} />}
+            icon={<Plus size={16} />}
             data-testid="grid-add-activity"
             disabled={busy}
             onClick={onAddActivity}
@@ -458,7 +458,7 @@ export function ActivityGrid({
           <Button
             variant="secondary"
             size="sm"
-            icon={<RotateCcw size={15} />}
+            icon={<RotateCcw size={16} />}
             data-testid="grid-reschedule"
             loading={rescheduleMutation.isPending}
             disabled={busy}
@@ -476,10 +476,10 @@ export function ActivityGrid({
       <div className="overflow-x-auto">
         <table
           data-testid="activity-grid"
-          className="w-full min-w-[1000px] border-collapse text-sm"
+          className="oe-table-compact min-w-[1000px]"
         >
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <tr className="bg-surface-secondary/30 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {columns.map((c) => (
                 <th
                   key={c.key}
@@ -495,7 +495,7 @@ export function ActivityGrid({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-3 py-6 text-center text-sm text-content-tertiary"
+                  className="text-center text-content-tertiary"
                 >
                   {t('schedule.grid_empty', {
                     defaultValue: 'No activities match the current filter.',
@@ -538,10 +538,10 @@ export function ActivityGrid({
                       if (body && !moveMutation.isPending) moveMutation.mutate({ id: a.id, body });
                     }}
                   >
-                    <td className="px-3 py-1.5 align-middle tabular-nums text-content-tertiary">
+                    <td className="tabular-nums text-content-tertiary">
                       {a.wbs_code || '-'}
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <div className="flex items-center gap-1.5" style={{ paddingLeft: `${(depthMap[a.id] ?? 0) * 16}px` }}>
                         {isSummary && (hasChildren.has(a.id) || collapsedIds?.has(a.id)) && onToggleCollapse ? (
                           <button
@@ -559,7 +559,7 @@ export function ActivityGrid({
                             {collapsedIds?.has(a.id) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
                           </button>
                         ) : isSummary ? (
-                          <Minus size={11} className="shrink-0 text-content-tertiary" />
+                          <Minus size={12} className="shrink-0 text-content-tertiary" />
                         ) : null}
                         {isCritical && (
                           <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-2xs font-semibold leading-none text-white">
@@ -567,7 +567,7 @@ export function ActivityGrid({
                           </span>
                         )}
                         {isMilestone && (
-                          <Diamond size={11} className="shrink-0 text-oe-blue" fill="currentColor" />
+                          <Diamond size={12} className="shrink-0 text-oe-blue" fill="currentColor" />
                         )}
                         <input
                           key={`name-${a.id}-${a.name}`}
@@ -583,7 +583,7 @@ export function ActivityGrid({
                         />
                       </div>
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <select
                         key={`type-${a.id}-${a.activity_type}`}
                         data-testid={`grid-type-${a.id}`}
@@ -600,7 +600,7 @@ export function ActivityGrid({
                         ))}
                       </select>
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       {(() => {
                         const own = subtreeOf(a.id);
                         const choices = sectionOptions.filter((s) => !own.has(s.id));
@@ -629,7 +629,7 @@ export function ActivityGrid({
                         );
                       })()}
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <input
                         type="date"
                         key={`start-${a.id}-${a.start_date}`}
@@ -641,7 +641,7 @@ export function ActivityGrid({
                         onBlur={(e) => commitStart(a, e.target.value)}
                       />
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <input
                         type="date"
                         key={`end-${a.id}-${a.end_date}`}
@@ -655,16 +655,16 @@ export function ActivityGrid({
                     </td>
                     <td
                       data-testid={`grid-duration-${a.id}`}
-                      className="px-3 py-1.5 text-right align-middle tabular-nums text-content-secondary"
+                      className="text-right tabular-nums text-content-secondary"
                     >
                       {a.duration_days} {t('schedule.days_short', { defaultValue: 'd' })}
                     </td>
-                    <td className="px-3 py-1.5 text-right align-middle">
+                    <td className="text-right">
                       <Badge variant={isCritical ? 'error' : 'neutral'} size="sm">
                         {a.progress_pct}%
                       </Badge>
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <select
                         data-testid={`grid-calendar-${a.id}`}
                         aria-label={t('schedule.calendar.column', { defaultValue: 'Calendar' })}
@@ -683,7 +683,7 @@ export function ActivityGrid({
                         ))}
                       </select>
                     </td>
-                    <td className="min-w-[170px] px-2 py-1.5 align-middle">
+                    <td className="min-w-[170px]">
                       <select
                         key={`constraint-${a.id}-${a.constraint_type ?? ''}`}
                         data-testid={`grid-constraint-${a.id}`}
@@ -716,7 +716,6 @@ export function ActivityGrid({
                       ) : null}
                     </td>
                     <td
-                      className="px-3 py-1.5 align-middle"
                       data-testid={`grid-resources-${a.id}`}
                     >
                       {/* No project scope means nothing was asked, so the cell
@@ -735,7 +734,7 @@ export function ActivityGrid({
                         </span>
                       )}
                     </td>
-                    <td className="min-w-[180px] px-2 py-1.5 align-middle">
+                    <td className="min-w-[180px]">
                       <GridAssigneeCell
                         activity={a}
                         disabled={cellsDisabled}
@@ -744,7 +743,7 @@ export function ActivityGrid({
                         }
                       />
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
+                    <td>
                       <button
                         type="button"
                         data-testid={`grid-deps-${a.id}`}
@@ -752,13 +751,13 @@ export function ActivityGrid({
                         title={t('schedule.edit_predecessors', { defaultValue: 'Edit predecessors' })}
                         className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue"
                       >
-                        <GitBranch size={13} className="shrink-0" />
+                        <GitBranch size={14} className="shrink-0" />
                         {depCount > 0
                           ? String(depCount)
                           : t('schedule.add_predecessor', { defaultValue: 'Add predecessor' })}
                       </button>
                     </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right align-middle">
+                    <td className="whitespace-nowrap text-right">
                       {canMove && (
                         <>
                           <button
@@ -786,7 +785,7 @@ export function ActivityGrid({
                           <select
                             data-testid={`grid-move-to-${a.id}`}
                             aria-label={t('schedule.move_to_section', { defaultValue: 'Move to section...' })}
-                            className="ms-1 h-6 w-7 cursor-pointer rounded-md border border-border-light bg-transparent text-2xs text-content-secondary"
+                            className="oe-select oe-input-sm ms-1 w-7 cursor-pointer bg-transparent"
                             value=""
                             disabled={moveMutation.isPending}
                             onChange={(e) => {

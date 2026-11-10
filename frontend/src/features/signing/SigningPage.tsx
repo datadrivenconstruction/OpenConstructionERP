@@ -127,9 +127,9 @@ function statusVariant(s: SigningSessionStatus): 'neutral' | 'blue' | 'warning' 
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 
 /* ── Create / edit session modal ──────────────────────────────────────── */
 
@@ -270,7 +270,7 @@ function SessionFormModal({
             placeholder={t('signing.document_ref_placeholder', {
               defaultValue: 'e.g. Contract-2026-014.pdf',
             })}
-            className={clsx(inputCls, docRefError && 'border-semantic-error')}
+            className={inputCls} aria-invalid={!!docRefError}
           />
         </WideModalField>
 
@@ -296,7 +296,7 @@ function SessionFormModal({
               setTouched(true);
             }}
             placeholder="e.g. 9f86d081884c7d659a2feaa0c55ad015..."
-            className={clsx(inputCls, 'font-mono text-xs', hashError && 'border-semantic-error')}
+            className={clsx('oe-input', 'oe-input-sm font-mono')} aria-invalid={!!hashError}
           />
         </WideModalField>
 
@@ -304,7 +304,7 @@ function SessionFormModal({
           <select
             value={form.provider_capability}
             onChange={(e) => set('provider_capability', e.target.value as SigningCapability)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {CAPABILITIES.map((c) => (
               <option key={c} value={c}>
@@ -333,7 +333,7 @@ function SessionFormModal({
           <select
             value={form.status}
             onChange={(e) => set('status', e.target.value as SigningSessionStatus)}
-            className={inputCls}
+            className="oe-select oe-input-lg"
           >
             {SETTABLE_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -391,7 +391,7 @@ function SessionFormModal({
                 </button>
               </div>
             ))}
-            <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={addSignatory}>
+            <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addSignatory}>
               {t('signing.add_signatory', { defaultValue: 'Add signatory' })}
             </Button>
           </div>
@@ -498,7 +498,7 @@ function AttestModal({
           <input
             value={contentHash}
             onChange={(e) => setContentHash(e.target.value)}
-            className={clsx(inputCls, 'font-mono text-xs')}
+            className={clsx('oe-input', 'oe-input-sm font-mono')}
           />
         </WideModalField>
         <WideModalField
@@ -691,7 +691,7 @@ const SessionRow = React.memo(function SessionRow({
           size={14}
           className={clsx('text-content-tertiary transition-transform shrink-0', expanded && 'rotate-90')}
         />
-        <FileSignature size={15} className="shrink-0 text-content-tertiary" />
+        <FileSignature size={16} className="shrink-0 text-content-tertiary" />
         <Link
           to={`/files?q=${encodeURIComponent(session.document_ref)}`}
           onClick={(e) => e.stopPropagation()}
@@ -702,7 +702,7 @@ const SessionRow = React.memo(function SessionRow({
           })}
         >
           <span className="truncate">{session.document_ref}</span>
-          <ExternalLink size={11} className="shrink-0 opacity-60" aria-hidden="true" />
+          <ExternalLink size={12} className="shrink-0 opacity-60" aria-hidden="true" />
         </Link>
 
         {/* The requirement, and beside it what was actually delivered whenever
@@ -723,7 +723,7 @@ const SessionRow = React.memo(function SessionRow({
           </Badge>
           {capabilityShortfall && (
             <Badge variant="warning" size="sm">
-              <AlertTriangle size={11} className="mr-1" />
+              <AlertTriangle size={12} className="mr-1" />
               {deliveredCapabilityLabel}
             </Badge>
           )}
@@ -735,7 +735,7 @@ const SessionRow = React.memo(function SessionRow({
 
         {hasStale && (
           <Badge variant="warning" size="sm" className="shrink-0">
-            <AlertTriangle size={11} className="mr-1" />
+            <AlertTriangle size={12} className="mr-1" />
             {t('signing.stale_badge', { defaultValue: 'Stale' })}
           </Badge>
         )}
@@ -869,7 +869,7 @@ const SessionRow = React.memo(function SessionRow({
               variant="secondary"
               size="sm"
               icon={
-                manifestPending ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />
+                manifestPending ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />
               }
               disabled={manifestPending}
               onClick={(e) => {
@@ -882,7 +882,7 @@ const SessionRow = React.memo(function SessionRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(session);
@@ -894,7 +894,7 @@ const SessionRow = React.memo(function SessionRow({
               variant="secondary"
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(session);
@@ -917,8 +917,8 @@ function StalePanel({ sessions }: { sessions: SigningSession[] }) {
 
   return (
     <div className="rounded-xl border border-border-light bg-surface-primary p-4">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <AlertTriangle size={15} className="text-semantic-warning" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <AlertTriangle size={16} className="text-semantic-warning" />
         {t('signing.stale_panel_title', { defaultValue: 'Stale signatures' })}
       </h2>
       <p className="mt-1 text-xs text-content-tertiary">
@@ -933,7 +933,7 @@ function StalePanel({ sessions }: { sessions: SigningSession[] }) {
       ) : (
         <ul className="mt-3 space-y-2">
           {staleSessions.map((s) => (
-            <li key={s.id} className="rounded-lg border border-border-light bg-surface-secondary/40 p-2.5">
+            <li key={s.id} className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <p className="text-xs font-medium text-content-primary truncate">{s.document_ref}</p>
               <p className="mt-0.5 text-2xs text-content-tertiary">
                 {fmtList(s.signatures
@@ -958,8 +958,8 @@ function ExpiringCertsPanel({ projectId }: { projectId: string }) {
 
   return (
     <div className="rounded-xl border border-border-light bg-surface-primary p-4">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <ShieldAlert size={15} className="text-semantic-warning" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <ShieldAlert size={16} className="text-semantic-warning" />
         {t('signing.certs_panel_title', { defaultValue: 'Expiring certificates' })}
       </h2>
       <p className="mt-1 text-xs text-content-tertiary">
@@ -978,7 +978,7 @@ function ExpiringCertsPanel({ projectId }: { projectId: string }) {
           {flags.map((f) => (
             <li
               key={f.signature_id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/40 p-2.5"
+              className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/40 p-3"
             >
               <div className="min-w-0">
                 <p className="text-xs font-medium text-content-primary truncate">{f.signatory_name}</p>
@@ -1214,7 +1214,7 @@ export function SigningPage() {
             <ModuleGuideButton content={signingGuide} />
             <Button
               variant="primary"
-              icon={<Plus size={15} />}
+              icon={<Plus size={16} />}
               onClick={() => setShowCreateModal(true)}
               disabled={!projectId}
             >
@@ -1254,7 +1254,7 @@ export function SigningPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as SigningSessionStatus | '')}
-                className={clsx(inputCls, 'w-auto')}
+                className={clsx('oe-select oe-input-lg', 'w-auto')}
               >
                 <option value="">{t('signing.all_statuses', { defaultValue: 'All statuses' })}</option>
                 {STATUS_ORDER.map((s) => (
@@ -1266,7 +1266,7 @@ export function SigningPage() {
               <select
                 value={capabilityFilter}
                 onChange={(e) => setCapabilityFilter(e.target.value as SigningCapability | '')}
-                className={clsx(inputCls, 'w-auto')}
+                className={clsx('oe-select oe-input-lg', 'w-auto')}
               >
                 <option value="">{t('signing.all_capabilities', { defaultValue: 'All capabilities' })}</option>
                 {CAPABILITIES.map((c) => (

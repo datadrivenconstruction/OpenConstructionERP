@@ -106,7 +106,7 @@ export function DashboardSkeleton({
         </div>
       )}
       {variant === 'timeline' && (
-        <div className="space-y-2.5 border-l-2 border-border-light pl-4 pt-2">
+        <div className="space-y-2 border-l-2 border-border-light pl-4 pt-2">
           {Array.from({ length: rows }).map((_, i) => (
             <div key={i} className="space-y-1">
               <Skeleton height={12} className="w-2/3" />
@@ -143,7 +143,7 @@ export function DashboardEmpty({
       data-testid="dashboard-empty"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
-        {icon ?? <Inbox size={18} className="text-content-tertiary" />}
+        {icon ?? <Inbox size={20} className="text-content-tertiary" />}
       </div>
       <h4 className="text-sm font-semibold text-content-primary">{title}</h4>
       {description && (
@@ -204,7 +204,7 @@ export function DashboardError({
       data-testid="dashboard-error"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error/10 text-semantic-error">
-        <AlertOctagon size={18} />
+        <AlertOctagon size={20} />
       </div>
       <h4 className="text-sm font-semibold text-content-primary">{resolvedTitle}</h4>
       <p className="text-xs text-content-tertiary max-w-md">{resolvedMessage}</p>

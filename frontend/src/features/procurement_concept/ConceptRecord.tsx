@@ -174,7 +174,7 @@ export function ConceptRecord({
         <div className="flex flex-wrap items-start gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('procurement_concept.ui.record.status_title', { defaultValue: 'Where the concept stands' })}
               </h2>
               <ToneBadge tone={CONCEPT_TONE[concept.state]} testId="concept-state">
@@ -212,7 +212,7 @@ export function ConceptRecord({
                 id="pc-reopen-reason"
                 rows={2}
                 maxLength={REOPEN_REASON_MAX}
-                className={FIELD_CLASS}
+                className="oe-textarea"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
@@ -236,7 +236,7 @@ export function ConceptRecord({
         )}
         {noGates ? (
           <p className="mt-3 flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-hand">
-            <Info size={15} className="mt-0.5 shrink-0" aria-hidden />
+            <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
             {t('procurement_concept.ui.record.approval_by_hand', {
               defaultValue:
                 'This project does not use gates, so a person with the manage right approves the concept. It cannot be the person who submitted it.',
@@ -244,7 +244,7 @@ export function ConceptRecord({
           </p>
         ) : (
           <p className="mt-3 flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-gate">
-            <Info size={15} className="mt-0.5 shrink-0" aria-hidden />
+            <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
             {t('procurement_concept.approval.by_gate', {
               defaultValue: 'The governance gate approves the concept. Submit it, then decide the gate.',
             })}
@@ -266,7 +266,7 @@ export function ConceptRecord({
 
       <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('procurement_concept.ui.record.rules_title', { defaultValue: 'Rules this project procures under' })}
           </h2>
           <ReasonedButton
@@ -299,7 +299,7 @@ export function ConceptRecord({
       </section>
 
       <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="concept-findings">
-        <h2 className="text-base font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {t('procurement_concept.ui.record.findings_title', { defaultValue: 'What the rule check found' })}
         </h2>
         {findingsLoading ? (
@@ -328,7 +328,7 @@ export function ConceptRecord({
       </section>
 
       <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4">
-        <h2 className="mb-1 text-base font-semibold text-content-primary">
+        <h2 className="oe-section-title mb-1">
           {t('procurement_concept.ui.export.title', { defaultValue: 'Printable record' })}
         </h2>
         <p className="mb-3 text-sm text-content-secondary">

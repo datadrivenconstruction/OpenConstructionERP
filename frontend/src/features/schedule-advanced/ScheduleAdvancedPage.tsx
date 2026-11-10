@@ -193,9 +193,9 @@ const WEEKLY_VARIANT: Record<WeeklyStatus, 'neutral' | 'blue' | 'success' | 'war
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+const labelCls = 'oe-label';
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -344,7 +344,7 @@ function TaskPicker({
         <div
           id="task-picker-list"
           role="listbox"
-          className="absolute left-0 top-full z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
+          className="absolute left-0 top-full z-dropdown mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
         >
           {tasksQ.isLoading ? (
             <div className="flex items-center justify-center gap-2 px-3 py-3 text-xs text-content-tertiary">
@@ -461,7 +461,7 @@ function HowScheduleAdvancedWorks() {
   return (
     <CollapsibleSection
       storageKey="schedule_advanced.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('schedule_advanced.flow_title', { defaultValue: 'How Last Planner fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1034,7 +1034,7 @@ function ProjectLpsDashboard({ projectId }: { projectId: string }) {
     <Card padding="md" data-testid="lps-dashboard">
       <div className="mb-3 flex items-center gap-2">
         <TrendingUp size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule_advanced.dashboard_title', { defaultValue: 'Project overview' })}
         </h3>
       </div>
@@ -1218,14 +1218,14 @@ function MasterTab({
 
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">{t('common.name')}</th>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.planned_start', { defaultValue: 'Planned start' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.planned_finish', { defaultValue: 'Planned finish' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                <th>{t('common.name')}</th>
+                <th>{t('schedule_advanced.planned_start', { defaultValue: 'Planned start' })}</th>
+                <th>{t('schedule_advanced.planned_finish', { defaultValue: 'Planned finish' })}</th>
+                <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -1240,7 +1240,7 @@ function MasterTab({
                       selected && 'bg-oe-blue-subtle/30',
                     )}
                   >
-                    <td className="px-4 py-2 font-medium">
+                    <td>
                       <span className="flex items-center gap-2">
                         <span
                           className={clsx(
@@ -1257,18 +1257,18 @@ function MasterTab({
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-content-secondary text-xs">
+                    <td className="text-content-secondary">
                       {m.planned_start ? <DateDisplay value={m.planned_start} /> : '—'}
                     </td>
-                    <td className="px-4 py-2 text-content-secondary text-xs">
+                    <td className="text-content-secondary">
                       {m.planned_finish ? <DateDisplay value={m.planned_finish} /> : '—'}
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <Badge variant={m.status === 'active' ? 'success' : 'neutral'} dot>
                         {t(`schedule_advanced.master_status.${m.status}`, { defaultValue: m.status })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <div className="flex justify-end gap-1">
                         <Button
                           size="sm"
@@ -1949,7 +1949,7 @@ function PhasesCardGrid({
             className={clsx(
               'border flex flex-col relative',
               colorClass,
-              onCritical && 'ring-1 ring-rose-400/60',
+              onCritical && 'ring-1 ring-semantic-error/60',
             )}
             data-phase-id={p.id}
             data-critical={onCritical ? 'true' : 'false'}
@@ -1968,7 +1968,7 @@ function PhasesCardGrid({
               <h4 className="text-sm font-semibold truncate flex items-center gap-1.5" title={p.name}>
                 {milestone && (
                   <Diamond
-                    size={11}
+                    size={12}
                     className="text-semantic-warning shrink-0 rotate-45"
                     aria-label={t('schedule_advanced.milestone', { defaultValue: 'Milestone' })}
                     data-testid="phase-milestone-glyph"
@@ -1977,7 +1977,7 @@ function PhasesCardGrid({
                 {p.name}
                 {p.pulled_status === 'completed' && (
                   <Check
-                    size={11}
+                    size={12}
                     className="text-semantic-success shrink-0"
                     aria-label={t('schedule_advanced.phase_status.completed', { defaultValue: 'Completed' })}
                   />
@@ -2065,18 +2065,18 @@ function PhasesTableView({
   return (
     <Card padding="none">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+        <table className="oe-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2.5 text-left">#</th>
-              <th className="px-4 py-2.5 text-left">{t('common.name')}</th>
-              <th className="px-4 py-2.5 text-left">{t('schedule_advanced.planned_start', { defaultValue: 'Start' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('schedule_advanced.planned_finish', { defaultValue: 'Finish' })}</th>
-              <th className="px-4 py-2.5 text-right">{t('schedule_advanced.duration_days', { defaultValue: 'Days' })}</th>
-              <th className="px-4 py-2.5 text-right">{t('schedule_advanced.variance', { defaultValue: 'Δ' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-              <th className="px-4 py-2.5 text-right">{t('schedule_advanced.progress', { defaultValue: 'Progress' })}</th>
-              <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+              <th>#</th>
+              <th>{t('common.name')}</th>
+              <th>{t('schedule_advanced.planned_start', { defaultValue: 'Start' })}</th>
+              <th>{t('schedule_advanced.planned_finish', { defaultValue: 'Finish' })}</th>
+              <th className="text-right">{t('schedule_advanced.duration_days', { defaultValue: 'Days' })}</th>
+              <th className="text-right">{t('schedule_advanced.variance', { defaultValue: 'Δ' })}</th>
+              <th>{t('common.status', { defaultValue: 'Status' })}</th>
+              <th className="text-right">{t('schedule_advanced.progress', { defaultValue: 'Progress' })}</th>
+              <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -2096,8 +2096,8 @@ function PhasesTableView({
                   data-phase-id={p.id}
                   data-critical={onCritical ? 'true' : 'false'}
                 >
-                  <td className="px-4 py-2 text-xs text-content-tertiary tabular-nums">{idx + 1}</td>
-                  <td className="px-4 py-2 font-medium">
+                  <td className="text-content-tertiary tabular-nums">{idx + 1}</td>
+                  <td>
                     <button type="button" className="text-left hover:text-oe-blue flex items-center gap-1.5" onClick={() => onEdit(p)}>
                       {isPhaseMilestone(p) && <Diamond size={10} className="text-semantic-warning rotate-45 shrink-0" aria-hidden />}
                       {p.name}
@@ -2106,24 +2106,24 @@ function PhasesTableView({
                       )}
                     </button>
                   </td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {p.planned_start ? <DateDisplay value={p.planned_start} /> : '—'}
                   </td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {p.planned_finish ? <DateDisplay value={p.planned_finish} /> : '—'}
                   </td>
-                  <td className="px-4 py-2 text-right font-mono text-xs">{days == null ? '—' : days}</td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right font-mono">{days == null ? '—' : days}</td>
+                  <td className="text-right">
                     {variance != null ? <VarianceBadge days={variance} /> : <span className="text-content-tertiary">—</span>}
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <Badge variant={delayed ? 'error' : PHASE_VARIANT[p.pulled_status]} dot>
                       {delayed
                         ? t('schedule_advanced.phase_status.delayed', { defaultValue: 'Delayed' })
                         : t(`schedule_advanced.phase_status.${p.pulled_status}`, { defaultValue: p.pulled_status })}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <div className="ml-auto flex items-center justify-end gap-2">
                       <div className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-secondary">
                         <div
@@ -2141,7 +2141,7 @@ function PhasesTableView({
                       <span className="font-mono text-2xs text-content-tertiary tabular-nums w-8 text-right">{pct}%</span>
                     </div>
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <div className="flex justify-end gap-1">
                       {p.pulled_status === 'in_planning' && (
                         <Button size="sm" variant="ghost" onClick={() => onPull(p.id)}>
@@ -2226,7 +2226,7 @@ function PhasesTimelineView({
                   ? 'bg-semantic-warning'
                   : p.pulled_status === 'pulled'
                     ? 'bg-blue-500'
-                    : 'bg-slate-400';
+                    : 'bg-content-quaternary';
           return (
             <li
               key={p.id}
@@ -2294,7 +2294,7 @@ function PhasesTimelineView({
                       : 'bg-semantic-warning'
                     : p.pulled_status === 'pulled'
                       ? 'bg-blue-500'
-                      : 'bg-slate-400';
+                      : 'bg-content-quaternary';
               return (
                 <li
                   key={p.id}
@@ -2491,7 +2491,7 @@ function PhaseFormModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
             placeholder={t('schedule_advanced.phase_notes_placeholder', { defaultValue: 'Scope, owner, key deliverables…' })}
           />
         </div>
@@ -2707,14 +2707,14 @@ function LookAheadTab({
       </div>
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.period_start', { defaultValue: 'Start' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.period_end', { defaultValue: 'End' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.weeks', { defaultValue: 'Weeks' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                <th>{t('schedule_advanced.period_start', { defaultValue: 'Start' })}</th>
+                <th>{t('schedule_advanced.period_end', { defaultValue: 'End' })}</th>
+                <th>{t('schedule_advanced.weeks', { defaultValue: 'Weeks' })}</th>
+                <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -2727,16 +2727,16 @@ function LookAheadTab({
                     la.id === lookAheadId && 'bg-oe-blue-subtle/30',
                   )}
                 >
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     <DateDisplay value={la.period_start} />
                   </td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     <DateDisplay value={la.period_end} />
                   </td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {la.window_weeks}
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <Badge
                       variant={
                         la.status === 'published'
@@ -2750,7 +2750,7 @@ function LookAheadTab({
                       {lookAheadStatusLabel(t, la.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right">
                     {la.status !== 'published' && (
                       <Button
                         size="sm"
@@ -2913,14 +2913,14 @@ function WeeklyTab({
 
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">{t('schedule_advanced.week_start', { defaultValue: 'Week start' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('schedule_advanced.week_end', { defaultValue: 'Week end' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-4 py-2.5 text-right">{t('schedule_advanced.ppc', { defaultValue: 'PPC' })}</th>
-                  <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('schedule_advanced.week_start', { defaultValue: 'Week start' })}</th>
+                  <th>{t('schedule_advanced.week_end', { defaultValue: 'Week end' })}</th>
+                  <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('schedule_advanced.ppc', { defaultValue: 'PPC' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -2933,21 +2933,21 @@ function WeeklyTab({
                       w.id === weekPlanId && 'bg-oe-blue-subtle/30',
                     )}
                   >
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       <DateDisplay value={w.week_start_date} />
                     </td>
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       <DateDisplay value={w.week_end_date} />
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <Badge variant={WEEKLY_VARIANT[w.status]} dot>
                         {weeklyStatusLabel(t, w.status)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2 text-right font-mono text-xs">
+                    <td className="text-right font-mono">
                       {fmtPercent(pctNumber(w.ppc_percent), 0)}
                     </td>
-                    <td className="px-4 py-2 text-right">
+                    <td className="text-right">
                       {w.status === 'draft' && (
                         <Button
                           size="sm"
@@ -3030,14 +3030,14 @@ function WeeklyTab({
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+                <table className="oe-table">
+                  <thead>
                     <tr>
-                      <th className="px-4 py-2 text-left">{t('schedule_advanced.crew', { defaultValue: 'Crew' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule_advanced.promised', { defaultValue: 'Promised' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule_advanced.actual', { defaultValue: 'Actual' })}</th>
-                      <th className="px-4 py-2 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                      <th className="px-4 py-2 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                      <th>{t('schedule_advanced.crew', { defaultValue: 'Crew' })}</th>
+                      <th className="text-right">{t('schedule_advanced.promised', { defaultValue: 'Promised' })}</th>
+                      <th className="text-right">{t('schedule_advanced.actual', { defaultValue: 'Actual' })}</th>
+                      <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                      <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3053,22 +3053,22 @@ function WeeklyTab({
                         (completeCommitmentMut.isPending &&
                           completeCommitmentMut.variables === c.id);
                       return (
-                        <tr key={c.id} className="border-t border-border-light">
-                          <td className="px-4 py-2 truncate max-w-[200px]">
+                        <tr key={c.id}>
+                          <td className="truncate max-w-[200px]">
                             {c.worker_or_crew || '—'}
                           </td>
-                          <td className="px-4 py-2 text-right font-mono text-xs">
+                          <td className="text-right font-mono">
                             {String(c.promised_qty)} {c.unit}
                           </td>
-                          <td className="px-4 py-2 text-right font-mono text-xs">
+                          <td className="text-right font-mono">
                             {c.actual_qty != null ? String(c.actual_qty) : '—'}
                           </td>
-                          <td className="px-4 py-2">
+                          <td>
                             <Badge variant={COMMITMENT_VARIANT[c.status]} dot>
                               {commitmentStatusLabel(t, c.status)}
                             </Badge>
                           </td>
-                          <td className="px-4 py-2">
+                          <td>
                             <div className="flex justify-end gap-1">
                               {canCommit && (
                                 <Button
@@ -3113,7 +3113,7 @@ function WeeklyTab({
       </div>
 
       <Card padding="md" className="h-fit">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-content-secondary mb-3">
+        <h3 className="oe-card-title text-content-secondary mb-3">
           {t('schedule_advanced.ppc_title', { defaultValue: 'Percent Plan Complete' })}
         </h3>
         <div className="flex flex-col items-center justify-center py-6">
@@ -3346,7 +3346,7 @@ function MissCommitmentDialog({
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as RNCCategory)}
-          className={inputCls}
+          className="oe-select"
         >
           {RNC_CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
@@ -3361,7 +3361,7 @@ function MissCommitmentDialog({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className={clsx(inputCls, 'h-auto py-2')}
+          className="oe-textarea"
           placeholder={t('schedule_advanced.rnc_desc_placeholder', {
             defaultValue: 'What blocked completion?',
           })}
@@ -3453,7 +3453,7 @@ function ConstraintsTab({
         <select
           value={lookAheadId}
           onChange={(e) => onSelectLA(e.target.value)}
-          className={clsx(inputCls, 'max-w-[260px]')}
+          className={clsx('oe-select', 'max-w-[260px]')}
         >
           {lookAheads.map((la) => (
             <option key={la.id} value={la.id}>
@@ -3464,7 +3464,7 @@ function ConstraintsTab({
         <select
           value={filter}
           onChange={(e) => onFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[180px]')}
+          className={clsx('oe-select', 'max-w-[180px]')}
         >
           <option value="">
             {t('common.all_statuses', { defaultValue: 'All statuses' })}
@@ -3518,34 +3518,34 @@ function ConstraintsTab({
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">{t('schedule_advanced.type', { defaultValue: 'Type' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('common.description', { defaultValue: 'Description' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('schedule_advanced.target_clear', { defaultValue: 'Target clear' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-4 py-2.5 text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                  <th>{t('schedule_advanced.type', { defaultValue: 'Type' })}</th>
+                  <th>{t('common.description', { defaultValue: 'Description' })}</th>
+                  <th>{t('schedule_advanced.target_clear', { defaultValue: 'Target clear' })}</th>
+                  <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {constraints.map((c) => (
-                  <tr key={c.id} className="border-t border-border-light hover:bg-surface-secondary">
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                  <tr key={c.id}>
+                    <td className="text-content-secondary">
                       {constraintTypeLabel(t, c.constraint_type)}
                     </td>
-                    <td className="px-4 py-2 truncate max-w-[360px]">
+                    <td className="truncate max-w-[360px]">
                       {c.description || '—'}
                     </td>
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       {c.target_clear_date ? <DateDisplay value={c.target_clear_date} /> : '—'}
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <Badge variant={CONSTRAINT_VARIANT[c.status]} dot>
                         {constraintStatusLabel(t, c.status)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <div className="flex justify-end gap-1">
                         {c.status !== 'cleared' && (
                           <Button
@@ -3694,7 +3694,7 @@ function NewConstraintModal({
           <select
             value={constraintType}
             onChange={(e) => setConstraintType(e.target.value as ConstraintType)}
-            className={inputCls}
+            className="oe-select"
           >
             {CONSTRAINT_TYPES.map((ct) => (
               <option key={ct} value={ct}>
@@ -3721,7 +3721,7 @@ function NewConstraintModal({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className={clsx(inputCls, 'h-auto py-2')}
+          className="oe-textarea"
           placeholder={t('schedule_advanced.constraint_desc_placeholder', {
             defaultValue: 'What is blocking this task?',
           })}
@@ -3867,13 +3867,13 @@ function BaselinesTab({
       </div>
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left">{t('common.name', { defaultValue: 'Name' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('schedule_advanced.captured_at', { defaultValue: 'Captured' })}</th>
-                <th className="px-4 py-2.5 text-left">{t('common.status', { defaultValue: 'Status' })}</th>
-                <th className="px-4 py-2.5 text-right">{t('schedule_advanced.delta', { defaultValue: 'Delta vs current' })}</th>
+                <th>{t('common.name', { defaultValue: 'Name' })}</th>
+                <th>{t('schedule_advanced.captured_at', { defaultValue: 'Captured' })}</th>
+                <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                <th className="text-right">{t('schedule_advanced.delta', { defaultValue: 'Delta vs current' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -3885,11 +3885,11 @@ function BaselinesTab({
                     b.id === compareId && 'bg-oe-blue-subtle/30',
                   )}
                 >
-                  <td className="px-4 py-2 font-medium">{b.name}</td>
-                  <td className="px-4 py-2 text-xs text-content-secondary">
+                  <td>{b.name}</td>
+                  <td className="text-content-secondary">
                     {b.captured_at ? <DateDisplay value={b.captured_at} /> : '—'}
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <Badge
                       variant={
                         b.status === 'active'
@@ -3903,7 +3903,7 @@ function BaselinesTab({
                       {baselineStatusLabel(t, b.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="text-right">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -4211,7 +4211,7 @@ function MasterFormModal({
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as 'active' | 'archived')}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="active">
                 {t('schedule_advanced.master_status.active', { defaultValue: 'Active' })}
@@ -4234,7 +4234,7 @@ function MasterFormModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className="oe-textarea"
             placeholder={t('schedule_advanced.master_notes_placeholder', {
               defaultValue: 'Scope, contract reference, key milestones…',
             })}
@@ -4460,7 +4460,7 @@ function CreateBaselineModal({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          className={clsx(inputCls, 'h-auto py-2')}
+          className="oe-textarea"
         />
       </div>
     </ModalShell>

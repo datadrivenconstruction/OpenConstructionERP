@@ -22,7 +22,7 @@ import { SEVERITY, vocab } from './labels';
 const SEVERITIES: Severity[] = ['critical', 'essential', 'recommended'];
 
 const fieldClass =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-select';
 
 export interface ConditionFieldsProps {
   projectId: string;
@@ -53,7 +53,7 @@ export function ConditionFields({
         <input
           aria-label={t('governance.project.decision.condition_text', { defaultValue: 'What must be done' })}
           placeholder={t('governance.project.decision.condition_text', { defaultValue: 'What must be done' })}
-          className={fieldClass}
+          className="oe-input"
           value={value.text}
           onChange={(e) => onChange({ text: e.target.value })}
         />
@@ -98,7 +98,7 @@ export function ConditionFields({
         <input
           type="date"
           aria-label={t('governance.project.decision.condition_due', { defaultValue: 'Due date' })}
-          className={fieldClass}
+          className="oe-input"
           value={value.due_date ?? ''}
           onChange={(e) => onChange({ due_date: e.target.value })}
         />

@@ -134,7 +134,7 @@ export function BlockerList({
   if (blockers.length === 0) {
     return (
       <p className="flex items-center gap-2 text-sm text-semantic-success" data-testid="no-blockers">
-        <CheckCircle2 size={15} aria-hidden />
+        <CheckCircle2 size={16} aria-hidden />
         {t('governance.project.gate.no_blockers', { defaultValue: 'Nothing blocks this gate.' })}
       </p>
     );
@@ -155,10 +155,10 @@ export function BlockerList({
 }
 
 function EvidenceIcon({ state }: { state: EvidenceState }) {
-  if (state === 'warning') return <AlertTriangle size={13} className="text-[#b45309]" aria-hidden />;
-  if (state === 'met') return <CheckCircle2 size={13} className="text-semantic-success" aria-hidden />;
-  if (state === 'not_met') return <XCircle size={13} className="text-semantic-error" aria-hidden />;
-  return <CircleDashed size={13} className="text-content-tertiary" aria-hidden />;
+  if (state === 'warning') return <AlertTriangle size={14} className="text-[#b45309]" aria-hidden />;
+  if (state === 'met') return <CheckCircle2 size={14} className="text-semantic-success" aria-hidden />;
+  if (state === 'not_met') return <XCircle size={14} className="text-semantic-error" aria-hidden />;
+  return <CircleDashed size={14} className="text-content-tertiary" aria-hidden />;
 }
 
 function AreaReadiness({
@@ -270,7 +270,7 @@ function AreaReadiness({
                   className="inline-flex items-center gap-1 text-2xs font-medium text-semantic-error underline-offset-2 hover:underline"
                   data-testid="gate-document-attach"
                 >
-                  <Paperclip size={11} aria-hidden />
+                  <Paperclip size={12} aria-hidden />
                   {t('governance.project.gate.attach_file', { defaultValue: 'No file yet: attach one' })}
                 </button>
               )}
@@ -349,7 +349,7 @@ function AreaReadiness({
             </div>
             <textarea
               rows={2}
-              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+              className="oe-textarea"
               aria-label={t('governance.project.gate.check_note', { defaultValue: 'Note' })}
               placeholder={
                 naMode
@@ -402,25 +402,25 @@ export function SnapshotView({
         </p>
       )}
       {docs.length > 0 && (
-        <table className="w-full">
+        <table className="oe-table-compact">
           <thead>
             <tr className="text-left text-content-tertiary">
-              <th className="py-0.5 font-medium">{t('governance.project.gate.snapshot_document', { defaultValue: 'Frame document' })}</th>
-              <th className="py-0.5 font-medium">{t('governance.project.gate.snapshot_state', { defaultValue: 'State' })}</th>
-              <th className="py-0.5 font-medium">{t('governance.project.gate.snapshot_revision', { defaultValue: 'Revision' })}</th>
-              <th className="py-0.5 font-medium">{t('governance.project.gate.snapshot_hash', { defaultValue: 'Content hash' })}</th>
+              <th>{t('governance.project.gate.snapshot_document', { defaultValue: 'Frame document' })}</th>
+              <th>{t('governance.project.gate.snapshot_state', { defaultValue: 'State' })}</th>
+              <th>{t('governance.project.gate.snapshot_revision', { defaultValue: 'Revision' })}</th>
+              <th>{t('governance.project.gate.snapshot_hash', { defaultValue: 'Content hash' })}</th>
             </tr>
           </thead>
           <tbody>
             {docs.map((d) => (
-              <tr key={d.document_id} className="border-t border-border-light">
-                <td className="py-0.5">
+              <tr key={d.document_id}>
+                <td>
                   {catalogueName(labels, { kind: 'area', code: d.area_code, catalogueId })} /{' '}
                   {catalogueName(labels, { kind: 'doc', code: d.doc_type, catalogueId })}
                 </td>
-                <td className="py-0.5">{vocab(t, DOCUMENT_STATUS, d.status as never)}</td>
-                <td className="py-0.5 font-mono">{d.revision_id ? d.revision_id.slice(0, 8) : '-'}</td>
-                <td className="py-0.5 font-mono">{d.content_hash ? d.content_hash.slice(0, 12) : '-'}</td>
+                <td>{vocab(t, DOCUMENT_STATUS, d.status as never)}</td>
+                <td className="font-mono">{d.revision_id ? d.revision_id.slice(0, 8) : '-'}</td>
+                <td className="font-mono">{d.content_hash ? d.content_hash.slice(0, 12) : '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -597,7 +597,7 @@ export function GatePanel({
         <Button size="sm" variant="ghost" icon={<ArrowLeft size={14} />} onClick={onBack}>
           {t('governance.project.back_to_matrix', { defaultValue: 'Back to matrix' })}
         </Button>
-        <h2 className="text-lg font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {gateName}
         </h2>
         <ToneBadge tone={GATE_STATUS_TONE[gate.status]}>{vocab(t, GATE_STATUS, gate.status)}</ToneBadge>
@@ -716,14 +716,14 @@ export function GatePanel({
       )}
 
       <section>
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {t('governance.project.gate.blockers_title', { defaultValue: 'Blockers' })}
         </h3>
         <BlockerList blockers={detail.blockers} areaName={areaName} />
       </section>
 
       <section>
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {t('governance.project.gate.readiness_title', { defaultValue: 'Readiness per area' })}
         </h3>
         {detail.areas.length === 0 ? (
@@ -753,8 +753,8 @@ export function GatePanel({
       </section>
 
       <section>
-        <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-content-primary">
-          <History size={15} aria-hidden />
+        <h3 className="oe-card-title mb-2 flex items-center gap-2">
+          <History size={16} aria-hidden />
           {t('governance.project.gate.history_title', { defaultValue: 'Decisions and attempts' })}
         </h3>
         {detail.decisions.length === 0 ? (
@@ -785,7 +785,7 @@ export function GatePanel({
                       size="sm"
                       variant="ghost"
                       className="ml-auto"
-                      icon={<ExternalLink size={13} />}
+                      icon={<ExternalLink size={14} />}
                       onClick={() => setOpenSnapshot(openSnapshot === d.id ? null : d.id)}
                       aria-expanded={openSnapshot === d.id}
                     >

@@ -182,7 +182,7 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
   );
 
   const selectClass =
-    'h-9 w-full rounded-lg border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
+    'oe-input';
   const currentId = effective.data?.source === 'schedule' ? effective.data.profile_id : '';
 
   return (
@@ -192,7 +192,7 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
           <label className="flex min-w-[260px] flex-col gap-1 text-xs text-content-secondary">
             {t('schedule.profiles.used_by_schedule', { defaultValue: 'Profile used by this schedule' })}
             <select
-              className={selectClass}
+              className="oe-select"
               value={currentId ?? ''}
               disabled={!canEdit || assign.isPending}
               onChange={(e) => assign.mutate(e.target.value || null)}
@@ -312,7 +312,7 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
               <label key={key} className="flex flex-col gap-1 text-xs text-content-secondary">
                 {label(key)}
                 <select
-                  className={selectClass}
+                  className="oe-select"
                   value={draft[key]}
                   onChange={(e) => setDraft({ ...draft, [key]: e.target.value } as ProfileDraft)}
                   data-testid={`profile-${key}`}
@@ -438,27 +438,27 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
             </div>
           </div>
           <div className="mt-3 max-h-[55vh] overflow-auto rounded-lg border border-border-light">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-surface-secondary text-content-secondary">
+            <table className="oe-table-compact">
+              <thead className="sticky top-0">
                 <tr>
-                  <th className="px-2 py-2 text-left">{t('schedule.profiles.col_activity', { defaultValue: 'Activity' })}</th>
-                  <th className="px-2 py-2 text-left">{t('schedule.profiles.col_current', { defaultValue: 'Current' })}</th>
-                  <th className="px-2 py-2 text-left">
+                  <th>{t('schedule.profiles.col_activity', { defaultValue: 'Activity' })}</th>
+                  <th>{t('schedule.profiles.col_current', { defaultValue: 'Current' })}</th>
+                  <th>
                     {t('schedule.profiles.col_recalculated', { defaultValue: 'Recalculated' })}
                   </th>
-                  <th className="px-2 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.profiles.col_finish_shift', { defaultValue: 'Finish shift (days)' })}
                   </th>
-                  <th className="px-2 py-2 text-right">{t('schedule.profiles.col_float', { defaultValue: 'Float' })}</th>
-                  <th className="px-2 py-2 text-left">
+                  <th className="text-right">{t('schedule.profiles.col_float', { defaultValue: 'Float' })}</th>
+                  <th>
                     {t('schedule.profiles.col_changed_by', { defaultValue: 'Changed by' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.activity_id} className="border-t border-border-light">
-                    <td className="px-2 py-1.5">
+                  <tr key={row.activity_id}>
+                    <td>
                       <div className="font-medium text-content-primary">{row.name}</div>
                       <div className="flex flex-wrap gap-1 text-content-tertiary">
                         {row.activity_code}
@@ -479,15 +479,15 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
                         )}
                       </div>
                     </td>
-                    <td className="px-2 py-1.5 tabular-nums text-content-secondary">
+                    <td className="tabular-nums text-content-secondary">
                       {row.current_start} – {row.current_end}
                     </td>
-                    <td className="px-2 py-1.5 tabular-nums text-content-primary">
+                    <td className="tabular-nums">
                       {row.new_start} – {row.new_end}
                     </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{formatShift(row.finish_shift_days)}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{row.total_float}</td>
-                    <td className="px-2 py-1.5">
+                    <td className="text-right tabular-nums">{formatShift(row.finish_shift_days)}</td>
+                    <td className="text-right tabular-nums">{row.total_float}</td>
+                    <td>
                       <div className="flex flex-wrap gap-1">
                         {row.changed_by.map((cause) => (
                           <Badge key={cause} variant="purple" size="sm">

@@ -70,7 +70,7 @@ export function LineRequirements({ line, certificateType, requiresInspection, di
           defaultValue: 'Required certificate for line {{line}}',
           line,
         })}
-        className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-2xs text-content-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+        className="oe-select oe-input-sm"
       >
         <option value="">{t('procurement.item_no_certificate', { defaultValue: 'No certificate required' })}</option>
         {list.map((tp) => (

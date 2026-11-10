@@ -83,7 +83,7 @@ export function WipReportPage() {
                 type="date"
                 value={asOf}
                 onChange={(e) => setAsOf(e.target.value)}
-                className="h-8 rounded-md border border-border-light bg-surface-primary px-2 text-sm text-content-primary"
+                className="oe-input"
                 data-testid="wip-as-of"
               />
             </label>
@@ -115,69 +115,69 @@ export function WipReportPage() {
         />
       ) : (
         <Card padding="none" className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-sm" data-testid="wip-table">
+          <table className="oe-table min-w-[1100px]" data-testid="wip-table">
             <thead>
-              <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
+              <tr className="text-2xs uppercase tracking-wide text-content-tertiary">
                 {COLUMNS.map((c) => (
                   <th key={c.key} className={`px-3 py-2 font-medium ${c.numeric ? 'text-right' : 'text-left'}`}>
                     <button type="button" onClick={() => toggleSort(c.key)} className="inline-flex items-center gap-1 hover:text-content-primary">
                       {t(c.labelKey, { defaultValue: c.labelDefault })}
-                      {sort.key === c.key && (sort.dir === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />)}
+                      {sort.key === c.key && (sort.dir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}
                     </button>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {rows.map((r) => {
                 const pos = billingPosition(r);
                 return (
                   <tr
                     key={r.project_id}
                     onClick={() => open(r)}
-                    className="cursor-pointer hover:bg-surface-secondary"
+                    className="cursor-pointer"
                     data-testid="wip-row"
                   >
-                    <td className="px-3 py-2">
+                    <td>
                       <div className="font-medium text-content-primary">{r.project_name}</div>
                       {r.loss_job && (
                         <span className="text-2xs font-medium text-semantic-error">{t('wip_report.loss_job_badge', { defaultValue: 'Loss job' })}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.contract_value, r.currency)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{r.percent_complete}%</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.earned_revenue, r.currency)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.billed_to_date, r.currency)}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(r.contract_value, r.currency)}</td>
+                    <td className="text-right tabular-nums">{r.percent_complete}%</td>
+                    <td className="text-right tabular-nums">{formatCurrency(r.earned_revenue, r.currency)}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(r.billed_to_date, r.currency)}</td>
                     <td className={`px-3 py-2 text-right tabular-nums ${pos === 'over' ? 'bg-semantic-warning-bg font-medium text-semantic-warning' : 'text-content-tertiary'}`}>
                       {formatCurrency(r.over_billing, r.currency)}
                     </td>
                     <td className={`px-3 py-2 text-right tabular-nums ${pos === 'under' ? 'bg-semantic-info-bg font-medium text-semantic-info' : 'text-content-tertiary'}`}>
                       {formatCurrency(r.under_billing, r.currency)}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.projected_gross_profit, r.currency)}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(r.projected_gross_profit, r.currency)}</td>
                     <td className={`px-3 py-2 text-right tabular-nums ${fadeClass(fadeTone(r.fade))}`}>
                       {r.fade == null ? '-' : formatCurrency(r.fade, r.currency)}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.backlog, r.currency)}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(r.backlog, r.currency)}</td>
                   </tr>
                 );
               })}
             </tbody>
             <tfoot>
               {(data?.totals ?? []).map((tot) => (
-                <tr key={tot.currency} className="border-t-2 border-border-light bg-surface-secondary font-semibold" data-testid="wip-total">
-                  <td className="px-3 py-2">
+                <tr key={tot.currency} className="border-t-2 bg-surface-secondary font-semibold" data-testid="wip-total">
+                  <td>
                     {t('wip_report.total_in', { defaultValue: 'Total {{currency}}', currency: tot.currency })} ({tot.projects})
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.contract_value, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{tot.percent_complete}%</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.earned_revenue, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.billed_to_date, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-semantic-warning">{formatCurrency(tot.over_billing, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-semantic-info">{formatCurrency(tot.under_billing, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.projected_gross_profit, tot.currency)}</td>
+                  <td className="text-right tabular-nums">{formatCurrency(tot.contract_value, tot.currency)}</td>
+                  <td className="text-right tabular-nums">{tot.percent_complete}%</td>
+                  <td className="text-right tabular-nums">{formatCurrency(tot.earned_revenue, tot.currency)}</td>
+                  <td className="text-right tabular-nums">{formatCurrency(tot.billed_to_date, tot.currency)}</td>
+                  <td className="text-right tabular-nums text-semantic-warning">{formatCurrency(tot.over_billing, tot.currency)}</td>
+                  <td className="text-right tabular-nums text-semantic-info">{formatCurrency(tot.under_billing, tot.currency)}</td>
+                  <td className="text-right tabular-nums">{formatCurrency(tot.projected_gross_profit, tot.currency)}</td>
                   <td className={`px-3 py-2 text-right tabular-nums ${fadeClass(fadeTone(tot.fade))}`}>{formatCurrency(tot.fade, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.backlog, tot.currency)}</td>
+                  <td className="text-right tabular-nums">{formatCurrency(tot.backlog, tot.currency)}</td>
                 </tr>
               ))}
             </tfoot>

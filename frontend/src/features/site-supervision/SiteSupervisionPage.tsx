@@ -128,7 +128,7 @@ function categoryVariant(category: string): 'blue' | 'warning' | 'success' | 'ne
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea resize-none';
 const selectCls = inputCls;
 
 /* ── Create / Edit visit modal ────────────────────────────────────────── */
@@ -510,7 +510,7 @@ function InsightPanels({ projectId }: { projectId: string }) {
                   : 'border-border text-content-secondary hover:bg-surface-secondary',
               )}
             >
-              <Icon size={13} />
+              <Icon size={14} />
               {tb.label}
             </button>
           );
@@ -585,7 +585,7 @@ function InsightPanels({ projectId }: { projectId: string }) {
               {(hiddenWorksQuery.data ?? []).map((row) => (
                 <li
                   key={row.entry_id}
-                  className="flex items-start gap-2 rounded-lg border border-border-light p-2.5 text-sm"
+                  className="flex items-start gap-2 rounded-lg border border-border-light p-3 text-sm"
                 >
                   <ShieldAlert size={14} className="mt-0.5 shrink-0 text-oe-blue" />
                   <div className="min-w-0 flex-1">
@@ -623,7 +623,7 @@ function InsightPanels({ projectId }: { projectId: string }) {
               {(changeLinksQuery.data ?? []).map((row) => (
                 <li
                   key={row.entry_id}
-                  className="flex items-start gap-2 rounded-lg border border-border-light p-2.5 text-sm"
+                  className="flex items-start gap-2 rounded-lg border border-border-light p-3 text-sm"
                 >
                   <Workflow size={14} className="mt-0.5 shrink-0 text-oe-blue" />
                   <div className="min-w-0 flex-1">
@@ -749,7 +749,7 @@ function VisitDetail({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('site_supervision.visit_log', { defaultValue: 'Visit log' })}
             </h3>
             <Badge variant={visitStatusVariant(visit.status)} size="sm">
@@ -1216,7 +1216,7 @@ export function SiteSupervisionPage() {
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-content-tertiary">
                         <span className="inline-flex items-center gap-1">
-                          <CalendarDays size={11} />
+                          <CalendarDays size={12} />
                           {visit.actual_date ? (
                             <DateDisplay value={visit.actual_date} />
                           ) : visit.planned_date ? (

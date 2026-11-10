@@ -158,7 +158,7 @@ function TimelineExplainer() {
   return (
     <CollapsibleSection
       storageKey="timeline.how"
-      icon={<Activity size={15} className="text-oe-blue" />}
+      icon={<Activity size={16} className="text-oe-blue" />}
       title={t('timeline.flow_title', { defaultValue: 'How the project timeline works' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -353,15 +353,13 @@ export function TimelinePage() {
           {/* Filter bar */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-tertiary" />
               <input
                 type="text"
                 placeholder={t('timeline.search', { defaultValue: 'Search actions, modules, entities...' })}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white py-2 ps-10 pe-4 text-sm
-                  focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue
-                  dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                className="oe-input ps-10"
               />
               {search && (
                 <button
@@ -369,7 +367,7 @@ export function TimelinePage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                   aria-label={t('common.clear_search', { defaultValue: 'Clear search' })}
                 >
-                  <X className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden />
+                  <X className="h-4 w-4 text-content-tertiary hover:text-content-secondary" aria-hidden />
                 </button>
               )}
             </div>
@@ -377,8 +375,7 @@ export function TimelinePage() {
             <select
               value={moduleFilter}
               onChange={(e) => { setModuleFilter(e.target.value); setOffset(0); setFilters(e.target.value ? { ...filters, module: [e.target.value] } : { ...filters, module: undefined }); }}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm
-                dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+              className="oe-select"
             >
               <option value="">{t('timeline.all_modules', { defaultValue: 'All modules' })}</option>
               {modules.map((m) => (
@@ -402,8 +399,8 @@ export function TimelinePage() {
             <button
               onClick={handleExportCsv}
               disabled={!filtered.length}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600
-                hover:border-gray-300 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 text-sm text-content-secondary
+                hover:border-border disabled:opacity-40"
               aria-label={t('timeline.export_csv', { defaultValue: 'Export CSV' })}
             >
               <Download className="h-3.5 w-3.5" aria-hidden />
@@ -416,11 +413,11 @@ export function TimelinePage() {
             <div className="rounded-lg border border-border-light bg-surface-secondary p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <label className="mb-1 block text-2xs font-medium text-gray-500 uppercase">{t('timeline.action_type', { defaultValue: 'Action Type' })}</label>
+                  <label className="mb-1 block text-2xs font-medium text-content-secondary uppercase">{t('timeline.action_type', { defaultValue: 'Action Type' })}</label>
                   <select
                     value={actionFilter}
                     onChange={(e) => setActionFilter(e.target.value)}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
+                    className="oe-select"
                   >
                     <option value="">{t('timeline.all_actions', { defaultValue: 'All actions' })}</option>
                     {ACTION_OPTIONS.map((a) => (
@@ -429,21 +426,21 @@ export function TimelinePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-2xs font-medium text-gray-500 uppercase">{t('timeline.since', { defaultValue: 'From Date' })}</label>
+                  <label className="mb-1 block text-2xs font-medium text-content-secondary uppercase">{t('timeline.since', { defaultValue: 'From Date' })}</label>
                   <input
                     type="date"
                     value={sinceFilter}
                     onChange={(e) => setSinceFilter(e.target.value)}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
+                    className="oe-input"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-2xs font-medium text-gray-500 uppercase">{t('timeline.until', { defaultValue: 'To Date' })}</label>
+                  <label className="mb-1 block text-2xs font-medium text-content-secondary uppercase">{t('timeline.until', { defaultValue: 'To Date' })}</label>
                   <input
                     type="date"
                     value={untilFilter}
                     onChange={(e) => setUntilFilter(e.target.value)}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
+                    className="oe-input"
                   />
                 </div>
                 <div className="flex items-end gap-2">
@@ -468,7 +465,7 @@ export function TimelinePage() {
 
           {/* Main content */}
           {isLoading && (
-            <div className="py-16 text-center text-gray-500">
+            <div className="py-16 text-center text-content-secondary">
               <Clock className="mx-auto mb-2 h-6 w-6 animate-spin" />
               {t('common.loading', { defaultValue: 'Loading...' })}
             </div>
@@ -510,7 +507,7 @@ export function TimelinePage() {
 
           {/* Pagination */}
           {total > LIMIT && (
-            <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+            <div className="mt-4 flex items-center justify-between text-sm text-content-secondary">
               <span>
                 {t('timeline.showing', {
                   defaultValue: '{{from}}-{{to}} of {{total}}',
@@ -547,34 +544,34 @@ export function TimelinePage() {
           {selectedEntry && (
             <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('timeline.event_details', { defaultValue: 'Event Details' })}
                 </h3>
                 <button onClick={() => setSelectedEntry(null)} aria-label={t('common.close', { defaultValue: 'Close' })}>
-                  <X className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden />
+                  <X className="h-4 w-4 text-content-tertiary hover:text-content-secondary" aria-hidden />
                 </button>
               </div>
               <div className="grid gap-2 text-sm sm:grid-cols-2">
-                <div><span className="text-gray-500">{t('timeline.detail_action', { defaultValue: 'Action' })}:</span> <span className="font-medium">{formatAction(selectedEntry.action)}</span></div>
-                <div><span className="text-gray-500">{t('timeline.detail_module', { defaultValue: 'Module' })}:</span> <span className="font-medium">{selectedEntry.module ? moduleLabel(selectedEntry.module, t) : '-'}</span></div>
-                <div><span className="text-gray-500">{t('timeline.detail_entity_type', { defaultValue: 'Entity Type' })}:</span> <span className="font-medium">{selectedEntry.entity_type ?? '-'}</span></div>
-                <div><span className="text-gray-500">{t('timeline.detail_entity_id', { defaultValue: 'Entity ID' })}:</span> <span className="font-mono text-xs">{selectedEntry.entity_id ?? '-'}</span></div>
-                <div><span className="text-gray-500">{t('timeline.detail_timestamp', { defaultValue: 'Timestamp' })}:</span> <span className="font-medium">{fullDateTime(selectedEntry.created_at)}</span></div>
-                <div><span className="text-gray-500">{t('timeline.detail_actor', { defaultValue: 'Actor' })}:</span> <span className="text-sm font-medium">{selectedEntry.actor_id ? (userMap.get(selectedEntry.actor_id) ?? selectedEntry.actor_id.slice(0, 8) + '...') : t('timeline.system', { defaultValue: 'System' })}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_action', { defaultValue: 'Action' })}:</span> <span className="font-medium">{formatAction(selectedEntry.action)}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_module', { defaultValue: 'Module' })}:</span> <span className="font-medium">{selectedEntry.module ? moduleLabel(selectedEntry.module, t) : '-'}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_entity_type', { defaultValue: 'Entity Type' })}:</span> <span className="font-medium">{selectedEntry.entity_type ?? '-'}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_entity_id', { defaultValue: 'Entity ID' })}:</span> <span className="font-mono text-xs">{selectedEntry.entity_id ?? '-'}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_timestamp', { defaultValue: 'Timestamp' })}:</span> <span className="font-medium">{fullDateTime(selectedEntry.created_at)}</span></div>
+                <div><span className="text-content-secondary">{t('timeline.detail_actor', { defaultValue: 'Actor' })}:</span> <span className="text-sm font-medium">{selectedEntry.actor_id ? (userMap.get(selectedEntry.actor_id) ?? selectedEntry.actor_id.slice(0, 8) + '...') : t('timeline.system', { defaultValue: 'System' })}</span></div>
                 {selectedEntry.from_status && selectedEntry.to_status && (
                   <div className="sm:col-span-2">
-                    <span className="text-gray-500">{t('timeline.detail_status_change', { defaultValue: 'Status Change' })}:</span>{' '}
+                    <span className="text-content-secondary">{t('timeline.detail_status_change', { defaultValue: 'Status Change' })}:</span>{' '}
                     <span className="font-medium">{selectedEntry.from_status}</span>
-                    <ArrowRight className="inline mx-1 h-3 w-3 text-gray-400" />
+                    <ArrowRight className="inline mx-1 h-3 w-3 text-content-tertiary" />
                     <span className="font-medium">{selectedEntry.to_status}</span>
                   </div>
                 )}
                 {selectedEntry.reason && (
-                  <div className="sm:col-span-2"><span className="text-gray-500">{t('timeline.detail_reason', { defaultValue: 'Reason' })}:</span> <span className="font-medium">{selectedEntry.reason}</span></div>
+                  <div className="sm:col-span-2"><span className="text-content-secondary">{t('timeline.detail_reason', { defaultValue: 'Reason' })}:</span> <span className="font-medium">{selectedEntry.reason}</span></div>
                 )}
                 {selectedEntry.metadata && Object.keys(selectedEntry.metadata).length > 0 && (
                   <div className="sm:col-span-2">
-                    <p className="mb-1 text-gray-500">{t('timeline.detail_metadata', { defaultValue: 'Metadata' })}:</p>
+                    <p className="mb-1 text-content-secondary">{t('timeline.detail_metadata', { defaultValue: 'Metadata' })}:</p>
                     <pre className="max-h-48 overflow-auto rounded bg-surface-secondary p-2 text-xs text-content-secondary">
                       {JSON.stringify(selectedEntry.metadata, null, 2)}
                     </pre>
@@ -600,11 +597,11 @@ export function TimelinePage() {
             <div className="rounded-lg border border-border-light bg-surface-primary p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-2xs font-medium uppercase text-gray-500">{t('timeline.total_events', { defaultValue: 'Total Events' })}</p>
+                  <p className="text-2xs font-medium uppercase text-content-secondary">{t('timeline.total_events', { defaultValue: 'Total Events' })}</p>
                   <p className="mt-1 text-xl font-semibold text-content-primary">{total}</p>
                 </div>
                 <div>
-                  <p className="text-2xs font-medium uppercase text-gray-500">{t('timeline.modules_active', { defaultValue: 'Modules Active' })}</p>
+                  <p className="text-2xs font-medium uppercase text-content-secondary">{t('timeline.modules_active', { defaultValue: 'Modules Active' })}</p>
                   <p className="mt-1 text-xl font-semibold text-content-primary">{stats.topModules.length}</p>
                 </div>
               </div>
@@ -619,7 +616,7 @@ export function TimelinePage() {
                     >
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="truncate font-medium text-content-secondary group-hover:text-blue-600">{moduleLabel(module, t)}</span>
-                        <span className="tabular-nums text-gray-500">{count}</span>
+                        <span className="tabular-nums text-content-secondary">{count}</span>
                       </div>
                       <div className="mt-1 h-1.5 rounded-full bg-surface-secondary">
                         <div
@@ -633,7 +630,7 @@ export function TimelinePage() {
               </ul>
 
               <div className="mt-4 border-t border-border-light pt-3">
-                <p className="mb-1.5 text-2xs font-medium uppercase text-gray-500">{t('timeline.top_actions', { defaultValue: 'Top Actions' })}</p>
+                <p className="mb-1.5 text-2xs font-medium uppercase text-content-secondary">{t('timeline.top_actions', { defaultValue: 'Top Actions' })}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {stats.topActions.map(([action, count]) => (
                     <span key={action} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium ${actionColor(action)}`}>
@@ -676,9 +673,9 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
     >
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-secondary" title={actorName ?? undefined}>
         {entry.actor_id ? (
-          <UserIcon className="h-4 w-4 text-gray-500" />
+          <UserIcon className="h-4 w-4 text-content-secondary" />
         ) : (
-          <Activity className="h-4 w-4 text-gray-500" />
+          <Activity className="h-4 w-4 text-content-secondary" />
         )}
       </div>
       <div className="min-w-0 flex-1">
@@ -693,12 +690,12 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
             <Badge variant="blue" className="text-xs">{moduleLabel(entry.module, t)}</Badge>
           )}
           {entry.entity_type && (
-            <span className="text-xs text-gray-500" title={entry.entity_type}>
+            <span className="text-xs text-content-secondary" title={entry.entity_type}>
               {entry.entity_type.split('.').pop()?.replace(/_/g, ' ')}
             </span>
           )}
           {entry.from_status && entry.to_status && (
-            <span className="flex items-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center gap-1 text-xs text-content-secondary">
               <span className="rounded bg-surface-secondary px-1.5 py-0.5">{entry.from_status}</span>
               <ArrowRight className="h-3 w-3" />
               <span className="rounded bg-surface-secondary px-1.5 py-0.5">{entry.to_status}</span>
@@ -719,7 +716,7 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
         )}
       </div>
       <div className="flex min-h-7 shrink-0 items-center text-right">
-        <span className="text-xs text-gray-400" title={fullDateTime(entry.created_at)}>
+        <span className="text-xs text-content-tertiary" title={fullDateTime(entry.created_at)}>
           {relativeTime(entry.created_at, t)}
         </span>
       </div>

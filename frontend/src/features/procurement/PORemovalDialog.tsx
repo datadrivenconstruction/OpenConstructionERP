@@ -305,7 +305,7 @@ export function PORemovalDialog({ po, projectId, onClose }: PORemovalDialogProps
               placeholder={t('procurement.remove_po_reason_placeholder', {
                 defaultValue: 'Why is this order being cancelled?',
               })}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+              className="oe-textarea"
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {t('procurement.remove_po_reason_hint', {

@@ -20,7 +20,7 @@ const DOT: Record<string, string> = {
   ok: 'bg-semantic-success',
   busy: 'bg-semantic-warning',
   error: 'bg-semantic-error',
-  idle: 'bg-slate-400',
+  idle: 'bg-content-quaternary',
 };
 
 // The panel and the wizard are code nobody needs on the first screen: they load

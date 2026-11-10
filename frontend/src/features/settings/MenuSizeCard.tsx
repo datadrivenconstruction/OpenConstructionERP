@@ -54,7 +54,7 @@ export function MenuSizeCard() {
           </OptionRow>
 
           <div className="grid gap-2 sm:grid-cols-[9rem_1fr] sm:items-center">
-            <label htmlFor={sliderId} className="text-sm font-medium text-content-primary">
+            <label htmlFor={sliderId} className="oe-label">
               {t('settings.menu_size_width', { defaultValue: 'Menu width' })}
             </label>
             <div className="flex flex-wrap items-center gap-3">
@@ -103,7 +103,7 @@ export function MenuSizeCard() {
               return (
                 <div
                   key={i}
-                  className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm ${
+                  className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm ${
                     row.active ? 'bg-oe-blue-subtle text-oe-blue-text' : 'text-content-secondary'
                   }`}
                 >

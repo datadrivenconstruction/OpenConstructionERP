@@ -203,7 +203,7 @@ export function CompliancePage({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         <Card padding="sm" className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
+            <p className="text-xs uppercase tracking-wide text-content-secondary">
               {t('propdev.compliance.tile.passed')}
             </p>
             <p className="text-2xl font-semibold text-semantic-success">
@@ -214,7 +214,7 @@ export function CompliancePage({
         </Card>
         <Card padding="sm" className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
+            <p className="text-xs uppercase tracking-wide text-content-secondary">
               {t('propdev.compliance.tile.warnings')}
             </p>
             <p className="text-2xl font-semibold text-semantic-warning">
@@ -225,7 +225,7 @@ export function CompliancePage({
         </Card>
         <Card padding="sm" className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
+            <p className="text-xs uppercase tracking-wide text-content-secondary">
               {t('propdev.compliance.tile.errors')}
             </p>
             <p className="text-2xl font-semibold text-semantic-error">
@@ -236,7 +236,7 @@ export function CompliancePage({
         </Card>
         <Card padding="sm" className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
+            <p className="text-xs uppercase tracking-wide text-content-secondary">
               {t('propdev.compliance.tile.infos')}
             </p>
             <p className="text-2xl font-semibold text-semantic-info">
@@ -304,9 +304,9 @@ export function CompliancePage({
                   >
                     <div className="flex items-center gap-3">
                       {isOpen ? (
-                        <ChevronDown className="h-4 w-4 text-zinc-400" />
+                        <ChevronDown className="h-4 w-4 text-content-tertiary" />
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-zinc-400" />
+                        <ChevronRight className="h-4 w-4 text-content-tertiary" />
                       )}
                       <span
                         className={clsx(
@@ -320,7 +320,7 @@ export function CompliancePage({
                       />
                       <div>
                         <p className="text-sm font-medium">{rule.ruleName}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-content-secondary">
                           {rule.category} · {rule.ruleId}
                         </p>
                       </div>
@@ -337,7 +337,7 @@ export function CompliancePage({
                           <span className="flex-1">
                             <span className="block">{r.message}</span>
                             {r.suggestion ? (
-                              <span className="mt-0.5 block text-zinc-500">
+                              <span className="mt-0.5 block text-content-secondary">
                                 {r.suggestion}
                               </span>
                             ) : null}
@@ -367,7 +367,7 @@ export function CompliancePage({
           <div className="flex items-center gap-2 text-sm">
             <label
               htmlFor="propdev-compliance-quarter"
-              className="text-zinc-500"
+              className="text-content-secondary"
             >
               {t('propdev.compliance.quarter')}
             </label>
@@ -378,7 +378,7 @@ export function CompliancePage({
               onChange={(e) => setQuarter(e.target.value.trim().toUpperCase())}
               placeholder="2026-Q2"
               pattern="\d{4}-Q[1-4]"
-              className="w-28 rounded border border-border px-2 py-1 text-sm"
+              className="oe-input w-28"
             />
           </div>
         </div>
@@ -391,7 +391,7 @@ export function CompliancePage({
                   <h3 className="text-sm font-semibold">{t(labelKey)}</h3>
                   <Badge variant="neutral">{code}</Badge>
                 </div>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-content-secondary">
                   {t(`propdev.compliance.regulator_desc.${code.toLowerCase()}`)}
                 </p>
                 <Button

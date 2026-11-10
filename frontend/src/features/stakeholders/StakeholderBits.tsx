@@ -26,7 +26,7 @@ import {
 import { errorText, humanizeCode, type KeyText, type TFn } from './labels';
 
 export const FIELD_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-select';
 
 /** Which server flag a button follows, and the sentence shown when the flag is off. */
 export type Capability = 'edit' | 'organisation';
@@ -74,7 +74,7 @@ export function GatedButton({
           data-reason={capability}
           className="inline-flex max-w-xs items-start gap-1 text-2xs text-content-tertiary"
         >
-          <Info size={11} className="mt-px shrink-0" aria-hidden />
+          <Info size={12} className="mt-px shrink-0" aria-hidden />
           {t(reason[0], { defaultValue: reason[1] })}
         </span>
       )}
@@ -294,7 +294,7 @@ export function SectionHead({ title, hint, action }: { title: string; hint?: str
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-sm font-semibold text-content-primary">{title}</h2>
+        <h2 className="oe-card-title">{title}</h2>
         {hint && <p className="text-xs text-content-secondary">{hint}</p>}
       </div>
       {action}

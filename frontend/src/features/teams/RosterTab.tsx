@@ -71,7 +71,7 @@ import { fmtList } from '@/shared/lib/formatters';
 const TICKET_WARN_DAYS = 30;
 
 const INPUT_CLASS =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 
 /** Read a backend `detail` off a failed request, falling back to the message. */
 function errorDetail(err: unknown, fallback: string): string {
@@ -423,7 +423,7 @@ function AddPeopleModal({
                   <label
                     key={key}
                     className={clsx(
-                      'flex items-center gap-2.5 border-b border-border-light px-3 py-2 text-sm last:border-b-0',
+                      'flex items-center gap-2 border-b border-border-light px-3 py-2 text-sm last:border-b-0',
                       c.on_roster
                         ? 'cursor-default opacity-60'
                         : 'cursor-pointer hover:bg-surface-secondary',
@@ -499,7 +499,7 @@ function AddPeopleModal({
                     onClick={() => setPicked((prev) => prev.filter((x) => x.key !== p.key))}
                     aria-label={t('teams.roster_remove_pick', 'Remove from the selection')}
                   >
-                    <X size={11} />
+                    <X size={12} />
                   </button>
                 </span>
               ))}
@@ -521,7 +521,7 @@ function AddPeopleModal({
             id="roster-add-team"
             value={teamId}
             onChange={(e) => setTeamId(e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_team', 'No team')}</option>
             {teams.map((team) => (
@@ -537,7 +537,7 @@ function AddPeopleModal({
             id="roster-add-trade"
             value={trade}
             onChange={(e) => setTrade(e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_trade', 'No trade')}</option>
             {trades.map((entry) => (
@@ -553,7 +553,7 @@ function AddPeopleModal({
             id="roster-add-role"
             value={siteRole}
             onChange={(e) => setSiteRole(e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_role', 'No site role')}</option>
             {siteRoles.map((entry) => (
@@ -767,7 +767,7 @@ function EditMemberModal({
             id="roster-edit-trade"
             value={form.trade ?? ''}
             onChange={(e) => set('trade', e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_trade', 'No trade')}</option>
             {trades.map((entry) => (
@@ -782,7 +782,7 @@ function EditMemberModal({
             id="roster-edit-role"
             value={form.site_role ?? ''}
             onChange={(e) => set('site_role', e.target.value)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_role', 'No site role')}</option>
             {siteRoles.map((entry) => (
@@ -797,7 +797,7 @@ function EditMemberModal({
             id="roster-edit-team"
             value={form.team_id ?? ''}
             onChange={(e) => set('team_id', e.target.value || null)}
-            className={INPUT_CLASS}
+            className="oe-select"
           >
             <option value="">{t('teams.roster_no_team', 'No team')}</option>
             {teams.map((team) => (
@@ -921,7 +921,7 @@ function EditMemberModal({
             rows={2}
             value={form.notes ?? ''}
             onChange={(e) => set('notes', e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-primary p-2.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-textarea"
           />
         </WideModalField>
         <WideModalField span={3}>
@@ -1063,7 +1063,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
             value={tradeFilter}
             onChange={(e) => setTradeFilter(e.target.value)}
             aria-label={t('teams.roster_all_trades', 'All trades')}
-            className={`${INPUT_CLASS} max-w-[11rem]`}
+            className="oe-select max-w-[11rem]"
           >
             <option value="">{t('teams.roster_all_trades', 'All trades')}</option>
             {trades.map((entry) => (
@@ -1077,7 +1077,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
             value={teamFilter}
             onChange={(e) => setTeamFilter(e.target.value)}
             aria-label={t('teams.roster_all_teams', 'All teams')}
-            className={`${INPUT_CLASS} max-w-[11rem]`}
+            className="oe-select max-w-[11rem]"
           >
             <option value="">{t('teams.roster_all_teams', 'All teams')}</option>
             {teamNames.map(([id, name]) => (
@@ -1121,25 +1121,25 @@ export function RosterTab({ projectId }: { projectId: string }) {
         </Card>
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-[60rem] text-sm">
+          <table className="oe-table min-w-[60rem]">
             <thead>
-              <tr className="border-b border-border text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="px-3 py-2 font-medium">
+              <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                <th>
                   {t('teams.roster_col_person', 'Person')}
                 </th>
-                <th className="px-3 py-2 font-medium">{t('teams.roster_col_firm', 'Firm')}</th>
-                <th className="px-3 py-2 font-medium">
+                <th>{t('teams.roster_col_firm', 'Firm')}</th>
+                <th>
                   {t('teams.roster_col_trade', 'Trade and site role')}
                 </th>
-                <th className="px-3 py-2 font-medium">{t('teams.roster_col_team', 'Team')}</th>
-                <th className="px-3 py-2 font-medium">
+                <th>{t('teams.roster_col_team', 'Team')}</th>
+                <th>
                   {t('teams.roster_col_dates', 'On the project')}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('teams.roster_col_tickets', 'Tickets')}
                 </th>
-                <th className="px-3 py-2 font-medium">{t('teams.roster_col_access', 'Access')}</th>
-                <th className="px-3 py-2" />
+                <th>{t('teams.roster_col_access', 'Access')}</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -1151,7 +1151,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                     !m.is_active && 'opacity-60',
                   )}
                 >
-                  <td className="px-3 py-2">
+                  <td>
                     <span className="block font-medium text-content-primary">
                       {m.display_name}
                     </span>
@@ -1164,8 +1164,8 @@ export function RosterTab({ projectId }: { projectId: string }) {
                       </Badge>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">{m.company_name || '—'}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-content-secondary">{m.company_name || '—'}</td>
+                  <td>
                     <span className="block text-content-secondary">
                       {m.trade
                         ? t(`teams.trade_${m.trade}`, { defaultValue: m.trade_label })
@@ -1177,8 +1177,8 @@ export function RosterTab({ projectId }: { projectId: string }) {
                         : ''}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">{m.team_name || '—'}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-content-secondary">{m.team_name || '—'}</td>
+                  <td>
                     <span
                       className={clsx(
                         'block text-2xs',
@@ -1203,7 +1203,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {m.certifications.length === 0 ? (
                       <span className="text-2xs text-content-quaternary">—</span>
                     ) : (
@@ -1214,7 +1214,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {m.has_project_access ? (
                       <Badge variant="blue" size="sm">
                         {t('teams.roster_has_access', 'Project access')}
@@ -1231,7 +1231,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     {confirmId === m.id ? (
                       <span className="inline-flex items-center gap-1.5">
                         <button

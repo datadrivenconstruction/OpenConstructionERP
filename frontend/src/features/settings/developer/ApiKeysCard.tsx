@@ -147,10 +147,10 @@ export function ApiKeysCard() {
     <Card padding="md" data-testid="developer-keys">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 rounded-lg bg-oe-blue/10 p-2 text-oe-blue">
-          <KeyRound size={18} aria-hidden="true" />
+          <KeyRound size={20} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('developer.keys_title', { defaultValue: 'API keys' })}
           </h3>
           <p className="mt-0.5 text-sm text-content-secondary">
@@ -179,27 +179,27 @@ export function ApiKeysCard() {
         <p className="mt-4 text-sm text-content-tertiary">{t('developer.no_keys', { defaultValue: 'No keys yet.' })}</p>
       ) : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm" data-testid="developer-key-table">
+          <table className="oe-table" data-testid="developer-key-table">
             <thead>
               <tr className="text-left text-xs text-content-tertiary">
-                <th className="py-1 pr-3 font-medium">{t('developer.col_name', { defaultValue: 'Name' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_scopes', { defaultValue: 'Scopes' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_last_used', { defaultValue: 'Last used' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_requests', { defaultValue: 'Requests' })}</th>
-                <th className="py-1 pr-3 font-medium">{t('developer.col_expires', { defaultValue: 'Expires' })}</th>
-                <th className="py-1" />
+                <th className="pr-3">{t('developer.col_name', { defaultValue: 'Name' })}</th>
+                <th className="pr-3">{t('developer.col_scopes', { defaultValue: 'Scopes' })}</th>
+                <th className="pr-3">{t('developer.col_last_used', { defaultValue: 'Last used' })}</th>
+                <th className="pr-3">{t('developer.col_requests', { defaultValue: 'Requests' })}</th>
+                <th className="pr-3">{t('developer.col_expires', { defaultValue: 'Expires' })}</th>
+                <th />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {keys.map((k) => (
                 <tr key={k.id} data-testid={`developer-key-${k.id}`}>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     <div className="font-medium text-content-primary">{k.name}</div>
                     <code className="text-xs text-content-tertiary" dir="ltr">
                       {k.key_prefix}…
                     </code>
                   </td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     {k.permissions.length === 0 ? (
                       <Badge size="sm" variant="warning">
                         {t('developer.scope_all', { defaultValue: 'All of your rights' })}
@@ -214,14 +214,14 @@ export function ApiKeysCard() {
                       </div>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-content-secondary">
+                  <td className="pr-3 text-content-secondary">
                     {k.last_used_at ? fmtDateTime(k.last_used_at) : t('developer.never', { defaultValue: 'Never' })}
                   </td>
-                  <td className="py-2 pr-3 tabular-nums text-content-secondary">{k.request_count}</td>
-                  <td className="py-2 pr-3 text-content-secondary">
+                  <td className="pr-3 tabular-nums text-content-secondary">{k.request_count}</td>
+                  <td className="pr-3 text-content-secondary">
                     {k.expires_at ? fmtDateTime(k.expires_at) : t('developer.no_expiry', { defaultValue: 'No expiry' })}
                   </td>
-                  <td className="py-2 text-right whitespace-nowrap">
+                  <td className="text-right whitespace-nowrap">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -310,7 +310,7 @@ export function ApiKeysCard() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <WideModalField label={t('developer.field_expiry', { defaultValue: 'Expires after' })}>
               <select
-                className="w-full rounded-md border border-border bg-surface-primary px-2 py-2 text-sm text-content-primary"
+                className="oe-select"
                 value={expiry}
                 onChange={(e) => setExpiry(Number(e.target.value))}
               >
@@ -343,7 +343,7 @@ export function ApiKeysCard() {
             error={cidrsValid ? undefined : t('developer.cidrs_too_many', { defaultValue: 'At most 20 networks.' })}
           >
             <textarea
-              className="w-full rounded-md border border-border bg-surface-primary px-2 py-2 text-sm text-content-primary"
+              className="oe-textarea"
               rows={2}
               dir="ltr"
               value={cidrs}

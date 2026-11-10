@@ -1488,7 +1488,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           aria-label={t('common.search', { defaultValue: 'Search' })}
           title={iconified ? t('common.search', { defaultValue: 'Search' }) : undefined}
         >
-          <Search size={13} strokeWidth={1.75} className="shrink-0" />
+          <Search size={14} strokeWidth={1.75} className="shrink-0" />
           {!iconified && (
             <>
               <span className="truncate">
@@ -1619,7 +1619,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                             title={label}
                             className="flex h-3.5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
                           >
-                            {delta < 0 ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                            {delta < 0 ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                           </button>
                         );
                       })}
@@ -1724,7 +1724,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 iconified ? 'h-8 w-8 justify-center' : 'w-full gap-2 px-2.5 py-1.5',
               )}
             >
-              <LayoutGrid size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
+              <LayoutGrid size={14} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
               {!iconified && (
                 <>
                   <span className="min-w-0 flex-1 truncate text-left text-xs font-medium">
@@ -1732,7 +1732,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   </span>
                   <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">{moreCount}</span>
                   <ChevronDown
-                    size={11}
+                    size={12}
                     strokeWidth={2}
                     className={clsx(
                       'shrink-0 text-content-quaternary transition-transform duration-200',
@@ -1757,7 +1757,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 iconified ? 'h-8 w-8 justify-center' : 'w-full gap-2 px-2.5 py-1.5',
               )}
             >
-              <Plus size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
+              <Plus size={14} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
               {!iconified && (
                 <span className="min-w-0 flex-1 truncate text-left text-xs font-medium">
                   {t('packs.focus_more', { defaultValue: 'Show more modules' })}
@@ -1951,7 +1951,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             title={iconified ? t('nav.add_module', { defaultValue: 'Add module' }) : undefined}
             className={clsx(
               'group flex items-center rounded-lg border border-dashed border-oe-blue/40 bg-gradient-to-br from-oe-blue/5 via-transparent to-blue-50/40 dark:from-oe-blue/10 dark:via-transparent dark:to-slate-900/30 hover:border-oe-blue hover:from-oe-blue/10 hover:shadow-sm transition-all',
-              iconified ? 'h-9 w-9 justify-center' : 'gap-2.5 px-2.5 py-2',
+              iconified ? 'h-9 w-9 justify-center' : 'gap-2 px-2.5 py-2',
             )}
           >
             <span className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-oe-blue/10 text-oe-blue group-hover:bg-oe-blue group-hover:text-white transition-colors">
@@ -1995,7 +1995,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             }
             className={clsx(
               'group flex items-center rounded-lg border border-dashed border-purple-400/40 bg-gradient-to-br from-purple-500/5 via-transparent to-purple-50/40 dark:from-purple-500/10 dark:via-transparent dark:to-slate-900/30 hover:border-purple-500 hover:from-purple-500/10 hover:shadow-sm transition-all text-left',
-              iconified ? 'h-9 w-9 justify-center' : 'w-full gap-2.5 px-2.5 py-2',
+              iconified ? 'h-9 w-9 justify-center' : 'w-full gap-2 px-2.5 py-2',
             )}
             aria-haspopup="dialog"
             aria-expanded={customModuleOpen}
@@ -2116,7 +2116,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 aria-label={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
                 className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all"
               >
-                <Github size={13} strokeWidth={1.75} className="text-content-secondary" />
+                <Github size={14} strokeWidth={1.75} className="text-content-secondary" />
               </a>
             )}
             {!footerPrefs.community && (
@@ -2299,7 +2299,7 @@ function RowIconMenu({
       ref={ref}
       role="menu"
       aria-label={t('settings.menu_icons_row_menu', { defaultValue: 'Menu item icon' })}
-      className="fixed z-[70] w-52 rounded-lg border border-border-light bg-surface-elevated p-1 shadow-lg animate-fade-in"
+      className="fixed z-popover w-52 rounded-lg border border-border-light bg-surface-elevated p-1 shadow-lg animate-fade-in"
       style={{ left, top }}
     >
       <button type="button" role="menuitem" onClick={onCustomise} className={itemClass}>
@@ -2385,7 +2385,7 @@ function NavGroupSection({
             </span>
             <span className="h-px min-w-[1rem] flex-1 bg-border-light" aria-hidden />
             <ChevronDown
-              size={11}
+              size={12}
               strokeWidth={2}
               className={clsx(
                 'shrink-0 text-content-quaternary transition-transform duration-200 group-hover:text-content-secondary',
@@ -2458,7 +2458,7 @@ function NavGroupSection({
           </span>
         </span>
         <ChevronDown
-          size={11}
+          size={12}
           strokeWidth={2}
           className={clsx(
             'shrink-0 text-content-quaternary group-hover:text-content-secondary',
@@ -3138,7 +3138,7 @@ function AdminGrid({
               </span>
               {editable && (
                 <span aria-hidden className="shrink-0 text-content-quaternary">
-                  {isHidden ? <EyeOff size={11} strokeWidth={2} /> : <Eye size={11} strokeWidth={2} />}
+                  {isHidden ? <EyeOff size={12} strokeWidth={2} /> : <Eye size={12} strokeWidth={2} />}
                 </span>
               )}
             </button>
@@ -3194,7 +3194,7 @@ export function FloatingRecentButton() {
                     to={item.url}
                     onClick={() => setOpen(false)}
                     title={item.title}
-                    className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
                   >
                     <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
                     <span className="truncate flex-1">{item.title}</span>
@@ -3223,7 +3223,7 @@ export function FloatingRecentButton() {
         )}
         title={t('nav.recent', { defaultValue: 'Recent' })}
       >
-        <History size={18} strokeWidth={2} aria-hidden="true" />
+        <History size={20} strokeWidth={2} aria-hidden="true" />
       </button>
     </div>
   );

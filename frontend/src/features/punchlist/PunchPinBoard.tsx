@@ -273,7 +273,7 @@ export function PunchPinBoard({
               setPlacing(false);
             }}
             aria-label={t('punch.select_drawing', { defaultValue: 'Select drawing' })}
-            className="h-9 max-w-[240px] flex-1 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select max-w-[240px] flex-1"
           >
             {!hasDrawings && (
               <option value="">{t('punch.no_drawings', { defaultValue: 'No drawings' })}</option>
@@ -335,7 +335,7 @@ export function PunchPinBoard({
 
           {placing && (
             <span className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-oe-blue/10 px-2 py-1 text-xs font-medium text-oe-blue">
-              <Crosshair size={13} />
+              <Crosshair size={14} />
               {t('punch.click_to_place', { defaultValue: 'Click the drawing to drop the pin' })}
               <button
                 type="button"
@@ -343,7 +343,7 @@ export function PunchPinBoard({
                 aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
                 className="ml-1 rounded hover:bg-oe-blue/20"
               >
-                <X size={13} />
+                <X size={14} />
               </button>
             </span>
           )}
@@ -422,7 +422,7 @@ export function PunchPinBoard({
             value={placingItemId}
             onChange={(e) => setPlacingItemId(e.target.value)}
             aria-label={t('punch.select_item_to_place', { defaultValue: 'Select an item to place' })}
-            className="mb-2 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select mb-2"
           >
             <option value="">
               {t('punch.choose_item', { defaultValue: 'Choose an item...' })}
@@ -475,7 +475,7 @@ export function PunchPinBoard({
                     <span className="min-w-0 flex-1 truncate text-content-secondary">
                       {pin.title}
                     </span>
-                    <MapPin size={13} className="shrink-0 text-content-quaternary" />
+                    <MapPin size={14} className="shrink-0 text-content-quaternary" />
                   </button>
                 </li>
               ))}

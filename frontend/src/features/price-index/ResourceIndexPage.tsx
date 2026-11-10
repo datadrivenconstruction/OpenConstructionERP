@@ -73,8 +73,7 @@ const EMPTY_SETTINGS: BOQResourceIndexSettings = {
 };
 
 const selectClass =
-  'h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary ' +
-  'focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-select';
 
 function todayIso(): string {
   const d = new Date();
@@ -335,7 +334,7 @@ function ResourceIndexContent() {
               {t('price_index.ri.vat_date', { defaultValue: 'VAT date' })}
               <input
                 type="date"
-                className={selectClass}
+                className="oe-input"
                 value={onDate}
                 onChange={(e) => setOnDate(e.target.value)}
               />
@@ -641,7 +640,7 @@ export function EstimateBreakdown({
           })}
         />
         <div className="mt-3 overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <tbody>
               <FormulaRow label={label('labor')} value={tt.ot} />
               <FormulaRow label={label('machine')} value={tt.em} />
@@ -722,19 +721,19 @@ export function EstimateBreakdown({
         <Card>
           <CardHeader title={t('price_index.ri.by_work_type', { defaultValue: 'Overheads and profit by work type' })} />
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table-compact">
               <thead>
-                <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-                  <th className="px-2 py-1.5 font-medium">{t('price_index.ri.work_type', { defaultValue: 'Work type' })}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t('price_index.ri.fot_short', { defaultValue: 'FOT' })}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t('price_index.ri.nr_short', { defaultValue: 'NR' })}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t('price_index.ri.sp_short', { defaultValue: 'SP' })}</th>
+                <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+                  <th>{t('price_index.ri.work_type', { defaultValue: 'Work type' })}</th>
+                  <th className="text-right">{t('price_index.ri.fot_short', { defaultValue: 'FOT' })}</th>
+                  <th className="text-right">{t('price_index.ri.nr_short', { defaultValue: 'NR' })}</th>
+                  <th className="text-right">{t('price_index.ri.sp_short', { defaultValue: 'SP' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {result.by_work_type.map((w) => (
-                  <tr key={w.work_type} className="border-b border-border-light last:border-0">
-                    <td className="px-2 py-1.5 text-content-secondary">
+                  <tr key={w.work_type} className="last:border-0">
+                    <td className="text-content-secondary">
                       {w.label || w.work_type}
                       {result.norms_used.some((n) => n.work_type_code === w.work_type && n.is_sample) && (
                         <Badge variant="warning" size="sm" className="ml-1">
@@ -742,14 +741,14 @@ export function EstimateBreakdown({
                         </Badge>
                       )}
                     </td>
-                    <td className="px-2 py-1.5 text-right">
+                    <td className="text-right">
                       <Money value={w.fot} />
                     </td>
-                    <td className="px-2 py-1.5 text-right">
+                    <td className="text-right">
                       <Money value={w.nr} />
                       <div className="text-xs text-content-tertiary">{formatFactorString(w.nr_pct)}%</div>
                     </td>
-                    <td className="px-2 py-1.5 text-right">
+                    <td className="text-right">
                       <Money value={w.sp} />
                       <div className="text-xs text-content-tertiary">{formatFactorString(w.sp_pct)}%</div>
                     </td>
@@ -848,7 +847,7 @@ function ExcludedList({
           {e.reason === 'no_work_type' && onWorkTypeChange && norms.length > 0 && (
             <select
               aria-label={t('price_index.ri.work_type', { defaultValue: 'Work type' })}
-              className={selectClass + ' h-7 text-xs'}
+              className="oe-select oe-input-sm"
               value=""
               onChange={(ev) => onWorkTypeChange(e.position_id, ev.target.value)}
             >
@@ -941,7 +940,7 @@ function PositionBlock({
           {onWorkTypeChange ? (
             <select
               aria-label={t('price_index.ri.work_type', { defaultValue: 'Work type' })}
-              className={selectClass + ' h-8 text-xs'}
+              className="oe-select oe-input-sm"
               value={chosen}
               onChange={(e) => onWorkTypeChange(p.ref, e.target.value)}
             >
@@ -960,16 +959,16 @@ function PositionBlock({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-              <th className="px-2 py-1 font-medium">{t('price_index.ri.col_code', { defaultValue: 'Code' })}</th>
-              <th className="px-2 py-1 font-medium">{t('price_index.ri.col_resource', { defaultValue: 'Resource' })}</th>
-              <th className="px-2 py-1 font-medium">{t('price_index.ri.col_group', { defaultValue: 'Index group' })}</th>
-              <th className="px-2 py-1 text-right font-medium">
+            <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+              <th>{t('price_index.ri.col_code', { defaultValue: 'Code' })}</th>
+              <th>{t('price_index.ri.col_resource', { defaultValue: 'Resource' })}</th>
+              <th>{t('price_index.ri.col_group', { defaultValue: 'Index group' })}</th>
+              <th className="text-right">
                 {t('price_index.ri.col_base', { defaultValue: 'Q × consumption × base price' })}
               </th>
-              <th className="px-2 py-1 text-right font-medium">{t('price_index.ri.col_current', { defaultValue: '× index = current' })}</th>
+              <th className="text-right">{t('price_index.ri.col_current', { defaultValue: '× index = current' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -979,7 +978,7 @@ function PositionBlock({
           </tbody>
         </table>
       </div>
-      <table className="w-full text-sm">
+      <table className="oe-table">
         <tbody>
           <FormulaRow label={label('labor')} value={p.ot} />
           <FormulaRow
@@ -1173,13 +1172,13 @@ function ReferenceData({
           })}
         />
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact">
             <tbody>
               {shown.map((i) => (
-                <tr key={i.id} className="border-b border-border-light last:border-0">
-                  <td className="px-2 py-1.5 font-mono text-xs">{i.region_code}</td>
-                  <td className="px-2 py-1.5 font-mono text-xs">{i.quarter}</td>
-                  <td className="px-2 py-1.5 text-content-secondary">
+                <tr key={i.id} className="last:border-0">
+                  <td className="font-mono">{i.region_code}</td>
+                  <td className="font-mono">{i.quarter}</td>
+                  <td className="text-content-secondary">
                     {label(i.resource_group)}
                     {i.is_sample && (
                       <Badge variant="warning" size="sm" className="ml-1">
@@ -1188,7 +1187,7 @@ function ReferenceData({
                     )}
                     {i.source && <div className="text-xs text-content-tertiary">{i.source}</div>}
                   </td>
-                  <td className="px-2 py-1.5 text-right">
+                  <td className="text-right">
                     {canManage ? (
                       <InlineDecimal
                         value={i.index_value}
@@ -1200,7 +1199,7 @@ function ReferenceData({
                       <span className="font-mono">{formatFactorString(i.index_value)}</span>
                     )}
                   </td>
-                  <td className="px-1 py-1.5 text-right">
+                  <td className="text-right">
                     {canManage && (
                       <button
                         type="button"
@@ -1271,19 +1270,19 @@ function ReferenceData({
           })}
         />
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact">
             <thead>
-              <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-                <th className="px-2 py-1 font-medium">{t('price_index.ri.work_type', { defaultValue: 'Work type' })}</th>
-                <th className="px-2 py-1 text-right font-medium">{t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}</th>
-                <th className="px-2 py-1 text-right font-medium">{t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}</th>
+              <tr className="text-left text-xs uppercase tracking-wide text-content-tertiary">
+                <th>{t('price_index.ri.work_type', { defaultValue: 'Work type' })}</th>
+                <th className="text-right">{t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}</th>
+                <th className="text-right">{t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}</th>
                 <th />
               </tr>
             </thead>
             <tbody>
               {norms.map((n) => (
-                <tr key={n.id} className="border-b border-border-light last:border-0">
-                  <td className="px-2 py-1.5 text-content-secondary">
+                <tr key={n.id} className="last:border-0">
+                  <td className="text-content-secondary">
                     {n.label || n.work_type_code}
                     <span className="ml-1 font-mono text-xs text-content-tertiary">{n.work_type_code}</span>
                     {n.is_sample && (
@@ -1292,7 +1291,7 @@ function ReferenceData({
                       </Badge>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-right">
+                  <td className="text-right">
                     {canManage ? (
                       <InlineDecimal
                         value={n.nr_pct}
@@ -1304,7 +1303,7 @@ function ReferenceData({
                       <span className="font-mono">{formatFactorString(n.nr_pct)}</span>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-right">
+                  <td className="text-right">
                     {canManage ? (
                       <InlineDecimal
                         value={n.sp_pct}
@@ -1316,7 +1315,7 @@ function ReferenceData({
                       <span className="font-mono">{formatFactorString(n.sp_pct)}</span>
                     )}
                   </td>
-                  <td className="px-1 py-1.5 text-right">
+                  <td className="text-right">
                     {canManage && (
                       <button
                         type="button"

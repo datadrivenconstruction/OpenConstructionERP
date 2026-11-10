@@ -56,9 +56,9 @@ const CRITICALITY_TOP_N = 12;
 const TORNADO_TOP_N = 10;
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 function fmtNum(n: number | null | undefined, digits = 0): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return '-';
@@ -214,7 +214,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
       <Card padding="md">
         <div className="mb-3 flex items-center gap-2">
           <Activity size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.risk.title', { defaultValue: 'Monte-Carlo schedule risk' })}
           </h3>
         </div>
@@ -432,7 +432,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
           <Card padding="md">
             <div className="mb-3 flex items-center gap-2">
               <Target size={16} className="text-content-secondary" />
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('schedule.risk.finish_dist', {
                   defaultValue: 'Finish-day distribution (work-days)',
                 })}
@@ -483,7 +483,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
           {/* ── S-curve (CDF) ───────────────────────────────────────── */}
           {cdfData.length > 0 && (
             <Card padding="md">
-              <h3 className="mb-3 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-3">
                 {t('schedule.risk.scurve', { defaultValue: 'S-curve (cumulative probability)' })}
               </h3>
               <ResponsiveContainer width="100%" height={240}>
@@ -534,7 +534,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
           {/* ── Histogram ───────────────────────────────────────────── */}
           {histData.length > 0 && (
             <Card padding="md">
-              <h3 className="mb-3 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-3">
                 {t('schedule.risk.histogram', { defaultValue: 'Finish-day histogram' })}
               </h3>
               <ResponsiveContainer width="100%" height={220}>
@@ -561,7 +561,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
           {/* ── Tornado ─────────────────────────────────────────────── */}
           {tornadoData.length > 0 && (
             <Card padding="md">
-              <h3 className="mb-1 text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title mb-1">
                 {t('schedule.risk.tornado', { defaultValue: 'Duration sensitivity (tornado)' })}
               </h3>
               <p className="mb-3 text-2xs text-content-tertiary">
@@ -601,30 +601,30 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
           {criticality.length > 0 && (
             <Card padding="none">
               <div className="border-b border-border-light px-4 py-3">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('schedule.risk.criticality', { defaultValue: 'Criticality index' })}
                 </h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+                <table className="oe-table">
+                  <thead>
                     <tr>
-                      <th className="px-4 py-2 text-left">{t('schedule.risk.activity', { defaultValue: 'Activity' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule.risk.ci', { defaultValue: 'Criticality' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule.risk.cruciality', { defaultValue: 'Cruciality' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule.risk.sensitivity', { defaultValue: 'Sensitivity' })}</th>
-                      <th className="px-4 py-2 text-right">{t('schedule.risk.mean_dur', { defaultValue: 'Mean dur. (d)' })}</th>
+                      <th>{t('schedule.risk.activity', { defaultValue: 'Activity' })}</th>
+                      <th className="text-right">{t('schedule.risk.ci', { defaultValue: 'Criticality' })}</th>
+                      <th className="text-right">{t('schedule.risk.cruciality', { defaultValue: 'Cruciality' })}</th>
+                      <th className="text-right">{t('schedule.risk.sensitivity', { defaultValue: 'Sensitivity' })}</th>
+                      <th className="text-right">{t('schedule.risk.mean_dur', { defaultValue: 'Mean dur. (d)' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {criticality.map((c) => (
-                      <tr key={c.activity_id} className="border-t border-border-light">
-                        <td className="px-4 py-2">
+                      <tr key={c.activity_id}>
+                        <td>
                           <span className="block max-w-xs truncate" title={c.activity_id}>
                             {nameFor(c.activity_id)}
                           </span>
                         </td>
-                        <td className="px-4 py-2 text-right">
+                        <td className="text-right">
                           <span className="inline-flex items-center gap-2">
                             <span className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-surface-secondary sm:inline-block">
                               <span
@@ -635,9 +635,9 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
                             <span className="font-mono tabular-nums">{fmtPct(c.criticality_index)}</span>
                           </span>
                         </td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{fmtNum(c.cruciality, 2)}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{fmtNum(c.duration_sensitivity, 2)}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{fmtNum(c.mean_duration, 1)}</td>
+                        <td className="text-right font-mono tabular-nums">{fmtNum(c.cruciality, 2)}</td>
+                        <td className="text-right font-mono tabular-nums">{fmtNum(c.duration_sensitivity, 2)}</td>
+                        <td className="text-right font-mono tabular-nums">{fmtNum(c.mean_duration, 1)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -651,7 +651,7 @@ export function ScheduleRiskPanel({ scheduleId, activitiesById }: ScheduleRiskPa
             <Card padding="md" data-testid="risk-jcl">
               <div className="mb-3 flex items-center gap-2">
                 <Target size={16} className="text-content-secondary" />
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('schedule.risk.jcl', { defaultValue: 'Joint Confidence Level' })}
                 </h3>
               </div>

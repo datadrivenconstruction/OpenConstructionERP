@@ -121,7 +121,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
             else if (!text.trim()) onChange({ wallHeight: undefined });
           }}
           aria-label={t('takeoff_wall.height', { defaultValue: 'Wall height' })}
-          className="w-24 rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary tabular-nums"
+          className="oe-input oe-input-sm w-24 tabular-nums"
           data-testid="wall-height-input"
         />
         <span className="text-2xs text-content-tertiary">{lengthUnitLabel}</span>
@@ -172,7 +172,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
                       title={t('takeoff_wall.remove_opening', { defaultValue: 'Remove opening' })}
                       data-testid="wall-opening-remove"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={12} />
                     </button>
                   </li>
                 );
@@ -189,7 +189,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               placeholder={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
               aria-label={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
               title={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
+              className="oe-input oe-input-sm min-w-0 tabular-nums"
               data-testid="wall-opening-width"
             />
             <span className="text-2xs text-content-tertiary">×</span>
@@ -201,7 +201,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               placeholder={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
               aria-label={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
               title={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
+              className="oe-input oe-input-sm min-w-0 tabular-nums"
               data-testid="wall-opening-height"
             />
             <span className="text-2xs text-content-tertiary">{lengthUnitLabel} ×</span>
@@ -215,7 +215,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               }}
               aria-label={t('takeoff_wall.opening_count', { defaultValue: 'Count' })}
               title={t('takeoff_wall.opening_count', { defaultValue: 'Count' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
+              className="oe-input oe-input-sm min-w-0 tabular-nums"
               data-testid="wall-opening-count"
             />
             <button
@@ -227,7 +227,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               title={t('takeoff_wall.add_opening', { defaultValue: 'Add opening' })}
               data-testid="wall-opening-add"
             >
-              <Plus size={11} />
+              <Plus size={12} />
             </button>
           </div>
 
@@ -236,7 +236,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               className="flex items-center gap-1 text-2xs text-semantic-error"
               data-testid="wall-openings-exceed"
             >
-              <AlertTriangle size={11} className="shrink-0" />
+              <AlertTriangle size={12} className="shrink-0" />
               {t('takeoff_wall.openings_exceed', {
                 defaultValue: 'The openings ({{openings}} {{unit}}) are larger than the wall. The wall reports 0.',
                 openings: fmt(breakdown.openings),

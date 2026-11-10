@@ -31,7 +31,7 @@ export function TaxWithholdingPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="tax_withholding.how"
-        icon={<Receipt size={15} className="text-oe-blue" />}
+        icon={<Receipt size={16} className="text-oe-blue" />}
         title={t('tax_withholding.flow_title', {
           defaultValue: 'How construction tax withholding works, and what it protects',
         })}

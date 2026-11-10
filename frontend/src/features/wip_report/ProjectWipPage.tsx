@@ -34,7 +34,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input';
 
 const RULE_DEFAULTS: Record<string, string> = {
   billed_exceeds_contract: 'Billed to date exceeds the contract value',
@@ -163,7 +163,7 @@ export function ProjectWipPage() {
           </Card>
 
           <Card padding="md">
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('wip_report.findings', { defaultValue: 'Findings' })}</h3>
+            <h3 className="oe-card-title mb-3">{t('wip_report.findings', { defaultValue: 'Findings' })}</h3>
             {findings.length === 0 ? (
               <p className="text-sm text-content-tertiary">{t('wip_report.findings_empty', { defaultValue: 'No findings. The figures pass every check.' })}</p>
             ) : (
@@ -181,7 +181,7 @@ export function ProjectWipPage() {
           </Card>
 
           <Card padding="md">
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('wip_report.forecast_title', { defaultValue: 'Estimated total cost override' })}</h3>
+            <h3 className="oe-card-title mb-3">{t('wip_report.forecast_title', { defaultValue: 'Estimated total cost override' })}</h3>
             <p className="mb-3 text-xs text-content-tertiary">
               {t('wip_report.forecast_hint', { defaultValue: 'Leave empty to use the cost forecast from the project. A value here replaces it in the WIP figures.' })}
             </p>
@@ -222,7 +222,7 @@ export function ProjectWipPage() {
 
           <Card padding="md">
             <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-              <h3 className="text-sm font-semibold text-content-primary">{t('wip_report.periods_title', { defaultValue: 'Closed months' })}</h3>
+              <h3 className="oe-card-title">{t('wip_report.periods_title', { defaultValue: 'Closed months' })}</h3>
               <div className="flex flex-wrap items-end gap-2">
                 <label className="text-xs text-content-secondary">
                   {t('wip_report.period', { defaultValue: 'Month' })}
@@ -253,30 +253,30 @@ export function ProjectWipPage() {
               <p className="text-sm text-content-tertiary">{t('wip_report.periods_empty', { defaultValue: 'No month closed yet. Close a month to freeze its figures and measure fade from it.' })}</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[800px] text-sm" data-testid="wip-periods">
+                <table className="oe-table min-w-[800px]" data-testid="wip-periods">
                   <thead>
-                    <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
-                      <th className="px-2 py-2 text-left font-medium">{t('wip_report.period', { defaultValue: 'Month' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_percent', { defaultValue: '% complete' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_earned', { defaultValue: 'Earned revenue' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_billed', { defaultValue: 'Billed to date' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_over', { defaultValue: 'Over-billing' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_under', { defaultValue: 'Under-billing' })}</th>
-                      <th className="px-2 py-2 text-right font-medium">{t('wip_report.col_profit', { defaultValue: 'Projected profit' })}</th>
-                      <th className="px-2 py-2 text-left font-medium">{t('wip_report.closed_on', { defaultValue: 'Closed' })}</th>
+                    <tr className="text-2xs uppercase tracking-wide text-content-tertiary">
+                      <th>{t('wip_report.period', { defaultValue: 'Month' })}</th>
+                      <th className="text-right">{t('wip_report.col_percent', { defaultValue: '% complete' })}</th>
+                      <th className="text-right">{t('wip_report.col_earned', { defaultValue: 'Earned revenue' })}</th>
+                      <th className="text-right">{t('wip_report.col_billed', { defaultValue: 'Billed to date' })}</th>
+                      <th className="text-right">{t('wip_report.col_over', { defaultValue: 'Over-billing' })}</th>
+                      <th className="text-right">{t('wip_report.col_under', { defaultValue: 'Under-billing' })}</th>
+                      <th className="text-right">{t('wip_report.col_profit', { defaultValue: 'Projected profit' })}</th>
+                      <th>{t('wip_report.closed_on', { defaultValue: 'Closed' })}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {periods.map((p) => (
                       <tr key={p.id}>
-                        <td className="px-2 py-2 font-medium">{p.period}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{p.percent_complete}%</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(p.earned_revenue, p.currency)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(p.billed_to_date, p.currency)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(p.over_billing, p.currency)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(p.under_billing, p.currency)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{formatCurrency(p.projected_gross_profit, p.currency)}</td>
-                        <td className="px-2 py-2 text-content-secondary"><DateDisplay value={p.created_at} /></td>
+                        <td>{p.period}</td>
+                        <td className="text-right tabular-nums">{p.percent_complete}%</td>
+                        <td className="text-right tabular-nums">{formatCurrency(p.earned_revenue, p.currency)}</td>
+                        <td className="text-right tabular-nums">{formatCurrency(p.billed_to_date, p.currency)}</td>
+                        <td className="text-right tabular-nums">{formatCurrency(p.over_billing, p.currency)}</td>
+                        <td className="text-right tabular-nums">{formatCurrency(p.under_billing, p.currency)}</td>
+                        <td className="text-right tabular-nums">{formatCurrency(p.projected_gross_profit, p.currency)}</td>
+                        <td className="text-content-secondary"><DateDisplay value={p.created_at} /></td>
                       </tr>
                     ))}
                   </tbody>

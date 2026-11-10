@@ -232,7 +232,7 @@ function ConverterCard({
   disabled: boolean;
 }) {
   const { t } = useTranslation();
-  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
+  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-border', icon: 'bg-content-tertiary' };
   const installed = converter.installed;
   const updateAvailable = installed && Boolean(versionEntry?.is_outdated);
   const installedVersion = versionEntry?.installed_version || converter.version;
@@ -309,7 +309,7 @@ function ConverterCard({
       </div>
 
       {/* Name + engine */}
-      <h3 className="mt-3 text-sm font-semibold text-content-primary">{converterName(t, converter)}</h3>
+      <h3 className="oe-card-title mt-3">{converterName(t, converter)}</h3>
       <p className="mt-0.5 text-2xs text-content-quaternary">{converter.engine}</p>
 
       {/* Description */}
@@ -491,7 +491,7 @@ function InstallProgressPanel({
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {error
                   ? t('quantities.install_failed', {
                       defaultValue: 'Installation failed',
@@ -530,7 +530,7 @@ function InstallProgressPanel({
               aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
               className="text-content-quaternary hover:text-content-secondary transition-colors"
             >
-              <XCircle size={18} />
+              <XCircle size={20} />
             </button>
           )}
         </div>
@@ -632,7 +632,7 @@ function InstallProgressPanel({
             <HardDrive size={10} /> {t('quantities.module_label', { defaultValue: 'Module' })}
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {t('quantities.open_source', { defaultValue: 'Open Source' })}
+            <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('quantities.open_source', { defaultValue: 'Open Source' })}
           </span>
           <span className="flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> {t('quantities.free_label', { defaultValue: 'Free' })}
@@ -668,7 +668,7 @@ function InstalledConvertersTable({
     <div className="rounded-xl border border-border-light bg-surface-primary p-5">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('quantities.installed_converters', { defaultValue: 'Installed Converters' })}
           </h3>
           <p className="text-2xs text-content-quaternary mt-0.5">
@@ -680,29 +680,29 @@ function InstalledConvertersTable({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-              <th className="pb-2 pr-4 font-medium">
+            <tr className="text-left text-xs text-content-tertiary">
+              <th className="pb-2 pr-4">
                 {t('quantities.table_converter', { defaultValue: 'Converter' })}
               </th>
-              <th className="pb-2 pr-4 font-medium">
+              <th className="pb-2 pr-4">
                 {t('quantities.table_formats', { defaultValue: 'Formats' })}
               </th>
-              <th className="pb-2 pr-4 font-medium">
+              <th className="pb-2 pr-4">
                 {t('quantities.table_status', { defaultValue: 'Status' })}
               </th>
-              <th className="pb-2 pr-4 font-medium">
+              <th className="pb-2 pr-4">
                 {t('quantities.table_version', { defaultValue: 'Version' })}
               </th>
-              <th className="pb-2 font-medium w-20"></th>
+              <th className="pb-2 w-20"></th>
             </tr>
           </thead>
           <tbody>
             {installed.map((c) => (
-              <tr key={c.id} className="border-b border-border-light last:border-0">
-                <td className="py-2.5 pr-4 font-medium text-content-primary">{converterName(t, c)}</td>
-                <td className="py-2.5 pr-4">
+              <tr key={c.id} className="last:border-0">
+                <td className="pr-4">{converterName(t, c)}</td>
+                <td className="pr-4">
                   <div className="flex flex-wrap gap-1">
                     {c.extensions.map((ext) => (
                       <span
@@ -714,7 +714,7 @@ function InstalledConvertersTable({
                     ))}
                   </div>
                 </td>
-                <td className="py-2.5 pr-4">
+                <td className="pr-4">
                   <span className="inline-flex items-center gap-1 text-semantic-success">
                     <CheckCircle2 size={12} />
                     <span className="text-xs">
@@ -722,10 +722,10 @@ function InstalledConvertersTable({
                     </span>
                   </span>
                 </td>
-                <td className="py-2.5 pr-4 text-xs text-content-quaternary font-mono">
+                <td className="pr-4 text-content-quaternary font-mono">
                   v{c.version}
                 </td>
-                <td className="py-2.5">
+                <td>
                   <button
                     onClick={() => onUninstall(c.id)}
                     disabled={uninstalling === c.id}
@@ -1022,7 +1022,7 @@ export function QuantitiesPage() {
                 <Icon size={24} strokeWidth={1.75} />
               </div>
 
-              <h3 className="mt-4 text-lg font-semibold text-content-primary">
+              <h3 className="oe-section-title mt-4">
                 {t(method.titleKey)}
               </h3>
               <p className="mt-1 text-sm text-content-tertiary leading-relaxed">
@@ -1085,7 +1085,7 @@ export function QuantitiesPage() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t('quantities.converters_title', {
                     defaultValue: 'CAD/BIM Converter Modules',
                   })}
@@ -1138,7 +1138,7 @@ export function QuantitiesPage() {
         {converters.length === 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
             {['dwg', 'rvt', 'ifc'].map((id) => {
-              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
+              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-border', icon: 'bg-content-tertiary' };
               return (
                 <div
                   key={id}
@@ -1186,7 +1186,7 @@ export function QuantitiesPage() {
         {/* Module info footer */}
         <div className="flex flex-wrap items-center gap-3 text-xs text-content-quaternary px-1">
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 size={11} />
+            <CheckCircle2 size={12} />
             {t('quantities.modules_managed', {
               defaultValue: 'Modules are managed automatically by the platform',
             })}
@@ -1197,7 +1197,7 @@ export function QuantitiesPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue transition-colors"
           >
-            <ExternalLink size={11} />
+            <ExternalLink size={12} />
             {t('quantities.source_code', {
               defaultValue: 'Source code',
             })}
@@ -1209,7 +1209,7 @@ export function QuantitiesPage() {
       <div className="rounded-xl border border-border-light bg-surface-primary p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('quantities.manual_title', { defaultValue: 'Quick Manual Entry' })}
             </h2>
             <p className="mt-0.5 text-sm text-content-tertiary">
@@ -1236,7 +1236,7 @@ export function QuantitiesPage() {
               <FileText size={20} className="text-blue-500" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('quantities.recent_documents_title', { defaultValue: 'Recent Documents' })}
               </h2>
               <p className="text-xs text-content-quaternary">

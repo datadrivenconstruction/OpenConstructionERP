@@ -275,7 +275,7 @@ function HowReconciliationWork() {
   return (
     <CollapsibleSection
       storageKey="reconciliation.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('reconciliation.flow_title', {
         defaultValue: 'How reconciliation works, and what it connects to',
       })}
@@ -469,7 +469,7 @@ export function ReconciliationPage() {
       </DismissibleInfo>
 
       <Card className="space-y-3 p-4">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <Search className="h-4 w-4" />
           {t('reconciliation.seed_title', { defaultValue: 'Assemble a thread' })}
         </h2>
@@ -485,7 +485,7 @@ export function ReconciliationPage() {
               placeholder={t('reconciliation.seed_ph', {
                 defaultValue: 'change_order:<id> or a subject line',
               })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input"
             />
           </label>
           <button
@@ -547,7 +547,7 @@ export function ReconciliationPage() {
               </div>
 
               <section className="space-y-2">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title flex items-center gap-2">
                   <Link2 className="h-4 w-4" />
                   {t('reconciliation.suggested_links', { defaultValue: 'Suggested correlations' })}
                   <Badge variant="neutral">{thread.links.length}</Badge>
@@ -584,7 +584,7 @@ export function ReconciliationPage() {
               </section>
 
               <section className="space-y-2">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+                <h2 className="oe-card-title flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {t('reconciliation.timeline', { defaultValue: 'Event timeline' })}
                   <Badge variant="neutral">{thread.records.length}</Badge>
@@ -608,7 +608,7 @@ export function ReconciliationPage() {
       )}
 
       <section className="space-y-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <CircleCheck className="h-4 w-4" />
           {t('reconciliation.decisions', { defaultValue: 'Recorded decisions' })}
         </h2>

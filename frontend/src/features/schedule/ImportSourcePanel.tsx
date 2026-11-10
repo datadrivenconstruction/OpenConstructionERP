@@ -213,44 +213,44 @@ export function ImportSourcePanel({ scheduleId, canEdit, compact = false, onOpen
             </label>
           </div>
           <div className="mt-2 max-h-[50vh] overflow-auto rounded-lg border border-border-light">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-surface-secondary text-content-secondary">
+            <table className="oe-table-compact">
+              <thead className="sticky top-0">
                 <tr>
-                  <th className="px-2 py-2 text-left">
+                  <th>
                     {t('schedule.import_source.col_activity', { defaultValue: 'Activity' })}
                   </th>
-                  <th className="px-2 py-2 text-left">
+                  <th>
                     {t('schedule.import_source.col_source', { defaultValue: 'Dates as in source' })}
                   </th>
-                  <th className="px-2 py-2 text-left">
+                  <th>
                     {t('schedule.import_source.col_current', { defaultValue: 'Recalculated' })}
                   </th>
-                  <th className="px-2 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.import_source.col_start_dev', { defaultValue: 'Start deviation' })}
                   </th>
-                  <th className="px-2 py-2 text-right">
+                  <th className="text-right">
                     {t('schedule.import_source.col_finish_dev', { defaultValue: 'Finish deviation' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.activity_id} className="border-t border-border-light">
-                    <td className="px-2 py-1.5">
+                  <tr key={row.activity_id}>
+                    <td>
                       <div className="font-medium text-content-primary">{row.name}</div>
                       <div className="text-content-tertiary">
                         {row.activity_code}
                         {row.source_id ? ` · ${row.source_id}` : ''}
                       </div>
                     </td>
-                    <td className="px-2 py-1.5 tabular-nums text-content-secondary">
+                    <td className="tabular-nums text-content-secondary">
                       {row.source_start} – {row.source_finish}
                     </td>
-                    <td className="px-2 py-1.5 tabular-nums text-content-primary">
+                    <td className="tabular-nums">
                       {row.current_start} – {row.current_finish}
                     </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{formatShift(row.start_deviation_days)}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{formatShift(row.finish_deviation_days)}</td>
+                    <td className="text-right tabular-nums">{formatShift(row.start_deviation_days)}</td>
+                    <td className="text-right tabular-nums">{formatShift(row.finish_deviation_days)}</td>
                   </tr>
                 ))}
               </tbody>

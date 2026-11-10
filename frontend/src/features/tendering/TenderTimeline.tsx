@@ -31,7 +31,7 @@ export function TimelineView({ events, rules }: { events: TenderTimelineEvent[];
     <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <Card padding="none" className="px-4 py-3">
         <h5 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-          <CalendarClock size={13} />
+          <CalendarClock size={14} />
           {t('tendering.timeline.title', { defaultValue: 'Tender timeline' })}
         </h5>
         <ol className="space-y-2" data-testid="tender-timeline">
@@ -62,7 +62,7 @@ export function TimelineView({ events, rules }: { events: TenderTimelineEvent[];
       {rules && (
         <Card padding="none" className="px-4 py-3" data-testid="tender-rules">
           <h5 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-            <Scale size={13} />
+            <Scale size={14} />
             {t('tendering.timeline.rules', { defaultValue: 'Jurisdiction rules' })}
           </h5>
           <p className="text-sm font-medium text-content-primary">{rules.label}</p>

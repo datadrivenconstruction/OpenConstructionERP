@@ -134,8 +134,8 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
       {/* Panel header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
         <div className="flex items-center gap-2">
-          <Sparkles size={15} className="text-amber-400" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <Sparkles size={16} className="text-semantic-warning" />
+          <h3 className="oe-card-title">
             {t('project_intelligence.ai.cost_advisor_title', {
               defaultValue: 'Cost Intelligence Advisor',
             })}
@@ -214,7 +214,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
               </div>
             )}
             {recError && (
-              <div className="flex items-center gap-2 text-sm text-red-400">
+              <div className="flex items-center gap-2 text-sm text-semantic-error">
                 <AlertCircle size={14} />
                 <span>{recError}</span>
                 <button
@@ -294,7 +294,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
               placeholder={t('project_intelligence.ask_placeholder', {
                 defaultValue: 'Ask about this project...',
               })}
-              className="flex-1 text-xs bg-surface-tertiary border border-border-light rounded-md px-3 py-2 text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input oe-input-sm flex-1"
               disabled={chatLoading}
             />
             <button

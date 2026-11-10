@@ -31,7 +31,7 @@ export function WipSummaryCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('wip_report.card_open', { defaultValue: 'Open WIP report' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

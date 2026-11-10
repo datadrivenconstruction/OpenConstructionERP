@@ -51,9 +51,9 @@ interface ScheduleComparePanelProps {
 const LIVE = '__live__';
 
 const selectCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 const labelCls =
-  'block text-2xs font-medium uppercase tracking-wide text-content-secondary mb-1';
+  'oe-label';
 
 const CHANGE_BADGE: Record<string, 'success' | 'error' | 'warning' | 'blue' | 'neutral'> = {
   added: 'success',
@@ -165,7 +165,7 @@ export function ScheduleComparePanel({
       <Card padding="md">
         <div className="mb-3 flex items-center gap-2">
           <GitCompare size={16} className="text-content-secondary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('schedule.compare.title', { defaultValue: 'Compare schedules' })}
           </h3>
         </div>
@@ -192,7 +192,7 @@ export function ScheduleComparePanel({
             </select>
           </div>
           <div className="hidden items-center justify-center pb-2 text-content-tertiary sm:flex">
-            <ArrowRight size={18} />
+            <ArrowRight size={20} />
           </div>
           <div>
             <label htmlFor="cmp-target" className={labelCls}>
@@ -292,7 +292,7 @@ function DiffSummaryCard({ diff, currency }: { diff: ScheduleDiff; currency?: st
     <Card padding="md">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <TrendingUp size={16} className="text-content-secondary" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('schedule.compare.summary', { defaultValue: 'Summary' })}
         </h3>
         <span className="flex items-center gap-1.5 text-xs text-content-tertiary">
@@ -404,14 +404,14 @@ function ActivityChangesCard({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-2 text-left">{t('schedule.compare.change', { defaultValue: 'Change' })}</th>
-                <th className="px-4 py-2 text-left">{t('schedule.compare.activity', { defaultValue: 'Activity' })}</th>
-                <th className="px-4 py-2 text-left">{t('schedule.compare.fields', { defaultValue: 'Fields' })}</th>
-                <th className="px-4 py-2 text-right">{t('schedule.compare.finish_move', { defaultValue: 'Finish move' })}</th>
-                <th className="px-4 py-2 text-center">{t('schedule.compare.cp', { defaultValue: 'CP' })}</th>
+                <th>{t('schedule.compare.change', { defaultValue: 'Change' })}</th>
+                <th>{t('schedule.compare.activity', { defaultValue: 'Activity' })}</th>
+                <th>{t('schedule.compare.fields', { defaultValue: 'Fields' })}</th>
+                <th className="text-right">{t('schedule.compare.finish_move', { defaultValue: 'Finish move' })}</th>
+                <th className="text-center">{t('schedule.compare.cp', { defaultValue: 'CP' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -419,13 +419,13 @@ function ActivityChangesCard({
                 const move = c.finish_movement_days;
                 const fieldNames = Object.keys(c.fields ?? {});
                 return (
-                  <tr key={`${c.key}-${c.change_type}`} className="border-t border-border-light align-top">
-                    <td className="px-4 py-2">
+                  <tr key={`${c.key}-${c.change_type}`} className="align-top">
+                    <td>
                       <Badge variant={CHANGE_BADGE[c.change_type] ?? 'neutral'}>
                         {changeTypeLabel(t, c.change_type)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <span className="block max-w-xs truncate font-medium text-content-primary" title={c.key}>
                         {c.name || nameFor(c.key)}
                       </span>
@@ -433,7 +433,7 @@ function ActivityChangesCard({
                         <span className="text-2xs text-content-tertiary">{c.wbs_code}</span>
                       )}
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       {fieldNames.length === 0 ? (
                         <span className="text-content-tertiary">-</span>
                       ) : (
@@ -449,7 +449,7 @@ function ActivityChangesCard({
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-right">
+                    <td className="text-right">
                       {move === 0 ? (
                         <span className="text-content-tertiary">-</span>
                       ) : (
@@ -465,7 +465,7 @@ function ActivityChangesCard({
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="text-center">
                       {c.critical_path ? (
                         <Badge variant="warning">{t('schedule.compare.cp', { defaultValue: 'CP' })}</Badge>
                       ) : (
@@ -501,12 +501,12 @@ function RelationshipChangesCard({
         count={changes.length}
       />
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2 text-left">{t('schedule.compare.change', { defaultValue: 'Change' })}</th>
-              <th className="px-4 py-2 text-left">{t('schedule.compare.link', { defaultValue: 'Link (pred -> succ)' })}</th>
-              <th className="px-4 py-2 text-left">{t('schedule.compare.fields', { defaultValue: 'Fields' })}</th>
+              <th>{t('schedule.compare.change', { defaultValue: 'Change' })}</th>
+              <th>{t('schedule.compare.link', { defaultValue: 'Link (pred -> succ)' })}</th>
+              <th>{t('schedule.compare.fields', { defaultValue: 'Fields' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -515,20 +515,20 @@ function RelationshipChangesCard({
               const succ = c.key[1] ?? '';
               const fieldNames = Object.keys(c.fields ?? {});
               return (
-                <tr key={`${pred}-${succ}-${c.change_type}-${i}`} className="border-t border-border-light align-top">
-                  <td className="px-4 py-2">
+                <tr key={`${pred}-${succ}-${c.change_type}-${i}`} className="align-top">
+                  <td>
                     <Badge variant={CHANGE_BADGE[c.change_type] ?? 'neutral'}>
                       {changeTypeLabel(t, c.change_type)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     <span className="flex items-center gap-1.5">
                       <span className="max-w-[10rem] truncate" title={pred}>{nameFor(pred)}</span>
                       <ArrowRight size={12} className="shrink-0 text-content-tertiary" />
                       <span className="max-w-[10rem] truncate" title={succ}>{nameFor(succ)}</span>
                     </span>
                   </td>
-                  <td className="px-4 py-2">
+                  <td>
                     {fieldNames.length === 0 ? (
                       <span className="text-content-tertiary">-</span>
                     ) : (
@@ -559,7 +559,7 @@ function RelationshipChangesCard({
 function SectionHead({ title, count }: { title: string; count: number }) {
   return (
     <div className="flex items-center gap-2 border-b border-border-light px-4 py-3">
-      <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+      <h3 className="oe-card-title">{title}</h3>
       <Badge variant="neutral">{count}</Badge>
     </div>
   );

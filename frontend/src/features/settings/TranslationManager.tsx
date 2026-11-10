@@ -116,21 +116,21 @@ function EditCell({ value, onSave, onCancel, placeholder }: EditCellProps) {
         onChange={(e) => setLocalValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="flex-1 h-7 rounded-md border border-oe-blue bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 min-w-0"
+        className="oe-input oe-input-sm flex-1 min-w-0"
       />
       <button
         onClick={() => onSave(localValue)}
         className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-semantic-success hover:bg-semantic-success/10 transition-colors"
         title={t('common.save', { defaultValue: 'Save' })}
       >
-        <Check size={13} />
+        <Check size={14} />
       </button>
       <button
         onClick={onCancel}
         className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary transition-colors"
         title={t('common.cancel', { defaultValue: 'Cancel' })}
       >
-        <X size={13} />
+        <X size={14} />
       </button>
     </div>
   );
@@ -309,7 +309,7 @@ export function TranslationManager() {
             </span>
           </div>
           <div className="flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5">
-            <CheckCircle2 size={13} className="text-semantic-success" />
+            <CheckCircle2 size={14} className="text-semantic-success" />
             <span className="text-xs text-content-tertiary">
               {t('settings.tm_translated', { defaultValue: 'Translated' })}
             </span>
@@ -318,7 +318,7 @@ export function TranslationManager() {
             </span>
           </div>
           <div className="flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5">
-            <Pencil size={13} className="text-oe-blue" />
+            <Pencil size={14} className="text-oe-blue" />
             <span className="text-xs text-content-tertiary">
               {t('settings.tm_custom', { defaultValue: 'Custom overrides' })}
             </span>
@@ -328,7 +328,7 @@ export function TranslationManager() {
           </div>
           {missingCount > 0 && (
             <div className="flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5">
-              <AlertCircle size={13} className="text-semantic-warning" />
+              <AlertCircle size={14} className="text-semantic-warning" />
               <span className="text-xs text-content-tertiary">
                 {t('settings.tm_missing', { defaultValue: 'Missing' })}
               </span>
@@ -354,7 +354,7 @@ export function TranslationManager() {
               placeholder={t('settings.tm_search_placeholder', {
                 defaultValue: 'Search keys or values...',
               })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-normal"
+              className="oe-input ps-8"
               data-testid="tm-search"
             />
           </div>
@@ -364,7 +364,7 @@ export function TranslationManager() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Upload size={13} />}
+              icon={<Upload size={14} />}
               onClick={handleImportClick}
               data-testid="tm-import-btn"
             >
@@ -373,7 +373,7 @@ export function TranslationManager() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={13} />}
+              icon={<Download size={14} />}
               onClick={handleExport}
               data-testid="tm-export-btn"
             >
@@ -485,7 +485,7 @@ export function TranslationManager() {
                             ))}
                         </span>
                         <Pencil
-                          size={11}
+                          size={12}
                           className="flex-shrink-0 text-content-tertiary opacity-0 group-hover:opacity-100 transition-opacity"
                         />
                       </button>

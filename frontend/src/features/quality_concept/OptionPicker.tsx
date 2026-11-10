@@ -62,7 +62,7 @@ export function OptionPicker({
         aria-label={t('qualityConcept.options.search', { defaultValue: 'Search' })}
         onChange={(e) => setQ(e.target.value)}
       />
-      <select className={inputCls} value={value} onChange={(e) => onChange(e.target.value)} data-testid={testId}>
+      <select className="oe-select" value={value} onChange={(e) => onChange(e.target.value)} data-testid={testId}>
         <option value="">{t('qualityConcept.common.none', { defaultValue: 'None' })}</option>
         {/* The stored choice stays selected while the search shows other rows. */}
         {value && !listed && (

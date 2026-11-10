@@ -238,12 +238,12 @@ export function ProjectControlsPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {(snapshot?.groups ?? []).map((group) => (
             <Card key={group.domain} className="p-4">
-              <h2 className="mb-3 text-sm font-semibold text-content-secondary">
+              <h2 className="oe-card-title mb-3 text-content-secondary">
                 {t(`controls.domain.${group.domain}`, {
                   defaultValue: group.label,
                 })}
               </h2>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {group.kpis.map((kpi) => (
                   <ControlsTile key={kpi.code} kpi={kpi} onDrill={setDrillKpi} />
                 ))}

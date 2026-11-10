@@ -134,10 +134,8 @@ type Tab = 'lists' | 'rules' | 'sim' | 'history';
 const PRICING_TAB_IDS: readonly Tab[] = ['lists', 'rules', 'sim', 'history'];
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const inputErrCls =
-  'h-9 w-full rounded-lg border border-semantic-error/60 bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-semantic-error/30';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input';
+const labelCls = 'oe-label';
 
 /**
  * Top-30 ISO 4217 currencies by global construction & property usage.
@@ -295,7 +293,7 @@ function Tabs({ tab, setTab }: TabsProps): JSX.Element {
           aria-label={t('propdev.pricing.tabs_aria', {
             defaultValue: 'Pricing engine sections',
           })}
-          className={inputCls}
+          className="oe-select"
           value={tab}
           onChange={(e) => setTab(e.target.value as Tab)}
         >
@@ -504,7 +502,7 @@ function TimeWindowPicker({
           <input
             id="rule-from"
             type="date"
-            className={validationErr ? inputErrCls : inputCls}
+            className={inputCls} aria-invalid={!!validationErr}
             value={from}
             onChange={(e) => onChange({ from: e.target.value, to })}
           />
@@ -521,7 +519,7 @@ function TimeWindowPicker({
           <input
             id="rule-to"
             type="date"
-            className={validationErr ? inputErrCls : inputCls}
+            className={inputCls} aria-invalid={!!validationErr}
             value={to ?? ''}
             onChange={(e) => onChange({ from, to: e.target.value || null })}
           />
@@ -796,7 +794,7 @@ function ConflictBadge({
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full z-30 mt-1 w-80 rounded-lg border border-border-light bg-surface-primary p-3 text-xs shadow-lg"
+          className="absolute left-0 top-full z-dropdown mt-1 w-80 rounded-lg border border-border-light bg-surface-primary p-3 text-xs shadow-lg"
           role="tooltip"
         >
           <div className="flex items-start justify-between gap-2">
@@ -957,7 +955,7 @@ function PriceListsTab({ devId }: PriceListsTabProps): JSX.Element {
               </label>
               <textarea
                 id="pl-notes"
-                className={clsx(inputCls, 'h-20')}
+                className={clsx('oe-textarea', 'h-20')}
                 value={form.notes}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, notes: e.target.value }))
@@ -995,32 +993,32 @@ function PriceListsTab({ devId }: PriceListsTabProps): JSX.Element {
         />
       ) : (
         <Card padding="none" className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs uppercase tracking-wide text-content-secondary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2">{t('propdev.pricing.name', 'Name')}</th>
-                <th className="px-3 py-2">
+                <th>{t('propdev.pricing.name', 'Name')}</th>
+                <th>
                   {t('propdev.pricing.status', 'Status')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.effective_from', 'Effective from')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.currency', 'Currency')}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('common.actions', 'Actions')}
                 </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((pl) => (
-                <tr key={pl.id} className="border-t border-border">
-                  <td className="px-3 py-2 font-medium">{pl.name}</td>
-                  <td className="px-3 py-2"><PriceListStatusBadge status={pl.status} /></td>
-                  <td className="px-3 py-2">{pl.effective_from}</td>
-                  <td className="px-3 py-2">{pl.currency}</td>
-                  <td className="px-3 py-2 text-right">
+                <tr key={pl.id}>
+                  <td>{pl.name}</td>
+                  <td><PriceListStatusBadge status={pl.status} /></td>
+                  <td>{pl.effective_from}</td>
+                  <td>{pl.currency}</td>
+                  <td className="text-right">
                     {pl.status === 'draft' && (
                       <Button
                         variant="secondary"
@@ -1227,7 +1225,7 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
               </label>
               <select
                 id="rule-type"
-                className={inputCls}
+                className="oe-select"
                 value={form.rule_type}
                 onChange={(e) => {
                   const next = e.target.value as PricingRuleType;
@@ -1352,7 +1350,7 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
               </label>
               <textarea
                 id="rule-cond"
-                className={clsx(inputCls, 'h-24 font-mono')}
+                className={clsx('oe-textarea', 'h-24 font-mono')}
                 value={JSON.stringify(form.condition_json, null, 2)}
                 onChange={(e) => {
                   try {
@@ -1394,31 +1392,31 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
         />
       ) : (
         <Card padding="none" className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs uppercase tracking-wide text-content-secondary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2 w-12">
+                <th className="w-12">
                   {t('propdev.pricing.priority_short', 'Pri')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.rule_name', 'Name')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.rule_type', 'Type')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.adj_pct', 'Adj %')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.adj_fixed', 'Fixed')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.uses', 'Uses')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.window', 'Window')}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('common.actions', 'Actions')}
                 </th>
               </tr>
@@ -1427,8 +1425,8 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
               {rules.map((r, idx) => {
                 const group = conflictMap.get(r.id);
                 return (
-                  <tr key={r.id} className="border-t border-border">
-                    <td className="px-3 py-2">
+                  <tr key={r.id}>
+                    <td>
                       <div className="flex flex-col items-center">
                         <button
                           type="button"
@@ -1461,7 +1459,7 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
                         </button>
                       </div>
                     </td>
-                    <td className="px-3 py-2 font-medium">
+                    <td>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span>{r.name}</span>
                         {group && (
@@ -1473,16 +1471,16 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {RULE_TYPE_LABELS[r.rule_type] ?? r.rule_type}
                     </td>
-                    <td className="px-3 py-2">{r.adjustment_pct ?? '0'}</td>
-                    <td className="px-3 py-2">{r.adjustment_fixed ?? '—'}</td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td>{r.adjustment_pct ?? '0'}</td>
+                    <td>{r.adjustment_fixed ?? '—'}</td>
+                    <td className="text-content-secondary">
                       {r.times_used}
                       {r.max_uses ? `/${r.max_uses}` : ''}
                     </td>
-                    <td className="px-3 py-2 text-2xs text-content-secondary whitespace-nowrap">
+                    <td className="text-content-secondary whitespace-nowrap">
                       {r.effective_from || '—'}
                       {' → '}
                       {r.effective_to ? (
@@ -1493,7 +1491,7 @@ function RulesTab({ devId }: RulesTabProps): JSX.Element {
                         </Badge>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1577,12 +1575,12 @@ function QuoteWaterfall({
           </ResponsiveContainer>
         </div>
       )}
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-left text-xs uppercase tracking-wide text-content-secondary">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2">{t('propdev.pricing.line', 'Line')}</th>
-            <th className="px-3 py-2">{t('propdev.pricing.rule_type', 'Type')}</th>
-            <th className="px-3 py-2 text-right">
+            <th>{t('propdev.pricing.line', 'Line')}</th>
+            <th>{t('propdev.pricing.rule_type', 'Type')}</th>
+            <th className="text-right">
               {t('propdev.pricing.amount', 'Amount')}
             </th>
           </tr>
@@ -1599,9 +1597,9 @@ function QuoteWaterfall({
               <ArrowRight className="inline h-3 w-3 text-content-tertiary" />
             );
             return (
-              <tr key={i} className="border-t border-border">
-                <td className="px-3 py-2">{l.rule_name || l.rule_type}</td>
-                <td className="px-3 py-2 text-content-secondary">
+              <tr key={i}>
+                <td>{l.rule_name || l.rule_type}</td>
+                <td className="text-content-secondary">
                   {l.rule_type}
                 </td>
                 <td
@@ -1730,7 +1728,7 @@ function SimulatorTab({ devId }: { devId: string }): JSX.Element {
             </label>
             <select
               id="sim-plot"
-              className={inputCls}
+              className="oe-select"
               value={plotId}
               onChange={(e) => setPlotId(e.target.value)}
             >
@@ -1831,7 +1829,7 @@ function SimulatorTab({ devId }: { devId: string }): JSX.Element {
                   {t('propdev.pricing.sim.previous', 'Previous quote')}
                 </p>
                 <select
-                  className={clsx(inputCls, 'mb-3')}
+                  className={clsx('oe-select', 'mb-3')}
                   value={
                     compareQuote
                       ? (compareQuote.computed_at as unknown as string)
@@ -2012,22 +2010,22 @@ function HistoryDetailDrawer({
             <p className="mb-1 text-xs font-medium text-content-secondary">
               {t('propdev.pricing.history.breakdown', 'Breakdown')}
             </p>
-            <table className="w-full text-xs">
-              <thead className="text-content-tertiary">
+            <table className="oe-table-compact">
+              <thead>
                 <tr>
-                  <th className="px-2 py-1 text-left">
+                  <th>
                     {t('propdev.pricing.line', 'Line')}
                   </th>
-                  <th className="px-2 py-1 text-right">
+                  <th className="text-right">
                     {t('propdev.pricing.amount', 'Amount')}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {snap.lines.map((l, i) => (
-                  <tr key={i} className="border-t border-border">
-                    <td className="px-2 py-1">{l.rule_name}</td>
-                    <td className="px-2 py-1 text-right tabular-nums">
+                  <tr key={i}>
+                    <td>{l.rule_name}</td>
+                    <td className="text-right tabular-nums">
                       <MoneyDisplay
                         amount={l.amount}
                         currency={snap.currency ?? reservation.currency ?? 'EUR'}
@@ -2278,7 +2276,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
             </label>
             <select
               id="hist-status"
-              className={inputCls}
+              className="oe-select"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as StatusFilter)}
             >
@@ -2316,43 +2314,43 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
         />
       ) : (
         <Card padding="none" className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.reservation_no', 'Reservation #')}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {sortHeader(
                     t('propdev.pricing.created_at', 'Created'),
                     'date_asc',
                     'date_desc',
                   )}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {sortHeader(
                     t('propdev.pricing.history.col_buyer', 'Buyer'),
                     'buyer_asc',
                     'buyer_asc',
                   )}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.history.col_plot', 'Plot')}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('propdev.pricing.base_price', 'Base')}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {sortHeader(
                     t('propdev.pricing.total', 'Total'),
                     'total_asc',
                     'total_desc',
                   )}
                 </th>
-                <th className="px-3 py-2">
+                <th>
                   {t('propdev.pricing.status', 'Status')}
                 </th>
-                <th className="px-3 py-2 w-10" />
+                <th className="w-10" />
               </tr>
             </thead>
             <tbody>
@@ -2375,17 +2373,17 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
                   <Fragment key={r.id}>
                     <tr
                       onClick={() => setOpenRes(r)}
-                      className="cursor-pointer border-t border-border hover:bg-surface-secondary/60"
+                      className="cursor-pointer"
                     >
-                      <td className="px-3 py-2 font-medium">
+                      <td>
                         {r.reservation_number}
                       </td>
-                      <td className="px-3 py-2 text-content-secondary whitespace-nowrap">
+                      <td className="text-content-secondary whitespace-nowrap">
                         {r.created_at?.slice(0, 10) ?? '—'}
                       </td>
-                      <td className="px-3 py-2">{buyer?.full_name ?? '—'}</td>
-                      <td className="px-3 py-2">{plot?.plot_number ?? '—'}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">
+                      <td>{buyer?.full_name ?? '—'}</td>
+                      <td>{plot?.plot_number ?? '—'}</td>
+                      <td className="text-right tabular-nums">
                         {snap.base_price ? (
                           <MoneyDisplay
                             amount={snap.base_price}
@@ -2395,7 +2393,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
                           '—'
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums">
+                      <td className="text-right tabular-nums">
                         {snap.total ? (
                           <MoneyDisplay
                             amount={snap.total}
@@ -2405,7 +2403,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
                           '—'
                         )}
                       </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
+                      <td className="whitespace-nowrap">
                         {reservationStatusBadge(r.status)}
                         {stale && snapDate && (
                           <span
@@ -2420,7 +2418,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right text-content-tertiary">
+                      <td className="text-right text-content-tertiary">
                         <ArrowRight className="h-3 w-3" />
                       </td>
                     </tr>

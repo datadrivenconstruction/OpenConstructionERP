@@ -284,7 +284,7 @@ export function CommitmentsPanel({ screen, commitments, stakeholders, events, fo
                         <Button
                           size="sm"
                           variant="ghost"
-                          icon={<Pencil size={13} />}
+                          icon={<Pencil size={14} />}
                           disabled={!edit.allowed}
                           onClick={() => setDialog({ kind: 'edit', commitment: c })}
                           data-testid="commitment-edit"

@@ -140,11 +140,11 @@ export function SubcontractChangesPanel({
     negative ? 'text-semantic-error' : 'text-content-primary',
   );
   const inputCls =
-    'h-8 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary';
+    'oe-input';
 
   return (
     <section className="space-y-3" data-testid="sub-changes-panel">
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('subcontractors.changes_title', { defaultValue: 'Subcontract changes' })}
       </h3>
 
@@ -235,23 +235,23 @@ export function SubcontractChangesPanel({
 
       {changes.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact">
             <thead>
               <tr className="text-left text-xs text-content-tertiary">
-                <th className="py-1 pr-2">{t('subcontractors.changes_code', { defaultValue: 'Code' })}</th>
-                <th className="py-1 pr-2">{t('subcontractors.changes_agreement', { defaultValue: 'Agreement' })}</th>
-                <th className="py-1 pr-2 text-right">{t('subcontractors.changes_amount', { defaultValue: 'Amount' })}</th>
-                <th className="py-1 pr-2 text-right">{t('subcontractors.changes_markup_pct', { defaultValue: 'Markup %' })}</th>
-                <th className="py-1 pr-2 text-right">{t('subcontractors.changes_days', { defaultValue: 'Days' })}</th>
-                <th className="py-1 pr-2">{t('subcontractors.changes_status', { defaultValue: 'Status' })}</th>
-                <th className="py-1" />
+                <th className="pr-2">{t('subcontractors.changes_code', { defaultValue: 'Code' })}</th>
+                <th className="pr-2">{t('subcontractors.changes_agreement', { defaultValue: 'Agreement' })}</th>
+                <th className="pr-2 text-right">{t('subcontractors.changes_amount', { defaultValue: 'Amount' })}</th>
+                <th className="pr-2 text-right">{t('subcontractors.changes_markup_pct', { defaultValue: 'Markup %' })}</th>
+                <th className="pr-2 text-right">{t('subcontractors.changes_days', { defaultValue: 'Days' })}</th>
+                <th className="pr-2">{t('subcontractors.changes_status', { defaultValue: 'Status' })}</th>
+                <th />
               </tr>
             </thead>
             <tbody>
               {changes.map((c: SubcontractChange) => (
-                <tr key={c.id} className="border-t border-border-light align-top">
-                  <td className="py-1.5 pr-2 font-mono text-xs">{c.code}</td>
-                  <td className="py-1.5 pr-2">
+                <tr key={c.id} className="align-top">
+                  <td className="pr-2 font-mono">{c.code}</td>
+                  <td className="pr-2">
                     <div className="truncate">{agreementTitle(c.agreement_id)}</div>
                     {failedById.get(c.id)?.map((f) => (
                       <div key={f.rule_id} className="text-xs text-semantic-warning" role="alert">
@@ -259,21 +259,21 @@ export function SubcontractChangesPanel({
                       </div>
                     ))}
                   </td>
-                  <td className="py-1.5 pr-2 text-right tabular-nums">
+                  <td className="pr-2 text-right tabular-nums">
                     {fmtCurrency(c.amount, c.currency)}
                   </td>
-                  <td className="py-1.5 pr-2 text-right tabular-nums" data-testid={`sc-markup-${c.code}`}>
+                  <td className="pr-2 text-right tabular-nums" data-testid={`sc-markup-${c.code}`}>
                     {c.markup_pct ?? '0'}
                   </td>
-                  <td className="py-1.5 pr-2 text-right tabular-nums" data-testid={`sc-days-${c.code}`}>
+                  <td className="pr-2 text-right tabular-nums" data-testid={`sc-days-${c.code}`}>
                     {c.time_impact_days ?? 0}
                   </td>
-                  <td className="py-1.5 pr-2">
+                  <td className="pr-2">
                     <Badge variant={STATUS_VARIANT[c.status]} size="sm" dot>
                       {t(`subcontractors.change_status_${c.status}`, { defaultValue: c.status })}
                     </Badge>
                   </td>
-                  <td className="py-1.5 text-right">
+                  <td className="text-right">
                     <div className="flex flex-wrap justify-end gap-1">
                       {awaitingOwner(c) && (
                         <span data-testid={`sc-blocker-${c.code}`}>
@@ -312,7 +312,7 @@ export function SubcontractChangesPanel({
               aria-label={t('subcontractors.changes_agreement', { defaultValue: 'Agreement' })}
               value={r.agreementId}
               onChange={(e) => patchRow(i, { agreementId: e.target.value })}
-              className={inputCls}
+              className="oe-select"
             >
               <option value="">
                 {t('subcontractors.changes_pick_agreement', { defaultValue: 'Select agreement' })}

@@ -102,7 +102,7 @@ export function ActivityDeleteDialog({
 
   const title = t('schedule.confirm_delete_activity_title', { defaultValue: 'Delete activity?' });
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onMouseDown={onCancel} />
       <div
         ref={dialogRef}
@@ -117,7 +117,7 @@ export function ActivityDeleteDialog({
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4 bg-semantic-error/10 text-semantic-error">
             <Trash2 size={20} />
           </div>
-          <h2 className="text-base font-semibold text-content-primary text-center">{title}</h2>
+          <h2 className="oe-section-title text-center">{title}</h2>
           <p id="activity-delete-message" className="mt-2 text-sm text-content-secondary text-center leading-relaxed">
             {t('schedule.confirm_delete_section', {
               defaultValue:

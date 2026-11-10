@@ -69,7 +69,7 @@ function complianceStyle(level: string, t: (key: string, opts?: Record<string, u
     case 'good': return { bg: 'bg-semantic-success-bg', text: 'text-semantic-success', Icon: CheckCircle2, label: t('sustainability.compliance_good', { defaultValue: 'Good' }) };
     case 'acceptable': return { bg: 'bg-semantic-warning-bg', text: 'text-semantic-warning', Icon: AlertTriangle, label: t('sustainability.compliance_acceptable', { defaultValue: 'Acceptable' }) };
     case 'non-compliant': return { bg: 'bg-semantic-error-bg', text: 'text-semantic-error', Icon: XCircle, label: t('sustainability.compliance_non_compliant', { defaultValue: 'Non-Compliant' }) };
-    default: return { bg: 'bg-surface-secondary', text: 'text-gray-500', Icon: Info, label: t('sustainability.compliance_na', { defaultValue: 'N/A' }) };
+    default: return { bg: 'bg-surface-secondary', text: 'text-content-secondary', Icon: Info, label: t('sustainability.compliance_na', { defaultValue: 'N/A' }) };
   }
 }
 
@@ -144,7 +144,7 @@ function EPDSelect({
       onChange={(e) => { if (e.target.value) onSelect(e.target.value); }}
       disabled={disabled}
       aria-label={t('sustainability.epd_material_select', { defaultValue: 'Select EPD material' })}
-      className="w-full max-w-[220px] rounded border border-border-light bg-surface-primary px-1.5 py-1 text-xs text-content-primary outline-none focus:border-oe-blue transition-colors truncate"
+      className="oe-select oe-input-sm max-w-[220px] truncate"
     >
       <option value="">{t('sustainability.epd_none', { defaultValue: '-- none --' })}</option>
       {materials.map((m) => (
@@ -440,7 +440,7 @@ export function SustainabilityPage() {
         <CardContent>
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <label htmlFor="sust-project-select" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-project-select" className="oe-label tracking-wider">
                 {t('sustainability.project', 'Project')}
               </label>
               <select
@@ -448,14 +448,14 @@ export function SustainabilityPage() {
                 value={selectedProjectId}
                 onChange={(e) => { setSelectedProjectId(e.target.value); setSelectedBoqId(''); setCalculated(false); }}
                 disabled={projectsLoading}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-oe-blue focus:ring-1 focus:ring-oe-blue transition-colors"
+                className="oe-select"
               >
                 <option value="">{projectsLoading ? t('common.loading', 'Loading...') : t('sustainability.select_project', '-- Select project --')}</option>
                 {projects?.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label htmlFor="sust-boq-select" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-boq-select" className="oe-label tracking-wider">
                 {t('sustainability.boq', 'BOQ')}
               </label>
               <select
@@ -463,21 +463,21 @@ export function SustainabilityPage() {
                 value={selectedBoqId}
                 onChange={(e) => { setSelectedBoqId(e.target.value); setCalculated(false); }}
                 disabled={!selectedProjectId || boqsLoading}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-oe-blue focus:ring-1 focus:ring-oe-blue transition-colors"
+                className="oe-select"
               >
                 <option value="">{boqsLoading ? t('common.loading', 'Loading...') : t('sustainability.select_boq', '-- Select BOQ --')}</option>
                 {boqs?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </div>
             <div className="min-w-[140px]">
-              <label htmlFor="sust-gfa-input" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-gfa-input" className="oe-label tracking-wider">
                 {t('sustainability.area', 'GFA (m2)')}
               </label>
               <input
                 id="sust-gfa-input"
                 type="number" value={areaM2} onChange={(e) => setAreaM2(Number(e.target.value) || 0)}
                 min={0} step={100}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-oe-blue focus:ring-1 focus:ring-oe-blue transition-colors tabular-nums"
+                className="oe-input tabular-nums"
               />
             </div>
             <Button variant="secondary" size="md" icon={<Zap size={16} />}
@@ -603,27 +603,27 @@ export function SustainabilityPage() {
                     data={data.breakdown.map((b) => ({ label: b.material, value: b.co2_kg, pct: b.percentage }))}
                   />
                   <div className="flex-1 min-w-0">
-                    <table className="w-full text-sm">
+                    <table className="oe-table">
                       <thead>
-                        <tr className="border-b border-border-light">
-                          <th className="py-2 pr-4 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_category', { defaultValue: 'Category' })}</th>
-                          <th className="py-2 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_positions', { defaultValue: 'Positions' })}</th>
-                          <th className="py-2 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">%</th>
-                          <th className="py-2 pl-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_co2', { defaultValue: 'CO2 (t)' })}</th>
+                        <tr>
+                          <th className="pr-4">{t('sustainability.col_category', { defaultValue: 'Category' })}</th>
+                          <th className="text-right">{t('sustainability.col_positions', { defaultValue: 'Positions' })}</th>
+                          <th className="text-right">%</th>
+                          <th className="pl-4 text-right">{t('sustainability.col_co2', { defaultValue: 'CO2 (t)' })}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border-light">
+                      <tbody>
                         {data.breakdown.map((item, i) => (
                           <tr key={item.category}>
-                            <td className="py-2.5 pr-4">
+                            <td className="pr-4">
                               <div className="flex items-center gap-2">
                                 <div className="h-3 w-3 rounded-sm shrink-0" style={{ backgroundColor: DONUT_COLORS[i % DONUT_COLORS.length] }} />
                                 <span className="text-content-primary font-medium">{item.material}</span>
                               </div>
                             </td>
-                            <td className="py-2.5 px-4 text-right tabular-nums text-content-secondary">{item.positions_count}</td>
-                            <td className="py-2.5 px-4 text-right tabular-nums text-content-secondary">{fmtPercent(item.percentage)}</td>
-                            <td className="py-2.5 pl-4 text-right tabular-nums font-medium text-content-primary">
+                            <td className="text-right tabular-nums text-content-secondary">{item.positions_count}</td>
+                            <td className="text-right tabular-nums text-content-secondary">{fmtPercent(item.percentage)}</td>
+                            <td className="pl-4 text-right tabular-nums">
                               {/* ABSOLUTE CO2 mass - kept in t CO2e (EN 15804 standard) */}
                               {(item.co2_kg / 1000).toLocaleString(numberLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} t
                             </td>
@@ -643,19 +643,19 @@ export function SustainabilityPage() {
               <CardHeader title={t('sustainability.positions_title', 'Position-Level CO2 Data')} />
               <CardContent>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="oe-table">
                     <thead>
-                      <tr className="border-b border-border-light">
-                        <th className="py-2 pr-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary w-[60px]">#</th>
-                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_description', { defaultValue: 'Description' })}</th>
-                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[80px]">{t('sustainability.col_qty', { defaultValue: 'Qty' })}</th>
-                        <th className="py-2 px-3 text-center text-xs font-medium uppercase tracking-wider text-content-tertiary w-[50px]">{t('sustainability.col_unit', { defaultValue: 'Unit' })}</th>
-                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary w-[220px]">{t('sustainability.col_epd_material', { defaultValue: 'EPD Material' })}</th>
-                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[90px]">{t('sustainability.col_gwp_unit', { defaultValue: 'GWP/unit' })}</th>
-                        <th className="py-2 pl-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[100px]">{t('sustainability.col_gwp_total', { defaultValue: 'GWP Total' })}</th>
+                      <tr>
+                        <th className="pr-3 w-[60px]">#</th>
+                        <th>{t('sustainability.col_description', { defaultValue: 'Description' })}</th>
+                        <th className="text-right w-[80px]">{t('sustainability.col_qty', { defaultValue: 'Qty' })}</th>
+                        <th className="text-center w-[50px]">{t('sustainability.col_unit', { defaultValue: 'Unit' })}</th>
+                        <th className="w-[220px]">{t('sustainability.col_epd_material', { defaultValue: 'EPD Material' })}</th>
+                        <th className="text-right w-[90px]">{t('sustainability.col_gwp_unit', { defaultValue: 'GWP/unit' })}</th>
+                        <th className="pl-3 text-right w-[100px]">{t('sustainability.col_gwp_total', { defaultValue: 'GWP Total' })}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {visiblePositions.map((pos) => {
                         // ABSOLUTE quantity in the position's own unit (m2/m3/m/
                         // kg/pcs...). q.convert multiplies + relabels; unmapped
@@ -668,11 +668,11 @@ export function SustainabilityPage() {
                         const gwpPerUnit = pos.gwp_per_unit / unitFactor;
                         return (
                         <tr key={pos.position_id} className={pos.source === 'none' ? 'opacity-50' : ''}>
-                          <td className="py-2 pr-3 tabular-nums text-content-secondary text-xs">{pos.ordinal}</td>
-                          <td className="py-2 px-3 text-content-primary truncate max-w-[300px]" title={pos.description}>{pos.description}</td>
-                          <td className="py-2 px-3 text-right tabular-nums text-content-secondary">{pq.value.toLocaleString(numberLocale, { maximumFractionDigits: 2 })}</td>
-                          <td className="py-2 px-3 text-center text-content-tertiary">{pq.unit}</td>
-                          <td className="py-2 px-3">
+                          <td className="pr-3 tabular-nums text-content-secondary">{pos.ordinal}</td>
+                          <td className="truncate max-w-[300px]" title={pos.description}>{pos.description}</td>
+                          <td className="text-right tabular-nums text-content-secondary">{pq.value.toLocaleString(numberLocale, { maximumFractionDigits: 2 })}</td>
+                          <td className="text-center text-content-tertiary">{pq.unit}</td>
+                          <td>
                             <EPDSelect
                               currentId={pos.epd_id}
                               materials={epdMaterials}
@@ -680,11 +680,11 @@ export function SustainabilityPage() {
                               disabled={assignMut.isPending}
                             />
                           </td>
-                          <td className="py-2 px-3 text-right tabular-nums text-content-secondary text-xs">
+                          <td className="text-right tabular-nums text-content-secondary">
                             {/* RATE (reciprocal) per the displayed unit */}
                             {pos.gwp_per_unit ? `${gwpPerUnit.toLocaleString(numberLocale, { maximumFractionDigits: 4 })}` : '-'}
                           </td>
-                          <td className="py-2 pl-3 text-right tabular-nums font-medium text-content-primary">
+                          <td className="pl-3 text-right tabular-nums">
                             {pos.gwp_total ? (
                               <span className={pos.gwp_total < 0 ? 'text-semantic-success' : ''}>
                                 {/* ABSOLUTE CO2 mass - kept in kg CO2e */}

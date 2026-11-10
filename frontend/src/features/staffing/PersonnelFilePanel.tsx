@@ -110,7 +110,7 @@ function Section({ title, action, children, testId }: { title: string; action?: 
   return (
     <section className="space-y-2" data-testid={testId}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="mr-auto text-base font-semibold text-content-primary">{title}</h2>
+        <h2 className="oe-section-title mr-auto">{title}</h2>
         {action}
       </div>
       {children}
@@ -207,7 +207,7 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
         <div className="flex flex-wrap items-start gap-3">
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">{personLabel(labels.t, file.name)}</h2>
+              <h2 className="oe-section-title">{personLabel(labels.t, file.name)}</h2>
               <ToneBadge tone={FILE_TONE[file.status]} testId="file-status">
                 {vocab(t, FILE_STATUS, file.status)}
               </ToneBadge>
@@ -304,14 +304,14 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
               </Quiet>
             ) : (
               <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-                <table className="w-full min-w-[640px] text-sm">
+                <table className="oe-table min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                      <th scope="col" className="px-3 py-2 font-medium">{t('staffing.document.kind', { defaultValue: 'Document' })}</th>
-                      <th scope="col" className="px-3 py-2 font-medium">{t('staffing.position.status', { defaultValue: 'Status' })}</th>
-                      <th scope="col" className="px-3 py-2 font-medium">{t('staffing.document.valid_until', { defaultValue: 'Valid until' })}</th>
-                      <th scope="col" className="px-3 py-2 font-medium">{t('staffing.document.checked', { defaultValue: 'Checked' })}</th>
-                      <th scope="col" className="px-3 py-2 font-medium">
+                    <tr className="text-left text-xs text-content-tertiary">
+                      <th scope="col">{t('staffing.document.kind', { defaultValue: 'Document' })}</th>
+                      <th scope="col">{t('staffing.position.status', { defaultValue: 'Status' })}</th>
+                      <th scope="col">{t('staffing.document.valid_until', { defaultValue: 'Valid until' })}</th>
+                      <th scope="col">{t('staffing.document.checked', { defaultValue: 'Checked' })}</th>
+                      <th scope="col">
                         <span className="sr-only">{t('staffing.actions', { defaultValue: 'Actions' })}</span>
                       </th>
                     </tr>
@@ -321,8 +321,8 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
                       const state = documentState(d);
                       const checker = personName(d.verified_by);
                       return (
-                        <tr key={d.document_kind} className="border-b border-border-light align-top last:border-b-0" data-testid="document-row">
-                          <td className="px-3 py-2">
+                        <tr key={d.document_kind} className="align-top last:border-b-0" data-testid="document-row">
+                          <td>
                             <div className="font-medium text-content-primary">{catalogueName(labels, catalogue, 'document_kind', d.document_kind)}</div>
                             <div className="text-xs text-content-tertiary">
                               {d.required
@@ -340,7 +340,7 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
                               </div>
                             )}
                           </td>
-                          <td className="px-3 py-2">
+                          <td>
                             <ToneBadge tone={state.tone} testId="document-state">
                               {state.key === 'status'
                                 ? vocab(t, DOCUMENT_STATUS, d.status ?? '')
@@ -352,21 +352,21 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
                             </ToneBadge>
                             {d.fit_for_role && <div className="mt-1 text-xs text-content-secondary">{vocab(t, FIT, d.fit_for_role)}</div>}
                           </td>
-                          <td className="px-3 py-2 text-content-secondary">
+                          <td className="text-content-secondary">
                             {d.valid_until
                               ? fmtDate(d.valid_until)
                               : d.status
                                 ? t('staffing.document.no_end', { defaultValue: 'No end date' })
                                 : ''}
                           </td>
-                          <td className="px-3 py-2 text-content-secondary">
+                          <td className="text-content-secondary">
                             {d.verified_at
                               ? checker
                                 ? t('staffing.document.checked_by', { defaultValue: '{{date}} by {{name}}', date: fmtDate(d.verified_at), name: checker })
                                 : fmtDate(d.verified_at)
                               : t('staffing.document.not_checked', { defaultValue: 'Not checked' })}
                           </td>
-                          <td className="px-3 py-2">
+                          <td>
                             {editable && d.status && !d.verified_at && !d.can.verify.allowed && (
                               <p className="mb-1 text-right text-xs text-content-tertiary" data-testid="document-verify-refused">
                                 {whyNot(labels.t, d.can.verify)}

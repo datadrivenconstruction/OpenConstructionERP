@@ -124,7 +124,7 @@ export function PlanningCrossLinks({ active }: { active: PlanningRouteKey }) {
                 : 'inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/10 hover:text-oe-blue-text'
             }
           >
-            <Icon size={13} />
+            <Icon size={14} />
             {l.label}
           </button>
         );
